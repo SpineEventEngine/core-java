@@ -197,10 +197,12 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>compile</goal>
                             <!-- Compiles the *.proto files. -->
-                            <goal>compile-custom</goal>
+                            <goal>compile</goal>
+
                             <!-- Compiles the gRPC services. -->
+                            <goal>compile-custom</goal>
+
                             <goal>test-compile</goal>
                             <goal>test-compile-custom</goal>
                         </goals>
