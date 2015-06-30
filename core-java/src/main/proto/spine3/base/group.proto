@@ -1,0 +1,28 @@
+// Copyright (c) 2000-2015 TeamDev Ltd. All rights reserved.
+// TeamDev PROPRIETARY and CONFIDENTIAL.
+// Use is subject to license terms.
+syntax = "proto3";
+
+package spine3.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "GroupProto";
+option java_package = "org.spine3.base";
+
+import "spine3/base/user.proto";
+
+message GroupId {
+    string value = 1;
+}
+
+// A user group can hold users and other groups.
+message Group {
+
+    GroupId id = 1;
+
+    repeated UserId users = 2;
+
+    repeated GroupId groups = 3;
+
+}

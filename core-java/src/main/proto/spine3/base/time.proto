@@ -1,0 +1,64 @@
+// Copyright (c) 2000-2015 TeamDev Ltd. All rights reserved.
+// TeamDev PROPRIETARY and CONFIDENTIAL.
+// Use is subject to license terms.
+syntax = "proto3";
+
+package spine3.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TimeProto";
+option java_package = "org.spine3.base";
+
+//TODO:2015-04-28:alexander.yevsyukov: Document
+
+message ZoneOffset {
+    int32 amountSeconds = 1;
+    string id = 2;
+}
+
+enum MonthOfYear {
+    UNDEFINED = 0;
+    JANUARY = 1;
+    FEBRUARY = 2;
+    MARCH = 3;
+    APRIL = 4;
+    MAY = 5;
+    JUNE = 6;
+    JULY = 7;
+    AUGUST = 8;
+    SEPTEMBER = 9;
+    OCTOBER = 10;
+    NOVEMBER = 11;
+    DECEMBER = 12;
+}
+
+message LocalDate {
+    int32 year = 1;
+    MonthOfYear month = 2;
+    int32 day = 3;
+}
+
+message LocalTime {
+    int32 hours = 1;
+    int32 minutes = 2;
+    int32 seconds = 3;
+    int32 millis = 4;
+    int64 nanos = 5;
+}
+
+message OffsetDate {
+    LocalDate date = 1;
+    ZoneOffset offset = 2;
+}
+
+message OffsetTime {
+    LocalTime time = 1;
+    ZoneOffset offset = 2;
+}
+
+message OffsetDateTime {
+    LocalDate date = 1;
+    LocalTime time = 2;
+    ZoneOffset offset = 3;
+}

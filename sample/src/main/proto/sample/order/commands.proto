@@ -1,0 +1,31 @@
+// Copyright (c) 2000-2015 TeamDev Ltd. All rights reserved.
+// TeamDev PROPRIETARY and CONFIDENTIAL.
+// Use is subject to license terms.
+syntax = "proto3";
+
+package spine3.sample.order.command;
+
+import "sample/order/order.proto";
+
+option java_package="org.spine3.sample.order.command";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+message CreateOrder {
+    OrderId order_id = 1;
+}
+
+message AddOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message RemoveOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message PayOrder {
+    OrderId order_id = 1;
+    BillingInfo billing_info = 2;
+}

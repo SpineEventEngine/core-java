@@ -1,0 +1,70 @@
+// Copyright (c) 2000-2015 TeamDev Ltd. All rights reserved.
+// TeamDev PROPRIETARY and CONFIDENTIAL.
+// Use is subject to license terms.
+syntax = "proto3";
+
+package spine3.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "CommandProto";
+option java_package = "org.spine3.base";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "spine3/base/user.proto";
+import "spine3/base/time.proto";
+
+// The command identifier is a composite key, which gives information about the context of the command creation.
+message CommandId {
+    UserId actor = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+// Meta-information about the client environment, which generated a command.
+message CommandContext {
+    CommandId command_id = 1;
+    ZoneOffset zone_offset = 2;
+}
+
+message CommandRequest {
+    // Any instance of the Protobuf message can be sent as a command.
+    google.protobuf.Any command = 1;
+    CommandContext context = 2;
+}
+
+message EventId {
+    // The command originated the event.
+    CommandId command_id = 1;
+    // The time event was created.
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+message EventContext {
+    EventId event_id = 1;
+    // The Id of the aggregate event was applied to.
+    google.protobuf.Any aggregate_id = 2;
+    // The version of the aggregate after the event was applied.
+    int32 version = 3;
+    // The aggregate result state after the event was applied.
+
+    // This field may store the state of an aggregate root after the event was applied.
+    // The availability of this field is defined by the aggregated root configuration.
+    // For example, it may not be present if the state of the root is big enough for being
+    // transmitted to other parts of the system.
+    // NOTE: This field is CLEARED for event contexts instances stored in a persistent media.
+    google.protobuf.Any aggregate_state = 4;
+    // This field may be used for additional attributes that were not known at the time of
+    // defining the corresponding event type.
+    repeated google.protobuf.Any attributes = 5;
+}
+
+message EventRecord {
+    google.protobuf.Any event = 1;
+    EventContext context = 2;
+}
+
+message CommandResult {
+    repeated EventRecord eventRecord = 1;
+    repeated google.protobuf.Any error = 2;
+}

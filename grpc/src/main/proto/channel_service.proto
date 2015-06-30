@@ -1,0 +1,19 @@
+// Copyright (c) 2000-2015 TeamDev Ltd. All rights reserved.
+// TeamDev PROPRIETARY and CONFIDENTIAL.
+// Use is subject to license terms.
+syntax = "proto3";
+
+package spine3.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "ChannelServiceProto";
+option java_package = "org.spine3.base";
+
+import "spine3/base/channel.proto";
+
+service ChannelService {
+    rpc Connect (ChannelRequest) returns (ChannelResponse);
+    //TODO:2015-04-28:alexander.yevsyukov: Do we need to have Renew() method?
+}
+
