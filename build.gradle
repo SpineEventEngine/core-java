@@ -8,6 +8,8 @@ allprojects {
 project.ext {
     PROTOBUF_TARGET_DIR = "target/generated-sources/protobuf"
     PROTOBUF_VERSION = '3.0.0-alpha-3'
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+    GRPC_DEPENDENCY = 'io.grpc:protoc-gen-grpc-java:0.1.0-SNAPSHOT'
 }
 
 subprojects {
@@ -17,7 +19,7 @@ subprojects {
 
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java', project.PROTOBUF_TARGET_DIR]
+            java.srcDirs = ['src/main/java', "${project.PROTOBUF_TARGET_DIR}/main/java"]
         }
     }
 

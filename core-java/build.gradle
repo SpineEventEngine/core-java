@@ -4,12 +4,10 @@ project.ext {
 
 buildscript {
     repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        mavenCentral()
     }
     dependencies {
-        classpath "gradle.plugin.com.google.protobuf:protobuf-gradle-plugin:0.4.1"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.0'
     }
 }
 
@@ -19,9 +17,9 @@ dependencies {
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
 }
 
-protocDep = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-extractedProtosDir = "${project.buildDir.path}/extracted-protos"
-generatedFileDir = project.PROTOBUF_TARGET_DIR
+//protocDep = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+//extractedProtosDir = "${project.buildDir.path}/extracted-protos"
+//generatedFileDir = project.PROTOBUF_TARGET_DIR
 
 def getProtocDependencyDir() {
     def name = ""
@@ -45,4 +43,16 @@ sourceSets {
             srcDir project.PROTOC_DEPENDENCIES_TARGET_DIR + getProtocDependencyDir()
         }
     }
+}
+
+protobuf {
+    protoc {
+        artifact = project.PROTOBUF_DEPENDENCY
+    }
+//    plugins {
+//        grpc {
+//            artifact = project.GRPC_DEPENDENCY
+//        }
+//    }
+    generatedFilesBaseDir = project.PROTOBUF_TARGET_DIR
 }
