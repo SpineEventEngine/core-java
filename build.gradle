@@ -23,10 +23,7 @@ subprojects {
 
     repositories {
         mavenLocal()
-
-        maven { url "http://maven.teamdev.com/repository/teamdev-maven/" }
-        maven { url "http://repo1.maven.org/maven2" }
-        maven { url "http://grahamcox.co.uk/maven2/" }
+        mavenCentral()
     }
 
     dependencies {
