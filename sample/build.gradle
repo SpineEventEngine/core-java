@@ -2,6 +2,7 @@ description = ''
 dependencies {
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.0.0-alpha-3'
     compile group: 'io.grpc', name: 'grpc-all', version: '0.7.1'
-    compile project(':core-java')
+    compile project(':core' +
+            '-java')
     compile project(':grpc')
 }
