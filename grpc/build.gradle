@@ -1,6 +1,31 @@
 description = ''
 dependencies {
+    compile project(':core-java')
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: "${project.PROTOBUF_VERSION}"
     compile group: 'io.grpc', name: 'grpc-all', version: '0.7.1'
-    compile project(':core-java')
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir "${project(":core-java").projectDir}/src/main/proto"
+        }
+    }
+}
+
+protobuf {
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:0.7.1'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {
+
+                }
+            }
+        }
+    }
 }
