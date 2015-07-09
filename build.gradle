@@ -21,6 +21,7 @@ project.ext {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: "idea"
     apply plugin: 'com.google.protobuf'
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -45,6 +46,10 @@ subprojects {
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
         protobuf files("${rootProject.projectDir}/lib/protos.zip")
+    }
+
+    idea.module {
+        generatedSourceDirs += file("$projectDir/src/generated/main/java")
     }
 
     sourceSets {
