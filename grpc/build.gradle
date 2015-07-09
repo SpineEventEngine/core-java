@@ -10,6 +10,9 @@ sourceSets {
         proto {
             srcDir "${project(":core-java").projectDir}/src/main/proto"
         }
+        java {
+            srcDir "$projectDir/src/generated/main/grpc"
+        }
     }
 }
 
@@ -23,7 +26,7 @@ protobuf {
         all().each { task ->
             task.plugins {
                 grpc {
-
+//                    option 'nano=true'
                 }
             }
         }
