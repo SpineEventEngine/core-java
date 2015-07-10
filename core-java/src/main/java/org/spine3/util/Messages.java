@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utility class for working with {@link Message} objects.
  *
  * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
 public class Messages {
@@ -85,8 +86,7 @@ public class Messages {
             Method method = messageType.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
 
             //noinspection unchecked
-            T result = (T) method.invoke(null, any.getValue());
-            return result;
+            return (T) method.invoke(null, any.getValue());
         } catch (ClassNotFoundException ignored) {
             throw new UnknownTypeInAnyException(any.getTypeUrl());
         } catch (NoSuchMethodException e) {
@@ -115,9 +115,8 @@ public class Messages {
      * @see #fromAny(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(String messageType) throws ClassNotFoundException {
-        String className = COM_PREFIX + messageType;
         //noinspection unchecked
-        return (Class<T>) Class.forName(className);
+        return (Class<T>) Class.forName(ProtoClassNameReader.getClassNameByProtoTypeUrl(messageType));
     }
 
     /**

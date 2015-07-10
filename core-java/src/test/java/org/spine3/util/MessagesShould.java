@@ -54,7 +54,6 @@ public class MessagesShould {
     }
 
     @Test
-    @Ignore
     public void convert_from_Any_to_id() {
         UserId result = Messages.fromAny(any);
 

@@ -85,8 +85,6 @@ subprojects {
                         //todo:2015-07-10:mikhail.mikhaylov: Check it on unix-based system.
                         protoUrl = protoUrl.replaceAll('\\\\', ".")
                         String className = prefixName + "." + protoUrl
-                        println(protoUrl + " " + className)
-
                         props.setProperty(protoUrl, className)
                     }
                 }
