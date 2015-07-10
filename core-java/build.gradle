@@ -1,1 +1,9 @@
 description = ''
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/res'
+        }
+    }
+}

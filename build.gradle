@@ -66,4 +66,35 @@ subprojects {
             artifact = project.PROTOBUF_DEPENDENCY
         }
     }
+
+    task saveProtoNames << {
+        String java_suffix = ".java"
+        String rootDirPath = "$projectDir/src/generated/main/java"
+        File rootDir = file(rootDirPath)
+        if (rootDir.exists()) {
+            Properties props = new Properties()
+            File propsFile = new File("${project(":core-java").projectDir}/src/res/protos.properties")
+            BufferedWriter writer = propsFile.newWriter();
+            props.load(propsFile.newDataInputStream())
+            rootDir.listFiles().each {
+                String prefixName = it.name
+                fileTree(it).each {
+                    if (it.name.endsWith(java_suffix)) {
+                        String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
+                        protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
+                        //todo:2015-07-10:mikhail.mikhaylov: Check it on unix-based system.
+                        protoUrl = protoUrl.replaceAll('\\\\', ".")
+                        String className = prefixName + "." + protoUrl
+                        println(protoUrl + " " + className)
+
+                        props.setProperty(protoUrl, className)
+                    }
+                }
+            }
+            props.store(writer, null)
+            writer.close()
+        }
+    }
+
+    compileJava.dependsOn saveProtoNames
 }
