@@ -23,9 +23,6 @@ package org.spine3.util;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
