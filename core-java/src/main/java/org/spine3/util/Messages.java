@@ -86,7 +86,8 @@ public class Messages {
             Method method = messageType.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
 
             //noinspection unchecked
-            return (T) method.invoke(null, any.getValue());
+            T result = (T) method.invoke(null, any.getValue());
+            return result;
         } catch (ClassNotFoundException ignored) {
             throw new UnknownTypeInAnyException(any.getTypeUrl());
         } catch (NoSuchMethodException e) {
@@ -116,7 +117,8 @@ public class Messages {
      */
     public static <T extends Message> Class<T> toMessageClass(String messageType) throws ClassNotFoundException {
         //noinspection unchecked
-        return (Class<T>) Class.forName(ProtoClassNameReader.getClassNameByProtoTypeUrl(messageType));
+        String className = ProtoClassNameReader.getClassNameByProtoTypeUrl(messageType);
+        return (Class<T>) Class.forName(className);
     }
 
     /**

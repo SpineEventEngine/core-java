@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -37,7 +38,6 @@ public class ProtoClassNameReader {
 
     private static final String PROPERTIES_FILE_NAME = "protos.properties";
 
-    //todo:2015-07-10:mikhail.mikhaylov: Is static context fine here?
     private static final Map<String, String> namesMap = new HashMap<String, String>();
     private static Properties properties;
 
@@ -53,13 +53,17 @@ public class ProtoClassNameReader {
             if (properties == null) {
                 properties = new Properties();
             }
+
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
+
             try {
-                properties.load(Thread.currentThread()
-                        .getContextClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME));
+                properties.load(resourceStream);
             } catch (IOException e) {
-                //todo:2015-07-10:mikhail.mikhaylov: This should never happen, but we should handle this.
+                //NOP
             }
-            namesMap.put(protoType, properties.getProperty(protoType));
+            String propertyValue = properties.getProperty(protoType);
+            namesMap.put(protoType, propertyValue);
         }
         return namesMap.get(protoType);
     }
