@@ -45,7 +45,7 @@ subprojects {
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
-        //todo:2015-07-09:mikhail.mikhaylov: Remove this workaround as soon as https://github.com/google/protobuf-gradle-plugin/issues/15 will be resolved.
+        //todo:2015-07-09:mikhail.mikhaylov: Remove this workaround as soon as https://github.com/google/protobuf-gradle-plugin/issues/15 is resolved.
         protobuf files("${rootProject.projectDir}/lib/protos.zip")
     }
 
