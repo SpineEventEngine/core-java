@@ -1,0 +1,98 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.0'
+    }
+}
+
+allprojects {
+    apply plugin: 'maven'
+
+    group = 'org.spine3'
+    version = '0.1'
+}
+
+project.ext {
+    PROTOBUF_VERSION = '3.0.0-alpha-3'
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: "idea"
+    apply plugin: 'com.google.protobuf'
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        compile group: 'com.google.guava', name: 'guava', version: '18.0'
+        compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
+        compile group: 'javax.time', name: 'jsr-310-ri', version: '0.6.3'
+        compile group: 'javax.time', name: 'jsr-310-TZDB', version: '0.6.3'
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.10'
+
+        testCompile(group: 'junit', name: 'junit', version: '4.12') {
+            exclude(module: 'hamcrest-core')
+        }
+        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+
+        compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
+        //todo:2015-07-09:mikhail.mikhaylov: Remove this workaround as soon as https://github.com/google/protobuf-gradle-plugin/issues/15 is resolved.
+        protobuf files("${rootProject.projectDir}/lib/protos.zip")
+    }
+
+    idea.module {
+        generatedSourceDirs += file("$projectDir/src/generated/main/java")
+    }
+
+    sourceSets {
+        main {
+            proto.srcDirs = ["build/extracted-protos/main", "src/main/proto"]
+            java.srcDirs = ["$projectDir/src/generated/main/java", "src/main/java"]
+        }
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/src/generated"
+        protoc {
+            artifact = project.PROTOBUF_DEPENDENCY
+        }
+    }
+
+    task saveProtoNames << {
+        String java_suffix = ".java"
+        String rootDirPath = "$projectDir/src/generated/main/java"
+        File rootDir = file(rootDirPath)
+        if (rootDir.exists()) {
+            Properties props = new Properties()
+            File propsFile = new File("${project(":core-java").projectDir}/src/res/protos.properties")
+            BufferedWriter writer = propsFile.newWriter();
+            props.load(propsFile.newDataInputStream())
+            rootDir.listFiles().each {
+                String prefixName = it.name
+                fileTree(it).each {
+                    if (it.name.endsWith(java_suffix)) {
+                        String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
+                        protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
+                        //todo:2015-07-10:mikhail.mikhaylov: Check it on unix-based system.
+                        protoUrl = protoUrl.replaceAll('\\\\', ".")
+                        String className = prefixName + "." + protoUrl
+                        props.setProperty(protoUrl, className)
+                    }
+                }
+            }
+            props.store(writer, null)
+            writer.close()
+        }
+    }
+
+    compileJava.dependsOn saveProtoNames
+}

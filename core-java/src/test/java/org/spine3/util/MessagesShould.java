@@ -21,6 +21,7 @@ package org.spine3.util;
 
 import com.google.protobuf.Any;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.UserId;
 

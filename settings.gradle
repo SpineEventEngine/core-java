@@ -1,0 +1,8 @@
+rootProject.name = 'spine'
+include ':core-java'
+include ':sample'
+include ':grpc'
+
+project(':core-java').projectDir = "$rootDir/core-java" as File
+project(':sample').projectDir = "$rootDir/sample" as File
+project(':grpc').projectDir = "$rootDir/grpc" as File
