@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author Mikhail Melnik
  */
-public interface Media {
+public interface Storage {
 
     /**
      * Returns the event records for the given aggregate root.

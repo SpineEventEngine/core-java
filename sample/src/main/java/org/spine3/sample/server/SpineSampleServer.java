@@ -31,9 +31,9 @@ import org.spine3.EventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.engine.Media;
+import org.spine3.engine.Storage;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.sample.store.filesystem.FileSystemMedia;
+import org.spine3.sample.store.filesystem.FileSystemStorage;
 
 /**
  * Spine sample gRPC server implementation.
@@ -49,23 +49,23 @@ public class SpineSampleServer {
     }
 
     public static void prepareEngine() {
-        Media media = new FileSystemMedia(STORAGE_PATH);
+        Storage storage = new FileSystemStorage(STORAGE_PATH);
 
-        OrderRootRepository orderRootRepository = getOrderRootRepository(media);
+        OrderRootRepository orderRootRepository = getOrderRootRepository(storage);
 
-        Engine engine = getEngine(media);
+        Engine engine = getEngine(storage);
         engine.register(orderRootRepository);
     }
 
-    public static OrderRootRepository getOrderRootRepository(Media media) {
+    public static OrderRootRepository getOrderRootRepository(Storage storage) {
         OrderRootRepository repository = new OrderRootRepository();
-        repository.configure(media);
+        repository.configure(storage);
         return repository;
     }
 
-    public static Engine getEngine(Media media) {
-        CommandStore commandStore = new CommandStore(media);
-        EventStore eventStore = new EventStore(media);
+    public static Engine getEngine(Storage storage) {
+        CommandStore commandStore = new CommandStore(storage);
+        EventStore eventStore = new EventStore(storage);
         Engine.configure(commandStore, eventStore);
         return Engine.getInstance();
     }

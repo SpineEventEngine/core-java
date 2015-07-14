@@ -22,7 +22,7 @@ package org.spine3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.Media;
+import org.spine3.engine.Storage;
 
 import java.util.List;
 
@@ -33,10 +33,10 @@ import java.util.List;
  */
 public class EventStore {
 
-    private final Media media;
+    private final Storage storage;
 
-    public EventStore(Media media) {
-        this.media = media;
+    public EventStore(Storage storage) {
+        this.storage = storage;
     }
 
     /**
@@ -46,7 +46,7 @@ public class EventStore {
      * @return list of commands for the aggregate root
      */
     public List<? extends Message> load(Message aggregateRootId) {
-        List<? extends Message> result = media.readEvents(aggregateRootId);
+        List<? extends Message> result = storage.readEvents(aggregateRootId);
         return result;
     }
 
@@ -56,18 +56,18 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        media.writeEvent(record);
+        storage.writeEvent(record);
     }
 
     public List<EventRecord> getEvents() {
-        List<EventRecord> result = media.readAllEvents();
+        List<EventRecord> result = storage.readAllEvents();
         return result;
     }
 
     ;
 
     public List<EventRecord> getEvents(Timestamp timestamp) {
-        List<EventRecord> result = media.readEvents(timestamp);
+        List<EventRecord> result = storage.readEvents(timestamp);
         return result;
     }
 

@@ -22,7 +22,7 @@ package org.spine3;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
-import org.spine3.engine.Media;
+import org.spine3.engine.Storage;
 
 import java.util.List;
 
@@ -33,10 +33,10 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private Media media;
+    private Storage storage;
 
-    public CommandStore(Media media) {
-        this.media = media;
+    public CommandStore(Storage storage) {
+        this.storage = storage;
     }
 
     /**
@@ -46,7 +46,7 @@ public class CommandStore {
      * @return list of commands for the aggregate root
      */
     List<CommandRequest> load(Message aggregateRootId) {
-        return media.readCommands(aggregateRootId);
+        return storage.readCommands(aggregateRootId);
     }
 
     /**
@@ -55,7 +55,7 @@ public class CommandStore {
      * @param request command request to store
      */
     void store(CommandRequest request) {
-        media.writeCommand(request);
+        storage.writeCommand(request);
     }
 
 }

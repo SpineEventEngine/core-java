@@ -20,9 +20,9 @@
 package org.spine3.engine;
 
 /**
- * The abstract implementation of the {@link Media} interface.
+ * The abstract implementation of the {@link Storage} interface.
  *
  * @author Mikhail Melnik
  */
-public abstract class AbstractMedia implements Media {
+public abstract class AbstractStorage implements Storage {
 }
