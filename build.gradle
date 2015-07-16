@@ -19,6 +19,15 @@ project.ext {
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
 }
 
+task removeSavedProtoNames << {
+    File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+    if (propsFile.exists()) {
+        propsFile.delete()
+    }
+}
+
+build.dependsOn removeSavedProtoNames
+
 subprojects {
     apply plugin: 'java'
     apply plugin: "idea"
@@ -73,9 +82,18 @@ subprojects {
         File rootDir = file(rootDirPath)
         if (rootDir.exists()) {
             Properties props = new Properties()
-            File propsFile = new File("${project(":core-java").projectDir}/src/res/protos.properties")
-            BufferedWriter writer = propsFile.newWriter();
-            props.load(propsFile.newDataInputStream())
+            File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+            if (propsFile.exists()) {
+                props.load(propsFile.newDataInputStream())
+                // as Properties API does not support saving default table values, we have to rewrite them all
+                Set<String> names = props.stringPropertyNames();
+                println names.size()
+                println props.getProperty("google.protobuf.Any")
+                for (Iterator<String> i = names.iterator(); i.hasNext();) {
+                    String propname = i.next();
+                    props.setProperty(propname, props.getProperty(propname));
+                }
+            }
             rootDir.listFiles().each {
                 String prefixName = it.name
                 fileTree(it).each {
@@ -89,6 +107,7 @@ subprojects {
                     }
                 }
             }
+            BufferedWriter writer = propsFile.newWriter();
             props.store(writer, null)
             writer.close()
         }
