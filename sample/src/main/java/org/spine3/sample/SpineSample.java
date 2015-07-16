@@ -19,6 +19,8 @@
  */
 package org.spine3.sample;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +37,16 @@ import java.util.List;
  * Simple Spine framework example.
  *
  * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
 public class SpineSample {
 
+    private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
     public static void main(String[] args) {
+        helper.setUp();
+
         SpineSampleServer.registerEventSubscribers();
 
         SpineSampleServer.prepareEngine();
@@ -50,6 +57,7 @@ public class SpineSample {
         }
 
         log().info("All the requests were handled.");
+        helper.tearDown();
     }
 
     private static List<CommandRequest> prepareRequests() {

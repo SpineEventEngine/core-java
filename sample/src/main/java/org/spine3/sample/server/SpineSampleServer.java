@@ -33,6 +33,7 @@ import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
 import org.spine3.engine.Storage;
 import org.spine3.sample.order.OrderRootRepository;
+import org.spine3.sample.store.datastore.DataStoreStorage;
 import org.spine3.sample.store.filesystem.FileSystemStorage;
 
 /**
@@ -49,7 +50,8 @@ public class SpineSampleServer {
     }
 
     public static void prepareEngine() {
-        Storage storage = new FileSystemStorage(STORAGE_PATH);
+//        Storage storage = new FileSystemStorage(STORAGE_PATH);
+        Storage storage = new DataStoreStorage();
 
         OrderRootRepository orderRootRepository = getOrderRootRepository(storage);
 
