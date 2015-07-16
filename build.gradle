@@ -87,8 +87,6 @@ subprojects {
                 props.load(propsFile.newDataInputStream())
                 // as Properties API does not support saving default table values, we have to rewrite them all
                 Set<String> names = props.stringPropertyNames();
-                println names.size()
-                println props.getProperty("google.protobuf.Any")
                 for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     String propname = i.next();
                     props.setProperty(propname, props.getProperty(propname));
