@@ -25,9 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.engine.AbstractStorage;
+import org.spine3.sample.store.datastore.entityutils.EntityExtractor;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
-import org.spine3.engine.Storage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,15 +38,15 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.*;
 /**
  * @author Mikhail Mikhaylov.
  */
-public class DataStoreStorage implements Storage {
+public class DataStoreStorage extends AbstractStorage {
 
-    private static final String VALUE_KEY = "value";
-    private static final String TYPE_URL_KEY = "type_url";
-    private static final String TIMESTAMP_KEY = "timestamp";
-    private static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
-    private static final String VERSION_KEY = "version";
-    private static final String AGGREGATE_ID_KEY = "aggregate_id";
-    private static final String SINGLETON_ID_KEY = "singleton_id";
+    public static final String VALUE_KEY = "value";
+    public static final String TYPE_URL_KEY = "type_url";
+    public static final String TIMESTAMP_KEY = "timestamp";
+    public static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
+    public static final String VERSION_KEY = "version";
+    public static final String AGGREGATE_ID_KEY = "aggregate_id";
+    public static final String SINGLETON_ID_KEY = "singleton_id";
 
     private static final String SINGLETON_KIND = "singleton";
 
@@ -56,21 +57,11 @@ public class DataStoreStorage implements Storage {
     }
 
     @Override
-    public void store(Class clazz, Message message, Message messageId, Message aggregateRootId,
-                      Timestamp timestamp, int version) {
-        final String kind = clazz.getName();
-        final String id = JsonFormat.printToString(messageId);
-
-        final Entity dataStoreEntity = new Entity(kind, id);
-
+    public void store(Message message) {
         final Any any = Messages.toAny(message);
+        final String typeUrl = any.getTypeUrl();
 
-        dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
-        dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
-        dataStoreEntity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
-        dataStoreEntity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
-        dataStoreEntity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
-        dataStoreEntity.setProperty(VERSION_KEY, version);
+        final Entity dataStoreEntity = EntityExtractor.extract(message, typeUrl);
 
         dataStore.put(dataStoreEntity);
     }

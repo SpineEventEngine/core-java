@@ -48,13 +48,7 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        storage.store(
-                ENTITY_CLASS,
-                record,
-                record.getContext().getEventId(),
-                record.getContext().getAggregateId(),
-                record.getContext().getEventId().getTimestamp(),
-                record.getContext().getVersion());
+        storage.store(record);
     }
 
     /**

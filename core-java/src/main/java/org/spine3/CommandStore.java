@@ -50,16 +50,7 @@ public class CommandStore {
      * @param request command request to store
      */
     public void store(CommandRequest request) {
-        final Message command = Messages.fromAny(request.getCommand());
-        final Message aggregateId = Commands.getAggregateId(command);
-
-        storage.store(
-                ENTITY_CLASS,
-                request,
-                request.getContext().getCommandId(),
-                aggregateId,
-                request.getContext().getCommandId().getTimestamp(),
-                0);
+        storage.store(request);
     }
 
     /**

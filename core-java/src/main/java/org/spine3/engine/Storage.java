@@ -32,20 +32,79 @@ import java.util.List;
  */
 public interface Storage {
 
+    /**
+     * Stores singleton instance, e.g. Snapshot.
+     *
+     * @param id      entity id
+     * @param message entity value
+     */
     void storeSingleton(Message id, Message message);
 
-    void store(Class clazz, Message message, Message messageId, Message aggregateRootId, Timestamp timestamp, int version);
+    /**
+     * Stores common messages: CommandRequest of EventRecord.
+     *
+     * @param message Protobuf message to store.
+     */
+    void store(Message message);
 
+    /**
+     * Reads singleton instance.
+     *
+     * @param id  instance id
+     * @param <T> instance type
+     * @return read instance
+     */
     <T extends Message> T readSingleton(Message id);
 
+    /**
+     * Queries the storage by Message's class.
+     *
+     * @param clazz the desired message's class
+     * @param <T>   message type
+     * @return list of messages
+     */
     <T extends Message> List<T> query(Class clazz);
 
+    /**
+     * Queries the storage by Message's class and AggregateRoot's Id.
+     *
+     * @param clazz           the desired message's class
+     * @param aggregateRootId the id of aggregateRoot
+     * @param <T>             message type
+     * @return list of messages
+     */
     <T extends Message> List<T> query(Class clazz, Message aggregateRootId);
 
+    /**
+     * Queries the storage by Message's class, AggregateRoot Id and version.
+     *
+     * @param clazz           the desired message's class
+     * @param aggregateRootId the id of aggregate root
+     * @param version         the version of the aggregate root used as lower threshold for the result list
+     * @param <T>             message type
+     * @return list of messages
+     */
     <T extends Message> List<T> query(Class clazz, Message aggregateRootId, int version);
 
+    /**
+     * Queries the storage by Message's class and AggregateRoot Id from timestamp.
+     *
+     * @param clazz           the desired message's class
+     * @param aggregateRootId the id of aggregate root
+     * @param from            timestamp to query from
+     * @param <T>             message type
+     * @return list of messages
+     */
     <T extends Message> List<T> query(Class clazz, Message aggregateRootId, Timestamp from);
 
+    /**
+     * Queries the storage by Message's class from timestamp.
+     *
+     * @param clazz the desired message's class
+     * @param from  timestamp to query from
+     * @param <T>   message type
+     * @return list of messages
+     */
     <T extends Message> List<T> query(Class clazz, Timestamp from);
 
 }
