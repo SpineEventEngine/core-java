@@ -21,17 +21,22 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
+import org.spine3.util.Commands;
 import org.spine3.engine.Storage;
+import org.spine3.util.Messages;
 
 import java.util.List;
 
 /**
- * Stores and loads the commands.
+ * Stores and loads commands.
  *
- * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
 public class CommandStore {
+
+    private static final Class ENTITY_CLASS = CommandRequest.class;
 
     private Storage storage;
 
@@ -40,22 +45,41 @@ public class CommandStore {
     }
 
     /**
+     * Stores the command request.
+     *
+     * @param request command request to store
+     */
+    public void store(CommandRequest request) {
+        final Message command = Messages.fromAny(request.getCommand());
+        final Message aggregateId = Commands.getAggregateId(command);
+
+        storage.store(
+                ENTITY_CLASS,
+                request,
+                request.getContext().getCommandId(),
+                aggregateId,
+                request.getContext().getCommandId().getTimestamp(),
+                0);
+    }
+
+    /**
      * Loads all commands for the given aggregate root id.
      *
      * @param aggregateRootId the id of the aggregate root
      * @return list of commands for the aggregate root
      */
-    List<CommandRequest> load(Message aggregateRootId) {
-        return storage.readCommands(aggregateRootId);
+    public List<CommandRequest> getCommands(Message aggregateRootId) {
+        return storage.query(ENTITY_CLASS, aggregateRootId);
     }
 
     /**
-     * Stores the command request.
+     * Loads all commands for the given aggregate root id from given timestamp.
      *
-     * @param request command request to store
+     * @param aggregateRootId the id of the aggregate root
+     * @param from            the timestamp to load commands from
+     * @return list of commands for the aggregate root
      */
-    void store(CommandRequest request) {
-        storage.writeCommand(request);
+    public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
+        return storage.query(ENTITY_CLASS, aggregateRootId, from);
     }
-
 }

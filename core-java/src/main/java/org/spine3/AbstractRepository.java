@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.engine.Storage;
 import org.spine3.util.Commands;
 import org.spine3.util.Messages;
 import org.spine3.util.Methods;
@@ -50,17 +49,17 @@ public abstract class AbstractRepository<I extends Message,
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
-    private Storage storage;
+    private EventStore eventStore;
 
     /**
      * Configures repository with passed implementation of the aggregate storage.
      * It is used for storing and loading aggregated root during handling
      * of the incoming commands.
      *
-     * @param storage the aggregate storage implementation
+     * @param eventStore the event store implementation
      */
-    public void configure(Storage storage) {
-        this.storage = storage;
+    public void configure(EventStore eventStore) {
+        this.eventStore = eventStore;
     }
 
     /**
@@ -71,20 +70,20 @@ public abstract class AbstractRepository<I extends Message,
      */
     @Override
     public R load(I aggregateId) throws IllegalStateException {
-        if (storage == null) {
+        if (eventStore == null) {
             throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
         }
 
         try {
-            Snapshot snapshot = storage.readLastSnapshot(aggregateId);
+            Snapshot snapshot = eventStore.getLastSnapshot(aggregateId);
             if (snapshot != null) {
-                List<EventRecord> trail = storage.readEvents(snapshot.getVersion());
+                List<EventRecord> trail = eventStore.getEvents(aggregateId, snapshot.getVersion());
                 R result = create(aggregateId);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = storage.readEvents(aggregateId);
+                List<EventRecord> events = eventStore.getAllEvents(aggregateId);
                 R result = create(aggregateId);
                 result.play(events);
                 return result;
@@ -101,7 +100,7 @@ public abstract class AbstractRepository<I extends Message,
      */
     @Override
     public void store(R aggregateRoot) {
-        if (storage == null) {
+        if (eventStore == null) {
             throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
         }
 
@@ -110,7 +109,7 @@ public abstract class AbstractRepository<I extends Message,
                 .setVersion(aggregateRoot.getVersion())
                 .setWhenLastModified(aggregateRoot.whenLastModified())
                 .build();
-        storage.writeSnapshot(aggregateRoot.getId(), snapshot);
+        eventStore.storeSnapshot(aggregateRoot.getId(), snapshot);
     }
 
     @Override

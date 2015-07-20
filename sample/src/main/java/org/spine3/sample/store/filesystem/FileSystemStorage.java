@@ -29,7 +29,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.engine.AbstractStorage;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 import org.spine3.util.Messages;
@@ -50,7 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mikhail Melnik
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage extends AbstractStorage {
+public class FileSystemStorage implements Storage {
 
     private static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
 

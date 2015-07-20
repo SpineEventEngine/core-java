@@ -21,37 +21,33 @@
 package org.spine3.sample.store.datastore;
 
 import com.google.appengine.api.datastore.*;
-import com.google.protobuf.*;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.base.Snapshot;
-import org.spine3.engine.AbstractStorage;
-
-import org.spine3.util.Commands;
+import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
+import org.spine3.engine.Storage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
-import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_THAN_OR_EQUAL;
-import static com.google.appengine.api.datastore.Query.FilterOperator.LESS_THAN_OR_EQUAL;
+import static com.google.appengine.api.datastore.Query.FilterOperator.*;
 
 /**
  * @author Mikhail Mikhaylov.
  */
-public class DataStoreStorage extends AbstractStorage {
+public class DataStoreStorage implements Storage {
 
     private static final String VALUE_KEY = "value";
     private static final String TYPE_URL_KEY = "type_url";
     private static final String TIMESTAMP_KEY = "timestamp";
+    private static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
     private static final String VERSION_KEY = "version";
     private static final String AGGREGATE_ID_KEY = "aggregate_id";
+    private static final String SINGLETON_ID_KEY = "singleton_id";
 
-    private static final String COMMAND_KIND = "command";
-    private static final String EVENT_KIND = "event";
-    private static final String SNAPSHOT_KIND = "snapshot";
+    private static final String SINGLETON_KIND = "singleton";
 
     private final DatastoreService dataStore;
 
@@ -60,162 +56,113 @@ public class DataStoreStorage extends AbstractStorage {
     }
 
     @Override
-    public List<EventRecord> readEvents(Message aggregateId) {
-        //todo:2015-07-16:mikhail.mikhaylov: encapsulate query
-        final Query query = new Query(EVENT_KIND).setFilter(
-                new Query.FilterPredicate(AGGREGATE_ID_KEY, EQUAL, JsonFormat.printToString(aggregateId)));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<EventRecord> eventRecords = readAllMessagesFromDataStoreByQuery(preparedQuery);
-        return eventRecords;
-    }
-
-    @Override
-    public List<CommandRequest> readCommands(Message aggregateId) {
-        final Query query = new Query(COMMAND_KIND).setFilter(
-                new Query.FilterPredicate(AGGREGATE_ID_KEY, EQUAL, JsonFormat.printToString(aggregateId)));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<CommandRequest> commandRequests = readAllMessagesFromDataStoreByQuery(preparedQuery);
-        return commandRequests;
-    }
-
-    @Override
-    public List<EventRecord> readEvents(int sinceVersion) {
-        final Query query = new Query(EVENT_KIND).setFilter(
-                new Query.FilterPredicate(VERSION_KEY, GREATER_THAN_OR_EQUAL, sinceVersion));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<EventRecord> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-        return messages;
-    }
-
-    @Override
-    public List<EventRecord> readEvents(Timestamp from) {
-        final Query query = new Query(EVENT_KIND).setFilter(prepareTimestampFilter(from));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<EventRecord> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-
-        return messages;
-    }
-
-    @Override
-    public List<CommandRequest> readCommands(Timestamp from) {
-        final Query query = new Query(COMMAND_KIND).setFilter(prepareTimestampFilter(from));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<CommandRequest> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-
-        return messages;
-    }
-
-    @Override
-    public List<EventRecord> readEvents(Timestamp from, Timestamp to) {
-        final Query query = new Query(EVENT_KIND).setFilter(prepareTimestampFilter(from, to));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<EventRecord> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-
-        return messages;
-    }
-
-    @Override
-    public List<CommandRequest> readCommands(Timestamp from, Timestamp to) {
-        final Query query = new Query(COMMAND_KIND).setFilter(prepareTimestampFilter(from, to));
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<CommandRequest> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-
-        return messages;
-    }
-
-    @Override
-    public List<EventRecord> readAllEvents() {
-        final List<EventRecord> events = readAllMessagesFromDataStoreByKind(EVENT_KIND);
-        return events;
-    }
-
-    @Override
-    public List<CommandRequest> readAllCommands() {
-        final List<CommandRequest> commands = readAllMessagesFromDataStoreByKind(COMMAND_KIND);
-        return commands;
-    }
-
-    @Override
-    public Snapshot readLastSnapshot(Message aggregateId) {
-        final String kind = SNAPSHOT_KIND;
-        final String id = JsonFormat.printToString(aggregateId);
-
-        final Snapshot snapshot = readMessageFromDataStore(kind, id);
-
-        return snapshot;
-    }
-
-    @Override
-    public void writeEvent(EventRecord eventRecord) {
-        final Message aggregateId = Messages.fromAny(eventRecord.getContext().getAggregateId());
-        final String kind = EVENT_KIND;
-        final String id = JsonFormat.printToString(eventRecord.getContext().getEventId());
+    public void store(Class clazz, Message message, Message messageId, Message aggregateRootId,
+                      Timestamp timestamp, int version) {
+        final String kind = clazz.getName();
+        final String id = JsonFormat.printToString(messageId);
 
         final Entity dataStoreEntity = new Entity(kind, id);
 
-        final Any any = Messages.toAny(eventRecord);
+        final Any any = Messages.toAny(message);
 
         dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
         dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
-        dataStoreEntity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateId));
-        dataStoreEntity.setProperty(TIMESTAMP_KEY, eventRecord.getContext().getEventId().getTimestamp().getSeconds());
-        dataStoreEntity.setProperty(VERSION_KEY, eventRecord.getContext().getVersion());
+        dataStoreEntity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
+        dataStoreEntity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
+        dataStoreEntity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
+        dataStoreEntity.setProperty(VERSION_KEY, version);
 
         dataStore.put(dataStoreEntity);
     }
 
     @Override
-    public void writeCommand(CommandRequest commandRequest) {
-        final Message command = Messages.fromAny(commandRequest.getCommand());
-        final Message aggregateId = Commands.getAggregateId(command);
+    public void storeSingleton(Message id, Message message) {
+        final Entity dataStoreEntity = new Entity(SINGLETON_KIND, JsonFormat.printToString(id));
 
-        final String kind = COMMAND_KIND;
-        final String id = JsonFormat.printToString(commandRequest.getContext().getCommandId());
-
-        final Entity dataStoreEntity = new Entity(kind, id);
-
-
-        final Any any = Messages.toAny(commandRequest);
+        final Any any = Messages.toAny(message);
 
         dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
         dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
-        dataStoreEntity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateId));
-        dataStoreEntity.setProperty(TIMESTAMP_KEY, commandRequest.getContext().getCommandId().getTimestamp().getSeconds());
+        dataStoreEntity.setProperty(SINGLETON_ID_KEY, JsonFormat.printToString(id));
 
         dataStore.put(dataStoreEntity);
     }
 
     @Override
-    public void writeSnapshot(Message aggregateId, Snapshot snapshot) {
-        final String kind = SNAPSHOT_KIND;
-        final String id = JsonFormat.printToString(aggregateId);
+    public <T extends Message> T readSingleton(Message id) {
+        return readMessageFromDataStore(SINGLETON_KIND, JsonFormat.printToString(id));
+    }
 
-        final Entity dataStoreEntity = new Entity(kind, id);
+    @Override
+    public <T extends Message> List<T> query(Class clazz) {
+        return readMessagesFromDataStore(clazz.getName());
+    }
 
-        final Any any = Messages.toAny(snapshot);
+    @Override
+    public <T extends Message> List<T> query(Class clazz, Message aggregateRootId, int version) {
+        return readMessagesFromDataStore(clazz.getName(),
+                prepareAggregateRootIdAndVersionFilter(aggregateRootId, version));
+    }
 
-        dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
-        dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
+    @Override
+    public <T extends Message> List<T> query(Class clazz, Message aggregateRootId) {
+        return readMessagesFromDataStore(clazz.getName(), new Query.FilterPredicate(
+                AGGREGATE_ID_KEY, EQUAL, JsonFormat.printToString(aggregateRootId)));
+    }
 
-        dataStore.put(dataStoreEntity);
+    @Override
+    public <T extends Message> List<T> query(Class clazz, Message aggregateRootId, Timestamp from) {
+        return readMessagesFromDataStore(clazz.getName(), new Query.FilterPredicate(
+                AGGREGATE_ID_KEY, EQUAL, prepareAggregateRootIdAndTimestampFilter(aggregateRootId, from)));
+    }
+
+    @Override
+    public <T extends Message> List<T> query(Class clazz, Timestamp from) {
+        return readMessagesFromDataStore(clazz.getName(), new Query.FilterPredicate(
+                AGGREGATE_ID_KEY, EQUAL, prepareTimestampFilter(from)));
+    }
+
+    private <T extends Message> List<T> readMessagesFromDataStore(String kind) {
+        return readMessagesFromDataStore(kind, null);
+    }
+
+    private <T extends Message> List<T> readMessagesFromDataStore(String kind, Query.Filter filter) {
+        final Query query = new Query(kind);
+        if (filter != null) {
+            query.setFilter(filter);
+        }
+
+        final PreparedQuery preparedQuery = dataStore.prepare(query);
+
+        final List<T> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
+
+        return messages;
     }
 
     private Query.Filter prepareTimestampFilter(Timestamp from) {
-        return new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, from.getSeconds());
-    }
-
-    private Query.Filter prepareTimestampFilter(Timestamp from, Timestamp to) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, from.getSeconds()));
-        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, LESS_THAN_OR_EQUAL, to.getSeconds()));
+        filters.add(new Query.FilterPredicate(TIMESTAMP_NANOS_KEY, GREATER_THAN_OR_EQUAL, from.getNanos()));
+
+        return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
+    }
+
+    private Query.Filter prepareAggregateRootIdAndTimestampFilter(Message aggregateRootId, Timestamp from) {
+
+        final List<Query.Filter> filters = new ArrayList<>();
+        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, from.getSeconds()));
+        filters.add(new Query.FilterPredicate(TIMESTAMP_NANOS_KEY, GREATER_THAN_OR_EQUAL, from.getNanos()));
+        filters.add(new Query.FilterPredicate(AGGREGATE_ID_KEY, EQUAL, JsonFormat.printToString(aggregateRootId)));
+
+        return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
+    }
+
+    private Query.Filter prepareAggregateRootIdAndVersionFilter(Message aggregateRootId, int sinceVersion) {
+
+        final List<Query.Filter> filters = new ArrayList<>();
+        filters.add(new Query.FilterPredicate(AGGREGATE_ID_KEY, EQUAL, JsonFormat.printToString(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(VERSION_KEY, GREATER_THAN_OR_EQUAL, sinceVersion));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
@@ -224,15 +171,6 @@ public class DataStoreStorage extends AbstractStorage {
         final Key key = KeyFactory.createKey(kind, id);
         final Entity entity = readEntityFromDataStore(key);
         return readMessageFromEntity(entity);
-    }
-
-    private <T extends Message> List<T> readAllMessagesFromDataStoreByKind(String kind) {
-        final Query query = new Query(kind);
-        final PreparedQuery preparedQuery = dataStore.prepare(query);
-
-        final List<T> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
-
-        return messages;
     }
 
     private <T extends Message> List<T> readAllMessagesFromDataStoreByQuery(PreparedQuery query) {
