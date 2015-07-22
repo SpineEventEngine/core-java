@@ -81,6 +81,10 @@ subprojects {
         String rootDirPath = "$projectDir/src/generated/main/java"
         File rootDir = file(rootDirPath)
         if (rootDir.exists()) {
+            File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
+            if (!propsFileFolder.exists()) {
+                propsFileFolder.mkdirs();
+            }
             Properties props = new Properties()
             File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
             if (propsFile.exists()) {
