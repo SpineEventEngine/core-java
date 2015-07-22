@@ -33,18 +33,18 @@ import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 
 /**
- * Extracts EventRecords' DataStore Entities from Protobuf Messages.
+ * Converts EventRecords' DataStore Entities from Protobuf Messages.
  *
  * @author Mikhail Mikhaylov
  */
-public class EventRecordEntityExtractor extends BaseTypedEntityExtractor {
+public class EventRecordEntityConverter extends BaseEntityConverter {
 
-    public EventRecordEntityExtractor() {
+    public EventRecordEntityConverter() {
         super(EventRecord.getDescriptor().getFullName());
     }
 
     @Override
-    public Entity extract(Message message) {
+    public Entity convert(Message message) {
         final EventRecord eventRecord = (EventRecord) message;
         final String id = JsonFormat.printToString(eventRecord.getContext().getEventId());
         final Message aggregateRootId = eventRecord.getContext().getAggregateId();

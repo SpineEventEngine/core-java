@@ -33,18 +33,18 @@ import org.spine3.util.Messages;
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
- * Extracts CommandRequests' DataStore Entities from Protobuf Messages.
+ * Converts CommandRequests' DataStore Entities from Protobuf Messages.
  *
  * @author Mikhail Mikhaylov
  */
-public class CommandRequestEntityExtractor extends BaseTypedEntityExtractor {
+public class CommandRequestEntityConverter extends BaseEntityConverter {
 
-    public CommandRequestEntityExtractor() {
+    public CommandRequestEntityConverter() {
         super(CommandRequest.getDescriptor().getFullName());
     }
 
     @Override
-    public Entity extract(Message message) {
+    public Entity convert(Message message) {
         final CommandRequest commandRequest = (CommandRequest) message;
         final Message command = Messages.fromAny(commandRequest.getCommand());
         final Message aggregateRootId = Commands.getAggregateId(command);

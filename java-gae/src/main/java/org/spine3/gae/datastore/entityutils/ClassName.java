@@ -20,26 +20,40 @@
 
 package org.spine3.gae.datastore.entityutils;
 
-import org.spine3.util.ProtoClassNameReader;
-
 /**
- * Base implementation for common EntityExtractor part.
+ * Class Name tiny type.
  *
  * @author Mikhail Mikhaylov
  */
-public abstract class BaseTypedEntityExtractor implements TypedEntityExtractor {
+public class ClassName {
 
-    private final String typeUrl;
+    private final String value;
 
-    public BaseTypedEntityExtractor(String typeUrl) {
-        this.typeUrl = typeUrl;
+    private ClassName(Class clazz) {
+        this.value = clazz.getName();
     }
 
-    protected String getTypeUrl() {
-        return typeUrl;
+    public String getValue() {
+        return value;
     }
 
-    protected String getEntityKind() {
-        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClassName className = (ClassName) o;
+
+        return !(value != null ? !value.equals(className.value) : className.value != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return value != null ? value.hashCode() : 0;
+    }
+
+    public static ClassName of(Class clazz) {
+        return new ClassName(clazz);
     }
 }

@@ -22,18 +22,30 @@ package org.spine3.gae.datastore.entityutils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.EventRecord;
+
+import java.util.HashMap;
 
 /**
- * Defines the interface for data store entity extraction from protobuf message.
+ * Holds Entity Converters and provides an API for them.
  *
- * @author Mikhail Mikhaylov
+ * @author Mikhayil Mikhaylov
  */
-public interface TypedEntityExtractor {
-    /**
-     * Extracts DataStore Entity from Protobuf message.
-     *
-     * @param message Protobuf message to extract from
-     * @return extracted DataStore Entity
-     */
-    Entity extract(Message message);
+public class EntityConverters {
+
+    private static HashMap<ClassName, EntityConverter> converters = new HashMap<ClassName, EntityConverter>() {{
+        put(ClassName.of(EventRecord.class), new EventRecordEntityConverter());
+        put(ClassName.of(CommandRequest.class), new CommandRequestEntityConverter());
+    }};
+
+    public static Entity convert(Message message) {
+        final ClassName messageClassName = ClassName.of(message.getClass());
+        if (!converters.containsKey(messageClassName)) {
+            throw new IllegalArgumentException("Unknown message type");
+        }
+
+        return converters.get(messageClassName).convert(message);
+    }
+
 }

@@ -26,7 +26,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.engine.AbstractStorage;
-import org.spine3.gae.datastore.entityutils.EntityExtractor;
+import org.spine3.gae.datastore.entityutils.EntityConverters;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 
@@ -58,10 +58,7 @@ public class DataStoreStorage extends AbstractStorage {
 
     @Override
     public void store(Message message) {
-        final Any any = Messages.toAny(message);
-        final String typeUrl = any.getTypeUrl();
-
-        final Entity dataStoreEntity = EntityExtractor.extract(message, typeUrl);
+        final Entity dataStoreEntity = EntityConverters.convert(message);
 
         dataStore.put(dataStoreEntity);
     }
