@@ -21,9 +21,6 @@ package org.spine3;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
-import org.spine3.CommandHandler;
-import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.engine.MessageSubscriber;
@@ -119,7 +116,7 @@ public class CommandDispatcher {
         Class<? extends AggregateRoot> rootClass = Methods.getRepositoryAggregateRootClass(repository);
         Set<Class<? extends Message>> commandClasses = Methods.getCommandClasses(rootClass);
 
-        MessageSubscriber subscriber = MessageSubscriber.fromRepository(repository);
+        MessageSubscriber subscriber = Repository.Converter.toMessageSubscriber(repository);
         for (Class<? extends Message> commandClass : commandClasses) {
             result.put(commandClass, subscriber);
         }

@@ -20,11 +20,6 @@
 package org.spine3.engine;
 
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
-import org.spine3.CommandHandler;
-import org.spine3.Repository;
-import org.spine3.base.CommandContext;
-import org.spine3.util.Messages;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;
@@ -52,6 +47,7 @@ public class MessageSubscriber {
      */
 
     private static final String ARGUMENT_REJECTED = "Method rejected target/argument: ";
+    private static final String MSG_UNABLE_TO_ACCESS = "Unable to call a method of the message: ";
 
     /**
      * Object sporting the subscriber method.
@@ -61,30 +57,6 @@ public class MessageSubscriber {
      * Subscriber method.
      */
     private final Method method;
-
-    public static MessageSubscriber fromCommandHandler(CommandHandler handler, Method method) throws NoSuchMethodException {
-        checkNotNull(handler);
-        checkNotNull(method);
-        return new MessageSubscriber(handler, method);
-    }
-
-    public static MessageSubscriber fromRepository(Repository repository) {
-        checkNotNull(repository);
-
-        try {
-            Method method = repository.getClass().getMethod("dispatch", Message.class, CommandContext.class);
-            return new MessageSubscriber(repository, method);
-        } catch (NoSuchMethodException e) {
-            //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
-            throw new Error(e);
-        }
-    }
-
-    public static MessageSubscriber fromAggregateRoot(AggregateRoot aggregateRoot, Method method) {
-        checkNotNull(aggregateRoot);
-        checkNotNull(method);
-        return new MessageSubscriber(aggregateRoot, method);
-    }
 
     /**
      * Creates a new MessageSubscriber to wrap {@code method} on {@code target}.
@@ -124,7 +96,7 @@ public class MessageSubscriber {
         } catch (IllegalArgumentException e) {
             throw new Error(ARGUMENT_REJECTED + message, e);
         } catch (IllegalAccessException e) {
-            throw new Error(Messages.INACCESSIBLE_METHOD + message, e);
+            throw new Error(MSG_UNABLE_TO_ACCESS + message, e);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof Error) {
                 //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
@@ -154,7 +126,7 @@ public class MessageSubscriber {
         } catch (IllegalArgumentException e) {
             throw new Error(ARGUMENT_REJECTED + message, e);
         } catch (IllegalAccessException e) {
-            throw new Error(Messages.INACCESSIBLE_METHOD + message, e);
+            throw new Error(MSG_UNABLE_TO_ACCESS + message, e);
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof Error) {
                 //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException

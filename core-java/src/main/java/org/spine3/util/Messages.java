@@ -35,16 +35,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
     public static final String PARSE_FROM_METHOD_NAME = "parseFrom";
 
-    public static final String UNEXISTING_METHOD_CALL = "There is no such method for the given object: ";
-    public static final String INACCESSIBLE_METHOD = "Method became inaccessible: ";
-
-    private static final String COM_PREFIX = "com.";
+    private static final String MSG_NO_SUCH_METHOD = "Method %s() is not defined in the class %s.";
+    private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
+    private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
@@ -81,33 +81,34 @@ public class Messages {
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
 
+        final String typeUrl = any.getTypeUrl();
+        Class<T> messageClass;
+        String messageClassName = "null";
         try {
-            Class<T> messageType = toMessageClass(any.getTypeUrl());
-            Method method = messageType.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
+            messageClass = toMessageClass(typeUrl);
+            messageClassName = messageClass.getName();
+            Method method = messageClass.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
 
             //noinspection unchecked
             T result = (T) method.invoke(null, any.getValue());
             return result;
         } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeInAnyException(any.getTypeUrl());
+            throw new UnknownTypeInAnyException(typeUrl);
         } catch (NoSuchMethodException e) {
-            throw new Error(UNEXISTING_METHOD_CALL + PARSE_FROM_METHOD_NAME, e);
+            String msg = String.format(MSG_NO_SUCH_METHOD, PARSE_FROM_METHOD_NAME, messageClassName);
+            throw new Error(msg, e);
         } catch (IllegalAccessException e) {
-            throw new Error(INACCESSIBLE_METHOD + PARSE_FROM_METHOD_NAME, e);
+            String msg = String.format(MSG_UNABLE_TO_ACCESS, PARSE_FROM_METHOD_NAME, messageClassName);
+            throw new Error(msg, e);
         } catch (InvocationTargetException e) {
-            //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new Error(e.getCause());
+            String msg = String.format(MSG_ERROR_INVOKING, PARSE_FROM_METHOD_NAME, messageClassName, e.getCause());
+            throw new Error(msg, e);
         }
     }
-
-    //TODO:2015-06-10:alexander.yevsyukov: This is fragile. Fix it to have some kind of translator between
-    // type name and Java class name. Do not store a map String->Java class, as it would initialize all the
-    // required classes. Store a map string->string.
 
     /**
      * Returns message {@link Class} for the given Protobuf message type.
      * <p/>
-     * NOTE: By convention classname is the Protobuf message type name prefixed with '.com'.
      * This method is temporary until full support of {@link Any} is provided.
      *
      * @param messageType full type name defined in the proto files
@@ -118,7 +119,9 @@ public class Messages {
     public static <T extends Message> Class<T> toMessageClass(String messageType) throws ClassNotFoundException {
         //noinspection unchecked
         String className = ProtoClassNameReader.getClassNameByProtoTypeUrl(messageType);
-        return (Class<T>) Class.forName(className);
+        @SuppressWarnings("unchecked")
+        final Class<T> result = (Class<T>) Class.forName(className);
+        return result;
     }
 
     /**
@@ -129,9 +132,8 @@ public class Messages {
      */
     public static String toString(Message message) {
         checkNotNull(message);
-
-        //TODO:2015-06-22:mikhail.melnik: implement
-        return JsonFormat.printToString(message);
+        final String result = JsonFormat.printToString(message);
+        return result;
     }
 
     /**
