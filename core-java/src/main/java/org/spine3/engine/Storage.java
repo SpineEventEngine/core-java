@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * Defines the low level data interface of the storage
- * that is used to read/write events, commands, snapshots, etc.
+ * that is used to read and write Protobuf messages.
  *
  * @author Mikhail Mikhaylov
  */

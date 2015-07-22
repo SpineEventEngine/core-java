@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.store.datastore.entityutils;
+package org.spine3.gae.datastore.entityutils;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
@@ -26,12 +26,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
 import org.spine3.util.Commands;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 
-import static org.spine3.sample.store.datastore.DataStoreStorage.*;
+import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
  * Extracts CommandRequests' DataStore Entities from Protobuf Messages.

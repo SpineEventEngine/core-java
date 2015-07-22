@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.store.datastore.entityutils;
+package org.spine3.gae.datastore.entityutils;
 
 import org.spine3.util.ProtoClassNameReader;
 

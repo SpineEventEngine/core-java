@@ -15,12 +15,9 @@ dependencies {
     compile project(':core' +
             '-java')
     compile project(':grpc')
+    compile project(':java-gae')
 
-    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.23'
-    compile 'com.google.appengine:appengine-api-labs:1.9.23'
-    compile 'com.google.appengine:appengine-api-stubs:1.9.23'
-    compile 'com.google.appengine:appengine-tools-sdk:1.9.23'
-    compile 'com.google.appengine:appengine-testing:1.9.23'
+
 }
 
 sourceSets {

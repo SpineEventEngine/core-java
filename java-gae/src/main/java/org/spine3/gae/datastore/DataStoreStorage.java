@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.store.datastore;
+package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.*;
 import com.google.protobuf.Any;
@@ -26,7 +26,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.engine.AbstractStorage;
-import org.spine3.sample.store.datastore.entityutils.EntityExtractor;
+import org.spine3.gae.datastore.entityutils.EntityExtractor;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 

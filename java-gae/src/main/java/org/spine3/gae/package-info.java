@@ -19,6 +19,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.sample.store.datastore;
+package org.spine3.gae;
 
 import javax.annotation.ParametersAreNonnullByDefault;
