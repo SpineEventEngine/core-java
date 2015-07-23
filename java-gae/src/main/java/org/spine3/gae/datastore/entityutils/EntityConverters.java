@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
+import org.spine3.util.ClassName;
 
 import java.util.Map;
 

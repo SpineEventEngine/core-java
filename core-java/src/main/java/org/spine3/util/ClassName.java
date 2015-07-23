@@ -18,10 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore.entityutils;
+package org.spine3.util;
+
+import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Class Name tiny type.
+ * A typed string value object holding a fully-qualified Java class name.
  *
  * @author Mikhail Mikhaylov
  */
@@ -37,23 +41,30 @@ public class ClassName {
         return value;
     }
 
+    public static ClassName of(Class clazz) {
+        return new ClassName(checkNotNull(clazz));
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ClassName className = (ClassName) o;
-
-        return !(value != null ? !value.equals(className.value) : className.value != null);
-
+    public String toString() {
+        return this.value;
     }
 
     @Override
     public int hashCode() {
-        return value != null ? value.hashCode() : 0;
+        return Objects.hash(value);
     }
 
-    public static ClassName of(Class clazz) {
-        return new ClassName(clazz);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        //noinspection ConstantConditions
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ClassName other = (ClassName) obj;
+        return Objects.equals(this.value, other.value);
     }
 }
