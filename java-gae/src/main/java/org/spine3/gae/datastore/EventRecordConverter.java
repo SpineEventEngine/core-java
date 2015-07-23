@@ -34,7 +34,7 @@ import org.spine3.util.Messages;
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
- * Converts EventRecords' DataStore Entities from Protobuf Messages.
+ * Converts Protobuf messages to DataStore EventRecord entities.
  *
  * @author Mikhail Mikhaylov
  */

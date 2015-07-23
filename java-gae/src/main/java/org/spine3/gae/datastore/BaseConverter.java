@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.util.ProtoClassNameReader;
 
 /**
- * Base implementation for common EntityConverter part.
+ * Provides base implementation for common EntityConverter part.
  *
  * @author Mikhail Mikhaylov
  */

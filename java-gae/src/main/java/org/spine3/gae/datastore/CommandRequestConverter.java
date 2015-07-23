@@ -35,7 +35,7 @@ import org.spine3.util.Messages;
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
- * Converts CommandRequests' DataStore Entities from Protobuf Messages.
+ * Converts Protobuf messages to DataStore CommandRequest entities.
  *
  * @author Mikhail Mikhaylov
  */
