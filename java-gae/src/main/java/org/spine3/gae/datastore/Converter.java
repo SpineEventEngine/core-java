@@ -38,4 +38,6 @@ interface Converter<T extends Message> {
      * @return extracted DataStore Entity
      */
     Entity convert(T message);
+
+    Class getMessageClass();
 }

@@ -27,6 +27,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.util.ClassName;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,18 +37,30 @@ import java.util.Map;
  */
 class EntityConverters {
 
-    private static Map<Class, Converter> converters = new ImmutableMap.Builder<Class, Converter>()
-            .put(CommandRequest.class, new CommandRequestConverter())
-            .put(EventRecord.class, new EventRecordConverter())
-            .build();
+    private static ConvertersMap convertersMap = new ConvertersMap();
+    static {
+        convertersMap.put(new CommandRequestConverter());
+        convertersMap.put(new EventRecordConverter());
+    }
 
     public static Entity convert(Message message) {
         final Class messageClass = message.getClass();
-        if (!converters.containsKey(messageClass)) {
-            throw new IllegalArgumentException("Unsupported message class: " + messageClass.getSimpleName());
-        }
 
-        return converters.get(messageClass).convert(message);
+        return convertersMap.get(messageClass).convert(message);
     }
 
+    private static class ConvertersMap {
+        private Map<Class, Converter> converters = new HashMap<>();
+
+        public void put(Converter converter) {
+            converters.put(converter.getMessageClass(), converter);
+        }
+
+        public Converter get(Class clazz) {
+            if (!converters.containsKey(clazz)) {
+                throw new IllegalArgumentException("Unsupported message class: " + clazz.getSimpleName());
+            }
+            return converters.get(clazz);
+        }
+    }
 }

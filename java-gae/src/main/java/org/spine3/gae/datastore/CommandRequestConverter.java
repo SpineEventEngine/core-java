@@ -66,4 +66,9 @@ class CommandRequestConverter extends BaseConverter<CommandRequest> {
 
         return entity;
     }
+
+    @Override
+    public Class getMessageClass() {
+        return CommandRequest.class;
+    }
 }
