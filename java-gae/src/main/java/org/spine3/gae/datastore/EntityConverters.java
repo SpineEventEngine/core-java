@@ -36,18 +36,18 @@ import java.util.Map;
  */
 class EntityConverters {
 
-    private static Map<ClassName, Converter> converters = new ImmutableMap.Builder<ClassName, Converter>()
-            .put(ClassName.of(CommandRequest.class), new CommandRequestConverter())
-            .put(ClassName.of(EventRecord.class), new EventRecordConverter())
+    private static Map<Class, Converter> converters = new ImmutableMap.Builder<Class, Converter>()
+            .put(CommandRequest.class, new CommandRequestConverter())
+            .put(EventRecord.class, new EventRecordConverter())
             .build();
 
     public static Entity convert(Message message) {
-        final ClassName messageClassName = ClassName.of(message.getClass());
-        if (!converters.containsKey(messageClassName)) {
-            throw new IllegalArgumentException("Unsupported message class: " + messageClassName);
+        final Class messageClass = message.getClass();
+        if (!converters.containsKey(messageClass)) {
+            throw new IllegalArgumentException("Unsupported message class: " + messageClass.getSimpleName());
         }
 
-        return converters.get(messageClassName).convert(message);
+        return converters.get(messageClass).convert(message);
     }
 
 }
