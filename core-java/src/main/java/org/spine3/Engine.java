@@ -97,7 +97,7 @@ public final class Engine {
         store(request);
 
         CommandResult result = dispatch(request);
-        post(result.getEventRecordList());
+        storeAndPost(result.getEventRecordList());
 
         return result;
     }
@@ -126,8 +126,7 @@ public final class Engine {
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
-    private void post(List<EventRecord> records) {
+    private void storeAndPost(Iterable<EventRecord> records) {
         for (EventRecord record : records) {
             eventStore.store(record);
             EventBus.instance().post(record);
