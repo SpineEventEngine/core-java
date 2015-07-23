@@ -21,11 +21,7 @@
 package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.util.ClassName;
 
 import java.util.HashMap;
 import java.util.Map;
