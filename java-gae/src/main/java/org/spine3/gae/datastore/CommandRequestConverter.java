@@ -25,6 +25,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.util.Commands;
 import org.spine3.util.JsonFormat;
@@ -47,8 +49,10 @@ class CommandRequestConverter extends BaseConverter<CommandRequest> {
     public Entity convert(CommandRequest commandRequest) {
         final Message command = Messages.fromAny(commandRequest.getCommand());
         final Message aggregateRootId = Commands.getAggregateId(command);
-        final String id = JsonFormat.printToString(commandRequest.getContext().getCommandId());
-        final Timestamp timestamp = commandRequest.getContext().getCommandId().getTimestamp();
+        final CommandContext commandContext = commandRequest.getContext();
+        final CommandId commandId = commandContext.getCommandId();
+        final String id = JsonFormat.printToString(commandId);
+        final Timestamp timestamp = commandId.getTimestamp();
 
         final Entity entity = new Entity(getEntityKind(), id);
 

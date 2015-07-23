@@ -25,6 +25,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
@@ -44,10 +46,12 @@ class EventRecordConverter extends BaseConverter<EventRecord> {
 
     @Override
     public Entity convert(EventRecord eventRecord) {
-        final String id = JsonFormat.printToString(eventRecord.getContext().getEventId());
-        final Message aggregateRootId = eventRecord.getContext().getAggregateId();
-        final Timestamp timestamp = eventRecord.getContext().getEventId().getTimestamp();
-        final int version = eventRecord.getContext().getVersion();
+        final EventContext eventContext = eventRecord.getContext();
+        final EventId eventId = eventContext.getEventId();
+        final String id = JsonFormat.printToString(eventId);
+        final Message aggregateRootId = eventContext.getAggregateId();
+        final Timestamp timestamp = eventId.getTimestamp();
+        final int version = eventContext.getVersion();
 
         final Entity entity = new Entity(getEntityKind(), id);
 
