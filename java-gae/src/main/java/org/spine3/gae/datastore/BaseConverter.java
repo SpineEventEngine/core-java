@@ -18,36 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore.entityutils;
+package org.spine3.gae.datastore;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.util.ClassName;
-
-import java.util.Map;
+import org.spine3.util.ProtoClassNameReader;
 
 /**
- * Holds Entity Converters and provides an API for them.
+ * Base implementation for common EntityConverter part.
  *
- * @author Mikhayil Mikhaylov
+ * @author Mikhail Mikhaylov
  */
-public class EntityConverters {
+abstract class BaseConverter<T extends Message> implements Converter<T> {
 
-    private static Map<ClassName, EntityConverter> converters = new ImmutableMap.Builder<ClassName, EntityConverter>()
-            .put(ClassName.of(CommandRequest.class), new CommandRequestEntityConverter())
-            .put(ClassName.of(EventRecord.class), new EventRecordEntityConverter())
-            .build();
+    private final String typeUrl;
 
-    public static Entity convert(Message message) {
-        final ClassName messageClassName = ClassName.of(message.getClass());
-        if (!converters.containsKey(messageClassName)) {
-            throw new IllegalArgumentException("Unsupported message class: " + messageClassName);
-        }
-
-        return converters.get(messageClassName).convert(message);
+    public BaseConverter(String typeUrl) {
+        this.typeUrl = typeUrl;
     }
 
+    protected String getTypeUrl() {
+        return typeUrl;
+    }
+
+    protected String getEntityKind() {
+        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
+    }
 }

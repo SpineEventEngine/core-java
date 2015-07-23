@@ -18,28 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore.entityutils;
+package org.spine3.gae.datastore;
 
-import org.spine3.util.ProtoClassNameReader;
+import com.google.appengine.api.datastore.Entity;
+import com.google.protobuf.Message;
 
 /**
- * Base implementation for common EntityConverter part.
+ * Defines the interface for message to data store entity conversion.
  *
+ * @param <T> message type
  * @author Mikhail Mikhaylov
  */
-public abstract class BaseEntityConverter implements EntityConverter {
+interface Converter<T extends Message> {
 
-    private final String typeUrl;
-
-    public BaseEntityConverter(String typeUrl) {
-        this.typeUrl = typeUrl;
-    }
-
-    protected String getTypeUrl() {
-        return typeUrl;
-    }
-
-    protected String getEntityKind() {
-        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
-    }
+    /**
+     * Converts DataStore Entity from Protobuf message.
+     *
+     * @param message Protobuf message to convert from
+     * @return extracted DataStore Entity
+     */
+    Entity convert(T message);
 }

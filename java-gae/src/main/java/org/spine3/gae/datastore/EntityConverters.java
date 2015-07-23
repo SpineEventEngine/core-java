@@ -18,23 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore.entityutils;
+package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.EventRecord;
+import org.spine3.util.ClassName;
+
+import java.util.Map;
 
 /**
- * Defines the interface for data store entity conversion from protobuf message.
+ * Holds Entity Converters and provides an API for them.
  *
- * @author Mikhail Mikhaylov
+ * @author Mikhayil Mikhaylov
  */
-public interface EntityConverter {
+class EntityConverters {
 
-    /**
-     * Converts DataStore Entity from Protobuf message.
-     *
-     * @param message Protobuf message to convert from
-     * @return extracted DataStore Entity
-     */
-    Entity convert(Message message);
+    private static Map<ClassName, Converter> converters = new ImmutableMap.Builder<ClassName, Converter>()
+            .put(ClassName.of(CommandRequest.class), new CommandRequestConverter())
+            .put(ClassName.of(EventRecord.class), new EventRecordConverter())
+            .build();
+
+    public static Entity convert(Message message) {
+        final ClassName messageClassName = ClassName.of(message.getClass());
+        if (!converters.containsKey(messageClassName)) {
+            throw new IllegalArgumentException("Unsupported message class: " + messageClassName);
+        }
+
+        return converters.get(messageClassName).convert(message);
+    }
+
 }

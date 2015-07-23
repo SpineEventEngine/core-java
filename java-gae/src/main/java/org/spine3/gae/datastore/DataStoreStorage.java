@@ -26,7 +26,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.engine.AbstractStorage;
-import org.spine3.gae.datastore.entityutils.EntityConverters;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 

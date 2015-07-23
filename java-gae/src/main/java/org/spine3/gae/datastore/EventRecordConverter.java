@@ -18,48 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore.entityutils;
+package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandRequest;
-import org.spine3.util.Commands;
+import org.spine3.base.EventRecord;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
- * Converts CommandRequests' DataStore Entities from Protobuf Messages.
+ * Converts EventRecords' DataStore Entities from Protobuf Messages.
  *
  * @author Mikhail Mikhaylov
  */
-public class CommandRequestEntityConverter extends BaseEntityConverter {
+class EventRecordConverter extends BaseConverter<EventRecord> {
 
-    public CommandRequestEntityConverter() {
-        super(CommandRequest.getDescriptor().getFullName());
+    public EventRecordConverter() {
+        super(EventRecord.getDescriptor().getFullName());
     }
 
     @Override
-    public Entity convert(Message message) {
-        final CommandRequest commandRequest = (CommandRequest) message;
-        final Message command = Messages.fromAny(commandRequest.getCommand());
-        final Message aggregateRootId = Commands.getAggregateId(command);
-        final String id = JsonFormat.printToString(commandRequest.getContext().getCommandId());
-        final Timestamp timestamp = commandRequest.getContext().getCommandId().getTimestamp();
+    public Entity convert(EventRecord eventRecord) {
+        final String id = JsonFormat.printToString(eventRecord.getContext().getEventId());
+        final Message aggregateRootId = eventRecord.getContext().getAggregateId();
+        final Timestamp timestamp = eventRecord.getContext().getEventId().getTimestamp();
+        final int version = eventRecord.getContext().getVersion();
 
         final Entity entity = new Entity(getEntityKind(), id);
 
-        final Any any = Messages.toAny(message);
+        final Any any = Messages.toAny(eventRecord);
 
         entity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
         entity.setProperty(TYPE_URL_KEY, getTypeUrl());
         entity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
         entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
         entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
+        entity.setProperty(VERSION_KEY, version);
 
         return entity;
     }
