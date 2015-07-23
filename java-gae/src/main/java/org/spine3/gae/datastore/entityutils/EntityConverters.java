@@ -21,11 +21,12 @@
 package org.spine3.gae.datastore.entityutils;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Holds Entity Converters and provides an API for them.
@@ -34,15 +35,15 @@ import java.util.HashMap;
  */
 public class EntityConverters {
 
-    private static HashMap<ClassName, EntityConverter> converters = new HashMap<ClassName, EntityConverter>() {{
-        put(ClassName.of(EventRecord.class), new EventRecordEntityConverter());
-        put(ClassName.of(CommandRequest.class), new CommandRequestEntityConverter());
-    }};
+    private static Map<ClassName, EntityConverter> converters = new ImmutableMap.Builder<ClassName, EntityConverter>()
+            .put(ClassName.of(CommandRequest.class), new CommandRequestEntityConverter())
+            .put(ClassName.of(EventRecord.class), new EventRecordEntityConverter())
+            .build();
 
     public static Entity convert(Message message) {
         final ClassName messageClassName = ClassName.of(message.getClass());
         if (!converters.containsKey(messageClassName)) {
-            throw new IllegalArgumentException("Unknown message type");
+            throw new IllegalArgumentException("Unsupported message class: " + messageClassName);
         }
 
         return converters.get(messageClassName).convert(message);
