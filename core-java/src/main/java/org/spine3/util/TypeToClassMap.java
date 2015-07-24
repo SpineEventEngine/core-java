@@ -37,14 +37,13 @@ import java.util.Properties;
  */
 public class TypeToClassMap {
 
-    //TODO:2015-07-24:alexander.yevsyukov: Describe how we build this file.
+    /**
+     * File, containing Protobuf messages' typeUrls and their appropriate class names.
+     * Is generated with Gradle during build process.
+     */
     private static final String PROPERTIES_FILE_NAME = "protos.properties";
 
     private static final Map<TypeName, ClassName> namesMap = new HashMap<>();
-
-    //TODO:2015-07-24:alexander.yevsyukov: Why do we need to have the static field for this?
-    private static Properties properties;
-
 
     /**
      * Retrieves compiled proto's java class name by proto type url
@@ -59,9 +58,7 @@ public class TypeToClassMap {
         // It will read properties each time we don't have an entry in the map.
 
         if (!namesMap.containsKey(protoType)) {
-            if (properties == null) {
-                properties = new Properties();
-            }
+            Properties properties = new Properties();
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
