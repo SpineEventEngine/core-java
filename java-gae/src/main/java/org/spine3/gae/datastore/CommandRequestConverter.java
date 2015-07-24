@@ -31,6 +31,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.util.Commands;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
+import org.spine3.util.TypeName;
 
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
@@ -42,7 +43,7 @@ import static org.spine3.gae.datastore.DataStoreStorage.*;
 class CommandRequestConverter extends BaseConverter<CommandRequest> {
 
     public CommandRequestConverter() {
-        super(CommandRequest.getDescriptor().getFullName());
+        super(TypeName.of(CommandRequest.getDescriptor().getFullName()));
     }
 
     @Override
@@ -59,7 +60,7 @@ class CommandRequestConverter extends BaseConverter<CommandRequest> {
         final Any any = Messages.toAny(commandRequest);
 
         entity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
-        entity.setProperty(TYPE_URL_KEY, getTypeUrl());
+        entity.setProperty(TYPE_URL_KEY, getTypeName());
         entity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
         entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
         entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());

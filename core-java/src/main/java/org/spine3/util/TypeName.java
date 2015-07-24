@@ -43,7 +43,7 @@ public final class TypeName extends StringValue {
     }
 
     /**
-     * Creates a new type name instace taking its name from the passed message instance.
+     * Creates a new type name instance taking its name from the passed message instance.
      * @param msg an instance to get the type name from
      * @return new instance
      */

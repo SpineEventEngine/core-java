@@ -20,6 +20,7 @@
 
 package org.spine3.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -29,12 +30,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class ClassName extends StringValue {
 
-    private ClassName(Class clazz) {
-        super(clazz.getName());
+    private ClassName(String value) {
+        super(checkNotNull(value));
     }
 
+    private ClassName(Class clazz) {
+        this(clazz.getName());
+    }
+
+    /**
+     * Creates a new instance with the name of the passed class.
+     * @param clazz the class to get name from
+     * @return new instance
+     */
     public static ClassName of(Class clazz) {
         return new ClassName(checkNotNull(clazz));
     }
 
+    /**
+     * Creates a new instance with the passed class name value.
+     * @param className a fully-qualified Java class name
+     * @return new
+     */
+    public static ClassName of(String className) {
+        checkNotNull(className);
+        checkArgument(className.length() > 0, "Class name cannot me empty");
+        return new ClassName(className);
+    }
 }

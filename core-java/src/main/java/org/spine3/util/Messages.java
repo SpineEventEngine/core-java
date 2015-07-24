@@ -81,11 +81,11 @@ public class Messages {
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
 
-        final String typeUrl = any.getTypeUrl();
+        final TypeName typeName = TypeName.of(any.getTypeUrl());
         Class<T> messageClass;
         String messageClassName = "null";
         try {
-            messageClass = toMessageClass(typeUrl);
+            messageClass = toMessageClass(typeName);
             messageClassName = messageClass.getName();
             Method method = messageClass.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
 
@@ -93,7 +93,7 @@ public class Messages {
             T result = (T) method.invoke(null, any.getValue());
             return result;
         } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeInAnyException(typeUrl);
+            throw new UnknownTypeInAnyException(typeName.toString());
         } catch (NoSuchMethodException e) {
             String msg = String.format(MSG_NO_SUCH_METHOD, PARSE_FROM_METHOD_NAME, messageClassName);
             throw new Error(msg, e);
@@ -116,11 +116,10 @@ public class Messages {
      * @throws ClassNotFoundException in case there is no corresponding class for the given Protobuf message type
      * @see #fromAny(Any) that uses the same convention
      */
-    public static <T extends Message> Class<T> toMessageClass(String messageType) throws ClassNotFoundException {
-        //noinspection unchecked
-        String className = ProtoClassNameReader.getClassNameByProtoTypeUrl(messageType);
+    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) throws ClassNotFoundException {
+        ClassName className = TypeToClassMap.get(messageType);
         @SuppressWarnings("unchecked")
-        final Class<T> result = (Class<T>) Class.forName(className);
+        final Class<T> result = (Class<T>) Class.forName(className.value());
         return result;
     }
 

@@ -21,7 +21,9 @@
 package org.spine3.gae.datastore;
 
 import com.google.protobuf.Message;
-import org.spine3.util.ProtoClassNameReader;
+import org.spine3.util.ClassName;
+import org.spine3.util.TypeName;
+import org.spine3.util.TypeToClassMap;
 
 /**
  * Provides base implementation for common EntityConverter part.
@@ -30,17 +32,18 @@ import org.spine3.util.ProtoClassNameReader;
  */
 abstract class BaseConverter<T extends Message> implements Converter<T> {
 
-    private final String typeUrl;
+    private final TypeName typeName;
 
-    protected BaseConverter(String typeUrl) {
-        this.typeUrl = typeUrl;
+    protected BaseConverter(TypeName typeName) {
+        this.typeName = typeName;
     }
 
-    protected String getTypeUrl() {
-        return typeUrl;
+    protected String getTypeName() {
+        return typeName.toString();
     }
 
     protected String getEntityKind() {
-        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
+        final ClassName className = TypeToClassMap.get(typeName);
+        return className.toString();
     }
 }

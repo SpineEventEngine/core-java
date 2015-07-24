@@ -33,15 +33,16 @@ import java.util.Properties;
  * Utility class for reading real proto class names from properties file.
  *
  * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-public class ProtoClassNameReader {
+public class TypeToClassMap {
 
     //TODO:2015-07-24:alexander.yevsyukov: Describe how we build this file.
     private static final String PROPERTIES_FILE_NAME = "protos.properties";
 
-    private static final Map<String, String> namesMap = new HashMap<>();
+    private static final Map<TypeName, ClassName> namesMap = new HashMap<>();
 
-    //TODO:2015-07-24:alexander.yevsyukov: Why do we need to ahve the static field for this?
+    //TODO:2015-07-24:alexander.yevsyukov: Why do we need to have the static field for this?
     private static Properties properties;
 
 
@@ -52,7 +53,7 @@ public class ProtoClassNameReader {
      * @param protoType {@link Any} type url
      * @return Java class name
      */
-    public static String getClassNameByProtoTypeUrl(String protoType) {
+    public static ClassName get(TypeName protoType) {
 
         //TODO:2015-07-24:alexander.yevsyukov: This code has serious flaw:
         // It will read properties each time we don't have an entry in the map.
@@ -70,10 +71,10 @@ public class ProtoClassNameReader {
             } catch (IOException e) {
                 //NOP
             }
-            String propertyValue = properties.getProperty(protoType);
-            namesMap.put(protoType, propertyValue);
+            String propertyValue = properties.getProperty(protoType.value());
+            namesMap.put(protoType, ClassName.of(propertyValue));
         }
-        final String result = namesMap.get(protoType);
+        final ClassName result = namesMap.get(protoType);
         return result;
     }
 }

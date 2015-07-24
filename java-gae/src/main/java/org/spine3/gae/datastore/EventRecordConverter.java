@@ -30,18 +30,19 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
+import org.spine3.util.TypeName;
 
 import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
- * Converts Protobuf messages to DataStore EventRecord entities.
+ * Converts EventRecord messages to DataStore entities.
  *
  * @author Mikhail Mikhaylov
  */
 class EventRecordConverter extends BaseConverter<EventRecord> {
 
     public EventRecordConverter() {
-        super(EventRecord.getDescriptor().getFullName());
+        super(TypeName.of(EventRecord.getDescriptor().getFullName()));
     }
 
     @Override
@@ -58,7 +59,7 @@ class EventRecordConverter extends BaseConverter<EventRecord> {
         final Any any = Messages.toAny(eventRecord);
 
         entity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
-        entity.setProperty(TYPE_URL_KEY, getTypeUrl());
+        entity.setProperty(TYPE_URL_KEY, getTypeName());
         entity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
         entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
         entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
