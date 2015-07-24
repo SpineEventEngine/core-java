@@ -1,9 +1,12 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.0'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.1-SNAPSHOT'
     }
 }
 
@@ -54,8 +57,6 @@ subprojects {
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
-        //todo:2015-07-09:mikhail.mikhaylov: Remove this workaround as soon as https://github.com/google/protobuf-gradle-plugin/issues/15 is resolved.
-        protobuf files("${rootProject.projectDir}/lib/protos.zip")
     }
 
     idea.module {
