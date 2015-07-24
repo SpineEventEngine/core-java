@@ -18,29 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore;
+package org.spine3.util;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.util.ProtoClassNameReader;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides base implementation for common EntityConverter part.
+ * A value object for fully-qualified Protobuf type name.
  *
- * @author Mikhail Mikhaylov
+ * @see Descriptors.FileDescriptor#getFullName()
+ * @see Message#getDescriptorForType()
+ * @author Alexander Yevsyukov
  */
-abstract class BaseConverter<T extends Message> implements Converter<T> {
+public final class TypeName extends StringValue {
 
-    private final String typeUrl;
-
-    protected BaseConverter(String typeUrl) {
-        this.typeUrl = typeUrl;
+    private TypeName(String value) {
+        super(checkNotNull(value));
     }
 
-    protected String getTypeUrl() {
-        return typeUrl;
+    private TypeName(Message msg) {
+        this(msg.getDescriptorForType().getFullName());
     }
 
-    protected String getEntityKind() {
-        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
+    /**
+     * Creates a new type name instace taking its name from the passed message instance.
+     * @param msg an instance to get the type name from
+     * @return new instance
+     */
+    public static TypeName of(Message msg) {
+        return new TypeName(msg);
+    }
+
+    /**
+     * Creates a new instance with the passed type name.
+     * @param typeName the name of the type
+     * @return new instance
+     */
+    public static TypeName of(String typeName) {
+        return new TypeName(typeName);
     }
 }

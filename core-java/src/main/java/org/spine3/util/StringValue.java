@@ -18,29 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore;
+package org.spine3.util;
 
-import com.google.protobuf.Message;
-import org.spine3.util.ProtoClassNameReader;
+import java.util.Objects;
 
 /**
- * Provides base implementation for common EntityConverter part.
+ * Abstract base for string value objects.
  *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-abstract class BaseConverter<T extends Message> implements Converter<T> {
+public abstract class StringValue {
 
-    private final String typeUrl;
+    private final String value;
 
-    protected BaseConverter(String typeUrl) {
-        this.typeUrl = typeUrl;
+    protected StringValue(String value) {
+        this.value = value;
     }
 
-    protected String getTypeUrl() {
-        return typeUrl;
+    protected String value() {
+        return value;
     }
 
-    protected String getEntityKind() {
-        return ProtoClassNameReader.getClassNameByProtoTypeUrl(typeUrl);
+    @Override
+    public String toString() {
+        return this.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        //noinspection ConstantConditions
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final StringValue other = (StringValue) obj;
+        return Objects.equals(this.value(), other.value());
     }
 }

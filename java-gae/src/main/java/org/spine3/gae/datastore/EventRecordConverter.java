@@ -67,8 +67,4 @@ class EventRecordConverter extends BaseConverter<EventRecord> {
         return entity;
     }
 
-    @Override
-    public Class getMessageClass() {
-        return EventRecord.class;
-    }
 }

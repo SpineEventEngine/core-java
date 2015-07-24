@@ -26,18 +26,17 @@ import com.google.protobuf.Message;
 /**
  * Defines the interface for converting Protobuf messages into DataStore entities.
  *
- * @param <T> message type
+ * @param <T> a class of messages the converter supports
  * @author Mikhail Mikhaylov
  */
 interface Converter<T extends Message> {
 
     /**
-     * Converts DataStore Entity from Protobuf message.
+     * Creates a DataStore entity from the passed Protobuf message.
      *
-     * @param message Protobuf message to convert from
-     * @return extracted DataStore Entity
+     * @param message source message
+     * @return new entity instance
      */
     Entity convert(T message);
 
-    Class getMessageClass();
 }

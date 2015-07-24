@@ -21,9 +21,11 @@
 package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.EventRecord;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -33,30 +35,22 @@ import java.util.Map;
  */
 class EntityConverters {
 
-    private static ConvertersMap convertersMap = new ConvertersMap();
-    static {
-        convertersMap.put(new CommandRequestConverter());
-        convertersMap.put(new EventRecordConverter());
-    }
+    private static Map<Class<?>, Converter<?>> map = ImmutableMap.<Class<?>, Converter<?>>builder()
+            .put(CommandRequest.class, new CommandRequestConverter())
+            .put(EventRecord.class, new EventRecordConverter())
+            .build();
 
     public static Entity convert(Message message) {
-        final Class messageClass = message.getClass();
+        final Class<?> messageClass = message.getClass();
 
-        return convertersMap.get(messageClass).convert(message);
-    }
-
-    private static class ConvertersMap {
-        private Map<Class, Converter> converters = new HashMap<>();
-
-        public void put(Converter converter) {
-            converters.put(converter.getMessageClass(), converter);
+        final Converter converter = map.get(messageClass);
+        if (converter == null) {
+            throw new IllegalArgumentException("Unable to find entity converter for the message class: " + messageClass.getName());
         }
 
-        public Converter get(Class clazz) {
-            if (!converters.containsKey(clazz)) {
-                throw new IllegalArgumentException("Unsupported message class: " + clazz.getSimpleName());
-            }
-            return converters.get(clazz);
-        }
+        @SuppressWarnings("unchecked") // We ensure type safety by having the private map of converters in the map initialization code above.
+        final Entity result = converter.convert(message);
+        return result;
     }
+
 }

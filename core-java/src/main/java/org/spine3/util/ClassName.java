@@ -20,8 +20,6 @@
 
 package org.spine3.util;
 
-import java.util.Objects;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -29,42 +27,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Mikhail Mikhaylov
  */
-public class ClassName {
-
-    private final String value;
+public final class ClassName extends StringValue {
 
     private ClassName(Class clazz) {
-        this.value = clazz.getName();
-    }
-
-    public String getValue() {
-        return value;
+        super(clazz.getName());
     }
 
     public static ClassName of(Class clazz) {
         return new ClassName(checkNotNull(clazz));
     }
 
-    @Override
-    public String toString() {
-        return this.value;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        //noinspection ConstantConditions
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final ClassName other = (ClassName) obj;
-        return Objects.equals(this.value, other.value);
-    }
 }
