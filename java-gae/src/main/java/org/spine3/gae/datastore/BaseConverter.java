@@ -43,6 +43,9 @@ abstract class BaseConverter<T extends Message> implements Converter<T> {
     }
 
     protected String getEntityKind() {
+        //TODO:2015-07-24:alexander.yevsyukov: Why do we use Java class name here and not a Proto type?
+        // What if we read this store from another language like Go?
+        // Also notice that this lookup is going to be done every time we create an entity.
         final ClassName className = TypeToClassMap.get(typeName);
         return className.toString();
     }

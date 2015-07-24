@@ -57,7 +57,7 @@ public class DataStoreStorage extends AbstractStorage {
 
     @Override
     public void store(Message message) {
-        final Entity dataStoreEntity = EntityConverters.convert(message);
+        final Entity dataStoreEntity = Converters.convert(message);
 
         dataStore.put(dataStoreEntity);
     }
