@@ -23,7 +23,6 @@ package org.spine3.gae.datastore;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -32,17 +31,15 @@ import org.spine3.AggregateId;
 import org.spine3.base.*;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
-import org.spine3.util.Messages;
 import org.spine3.util.TypeName;
 
 import java.util.Map;
-
-import static org.spine3.gae.datastore.DataStoreStorage.*;
 
 /**
  * Holds Entity Converters and provides an API for them.
  *
  * @author Mikhayil Mikhaylov
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("UtilityClass")
 class Converters {
@@ -79,12 +76,17 @@ class Converters {
     }
 
     /**
-     * Converts Protobuf messages to DataStore CommandRequest entities.
+     * Converts Protobuf messages to DataStore {@code CommandRequest} entities.
      */
-    static class CommandRequestConverter extends BaseConverter<CommandRequest> {
+    static class CommandRequestConverter extends BaseConverter<CommandRequest, CommandId> {
 
         CommandRequestConverter() {
             super(TypeName.of(CommandRequest.getDescriptor()));
+        }
+
+        protected Entity newEntity(CommandId commandId) {
+            final String id = Commands.idToString(commandId);
+            return new Entity(getEntityKind(), id);
         }
 
         @Override
@@ -93,56 +95,48 @@ class Converters {
             final AggregateId aggregateId = command.getAggregateId();
             final CommandContext commandContext = commandRequest.getContext();
             final CommandId commandId = commandContext.getCommandId();
-            final String id = Commands.idToString(commandId);
             final Timestamp timestamp = commandId.getTimestamp();
 
-            final Entity entity = new Entity(getEntityKind(), id);
-
-            final Any any = Messages.toAny(commandRequest);
-
-            entity.setProperty(VALUE_KEY, toBlob(any));
-            entity.setProperty(TYPE_URL_KEY, getTypeName());
-            entity.setProperty(AGGREGATE_ID_KEY, aggregateId.toString());
-            //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
-            entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
-            entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
+            final Entity entity = newEntity(commandId);
+            setType(entity);
+            setAggregateId(entity, aggregateId);
+            setValue(entity, commandRequest);
+            setTimestamp(entity, timestamp);
 
             return entity;
         }
-
     }
 
     /**
-     * Converts EventRecord messages to DataStore entities.
+     * Converts {@code EventRecord} messages to DataStore entities.
      *
      * @author Mikhail Mikhaylov
      */
-    static class EventRecordConverter extends BaseConverter<EventRecord> {
+    static class EventRecordConverter extends BaseConverter<EventRecord, EventId> {
 
         EventRecordConverter() {
             super(TypeName.of(EventRecord.getDescriptor()));
+        }
+
+        protected Entity newEntity(EventId eventId) {
+            final String id = Events.idToString(eventId);
+            return new Entity(getEntityKind(), id);
         }
 
         @Override
         public Entity convert(EventRecord eventRecord) {
             final EventContext eventContext = eventRecord.getContext();
             final EventId eventId = eventContext.getEventId();
-            final String id = Events.idToString(eventId);
             final AggregateId aggregateId = AggregateId.of(eventContext);
             final Timestamp timestamp = eventId.getTimestamp();
             final int version = eventContext.getVersion();
 
-            final Entity entity = new Entity(getEntityKind(), id);
-
-            final Any any = Messages.toAny(eventRecord);
-
-            entity.setProperty(VALUE_KEY, toBlob(any));
-            entity.setProperty(TYPE_URL_KEY, getTypeName());
-            entity.setProperty(AGGREGATE_ID_KEY, aggregateId.toString());
-            //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
-            entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
-            entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
-            entity.setProperty(VERSION_KEY, version);
+            final Entity entity = newEntity(eventId);
+            setType(entity);
+            setAggregateId(entity, aggregateId);
+            setValue(entity, eventRecord);
+            setTimestamp(entity, timestamp);
+            setVersion(entity, version);
 
             return entity;
         }

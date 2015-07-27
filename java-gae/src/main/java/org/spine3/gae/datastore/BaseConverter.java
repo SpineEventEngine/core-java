@@ -20,23 +20,63 @@
 
 package org.spine3.gae.datastore;
 
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.Entity;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.AggregateId;
 import org.spine3.util.ClassName;
+import org.spine3.util.Messages;
 import org.spine3.util.TypeName;
 import org.spine3.util.TypeToClassMap;
 
+import static org.spine3.gae.datastore.DataStoreStorage.*;
+
 /**
- * Provides base implementation for common EntityConverter part.
+ * Abstract implementation base for entity converters.
  *
+ * @param <T> the type of messages the converter handles
+ * @param <I> the type of the IDs for the messages
  * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-abstract class BaseConverter<T extends Message> implements Converter<T> {
+abstract class BaseConverter<T extends Message, I extends Message> implements Converter<T> {
 
     private final TypeName typeName;
 
     protected BaseConverter(TypeName typeName) {
         this.typeName = typeName;
     }
+
+    protected void setTimestamp(Entity entity, Timestamp timestamp) {
+        //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
+        entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
+        entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
+    }
+
+    //TODO:2015-07-27:alexander.yevsyukov: Move constants closer to the usage.
+    // It looks like they don't really belong to the DataStoreStorage class.
+
+    protected void setValue(Entity entity, T value) {
+        final Any any = Messages.toAny(value);
+        final Blob blob = Converters.toBlob(any);
+        entity.setProperty(VALUE_KEY, blob);
+    }
+
+    protected void setType(Entity entity) {
+        entity.setProperty(TYPE_URL_KEY, getTypeName());
+    }
+
+    protected void setAggregateId(Entity entity, AggregateId aggregateId) {
+        entity.setProperty(AGGREGATE_ID_KEY, aggregateId.toString());
+    }
+
+    protected void setVersion(Entity entity, int version) {
+        entity.setProperty(VERSION_KEY, version);
+    }
+
+    protected abstract Entity newEntity(I id);
 
     protected String getTypeName() {
         return typeName.toString();

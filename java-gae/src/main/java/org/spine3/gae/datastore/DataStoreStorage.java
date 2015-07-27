@@ -39,12 +39,15 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.*;
  */
 public class DataStoreStorage extends AbstractStorage {
 
+    //TODO:2015-07-27:alexander.yevsyukov: Review usage of this constants.
     public static final String VALUE_KEY = "value";
+    //TODO:2015-07-27:alexander.yevsyukov: Rename this to just "type"
     public static final String TYPE_URL_KEY = "type_url";
     public static final String TIMESTAMP_KEY = "timestamp";
     public static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
     public static final String VERSION_KEY = "version";
     public static final String AGGREGATE_ID_KEY = "aggregate_id";
+    //TODO:2015-07-27:alexander.yevsyukov: Think of a better name.
     public static final String SINGLETON_ID_KEY = "singleton_id";
 
     private static final String SINGLETON_KIND = "singleton";

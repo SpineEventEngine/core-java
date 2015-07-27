@@ -24,7 +24,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Message;
 
 /**
- * Defines the interface for converting Protobuf messages into DataStore entities.
+ * A converter of Protobuf messages into DataStore entities.
  *
  * @param <T> a class of messages the converter supports
  * @author Mikhail Mikhaylov
