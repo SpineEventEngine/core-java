@@ -36,11 +36,11 @@ import static org.spine3.gae.datastore.DataStoreHelper.*;
  * @param <M> Message type to store
  * @param <P> ParentId type for message
  */
-public class DataStoreSnapshotStorage2<M extends Message, P extends Message> implements SnapshotStorage<M, P> {
+public class DataStoreSnapshotStorage<M extends Message, P extends Message> implements SnapshotStorage<M, P> {
 
     private final DataStoreHelper dataStoreHelper;
 
-    public DataStoreSnapshotStorage2() {
+    public DataStoreSnapshotStorage() {
         dataStoreHelper = new DataStoreHelper();
     }
 
