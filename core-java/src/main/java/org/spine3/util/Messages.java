@@ -19,16 +19,14 @@
  */
 package org.spine3.util;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-import com.google.protobuf.TextFormat;
+import com.google.protobuf.*;
 import org.spine3.lang.UnknownTypeInAnyException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -45,6 +43,12 @@ public class Messages {
     private static final String MSG_NO_SUCH_METHOD = "Method %s() is not defined in the class %s.";
     private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
     private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
+
+    private Messages() {
+        // Prevent instantiation.
+    }
+
+    private static final String GETTER_METHOD_PREFIX = "get";
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
@@ -83,7 +87,7 @@ public class Messages {
 
         final TypeName typeName = TypeName.of(any.getTypeUrl());
         Class<T> messageClass;
-        String messageClassName = "null";
+        String messageClassName = StringValue.NULL;
         try {
             messageClass = toMessageClass(typeName);
             messageClassName = messageClass.getName();
@@ -159,7 +163,64 @@ public class Messages {
         return JsonFormat.printToString(message);
     }
 
-    private Messages() {
+    /**
+     * Obtains Protobuf field name for the passed message.
+     *
+     * @param msg a message to inspect
+     * @param index   a zero-based index of the field
+     * @return name of the field
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
+    public static String getFieldName(Message msg, int index) {
+        final Descriptors.FieldDescriptor fieldDescriptor = getField(msg, index);
+        String fieldName = fieldDescriptor.getName();
+        return fieldName;
     }
 
+    static Descriptors.FieldDescriptor getField(MessageOrBuilder msg, int fieldIndex) {
+        final Descriptors.FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
+        return result;
+    }
+
+    /**
+     * Converts Protobuf field name into Java accessor method name.
+     */
+    public static String toAccessorMethodName(CharSequence fieldName) {
+        StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
+        out.append(GETTER_METHOD_PREFIX);
+        out.append(Character.toUpperCase(fieldName.charAt(0)));
+        boolean nextUpperCase = false;
+        for (int i = 1; i < fieldName.length(); i++) {
+            char c = fieldName.charAt(i);
+            if ('_' == c) {
+                nextUpperCase = true;
+                continue;
+            }
+            out.append(nextUpperCase ? Character.toUpperCase(c) : c);
+            nextUpperCase = false;
+        }
+
+        return out.toString();
+    }
+
+    /**
+     * Reads field from the passed message by its index.
+     *
+     * @param command    a message to inspect
+     * @param fieldIndex a zero-based index of the field
+     * @return value a value of the field
+     */
+    public static Object getFieldValue(MessageOrBuilder command, int fieldIndex) {
+        final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
+        String fieldName = fieldDescriptor.getName();
+        String methodName = toAccessorMethodName(fieldName);
+
+        try {
+            Method method = command.getClass().getMethod(methodName);
+            Object result = method.invoke(command);
+            return result;
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw propagate(e);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-/*
+package org.spine3.util;/*
  * Copyright 2015, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -18,37 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+import com.google.protobuf.Message;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * Abstract base for string value objects.
+ * An abstract base value objects holding a Protobuf message.
  *
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class StringValue {
+public abstract class MessageValue {
 
-    public static final String NULL = "null";
-    private final String value;
+    private final Message value;
 
-    protected StringValue(String value) {
+    protected MessageValue(@Nullable Message value) {
         this.value = value;
     }
 
-    protected String value() {
+    @Nullable
+    protected Message value() {
         return value;
     }
 
     @Override
-    public String toString() {
-        return this.value;
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(this.value);
+        return Objects.hash(value);
     }
 
     @Override
@@ -60,7 +56,8 @@ public abstract class StringValue {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final StringValue other = (StringValue) obj;
-        return Objects.equals(this.value(), other.value());
+        final MessageValue other = (MessageValue) obj;
+        return Objects.equals(this.value, other.value);
     }
 }
+

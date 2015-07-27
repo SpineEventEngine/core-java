@@ -18,49 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3;
 
-import java.util.Objects;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.CommandRequestOrBuilder;
+import org.spine3.util.MessageValue;
+import org.spine3.util.Messages;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Abstract base for string value objects.
+ * A command in the system.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class StringValue {
+@SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
+public class Command extends MessageValue {
 
-    public static final String NULL = "null";
-    private final String value;
-
-    protected StringValue(String value) {
-        this.value = value;
+    protected Command(Message value) {
+        super(value);
     }
 
-    protected String value() {
-        return value;
+    public static Command of(Message value) {
+        return new Command(checkNotNull(value));
     }
 
-    @Override
-    public String toString() {
-        return this.value;
+    public static Command of(CommandRequest cr) {
+        return new Command(getCommandValue(checkNotNull(cr)));
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.value);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        //noinspection ConstantConditions
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final StringValue other = (StringValue) obj;
-        return Objects.equals(this.value(), other.value());
+    public static Message getCommandValue(CommandRequestOrBuilder commandRequest) {
+        return Messages.fromAny(commandRequest.getCommand());
     }
 }

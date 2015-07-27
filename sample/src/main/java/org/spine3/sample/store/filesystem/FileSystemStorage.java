@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.AggregateCommand;
+import org.spine3.Command;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
@@ -202,7 +204,7 @@ public class FileSystemStorage implements Storage {
         checkNotNull(to);
 
         List<CommandRequest> commands = readAllCommands();
-        Predicate<CommandRequest> predicate = Commands.getCommandPredicate(from, to);
+        Predicate<CommandRequest> predicate = Commands.wereWithinPeriod(from, to);
         final ImmutableList<CommandRequest> result = filter(commands, predicate);
 
         return result;
@@ -323,8 +325,8 @@ public class FileSystemStorage implements Storage {
      */
     @Override
     public void writeCommand(CommandRequest commandRequest) {
-        Message command = Messages.fromAny(commandRequest.getCommand());
-        Message aggregateId = Commands.getAggregateId(command);
+        Message command = Command.getCommandValue(commandRequest);
+        Message aggregateId = AggregateCommand.getAggregateId(command);
         File file = getCommandsFile(aggregateId);
 
         writeMessage(file, commandRequest);

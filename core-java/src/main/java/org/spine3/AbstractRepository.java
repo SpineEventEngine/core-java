@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.util.Commands;
 import org.spine3.util.Messages;
 import org.spine3.util.Methods;
 
@@ -161,7 +160,7 @@ public abstract class AbstractRepository<I extends Message,
     // A better way would be to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile-time.
     private I getAggregateId(Message command) {
-        return (I) Commands.getAggregateId(command);
+        return (I) AggregateCommand.getAggregateId(command);
     }
 
     /**

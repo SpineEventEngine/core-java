@@ -54,8 +54,8 @@ public class CommandsShould {
 
     @Test
     public void convert_field_name_to_method_name() {
-        assertEquals("getUserId", Commands.toAccessorMethodName("user_id"));
-        assertEquals("getId", Commands.toAccessorMethodName("id"));
-        assertEquals("getAggregateRootId", Commands.toAccessorMethodName("aggregate_root_id"));
+        assertEquals("getUserId", Messages.toAccessorMethodName("user_id"));
+        assertEquals("getId", Messages.toAccessorMethodName("id"));
+        assertEquals("getAggregateRootId", Messages.toAccessorMethodName("aggregate_root_id"));
     }
 }

@@ -109,7 +109,7 @@ public final class Engine {
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         try {
-            Message command = Messages.fromAny(request.getCommand());
+            Message command = Command.getCommandValue(request);
             CommandContext context = request.getContext();
 
             List<EventRecord> eventRecords = dispatcher.dispatch(command, context);

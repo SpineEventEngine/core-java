@@ -24,10 +24,16 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
+import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.AggregateCommand;
+import org.spine3.AggregateId;
 import org.spine3.base.*;
-import org.spine3.util.*;
+import org.spine3.util.Commands;
+import org.spine3.util.Events;
+import org.spine3.util.Messages;
+import org.spine3.util.TypeName;
 
 import java.util.Map;
 
@@ -64,9 +70,16 @@ class Converters {
     }
 
     /**
+     * Creates new {@code Blob} with the {@code ByteArray} content from the passed 'any' instance.
+     * @param any the instance to convert
+     * @return new {@code Blob}
+     */
+    public static Blob toBlob(AnyOrBuilder any) {
+        return new Blob(any.getValue().toByteArray());
+    }
+
+    /**
      * Converts Protobuf messages to DataStore CommandRequest entities.
-     *
-     * @author Mikhail Mikhaylov
      */
     static class CommandRequestConverter extends BaseConverter<CommandRequest> {
 
@@ -76,8 +89,8 @@ class Converters {
 
         @Override
         public Entity convert(CommandRequest commandRequest) {
-            final Message command = Messages.fromAny(commandRequest.getCommand());
-            final Message aggregateRootId = Commands.getAggregateId(command);
+            final AggregateCommand command = AggregateCommand.of(commandRequest);
+            final AggregateId aggregateId = command.getAggregateId();
             final CommandContext commandContext = commandRequest.getContext();
             final CommandId commandId = commandContext.getCommandId();
             final String id = Commands.idToString(commandId);
@@ -87,9 +100,10 @@ class Converters {
 
             final Any any = Messages.toAny(commandRequest);
 
-            entity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
+            entity.setProperty(VALUE_KEY, toBlob(any));
             entity.setProperty(TYPE_URL_KEY, getTypeName());
-            entity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
+            entity.setProperty(AGGREGATE_ID_KEY, aggregateId.toString());
+            //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
             entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
             entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
 
@@ -114,7 +128,7 @@ class Converters {
             final EventContext eventContext = eventRecord.getContext();
             final EventId eventId = eventContext.getEventId();
             final String id = Events.idToString(eventId);
-            final Message aggregateRootId = eventContext.getAggregateId();
+            final AggregateId aggregateId = AggregateId.of(eventContext);
             final Timestamp timestamp = eventId.getTimestamp();
             final int version = eventContext.getVersion();
 
@@ -122,9 +136,10 @@ class Converters {
 
             final Any any = Messages.toAny(eventRecord);
 
-            entity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
+            entity.setProperty(VALUE_KEY, toBlob(any));
             entity.setProperty(TYPE_URL_KEY, getTypeName());
-            entity.setProperty(AGGREGATE_ID_KEY, JsonFormat.printToString(aggregateRootId));
+            entity.setProperty(AGGREGATE_ID_KEY, aggregateId.toString());
+            //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
             entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
             entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
             entity.setProperty(VERSION_KEY, version);
