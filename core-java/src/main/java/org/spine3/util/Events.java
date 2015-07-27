@@ -109,4 +109,15 @@ public class Events {
         });
     }
 
+    /**
+     * Converts {@code EventId} into Json string.
+     *
+     * @param id the id to convert
+     * @return Json representation of the id
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
+    public static String idToString(EventId id) {
+        final String result = JsonFormat.printToString(id);
+        return result;
+    }
 }

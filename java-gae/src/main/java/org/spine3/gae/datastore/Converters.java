@@ -27,10 +27,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
-import org.spine3.util.Commands;
-import org.spine3.util.JsonFormat;
-import org.spine3.util.Messages;
-import org.spine3.util.TypeName;
+import org.spine3.util.*;
 
 import java.util.Map;
 
@@ -83,7 +80,7 @@ class Converters {
             final Message aggregateRootId = Commands.getAggregateId(command);
             final CommandContext commandContext = commandRequest.getContext();
             final CommandId commandId = commandContext.getCommandId();
-            final String id = JsonFormat.printToString(commandId);
+            final String id = Commands.idToString(commandId);
             final Timestamp timestamp = commandId.getTimestamp();
 
             final Entity entity = new Entity(getEntityKind(), id);
@@ -100,6 +97,7 @@ class Converters {
         }
 
     }
+
     /**
      * Converts EventRecord messages to DataStore entities.
      *
@@ -115,7 +113,7 @@ class Converters {
         public Entity convert(EventRecord eventRecord) {
             final EventContext eventContext = eventRecord.getContext();
             final EventId eventId = eventContext.getEventId();
-            final String id = JsonFormat.printToString(eventId);
+            final String id = Events.idToString(eventId);
             final Message aggregateRootId = eventContext.getAggregateId();
             final Timestamp timestamp = eventId.getTimestamp();
             final int version = eventContext.getVersion();
@@ -135,4 +133,5 @@ class Converters {
         }
 
     }
+
 }

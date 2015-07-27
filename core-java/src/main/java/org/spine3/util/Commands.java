@@ -187,4 +187,15 @@ public class Commands {
         });
     }
 
+    /**
+     * Converts {@code CommandId} into Json string.
+     *
+     * @param id the id to convert
+     * @return Json representation of the id
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types converted in this way.
+    public static String idToString(CommandId id) {
+        final String result = JsonFormat.printToString(id);
+        return result;
+    }
 }
