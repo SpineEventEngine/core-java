@@ -81,6 +81,10 @@ public class AggregateCommand extends Command {
         }
     }
 
+    //TODO:2015-07-28:alexander.yevsyukov: Do we want to accept AggregateCommand here?
+
+    //TODO:2015-07-28:alexander.yevsyukov: Do we want to return AggregateState instance instead?
+
     /**
      * Obtains initial aggregate root state from the creation command.
      * <p>
@@ -91,7 +95,7 @@ public class AggregateCommand extends Command {
      * @return initial aggregated root state
      * @throws IllegalStateException if the field value is not a {@link Message} instance
      */
-    public static Message getAggregateState(MessageOrBuilder creationCommand) {
+    public static Message getAggregateState(Message creationCommand) {
         Object state = Messages.getFieldValue(creationCommand, AGGREGATE_STATE_FIELD_INDEX);
         Message result;
         try {

@@ -44,6 +44,8 @@ public class Messages {
     private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
     private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
 
+    private static final char UNDERSCORE_PROPERTY_NAME_SEPARATOR = '_';
+
     private Messages() {
         // Prevent instantiation.
     }
@@ -127,8 +129,10 @@ public class Messages {
         return result;
     }
 
+
+    //TODO:2015-07-27:alexander.yevsyukov: Why are we having this and toJson()?
     /**
-     * Prints the passed message into to string.
+     * Prints the passed message into to Json representation.
      *
      * @param message the message object
      * @return string representation of the passed message
@@ -147,8 +151,8 @@ public class Messages {
      */
     public static String toText(Message message) {
         checkNotNull(message);
-
-        return TextFormat.printToString(message);
+        final String result = TextFormat.printToString(message);
+        return result;
     }
 
     /**
@@ -159,8 +163,8 @@ public class Messages {
      */
     public static String toJson(Message message) {
         checkNotNull(message);
-
-        return JsonFormat.printToString(message);
+        final String result = JsonFormat.printToString(message);
+        return result;
     }
 
     /**
@@ -173,7 +177,7 @@ public class Messages {
     @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
     public static String getFieldName(Message msg, int index) {
         final Descriptors.FieldDescriptor fieldDescriptor = getField(msg, index);
-        String fieldName = fieldDescriptor.getName();
+        final String fieldName = fieldDescriptor.getName();
         return fieldName;
     }
 
@@ -188,11 +192,13 @@ public class Messages {
     public static String toAccessorMethodName(CharSequence fieldName) {
         StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
         out.append(GETTER_METHOD_PREFIX);
-        out.append(Character.toUpperCase(fieldName.charAt(0)));
+        final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));
+        out.append(uppercaseFirstChar);
+
         boolean nextUpperCase = false;
         for (int i = 1; i < fieldName.length(); i++) {
             char c = fieldName.charAt(i);
-            if ('_' == c) {
+            if (UNDERSCORE_PROPERTY_NAME_SEPARATOR == c) {
                 nextUpperCase = true;
                 continue;
             }
@@ -210,10 +216,15 @@ public class Messages {
      * @param fieldIndex a zero-based index of the field
      * @return value a value of the field
      */
-    public static Object getFieldValue(MessageOrBuilder command, int fieldIndex) {
+    @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
+    public static Object getFieldValue(Message command, int fieldIndex) {
+
+        //TODO:2015-07-27:alexander.yevsyukov: We need to chache this kind of calculations as they are slow.
+        // For this we need a value object FieldAccessor parameterized with a message class and a field index.
+
         final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
-        String fieldName = fieldDescriptor.getName();
-        String methodName = toAccessorMethodName(fieldName);
+        final String fieldName = fieldDescriptor.getName();
+        final String methodName = toAccessorMethodName(fieldName);
 
         try {
             Method method = command.getClass().getMethod(methodName);
