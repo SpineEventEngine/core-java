@@ -1,0 +1,63 @@
+/*
+ * Copyright 2015, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.spine3.gae.datastore;
+
+import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.Entity;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import org.spine3.engine.SnapshotStorage;
+import org.spine3.util.JsonFormat;
+import org.spine3.util.Messages;
+
+import static org.spine3.gae.datastore.DataStoreHelper.*;
+
+/**
+ * DataStore-based {@link SnapshotStorage} implementation.
+ *
+ * @param <M> Message type to store
+ * @param <P> ParentId type for message
+ */
+public class DataStoreSnapshotStorage2<M extends Message, P extends Message> implements SnapshotStorage<M, P> {
+
+    private final DataStoreHelper dataStoreHelper;
+
+    public DataStoreSnapshotStorage2() {
+        dataStoreHelper = new DataStoreHelper();
+    }
+
+    @Override
+    public void store(M message, P parentId) {
+        final Entity dataStoreEntity = new Entity(SINGLETON_KIND, JsonFormat.printToString(parentId));
+
+        final Any any = Messages.toAny(message);
+
+        dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
+        dataStoreEntity.setProperty(SINGLETON_ID_KEY, JsonFormat.printToString(parentId));
+
+        dataStoreHelper.put(dataStoreEntity);
+    }
+
+    @Override
+    public M read(P parentId) {
+        return dataStoreHelper.readMessageFromDataStore(SINGLETON_KIND, JsonFormat.printToString(parentId));
+    }
+}
