@@ -41,12 +41,17 @@ import static org.spine3.gae.datastore.DataStoreStorage.*;
  *
  * @author Mikhayil Mikhaylov
  */
+@SuppressWarnings("UtilityClass")
 class Converters {
 
-    private static Map<Class<?>, Converter<?>> map = ImmutableMap.<Class<?>, Converter<?>>builder()
+    private static final Map<Class<?>, Converter<?>> map = ImmutableMap.<Class<?>, Converter<?>>builder()
             .put(CommandRequest.class, new CommandRequestConverter())
             .put(EventRecord.class, new EventRecordConverter())
             .build();
+
+    private Converters() {
+        // Prevent instantiation of this utility class.
+    }
 
     public static Entity convert(Message message) {
         final Class<?> messageClass = message.getClass();
@@ -68,8 +73,8 @@ class Converters {
      */
     static class CommandRequestConverter extends BaseConverter<CommandRequest> {
 
-        public CommandRequestConverter() {
-            super(TypeName.of(CommandRequest.getDescriptor().getFullName()));
+        CommandRequestConverter() {
+            super(TypeName.of(CommandRequest.getDescriptor()));
         }
 
         @Override
@@ -93,8 +98,8 @@ class Converters {
 
             return entity;
         }
-    }
 
+    }
     /**
      * Converts EventRecord messages to DataStore entities.
      *
@@ -102,8 +107,8 @@ class Converters {
      */
     static class EventRecordConverter extends BaseConverter<EventRecord> {
 
-        public EventRecordConverter() {
-            super(TypeName.of(EventRecord.getDescriptor().getFullName()));
+        EventRecordConverter() {
+            super(TypeName.of(EventRecord.getDescriptor()));
         }
 
         @Override

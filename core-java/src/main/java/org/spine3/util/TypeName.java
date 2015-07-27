@@ -22,6 +22,7 @@ package org.spine3.util;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,7 +39,7 @@ public final class TypeName extends StringValue {
         super(checkNotNull(value));
     }
 
-    private TypeName(Message msg) {
+    private TypeName(MessageOrBuilder msg) {
         this(msg.getDescriptorForType().getFullName());
     }
 
@@ -49,6 +50,16 @@ public final class TypeName extends StringValue {
      */
     public static TypeName of(Message msg) {
         return new TypeName(msg);
+    }
+
+    /**
+     * Creates a new instance by the passed descriptor taking full name of the type.
+     *
+     * @param descriptor the descriptor of the type
+     * @return new instance
+     */
+    public static TypeName of(Descriptors.Descriptor descriptor) {
+        return new TypeName(descriptor.getFullName());
     }
 
     /**
