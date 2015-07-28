@@ -167,6 +167,9 @@ public class Methods {
             @Nullable
             @Override
             public CommandClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
                 return CommandClass.of(input);
             }
         });
