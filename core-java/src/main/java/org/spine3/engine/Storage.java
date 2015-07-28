@@ -17,10 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.engine;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 
 import java.util.List;
 
@@ -28,83 +28,31 @@ import java.util.List;
  * Defines the low level data interface of the storage
  * that is used to read and write Protobuf messages.
  *
+ * @param <M> Message type to store
  * @author Mikhail Mikhaylov
  */
-public interface Storage {
+public interface Storage<M extends Message> {
 
     /**
-     * Stores singleton instance, e.g. Snapshot.
+     * Reads Messages of type {@link M} with appropriate Parent Id from storage.
      *
-     * @param id      entity id
-     * @param message entity value
+     * @param parentId parent id of message
+     * @return read message
      */
-    void storeSingleton(Message id, Message message);
+    List<M> read(Message parentId);
 
     /**
-     * Stores common messages: CommandRequest of EventRecord.
+     * Reads all Messages of type {@link M} from storage.
      *
-     * @param message Protobuf message to store.
+     * @return read messages
      */
-    void store(Message message);
+    List<M> readAll();
 
     /**
-     * Reads singleton instance.
+     * Stores message to storage. Storage should determine parent id by itself.
      *
-     * @param id  instance id
-     * @param <T> instance type
-     * @return read instance
+     * @param message message to store in storage
      */
-    <T extends Message> T readSingleton(Message id);
-
-    /**
-     * Queries the storage by Message's class.
-     *
-     * @param clazz the desired message's class
-     * @param <T>   message type
-     * @return list of messages
-     */
-    <T extends Message> List<T> query(Class clazz);
-
-    /**
-     * Queries the storage by Message's class and AggregateRoot's Id.
-     *
-     * @param clazz           the desired message's class
-     * @param aggregateRootId the id of aggregateRoot
-     * @param <T>             message type
-     * @return list of messages
-     */
-    <T extends Message> List<T> query(Class clazz, Message aggregateRootId);
-
-    /**
-     * Queries the storage by Message's class, AggregateRoot Id and version.
-     *
-     * @param clazz           the desired message's class
-     * @param aggregateRootId the id of aggregate root
-     * @param version         the version of the aggregate root used as lower threshold for the result list
-     * @param <T>             message type
-     * @return list of messages
-     */
-    <T extends Message> List<T> query(Class clazz, Message aggregateRootId, int version);
-
-    /**
-     * Queries the storage by Message's class and AggregateRoot Id from timestamp.
-     *
-     * @param clazz           the desired message's class
-     * @param aggregateRootId the id of aggregate root
-     * @param from            timestamp to query from
-     * @param <T>             message type
-     * @return list of messages
-     */
-    <T extends Message> List<T> query(Class clazz, Message aggregateRootId, Timestamp from);
-
-    /**
-     * Queries the storage by Message's class from timestamp.
-     *
-     * @param clazz the desired message's class
-     * @param from  timestamp to query from
-     * @param <T>   message type
-     * @return list of messages
-     */
-    <T extends Message> List<T> query(Class clazz, Timestamp from);
+    void store(M message);
 
 }

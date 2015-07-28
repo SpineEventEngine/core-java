@@ -28,11 +28,17 @@ import java.util.List;
  * Extends {@link StorageWithTimeline} and provides an ability to work with Version.
  *
  * @param <M> Message type to store
- * @param <P> ParentId type for message
  * @author Mikhail Mikhaylov
  */
-public interface StorageWithTimelineAndVersion<M extends Message, P extends Message>
-        extends StorageWithTimeline<M, P> {
+public interface StorageWithTimelineAndVersion<M extends Message>
+        extends StorageWithTimeline<M> {
 
-    List<M> read(P parentId, int version);
+    /**
+     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
+     *
+     * @param parentId parent id of message
+     * @param sinceVersion  sinceVersion to read messages from
+     * @return read message
+     */
+    List<M> read(Message parentId, int sinceVersion);
 }

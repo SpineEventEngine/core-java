@@ -21,18 +21,30 @@
 package org.spine3.engine;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Snapshot;
 
 /**
  * Defines the low level data interface of the storage
  * that is used to read and write Snapshots as Protobuf messages.
  *
- * @param <M> Message type to store
- * @param <P> ParentId type for message
+ * @author Mikhail Mikhaylov
  */
-public interface SnapshotStorage<M extends Message, P extends Message> {
+public interface SnapshotStorage {
 
-    void store(M message, P parentId);
+    /**
+     * Stores Snapshot with desired Parent Id.
+     *
+     * @param snapshot snapshot to be stored
+     * @param parentId parent id to identify snapshots of different Aggregate Root instances
+     */
+    void store(Snapshot snapshot, Message parentId);
 
-    M read(P parentId);
+    /**
+     * Reads snapshot from storage by appropriate parent id.
+     *
+     * @param parentId parent id to identify snapshots of different Aggregate Root instances
+     * @return read snapshot
+     */
+    Snapshot read(Message parentId);
 
 }

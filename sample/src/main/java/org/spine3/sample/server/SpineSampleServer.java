@@ -24,16 +24,12 @@ import io.grpc.stub.StreamObserver;
 import io.grpc.transport.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.CommandStore;
-import org.spine3.Engine;
-import org.spine3.EventBus;
-import org.spine3.EventStore;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.CommandResult;
-import org.spine3.base.CommandServiceGrpc;
-import org.spine3.engine.Storage;
-import org.spine3.gae.datastore.DataStoreStorage;
+import org.spine3.*;
+import org.spine3.base.*;
+import org.spine3.gae.datastore.DataStoreStorageProvider;
+import org.spine3.sample.order.OrderRoot;
 import org.spine3.sample.order.OrderRootRepository;
+import org.spine3.util.ClassName;
 
 /**
  * Spine sample gRPC server implementation.
@@ -42,27 +38,28 @@ import org.spine3.sample.order.OrderRootRepository;
  */
 public class SpineSampleServer {
 
-    private static final String STORAGE_PATH = "./storage";
-
     public static void registerEventSubscribers() {
         EventBus.instance().register(new SampleSubscriber());
     }
 
     public static void prepareEngine() {
-//        Storage storage = new FileSystemStorage(STORAGE_PATH);
-        Storage storage = new DataStoreStorage();
-        CommandStore commandStore = new CommandStore(storage);
-        EventStore eventStore = new EventStore(storage);
+        final GlobalEventStore globalEventStore = new GlobalEventStore(DataStoreStorageProvider.provideEventStoreStorage());
+        final CommandStore commandStore = new CommandStore(DataStoreStorageProvider.provideCommandStoreStorage());
 
-        OrderRootRepository orderRootRepository = getOrderRootRepository(eventStore);
+        final OrderRootRepository orderRootRepository = getOrderRootRepository();
 
-        Engine.configure(commandStore, eventStore);
-        Engine engine = Engine.getInstance();
+        Engine.configure(commandStore, globalEventStore);
+        final Engine engine = Engine.getInstance();
         engine.register(orderRootRepository);
     }
 
-    public static OrderRootRepository getOrderRootRepository(EventStore eventStore) {
-        OrderRootRepository repository = new OrderRootRepository();
+    public static OrderRootRepository getOrderRootRepository() {
+        final ClassName aggregateRootClass = ClassName.of(OrderRoot.class);
+        final EventStore eventStore = new EventStore(
+                DataStoreStorageProvider.provideEventStoreStorage(),
+                DataStoreStorageProvider.provideSnapshotStorage(aggregateRootClass));
+
+        final OrderRootRepository repository = new OrderRootRepository();
         repository.configure(eventStore);
         return repository;
     }

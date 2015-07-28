@@ -23,9 +23,7 @@ package org.spine3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.util.Commands;
-import org.spine3.engine.Storage;
-import org.spine3.util.Messages;
+import org.spine3.engine.StorageWithTimeline;
 
 import java.util.List;
 
@@ -36,11 +34,9 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private static final Class ENTITY_CLASS = CommandRequest.class;
+    private final StorageWithTimeline<CommandRequest> storage;
 
-    private Storage storage;
-
-    public CommandStore(Storage storage) {
+    public CommandStore(StorageWithTimeline<CommandRequest> storage) {
         this.storage = storage;
     }
 
@@ -60,7 +56,7 @@ public class CommandStore {
      * @return list of commands for the aggregate root
      */
     public List<CommandRequest> getCommands(Message aggregateRootId) {
-        return storage.query(ENTITY_CLASS, aggregateRootId);
+        return storage.read(aggregateRootId);
     }
 
     /**
@@ -71,6 +67,6 @@ public class CommandStore {
      * @return list of commands for the aggregate root
      */
     public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
-        return storage.query(ENTITY_CLASS, aggregateRootId, from);
+        return storage.read(aggregateRootId, from);
     }
 }

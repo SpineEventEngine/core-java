@@ -43,8 +43,8 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 public abstract class AbstractRepository<I extends Message,
-                                         R extends AggregateRoot,
-                                         C extends Message> implements Repository<I, R, C> {
+        R extends AggregateRoot,
+        C extends Message> implements Repository<I, R, C> {
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
@@ -108,7 +108,10 @@ public abstract class AbstractRepository<I extends Message,
                 .setVersion(aggregateRoot.getVersion())
                 .setWhenLastModified(aggregateRoot.whenLastModified())
                 .build();
-        eventStore.storeSnapshot(aggregateRoot.getId(), snapshot);
+
+        //noinspection unchecked
+        final I aggregateRootId = (I) aggregateRoot.getId();
+        eventStore.storeSnapshot(aggregateRootId, snapshot);
     }
 
     @Override
@@ -129,7 +132,7 @@ public abstract class AbstractRepository<I extends Message,
 
     /**
      * Creates, initializes, and stores a new aggregated root.
-     * <p>
+     * <p/>
      * The initial state of the aggregate root is taken from the creation command.
      *
      * @param command creation command

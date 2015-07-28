@@ -23,12 +23,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.engine.Storage;
+import org.spine3.engine.SnapshotStorage;
+import org.spine3.engine.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
 /**
- * Stores and loads the events and snapshots.
+ * Stores and loads the events for desired Aggregate Root and it's snapshots.
  *
  * @author Mikhail Mikhaylov
  */
@@ -36,10 +37,12 @@ public class EventStore {
 
     private static final Class ENTITY_CLASS = EventRecord.class;
 
-    private final Storage storage;
+    private final StorageWithTimelineAndVersion<EventRecord> storage;
+    private final SnapshotStorage snapshotStorage;
 
-    public EventStore(Storage storage) {
+    public EventStore(StorageWithTimelineAndVersion<EventRecord> storage, SnapshotStorage snapshotStorage) {
         this.storage = storage;
+        this.snapshotStorage = snapshotStorage;
     }
 
     /**
@@ -58,7 +61,7 @@ public class EventStore {
      * @param snapshot    the snapshot of aggregate root
      */
     public void storeSnapshot(Message aggregateId, Snapshot snapshot) {
-        storage.storeSingleton(aggregateId, snapshot);
+        snapshotStorage.store(snapshot, aggregateId);
     }
 
     /**
@@ -68,7 +71,7 @@ public class EventStore {
      * @return the snapshot of aggregate root
      */
     public Snapshot getLastSnapshot(Message aggregateRootId) {
-        return storage.readSingleton(aggregateRootId);
+        return snapshotStorage.read(aggregateRootId);
     }
 
     /**
@@ -78,7 +81,7 @@ public class EventStore {
      * @return list of events
      */
     public List<EventRecord> getAllEvents(Message aggregateRootId) {
-        List<EventRecord> result = storage.query(ENTITY_CLASS, aggregateRootId);
+        List<EventRecord> result = storage.read(aggregateRootId);
         return result;
     }
 
@@ -90,18 +93,7 @@ public class EventStore {
      * @return list of events
      */
     public List<EventRecord> getEvents(Message aggregateRootId, Timestamp from) {
-        List<EventRecord> result = storage.query(ENTITY_CLASS, aggregateRootId, from);
-        return result;
-    }
-
-    /**
-     * Loads all events from given timestamp.
-     *
-     * @param from timestamp to load events from
-     * @return list of events
-     */
-    public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.query(ENTITY_CLASS, from);
+        List<EventRecord> result = storage.read(aggregateRootId, from);
         return result;
     }
 
@@ -113,7 +105,7 @@ public class EventStore {
      * @return list of the event records
      */
     public List<EventRecord> getEvents(Message aggregateRootId, int sinceVersion) {
-        List<EventRecord> result = storage.query(ENTITY_CLASS, aggregateRootId, sinceVersion);
+        List<EventRecord> result = storage.read(aggregateRootId, sinceVersion);
         return result;
     }
 

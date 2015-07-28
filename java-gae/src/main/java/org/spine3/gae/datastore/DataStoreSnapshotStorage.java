@@ -24,7 +24,9 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.Snapshot;
 import org.spine3.engine.SnapshotStorage;
+import org.spine3.util.ClassName;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
 
@@ -32,32 +34,39 @@ import static org.spine3.gae.datastore.DataStoreHelper.*;
 
 /**
  * DataStore-based {@link SnapshotStorage} implementation.
- *
- * @param <M> Message type to store
- * @param <P> ParentId type for message
  */
-public class DataStoreSnapshotStorage<M extends Message, P extends Message> implements SnapshotStorage<M, P> {
+public class DataStoreSnapshotStorage implements SnapshotStorage {
 
     private final DataStoreHelper dataStoreHelper;
 
-    public DataStoreSnapshotStorage() {
+    private final ClassName entityKind;
+
+    /**
+     * Requires unique class name to be used as snapshot kind.
+     *
+     * @param entityKind class name for snapshots to be stored
+     */
+    public DataStoreSnapshotStorage(ClassName entityKind) {
+        this.entityKind = entityKind;
         dataStoreHelper = new DataStoreHelper();
     }
 
     @Override
-    public void store(M message, P parentId) {
-        final Entity dataStoreEntity = new Entity(SINGLETON_KIND, JsonFormat.printToString(parentId));
+    public void store(Snapshot snapshot, Message parentId) {
+        final Entity dataStoreEntity = new Entity(entityKind.toString(), JsonFormat.printToString(parentId));
 
-        final Any any = Messages.toAny(message);
+        final Any any = Messages.toAny(snapshot);
 
         dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
+        dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
+
         dataStoreEntity.setProperty(SINGLETON_ID_KEY, JsonFormat.printToString(parentId));
 
         dataStoreHelper.put(dataStoreEntity);
     }
 
     @Override
-    public M read(P parentId) {
-        return dataStoreHelper.readMessageFromDataStore(SINGLETON_KIND, JsonFormat.printToString(parentId));
+    public Snapshot read(Message parentId) {
+        return dataStoreHelper.readMessageFromDataStore(entityKind.toString(), JsonFormat.printToString(parentId));
     }
 }

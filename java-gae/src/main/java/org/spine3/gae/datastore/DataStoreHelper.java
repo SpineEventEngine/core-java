@@ -40,12 +40,16 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_TH
  */
 class DataStoreHelper {
 
+    //TODO:2015-07-27:alexander.yevsyukov: Review usage of this constants.
     public static final String VALUE_KEY = "value";
+    //TODO:2015-07-27:alexander.yevsyukov: Rename this to just "type"
     public static final String TYPE_URL_KEY = "type_url";
     public static final String TIMESTAMP_KEY = "timestamp";
     public static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
     public static final String VERSION_KEY = "version";
+    public static final String AGGREGATE_ID_KEY = "aggregate_id";
     public static final String PARENT_ID_KEY = "parent_id";
+    //TODO:2015-07-27:alexander.yevsyukov: Think of a better name.
     public static final String SINGLETON_ID_KEY = "singleton_id";
 
     public static final String SINGLETON_KIND = "singleton";
@@ -127,15 +131,10 @@ class DataStoreHelper {
     private static <T extends Message> T readMessageFromEntity(Entity entity) {
         final Blob messageBlob = (Blob) entity.getProperty(VALUE_KEY);
         final ByteString messageByteString = ByteString.copyFrom(messageBlob.getBytes());
+        final String typeUrl = (String) entity.getProperty(TYPE_URL_KEY);
 
-        Any messageAny = null;
-        try {
-            messageAny = Any.parseFrom(messageByteString);
-        } catch (InvalidProtocolBufferException e) {
-            //NOP
-        }
+        final Any messageAny = Any.newBuilder().setValue(messageByteString).setTypeUrl(typeUrl).build();
 
-        //noinspection ConstantConditions
         return Messages.fromAny(messageAny);
     }
 

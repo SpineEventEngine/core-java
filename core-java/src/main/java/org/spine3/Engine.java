@@ -20,7 +20,6 @@
 package org.spine3;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
@@ -44,7 +43,7 @@ public final class Engine {
     private final CommandDispatcher dispatcher = new CommandDispatcher();
 
     private CommandStore commandStore;
-    private EventStore eventStore;
+    private GlobalEventStore globalEventStore;
 
     /**
      * Returns a singleton instance of the engine.
@@ -52,12 +51,12 @@ public final class Engine {
      * @return Engine instance
      * @throws IllegalStateException if the engine was not configured
      *                               with {@link CommandStore} and {@link EventStore} instances
-     * @see #configure(CommandStore, EventStore)
+     * @see #configure(CommandStore, GlobalEventStore)
      */
     public static Engine getInstance() {
         final Engine engine = instance();
 
-        if (engine.commandStore == null || engine.eventStore == null) {
+        if (engine.commandStore == null || engine.globalEventStore == null) {
             throw new IllegalStateException(
                     "Engine is not configured. Call Engine.configure() before obtaining the instance.");
         }
@@ -68,12 +67,11 @@ public final class Engine {
      * Configures the engine with the passed implementations of command and event stores.
      *
      * @param commandStore storage for the commands
-     * @param eventStore   storage for the events
      */
-    public static void configure(CommandStore commandStore, EventStore eventStore) {
+    public static void configure(CommandStore commandStore, GlobalEventStore globalEventStore) {
         final Engine engine = instance();
         engine.commandStore = commandStore;
-        engine.eventStore = eventStore;
+        engine.globalEventStore = globalEventStore;
     }
 
     public void register(Repository repository) {
@@ -127,13 +125,9 @@ public final class Engine {
 
     private void storeAndPost(Iterable<EventRecord> records) {
         for (EventRecord record : records) {
-            eventStore.store(record);
+            globalEventStore.store(record);
             EventBus.instance().post(record);
         }
-    }
-
-    public EventStore getEventStore() {
-        return eventStore;
     }
 
     private static Engine instance() {

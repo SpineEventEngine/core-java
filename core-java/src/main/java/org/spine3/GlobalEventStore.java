@@ -17,27 +17,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.engine;
+package org.spine3;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.base.EventRecord;
+import org.spine3.engine.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Protobuf messages.
+ * Stores and loads the events.
  *
- * @param <M> Message type to store
- * @param <P> ParentId type for message
  * @author Mikhail Mikhaylov
  */
-public interface Storage2<M extends Message, P extends Message> {
+public class GlobalEventStore {
 
-    List<M> read(P parentId);
+    private final StorageWithTimelineAndVersion<EventRecord> storage;
 
-    List<M> readAll();
+    public GlobalEventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
+        this.storage = storage;
+    }
 
-    void store(M message);
+    /**
+     * Stores the event record.
+     *
+     * @param record event record to store
+     */
+    public void store(EventRecord record) {
+        storage.store(record);
+    }
+
+    /**
+     * Loads all events from given timestamp.
+     *
+     * @param from timestamp to load events from
+     * @param <ID> aggregate id type
+     * @return list of events
+     */
+    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
+        List<EventRecord> result = storage.read(from);
+        return result;
+    }
 
 }

@@ -31,7 +31,7 @@ import org.spine3.util.Messages;
 import org.spine3.util.TypeName;
 import org.spine3.util.TypeToClassMap;
 
-import static org.spine3.gae.datastore.DataStoreStorage.*;
+import static org.spine3.gae.datastore.DataStoreHelper.*;
 
 /**
  * Abstract implementation base for entity converters.
