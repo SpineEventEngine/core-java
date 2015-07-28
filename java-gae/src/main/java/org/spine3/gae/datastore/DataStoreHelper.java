@@ -25,9 +25,11 @@ import com.google.protobuf.*;
 import org.spine3.gae.lang.MissingEntityException;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
+import org.spine3.util.Timestamps;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
@@ -40,19 +42,12 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_TH
  */
 class DataStoreHelper {
 
-    //TODO:2015-07-27:alexander.yevsyukov: Review usage of this constants.
     public static final String VALUE_KEY = "value";
-    //TODO:2015-07-27:alexander.yevsyukov: Rename this to just "type"
-    public static final String TYPE_URL_KEY = "type_url";
+    public static final String TYPE_KEY = "type";
     public static final String TIMESTAMP_KEY = "timestamp";
-    public static final String TIMESTAMP_NANOS_KEY = "timestamp_nanos";
     public static final String VERSION_KEY = "version";
     public static final String AGGREGATE_ID_KEY = "aggregate_id";
     public static final String PARENT_ID_KEY = "parent_id";
-    //TODO:2015-07-27:alexander.yevsyukov: Think of a better name.
-    public static final String SINGLETON_ID_KEY = "singleton_id";
-
-    public static final String SINGLETON_KIND = "singleton";
 
     private final DatastoreService dataStore;
 
@@ -70,11 +65,10 @@ class DataStoreHelper {
         return readMessageFromEntity(entity);
     }
 
-    protected static Query.Filter prepareTimestampFilter(Timestamp from) {
+    protected static Query.Filter prepareTimestampFilter(TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
-        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, from.getSeconds()));
-        filters.add(new Query.FilterPredicate(TIMESTAMP_NANOS_KEY, GREATER_THAN_OR_EQUAL, from.getNanos()));
+        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, Timestamps.convertToDate(from)));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
@@ -96,11 +90,11 @@ class DataStoreHelper {
         return messages;
     }
 
-    protected static Query.Filter prepareAggregateRootIdAndTimestampFilter(Message aggregateRootId, Timestamp from) {
+    protected static Query.Filter prepareAggregateRootIdAndTimestampFilter(Message aggregateRootId, TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
-        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, from.getSeconds()));
-        filters.add(new Query.FilterPredicate(TIMESTAMP_NANOS_KEY, GREATER_THAN_OR_EQUAL, from.getNanos()));
+        final Date timestampDate = Timestamps.convertToDate(from);
+        filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, timestampDate));
         filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, JsonFormat.printToString(aggregateRootId)));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
@@ -131,7 +125,7 @@ class DataStoreHelper {
     private static <T extends Message> T readMessageFromEntity(Entity entity) {
         final Blob messageBlob = (Blob) entity.getProperty(VALUE_KEY);
         final ByteString messageByteString = ByteString.copyFrom(messageBlob.getBytes());
-        final String typeUrl = (String) entity.getProperty(TYPE_URL_KEY);
+        final String typeUrl = (String) entity.getProperty(TYPE_KEY);
 
         final Any messageAny = Any.newBuilder().setValue(messageByteString).setTypeUrl(typeUrl).build();
 

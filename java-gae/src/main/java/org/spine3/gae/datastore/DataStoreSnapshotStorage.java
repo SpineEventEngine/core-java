@@ -58,9 +58,7 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
         final Any any = Messages.toAny(snapshot);
 
         dataStoreEntity.setProperty(VALUE_KEY, new Blob(any.getValue().toByteArray()));
-        dataStoreEntity.setProperty(TYPE_URL_KEY, any.getTypeUrl());
-
-        dataStoreEntity.setProperty(SINGLETON_ID_KEY, JsonFormat.printToString(parentId));
+        dataStoreEntity.setProperty(TYPE_KEY, any.getTypeUrl());
 
         dataStoreHelper.put(dataStoreEntity);
     }

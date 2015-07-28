@@ -42,6 +42,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AbstractRepository<I extends Message,
         R extends AggregateRoot,
         C extends Message> implements Repository<I, R, C> {

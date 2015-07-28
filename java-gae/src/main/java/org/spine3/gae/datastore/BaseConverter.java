@@ -26,10 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.AggregateId;
-import org.spine3.util.ClassName;
-import org.spine3.util.Messages;
-import org.spine3.util.TypeName;
-import org.spine3.util.TypeToClassMap;
+import org.spine3.util.*;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;
 
@@ -51,8 +48,7 @@ abstract class BaseConverter<T extends Message, I extends Message> implements Co
 
     protected void setTimestamp(Entity entity, Timestamp timestamp) {
         //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
-        entity.setProperty(TIMESTAMP_KEY, timestamp.getSeconds());
-        entity.setProperty(TIMESTAMP_NANOS_KEY, timestamp.getNanos());
+        entity.setProperty(TIMESTAMP_KEY, Timestamps.convertToDate(timestamp));
     }
 
     //TODO:2015-07-27:alexander.yevsyukov: Move constants closer to the usage.
@@ -65,7 +61,7 @@ abstract class BaseConverter<T extends Message, I extends Message> implements Co
     }
 
     protected void setType(Entity entity) {
-        entity.setProperty(TYPE_URL_KEY, getTypeName());
+        entity.setProperty(TYPE_KEY, getTypeName());
     }
 
     protected void setAggregateId(Entity entity, AggregateId aggregateId) {

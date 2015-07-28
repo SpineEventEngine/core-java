@@ -20,8 +20,10 @@
 package org.spine3.util;
 
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.TimestampOrBuilder;
 
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * Utility class for working with timestamps.
@@ -31,13 +33,15 @@ import java.util.Comparator;
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
 
+    private static final long THOUSAND = 1_000;
+    private static final long MILLION = 1_000_000;
     private static final long BILLION = 1_000_000_000;
 
     /**
      * Returns current system time as a {@link Timestamp} object.
-     * <p>
+     * <p/>
      * Timestamp is represented as the combination of milliseconds and nanoseconds.
-     * <p>
+     * <p/>
      * Current implementation is based on {@link System#nanoTime()}
      * that is native, so it's behavior and result may vary on different platforms.
      *
@@ -75,6 +79,24 @@ public class Timestamps {
 
     public static Comparator<? super Timestamp> comparator() {
         return new TimestampComparator();
+    }
+
+    public static Date convertToDate(TimestampOrBuilder timestamp) {
+        final long millis = timestamp.getNanos() / MILLION * timestamp.getSeconds();
+        final Date date = new Date(millis);
+        return date;
+    }
+
+    public static Timestamp parseFromDate(Date date) {
+        final long time = date.getTime();
+        //noinspection NumericCastThatLosesPrecision
+        final int nanos = (int) ((time * MILLION) % BILLION);
+
+        Timestamp timestamp = Timestamp.newBuilder()
+                .setSeconds(time / THOUSAND)
+                .setNanos(nanos)
+                .build();
+        return timestamp;
     }
 
     private static class TimestampComparator implements Comparator<Timestamp> {
