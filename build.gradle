@@ -1,12 +1,13 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
+        mavenLocal()
+//        maven {
+//            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.1-SNAPSHOT'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.6.0-SNAPSHOT'
     }
 }
 
