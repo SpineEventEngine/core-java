@@ -21,12 +21,10 @@ package org.spine3;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.engine.MessageSubscriber;
 import org.spine3.lang.MissingEventApplierException;
-import org.spine3.util.Messages;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -41,29 +39,35 @@ import static org.spine3.util.Methods.scanForEventSubscribers;
  * according to the type of incoming event.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyuov
  */
 public class EventBus {
 
-    /** This code bases on Guava {@link com.google.common.eventbus.EventBus} class. */
+    /** This code is based on Guava {@link com.google.common.eventbus.EventBus} class. */
 
-    private final Multimap<Class<? extends Message>, MessageSubscriber> subscribersByType = HashMultimap.create();
+    private final Multimap<EventClass, MessageSubscriber> subscribersByType = HashMultimap.create();
     private final ReadWriteLock subscribersByTypeLock = new ReentrantReadWriteLock();
 
+    private EventBus() {
+        // Prevent instantiation from outside.
+        // This constructor is supposed to be called only by singleton implementation.
+    }
+
     /**
-     * Registers all subscriber methods on {@code eventApplier} to receive events.
+     * Registers all subscriber methods on {@code eventHandler} to receive events.
      *
-     * @param eventApplier the event applier object whose subscriber methods should be registered
+     * @param eventHandler the event applier object whose subscriber methods should be registered
      */
-    public void register(Object eventApplier) {
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForEventSubscribers(eventApplier);
+    public void register(Object eventHandler) {
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventSubscribers(eventHandler);
 
         putSubscribersToBus(subscribers);
     }
 
-    private void putSubscribersToBus(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
+    private void putSubscribersToBus(Map<EventClass, MessageSubscriber> subscribers) {
         subscribersByTypeLock.writeLock().lock();
         try {
-            for (Map.Entry<Class<? extends Message>, MessageSubscriber> subscriber : subscribers.entrySet()) {
+            for (Map.Entry<EventClass, MessageSubscriber> subscriber : subscribers.entrySet()) {
                 subscribersByType.put(subscriber.getKey(), subscriber.getValue());
             }
         } finally {
@@ -72,25 +76,29 @@ public class EventBus {
     }
 
     /**
-     * Unregisters all subscriber methods on a registered {@code eventApplier}.
+     * Unregisters all subscriber methods on a registered {@code eventHandler}.
      *
-     * @param eventApplier object whose subscriber methods should be unregistered
+     * @param eventHandler object whose subscriber methods should be unregistered
      * @throws IllegalArgumentException if the object was not previously registered
      */
-    public void unregister(Object eventApplier) {
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForEventSubscribers(eventApplier);
+    public void unregister(Object eventHandler) {
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventSubscribers(eventHandler);
 
-        removeSubscribersFromBus(subscribers);
+        unsubscribe(subscribers);
     }
 
-    private void removeSubscribersFromBus(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
-            Class<? extends Message> eventClass = entry.getKey();
+    /**
+     * Removes passed event subscribers from the bus.
+     * @param subscribers a map of the event subscribers to remove
+     */
+    private void unsubscribe(Map<EventClass, MessageSubscriber> subscribers) {
+        for (Map.Entry<EventClass, MessageSubscriber> entry : subscribers.entrySet()) {
+            final EventClass c = entry.getKey();
             MessageSubscriber subscriber = entry.getValue();
 
             subscribersByTypeLock.writeLock().lock();
             try {
-                Collection<MessageSubscriber> currentSubscribers = subscribersByType.get(eventClass);
+                Collection<MessageSubscriber> currentSubscribers = subscribersByType.get(c);
                 if (!currentSubscribers.contains(subscriber)) {
                     throw new IllegalArgumentException(
                             "missing event subscriber for an annotated method. Is " + subscriber.getFullName() + " registered?");
@@ -109,15 +117,15 @@ public class EventBus {
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public void post(EventRecord eventRecord) {
-        Message event = Messages.fromAny(eventRecord.getEvent());
+        Event event = Event.from(eventRecord);
         EventContext context = eventRecord.getContext();
 
         post(event, context);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private void post(Message event, EventContext context) {
-        Collection<MessageSubscriber> subscribers = getSubscribers(event.getClass());
+    private void post(Event event, EventContext context) {
+        Collection<MessageSubscriber> subscribers = getSubscribers(event.getEventClass());
 
         if (subscribers.isEmpty()) {
             throw new MissingEventApplierException(event);
@@ -125,15 +133,15 @@ public class EventBus {
 
         for (MessageSubscriber subscriber : subscribers) {
             try {
-                subscriber.handle(event, context);
+                subscriber.handle(event.value(), context);
             } catch (InvocationTargetException e) {
                 //NOP
             }
         }
     }
 
-    private Collection<MessageSubscriber> getSubscribers(Class<? extends Message> eventClass) {
-        return subscribersByType.get(eventClass);
+    private Collection<MessageSubscriber> getSubscribers(EventClass c) {
+        return subscribersByType.get(c);
     }
 
     /**
@@ -148,13 +156,8 @@ public class EventBus {
 
     private enum Singleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final EventBus value = new EventBus();
-    }
-
-    private EventBus() {
-        // Disallow creation of instances from outside.
     }
 
 }

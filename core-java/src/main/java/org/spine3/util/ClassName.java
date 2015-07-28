@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Mikhail Mikhaylov
  */
-public final class ClassName extends StringValue {
+public final class ClassName extends StringTypeValue {
 
     private ClassName(String value) {
         super(checkNotNull(value));

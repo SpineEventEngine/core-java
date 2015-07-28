@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Message#getDescriptorForType()
  * @author Alexander Yevsyukov
  */
-public final class TypeName extends StringValue {
+public final class TypeName extends StringTypeValue {
 
     private TypeName(String value) {
         super(checkNotNull(value));

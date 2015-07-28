@@ -1,4 +1,4 @@
-package org.spine3.util;/*
+/*
  * Copyright 2015, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -17,6 +17,8 @@ package org.spine3.util;/*
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package org.spine3.util;
 
 import com.google.protobuf.Message;
 
@@ -37,22 +39,30 @@ public abstract class MessageValue {
         this.value = value;
     }
 
+    /**
+     * @return stored {@code Message} object
+     */
     @Nullable
     protected Message value() {
         return value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return Objects.hash(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
-        //noinspection ConstantConditions
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }

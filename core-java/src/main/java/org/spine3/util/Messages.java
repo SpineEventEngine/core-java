@@ -89,7 +89,7 @@ public class Messages {
 
         final TypeName typeName = TypeName.of(any.getTypeUrl());
         Class<T> messageClass;
-        String messageClassName = StringValue.NULL;
+        String messageClassName = StringTypeValue.NULL;
         try {
             messageClass = toMessageClass(typeName);
             messageClassName = messageClass.getName();

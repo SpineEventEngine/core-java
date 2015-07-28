@@ -21,7 +21,6 @@ package org.spine3;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
 import org.spine3.engine.MessageSubscriber;
 import org.spine3.lang.EventApplierAlreadyRegisteredException;
 import org.spine3.lang.MissingEventApplierException;
@@ -40,7 +39,7 @@ import static org.spine3.util.Methods.scanForEventSubscribers;
  */
 class EventApplier {
 
-    private final Map<Class<? extends Message>, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
+    private final Map<EventClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
 
     /**
      * This method is used to register an aggregated root.
@@ -50,20 +49,20 @@ class EventApplier {
     public void register(AggregateRoot aggregateRoot) {
         checkNotNull(aggregateRoot);
 
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = getEventSubscribers(aggregateRoot);
+        Map<EventClass, MessageSubscriber> subscribers = getEventSubscribers(aggregateRoot);
         checkSubscribers(subscribers);
 
         putAll(subscribers);
     }
 
-    private static Map<Class<? extends Message>, MessageSubscriber> getEventSubscribers(AggregateRoot aggregateRoot) {
-        Map<Class<? extends Message>, MessageSubscriber> result = scanForEventSubscribers(aggregateRoot);
+    private static Map<EventClass, MessageSubscriber> getEventSubscribers(AggregateRoot aggregateRoot) {
+        Map<EventClass, MessageSubscriber> result = scanForEventSubscribers(aggregateRoot);
         return result;
     }
 
-    private void checkSubscribers(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
-            Class<? extends Message> eventClass = entry.getKey();
+    private void checkSubscribers(Map<EventClass, MessageSubscriber> subscribers) {
+        for (Map.Entry<EventClass, MessageSubscriber> entry : subscribers.entrySet()) {
+            EventClass eventClass = entry.getKey();
 
             if (subscriberRegistered(eventClass)) {
                 final MessageSubscriber alreadyAddedApplier = getSubscriber(eventClass);
@@ -78,28 +77,27 @@ class EventApplier {
      * @param event the event to be applied
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    public void apply(Message event) throws InvocationTargetException {
-
+    public void apply(Event event) throws InvocationTargetException {
         checkNotNull(event);
 
-        Class<? extends Message> eventClass = event.getClass();
+        EventClass eventClass = event.getEventClass();
         if (!subscriberRegistered(eventClass)) {
             throw new MissingEventApplierException(event);
         }
 
         MessageSubscriber subscriber = getSubscriber(eventClass);
-        subscriber.handle(event);
+        subscriber.handle(event.value());
     }
 
-    private void putAll(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
+    private void putAll(Map<EventClass, MessageSubscriber> subscribers) {
         subscribersByType.putAll(subscribers);
     }
 
-    private MessageSubscriber getSubscriber(Class<? extends Message> eventClass) {
+    private MessageSubscriber getSubscriber(EventClass eventClass) {
         return subscribersByType.get(eventClass);
     }
 
-    private boolean subscriberRegistered(Class<? extends Message> eventClass) {
+    private boolean subscriberRegistered(EventClass eventClass) {
         return subscribersByType.containsKey(eventClass);
     }
 

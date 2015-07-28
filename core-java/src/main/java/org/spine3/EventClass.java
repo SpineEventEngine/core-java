@@ -17,22 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
 
-import org.spine3.Event;
+package org.spine3;
+
+import com.google.protobuf.Message;
+import org.spine3.util.ClassTypeValue;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Exception that is thrown when unsupported event is obtained
- * or in case there is no class for given Protobuf event message.
+ * A value object holding a class of events.
  *
- * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class MissingEventApplierException extends RuntimeException {
+public class EventClass extends ClassTypeValue {
 
-    public MissingEventApplierException(Event event) {
-        super("There is no registered handler for the event: " + event.getEventClass());
+    private EventClass(Class<? extends Message> value) {
+        super(value);
     }
 
-    private static final long serialVersionUID = 0L;
+    /**
+     * Creates a new instance of the event class.
+     * @param value a value to hold
+     * @return new instance
+     */
+    public static EventClass of(Class<? extends Message> value) {
+        return new EventClass(checkNotNull(value));
+    }
 
 }

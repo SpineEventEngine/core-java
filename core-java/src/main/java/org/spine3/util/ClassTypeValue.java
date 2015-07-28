@@ -20,47 +20,54 @@
 
 package org.spine3.util;
 
+import com.google.protobuf.Message;
+
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * Abstract base for string value objects.
+ * A base class for value objects storing class references.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class StringValue {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
+// NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
+public abstract class ClassTypeValue {
 
-    public static final String NULL = "null";
-    private final String value;
+    private final Class<? extends Message> value;
 
-    protected StringValue(String value) {
+    protected ClassTypeValue(Class<? extends Message> value) {
         this.value = value;
     }
 
-    protected String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
+    /**
+     * @return value of the object
+     */
+    public Class<? extends Message> value() {
         return this.value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(this.value);
+        return Objects.hash(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
-        //noinspection ConstantConditions
+
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final StringValue other = (StringValue) obj;
-        return Objects.equals(this.value(), other.value());
+        final ClassTypeValue other = (ClassTypeValue) obj;
+        return Objects.equals(this.value, other.value);
     }
 }

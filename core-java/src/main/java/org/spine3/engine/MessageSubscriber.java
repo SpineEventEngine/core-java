@@ -22,6 +22,7 @@ package org.spine3.engine;
 import com.google.protobuf.Message;
 import org.spine3.util.Methods;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -159,11 +160,10 @@ public class MessageSubscriber {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
-        //noinspection ConstantConditions
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }

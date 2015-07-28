@@ -64,6 +64,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         this.idAsAny = Messages.toAny(id);
     }
 
+    //TODO:2015-07-28:alexander.yevsyukov: Migrate API to use Event and Command instead of Message
+
     /**
      * Dispatches commands, generates events and apply them to the aggregate root.
      *
@@ -123,7 +125,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
             return;
         }
 
-        applier.apply(event);
+        applier.apply(Event.of(event));
     }
 
     /**

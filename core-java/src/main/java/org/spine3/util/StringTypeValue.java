@@ -18,36 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.util;
 
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.CommandRequestOrBuilder;
-import org.spine3.util.MessageValue;
-import org.spine3.util.Messages;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
- * A command in the system.
+ * Abstract base for string value objects.
  *
  * @author Alexander Yevsyukov
  */
-public class Command extends MessageValue {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
+public abstract class StringTypeValue {
+    // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
 
-    protected Command(Message value) {
-        super(value);
+    public static final String NULL = "null";
+    private final String value;
+
+    protected StringTypeValue(String value) {
+        this.value = value;
     }
 
-    public static Command of(Message value) {
-        return new Command(checkNotNull(value));
+    protected String value() {
+        return value;
     }
 
-    public static Command from(CommandRequest cr) {
-        return new Command(getCommandValue(checkNotNull(cr)));
+    @Override
+    public String toString() {
+        return this.value;
     }
 
-    public static Message getCommandValue(CommandRequestOrBuilder commandRequest) {
-        return Messages.fromAny(commandRequest.getCommand());
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.value);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final StringTypeValue other = (StringTypeValue) obj;
+        return Objects.equals(this.value(), other.value());
     }
 }

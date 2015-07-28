@@ -21,51 +21,58 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.util.JsonFormat;
+import org.spine3.base.EventRecord;
 import org.spine3.util.MessageValue;
 import org.spine3.util.Messages;
-import org.spine3.util.StringTypeValue;
+
+import javax.annotation.Nonnull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Value object for aggregate root IDs.
- * <p/>
- * An aggregate root ID can be defined as any valid Protobuf message, which content fits the business
- * logic of an application. The purpose of this class is to provide type safety for these messages.
+ * A value object for holding an event instance.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
-public final class AggregateId extends MessageValue {
+public class Event extends MessageValue {
 
-    private AggregateId(Message value) {
+    protected Event(Message value) {
         super(value);
     }
 
     /**
-     * Creates a new non-null id of an aggregate root.
-     *
-     * @param value id value
+     * Creates a new instance of the event value object.
+     * @param value the event message
      * @return new instance
      */
-    public static AggregateId of(Message value) {
-        return new AggregateId(checkNotNull(value));
+    public static Event of(Message value) {
+        return new Event(checkNotNull(value));
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We want already built instances on this level of API.
-    public static AggregateId of(EventContext value) {
-        return new AggregateId(Messages.fromAny(value.getAggregateId()));
+    @SuppressWarnings("TypeMayBeWeakened") // Restrict API to already built instances.
+    public static Event from(EventRecord record) {
+        Message value = Messages.fromAny(record.getEvent());
+        return of(value);
     }
 
-    public static String idToString(Message aggregateRootId) {
-        return JsonFormat.printToString(aggregateRootId);
-    }
-
+    /**
+     * {@inheritDoc}
+     * Opens access for classes in this package.
+     * @return non-null value of the event message
+     */
+    @Nonnull
     @Override
-    public String toString() {
+    protected Message value() {
+        Message value = super.value();
+        assert value != null; // because we don't allow null input.
+        return value;
+    }
+
+    /**
+     * @return the class of the event object
+     */
+    public EventClass getEventClass() {
         final Message value = value();
-        return (value != null ? idToString(value) : StringTypeValue.NULL);
+        return EventClass.of(value.getClass());
     }
 }

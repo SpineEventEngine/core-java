@@ -19,13 +19,14 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.AggregateRoot;
 import org.spine3.CommandHandler;
+import org.spine3.EventClass;
 import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
@@ -53,6 +54,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings("UtilityClass")
 public class Methods {
+
+    private Methods() {
+        // Prevent instantiation of the utility class.
+    }
 
     /**
      * Returns a full method name without parameters.
@@ -134,12 +139,19 @@ public class Methods {
      * Returns set of the event types handled by a given aggregate root.
      *
      * @param aggregateRootClass {@link Class} of the aggregate root
-     * @return event classes handled by the aggregate root
+     * @return immutable set of event classes handled by the aggregate root
      */
     @CheckReturnValue
-    public static Set<Class<? extends Message>> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
-        Set<Class<? extends Message>> result = getHandledMessageClasses(aggregateRootClass, isEventApplierPredicate);
-        return result;
+    public static Set<EventClass> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(aggregateRootClass, isEventApplierPredicate);
+        Iterable<EventClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, EventClass>() {
+            @Nullable
+            @Override
+            public EventClass apply(@Nullable Class<? extends Message> input) {
+                return null;
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
     }
 
     /**
@@ -238,11 +250,16 @@ public class Methods {
      * Returns a map of the {@link MessageSubscriber} objects to the corresponding event class.
      *
      * @param eventApplier the object that keeps event subscriber methods
-     * @return the map of event subscribers
+     * @return immutable map of event subscribers
      */
-    public static Map<Class<? extends Message>, MessageSubscriber> scanForEventSubscribers(Object eventApplier) {
-        Map<Class<? extends Message>, MessageSubscriber> result = scanForSubscribers(eventApplier, isEventApplierPredicate);
-        return result;
+    public static Map<EventClass, MessageSubscriber> scanForEventSubscribers(Object eventApplier) {
+        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventApplier, isEventApplierPredicate);
+
+        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+            builder.put(EventClass.of(entry.getKey()), entry.getValue());
+        }
+        return builder.build();
     }
 
     /**
@@ -298,9 +315,6 @@ public class Methods {
         if (isCommandHandler && !methodIsPublic) {
             throw AccessLevelException.forCommandHandler(handler, handlerMethod);
         }
-    }
-
-    private Methods() {
     }
 
 }
