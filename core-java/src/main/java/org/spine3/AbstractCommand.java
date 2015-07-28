@@ -21,48 +21,23 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.base.CommandRequestOrBuilder;
+import org.spine3.util.MessageValue;
+import org.spine3.util.Messages;
 
 /**
- * A command in the system.
+ * Abstract base for command classes.
  *
  * @author Alexander Yevsyukov
  */
-public final class Command extends AbstractCommand {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+abstract class AbstractCommand extends MessageValue {
 
-    private Command(Message value) {
+    protected AbstractCommand(Message value) {
         super(value);
     }
 
-    public static Command of(Message value) {
-        return new Command(checkNotNull(value));
-    }
-
-    public static Command from(CommandRequest cr) {
-        return new Command(getCommandValue(checkNotNull(cr)));
-    }
-
-    /**
-     * @return the class of the command
-     */
-    public CommandClass getCommandClass() {
-        Message value = value();
-        return CommandClass.of(value.getClass());
-    }
-
-    /**
-     * @return contained command message
-     */
-    @Nonnull
-    @Override
-    protected Message value() {
-        final Message value = super.value();
-        assert value != null; // as we prevent null value initialization.
-        return value;
+    public static Message getCommandValue(CommandRequestOrBuilder commandRequest) {
+        return Messages.fromAny(commandRequest.getCommand());
     }
 }

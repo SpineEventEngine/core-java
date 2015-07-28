@@ -272,7 +272,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
 
-        List<? extends Message> result = dispatcher.dispatchToAggregate(command, context);
+        List<? extends Message> result = dispatcher.dispatchToAggregate(Command.of(command), context);
         return result;
     }
 

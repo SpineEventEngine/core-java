@@ -20,7 +20,6 @@
 package org.spine3;
 
 import com.google.common.collect.Maps;
-import com.google.protobuf.Message;
 import org.spine3.engine.MessageSubscriber;
 import org.spine3.lang.EventApplierAlreadyRegisteredException;
 import org.spine3.lang.MissingEventApplierException;
@@ -29,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Methods.scanForEventSubscribers;
+import static org.spine3.util.Methods.scanForEventAppliers;
 
 /**
  * Dispatches the incoming events to the corresponding applier method of an aggregate root.
@@ -56,7 +55,7 @@ class EventApplier {
     }
 
     private static Map<EventClass, MessageSubscriber> getEventSubscribers(AggregateRoot aggregateRoot) {
-        Map<EventClass, MessageSubscriber> result = scanForEventSubscribers(aggregateRoot);
+        Map<EventClass, MessageSubscriber> result = scanForEventAppliers(aggregateRoot);
         return result;
     }
 

@@ -26,7 +26,6 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
 import org.spine3.util.Events;
-import org.spine3.util.Messages;
 
 import java.util.Collections;
 import java.util.List;
@@ -109,7 +108,7 @@ public final class Engine {
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         try {
-            Message command = Command.getCommandValue(request);
+            Command command = Command.from(request);
             CommandContext context = request.getContext();
 
             List<EventRecord> eventRecords = dispatcher.dispatch(command, context);

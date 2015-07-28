@@ -19,7 +19,7 @@
  */
 package org.spine3.lang;
 
-import com.google.protobuf.Message;
+import org.spine3.CommandClass;
 import org.spine3.engine.MessageSubscriber;
 
 /**
@@ -34,16 +34,16 @@ public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
     /**
      * Accepts event type and both old and new handlers.
      *
-     * @param commandType type of the command
+     * @param commandClass the class of the command
      * @param currentSubscriber a method currently registered for the given message type
      * @param discoveredSubscriber a new subscriber for the command type
      */
     public CommandHandlerAlreadyRegisteredException(
-            Class<? extends Message> commandType,
+            CommandClass commandClass,
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
 
-        super("The command " + commandType + " already has associated handler method" + currentSubscriber.getFullName() + '.'
+        super("The command " + commandClass + " already has associated handler method" + currentSubscriber.getFullName() + '.'
                 + " There can be only one handler per command type. "
                 + " You attempt to register handler " + discoveredSubscriber.getFullName() + '.'
                 + " If this is an intended operation, consider un-registering the current handler first.");

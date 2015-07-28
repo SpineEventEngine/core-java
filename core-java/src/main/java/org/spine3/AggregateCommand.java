@@ -21,7 +21,6 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.MessageOrBuilder;
 import org.spine3.base.CommandRequest;
 import org.spine3.lang.MissingAggregateIdException;
 import org.spine3.util.Commands;
@@ -35,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
-public class AggregateCommand extends Command {
+public class AggregateCommand extends AbstractCommand {
 
     public static final int AGGREGATE_STATE_FIELD_INDEX = 1;
 
@@ -59,6 +58,8 @@ public class AggregateCommand extends Command {
         return this.aggregateId;
     }
 
+    //TODO:2015-07-28:alexander.yevsyukov: Migrate to accepting AggregateCommand and returning AggregateId.
+
     /**
      * Obtains an aggregate id from the passed command instance.
      * <p/>
@@ -81,9 +82,8 @@ public class AggregateCommand extends Command {
         }
     }
 
-    //TODO:2015-07-28:alexander.yevsyukov: Do we want to accept AggregateCommand here?
-
-    //TODO:2015-07-28:alexander.yevsyukov: Do we want to return AggregateState instance instead?
+    //TODO:2015-07-28:alexander.yevsyukov: Accept AggregateCommand here.
+    //TODO:2015-07-28:alexander.yevsyukov: Return AggregateState instance instead.
 
     /**
      * Obtains initial aggregate root state from the creation command.

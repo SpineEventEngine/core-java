@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.util.Methods.scanForEventSubscribers;
+import static org.spine3.util.Methods.scanForEventAppliers;
 
 /**
  * Manages incoming events to the appropriate registered applier
@@ -59,7 +59,7 @@ public class EventBus {
      * @param eventHandler the event applier object whose subscriber methods should be registered
      */
     public void register(Object eventHandler) {
-        Map<EventClass, MessageSubscriber> subscribers = scanForEventSubscribers(eventHandler);
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(eventHandler);
 
         putSubscribersToBus(subscribers);
     }
@@ -82,7 +82,7 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object eventHandler) {
-        Map<EventClass, MessageSubscriber> subscribers = scanForEventSubscribers(eventHandler);
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(eventHandler);
 
         unsubscribe(subscribers);
     }

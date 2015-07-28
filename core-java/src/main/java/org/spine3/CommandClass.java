@@ -21,58 +21,28 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
-import org.spine3.base.EventRecord;
-import org.spine3.util.MessageValue;
-import org.spine3.util.Messages;
-
-import javax.annotation.Nonnull;
+import org.spine3.util.ClassTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object for holding an event instance.
+ * A value object for class type references.
  *
  * @author Alexander Yevsyukov
  */
-public final class Event extends MessageValue {
+public class CommandClass extends ClassTypeValue {
 
-    private Event(Message value) {
+    protected CommandClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
-     * Creates a new instance of the event value object.
-     * @param value the event message
+     * Creates a new instance for the passed class value
+     * @param value class reference
      * @return new instance
      */
-    public static Event of(Message value) {
-        return new Event(checkNotNull(value));
+    public static CommandClass of(Class<? extends Message> value) {
+        return new CommandClass(checkNotNull(value));
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // Restrict API to already built instances.
-    public static Event from(EventRecord record) {
-        Message value = Messages.fromAny(record.getEvent());
-        return of(value);
-    }
-
-    /**
-     * {@inheritDoc}
-     * Opens access for classes in this package.
-     * @return non-null value of the event message
-     */
-    @Nonnull
-    @Override
-    protected Message value() {
-        Message value = super.value();
-        assert value != null; // because we don't allow null input.
-        return value;
-    }
-
-    /**
-     * @return the class of the event object
-     */
-    public EventClass getEventClass() {
-        final Message value = value();
-        return EventClass.of(value.getClass());
-    }
 }
