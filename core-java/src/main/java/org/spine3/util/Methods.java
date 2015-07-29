@@ -29,7 +29,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.engine.MessageSubscriber;
 import org.spine3.lang.AccessLevelException;
-import org.spine3.lang.ClassHoldsSubscribersOfSameTypeException;
+import org.spine3.lang.DuplicateSubscriberException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -301,10 +301,10 @@ public class Methods {
 
                 MessageSubscriber subscriber = new MessageSubscriber(subscribersHolder, method);
 
-                //noinspection unchecked as we always expect first param as Message
-                Class<? extends Message> messageClass = (Class<? extends Message>) method.getParameterTypes()[0];
+                Class<? extends Message> messageClass = getFirstParamType(method);
                 if (result.containsKey(messageClass)) {
-                    throw new ClassHoldsSubscribersOfSameTypeException(subscribersHolder, messageClass);
+                    final MessageSubscriber firstMethod = result.get(messageClass);
+                    throw new DuplicateSubscriberException(messageClass, firstMethod, subscriber);
                 }
                 result.put(messageClass, subscriber);
             }

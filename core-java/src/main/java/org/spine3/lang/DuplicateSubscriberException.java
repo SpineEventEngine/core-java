@@ -20,23 +20,27 @@
 package org.spine3.lang;
 
 import com.google.protobuf.Message;
+import org.spine3.engine.MessageSubscriber;
 
 /**
- * Indicates that more than one subscriber for message of the same type
- * are present in the one class.
+ * Indicates that more than one subscriber for the same message class are present in a declaring class.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class ClassHoldsSubscribersOfSameTypeException extends RuntimeException {
+public class DuplicateSubscriberException extends RuntimeException {
 
-    public ClassHoldsSubscribersOfSameTypeException(
-            Object subscribersHolder, Class<? extends Message> messageClass) {
+    public DuplicateSubscriberException(
+            Class<? extends Message> messageClass,
+            MessageSubscriber firstSubscriber,
+            MessageSubscriber secondSubscriber) {
 
-        super("The " + subscribersHolder.getClass().getName() + " class"
+        super("The " + firstSubscriber.getTargetClass().getName() + " class"
                 + " defines more than one subscriber method"
-                + " for the message of type " + messageClass.getName() + '.');
+                + " for the message class " + messageClass.getName() + '.'
+                + " Subscribers encountered: " + firstSubscriber.getShortName() + ", " + secondSubscriber.getShortName());
     }
 
-    private static final long serialVersionUID = -5347395549242861960L;
+    private static final long serialVersionUID = 0L;
 
 }

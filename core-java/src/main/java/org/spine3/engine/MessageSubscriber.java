@@ -31,10 +31,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Wraps a subscriber method on a specific object.
- * <p>
+ * <p/>
  * <p>This class only verifies the suitability of the method and event type if
  * something fails.  Callers are expected to verify their uses of this class.
- * <p>
+ * <p/>
  * <p>Two EventSubscribers are equivalent when they refer to the same method on the
  * same object (not class).   This property is used to ensure that no subscriber
  * method is registered more than once.
@@ -138,8 +138,8 @@ public class MessageSubscriber {
     }
 
     /**
-     * Returns a full name of the subscriber.
-     * <p>
+     * Returns a full name of the subscriber method.
+     * <p/>
      * The full name consists of a fully qualified class name of the target object and
      * the method name separated with a dot character.
      *
@@ -149,6 +149,24 @@ public class MessageSubscriber {
         return Methods.getFullMethodName(target, method);
     }
 
+    /**
+     * @return the name of the subscriber method itself, without parameters
+     */
+    public String getShortName() {
+        return method.getName() + "()";
+    }
+
+    /**
+     * @return the class of the target object.
+     */
+    public Class<?> getTargetClass() {
+        return target.getClass();
+    }
+
+    /**
+     * @return full name of the subscriber method
+     * @see #getFullName()
+     */
     @Override
     public String toString() {
         return getFullName();
@@ -171,6 +189,5 @@ public class MessageSubscriber {
         return Objects.equals(this.target, other.target)
                 && Objects.equals(this.method, other.method);
     }
-
 }
 
