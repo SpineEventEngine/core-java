@@ -28,9 +28,7 @@ import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.gae.datastore.DataStoreStorageProvider;
 import org.spine3.sample.order.Order;
-import org.spine3.sample.order.OrderRoot;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.util.ClassName;
 import org.spine3.util.TypeName;
 
 /**
@@ -45,19 +43,19 @@ public class SpineSampleServer {
     }
 
     public static void prepareEngine() {
-        final GlobalEventStore globalEventStore = new GlobalEventStore(DataStoreStorageProvider.provideEventStoreStorage());
+        final EventStore eventStore = new EventStore(DataStoreStorageProvider.provideEventStoreStorage());
         final CommandStore commandStore = new CommandStore(DataStoreStorageProvider.provideCommandStoreStorage());
 
         final OrderRootRepository orderRootRepository = getOrderRootRepository();
 
-        Engine.configure(commandStore, globalEventStore);
+        Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
         engine.register(orderRootRepository);
     }
 
     public static OrderRootRepository getOrderRootRepository() {
 
-        final EventStore eventStore = new EventStore(
+        final RepositoryEventStore eventStore = new RepositoryEventStore(
                 DataStoreStorageProvider.provideEventStoreStorage(),
                 DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
 

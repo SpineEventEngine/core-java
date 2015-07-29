@@ -32,8 +32,8 @@ import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
-import org.spine3.util.Messages;
-import org.spine3.util.Timestamps;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
 import java.io.*;

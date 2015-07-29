@@ -25,6 +25,8 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandRequestOrBuilder;
 import org.spine3.base.UserId;
+import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

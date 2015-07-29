@@ -43,20 +43,20 @@ public final class Engine {
     private final CommandDispatcher dispatcher = new CommandDispatcher();
 
     private CommandStore commandStore;
-    private GlobalEventStore globalEventStore;
+    private EventStore eventStore;
 
     /**
      * Returns a singleton instance of the engine.
      *
      * @return Engine instance
      * @throws IllegalStateException if the engine was not configured
-     *                               with {@link CommandStore} and {@link EventStore} instances
-     * @see #configure(CommandStore, GlobalEventStore)
+     *                               with {@link CommandStore} and {@link RepositoryEventStore} instances
+     * @see #configure(CommandStore, EventStore)
      */
     public static Engine getInstance() {
         final Engine engine = instance();
 
-        if (engine.commandStore == null || engine.globalEventStore == null) {
+        if (engine.commandStore == null || engine.eventStore == null) {
             throw new IllegalStateException(
                     "Engine is not configured. Call Engine.configure() before obtaining the instance.");
         }
@@ -68,10 +68,10 @@ public final class Engine {
      *
      * @param commandStore storage for the commands
      */
-    public static void configure(CommandStore commandStore, GlobalEventStore globalEventStore) {
+    public static void configure(CommandStore commandStore, EventStore eventStore) {
         final Engine engine = instance();
         engine.commandStore = commandStore;
-        engine.globalEventStore = globalEventStore;
+        engine.eventStore = eventStore;
     }
 
     public void register(Repository repository) {
@@ -125,7 +125,7 @@ public final class Engine {
 
     private void storeAndPost(Iterable<EventRecord> records) {
         for (EventRecord record : records) {
-            globalEventStore.store(record);
+            eventStore.store(record);
             EventBus.instance().post(record);
         }
     }

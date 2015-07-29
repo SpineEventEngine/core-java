@@ -21,9 +21,9 @@ package org.spine3.util;
 
 import com.google.protobuf.Any;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.UserId;
+import org.spine3.protobuf.Messages;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -26,7 +26,7 @@ import org.spine3.base.EventContext;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPayed;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.Messages;
 
 /**
  * Sample Spine event subscriber implementation.

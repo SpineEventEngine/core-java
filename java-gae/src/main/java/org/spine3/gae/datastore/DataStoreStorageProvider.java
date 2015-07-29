@@ -22,16 +22,16 @@ package org.spine3.gae.datastore;
 
 import org.spine3.CommandStore;
 import org.spine3.EventStore;
+import org.spine3.RepositoryEventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.engine.SnapshotStorage;
 import org.spine3.engine.StorageWithTimeline;
 import org.spine3.engine.StorageWithTimelineAndVersion;
-import org.spine3.util.ClassName;
 import org.spine3.util.TypeName;
 
 /**
- * Utility class which provides storage instances for {@link EventStore}
+ * Utility class which provides storage instances for {@link RepositoryEventStore}
  * and {@link CommandStore}.
  *
  * @author Mikhail Mikhaylov
@@ -43,7 +43,7 @@ public class DataStoreStorageProvider {
     }
 
     /**
-     * Provides Storage which can be used by {@link EventStore} or {@link org.spine3.GlobalEventStore}.
+     * Provides Storage which can be used by {@link RepositoryEventStore} or {@link EventStore}.
      *
      * @return Storage with Timeline and Version
      */
@@ -52,7 +52,7 @@ public class DataStoreStorageProvider {
     }
 
     /**
-     * Provides Snapshot Storage which can be used by {@link EventStore}.
+     * Provides Snapshot Storage which can be used by {@link RepositoryEventStore}.
      *
      * @param stateTypeName aggregate root state type name to be used as snapshot kind
      * @return Snapshot Storage

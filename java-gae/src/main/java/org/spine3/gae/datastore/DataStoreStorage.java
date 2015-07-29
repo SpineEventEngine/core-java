@@ -25,8 +25,8 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.engine.StorageWithTimelineAndVersion;
-import org.spine3.util.JsonFormat;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
 import org.spine3.util.TypeName;
 
 import java.util.List;

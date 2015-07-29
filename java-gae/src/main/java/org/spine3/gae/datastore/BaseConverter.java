@@ -26,6 +26,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.AggregateId;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.util.*;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;

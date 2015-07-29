@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.Messages;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.Constructor;
@@ -49,7 +49,7 @@ public abstract class AbstractRepository<I extends Message,
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
-    private EventStore eventStore;
+    private RepositoryEventStore eventStore;
 
     /**
      * Configures repository with passed implementation of the aggregate storage.
@@ -58,7 +58,7 @@ public abstract class AbstractRepository<I extends Message,
      *
      * @param eventStore the event store implementation
      */
-    public void configure(EventStore eventStore) {
+    public void configure(RepositoryEventStore eventStore) {
         this.eventStore = eventStore;
     }
 

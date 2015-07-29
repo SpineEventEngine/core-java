@@ -26,9 +26,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Snapshot;
 import org.spine3.engine.SnapshotStorage;
-import org.spine3.util.ClassName;
-import org.spine3.util.JsonFormat;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
 import org.spine3.util.TypeName;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;

@@ -23,7 +23,7 @@ package org.spine3;
 import com.google.protobuf.Message;
 import org.spine3.base.EventRecord;
 import org.spine3.util.MessageValue;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nonnull;
 

@@ -1,4 +1,4 @@
-package org.spine3.util;
+package org.spine3.protobuf;
 /* 
     Copyright (c) 2009, Orbitz World Wide
 	All rights reserved.

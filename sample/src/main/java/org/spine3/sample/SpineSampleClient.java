@@ -29,7 +29,7 @@ import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
-import org.spine3.util.Messages;
+import org.spine3.protobuf.Messages;
 import org.spine3.util.UserIds;
 
 import java.util.concurrent.TimeUnit;

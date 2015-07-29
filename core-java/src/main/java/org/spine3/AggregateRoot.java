@@ -27,8 +27,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
 import org.spine3.lang.MissingEventApplierException;
 import org.spine3.util.Events;
-import org.spine3.util.Messages;
-import org.spine3.util.Timestamps;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

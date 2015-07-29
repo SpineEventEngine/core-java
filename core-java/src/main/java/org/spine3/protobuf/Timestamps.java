@@ -17,11 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+package org.spine3.protobuf;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 
+import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -58,7 +60,7 @@ public class Timestamps {
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    public static int compare(Timestamp t1, Timestamp t2) {
+    public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {
         if (t1 == null) {
             return t2 == null ? 0 : 1;
         }
@@ -99,11 +101,13 @@ public class Timestamps {
         return timestamp;
     }
 
-    private static class TimestampComparator implements Comparator<Timestamp> {
+    private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
         @Override
         public int compare(Timestamp t1, Timestamp t2) {
             return Timestamps.compare(t1, t2);
         }
+
+        private static final long serialVersionUID = 0;
     }
 
     private Timestamps() {

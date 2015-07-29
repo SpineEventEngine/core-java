@@ -17,11 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+package org.spine3.protobuf;
 
 import com.google.protobuf.*;
-import org.spine3.lang.MissingMessageDescriptorException;
-import org.spine3.lang.UnknownTypeInAnyException;
+import org.spine3.util.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -220,7 +219,7 @@ public class Messages {
     @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
     public static Object getFieldValue(Message command, int fieldIndex) {
 
-        //TODO:2015-07-27:alexander.yevsyukov: We need to chache this kind of calculations as they are slow.
+        //TODO:2015-07-27:alexander.yevsyukov: We need to cache this kind of calculations as they are slow.
         // For this we need a value object FieldAccessor parameterized with a message class and a field index.
 
         final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);

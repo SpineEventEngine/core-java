@@ -17,20 +17,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
+package org.spine3.gae.datastore;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.protobuf.Message;
+import org.spine3.util.Commands;
 
 /**
- * Exception that is thrown when unsupported message is obtained
- * or in case there is no class for given Protobuf message.
+ * Exception is thrown if the data store could not read entity by id.
+ * <p/>
+ * To be found entity should first be stored into data store.
  *
- * @author Mikhail Melnik
+ * @author Mikhail Meikhaylov
  */
-public class UnknownTypeInAnyException extends RuntimeException {
+public class MissingEntityException extends RuntimeException {
 
-    public UnknownTypeInAnyException(String typeUrl) {
-        super("There is no appropriate Java class for the Protobuf message: " + typeUrl);
+    public MissingEntityException(Key key, Throwable cause) {
+        super(createMessage(key), cause);
+    }
+
+    private static String createMessage(Key key) {
+        return "Unable to find entity by key " + key + " in data store";
     }
 
     private static final long serialVersionUID = 0L;
-
 }

@@ -17,28 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.gae.lang;
+package org.spine3.protobuf;
 
-import com.google.appengine.api.datastore.Key;
 import com.google.protobuf.Message;
-import org.spine3.util.Commands;
 
 /**
- * Exception is thrown if the data store could not read entity by id.
- * <p/>
- * To be found entity should first be stored into data store.
+ * Exception that is thrown when no descriptor for a message class found.
  *
- * @author Mikhail Meikhaylov
+ * @author Mikhail Mikhaylov
  */
-public class MissingEntityException extends RuntimeException {
+public class MissingMessageDescriptorException extends RuntimeException {
 
-    public MissingEntityException(Key key, Throwable cause) {
-        super(createMessage(key), cause);
-    }
-
-    private static String createMessage(Key key) {
-        return "Unable to find entity by key " + key + " in data store";
+    public MissingMessageDescriptorException(Class<? extends Message> clazz, Throwable cause) {
+        super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
     }
 
     private static final long serialVersionUID = 0L;
+
 }

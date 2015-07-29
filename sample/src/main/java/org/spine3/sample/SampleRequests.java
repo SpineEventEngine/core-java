@@ -28,8 +28,8 @@ import org.spine3.sample.order.OrderLine;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayOrder;
-import org.spine3.util.Messages;
-import org.spine3.util.Timestamps;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 
 /**
  * Utility class for generating sample command requests.

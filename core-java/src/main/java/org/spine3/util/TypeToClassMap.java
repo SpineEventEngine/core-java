@@ -22,7 +22,7 @@ package org.spine3.util;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.lang.UnknownTypeInAnyException;
+import org.spine3.protobuf.UnknownTypeInAnyException;
 
 import java.io.IOException;
 import java.io.InputStream;

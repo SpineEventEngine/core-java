@@ -22,10 +22,9 @@ package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.*;
 import com.google.protobuf.*;
-import org.spine3.gae.lang.MissingEntityException;
-import org.spine3.util.JsonFormat;
-import org.spine3.util.Messages;
-import org.spine3.util.Timestamps;
+import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

@@ -22,6 +22,7 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
+import org.spine3.protobuf.Messages;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

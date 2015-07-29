@@ -17,21 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
-
-import com.google.protobuf.Message;
 
 /**
- * Exception that is thrown when no descriptor for message class found.
- *
- * @author Mikhail Mikhaylov
+ * This package provides utility classes for working with Google Protobuf implementation in Java.
  */
-public class MissingMessageDescriptorException extends RuntimeException {
+@ParametersAreNonnullByDefault
+package org.spine3.protobuf;
 
-    public MissingMessageDescriptorException(Class<? extends Message> clazz, Throwable cause) {
-        super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage());
-    }
-
-    private static final long serialVersionUID = 0L;
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

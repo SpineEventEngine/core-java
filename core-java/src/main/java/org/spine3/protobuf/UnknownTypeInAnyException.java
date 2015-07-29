@@ -17,47 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
-
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.base.EventRecord;
-import org.spine3.engine.StorageWithTimelineAndVersion;
-
-import java.util.List;
+package org.spine3.protobuf;
 
 /**
- * Stores and loads the events.
+ * Exception that is thrown when unsupported message is obtained
+ * or in case there is no class for given Protobuf message.
  *
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public class GlobalEventStore {
+public class UnknownTypeInAnyException extends RuntimeException {
 
-    private final StorageWithTimelineAndVersion<EventRecord> storage;
-
-    public GlobalEventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
-        this.storage = storage;
+    public UnknownTypeInAnyException(String typeUrl) {
+        super("There is no appropriate Java class for the Protobuf message: " + typeUrl);
     }
 
-    /**
-     * Stores the event record.
-     *
-     * @param record event record to store
-     */
-    public void store(EventRecord record) {
-        storage.store(record);
-    }
-
-    /**
-     * Loads all events from given timestamp.
-     *
-     * @param from timestamp to load events from
-     * @param <ID> aggregate id type
-     * @return list of events
-     */
-    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.read(from);
-        return result;
-    }
+    private static final long serialVersionUID = 0L;
 
 }
