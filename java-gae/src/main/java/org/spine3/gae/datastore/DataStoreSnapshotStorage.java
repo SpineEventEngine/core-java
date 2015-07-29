@@ -29,6 +29,7 @@ import org.spine3.engine.SnapshotStorage;
 import org.spine3.util.ClassName;
 import org.spine3.util.JsonFormat;
 import org.spine3.util.Messages;
+import org.spine3.util.TypeName;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;
 
@@ -39,14 +40,14 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
 
     private final DataStoreHelper dataStoreHelper;
 
-    private final ClassName entityKind;
+    private final TypeName entityKind;
 
     /**
      * Requires unique class name to be used as snapshot kind.
      *
      * @param entityKind class name for snapshots to be stored
      */
-    public DataStoreSnapshotStorage(ClassName entityKind) {
+    public DataStoreSnapshotStorage(TypeName entityKind) {
         this.entityKind = entityKind;
         dataStoreHelper = new DataStoreHelper();
     }

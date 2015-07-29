@@ -28,6 +28,7 @@ import org.spine3.engine.SnapshotStorage;
 import org.spine3.engine.StorageWithTimeline;
 import org.spine3.engine.StorageWithTimelineAndVersion;
 import org.spine3.util.ClassName;
+import org.spine3.util.TypeName;
 
 /**
  * Utility class which provides storage instances for {@link EventStore}
@@ -53,11 +54,11 @@ public class DataStoreStorageProvider {
     /**
      * Provides Snapshot Storage which can be used by {@link EventStore}.
      *
-     * @param aggregateRootClass aggregate root class name to be used as snapshot kind
+     * @param stateTypeName aggregate root state type name to be used as snapshot kind
      * @return Snapshot Storage
      */
-    public static SnapshotStorage provideSnapshotStorage(ClassName aggregateRootClass) {
-        return new DataStoreSnapshotStorage(aggregateRootClass);
+    public static SnapshotStorage provideSnapshotStorage(TypeName stateTypeName) {
+        return new DataStoreSnapshotStorage(stateTypeName);
     }
 
     /**

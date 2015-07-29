@@ -20,6 +20,7 @@
 package org.spine3.util;
 
 import com.google.protobuf.*;
+import org.spine3.lang.MissingMessageDescriptorException;
 import org.spine3.lang.UnknownTypeInAnyException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -234,4 +235,14 @@ public class Messages {
             throw propagate(e);
         }
     }
+
+    public static Descriptors.Descriptor getClassDescriptor(Class<? extends Message> clazz) {
+        try {
+            return (Descriptors.Descriptor) clazz.getMethod("getDescriptor").invoke(null);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
+            throw new MissingMessageDescriptorException(clazz, e.getCause());
+        }
+    }
+
 }

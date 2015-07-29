@@ -24,7 +24,7 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.AggregateId;
 import org.spine3.util.*;
 
@@ -46,7 +46,7 @@ abstract class BaseConverter<T extends Message, I extends Message> implements Co
         this.typeName = typeName;
     }
 
-    protected void setTimestamp(Entity entity, Timestamp timestamp) {
+    protected void setTimestamp(Entity entity, TimestampOrBuilder timestamp) {
         entity.setProperty(TIMESTAMP_KEY, Timestamps.convertToDate(timestamp));
     }
 
@@ -75,10 +75,6 @@ abstract class BaseConverter<T extends Message, I extends Message> implements Co
     }
 
     protected String getEntityKind() {
-        //TODO:2015-07-24:alexander.yevsyukov: Why do we use Java class name here and not a Proto type?
-        // What if we read this store from another language like Go?
-        // Also notice that this lookup is going to be done every time we create an entity.
-        final ClassName className = TypeToClassMap.get(typeName);
-        return className.toString();
+        return typeName.toString();
     }
 }

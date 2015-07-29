@@ -27,9 +27,11 @@ import org.slf4j.LoggerFactory;
 import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.gae.datastore.DataStoreStorageProvider;
+import org.spine3.sample.order.Order;
 import org.spine3.sample.order.OrderRoot;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.util.ClassName;
+import org.spine3.util.TypeName;
 
 /**
  * Spine sample gRPC server implementation.
@@ -54,10 +56,10 @@ public class SpineSampleServer {
     }
 
     public static OrderRootRepository getOrderRootRepository() {
-        final ClassName aggregateRootClass = ClassName.of(OrderRoot.class);
+
         final EventStore eventStore = new EventStore(
                 DataStoreStorageProvider.provideEventStoreStorage(),
-                DataStoreStorageProvider.provideSnapshotStorage(aggregateRootClass));
+                DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
 
         final OrderRootRepository repository = new OrderRootRepository();
         repository.configure(eventStore);

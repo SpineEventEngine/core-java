@@ -21,10 +21,13 @@
 package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.*;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.engine.StorageWithTimelineAndVersion;
 import org.spine3.util.JsonFormat;
+import org.spine3.util.Messages;
+import org.spine3.util.TypeName;
 
 import java.util.List;
 
@@ -40,13 +43,14 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
 
     private final DataStoreHelper dataStoreHelper;
 
-    private final Class<M> type;
+    private final TypeName type;
 
     public static <M extends Message> DataStoreStorage<M> newInstance(Class<M> messageClass) {
-        return new DataStoreStorage<>(messageClass);
+        final Descriptors.Descriptor classDescriptor = Messages.getClassDescriptor(messageClass);
+        return new DataStoreStorage<>(TypeName.of(classDescriptor));
     }
 
-    private DataStoreStorage(Class<M> type) {
+    private DataStoreStorage(TypeName type) {
         this.type = type;
         dataStoreHelper = new DataStoreHelper();
     }
@@ -60,29 +64,29 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
 
     @Override
     public List<M> read(Message parentId, int sinceVersion) {
-        return dataStoreHelper.readMessagesFromDataStore(type.getName(),
+        return dataStoreHelper.readMessagesFromDataStore(type.toString(),
                 prepareAggregateRootIdAndVersionFilter(parentId, sinceVersion));
     }
 
     @Override
     public List<M> read(Timestamp from) {
-        return dataStoreHelper.readMessagesFromDataStore(type.getName(), prepareTimestampFilter(from));
+        return dataStoreHelper.readMessagesFromDataStore(type.toString(), prepareTimestampFilter(from));
     }
 
     @Override
     public List<M> read(Message parentId, Timestamp from) {
-        return dataStoreHelper.readMessagesFromDataStore(type.getName(),
+        return dataStoreHelper.readMessagesFromDataStore(type.toString(),
                 prepareAggregateRootIdAndTimestampFilter(parentId, from));
     }
 
     @Override
     public List<M> read(Message parentId) {
-        return dataStoreHelper.readMessagesFromDataStore(type.getName(), new Query.FilterPredicate(
+        return dataStoreHelper.readMessagesFromDataStore(type.toString(), new Query.FilterPredicate(
                 PARENT_ID_KEY, EQUAL, JsonFormat.printToString(parentId)));
     }
 
     @Override
     public List<M> readAll() {
-        return dataStoreHelper.readMessagesFromDataStore(type.getName());
+        return dataStoreHelper.readMessagesFromDataStore(type.toString());
     }
 }
