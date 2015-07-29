@@ -47,12 +47,8 @@ abstract class BaseConverter<T extends Message, I extends Message> implements Co
     }
 
     protected void setTimestamp(Entity entity, Timestamp timestamp) {
-        //TODO:2015-07-27:alexander.yevsyukov: Store as one field.
         entity.setProperty(TIMESTAMP_KEY, Timestamps.convertToDate(timestamp));
     }
-
-    //TODO:2015-07-27:alexander.yevsyukov: Move constants closer to the usage.
-    // It looks like they don't really belong to the DataStoreStorage class.
 
     protected void setValue(Entity entity, T value) {
         final Any any = Messages.toAny(value);

@@ -22,6 +22,7 @@ package org.spine3.util;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.lang.UnknownTypeInAnyException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ import java.util.Properties;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("UtilityClass")
 public class TypeToClassMap {
 
     /**
@@ -45,6 +47,28 @@ public class TypeToClassMap {
 
     private static final Map<TypeName, ClassName> namesMap = new HashMap<>();
 
+    static {
+        Properties properties = new Properties();
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
+
+        try {
+            properties.load(resourceStream);
+        } catch (IOException e) {
+            //NOP
+        }
+
+        for (String key : properties.stringPropertyNames()) {
+            final TypeName typeName = TypeName.of(key);
+            final ClassName className = ClassName.of(properties.getProperty(key));
+            namesMap.put(typeName, className);
+        }
+    }
+
+    private TypeToClassMap() {
+    }
+
     /**
      * Retrieves compiled proto's java class name by proto type url
      * to be used to parse {@link Message} from {@link Any}.
@@ -53,23 +77,8 @@ public class TypeToClassMap {
      * @return Java class name
      */
     public static ClassName get(TypeName protoType) {
-
-        //TODO:2015-07-24:alexander.yevsyukov: This code has serious flaw:
-        // It will read properties each time we don't have an entry in the map.
-
         if (!namesMap.containsKey(protoType)) {
-            Properties properties = new Properties();
-
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
-
-            try {
-                properties.load(resourceStream);
-            } catch (IOException e) {
-                //NOP
-            }
-            String propertyValue = properties.getProperty(protoType.value());
-            namesMap.put(protoType, ClassName.of(propertyValue));
+            throw new UnknownTypeInAnyException(protoType.value());
         }
         final ClassName result = namesMap.get(protoType);
         return result;
