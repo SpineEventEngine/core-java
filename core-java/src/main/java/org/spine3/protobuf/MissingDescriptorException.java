@@ -22,13 +22,13 @@ package org.spine3.protobuf;
 import com.google.protobuf.Message;
 
 /**
- * Exception that is thrown when no descriptor for a message class found.
+ * Exception that is thrown when no descriptor for a message class can be found.
  *
  * @author Mikhail Mikhaylov
  */
-public class MissingMessageDescriptorException extends RuntimeException {
+public class MissingDescriptorException extends RuntimeException {
 
-    public MissingMessageDescriptorException(Class<? extends Message> clazz, Throwable cause) {
+    public MissingDescriptorException(Class<? extends Message> clazz, Throwable cause) {
         super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
     }
 

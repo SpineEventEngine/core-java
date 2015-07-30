@@ -38,19 +38,20 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
-    public static final String PARSE_FROM_METHOD_NAME = "parseFrom";
+    private static final String GETTER_METHOD_PREFIX = "get";
+
+    private static final String METHOD_PARSE_FROM = "parseFrom";
+    private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
+
+    private static final char UNDERSCORE_PROPERTY_NAME_SEPARATOR = '_';
 
     private static final String MSG_NO_SUCH_METHOD = "Method %s() is not defined in the class %s.";
     private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
     private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
 
-    private static final char UNDERSCORE_PROPERTY_NAME_SEPARATOR = '_';
-
     private Messages() {
         // Prevent instantiation.
     }
-
-    private static final String GETTER_METHOD_PREFIX = "get";
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
@@ -93,7 +94,7 @@ public class Messages {
         try {
             messageClass = toMessageClass(typeName);
             messageClassName = messageClass.getName();
-            Method method = messageClass.getMethod(PARSE_FROM_METHOD_NAME, ByteString.class);
+            Method method = messageClass.getMethod(METHOD_PARSE_FROM, ByteString.class);
 
             //noinspection unchecked
             T result = (T) method.invoke(null, any.getValue());
@@ -101,13 +102,13 @@ public class Messages {
         } catch (ClassNotFoundException ignored) {
             throw new UnknownTypeInAnyException(typeName.toString());
         } catch (NoSuchMethodException e) {
-            String msg = String.format(MSG_NO_SUCH_METHOD, PARSE_FROM_METHOD_NAME, messageClassName);
+            String msg = String.format(MSG_NO_SUCH_METHOD, METHOD_PARSE_FROM, messageClassName);
             throw new Error(msg, e);
         } catch (IllegalAccessException e) {
-            String msg = String.format(MSG_UNABLE_TO_ACCESS, PARSE_FROM_METHOD_NAME, messageClassName);
+            String msg = String.format(MSG_UNABLE_TO_ACCESS, METHOD_PARSE_FROM, messageClassName);
             throw new Error(msg, e);
         } catch (InvocationTargetException e) {
-            String msg = String.format(MSG_ERROR_INVOKING, PARSE_FROM_METHOD_NAME, messageClassName, e.getCause());
+            String msg = String.format(MSG_ERROR_INVOKING, METHOD_PARSE_FROM, messageClassName, e.getCause());
             throw new Error(msg, e);
         }
     }
@@ -130,7 +131,7 @@ public class Messages {
     }
 
 
-    //TODO:2015-07-27:alexander.yevsyukov: Why are we having this and toJson()?
+    //TODO:2015-07-27:alexander.yevsyukov: Why are we having this AND toJson()?
     /**
      * Prints the passed message into to Json representation.
      *
@@ -237,10 +238,12 @@ public class Messages {
 
     public static Descriptors.Descriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
-            return (Descriptors.Descriptor) clazz.getMethod("getDescriptor").invoke(null);
+            final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
+            final Descriptors.Descriptor result = (Descriptors.Descriptor) method.invoke(null);
+            return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new MissingMessageDescriptorException(clazz, e.getCause());
+            throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
 
