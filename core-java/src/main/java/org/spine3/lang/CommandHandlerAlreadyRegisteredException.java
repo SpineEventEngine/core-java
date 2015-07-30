@@ -34,8 +34,8 @@ public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
     /**
      * Accepts event type and both old and new handlers.
      *
-     * @param commandClass the class of the command
-     * @param currentSubscriber a method currently registered for the given message type
+     * @param commandClass         the class of the command
+     * @param currentSubscriber    a method currently registered for the given message type
      * @param discoveredSubscriber a new subscriber for the command type
      */
     public CommandHandlerAlreadyRegisteredException(
@@ -43,10 +43,11 @@ public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
 
-        super("The command " + commandClass + " already has associated handler method" + currentSubscriber.getFullName() + '.'
-                + " There can be only one handler per command type. "
-                + " You attempt to register handler " + discoveredSubscriber.getFullName() + '.'
-                + " If this is an intended operation, consider un-registering the current handler first.");
+        super(String.format("The command %s already has associated handler method %s. "
+                        + " There can be only one handler per command class. "
+                        + " Duplicating handler encountered: %s. "
+                        + " Consider un-registering the current handler first.",
+                commandClass, currentSubscriber.getFullName(), discoveredSubscriber.getFullName()));
     }
 
     private static final long serialVersionUID = 0L;

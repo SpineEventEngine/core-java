@@ -30,7 +30,7 @@ import org.spine3.Event;
 public class MissingEventApplierException extends RuntimeException {
 
     public MissingEventApplierException(Event event) {
-        super("There is no registered handler for the event: " + event.getEventClass());
+        super("There is no registered applier for the event: " + event.getEventClass());
     }
 
     private static final long serialVersionUID = 0L;

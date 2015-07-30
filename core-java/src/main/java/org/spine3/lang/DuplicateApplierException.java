@@ -29,7 +29,7 @@ import org.spine3.engine.MessageSubscriber;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class ApplierAlreadyRegisteredException extends RuntimeException {
+public class DuplicateApplierException extends RuntimeException {
 
     /**
      * Creates new exception.
@@ -38,7 +38,7 @@ public class ApplierAlreadyRegisteredException extends RuntimeException {
      * @param currentSubscriber    a method currently registered
      * @param discoveredSubscriber another applier method for the same event class
      */
-    public ApplierAlreadyRegisteredException(
+    public DuplicateApplierException(
             EventClass eventClass,
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
