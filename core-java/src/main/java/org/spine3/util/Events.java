@@ -84,6 +84,17 @@ public class Events {
         };
     }
 
+    public static Predicate<EventRecord> getEventPredicate(final Timestamp from) {
+        return new Predicate<EventRecord>() {
+            @Override
+            public boolean apply(@Nullable EventRecord record) {
+                checkNotNull(record);
+                Timestamp timestamp = record.getContext().getEventId().getTimestamp();
+                return Timestamps.isAfter(timestamp, from);
+            }
+        };
+    }
+
     public static Predicate<EventRecord> getEventPredicate(final Timestamp from, final Timestamp to) {
         return new Predicate<EventRecord>() {
             @Override

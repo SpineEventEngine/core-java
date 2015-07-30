@@ -79,6 +79,10 @@ public class Timestamps {
                 && (compare(timestamp, to) < 0);
     }
 
+    public static boolean isAfter(Timestamp timestamp, Timestamp from) {
+        return (compare(from, timestamp) < 0);
+    }
+
     public static Comparator<? super Timestamp> comparator() {
         return new TimestampComparator();
     }
