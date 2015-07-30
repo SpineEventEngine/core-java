@@ -19,45 +19,26 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine3.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "UserProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "GroupProto";
+option java_package = "org.spine3.users";
 
-import "spine3/base/email.proto";
+import "spine3/base/user_id.proto";
 
-// A string-based identifier of the user.
-message UserId {
-  // User ID value.
-  string value = 1;
+message GroupId {
+    string value = 1;
 }
 
-// A link to the user's photo.
-message PhotoLink {
-  // The address of an image in one of the popular image formats.
-  string url = 1;
-  //TODO:2015-04-28:alexander.yevsyukov: How do we handle medium and small size icons? Via PhotoService? Is it a part of UserService?
-}
+// A user group can hold users and other groups.
+message Group {
 
-// General information about a human user.
-message User {
-  // An identifier of the user in the system.
-  UserId id = 1;
+    GroupId id = 1;
 
-  // A user name to be displayed on the screen.
-  string given_name = 2;
+    repeated spine3.base.UserId users = 2;
 
-  // A family name of the user.
-  string family_name = 3;
+    repeated GroupId groups = 3;
 
-  // Email address of the user;
-  EmailAddress email = 4;
-
-  // A reference to the user photo.
-  PhotoLink photo = 5;
-
-  // Flag to say if this user is the administrator of the domain.
-  bool domain_admin = 6;
 }

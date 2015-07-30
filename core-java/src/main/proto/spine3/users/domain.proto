@@ -19,26 +19,16 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine3.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "GroupProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "DomainProto";
+option java_package = "org.spine3.users";
 
-import "spine3/base/user.proto";
-
-message GroupId {
-    string value = 1;
-}
-
-// A user group can hold users and other groups.
-message Group {
-
-    GroupId id = 1;
-
-    repeated UserId users = 2;
-
-    repeated GroupId groups = 3;
-
+// Domain defines a boundary for organization's data.
+// Most common case of the domain name would be Internet domain name of a company.
+message Domain {
+  // The name of the domain.
+  string name = 1;
 }

@@ -23,34 +23,12 @@ package spine3.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "SharingProto";
+option java_outer_classname = "UserIdProto";
 option java_package = "org.spine3.base";
 
-import "spine3/base/user.proto";
-import "spine3/base/group.proto";
-
-
-message Subject {
-    oneof kind {
-        UserId user = 1;
-        GroupId group = 2;
-    }
+// A string-based identifier of the user.
+message UserId {
+  // User ID value.
+  string value = 1;
 }
 
-enum SharingLevel {
-    NONE = 0;
-    VIEW = 1;
-    COMMENT = 2;
-    MODIFY = 3;
-    MODERATE = 4;
-}
-
-message Permission {
-    Subject subject = 1;
-    SharingLevel level = 2;
-}
-
-message Sharing {
-    UserId owner = 1;
-    repeated Permission permissions = 2;
-}

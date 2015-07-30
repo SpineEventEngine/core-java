@@ -19,16 +19,38 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine3.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "DomainProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "SharingProto";
+option java_package = "org.spine3.users";
 
-// Domain defines a boundary for organization's data.
-// Most common case of the domain name would be Internet domain name of a company.
-message Domain {
-  // The name of the domain.
-  string name = 1;
+import "spine3/base/user_id.proto";
+import "spine3/users/group.proto";
+
+
+message Subject {
+    oneof kind {
+        spine3.base.UserId user = 1;
+        GroupId group = 2;
+    }
+}
+
+enum SharingLevel {
+    NONE = 0;
+    VIEW = 1;
+    COMMENT = 2;
+    MODIFY = 3;
+    MODERATE = 4;
+}
+
+message Permission {
+    Subject subject = 1;
+    SharingLevel level = 2;
+}
+
+message Sharing {
+    spine3.base.UserId owner = 1;
+    repeated Permission permissions = 2;
 }

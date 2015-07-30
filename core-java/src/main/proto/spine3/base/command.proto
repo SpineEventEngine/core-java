@@ -28,7 +28,7 @@ option java_package = "org.spine3.base";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
-import "spine3/base/user.proto";
+import "spine3/base/user_id.proto";
 import "spine3/time/time.proto";
 
 // The command identifier is a composite key, which gives information about the context of the command creation.
