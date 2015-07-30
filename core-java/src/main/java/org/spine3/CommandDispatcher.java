@@ -23,7 +23,6 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.MessageSubscriber;
 import org.spine3.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.error.UnsupportedCommandException;
 import org.spine3.util.Methods;

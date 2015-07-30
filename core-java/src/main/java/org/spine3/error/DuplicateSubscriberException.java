@@ -20,7 +20,7 @@
 package org.spine3.error;
 
 import com.google.protobuf.Message;
-import org.spine3.engine.MessageSubscriber;
+import org.spine3.MessageSubscriber;
 
 /**
  * Indicates that more than one subscriber for the same message class are present in a declaring class.

@@ -20,7 +20,6 @@
 package org.spine3;
 
 import com.google.common.collect.Maps;
-import org.spine3.engine.MessageSubscriber;
 import org.spine3.error.DuplicateApplierException;
 import org.spine3.error.MissingEventApplierException;
 
@@ -36,7 +35,7 @@ import static org.spine3.util.Methods.scanForEventAppliers;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-class EventApplier {
+class EventApplierMap {
 
     private final Map<EventClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
 

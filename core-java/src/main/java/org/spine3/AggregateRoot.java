@@ -46,7 +46,7 @@ import java.util.List;
 public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     private CommandDispatcher dispatcher;
-    private EventApplier applier;
+    private EventApplierMap applier;
 
     private final I id;
     private final Any idAsAny;
@@ -201,7 +201,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     protected void init() {
         if (!initialized) {
             dispatcher = new CommandDispatcher();
-            applier = new EventApplier();
+            applier = new EventApplierMap();
 
             dispatcher.register(this);
             applier.register(this);

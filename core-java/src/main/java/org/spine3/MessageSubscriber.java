@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.engine;
+package org.spine3;
 
 import com.google.protobuf.Message;
 import org.spine3.util.Methods;
@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class MessageSubscriber {
 
     /**
-     * This code bases on Guava {@link com.google.common.eventbus.EventSubscriber}
+     * This code is based on Guava's {@link com.google.common.eventbus.EventSubscriber}.
      */
 
     private static final String ARGUMENT_REJECTED = "Method rejected target/argument: ";

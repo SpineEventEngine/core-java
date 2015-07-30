@@ -20,7 +20,7 @@
 package org.spine3.error;
 
 import org.spine3.CommandClass;
-import org.spine3.engine.MessageSubscriber;
+import org.spine3.MessageSubscriber;
 
 /**
  * Exception that is thrown when more than one handler

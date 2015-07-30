@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-import org.spine3.engine.MessageSubscriber;
+import org.spine3.MessageSubscriber;
 import org.spine3.error.AccessLevelException;
 import org.spine3.error.DuplicateSubscriberException;
 
@@ -74,20 +74,23 @@ public class Methods {
      * @param method to check
      * @return {@code true} if the method is an event applier, {@code false} otherwise
      */
+    @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
     public static boolean isEventApplier(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
-        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
-        boolean acceptsMessage = parameterTypes.length == 1 && Message.class.isAssignableFrom(parameterTypes[0]);
-        //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndEventContext =
+        final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+        final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[0]);
+        final boolean acceptsMessageAsFistParam = parameterTypes.length == 1 && firstParamIsMessage;
+        final boolean secondParamIsEventContext = EventContext.class.equals(parameterTypes[1]);
+
+        final boolean acceptsMessageAndEventContext =
                 parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && EventContext.class.equals(parameterTypes[1]);
-        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+                        && firstParamIsMessage
+                        && secondParamIsEventContext;
+        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
-        return isAnnotated && (acceptsMessage || acceptsMessageAndEventContext) && returnsNothing;
+        return isAnnotated && (acceptsMessageAsFistParam || acceptsMessageAndEventContext) && returnsNothing;
     }
 
     /**
