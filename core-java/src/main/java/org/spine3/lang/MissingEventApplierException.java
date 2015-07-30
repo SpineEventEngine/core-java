@@ -22,8 +22,8 @@ package org.spine3.lang;
 import org.spine3.Event;
 
 /**
- * Exception that is thrown when unsupported event is obtained
- * or in case there is no class for given Protobuf event message.
+ * This exception is thrown on a discovery of an event class, which is not handled by any of
+ * the applier methods of an aggregate root class.
  *
  * @author Mikhail Melnik
  */
