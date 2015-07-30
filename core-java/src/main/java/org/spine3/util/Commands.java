@@ -65,6 +65,17 @@ public class Commands {
                 .build();
     }
 
+    public static Predicate<CommandRequest> wereAfter(final Timestamp from) {
+        return new Predicate<CommandRequest>() {
+            @Override
+            public boolean apply(@Nullable CommandRequest request) {
+                checkNotNull(request);
+                Timestamp timestamp = getTimestamp(request);
+                return Timestamps.isAfter(timestamp, from);
+            }
+        };
+    }
+
     public static Predicate<CommandRequest> wereWithinPeriod(final Timestamp from, final Timestamp to) {
         return new Predicate<CommandRequest>() {
             @Override

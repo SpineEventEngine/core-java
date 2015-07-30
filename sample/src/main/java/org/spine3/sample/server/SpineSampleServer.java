@@ -29,6 +29,8 @@ import org.spine3.base.*;
 import org.spine3.gae.datastore.DataStoreStorageProvider;
 import org.spine3.sample.order.Order;
 import org.spine3.sample.order.OrderRootRepository;
+import org.spine3.sample.store.filesystem.FileSystemHelper;
+import org.spine3.sample.store.filesystem.FileSystemStorageProvider;
 import org.spine3.util.TypeName;
 
 /**
@@ -38,13 +40,17 @@ import org.spine3.util.TypeName;
  */
 public class SpineSampleServer {
 
+    private static final String STORAGE_PATH = "./storage";
+
     public static void registerEventSubscribers() {
         EventBus.instance().register(new SampleSubscriber());
     }
 
     public static void prepareEngine() {
-        final EventStore eventStore = new EventStore(DataStoreStorageProvider.provideEventStoreStorage());
-        final CommandStore commandStore = new CommandStore(DataStoreStorageProvider.provideCommandStoreStorage());
+        FileSystemHelper.configure(STORAGE_PATH);
+
+        final EventStore eventStore = new EventStore(FileSystemStorageProvider.provideEventStoreStorage());
+        final CommandStore commandStore = new CommandStore(FileSystemStorageProvider.provideCommandStoreStorage());
 
         final OrderRootRepository orderRootRepository = getOrderRootRepository();
 
@@ -56,8 +62,9 @@ public class SpineSampleServer {
     public static OrderRootRepository getOrderRootRepository() {
 
         final RepositoryEventStore eventStore = new RepositoryEventStore(
-                DataStoreStorageProvider.provideEventStoreStorage(),
-                DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
+                FileSystemStorageProvider.provideEventStoreStorage(),
+                FileSystemStorageProvider.provideSnapshotStorage());
+//                DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
 
         final OrderRootRepository repository = new OrderRootRepository();
         repository.configure(eventStore);
