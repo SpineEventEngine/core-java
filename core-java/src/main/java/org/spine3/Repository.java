@@ -93,10 +93,19 @@ public interface Repository<I extends Message,
     List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
 
 
+    /**
+     * Helper class for wiring repositories into command processing.
+     */
+    @SuppressWarnings("UtilityClass")
     class Converter {
 
         private static final String DISPATCH_METHOD_NAME = "dispatch";
 
+        /**
+         * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
+         * @param repository the repository instance to inspect
+         * @return reference to the method
+         */
         public static MessageSubscriber toMessageSubscriber(Repository repository) {
             checkNotNull(repository);
 
@@ -108,6 +117,9 @@ public interface Repository<I extends Message,
                 //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
                 throw new Error(e);
             }
+        }
+
+        private Converter() {
         }
     }
 }

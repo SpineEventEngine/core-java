@@ -219,13 +219,16 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         return initialized;
     }
 
+    /**
+     * @return immutable view of records for uncommitted events
+     */
     @CheckReturnValue
-    protected List<EventRecord> getUncommittedEvents() {
+    public List<EventRecord> getUncommittedEvents() {
         return ImmutableList.copyOf(eventRecords);
     }
 
     @CheckReturnValue
-    protected Timestamp whenLastModified() {
+    public Timestamp whenLastModified() {
         return this.whenLastModified;
     }
 

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.*;
 import org.spine3.base.*;
+import org.spine3.repository.RepositoryEventStore;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.sample.store.filesystem.FileSystemHelper;
 import org.spine3.sample.store.filesystem.FileSystemStorageProvider;

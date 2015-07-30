@@ -22,7 +22,7 @@ package org.spine3.sample.store.filesystem;
 
 import org.spine3.CommandStore;
 import org.spine3.EventStore;
-import org.spine3.RepositoryEventStore;
+import org.spine3.repository.RepositoryEventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.storage.SnapshotStorage;

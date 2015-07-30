@@ -17,10 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.repository;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
+import org.spine3.AggregateCommand;
+import org.spine3.AggregateRoot;
+import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
@@ -32,6 +35,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
+
+//TODO:2015-07-30:alexander.yevsyukov: Make creation command a part of AggregateRoot API.
+// This way all the commands will be handled by aggregate roots.
 
 /**
  * Abstract base for aggregate root repositories.
