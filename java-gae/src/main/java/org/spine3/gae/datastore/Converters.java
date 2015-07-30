@@ -31,7 +31,7 @@ import org.spine3.AggregateId;
 import org.spine3.base.*;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
-import org.spine3.util.TypeName;
+import org.spine3.TypeName;
 
 import java.util.Map;
 

@@ -28,7 +28,7 @@ import org.spine3.base.Snapshot;
 import org.spine3.storage.SnapshotStorage;
 import org.spine3.protobuf.JsonFormat;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.TypeName;
+import org.spine3.TypeName;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;
 

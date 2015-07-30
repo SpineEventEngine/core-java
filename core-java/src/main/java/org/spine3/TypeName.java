@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
+import org.spine3.util.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -69,5 +70,14 @@ public final class TypeName extends StringTypeValue {
      */
     public static TypeName of(String typeName) {
         return new TypeName(typeName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String value() {
+        // Expose method to other packages.
+        return super.value();
     }
 }

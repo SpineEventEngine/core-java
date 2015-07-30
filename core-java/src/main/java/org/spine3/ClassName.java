@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3;
+
+import org.spine3.util.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A typed string value object holding a fully-qualified Java class name.
+ * A value object holding a fully-qualified Java class name.
  *
  * @author Mikhail Mikhaylov
  */

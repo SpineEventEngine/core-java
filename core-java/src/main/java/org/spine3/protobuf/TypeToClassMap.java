@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.ClassName;
+import org.spine3.TypeName;
 import org.spine3.protobuf.UnknownTypeInAnyException;
 
 import java.io.IOException;

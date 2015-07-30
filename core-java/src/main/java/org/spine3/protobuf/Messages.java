@@ -20,6 +20,8 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.*;
+import org.spine3.ClassName;
+import org.spine3.TypeName;
 import org.spine3.util.*;
 
 import java.lang.reflect.InvocationTargetException;

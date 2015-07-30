@@ -26,12 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.*;
 import org.spine3.base.*;
-import org.spine3.gae.datastore.DataStoreStorageProvider;
-import org.spine3.sample.order.Order;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.sample.store.filesystem.FileSystemHelper;
 import org.spine3.sample.store.filesystem.FileSystemStorageProvider;
-import org.spine3.util.TypeName;
 
 /**
  * Spine sample gRPC server implementation.
