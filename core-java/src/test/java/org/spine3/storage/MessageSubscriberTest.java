@@ -17,19 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.engine;
-
-import org.spine3.CommandDispatcher;
+package org.spine3.storage;
 
 /**
  * @author Mikhail Melnik
  */
-public class CommandBusTest {
-
-    private CommandDispatcher commandBus;
-
-    public CommandBusTest() {
-        commandBus = new CommandDispatcher();
-    }
-
+public class MessageSubscriberTest {
 }

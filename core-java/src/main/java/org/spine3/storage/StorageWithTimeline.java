@@ -18,27 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.engine;
+package org.spine3.storage;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 
 import java.util.List;
 
 /**
- * Extends {@link StorageWithTimeline} and provides an ability to work with Version.
+ * Extends {@link Storage} and provides an ability to work with Timestamp.
  *
  * @param <M> Message type to store
  * @author Mikhail Mikhaylov
  */
-public interface StorageWithTimelineAndVersion<M extends Message>
-        extends StorageWithTimeline<M> {
+public interface StorageWithTimeline<M extends Message> extends Storage<M> {
 
     /**
-     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
+     * Reads Messages of type {@link M} from storage from chosen timestamp.
      *
-     * @param parentId parent id of message
-     * @param sinceVersion  sinceVersion to read messages from
+     * @param from     timestamp to read messages from
      * @return read message
      */
-    List<M> read(Message parentId, int sinceVersion);
+    List<M> read(Timestamp from);
+
+    /**
+     * Reads Messages of type {@link M} with appropriate Parent Id from storage from chosen timestamp.
+     *
+     * @param parentId parent id of message
+     * @param from     timestamp to read messages from
+     * @return read message
+     */
+    List<M> read(Message parentId, Timestamp from);
 }

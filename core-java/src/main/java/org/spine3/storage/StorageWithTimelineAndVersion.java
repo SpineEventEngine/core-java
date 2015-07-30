@@ -18,10 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains classes that implement message bus of the framework.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.engine;
+package org.spine3.storage;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Message;
+
+import java.util.List;
+
+/**
+ * Extends {@link StorageWithTimeline} and provides an ability to work with Version.
+ *
+ * @param <M> Message type to store
+ * @author Mikhail Mikhaylov
+ */
+public interface StorageWithTimelineAndVersion<M extends Message>
+        extends StorageWithTimeline<M> {
+
+    /**
+     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
+     *
+     * @param parentId parent id of message
+     * @param sinceVersion  sinceVersion to read messages from
+     * @return read message
+     */
+    List<M> read(Message parentId, int sinceVersion);
+}

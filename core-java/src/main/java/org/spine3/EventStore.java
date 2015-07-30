@@ -22,7 +22,7 @@ package org.spine3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.StorageWithTimelineAndVersion;
+import org.spine3.storage.StorageWithTimelineAndVersion;
 
 import java.util.List;
 

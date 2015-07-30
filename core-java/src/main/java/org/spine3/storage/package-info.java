@@ -17,10 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.engine;
 
 /**
- * @author Mikhail Melnik
+ * This package provides basic interfaces and default implementation for storages.
  */
-public class MessageSubscriberTest {
-}
+@ParametersAreNonnullByDefault
+package org.spine3.storage;
+
+import javax.annotation.ParametersAreNonnullByDefault;

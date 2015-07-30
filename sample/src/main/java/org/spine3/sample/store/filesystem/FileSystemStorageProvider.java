@@ -25,9 +25,9 @@ import org.spine3.EventStore;
 import org.spine3.RepositoryEventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.SnapshotStorage;
-import org.spine3.engine.StorageWithTimeline;
-import org.spine3.engine.StorageWithTimelineAndVersion;
+import org.spine3.storage.SnapshotStorage;
+import org.spine3.storage.StorageWithTimeline;
+import org.spine3.storage.StorageWithTimelineAndVersion;
 
 /**
  * Utility class which provides storage instances for {@link RepositoryEventStore}

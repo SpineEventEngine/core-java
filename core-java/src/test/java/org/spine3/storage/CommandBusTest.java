@@ -17,34 +17,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.storage;
 
-package org.spine3.engine;
-
-import com.google.protobuf.Message;
-import org.spine3.base.Snapshot;
+import org.spine3.CommandDispatcher;
 
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Snapshots as Protobuf messages.
- *
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public interface SnapshotStorage {
+public class CommandBusTest {
 
-    /**
-     * Stores Snapshot with desired Parent Id.
-     *
-     * @param snapshot snapshot to be stored
-     * @param parentId parent id to identify snapshots of different Aggregate Root instances
-     */
-    void store(Snapshot snapshot, Message parentId);
+    private CommandDispatcher commandBus;
 
-    /**
-     * Reads snapshot from storage by appropriate parent id.
-     *
-     * @param parentId parent id to identify snapshots of different Aggregate Root instances
-     * @return read snapshot
-     */
-    Snapshot read(Message parentId);
+    public CommandBusTest() {
+        commandBus = new CommandDispatcher();
+    }
 
 }

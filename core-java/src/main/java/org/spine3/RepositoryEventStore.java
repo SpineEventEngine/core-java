@@ -23,8 +23,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Snapshot;
-import org.spine3.engine.SnapshotStorage;
-import org.spine3.engine.StorageWithTimelineAndVersion;
+import org.spine3.storage.SnapshotStorage;
+import org.spine3.storage.StorageWithTimelineAndVersion;
 
 import java.util.List;
 

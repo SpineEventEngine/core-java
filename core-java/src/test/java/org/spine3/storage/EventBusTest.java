@@ -17,42 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.engine;
-
-import com.google.protobuf.Message;
-
-import java.util.List;
+package org.spine3.storage;
 
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Protobuf messages.
- *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public interface Storage<M extends Message> {
-
-    /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage.
-     *
-     * @param parentId parent id of message
-     * @return read message
-     */
-    List<M> read(Message parentId);
-
-    /**
-     * Reads all Messages of type {@link M} from storage.
-     *
-     * @return read messages
-     */
-    List<M> readAll();
-
-    /**
-     * Stores message to storage. Storage should determine parent id by itself.
-     *
-     * @param message message to store in storage
-     */
-    void store(M message);
-
+public class EventBusTest {
 }

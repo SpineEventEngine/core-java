@@ -23,7 +23,7 @@ package org.spine3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.engine.StorageWithTimeline;
+import org.spine3.storage.StorageWithTimeline;
 
 import java.util.List;
 
