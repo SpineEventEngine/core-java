@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine3.time;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "TimeProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.time";
 
 //TODO:2015-04-28:alexander.yevsyukov: Document
 

@@ -29,7 +29,7 @@ option java_package = "org.spine3.base";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 import "spine3/base/user.proto";
-import "spine3/base/time.proto";
+import "spine3/time/time.proto";
 
 // The command identifier is a composite key, which gives information about the context of the command creation.
 message CommandId {
@@ -40,7 +40,7 @@ message CommandId {
 // Meta-information about the client environment, which generated a command.
 message CommandContext {
     CommandId command_id = 1;
-    ZoneOffset zone_offset = 2;
+    time.ZoneOffset zone_offset = 2;
 }
 
 message CommandRequest {
