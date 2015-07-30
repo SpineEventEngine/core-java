@@ -17,29 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
+package org.spine3.error;
 
-import com.google.protobuf.Message;
-import org.spine3.engine.MessageSubscriber;
+import org.spine3.Event;
 
 /**
- * Indicates that more than one subscriber for the same message class are present in a declaring class.
+ * This exception is thrown on a discovery of an event class, which is not handled by any of
+ * the applier methods of an aggregate root class.
  *
  * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
-public class DuplicateSubscriberException extends RuntimeException {
+public class MissingEventApplierException extends RuntimeException {
 
-    public DuplicateSubscriberException(
-            Class<? extends Message> messageClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
-
-        super(String.format(
-                "The %s class defines more than one subscriber method for the message class %s." +
-                        " Subscribers encountered: %s, %s.",
-                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
-                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
+    public MissingEventApplierException(Event event) {
+        super("There is no registered applier for the event: " + event.getEventClass());
     }
 
     private static final long serialVersionUID = 0L;

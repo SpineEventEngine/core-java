@@ -21,8 +21,8 @@ package org.spine3;
 
 import com.google.common.collect.Maps;
 import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.DuplicateApplierException;
-import org.spine3.lang.MissingEventApplierException;
+import org.spine3.error.DuplicateApplierException;
+import org.spine3.error.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

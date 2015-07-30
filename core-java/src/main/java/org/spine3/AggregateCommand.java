@@ -22,7 +22,7 @@ package org.spine3;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
-import org.spine3.lang.MissingAggregateIdException;
+import org.spine3.error.MissingAggregateIdException;
 import org.spine3.util.Commands;
 import org.spine3.protobuf.Messages;
 

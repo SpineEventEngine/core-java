@@ -28,8 +28,8 @@ import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.AccessLevelException;
-import org.spine3.lang.DuplicateSubscriberException;
+import org.spine3.error.AccessLevelException;
+import org.spine3.error.DuplicateSubscriberException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

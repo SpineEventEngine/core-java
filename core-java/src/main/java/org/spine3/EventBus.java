@@ -24,7 +24,7 @@ import com.google.common.collect.Multimap;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.MissingEventApplierException;
+import org.spine3.error.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;

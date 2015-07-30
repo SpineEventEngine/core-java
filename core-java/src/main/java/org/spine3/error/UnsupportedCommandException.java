@@ -17,20 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
+package org.spine3.error;
 
-import org.spine3.Event;
+import com.google.protobuf.Message;
 
 /**
- * This exception is thrown on a discovery of an event class, which is not handled by any of
- * the applier methods of an aggregate root class.
+ * Exception that is thrown when unsupported command is obtained
+ * or in case there is no class for given Protobuf command message.
  *
  * @author Mikhail Melnik
  */
-public class MissingEventApplierException extends RuntimeException {
+public class UnsupportedCommandException extends RuntimeException {
 
-    public MissingEventApplierException(Event event) {
-        super("There is no registered applier for the event: " + event.getEventClass());
+    public UnsupportedCommandException(Message command) {
+        super("There is no registered handler for the command: " + command.getClass().getName());
     }
 
     private static final long serialVersionUID = 0L;

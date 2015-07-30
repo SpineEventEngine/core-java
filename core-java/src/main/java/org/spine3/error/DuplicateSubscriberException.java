@@ -17,36 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.lang;
+package org.spine3.error;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Commands;
+import org.spine3.engine.MessageSubscriber;
 
 /**
- * Exception is thrown if a command, which is intended to be used for an aggregate
- * does not have {@code getAggregateId()} method.
- * <p/>
- * To have this method in Java, corresponding Protobuf message definition must have
- * the property called {@code aggregate_id}.
+ * Indicates that more than one subscriber for the same message class are present in a declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class MissingAggregateIdException extends RuntimeException {
+public class DuplicateSubscriberException extends RuntimeException {
 
-    public MissingAggregateIdException(Message command, String methodName, Throwable cause) {
-        super(createMessage(command, methodName), cause);
-    }
+    public DuplicateSubscriberException(
+            Class<? extends Message> messageClass,
+            MessageSubscriber currentSubscriber,
+            MessageSubscriber discoveredSubscriber) {
 
-    private static String createMessage(Message command, String methodName) {
-        return "Unable to call ID accessor method " + methodName + " from the command of class "
-                + command.getClass().getName();
-    }
-
-    public MissingAggregateIdException(String commandClassName, String propertyName) {
-        super("The first property of the aggregate command " + commandClassName +
-                " must define aggregate ID with a name ending with '" + Commands.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
+        super(String.format(
+                "The %s class defines more than one subscriber method for the message class %s." +
+                        " Subscribers encountered: %s, %s.",
+                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
+                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
     }
 
     private static final long serialVersionUID = 0L;
+
 }
