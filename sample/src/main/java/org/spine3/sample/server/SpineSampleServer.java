@@ -29,7 +29,7 @@ import org.spine3.base.*;
 import org.spine3.repository.RepositoryEventStore;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.sample.store.filesystem.FileSystemHelper;
-import org.spine3.sample.store.filesystem.FileSystemStorageProvider;
+import org.spine3.sample.store.filesystem.FileSystemStorageFactory;
 
 /**
  * Spine sample gRPC server implementation.
@@ -47,8 +47,8 @@ public class SpineSampleServer {
     public static void prepareEngine() {
         FileSystemHelper.configure(STORAGE_PATH);
 
-        final EventStore eventStore = new EventStore(FileSystemStorageProvider.provideEventStoreStorage());
-        final CommandStore commandStore = new CommandStore(FileSystemStorageProvider.provideCommandStoreStorage());
+        final EventStore eventStore = new EventStore(FileSystemStorageFactory.createEventStore());
+        final CommandStore commandStore = new CommandStore(FileSystemStorageFactory.createCommandStore());
 
         final OrderRootRepository orderRootRepository = getOrderRootRepository();
 
@@ -60,8 +60,8 @@ public class SpineSampleServer {
     public static OrderRootRepository getOrderRootRepository() {
 
         final RepositoryEventStore eventStore = new RepositoryEventStore(
-                FileSystemStorageProvider.provideEventStoreStorage(),
-                FileSystemStorageProvider.provideSnapshotStorage());
+                FileSystemStorageFactory.createEventStore(),
+                FileSystemStorageFactory.createSnapshotStorage());
 //                DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
 
         final OrderRootRepository repository = new OrderRootRepository();

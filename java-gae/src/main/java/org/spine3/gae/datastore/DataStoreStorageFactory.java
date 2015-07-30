@@ -20,53 +20,49 @@
 
 package org.spine3.gae.datastore;
 
-import org.spine3.CommandStore;
-import org.spine3.EventStore;
-import org.spine3.repository.RepositoryEventStore;
+import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.storage.SnapshotStorage;
 import org.spine3.storage.StorageWithTimeline;
 import org.spine3.storage.StorageWithTimelineAndVersion;
-import org.spine3.TypeName;
 
 /**
- * Utility class which provides storage instances for {@link RepositoryEventStore}
- * and {@link CommandStore}.
+ * This class provides factory method for DataStore-based storages.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class DataStoreStorageProvider {
+public class DataStoreStorageFactory {
 
-    private DataStoreStorageProvider() {
+    private DataStoreStorageFactory() {
     }
 
     /**
-     * Provides Storage which can be used by {@link RepositoryEventStore} or {@link EventStore}.
+     * Creates a new storage instance.
      *
      * @return Storage with Timeline and Version
      */
-    public static StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
+    public static StorageWithTimelineAndVersion<EventRecord> createEventStore() {
         return DataStoreStorage.newInstance(EventRecord.class);
     }
 
     /**
-     * Provides Snapshot Storage which can be used by {@link RepositoryEventStore}.
+     * Creates new snapshot storage instance.
      *
      * @param stateTypeName aggregate root state type name to be used as snapshot kind
      * @return Snapshot Storage
      */
-    public static SnapshotStorage provideSnapshotStorage(TypeName stateTypeName) {
+    public static SnapshotStorage createSnapshotStorage(TypeName stateTypeName) {
         return new DataStoreSnapshotStorage(stateTypeName);
     }
 
     /**
-     * Provides Storage which can be used by {@link CommandStore}.
+     * Creates new storage for command requests.
      *
      * @return Storage with Timeline
      */
-    public static StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
+    public static StorageWithTimeline<CommandRequest> createCommandStore() {
         return DataStoreStorage.newInstance(CommandRequest.class);
     }
 }

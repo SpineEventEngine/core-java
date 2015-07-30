@@ -20,9 +20,6 @@
 
 package org.spine3.sample.store.filesystem;
 
-import org.spine3.CommandStore;
-import org.spine3.EventStore;
-import org.spine3.repository.RepositoryEventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.storage.SnapshotStorage;
@@ -30,41 +27,40 @@ import org.spine3.storage.StorageWithTimeline;
 import org.spine3.storage.StorageWithTimelineAndVersion;
 
 /**
- * Utility class which provides storage instances for {@link RepositoryEventStore}
- * and {@link CommandStore}.
+ * This class provides factory methods for creating storages based on file system.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemStorageProvider {
+public class FileSystemStorageFactory {
 
-    private FileSystemStorageProvider() {
+    private FileSystemStorageFactory() {
     }
 
     /**
-     * Provides Storage which can be used by {@link RepositoryEventStore} or {@link EventStore}.
+     * Creates new instance of the event store.
      *
-     * @return Storage with Timeline and Version
+     * @return new storage instance
      */
-    public static StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
+    public static StorageWithTimelineAndVersion<EventRecord> createEventStore() {
         return FileSystemStorage.newInstance(EventRecord.class);
     }
 
     /**
-     * Provides Snapshot Storage which can be used by {@link RepositoryEventStore}.
+     * Creates new snapshot storage.
      *
-     * @return Snapshot Storage
+     * @return new storage instance
      */
-    public static SnapshotStorage provideSnapshotStorage() {
+    public static SnapshotStorage createSnapshotStorage() {
         return new FileSystemSnapshotStorage();
     }
 
     /**
-     * Provides Storage which can be used by {@link CommandStore}.
+     * Creates new command store.
      *
-     * @return Storage with Timeline
+     * @return new storage instance
      */
-    public static StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
+    public static StorageWithTimeline<CommandRequest> createCommandStore() {
         return FileSystemStorage.newInstance(CommandRequest.class);
     }
 }
