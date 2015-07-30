@@ -24,29 +24,31 @@ import org.spine3.engine.MessageSubscriber;
 
 /**
  * Exception that is thrown when more than one applier
- * of the same event type were found in the event dispatcher instance.
+ * of the same event class is found in a declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class EventApplierAlreadyRegisteredException extends RuntimeException {
+public class ApplierAlreadyRegisteredException extends RuntimeException {
 
     /**
-     * Accepts event type and both old and new handlers.
+     * Creates new exception.
      *
      * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered for the given message type
-     * @param discoveredSubscriber a new subscriber for the event type
+     * @param currentSubscriber    a method currently registered
+     * @param discoveredSubscriber another applier method for the same event class
      */
-    public EventApplierAlreadyRegisteredException(
+    public ApplierAlreadyRegisteredException(
             EventClass eventClass,
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
 
-        super("The event " + eventClass + " already has associated applier method" + currentSubscriber.getFullName() + '.'
-                + " There can be only one applier per event type. "
-                + " You attempt to register applier " + discoveredSubscriber.getFullName() + '.'
-                + " If this is an intended operation, consider un-registering the current applier first.");
+        super(String.format("The class %s defines more than one applier method for the event class %s. " +
+                            "Applier methods encountered: %s, %s.",
+                currentSubscriber.getTargetClass(),
+                eventClass,
+                currentSubscriber,
+                discoveredSubscriber));
     }
 
     private static final long serialVersionUID = 0L;

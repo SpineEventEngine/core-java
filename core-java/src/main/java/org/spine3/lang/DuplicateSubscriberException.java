@@ -32,13 +32,14 @@ public class DuplicateSubscriberException extends RuntimeException {
 
     public DuplicateSubscriberException(
             Class<? extends Message> messageClass,
-            MessageSubscriber firstSubscriber,
-            MessageSubscriber secondSubscriber) {
+            MessageSubscriber currentSubscriber,
+            MessageSubscriber discoveredSubscriber) {
 
-        super("The " + firstSubscriber.getTargetClass().getName() + " class"
-                + " defines more than one subscriber method"
-                + " for the message class " + messageClass.getName() + '.'
-                + " Subscribers encountered: " + firstSubscriber.getShortName() + ", " + secondSubscriber.getShortName());
+        super(String.format(
+                "The %s class defines more than one subscriber method for the message class %s." +
+                        " Subscribers encountered: %s, %s.",
+                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
+                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
     }
 
     private static final long serialVersionUID = 0L;

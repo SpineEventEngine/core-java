@@ -21,7 +21,7 @@ package org.spine3;
 
 import com.google.common.collect.Maps;
 import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.EventApplierAlreadyRegisteredException;
+import org.spine3.lang.ApplierAlreadyRegisteredException;
 import org.spine3.lang.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -65,7 +65,7 @@ class EventApplier {
 
             if (subscriberRegistered(eventClass)) {
                 final MessageSubscriber alreadyAddedApplier = getSubscriber(eventClass);
-                throw new EventApplierAlreadyRegisteredException(eventClass, alreadyAddedApplier, entry.getValue());
+                throw new ApplierAlreadyRegisteredException(eventClass, alreadyAddedApplier, entry.getValue());
             }
         }
     }
