@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package contains exceptions thrown for errors of domain model definitions in Protobuf,
+ * or for errors in Java classes handling the domain.
+ */
 @ParametersAreNonnullByDefault
 package org.spine3.error;
 
