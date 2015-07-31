@@ -21,7 +21,7 @@ package org.spine3.sample.store.filesystem;
 
 import com.google.protobuf.Message;
 import org.spine3.server.Snapshot;
-import org.spine3.storage.SnapshotStorage;
+import org.spine3.server.SnapshotStorage;
 
 import java.io.*;
 

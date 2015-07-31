@@ -24,7 +24,7 @@ import com.google.appengine.api.datastore.*;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.storage.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageWithTimelineAndVersion;
 import org.spine3.protobuf.JsonFormat;
 import org.spine3.protobuf.Messages;
 import org.spine3.TypeName;

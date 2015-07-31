@@ -18,10 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides basic interfaces and default implementation for storages.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.storage;
+package org.spine3.server;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+
+import java.util.List;
+
+/**
+ * Extends {@link Storage} and provides an ability to work with Timestamp.
+ *
+ * @param <M> Message type to store
+ * @author Mikhail Mikhaylov
+ */
+public interface StorageWithTimeline<M extends Message> extends Storage<M> {
+
+    /**
+     * Reads Messages of type {@link M} from storage from chosen timestamp.
+     *
+     * @param from     timestamp to read messages from
+     * @return read message
+     */
+    List<M> read(Timestamp from);
+
+    /**
+     * Reads Messages of type {@link M} with appropriate Parent Id from storage from chosen timestamp.
+     *
+     * @param parentId parent id of message
+     * @param from     timestamp to read messages from
+     * @return read message
+     */
+    List<M> read(Message parentId, Timestamp from);
+}

@@ -25,7 +25,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.Snapshot;
-import org.spine3.storage.SnapshotStorage;
+import org.spine3.server.SnapshotStorage;
 import org.spine3.protobuf.JsonFormat;
 import org.spine3.protobuf.Messages;
 import org.spine3.TypeName;

@@ -17,36 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.storage;
-
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-
-import java.util.List;
+package org.spine3.server;
 
 /**
- * Extends {@link Storage} and provides an ability to work with Timestamp.
- *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public interface StorageWithTimeline<M extends Message> extends Storage<M> {
-
-    /**
-     * Reads Messages of type {@link M} from storage from chosen timestamp.
-     *
-     * @param from     timestamp to read messages from
-     * @return read message
-     */
-    List<M> read(Timestamp from);
-
-    /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage from chosen timestamp.
-     *
-     * @param parentId parent id of message
-     * @param from     timestamp to read messages from
-     * @return read message
-     */
-    List<M> read(Message parentId, Timestamp from);
+public class MessageSubscriberTest {
 }

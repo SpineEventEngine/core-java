@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.storage;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
-import org.spine3.server.Snapshot;
 
 /**
  * Defines the low level data interface of the storage

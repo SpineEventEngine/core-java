@@ -23,9 +23,9 @@ package org.spine3.gae.datastore;
 import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.storage.SnapshotStorage;
-import org.spine3.storage.StorageWithTimeline;
-import org.spine3.storage.StorageWithTimelineAndVersion;
+import org.spine3.server.SnapshotStorage;
+import org.spine3.server.StorageWithTimeline;
+import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
  * This class provides factory method for DataStore-based storages.

@@ -17,12 +17,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.storage;
+package org.spine3.server;
+
+import org.spine3.CommandDispatcher;
 
 /**
- * The abstract implementation of the {@link Storage} interface.
- *
  * @author Mikhail Melnik
  */
-public abstract class AbstractStorage implements Storage {
+public class CommandBusTest {
+
+    private CommandDispatcher commandBus;
+
+    public CommandBusTest() {
+        commandBus = new CommandDispatcher();
+    }
+
 }

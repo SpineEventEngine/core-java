@@ -17,28 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.storage;
-
-import com.google.protobuf.Message;
-
-import java.util.List;
+package org.spine3.server;
 
 /**
- * Extends {@link StorageWithTimeline} and provides an ability to work with Version.
+ * The abstract implementation of the {@link Storage} interface.
  *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public interface StorageWithTimelineAndVersion<M extends Message>
-        extends StorageWithTimeline<M> {
-
-    /**
-     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
-     *
-     * @param parentId parent id of message
-     * @param sinceVersion  sinceVersion to read messages from
-     * @return read message
-     */
-    List<M> read(Message parentId, int sinceVersion);
+public abstract class AbstractStorage implements Storage {
 }

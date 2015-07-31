@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.storage.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageWithTimelineAndVersion;
 import org.spine3.util.*;
 
 import java.util.List;
