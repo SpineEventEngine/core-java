@@ -105,7 +105,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
             apply(event);
 
             int currentVersion = incrementVersion();
-            EventContext eventContext = createEventContext(commandId, currentVersion, getState());
+            final S state = getState();
+            EventContext eventContext = createEventContext(commandId, event, state, currentVersion);
             EventRecord eventRecord = createEventRecord(event, eventContext);
 
             putUncommitted(eventRecord);
@@ -114,7 +115,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     /**
      * Applies an event to the aggregate root.
-     * <p>
+     * <p/>
      * If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
@@ -149,7 +150,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     private static EventRecord createEventRecord(Message event, EventContext context) {
         EventRecord result = EventRecord.newBuilder()
                 .setEvent(Messages.toAny(event))
-                .setContext(context).build();
+                .setContext(context)
+                .build();
         return result;
     }
 
@@ -167,7 +169,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     /**
      * Validates the passed state.
-     * <p>
+     * <p/>
      * Does nothing by default. Aggregate roots may override this method to
      * specify logic of validating initial or intermediate state of the root.
      *
@@ -247,28 +249,69 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     /**
      * Creates a context for an event.
-     * <p>
-     * Override this method if you want to add custom attributes to the created context.
+     * <p/>
+     * The created context will hold the state of the root, if {@link #eventContextHasState()} returns {@code true}
+     * (which is the default behaviour).
+     * <p/>
+     * The context may optionally have custom attributes are added by
+     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
-     * @param currentVersion the version of the aggregate root after the event was applied
+     * @param event          the event for which to create the context
      * @param currentState   the state of the aggregated root after the event was applied
+     * @param currentVersion the version of the aggregate root after the event was applied
      * @return new instance of the {@code EventContext}
+     * @see #eventContextHasState()
+     * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
-    protected EventContext createEventContext(CommandId commandId, int currentVersion, S currentState) {
+    protected EventContext createEventContext(CommandId commandId, Message event, S currentState, int currentVersion) {
 
         EventId eventId = Events.generateId(commandId);
 
         Any state = Messages.toAny(currentState);
 
-        EventContext result = EventContext.newBuilder()
+        EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
-                .setAggregateId(idAsAny)
-                .setAggregateState(state)
-                .build();
+                .setAggregateId(idAsAny);
 
-        return result;
+        if (eventContextHasState()) {
+            builder.setAggregateState(state);
+        }
+
+        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
+
+        return builder.build();
+    }
+
+    /**
+     * This method controls inclusion of the aggregate root state into an event context.
+     * <p/>
+     * By default this method always return {@code true} making event contexts always include states.
+     * Override this method to control the inclusion.
+     *
+     * @return always {@code true}
+     * @see #createEventContext(CommandId, Message, Message, int)
+     */
+    protected boolean eventContextHasState() {
+        return true;
+    }
+
+    /**
+     * Adds custom attributes to an event context builder during the creation of the event context.
+     * <p/>
+     * Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     *
+     * @param builder        a builder for the event context
+     * @param commandId      the id of the command, which cased the event
+     * @param event          the event message
+     * @param currentState   the current state of the aggregate root after the event was applied
+     * @param currentVersion the version of the aggregate root after the event was applied   @see #createEventContext(CommandId, Message, Message, int)
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
+    protected void addEventContextAttributes(EventContext.Builder builder,
+                                             CommandId commandId, Message event, S currentState, int currentVersion) {
+        // Do nothing.
     }
 
     private void putUncommitted(EventRecord record) {
