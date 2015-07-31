@@ -23,13 +23,19 @@ package spine3.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ChannelServiceProto";
+option java_outer_classname = "ChannelProto";
 option java_package = "org.spine3.base";
 
-import "channel.proto";
+import "spine3/base/user_id.proto";
+import "spine3/base/client.proto";
 
-service ChannelService {
-    rpc Connect (ChannelRequest) returns (ChannelResponse);
-    //TODO:2015-04-28:alexander.yevsyukov: Do we need to have Renew() method?
+// The request to create a channel for the passed user.
+message ChannelRequest {
+    UserId user_id = 1;
+    Client client = 2;
 }
 
+message ChannelResponse {
+    //TODO:2015-04-28:alexander.yevsyukov: Review channel API and see what data we need here.
+    string channel_id = 1;
+}
