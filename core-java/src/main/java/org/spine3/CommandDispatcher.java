@@ -25,6 +25,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.error.UnsupportedCommandException;
+import org.spine3.server.AggregateRoot;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;

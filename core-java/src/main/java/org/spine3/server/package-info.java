@@ -19,7 +19,11 @@
  */
 
 /**
- * This package provides basic interfaces and default implementation for storages.
+ * This package provides classes and interfaces for backend part of the system.
+ * <p>
+ * Some of the classes in this package are also generated from Protobuf.
+ * Those classes represent basing data structures for working with backend data in
+ * a multi-language system.
  */
 @ParametersAreNonnullByDefault
 package org.spine3.server;

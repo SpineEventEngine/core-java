@@ -62,7 +62,7 @@ public final class Event extends MessageValue {
      */
     @Nonnull
     @Override
-    protected Message value() {
+    public Message value() {
         Message value = super.value();
         assert value != null; // because we don't allow null input.
         return value;

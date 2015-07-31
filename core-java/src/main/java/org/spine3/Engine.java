@@ -24,7 +24,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
-import org.spine3.repository.RepositoryEventStore;
+import org.spine3.server.RepositoryEventStore;
 import org.spine3.util.Events;
 
 import java.util.Collections;

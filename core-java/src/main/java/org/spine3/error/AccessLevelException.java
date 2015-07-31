@@ -19,7 +19,7 @@
  */
 package org.spine3.error;
 
-import org.spine3.AggregateRoot;
+import org.spine3.server.AggregateRoot;
 import org.spine3.Repository;
 import org.spine3.util.Methods;
 

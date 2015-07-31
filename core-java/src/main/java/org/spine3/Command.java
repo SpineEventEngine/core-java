@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,7 +59,7 @@ public final class Command extends AbstractCommand {
      */
     @Nonnull
     @Override
-    protected Message value() {
+    public Message value() {
         final Message value = super.value();
         assert value != null; // as we prevent null value initialization.
         return value;

@@ -23,6 +23,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.AggregateRoot;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

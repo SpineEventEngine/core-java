@@ -17,16 +17,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.repository;
+package org.spine3.server;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.AggregateCommand;
-import org.spine3.AggregateRoot;
 import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Snapshot;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Methods;
 

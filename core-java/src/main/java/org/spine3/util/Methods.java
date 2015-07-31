@@ -30,6 +30,7 @@ import org.spine3.base.EventContext;
 import org.spine3.MessageSubscriber;
 import org.spine3.error.AccessLevelException;
 import org.spine3.error.DuplicateSubscriberException;
+import org.spine3.server.AggregateRoot;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

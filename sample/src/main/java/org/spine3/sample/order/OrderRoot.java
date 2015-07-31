@@ -21,7 +21,7 @@ package org.spine3.sample.order;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
+import org.spine3.server.AggregateRoot;
 import org.spine3.base.CommandContext;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;

@@ -17,9 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.common.collect.Maps;
+import org.spine3.Event;
+import org.spine3.EventClass;
+import org.spine3.MessageSubscriber;
 import org.spine3.error.DuplicateApplierException;
 import org.spine3.error.MissingEventApplierException;
 

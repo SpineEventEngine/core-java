@@ -20,7 +20,7 @@
 package org.spine3.sample.order;
 
 import com.google.common.eventbus.Subscribe;
-import org.spine3.repository.AbstractRepository;
+import org.spine3.server.AbstractRepository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.sample.order.command.CreateOrder;

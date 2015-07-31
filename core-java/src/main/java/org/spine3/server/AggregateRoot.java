@@ -17,16 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Command;
+import org.spine3.CommandDispatcher;
+import org.spine3.Event;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
-import org.spine3.server.Snapshot;
 import org.spine3.util.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
@@ -74,7 +76,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
      * @param context of the command
      * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
      */
-    public void dispatch(Message command, CommandContext context) throws InvocationTargetException {
+    protected void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
         List<? extends Message> events = generateEvents(command, context);
 
