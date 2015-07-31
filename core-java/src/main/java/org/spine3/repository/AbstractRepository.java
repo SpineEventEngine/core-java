@@ -26,7 +26,7 @@ import org.spine3.AggregateRoot;
 import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.base.Snapshot;
+import org.spine3.server.Snapshot;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Methods;
 

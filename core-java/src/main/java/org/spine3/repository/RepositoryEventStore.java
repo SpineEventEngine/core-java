@@ -22,7 +22,7 @@ package org.spine3.repository;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.base.Snapshot;
+import org.spine3.server.Snapshot;
 import org.spine3.storage.SnapshotStorage;
 import org.spine3.storage.StorageWithTimelineAndVersion;
 

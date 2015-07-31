@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.Snapshot;
 import org.spine3.util.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;

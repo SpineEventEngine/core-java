@@ -21,7 +21,7 @@
 package org.spine3.storage;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Snapshot;
+import org.spine3.server.Snapshot;
 
 /**
  * Defines the low level data interface of the storage
