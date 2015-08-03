@@ -79,25 +79,17 @@ public class Methods {
     public static boolean isEventApplier(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
-        final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
-
-        //if we try reading a method without parameters we would get ArrayOutOfBounds without this
-        if (!isAnnotated || parameterTypes.length < 2) {
-            return false;
-        }
-
-        final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[0]);
-        final boolean acceptsMessageAsFistParam = parameterTypes.length == 1 && firstParamIsMessage;
-        final boolean secondParamIsEventContext = EventContext.class.equals(parameterTypes[1]);
-
-        final boolean acceptsMessageAndEventContext =
+        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+        boolean acceptsMessage = parameterTypes.length == 1 && Message.class.isAssignableFrom(parameterTypes[0]);
+        //noinspection LocalVariableNamingConvention
+        boolean acceptsMessageAndEventContext =
                 parameterTypes.length == 2
-                        && firstParamIsMessage
-                        && secondParamIsEventContext;
-        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+                        && Message.class.isAssignableFrom(parameterTypes[0])
+                        && EventContext.class.equals(parameterTypes[1]);
+        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
-        return (acceptsMessageAsFistParam || acceptsMessageAndEventContext) && returnsNothing;
+        return isAnnotated && (acceptsMessage || acceptsMessageAndEventContext) && returnsNothing;
     }
 
     /**
