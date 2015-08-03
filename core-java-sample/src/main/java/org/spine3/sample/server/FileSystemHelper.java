@@ -82,7 +82,7 @@ public class FileSystemHelper {
         }
         File result = new File(fileStoragePath + '/'
                 + aggregateId.getClass().getSimpleName()
-                + '-' + Messages.toString(aggregateId) + '/' + fileName);
+                + '-' + Messages.toJson(aggregateId) + '/' + fileName);
         return result;
     }
 

@@ -132,20 +132,6 @@ public class Messages {
         return result;
     }
 
-
-    //TODO:2015-07-27:alexander.yevsyukov: Why are we having this AND toJson()?
-    /**
-     * Prints the passed message into to Json representation.
-     *
-     * @param message the message object
-     * @return string representation of the passed message
-     */
-    public static String toString(Message message) {
-        checkNotNull(message);
-        final String result = JsonFormat.printToString(message);
-        return result;
-    }
-
     /**
      * Prints the passed message into well formatted text.
      *
