@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Mikhail Melnik
  */
-public class SampleGrpcClient {
+public class ClientSample {
 
     private final ChannelImpl channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
@@ -66,7 +66,7 @@ public class SampleGrpcClient {
     /**
      * Construct client connecting to HelloWorld server at {@code host:port}.
      */
-    public SampleGrpcClient(String host, int port) {
+    public ClientSample(String host, int port) {
         channel = NettyChannelBuilder
                 .forAddress(host, port)
                 .negotiationType(NegotiationType.PLAINTEXT)
@@ -124,7 +124,7 @@ public class SampleGrpcClient {
     public static void main(String[] args) throws Exception {
 
         /* Access a service running on the local machine on port 50051 */
-        SampleGrpcClient client = new SampleGrpcClient("localhost", 50051);
+        ClientSample client = new ClientSample("localhost", 50051);
 
         try {
 
@@ -146,7 +146,7 @@ public class SampleGrpcClient {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SampleGrpcClient.class);
+        private final Logger value = LoggerFactory.getLogger(ClientSample.class);
     }
 
     private static Logger log() {

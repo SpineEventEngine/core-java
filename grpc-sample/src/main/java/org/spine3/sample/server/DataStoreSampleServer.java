@@ -24,9 +24,11 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.gae.datastore.DataStoreStorageFactory;
+import org.spine3.sample.order.Order;
 import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
@@ -79,7 +81,7 @@ public class DataStoreSampleServer extends BaseSampleServer {
 
     @Override
     protected SnapshotStorage provideSnapshotStorage() {
-        return FileSystemStorageFactory.createSnapshotStorage();
+        return DataStoreStorageFactory.createSnapshotStorage(TypeName.of(Order.getDescriptor()));
     }
 
     private enum LogSingleton {
