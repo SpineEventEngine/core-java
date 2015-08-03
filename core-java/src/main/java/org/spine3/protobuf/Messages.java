@@ -159,8 +159,8 @@ public class Messages {
     /**
      * Obtains Protobuf field name for the passed message.
      *
-     * @param msg a message to inspect
-     * @param index   a zero-based index of the field
+     * @param msg   a message to inspect
+     * @param index a zero-based index of the field
      * @return name of the field
      */
     @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
