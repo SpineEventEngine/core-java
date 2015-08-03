@@ -34,13 +34,13 @@ import org.spine3.util.UserIds;
 import java.util.List;
 
 /**
- * Simple Spine framework example.
+ * Simple Spine framework example. Uses server implementation, but invokes requests on it manually.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class ServerSample {
+public class GrpcServerSample {
 
     private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -81,14 +81,14 @@ public class ServerSample {
         return result;
     }
 
-    private ServerSample() {
+    private GrpcServerSample() {
     }
 
     private enum LogSingleton {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ServerSample.class);
+        private final Logger value = LoggerFactory.getLogger(GrpcServerSample.class);
     }
 
     private static Logger log() {

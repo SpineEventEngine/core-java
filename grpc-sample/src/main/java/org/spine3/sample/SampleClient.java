@@ -54,11 +54,12 @@ import org.spine3.util.UserIds;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sample gRPC client implementation.
+ * Sample gRPC client implementation. Can be used with {@link org.spine3.sample.server.DataStoreSampleServer} and
+ * {@link org.spine3.sample.server.FileSystemSampleServer}.
  *
  * @author Mikhail Melnik
  */
-public class ClientSample {
+public class SampleClient {
 
     private final ChannelImpl channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
@@ -66,7 +67,7 @@ public class ClientSample {
     /**
      * Construct client connecting to HelloWorld server at {@code host:port}.
      */
-    public ClientSample(String host, int port) {
+    public SampleClient(String host, int port) {
         channel = NettyChannelBuilder
                 .forAddress(host, port)
                 .negotiationType(NegotiationType.PLAINTEXT)
@@ -124,7 +125,7 @@ public class ClientSample {
     public static void main(String[] args) throws Exception {
 
         /* Access a service running on the local machine on port 50051 */
-        ClientSample client = new ClientSample("localhost", 50051);
+        SampleClient client = new SampleClient("localhost", 50051);
 
         try {
 
@@ -146,7 +147,7 @@ public class ClientSample {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ClientSample.class);
+        private final Logger value = LoggerFactory.getLogger(SampleClient.class);
     }
 
     private static Logger log() {
