@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.store.filesystem;
+package org.spine3.sample.server;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -32,7 +32,10 @@ import org.spine3.protobuf.Messages;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides common file system access for {@link FileSystemStorage} and {@link FileSystemSnapshotStorage}.

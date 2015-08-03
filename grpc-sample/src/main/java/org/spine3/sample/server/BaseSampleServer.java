@@ -23,32 +23,35 @@ import io.grpc.ServerImpl;
 import io.grpc.stub.StreamObserver;
 import io.grpc.transport.netty.NettyServerBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spine3.*;
-import org.spine3.base.*;
-import org.spine3.server.RepositoryEventStore;
+import org.spine3.CommandStore;
+import org.spine3.Engine;
+import org.spine3.EventBus;
+import org.spine3.EventStore;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.CommandResult;
+import org.spine3.base.CommandServiceGrpc;
+import org.spine3.base.EventRecord;
+import org.spine3.sample.EventLogger;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.sample.store.filesystem.FileSystemHelper;
-import org.spine3.sample.store.filesystem.FileSystemStorageFactory;
+import org.spine3.server.RepositoryEventStore;
+import org.spine3.server.SnapshotStorage;
+import org.spine3.server.StorageWithTimeline;
+import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
- * Spine sample gRPC server implementation.
+ * Sample gRPC server implementation.
  *
  * @author Mikhail Melnik
  */
-public class SpineSampleServer {
+public abstract class BaseSampleServer {
 
-    private static final String STORAGE_PATH = "./storage";
-
-    public static void registerEventSubscribers() {
-        EventBus.instance().register(new SampleSubscriber());
+    public void registerEventSubscribers() {
+        EventBus.instance().register(new EventLogger());
     }
 
-    public static void prepareEngine() {
-        FileSystemHelper.configure(STORAGE_PATH);
-
-        final EventStore eventStore = new EventStore(FileSystemStorageFactory.createEventStore());
-        final CommandStore commandStore = new CommandStore(FileSystemStorageFactory.createCommandStore());
+    public void prepareEngine() {
+        final EventStore eventStore = new EventStore(provideEventStoreStorage());
+        final CommandStore commandStore = new CommandStore(provideCommandStoreStorage());
 
         final OrderRootRepository orderRootRepository = getOrderRootRepository();
 
@@ -57,12 +60,11 @@ public class SpineSampleServer {
         engine.register(orderRootRepository);
     }
 
-    public static OrderRootRepository getOrderRootRepository() {
+    private OrderRootRepository getOrderRootRepository() {
 
         final RepositoryEventStore eventStore = new RepositoryEventStore(
-                FileSystemStorageFactory.createEventStore(),
-                FileSystemStorageFactory.createSnapshotStorage());
-//                DataStoreStorageProvider.provideSnapshotStorage(TypeName.of(Order.getDescriptor())));
+                provideEventStoreStorage(),
+                provideSnapshotStorage());
 
         final OrderRootRepository repository = new OrderRootRepository();
         repository.configure(eventStore);
@@ -73,7 +75,7 @@ public class SpineSampleServer {
     private int port = 50051;
     private ServerImpl server;
 
-    private void start() throws Exception {
+    protected void start() throws Exception {
 
         prepareEngine();
         registerEventSubscribers();
@@ -83,32 +85,24 @@ public class SpineSampleServer {
                 .build()
                 .start();
 
-        log().info("Server started, listening on " + port);
+        getLog().info("Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 // Use stderr here since the logger may have been reset by its JVM shutdown hook.
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                SpineSampleServer.this.stop();
+                BaseSampleServer.this.stop();
                 System.err.println("*** server shut down");
             }
         });
 
     }
 
-    private void stop() {
+    protected void stop() {
         if (server != null) {
             server.shutdown();
         }
-    }
-
-    /**
-     * Main launches the server from the command line.
-     */
-    public static void main(String[] args) throws Exception {
-        final SpineSampleServer server = new SpineSampleServer();
-        server.start();
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
@@ -128,15 +122,11 @@ public class SpineSampleServer {
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
+    protected abstract Logger getLog();
 
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SpineSampleServer.class);
-    }
+    protected abstract StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage();
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
+    protected abstract StorageWithTimeline<CommandRequest> provideCommandStoreStorage();
 
+    protected abstract SnapshotStorage provideSnapshotStorage();
 }

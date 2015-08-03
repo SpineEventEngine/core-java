@@ -1,4 +1,4 @@
-/*
+package org.spine3.sample;/*
  * Copyright 2015, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -17,7 +17,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -28,7 +27,8 @@ import org.spine3.Engine;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
-import org.spine3.sample.server.SpineSampleServer;
+import org.spine3.sample.server.BaseSampleServer;
+import org.spine3.sample.server.DataStoreSampleServer;
 import org.spine3.util.UserIds;
 
 import java.util.List;
@@ -40,16 +40,18 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class SpineSample {
+public class ServerSample {
 
     private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     public static void main(String[] args) {
+
+        // as we don't start server, we have to manually setup DataStore helper
         helper.setUp();
 
-        SpineSampleServer.registerEventSubscribers();
-
-        SpineSampleServer.prepareEngine();
+        BaseSampleServer server = new DataStoreSampleServer();
+        server.registerEventSubscribers();
+        server.prepareEngine();
 
         List<CommandRequest> requests = prepareRequests();
         for (CommandRequest request : requests) {
@@ -79,14 +81,14 @@ public class SpineSample {
         return result;
     }
 
-    private SpineSample() {
+    private ServerSample() {
     }
 
     private enum LogSingleton {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SpineSample.class);
+        private final Logger value = LoggerFactory.getLogger(ServerSample.class);
     }
 
     private static Logger log() {

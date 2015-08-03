@@ -17,13 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.store.filesystem;
+package org.spine3.sample.server;
 
 import com.google.protobuf.Message;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotStorage;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Test file system based implementation of the {@link Message} repository.

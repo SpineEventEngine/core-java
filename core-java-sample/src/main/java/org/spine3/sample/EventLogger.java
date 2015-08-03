@@ -17,23 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.server;
+package org.spine3.sample;
 
 import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
+import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPayed;
-import org.spine3.protobuf.Messages;
 
 /**
  * Sample Spine event subscriber implementation.
  *
  * @author Mikhail Melnik
  */
-public class SampleSubscriber {
+public class EventLogger {
 
     public static final String NEW_LINE = System.lineSeparator();
 
@@ -64,7 +64,7 @@ public class SampleSubscriber {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SampleSubscriber.class);
+        private final Logger value = LoggerFactory.getLogger(EventLogger.class);
     }
 
     private static Logger log() {

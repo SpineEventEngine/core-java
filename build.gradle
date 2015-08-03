@@ -66,7 +66,7 @@ subprojects {
 
     sourceSets {
         main {
-            proto.srcDirs = ["build/extracted-protos/main", "src/main/proto"]
+            proto.srcDirs = ["src/main/proto"]
             java.srcDirs = ["$projectDir/src/generated/main/java", "src/main/java"]
         }
     }

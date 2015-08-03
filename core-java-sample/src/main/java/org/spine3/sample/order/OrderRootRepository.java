@@ -17,8 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.sample.order;
 
-@ParametersAreNonnullByDefault
-package org.spine3.sample.store.filesystem;
+import com.google.common.eventbus.Subscribe;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventRecord;
+import org.spine3.server.AbstractRepository;
+import org.spine3.sample.order.command.CreateOrder;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+/**
+ * @author Mikhail Melnik
+ */
+public class OrderRootRepository extends AbstractRepository<OrderId, OrderRoot, CreateOrder> {
+
+    @Subscribe
+    @Override
+    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
+        return super.handleCreate(command, context);
+    }
+
+}

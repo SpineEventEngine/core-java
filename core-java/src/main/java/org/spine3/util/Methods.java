@@ -80,6 +80,12 @@ public class Methods {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
         final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+
+        //if we try reading a method without parameters we would get ArrayOutOfBounds without this
+        if (!isAnnotated || parameterTypes.length < 2) {
+            return false;
+        }
+
         final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[0]);
         final boolean acceptsMessageAsFistParam = parameterTypes.length == 1 && firstParamIsMessage;
         final boolean secondParamIsEventContext = EventContext.class.equals(parameterTypes[1]);
@@ -91,7 +97,7 @@ public class Methods {
         final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
-        return isAnnotated && (acceptsMessageAsFistParam || acceptsMessageAndEventContext) && returnsNothing;
+        return (acceptsMessageAsFistParam || acceptsMessageAndEventContext) && returnsNothing;
     }
 
     /**

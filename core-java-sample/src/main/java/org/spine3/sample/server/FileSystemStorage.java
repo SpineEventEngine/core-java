@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.store.filesystem;
+package org.spine3.sample.server;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -28,7 +28,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.server.StorageWithTimelineAndVersion;
-import org.spine3.util.*;
+import org.spine3.util.Commands;
+import org.spine3.util.Events;
 
 import java.util.List;
 import java.util.Map;

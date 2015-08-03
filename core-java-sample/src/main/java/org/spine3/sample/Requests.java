@@ -19,7 +19,12 @@
  */
 package org.spine3.sample;
 
-import org.spine3.base.*;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.UserId;
+import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.sample.order.BillingInfo;
 import org.spine3.sample.order.Book;
 import org.spine3.sample.order.BookId;
@@ -27,8 +32,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayOrder;
-import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
 /**

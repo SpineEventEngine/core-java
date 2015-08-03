@@ -222,6 +222,7 @@ public class Messages {
     @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
     public static Object getFieldValue(Message command, int fieldIndex) {
 
+        //todo:2015-07-31:mikhail.mikhaylov: implement
         //TODO:2015-07-27:alexander.yevsyukov: We need to cache this kind of calculations as they are slow.
         // For this we need a value object FieldAccessor parameterized with a message class and a field index.
 
