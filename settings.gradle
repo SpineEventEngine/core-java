@@ -1,13 +1,13 @@
 rootProject.name = 'spine'
 include ':core-java'
-include ':grpc'
 include ':java-gae'
+include ':grpc'
 include ':core-java-sample'
 include ':grpc-sample'
 
 project(':core-java').projectDir = "$rootDir/core-java" as File
-project(':grpc').projectDir = "$rootDir/grpc" as File
 project(':java-gae').projectDir = "$rootDir/java-gae" as File
+project(':grpc').projectDir = "$rootDir/grpc" as File
 project(':core-java-sample').projectDir = "$rootDir/core-java-sample" as File
 project(':grpc-sample').projectDir = "$rootDir/grpc-sample" as File
 
