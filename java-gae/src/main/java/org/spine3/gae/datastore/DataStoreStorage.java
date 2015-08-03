@@ -64,29 +64,29 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
 
     @Override
     public List<M> read(Message parentId, int sinceVersion) {
-        return dataStoreHelper.readMessagesFromDataStore(type.toString(),
-                prepareAggregateRootIdAndVersionFilter(parentId, sinceVersion));
+        return dataStoreHelper.readByFilter(type.toString(),
+                prepareFilter(parentId, sinceVersion));
     }
 
     @Override
     public List<M> read(Timestamp from) {
-        return dataStoreHelper.readMessagesFromDataStore(type.toString(), prepareTimestampFilter(from));
+        return dataStoreHelper.readByFilter(type.toString(), prepareFilter(from));
     }
 
     @Override
     public List<M> read(Message parentId, Timestamp from) {
-        return dataStoreHelper.readMessagesFromDataStore(type.toString(),
-                prepareAggregateRootIdAndTimestampFilter(parentId, from));
+        return dataStoreHelper.readByFilter(type.toString(),
+                prepareFilter(parentId, from));
     }
 
     @Override
     public List<M> read(Message parentId) {
-        return dataStoreHelper.readMessagesFromDataStore(type.toString(), new Query.FilterPredicate(
+        return dataStoreHelper.readByFilter(type.toString(), new Query.FilterPredicate(
                 PARENT_ID_KEY, EQUAL, JsonFormat.printToString(parentId)));
     }
 
     @Override
     public List<M> readAll() {
-        return dataStoreHelper.readMessagesFromDataStore(type.toString());
+        return dataStoreHelper.read(type.toString());
     }
 }
