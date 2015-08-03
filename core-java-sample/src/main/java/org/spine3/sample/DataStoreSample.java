@@ -60,12 +60,12 @@ public class DataStoreSample extends BaseSample {
 
     @Override
     protected StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
-        return DataStoreStorageFactory.createEventStore();
+        return DataStoreStorageFactory.createEventStoreStorage();
     }
 
     @Override
     protected StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
-        return DataStoreStorageFactory.createCommandStore();
+        return DataStoreStorageFactory.createCommandStoreStorage();
     }
 
     /**

@@ -42,7 +42,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStore() {
+    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
         return FileSystemStorage.newInstance(EventRecord.class);
     }
 
@@ -60,7 +60,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimeline<CommandRequest> createCommandStore() {
+    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
         return FileSystemStorage.newInstance(CommandRequest.class);
     }
 }

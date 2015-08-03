@@ -54,12 +54,12 @@ public class FileSystemSampleServer extends BaseSampleServer {
 
     @Override
     protected StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
-        return FileSystemStorageFactory.createEventStore();
+        return FileSystemStorageFactory.createEventStoreStorage();
     }
 
     @Override
     protected StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
-        return FileSystemStorageFactory.createCommandStore();
+        return FileSystemStorageFactory.createCommandStoreStorage();
     }
 
     @Override
