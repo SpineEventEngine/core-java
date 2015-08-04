@@ -104,7 +104,6 @@ subprojects {
                     if (it.name.endsWith(java_suffix)) {
                         String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
                         protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
-                        //todo:2015-07-10:mikhail.mikhaylov: Check it on unix-based system.
                         protoUrl = protoUrl.replaceAll('\\\\', ".")
                         String className = prefixName + "." + protoUrl
                         props.setProperty(protoUrl, className)
@@ -119,3 +118,13 @@ subprojects {
 
     compileJava.dependsOn saveProtoNames
 }
+
+task removeProtoNames << {
+    File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+    if (propsFile.exists()) {
+        propsFile.delete();
+    }
+}
+
+clean.dependsOn removeProtoNames
+
