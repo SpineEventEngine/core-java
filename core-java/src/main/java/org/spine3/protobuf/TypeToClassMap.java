@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
-import org.spine3.protobuf.UnknownTypeInAnyException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +39,8 @@ import java.util.Properties;
  */
 @SuppressWarnings("UtilityClass")
 public class TypeToClassMap {
+
+    private static final char CLASS_PACKAGE_DELIMITER = '.';
 
     /**
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
@@ -80,9 +81,55 @@ public class TypeToClassMap {
      */
     public static ClassName get(TypeName protoType) {
         if (!namesMap.containsKey(protoType)) {
-            throw new UnknownTypeInAnyException(protoType.value());
+            final ClassName className = searchAsSubclass(protoType);
+            namesMap.put(protoType, className);
         }
         final ClassName result = namesMap.get(protoType);
         return result;
+    }
+
+    private static ClassName searchAsSubclass(TypeName lookupTypeName) {
+        String lookupType = lookupTypeName.value();
+        ClassName className = null;
+        final StringBuilder suffix = new StringBuilder(lookupType.length());
+
+        int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
+        while (className == null && lastDotPosition != -1) {
+            suffix.insert(0, lookupType.substring(lastDotPosition));
+
+            lookupType = lookupType.substring(0, lastDotPosition);
+            final TypeName typeName = TypeName.of(lookupType);
+
+            className = namesMap.get(typeName);
+
+            lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
+        }
+
+        if (className == null) {
+            throw new UnknownTypeInAnyException(lookupTypeName.value());
+        }
+
+        className = ClassName.of(className.value() + suffix);
+        try {
+            Class.forName(className.value());
+        } catch (ClassNotFoundException e) {
+            //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
+            throw new UnknownTypeInAnyException(lookupTypeName.value());
+        }
+        return className;
+    }
+
+    private static ClassName searchClassNameRecursively(String lookupType, StringBuilder currentSuffix) {
+        final int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
+        if (lastDotPosition == -1) {
+            return null;
+        }
+        String rootType = lookupType.substring(0, lastDotPosition);
+        currentSuffix.insert(0, lookupType.substring(lastDotPosition));
+        final TypeName rootTypeName = TypeName.of(rootType);
+        if (namesMap.get(rootTypeName) == null) {
+            return searchClassNameRecursively(lookupType, currentSuffix);
+        }
+        return ClassName.of(rootType + currentSuffix);
     }
 }
