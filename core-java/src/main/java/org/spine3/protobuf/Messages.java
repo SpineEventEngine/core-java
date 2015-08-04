@@ -198,6 +198,7 @@ public class Messages {
         return out.toString();
     }
 
+
     /**
      * Reads field from the passed message by its index.
      *
@@ -208,19 +209,25 @@ public class Messages {
     @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
     public static Object getFieldValue(Message command, int fieldIndex) {
 
-        //todo:2015-07-31:mikhail.mikhaylov: implement
-        //TODO:2015-07-27:alexander.yevsyukov: We need to cache this kind of calculations as they are slow.
-        // For this we need a value object FieldAccessor parameterized with a message class and a field index.
+        final Class<? extends Message> commandClass = command.getClass();
+        Method method = MethodAccessors.get(commandClass, fieldIndex);
 
-        final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
-        final String fieldName = fieldDescriptor.getName();
-        final String methodName = toAccessorMethodName(fieldName);
+        if (method == null) {
+            final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
+            final String fieldName = fieldDescriptor.getName();
+            final String methodName = toAccessorMethodName(fieldName);
 
+            try {
+                method = commandClass.getMethod(methodName);
+                MethodAccessors.put(commandClass, fieldIndex, method);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+        }
         try {
-            Method method = command.getClass().getMethod(methodName);
             Object result = method.invoke(command);
             return result;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
             throw propagate(e);
         }
     }
@@ -235,5 +242,4 @@ public class Messages {
             throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
-
 }
