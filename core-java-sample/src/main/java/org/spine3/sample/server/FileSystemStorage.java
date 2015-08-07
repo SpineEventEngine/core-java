@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.ListFilters.filter;
 
 /**
  * Test file system based implementation of the {@link Message} repository.
@@ -58,11 +59,6 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
 
     private FileSystemStorage(Class<M> clazz) {
         this.clazz = clazz;
-    }
-
-
-    private static <T> ImmutableList<T> filter(Iterable<T> list, Predicate<T> predicate) {
-        return FluentIterable.from(list).filter(predicate).toList();
     }
 
     @Override

@@ -19,14 +19,24 @@
  */
 package org.spine3.util;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.testutil.CommandRequestFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
+
+import static org.spine3.util.ListFilters.*;
 
 /**
  * @author Mikhail Melnik
@@ -52,11 +62,27 @@ public class CommandsShould {
         Commands.generateId(null);
     }
 
-
     @Test
     public void convert_field_name_to_method_name() {
         assertEquals("getUserId", Messages.toAccessorMethodName("user_id"));
         assertEquals("getId", Messages.toAccessorMethodName("id"));
         assertEquals("getAggregateRootId", Messages.toAccessorMethodName("aggregate_root_id"));
+    }
+
+    @Test
+    public void return_correct_were_after_predicate() {
+        final Timestamp timestamp = Timestamps.now();
+        final CommandRequest commandRequest = CommandRequestFactory.create(timestamp);
+        final CommandRequest commandRequestAfter = CommandRequestFactory.create();
+
+        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
+                .add(commandRequest)
+                .add(commandRequestAfter)
+                .build();
+
+        final List<CommandRequest> filteredList = filter(commandList, Commands.wereAfter(timestamp));
+
+        assertEquals(1, filteredList.size());
+        assertEquals(commandRequestAfter, filteredList.get(0));
     }
 }
