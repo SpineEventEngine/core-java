@@ -62,6 +62,7 @@ subprojects {
 
     idea.module {
         generatedSourceDirs += file("$projectDir/src/generated/main/java")
+        testSourceDirs += file("$projectDir/src/generated/test/java")
     }
 
     sourceSets {
