@@ -30,12 +30,14 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 
+import static org.junit.Assert.assertFalse;
 import static org.spine3.util.ListFilters.*;
 
 /**
@@ -84,5 +86,28 @@ public class CommandsShould {
 
         assertEquals(1, filteredList.size());
         assertEquals(commandRequestAfter, filteredList.get(0));
+    }
+
+    @Test
+    public void sort() {
+        final CommandRequest commandRequest1 = CommandRequestFactory.create();
+        final CommandRequest commandRequest2 = CommandRequestFactory.create();
+        final CommandRequest commandRequest3 = CommandRequestFactory.create();
+
+        final Collection<CommandRequest> sortedList = new ArrayList<>();
+        sortedList.add(commandRequest1);
+        sortedList.add(commandRequest2);
+        sortedList.add(commandRequest3);
+
+        final List<CommandRequest> unSortedList = new ArrayList<>();
+        unSortedList.add(commandRequest3);
+        unSortedList.add(commandRequest1);
+        unSortedList.add(commandRequest2);
+
+        assertFalse(sortedList.equals(unSortedList));
+
+        Commands.sort(unSortedList);
+
+        assertEquals(sortedList, unSortedList);
     }
 }

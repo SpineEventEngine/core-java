@@ -40,6 +40,7 @@ public class UtilitiesShould {
     @Test
     public void have_private_constructors() {
         checkPrivateConstructor(ListFilters.class);
+        checkPrivateConstructor(UserIds.class);
     }
 
     private static void checkPrivateConstructor(Class<?> clazz) {
