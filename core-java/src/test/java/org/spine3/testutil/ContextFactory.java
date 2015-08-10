@@ -20,9 +20,8 @@
 
 package org.spine3.testutil;
 
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.UserId;
+import org.spine3.base.*;
+import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
@@ -30,14 +29,14 @@ import com.google.protobuf.Timestamp;
 
 
 /**
- * Creates CommandContext for tests.
+ * Creates Context for tests.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class CommandContextFactory {
+public class ContextFactory {
 
-    private CommandContextFactory() {
+    private ContextFactory() {
     }
 
     public static CommandContext getCommandContext(UserId userId) {
@@ -52,6 +51,23 @@ public class CommandContextFactory {
         return CommandContext.newBuilder()
                 .setCommandId(commandId)
                 .setZoneOffset(ZoneOffset.getDefaultInstance())
+                .build();
+    }
+
+    public static EventContext getEventContext(int version) {
+        final Timestamp now = Timestamps.now();
+        final CommandId commandId = CommandId.newBuilder()
+                .setActor(UserId.getDefaultInstance())
+                .setTimestamp(now)
+                .build();
+        final EventId eventId = EventId.newBuilder()
+                .setCommandId(commandId)
+                .setTimestamp(now)
+                .build();
+        return EventContext.newBuilder()
+                .setEventId(eventId)
+                .setAggregateId(Messages.toAny(AggregateIdFactory.createCommon()))
+                .setVersion(version)
                 .build();
     }
 }

@@ -44,7 +44,7 @@ public class UtilitiesShould {
         checkPrivateConstructor(Commands.class);
     }
 
-    private static void checkPrivateConstructor(Class<?> clazz) {
+    protected static void checkPrivateConstructor(Class<?> clazz) {
         Constructor<?> constructor = null;
         try {
             constructor = clazz.getDeclaredConstructor();

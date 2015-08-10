@@ -22,38 +22,33 @@ package org.spine3.testutil;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandRequest;
-
+import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.test.order.command.CreateOrder;
+import org.spine3.test.order.event.OrderCreated;
 
 /**
- * The utility class which is used for creating CommandRequests for tests.
+ * The utility class which is used for creating EventRecords for tests.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class CommandRequestFactory {
+public class EventRecordFactory {
 
-    private CommandRequestFactory() {
-    }
-
-    public static CommandRequest create(Timestamp when) {
-        final UserId userId = UserId.getDefaultInstance();
-        final Any command = Messages.toAny(CreateOrder.newBuilder().setOrderId(
+    public static EventRecord create(Timestamp when) {
+        //todo:2015-08-10:mikhail.mikhaylov: check it.
+        final Any event = Messages.toAny(OrderCreated.newBuilder().setOrderId(
                 AggregateIdFactory.createCommon()).build());
 
-        final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
-                .setContext(ContextFactory.getCommandContext(userId, when))
-                .setCommand(command)
+        final EventRecord eventRecord = EventRecord.newBuilder()
+                .setContext(ContextFactory.getEventContext(0))
+                .setEvent(event)
                 .build();
-        return dummyCommandRequest;
+        return eventRecord;
     }
 
-    public static CommandRequest create() {
+    public static EventRecord create() {
         return create(Timestamps.now());
     }
-
 }

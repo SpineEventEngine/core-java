@@ -31,7 +31,10 @@ import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.JsonFormat;
 import org.spine3.testutil.CommandRequestFactory;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DataStoreHelperShould {
@@ -68,5 +71,24 @@ public class DataStoreHelperShould {
     @Test(expected = MissingEntityException.class)
     public void fail_read_on_wrong_key() {
         dataStoreHelper.read(commandTypeName, SOME_RANDOM_STRING);
+    }
+
+    @Test
+    public void read_all() {
+        final CommandRequest commandRequest1 = CommandRequestFactory.create();
+        final CommandRequest commandRequest2 = CommandRequestFactory.create();
+
+        dataStoreHelper.put(Converters.convert(commandRequest1));
+        dataStoreHelper.put(Converters.convert(commandRequest2));
+
+        final List<Message> readCommands = dataStoreHelper.read(commandTypeName.toString());
+
+        assertTrue(readCommands.contains(commandRequest1));
+        assertTrue(readCommands.contains(commandRequest2));
+    }
+
+    @Test
+    public void read_by_filter() {
+        ////todo:2015-08-10:mikhail.mikhaylov: implement
     }
 }

@@ -20,40 +20,27 @@
 
 package org.spine3.testutil;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandRequest;
-
-import org.spine3.base.UserId;
-import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
-import org.spine3.test.order.command.CreateOrder;
+import org.spine3.test.order.OrderId;
 
 /**
- * The utility class which is used for creating CommandRequests for tests.
+ * The utility class which is used for creating Aggregate Root Ids for tests.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class CommandRequestFactory {
+public class AggregateIdFactory {
 
-    private CommandRequestFactory() {
+    public static final String DUMMY_ORDER_ID = "dummy_order_id";
+
+    private AggregateIdFactory() {
     }
 
-    public static CommandRequest create(Timestamp when) {
-        final UserId userId = UserId.getDefaultInstance();
-        final Any command = Messages.toAny(CreateOrder.newBuilder().setOrderId(
-                AggregateIdFactory.createCommon()).build());
-
-        final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
-                .setContext(ContextFactory.getCommandContext(userId, when))
-                .setCommand(command)
-                .build();
-        return dummyCommandRequest;
+    /**
+     * Generates the same OrderId for each requests.
+     *
+     * @return OrderId instance
+     */
+    public static OrderId createCommon() {
+        return OrderId.newBuilder().setValue(DUMMY_ORDER_ID).build();
     }
-
-    public static CommandRequest create() {
-        return create(Timestamps.now());
-    }
-
 }
