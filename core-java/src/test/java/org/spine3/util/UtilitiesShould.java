@@ -41,6 +41,7 @@ public class UtilitiesShould {
     public void have_private_constructors() {
         checkPrivateConstructor(ListFilters.class);
         checkPrivateConstructor(UserIds.class);
+        checkPrivateConstructor(Commands.class);
     }
 
     private static void checkPrivateConstructor(Class<?> clazz) {

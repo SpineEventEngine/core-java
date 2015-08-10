@@ -110,4 +110,23 @@ public class CommandsShould {
 
         assertEquals(sortedList, unSortedList);
     }
+
+    @Test
+    public void return_correct_were_within_period_predicate() {
+        final CommandRequest commandRequest1 = CommandRequestFactory.create();
+        final Timestamp from = Timestamps.now();
+        final CommandRequest commandRequest2 = CommandRequestFactory.create();
+        final Timestamp to = Timestamps.now();
+
+        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
+                .add(commandRequest1)
+                .add(commandRequest2)
+                .build();
+
+        final List<CommandRequest> filteredList = filter(commandList, Commands.wereWithinPeriod(
+                from, to));
+
+        assertEquals(1, filteredList.size());
+        assertEquals(commandRequest2, filteredList.get(0));
+    }
 }
