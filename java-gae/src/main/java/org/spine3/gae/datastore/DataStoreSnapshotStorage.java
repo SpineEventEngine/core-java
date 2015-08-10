@@ -65,6 +65,6 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
 
     @Override
     public Snapshot read(Message parentId) {
-        return dataStoreHelper.read(entityKind.toString(), JsonFormat.printToString(parentId));
+        return dataStoreHelper.read(entityKind, JsonFormat.printToString(parentId));
     }
 }

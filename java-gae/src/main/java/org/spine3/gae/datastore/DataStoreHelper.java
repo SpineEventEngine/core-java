@@ -22,6 +22,7 @@ package org.spine3.gae.datastore;
 
 import com.google.appengine.api.datastore.*;
 import com.google.protobuf.*;
+import org.spine3.TypeName;
 import org.spine3.protobuf.JsonFormat;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
@@ -58,8 +59,8 @@ class DataStoreHelper {
         return dataStore.put(entity);
     }
 
-    protected <T extends Message> T read(String kind, String id) {
-        final Key key = KeyFactory.createKey(kind, id);
+    protected <T extends Message> T read(TypeName kind, String id) {
+        final Key key = KeyFactory.createKey(kind.toString(), id);
         final Entity entity = readEntity(key);
         return readMessageFromEntity(entity);
     }
