@@ -1,0 +1,7 @@
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+
+    compile project(':core-java')
+    compile project(':java-gae')
+
+}

@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.gae.datastore;
+package org.spine3.sample.server;
 
-import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.server.SnapshotStorage;
@@ -28,41 +27,40 @@ import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
- * This class provides factory method for DataStore-based storages.
+ * This class provides factory methods for creating storages based on file system.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class DataStoreStorageFactory {
+public class FileSystemStorageFactory {
 
-    private DataStoreStorageFactory() {
+    private FileSystemStorageFactory() {
     }
 
     /**
-     * Creates a new storage instance.
+     * Creates new instance of the event store.
      *
-     * @return Storage with Timeline and Version
+     * @return new storage instance
      */
     public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return DataStoreStorage.newInstance(EventRecord.class);
+        return FileSystemStorage.newInstance(EventRecord.class);
     }
 
     /**
-     * Creates new snapshot storage instance.
+     * Creates new snapshot storage.
      *
-     * @param stateTypeName aggregate root state type name to be used as snapshot kind
-     * @return Snapshot Storage
+     * @return new storage instance
      */
-    public static SnapshotStorage createSnapshotStorage(TypeName stateTypeName) {
-        return new DataStoreSnapshotStorage(stateTypeName);
+    public static SnapshotStorage createSnapshotStorage() {
+        return new FileSystemSnapshotStorage();
     }
 
     /**
-     * Creates new storage for command requests.
+     * Creates new command store.
      *
-     * @return Storage with Timeline
+     * @return new storage instance
      */
     public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return DataStoreStorage.newInstance(CommandRequest.class);
+        return FileSystemStorage.newInstance(CommandRequest.class);
     }
 }

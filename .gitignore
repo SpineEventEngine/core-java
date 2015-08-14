@@ -25,3 +25,4 @@ infr.gdata/WEB-INF/appengine-generated/local_db.bin
 */WEB-INF/pages/index.jsp
 webapp/src/main/webapp/static/build
 */src/generated
+core-java/src/res/protos.properties

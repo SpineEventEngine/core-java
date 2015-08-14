@@ -132,20 +132,6 @@ public class Messages {
         return result;
     }
 
-
-    //TODO:2015-07-27:alexander.yevsyukov: Why are we having this AND toJson()?
-    /**
-     * Prints the passed message into to Json representation.
-     *
-     * @param message the message object
-     * @return string representation of the passed message
-     */
-    public static String toString(Message message) {
-        checkNotNull(message);
-        final String result = JsonFormat.printToString(message);
-        return result;
-    }
-
     /**
      * Prints the passed message into well formatted text.
      *
@@ -173,8 +159,8 @@ public class Messages {
     /**
      * Obtains Protobuf field name for the passed message.
      *
-     * @param msg a message to inspect
-     * @param index   a zero-based index of the field
+     * @param msg   a message to inspect
+     * @param index a zero-based index of the field
      * @return name of the field
      */
     @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
@@ -212,6 +198,7 @@ public class Messages {
         return out.toString();
     }
 
+
     /**
      * Reads field from the passed message by its index.
      *
@@ -222,18 +209,25 @@ public class Messages {
     @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
     public static Object getFieldValue(Message command, int fieldIndex) {
 
-        //TODO:2015-07-27:alexander.yevsyukov: We need to cache this kind of calculations as they are slow.
-        // For this we need a value object FieldAccessor parameterized with a message class and a field index.
+        final Class<? extends Message> commandClass = command.getClass();
+        Method method = MethodAccessors.get(commandClass, fieldIndex);
 
-        final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
-        final String fieldName = fieldDescriptor.getName();
-        final String methodName = toAccessorMethodName(fieldName);
+        if (method == null) {
+            final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
+            final String fieldName = fieldDescriptor.getName();
+            final String methodName = toAccessorMethodName(fieldName);
 
+            try {
+                method = commandClass.getMethod(methodName);
+                MethodAccessors.put(commandClass, fieldIndex, method);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+        }
         try {
-            Method method = command.getClass().getMethod(methodName);
             Object result = method.invoke(command);
             return result;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
             throw propagate(e);
         }
     }
@@ -248,5 +242,4 @@ public class Messages {
             throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
-
 }

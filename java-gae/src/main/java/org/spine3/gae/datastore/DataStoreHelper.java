@@ -58,13 +58,13 @@ class DataStoreHelper {
         return dataStore.put(entity);
     }
 
-    protected <T extends Message> T readMessageFromDataStore(String kind, String id) {
+    protected <T extends Message> T read(String kind, String id) {
         final Key key = KeyFactory.createKey(kind, id);
-        final Entity entity = readEntityFromDataStore(key);
+        final Entity entity = readEntity(key);
         return readMessageFromEntity(entity);
     }
 
-    protected static Query.Filter prepareTimestampFilter(TimestampOrBuilder from) {
+    protected static Query.Filter prepareFilter(TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, Timestamps.convertToDate(from)));
@@ -72,11 +72,11 @@ class DataStoreHelper {
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected <T extends Message> List<T> readMessagesFromDataStore(String kind) {
-        return readMessagesFromDataStore(kind, null);
+    protected <T extends Message> List<T> read(String kind) {
+        return readByFilter(kind, null);
     }
 
-    protected <T extends Message> List<T> readMessagesFromDataStore(String kind, @Nullable Query.Filter filter) {
+    protected <T extends Message> List<T> readByFilter(String kind, @Nullable Query.Filter filter) {
         final Query query = new Query(kind);
         if (filter != null) {
             query.setFilter(filter);
@@ -84,12 +84,12 @@ class DataStoreHelper {
 
         final PreparedQuery preparedQuery = dataStore.prepare(query);
 
-        final List<T> messages = readAllMessagesFromDataStoreByQuery(preparedQuery);
+        final List<T> messages = readAll(preparedQuery);
 
         return messages;
     }
 
-    protected static Query.Filter prepareAggregateRootIdAndTimestampFilter(Message aggregateRootId, TimestampOrBuilder from) {
+    protected static Query.Filter prepareFilter(Message aggregateRootId, TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         final Date timestampDate = Timestamps.convertToDate(from);
@@ -99,7 +99,7 @@ class DataStoreHelper {
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected static Query.Filter prepareAggregateRootIdAndVersionFilter(Message aggregateRootId, int sinceVersion) {
+    protected static Query.Filter prepareFilter(Message aggregateRootId, int sinceVersion) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, JsonFormat.printToString(aggregateRootId)));
@@ -108,7 +108,7 @@ class DataStoreHelper {
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    private Entity readEntityFromDataStore(Key key) {
+    private Entity readEntity(Key key) {
         Entity entity;
 
         try {
@@ -131,7 +131,7 @@ class DataStoreHelper {
         return Messages.fromAny(messageAny);
     }
 
-    private static <T extends Message> List<T> readAllMessagesFromDataStoreByQuery(PreparedQuery query) {
+    private static <T extends Message> List<T> readAll(PreparedQuery query) {
         final List<T> messages = new ArrayList<>();
 
         for (Entity entity : query.asIterable()) {
