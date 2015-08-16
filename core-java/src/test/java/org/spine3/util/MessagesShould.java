@@ -25,8 +25,7 @@ import org.junit.Test;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Melnik
@@ -48,16 +47,16 @@ public class MessagesShould {
 
     @Test
     public void convert_id_to_Any() {
-        Any result = Messages.toAny(id);
+        Any test = Messages.toAny(id);
 
-        assertThat(result, equalTo(any));
+        assertEquals(any, test);
     }
 
     @Test
     public void convert_from_Any_to_id() {
-        UserId result = Messages.fromAny(any);
+        UserId test = Messages.fromAny(any);
 
-        assertThat(result, equalTo(id));
+        assertEquals(id, test);
     }
 
     @Test(expected = NullPointerException.class)
