@@ -20,10 +20,11 @@
 
 package org.spine3;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequestOrBuilder;
-import org.spine3.util.MessageValue;
+import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 
 /**
  * Abstract base for command classes.
@@ -37,7 +38,10 @@ abstract class AbstractCommand extends MessageValue {
         super(value);
     }
 
-    public static Message getCommandValue(CommandRequestOrBuilder commandRequest) {
-        return Messages.fromAny(commandRequest.getCommand());
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
+        return result;
     }
 }

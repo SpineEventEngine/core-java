@@ -47,7 +47,7 @@ public final class Command extends AbstractCommand {
     }
 
     /**
-     * @return the class of the command
+     * @return the class of the command message
      */
     public CommandClass getCommandClass() {
         Message value = value();
