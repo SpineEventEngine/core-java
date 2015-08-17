@@ -24,13 +24,17 @@ project.ext {
 }
 
 task removeSavedProtoNames << {
-    File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+    File propsFile = file(getProtoPropertiesFilePath())
     if (propsFile.exists()) {
         propsFile.delete()
     }
 }
 
 build.dependsOn removeSavedProtoNames
+
+String getProtoPropertiesFilePath() {
+    return "${project(":core-java").projectDir}/src/res/protos.properties";
+}
 
 subprojects {
     apply plugin: 'java'
@@ -87,7 +91,7 @@ subprojects {
                     propsFileFolder.mkdirs();
                 }
                 Properties props = new Properties()
-                File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+                File propsFile = file(getProtoPropertiesFilePath())
                 if (propsFile.exists()) {
                     props.load(propsFile.newDataInputStream())
                     // as Properties API does not support saving default table values, we have to rewrite them all
@@ -121,7 +125,7 @@ subprojects {
 }
 
 task removeProtoNames << {
-    File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+    File propsFile = file(getProtoPropertiesFilePath())
     if (propsFile.exists()) {
         propsFile.delete();
     }
