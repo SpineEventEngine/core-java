@@ -19,19 +19,18 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
-import org.spine3.CommandHandler;
-import org.spine3.Repository;
+import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.AccessLevelException;
-import org.spine3.lang.ClassHoldsSubscribersOfSameTypeException;
+import org.spine3.MessageSubscriber;
+import org.spine3.error.AccessLevelException;
+import org.spine3.error.DuplicateSubscriberException;
+import org.spine3.server.AggregateRoot;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -54,6 +53,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("UtilityClass")
 public class Methods {
 
+    private Methods() {
+        // Prevent instantiation of the utility class.
+    }
+
     /**
      * Returns a full method name without parameters.
      *
@@ -72,6 +75,7 @@ public class Methods {
      * @param method to check
      * @return {@code true} if the method is an event applier, {@code false} otherwise
      */
+    @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
     public static boolean isEventApplier(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
@@ -134,12 +138,22 @@ public class Methods {
      * Returns set of the event types handled by a given aggregate root.
      *
      * @param aggregateRootClass {@link Class} of the aggregate root
-     * @return event classes handled by the aggregate root
+     * @return immutable set of event classes handled by the aggregate root
      */
     @CheckReturnValue
-    public static Set<Class<? extends Message>> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
-        Set<Class<? extends Message>> result = getHandledMessageClasses(aggregateRootClass, isEventApplierPredicate);
-        return result;
+    public static Set<EventClass> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(aggregateRootClass, isEventApplierPredicate);
+        Iterable<EventClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, EventClass>() {
+            @Nullable
+            @Override
+            public EventClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return EventClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
     }
 
     /**
@@ -149,9 +163,19 @@ public class Methods {
      * @return command types handled by aggregate root
      */
     @CheckReturnValue
-    public static Set<Class<? extends Message>> getCommandClasses(Class<? extends AggregateRoot> clazz) {
-        Set<Class<? extends Message>> result = getHandledMessageClasses(clazz, isCommandHandlerPredicate);
-        return result;
+    public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, isCommandHandlerPredicate);
+        Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
+            @Nullable
+            @Override
+            public CommandClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return CommandClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
     }
 
     /**
@@ -177,14 +201,15 @@ public class Methods {
 
     /**
      * Returns the first param type of the passed method object.
+     * <p/>
+     * It is expected that the first parameter of a handler or an applier method is always of {@code Message} class.
      *
-     * @param method the method object to take first parameter type from
+     * @param handler the method object to take first parameter type from
      * @return the {@link Class} of the first method parameter
      */
-    public static Class<? extends Message> getFirstParamType(Method method) {
-
+    public static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
-                Class<? extends Message> result = (Class<? extends Message>) method.getParameterTypes()[0];
+                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -226,23 +251,33 @@ public class Methods {
     /**
      * Returns a map of the {@link MessageSubscriber} objects to the corresponding command class.
      *
-     * @param commandHandler the object that keeps command subscriber methods
-     * @return the map of command subscribers
+     * @param commandHandler the object that keeps command handler methods
+     * @return immutable map of command handler methods
      */
-    public static Map<Class<? extends Message>, MessageSubscriber> scanForCommandSubscribers(Object commandHandler) {
-        Map<Class<? extends Message>, MessageSubscriber> result = scanForSubscribers(commandHandler, isCommandHandlerPredicate);
-        return result;
+    public static Map<CommandClass, MessageSubscriber> scanForCommandHandlers(Object commandHandler) {
+        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(commandHandler, isCommandHandlerPredicate);
+
+        final ImmutableMap.Builder<CommandClass, MessageSubscriber> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+            builder.put(CommandClass.of(entry.getKey()), entry.getValue());
+        }
+        return builder.build();
     }
 
     /**
      * Returns a map of the {@link MessageSubscriber} objects to the corresponding event class.
      *
-     * @param eventApplier the object that keeps event subscriber methods
-     * @return the map of event subscribers
+     * @param eventApplier the object that keeps event applier methods
+     * @return immutable map of event appliers
      */
-    public static Map<Class<? extends Message>, MessageSubscriber> scanForEventSubscribers(Object eventApplier) {
-        Map<Class<? extends Message>, MessageSubscriber> result = scanForSubscribers(eventApplier, isEventApplierPredicate);
-        return result;
+    public static Map<EventClass, MessageSubscriber> scanForEventAppliers(Object eventApplier) {
+        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventApplier, isEventApplierPredicate);
+
+        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+            builder.put(EventClass.of(entry.getKey()), entry.getValue());
+        }
+        return builder.build();
     }
 
     /**
@@ -268,10 +303,10 @@ public class Methods {
 
                 MessageSubscriber subscriber = new MessageSubscriber(subscribersHolder, method);
 
-                //noinspection unchecked as we always expect first param as Message
-                Class<? extends Message> messageClass = (Class<? extends Message>) method.getParameterTypes()[0];
+                Class<? extends Message> messageClass = getFirstParamType(method);
                 if (result.containsKey(messageClass)) {
-                    throw new ClassHoldsSubscribersOfSameTypeException(subscribersHolder, messageClass);
+                    final MessageSubscriber firstMethod = result.get(messageClass);
+                    throw new DuplicateSubscriberException(messageClass, firstMethod, subscriber);
                 }
                 result.put(messageClass, subscriber);
             }
@@ -298,9 +333,6 @@ public class Methods {
         if (isCommandHandler && !methodIsPublic) {
             throw AccessLevelException.forCommandHandler(handler, handlerMethod);
         }
-    }
-
-    private Methods() {
     }
 
 }

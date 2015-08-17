@@ -1,9 +1,13 @@
 buildscript {
     repositories {
         mavenCentral()
+        mavenLocal()
+//        maven {
+//            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        }
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.5.0'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.0'
     }
 }
 
@@ -20,13 +24,17 @@ project.ext {
 }
 
 task removeSavedProtoNames << {
-    File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
+    File propsFile = file(getProtoPropertiesFilePath())
     if (propsFile.exists()) {
         propsFile.delete()
     }
 }
 
 build.dependsOn removeSavedProtoNames
+
+String getProtoPropertiesFilePath() {
+    return "${project(":core-java").projectDir}/src/res/protos.properties";
+}
 
 subprojects {
     apply plugin: 'java'
@@ -43,8 +51,6 @@ subprojects {
     dependencies {
         compile group: 'com.google.guava', name: 'guava', version: '18.0'
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
-        compile group: 'javax.time', name: 'jsr-310-ri', version: '0.6.3'
-        compile group: 'javax.time', name: 'jsr-310-TZDB', version: '0.6.3'
         compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
         compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.10'
 
@@ -54,17 +60,16 @@ subprojects {
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
-        //todo:2015-07-09:mikhail.mikhaylov: Remove this workaround as soon as https://github.com/google/protobuf-gradle-plugin/issues/15 is resolved.
-        protobuf files("${rootProject.projectDir}/lib/protos.zip")
     }
 
     idea.module {
         generatedSourceDirs += file("$projectDir/src/generated/main/java")
+        testSourceDirs += file("$projectDir/src/generated/test/java")
     }
 
     sourceSets {
         main {
-            proto.srcDirs = ["build/extracted-protos/main", "src/main/proto"]
+            proto.srcDirs = ["src/main/proto"]
             java.srcDirs = ["$projectDir/src/generated/main/java", "src/main/java"]
         }
     }
@@ -78,42 +83,53 @@ subprojects {
 
     task saveProtoNames << {
         String java_suffix = ".java"
-        String rootDirPath = "$projectDir/src/generated/main/java"
-        File rootDir = file(rootDirPath)
-        if (rootDir.exists()) {
-            File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
-            if (!propsFileFolder.exists()) {
-                propsFileFolder.mkdirs();
-            }
-            Properties props = new Properties()
-            File propsFile = file("${project(":core-java").projectDir}/src/res/protos.properties")
-            if (propsFile.exists()) {
-                props.load(propsFile.newDataInputStream())
-                // as Properties API does not support saving default table values, we have to rewrite them all
-                Set<String> names = props.stringPropertyNames();
-                for (Iterator<String> i = names.iterator(); i.hasNext();) {
-                    String propname = i.next();
-                    props.setProperty(propname, props.getProperty(propname));
+        ["$projectDir/src/generated/main/java", "$projectDir/src/generated/test/java"].each { String rootDirPath ->
+            File rootDir = file(rootDirPath)
+            if (rootDir.exists()) {
+                File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
+                if (!propsFileFolder.exists()) {
+                    propsFileFolder.mkdirs();
                 }
-            }
-            rootDir.listFiles().each {
-                String prefixName = it.name
-                fileTree(it).each {
-                    if (it.name.endsWith(java_suffix)) {
-                        String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
-                        protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
-                        //todo:2015-07-10:mikhail.mikhaylov: Check it on unix-based system.
-                        protoUrl = protoUrl.replaceAll('\\\\', ".")
-                        String className = prefixName + "." + protoUrl
-                        props.setProperty(protoUrl, className)
+                Properties props = new Properties()
+                File propsFile = file(getProtoPropertiesFilePath())
+                if (propsFile.exists()) {
+                    props.load(propsFile.newDataInputStream())
+                    // as Properties API does not support saving default table values, we have to rewrite them all
+                    // Probably we should use Apache property API
+                    Set<String> names = props.stringPropertyNames();
+                    for (Iterator<String> i = names.iterator(); i.hasNext();) {
+                        String propname = i.next();
+                        props.setProperty(propname, props.getProperty(propname));
                     }
                 }
+                rootDir.listFiles().each {
+                    String prefixName = it.name
+                    fileTree(it).each {
+                        if (it.name.endsWith(java_suffix)) {
+                            String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
+                            protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
+                            protoUrl = protoUrl.replaceAll('\\\\', ".")
+                            String className = prefixName + "." + protoUrl
+                            props.setProperty(protoUrl, className)
+                        }
+                    }
+                }
+                BufferedWriter writer = propsFile.newWriter();
+                props.store(writer, null)
+                writer.close()
             }
-            BufferedWriter writer = propsFile.newWriter();
-            props.store(writer, null)
-            writer.close()
         }
     }
 
     compileJava.dependsOn saveProtoNames
 }
+
+task removeProtoNames << {
+    File propsFile = file(getProtoPropertiesFilePath())
+    if (propsFile.exists()) {
+        propsFile.delete();
+    }
+}
+
+clean.dependsOn removeProtoNames
+

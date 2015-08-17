@@ -20,13 +20,12 @@
 package org.spine3;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
+import org.spine3.server.RepositoryEventStore;
 import org.spine3.util.Events;
-import org.spine3.util.Messages;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class Engine {
      *
      * @return Engine instance
      * @throws IllegalStateException if the engine was not configured
-     *                               with {@link CommandStore} and {@link EventStore} instances
+     *                               with {@link CommandStore} and {@link RepositoryEventStore} instances
      * @see #configure(CommandStore, EventStore)
      */
     public static Engine getInstance() {
@@ -69,7 +68,6 @@ public final class Engine {
      * Configures the engine with the passed implementations of command and event stores.
      *
      * @param commandStore storage for the commands
-     * @param eventStore   storage for the events
      */
     public static void configure(CommandStore commandStore, EventStore eventStore) {
         final Engine engine = instance();
@@ -97,7 +95,7 @@ public final class Engine {
         store(request);
 
         CommandResult result = dispatch(request);
-        post(result.getEventRecordList());
+        storeAndPost(result.getEventRecordList());
 
         return result;
     }
@@ -109,7 +107,7 @@ public final class Engine {
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         try {
-            Message command = Messages.fromAny(request.getCommand());
+            Command command = Command.from(request);
             CommandContext context = request.getContext();
 
             List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
@@ -126,16 +124,11 @@ public final class Engine {
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
-    private void post(List<EventRecord> records) {
+    private void storeAndPost(Iterable<EventRecord> records) {
         for (EventRecord record : records) {
             eventStore.store(record);
             EventBus.instance().post(record);
         }
-    }
-
-    public EventStore getEventStore() {
-        return eventStore;
     }
 
     private static Engine instance() {

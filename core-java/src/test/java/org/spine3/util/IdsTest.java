@@ -20,6 +20,7 @@
 package org.spine3.util;
 
 import org.junit.Test;
+import org.spine3.protobuf.Messages;
 
 /**
  * @author Mikhail Melnik

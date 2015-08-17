@@ -22,25 +22,26 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.base.UserId;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Melnik
  */
 public class UserIdsTest {
 
-    private static String testIdString = "12345";
+    private static final String testIdString = "12345";
 
     @Test
     public void create() {
         UserId userId = UserIds.create(testIdString);
 
-        assertThat(userId, equalTo(UserId.newBuilder().setValue(testIdString).build()));
+        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+        assertEquals(expected, userId);
     }
 
     @Test(expected = NullPointerException.class)
     public void createFailsOnNull() {
+        //noinspection ConstantConditions
         UserIds.create(null);
     }
 

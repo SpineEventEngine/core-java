@@ -23,9 +23,13 @@ import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.AggregateRoot;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Base interface for aggregate root repositories.
@@ -89,4 +93,34 @@ public interface Repository<I extends Message,
     @Subscribe
     List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
 
+
+    /**
+     * Helper class for wiring repositories into command processing.
+     */
+    @SuppressWarnings("UtilityClass")
+    class Converter {
+
+        private static final String DISPATCH_METHOD_NAME = "dispatch";
+
+        /**
+         * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
+         * @param repository the repository instance to inspect
+         * @return reference to the method
+         */
+        public static MessageSubscriber toMessageSubscriber(Repository repository) {
+            checkNotNull(repository);
+
+            try {
+                Method method = repository.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
+                final MessageSubscriber result = new MessageSubscriber(repository, method);
+                return result;
+            } catch (NoSuchMethodException e) {
+                //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
+                throw new Error(e);
+            }
+        }
+
+        private Converter() {
+        }
+    }
 }

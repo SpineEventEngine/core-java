@@ -22,32 +22,21 @@ package org.spine3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.Media;
+import org.spine3.server.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
 /**
  * Stores and loads the events.
  *
- * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
 public class EventStore {
 
-    private final Media media;
+    private final StorageWithTimelineAndVersion<EventRecord> storage;
 
-    public EventStore(Media media) {
-        this.media = media;
-    }
-
-    /**
-     * Loads all events for the given aggregate root id.
-     *
-     * @param aggregateRootId the id of the aggregate root
-     * @return list of commands for the aggregate root
-     */
-    public List<? extends Message> load(Message aggregateRootId) {
-        List<? extends Message> result = media.readEvents(aggregateRootId);
-        return result;
+    public EventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
+        this.storage = storage;
     }
 
     /**
@@ -56,21 +45,19 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        media.writeEvent(record);
+        storage.store(record);
     }
 
-    public List<EventRecord> getEvents() {
-        List<EventRecord> result = media.readAllEvents();
+    /**
+     * Loads all events from given timestamp.
+     *
+     * @param from timestamp to load events from
+     * @param <ID> aggregate id type
+     * @return list of events
+     */
+    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
+        List<EventRecord> result = storage.read(from);
         return result;
     }
-
-    ;
-
-    public List<EventRecord> getEvents(Timestamp timestamp) {
-        List<EventRecord> result = media.readEvents(timestamp);
-        return result;
-    }
-
-    ;
 
 }

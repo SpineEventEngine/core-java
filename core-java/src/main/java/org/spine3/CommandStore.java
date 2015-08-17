@@ -21,22 +21,32 @@
 package org.spine3;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.engine.Media;
+import org.spine3.server.StorageWithTimeline;
 
 import java.util.List;
 
 /**
- * Stores and loads the commands.
+ * Stores and loads commands.
  *
- * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
 public class CommandStore {
 
-    private Media media;
+    private final StorageWithTimeline<CommandRequest> storage;
 
-    public CommandStore(Media media) {
-        this.media = media;
+    public CommandStore(StorageWithTimeline<CommandRequest> storage) {
+        this.storage = storage;
+    }
+
+    /**
+     * Stores the command request.
+     *
+     * @param request command request to store
+     */
+    public void store(CommandRequest request) {
+        storage.store(request);
     }
 
     /**
@@ -45,17 +55,18 @@ public class CommandStore {
      * @param aggregateRootId the id of the aggregate root
      * @return list of commands for the aggregate root
      */
-    List<CommandRequest> load(Message aggregateRootId) {
-        return media.readCommands(aggregateRootId);
+    public List<CommandRequest> getCommands(Message aggregateRootId) {
+        return storage.read(aggregateRootId);
     }
 
     /**
-     * Stores the command request.
+     * Loads all commands for the given aggregate root id from given timestamp.
      *
-     * @param request command request to store
+     * @param aggregateRootId the id of the aggregate root
+     * @param from            the timestamp to load commands from
+     * @return list of commands for the aggregate root
      */
-    void store(CommandRequest request) {
-        media.writeCommand(request);
+    public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
+        return storage.read(aggregateRootId, from);
     }
-
 }

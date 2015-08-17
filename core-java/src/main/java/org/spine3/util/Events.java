@@ -26,6 +26,8 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
+import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -82,6 +84,17 @@ public class Events {
         };
     }
 
+    public static Predicate<EventRecord> getEventPredicate(final Timestamp from) {
+        return new Predicate<EventRecord>() {
+            @Override
+            public boolean apply(@Nullable EventRecord record) {
+                checkNotNull(record);
+                Timestamp timestamp = record.getContext().getEventId().getTimestamp();
+                return Timestamps.isAfter(timestamp, from);
+            }
+        };
+    }
+
     public static Predicate<EventRecord> getEventPredicate(final Timestamp from, final Timestamp to) {
         return new Predicate<EventRecord>() {
             @Override
@@ -109,4 +122,15 @@ public class Events {
         });
     }
 
+    /**
+     * Converts {@code EventId} into Json string.
+     *
+     * @param id the id to convert
+     * @return Json representation of the id
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
+    public static String idToString(EventId id) {
+        final String result = JsonFormat.printToString(id);
+        return result;
+    }
 }

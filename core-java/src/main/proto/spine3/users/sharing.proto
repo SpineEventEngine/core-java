@@ -1,0 +1,56 @@
+//
+// Copyright 2015, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine3.users;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "SharingProto";
+option java_package = "org.spine3.users";
+
+import "spine3/base/user_id.proto";
+import "spine3/users/group.proto";
+
+
+message Subject {
+    oneof kind {
+        spine3.base.UserId user = 1;
+        GroupId group = 2;
+    }
+}
+
+enum SharingLevel {
+    NONE = 0;
+    VIEW = 1;
+    COMMENT = 2;
+    MODIFY = 3;
+    MODERATE = 4;
+}
+
+message Permission {
+    Subject subject = 1;
+    SharingLevel level = 2;
+}
+
+message Sharing {
+    spine3.base.UserId owner = 1;
+    repeated Permission permissions = 2;
+}

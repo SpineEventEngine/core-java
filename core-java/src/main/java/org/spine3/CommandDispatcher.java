@@ -21,14 +21,11 @@ package org.spine3;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.AggregateRoot;
-import org.spine3.CommandHandler;
-import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.engine.MessageSubscriber;
-import org.spine3.lang.CommandHandlerAlreadyRegisteredException;
-import org.spine3.lang.UnsupportedCommandException;
+import org.spine3.error.CommandHandlerAlreadyRegisteredException;
+import org.spine3.error.UnsupportedCommandException;
+import org.spine3.server.AggregateRoot;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    private final Map<Class<? extends Message>, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
+    private final Map<CommandClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
 
     /**
      * Register the passed command handler in the dispatcher.
@@ -57,7 +54,7 @@ public class CommandDispatcher {
     public void register(CommandHandler handler) {
         checkNotNull(handler);
 
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = getSubscribers(handler);
+        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(handler);
         checkSubscribers(subscribers);
 
         putAll(subscribers);
@@ -71,7 +68,7 @@ public class CommandDispatcher {
     public void register(Repository repository) {
         checkNotNull(repository);
 
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = getSubscribers(repository);
+        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(repository);
         checkSubscribers(subscribers);
 
         putAll(subscribers);
@@ -85,55 +82,52 @@ public class CommandDispatcher {
     public void register(AggregateRoot aggregateRoot) {
         checkNotNull(aggregateRoot);
 
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = getSubscribers(aggregateRoot);
+        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(aggregateRoot);
         checkSubscribers(subscribers);
 
         putAll(subscribers);
     }
 
-    private static Map<Class<? extends Message>, MessageSubscriber> getSubscribers(CommandHandler handler) {
-        //TODO:2015-06-15:mikhail.melnik: check that method is called "handle()"
-        //or maybe we do not need handler() in the API as we use usual class scanning
-        Map<Class<? extends Message>, MessageSubscriber> result = Methods.scanForCommandSubscribers(handler);
-        return result;
+    private static Map<CommandClass, MessageSubscriber> getSubscribers(CommandHandler handler) {
+        Map<CommandClass, MessageSubscriber> subscribers = Methods.scanForCommandHandlers(handler);
+        return subscribers;
     }
 
-    private static Map<Class<? extends Message>, MessageSubscriber> getSubscribers(Repository repository) {
+    private static Map<CommandClass, MessageSubscriber> getSubscribers(Repository repository) {
         /*
            The order inside this method is important!
 
            At first we add all subscribers from the aggregate root
            and after that register directly Repository's subscribers.
          */
-        Map<Class<? extends Message>, MessageSubscriber> result = getSubscribersFromRepositoryRoot(repository);
+        Map<CommandClass, MessageSubscriber> subscribers = getSubscribersFromRepositoryRoot(repository);
+        Map<CommandClass, MessageSubscriber> repoSubscribers = Methods.scanForCommandHandlers(repository);
+        subscribers.putAll(repoSubscribers);
 
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = Methods.scanForCommandSubscribers(repository);
-        result.putAll(subscribers);
-
-        return result;
+        return subscribers;
     }
 
-    private static Map<Class<? extends Message>, MessageSubscriber> getSubscribersFromRepositoryRoot(Repository repository) {
-        Map<Class<? extends Message>, MessageSubscriber> result = Maps.newHashMap();
+    private static Map<CommandClass, MessageSubscriber> getSubscribersFromRepositoryRoot(Repository repository) {
+        Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
 
         Class<? extends AggregateRoot> rootClass = Methods.getRepositoryAggregateRootClass(repository);
-        Set<Class<? extends Message>> commandClasses = Methods.getCommandClasses(rootClass);
+        Set<CommandClass> commandClasses = Methods.getCommandClasses(rootClass);
 
-        MessageSubscriber subscriber = MessageSubscriber.fromRepository(repository);
-        for (Class<? extends Message> commandClass : commandClasses) {
+        MessageSubscriber subscriber = Repository.Converter.toMessageSubscriber(repository);
+        for (CommandClass commandClass : commandClasses) {
             result.put(commandClass, subscriber);
         }
         return result;
     }
 
-    private static Map<Class<? extends Message>, MessageSubscriber> getSubscribers(AggregateRoot aggregateRoot) {
-        Map<Class<? extends Message>, MessageSubscriber> result = Methods.scanForCommandSubscribers(aggregateRoot);
+    private static Map<CommandClass, MessageSubscriber> getSubscribers(AggregateRoot aggregateRoot) {
+        Map<CommandClass, MessageSubscriber> result = Methods.scanForCommandHandlers(aggregateRoot);
         return result;
     }
 
-    private void checkSubscribers(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
-            Class<? extends Message> commandClass = entry.getKey();
+    private void checkSubscribers(Map<CommandClass, MessageSubscriber> subscribers) {
+        for (Map.Entry<CommandClass, MessageSubscriber> entry : subscribers.entrySet()) {
+            CommandClass commandClass = entry.getKey();
 
             if (subscriberRegistered(commandClass)) {
                 final MessageSubscriber alreadyAddedHandler = getSubscriber(commandClass);
@@ -150,19 +144,19 @@ public class CommandDispatcher {
      * @return a list of the event records as the result of handling the command
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    public List<EventRecord> dispatch(Message command, CommandContext context)
+    public List<EventRecord> dispatch(Command command, CommandContext context)
             throws InvocationTargetException {
 
         checkNotNull(command);
         checkNotNull(context);
 
-        Class<? extends Message> commandClass = command.getClass();
+        CommandClass commandClass = command.getCommandClass();
         if (!subscriberRegistered(commandClass)) {
-            throw new UnsupportedCommandException(command);
+            throw new UnsupportedCommandException(command.value());
         }
 
         MessageSubscriber subscriber = getSubscriber(commandClass);
-        List<EventRecord> result = subscriber.handle(command, context);
+        List<EventRecord> result = subscriber.handle(command.value(), context);
         return result;
     }
 
@@ -171,18 +165,18 @@ public class CommandDispatcher {
      *
      * @param command the command to be processed
      * @param context the context of the command
-     * @return a list of the events that were produced as the result of handling the command
+     * @return a list of the event messages that were produced as the result of handling the command
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    public List<? extends Message> dispatchToAggregate(Message command, CommandContext context)
+    public List<? extends Message> dispatchToAggregate(Command command, CommandContext context)
             throws InvocationTargetException {
 
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageSubscriber subscriber = getSubscriber(command.getClass());
+        MessageSubscriber subscriber = getSubscriber(command.getCommandClass());
 
-        Object handlingResult = subscriber.handle(command, context);
+        Object handlingResult = subscriber.handle(command.value(), context);
 
         //noinspection IfMayBeConditional
         if (List.class.isAssignableFrom(handlingResult.getClass())) {
@@ -195,16 +189,16 @@ public class CommandDispatcher {
         }
     }
 
-    private void putAll(Map<Class<? extends Message>, MessageSubscriber> subscribers) {
+    private void putAll(Map<CommandClass, MessageSubscriber> subscribers) {
         subscribersByType.putAll(subscribers);
     }
 
-    private MessageSubscriber getSubscriber(Class<? extends Message> commandClass) {
-        return subscribersByType.get(commandClass);
+    private MessageSubscriber getSubscriber(CommandClass cls) {
+        return subscribersByType.get(cls);
     }
 
-    private boolean subscriberRegistered(Class<? extends Message> commandClass) {
-        return subscribersByType.containsKey(commandClass);
+    private boolean subscriberRegistered(CommandClass cls) {
+        return subscribersByType.containsKey(cls);
     }
 
 }
