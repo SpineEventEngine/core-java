@@ -109,7 +109,7 @@ subprojects {
                             String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
                             protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
                             protoUrl = protoUrl.replaceAll('\\\\', ".")
-                            String className = prefixName + "." + protoUrl
+                            String className = prefixName.replaceAll('\\\\', ".") + "." + protoUrl
                             props.setProperty(protoUrl, className)
                         }
                     }

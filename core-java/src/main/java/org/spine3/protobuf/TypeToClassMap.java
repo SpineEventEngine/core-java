@@ -63,14 +63,8 @@ public class TypeToClassMap {
         }
 
         for (String key : properties.stringPropertyNames()) {
-
-            //TODO:2015-08-16:alexander.yevsyukov: Remove this conversion after the generation of protos.propertis is fixed.
-            String typeStr = key.replace('/', '.');
-            final String classStr = properties.getProperty(key).replace('/', '.');
-            //END
-
-            final TypeName typeName = TypeName.of(typeStr);
-            final ClassName className = ClassName.of(classStr);
+            final TypeName typeName = TypeName.of(key);
+            final ClassName className = ClassName.of(properties.getProperty(key));
             namesMap.put(typeName, className);
         }
     }
