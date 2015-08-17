@@ -2,6 +2,4 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     compile project(':core-java')
-    compile project(':java-gae')
-
 }

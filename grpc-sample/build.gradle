@@ -3,4 +3,5 @@ dependencies {
 
     compile project(':grpc')
     compile project(':core-java-sample')
+    compile project(':java-gae-sample')
 }
