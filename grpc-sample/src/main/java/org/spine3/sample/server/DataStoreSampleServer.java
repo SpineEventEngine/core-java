@@ -35,22 +35,14 @@ import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
  * File system Server implementation.
+ * No main method provided because of requirement to initialize
+ * helper for each working with data store thread.
  *
  * @author Mikhail Mikhaylov
  */
 public class DataStoreSampleServer extends BaseSampleServer {
 
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-
-    /**
-     * Main launches the server from the command line.
-     */
-    public static void main(String[] args) throws Exception {
-        final BaseSampleServer server = new DataStoreSampleServer();
-        server.registerEventSubscribers();
-        server.prepareEngine();
-        server.start();
-    }
 
     @Override
     protected void start() throws Exception {

@@ -43,7 +43,6 @@ public class FileSystemSampleServer extends BaseSampleServer {
         FileSystemHelper.configure(STORAGE_PATH);
         final BaseSampleServer server = new FileSystemSampleServer();
         server.registerEventSubscribers();
-        server.prepareEngine();
         server.start();
     }
 
