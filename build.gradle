@@ -82,7 +82,8 @@ subprojects {
     }
 
     task saveProtoNames << {
-        String java_suffix = ".java"
+        String javaSuffix = ".java"
+        String orBuilderSuffix = "OrBuilder" + javaSuffix
         ["$projectDir/src/generated/main/java", "$projectDir/src/generated/test/java"].each { String rootDirPath ->
             File rootDir = file(rootDirPath)
             if (rootDir.exists()) {
@@ -110,9 +111,9 @@ subprojects {
                 rootDir.listFiles().each {
                     String prefixName = it.name
                     fileTree(it).each {
-                        if (it.name.endsWith(java_suffix)) {
+                        if (it.name.endsWith(javaSuffix) && !it.name.endsWith(orBuilderSuffix)) {
                             String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
-                            protoUrl = protoUrl.substring(0, protoUrl.length() - java_suffix.length())
+                            protoUrl = protoUrl.substring(0, protoUrl.length() - javaSuffix.length())
                             protoUrl = protoUrl.replaceAll('\\\\', ".")
                             String className = prefixName.replaceAll('\\\\', ".") + "." + protoUrl
                             props.setProperty(protoUrl, className)
