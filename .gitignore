@@ -1,6 +1,6 @@
 *.iml
-.idea/dictionaries
 .idea/libraries
 .idea/*.xml
 */src/generated
 core-java/src/res/protos.properties
+gradle.properties

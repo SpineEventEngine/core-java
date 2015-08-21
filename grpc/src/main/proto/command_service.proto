@@ -19,14 +19,14 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "CommandServiceProto";
 option java_package = "org.spine3.base";
 
-import "spine3/base/command.proto";
+import "spine/base/command.proto";
 
 service CommandService {
     rpc Handle (CommandRequest) returns (CommandResult);

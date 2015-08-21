@@ -19,40 +19,38 @@
 //
 syntax = "proto3";
 
-package spine3.base;
+package spine.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ClientProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "SharingProto";
+option java_package = "org.spine3.users";
 
-// Version of the code executed on the client.
-message CodeVersion {
-    int32 major = 1;
-    int32 minor = 2;
-    int32 patch_level = 3;
-    int32 build_number = 4;
+import "spine/base/user_id.proto";
+import "spine/users/group.proto";
+
+
+message Subject {
+    oneof kind {
+        spine.base.UserId user = 1;
+        GroupId group = 2;
+    }
 }
 
-// Meta-information about the client computer device and client code.
-message Client {
+enum SharingLevel {
+    NONE = 0;
+    VIEW = 1;
+    COMMENT = 2;
+    MODIFY = 3;
+    MODERATE = 4;
+}
 
-    enum Type {
-        BROWSER = 0;
-        BROWSER_MOBILE = 1;
-        IOS_IPHONE = 2;
-        IOS_IPAD = 3;
-        ANDROID_PHONE = 4;
-        ANDROID_TABLET = 5;
-        SERVER = 6;
-    }
+message Permission {
+    Subject subject = 1;
+    SharingLevel level = 2;
+}
 
-    message OsInfo {
-        string name = 1;
-        CodeVersion version = 2;
-    }
-
-    Type type = 1;
-    CodeVersion version = 2;
-    OsInfo os_info = 3;
+message Sharing {
+    spine.base.UserId owner = 1;
+    repeated Permission permissions = 2;
 }

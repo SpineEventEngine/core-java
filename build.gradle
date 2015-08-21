@@ -24,7 +24,7 @@ project.ext {
 }
 
 task removeSavedProtoNames << {
-    File propsFile = file(getProtoPropertiesFilePath())
+    File propsFile = file(protoPropertiesFilePath())
     if (propsFile.exists()) {
         propsFile.delete()
     }
@@ -32,16 +32,28 @@ task removeSavedProtoNames << {
 
 build.dependsOn removeSavedProtoNames
 
-String getProtoPropertiesFilePath() {
+String protoPropertiesFilePath() {
     return "${project(":core-java").projectDir}/src/res/protos.properties";
+}
+
+String replaceFileSeparatorWithDot(String filePath) {
+    return filePath.replace((char)File.separatorChar, (char)'.');
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: "idea"
     apply plugin: 'com.google.protobuf'
+
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
+
+    // Set Java home to point to JDK7 in gradle.properties file.
+    //
+    // For Mac OS X, it looks like this:
+    //
+    // # suppress inspection "UnusedProperty"
+    // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
 
     repositories {
         mavenLocal()
@@ -86,44 +98,53 @@ subprojects {
         String orBuilderSuffix = "OrBuilder" + javaSuffix
         ["$projectDir/src/generated/main/java", "$projectDir/src/generated/test/java"].each { String rootDirPath ->
             File rootDir = file(rootDirPath)
-            if (rootDir.exists()) {
-                File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
-                if (!propsFileFolder.exists()) {
-                    propsFileFolder.mkdirs();
-                }
-                Properties props = new Properties() {
-                    @Override
-                    public synchronized Enumeration<Object> keys() {
-                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-                    }
-                };
-                File propsFile = file(getProtoPropertiesFilePath())
-                if (propsFile.exists()) {
-                    props.load(propsFile.newDataInputStream())
-                    // as Properties API does not support saving default table values, we have to rewrite them all
-                    // Probably we should use Apache property API
-                    Set<String> names = props.stringPropertyNames();
-                    for (Iterator<String> i = names.iterator(); i.hasNext();) {
-                        String propname = i.next();
-                        props.setProperty(propname, props.getProperty(propname));
-                    }
-                }
-                rootDir.listFiles().each {
-                    String prefixName = it.name
-                    fileTree(it).each {
-                        if (it.name.endsWith(javaSuffix) && !it.name.endsWith(orBuilderSuffix)) {
-                            String protoUrl = it.path.substring((rootDirPath + prefixName).length() + 2)
-                            protoUrl = protoUrl.substring(0, protoUrl.length() - javaSuffix.length())
-                            protoUrl = protoUrl.replaceAll('\\\\', ".")
-                            String className = prefixName.replaceAll('\\\\', ".") + "." + protoUrl
-                            props.setProperty(protoUrl, className)
-                        }
-                    }
-                }
-                BufferedWriter writer = propsFile.newWriter();
-                props.store(writer, null)
-                writer.close()
+            if (!rootDir.exists()) {
+                return
             }
+
+            File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
+            if (!propsFileFolder.exists()) {
+                propsFileFolder.mkdirs();
+            }
+            Properties props = new Properties() {
+                @Override
+                public synchronized Enumeration<Object> keys() {
+                    return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+                }
+            };
+            File propsFile = file(protoPropertiesFilePath())
+            if (propsFile.exists()) {
+                props.load(propsFile.newDataInputStream())
+                // as Properties API does not support saving default table values, we have to rewrite them all
+                // Probably we should use Apache property API
+                Set<String> names = props.stringPropertyNames();
+                for (Iterator<String> i = names.iterator(); i.hasNext();) {
+                    String propName = i.next();
+                    props.setProperty(propName, props.getProperty(propName));
+                }
+            }
+            rootDir.listFiles().each {
+                String prefixName = it.name
+                fileTree(it).each {
+                    if (it.name.endsWith(javaSuffix) && !it.name.endsWith(orBuilderSuffix)) {
+                        String protoPath = it.path.substring((rootDirPath + prefixName).length() + 2)
+                        protoPath = protoPath.substring(0, protoPath.length() - javaSuffix.length())
+                        protoPath = replaceFileSeparatorWithDot(protoPath)
+                        String className = replaceFileSeparatorWithDot(prefixName) + "." + protoPath
+
+                        // 'Spine3' is the abbreviation for Spine Event Engine.
+                        // We have 'org.spine3' package name for Java because other 'spine' in 'org' or 'io'
+                        // were occupied.
+                        // We have 'spine' package for Protobuf (without '3') because it reads better.
+                        String protoType = protoPath.replace("spine3", "spine")
+
+                        props.setProperty(protoType, className)
+                    }
+                }
+            }
+            BufferedWriter writer = propsFile.newWriter();
+            props.store(writer, null)
+            writer.close()
         }
     }
 
@@ -131,7 +152,7 @@ subprojects {
 }
 
 task removeProtoNames << {
-    File propsFile = file(getProtoPropertiesFilePath())
+    File propsFile = file(protoPropertiesFilePath())
     if (propsFile.exists()) {
         propsFile.delete();
     }

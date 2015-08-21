@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine3.sample.order;
+package spine.sample.order;
 
 option java_package="org.spine3.sample.order";
 option java_multiple_files = true;

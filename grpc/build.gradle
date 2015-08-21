@@ -20,7 +20,7 @@ sourceSets {
 protobuf {
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:0.8.0'
+            artifact = 'io.grpc:protoc-gen-grpc-java:0.7.1'
         }
     }
     generateProtoTasks {

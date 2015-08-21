@@ -19,29 +19,29 @@
 //
 syntax = "proto3";
 
-package spine3.test.order.command;
+package spine.test.order.event;
 
-import "spine3/test/order/order.proto";
+import "spine/test/order/order.proto";
 
-option java_package="org.spine3.test.order.command";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.test.order.event";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-message CreateOrder {
+message OrderCreated {
     OrderId order_id = 1;
 }
 
-message AddOrderLine {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message RemoveOrderLine {
+message OrderLineAdded {
     OrderId order_id = 1;
     OrderLine order_line = 2;
 }
 
-message PayOrder {
+message OrderLineRemoved {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message OrderPayed {
     OrderId order_id = 1;
     BillingInfo billing_info = 2;
 }

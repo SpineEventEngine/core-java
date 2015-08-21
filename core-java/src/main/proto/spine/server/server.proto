@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine3.server;
+package spine.server;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
@@ -28,7 +28,7 @@ option java_package = "org.spine3.server";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
-import "spine3/base/command.proto";
+import "spine/base/command.proto";
 
 // Built-in event type for storing aggregate root snapshots.
 message Snapshot {
@@ -60,5 +60,5 @@ message EventStoreRecord {
     int32 version = 5;
 
     // Event data and context.
-    spine3.base.EventRecord eventRecord = 6;
+    spine.base.EventRecord eventRecord = 6;
 }

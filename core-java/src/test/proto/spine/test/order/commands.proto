@@ -19,16 +19,29 @@
 //
 syntax = "proto3";
 
-package spine3.users;
+package spine.test.order.command;
 
-option java_generate_equals_and_hash = true;
+import "spine/test/order/order.proto";
+
+option java_package="org.spine3.test.order.command";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
-option java_outer_classname = "DomainProto";
-option java_package = "org.spine3.base";
 
-// Domain defines a boundary for organization's data.
-// Most common case of the domain name would be Internet domain name of a company.
-message Domain {
-  // The name of the domain.
-  string name = 1;
+message CreateOrder {
+    OrderId order_id = 1;
+}
+
+message AddOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message RemoveOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message PayOrder {
+    OrderId order_id = 1;
+    BillingInfo billing_info = 2;
 }
