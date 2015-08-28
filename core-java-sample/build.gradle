@@ -1,15 +1,19 @@
-repositories {
-    maven {
-        url 'http://maven.teamdev.com/repository/teamdev-maven'
-    }
-}
+//repositories {
+//    maven {
+//        credentials {
+//            username 'mikhail.mikhaylov'
+//            password 'zxD123awdq2e'
+//        }
+//        url 'http://maven.teamdev.com/repository/teamdev-maven'
+//    }
+//}
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    compile files('lib/core-java-0.1.jar') //works
+//    compile files('lib/core-java-0.1.jar') //works
 
 //    compile group: 'org.spine3', name: 'core-java', version: '0.1' //should work
 
-//    compile project(':core-java')
+    compile project(':core-java')
 }

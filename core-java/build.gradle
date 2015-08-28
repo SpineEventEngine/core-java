@@ -1,9 +1,34 @@
 description = ''
-
-sourceSets {
-    main {
-        resources {
-            srcDir 'src/res'
-        }
-    }
-}
+//
+//apply plugin: 'maven-publish'
+//
+//sourceSets {
+//    main {
+//        resources {
+//            srcDir 'src/res'
+//        }
+//    }
+//}
+//
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            groupId 'org.spine3'
+//            artifactId 'core-java'
+//            version '0.1'
+//
+//            from components.java
+//        }
+//    }
+//}
+//publishing {
+//    repositories {
+//        maven {
+//            credentials {
+//                username 'mikhail.mikhaylov'
+//                password 'zxD123awdq2e'
+//            }
+//            url "http://maven.teamdev.com/repository/teamdev-maven"
+//        }
+//    }
+//}
