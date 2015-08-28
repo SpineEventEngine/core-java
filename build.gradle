@@ -23,7 +23,18 @@ project.ext {
     PROTOBUF_VERSION = '3.0.0-alpha-3'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
 
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/teamdev-maven'
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
+}
+
+def repositoryUserName = null
+def repositoryUserPassword = null
+Properties properties = new Properties()
+File credentialsFile = file("credentials.properties")
+if (credentialsFile.exists()) {
+    properties.load(credentialsFile.newDataInputStream())
+
+    repositoryUserName = properties.getProperty("user.name")
+    repositoryUserPassword = properties.getProperty("user.password")
 }
 
 task removeSavedProtoNames << {
@@ -149,8 +160,10 @@ subprojects {
         repositories {
             maven {
                 credentials {
-                    username 'teamdev-maven-observer'
-                    password 'pVYgK3Uz'
+//                    username project.extensions.extraProperties.properties.get("repositoryUserName")
+//                    password project.extensions.extraProperties.properties.get("repositoryUserPassword")
+                    username "${repositoryUserName}"
+                    password "${repositoryUserPassword}"
                 }
                 url "${project.MAVEN_REPOSITORY_URL}"
             }
@@ -158,18 +171,22 @@ subprojects {
     }
 }
 
-task removeProtoNames << {
-    File propsFile = file(getProtoPropertiesFilePath())
-    if (propsFile.exists()) {
-        propsFile.delete();
+task readPublishingCredentials << {
+    if (repositoryUserName == null || repositoryUserPassword == null) {
+        throw new InvalidUserDataException("Please set up valid credentials.")
     }
+    println "Publishing build as ${repositoryUserName}"
 }
 
 task publish << {}
 
 subprojects.each { project ->
+    def credentialsTask = getTasksByName("readPublishingCredentials", false)
+    project.getTasksByName("publish", false).each { task ->
+        task.dependsOn credentialsTask
+    }
     publish.dependsOn project.getTasksByName("publish", false)
 }
 
-clean.dependsOn removeProtoNames
+clean.dependsOn removeSavedProtoNames
 
