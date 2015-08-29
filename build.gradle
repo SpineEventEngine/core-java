@@ -1,3 +1,5 @@
+def CREDENTIALS_LOCATION = "credentials.properties"
+
 buildscript {
     repositories {
         mavenCentral()
@@ -12,6 +14,7 @@ buildscript {
 }
 
 allprojects {
+    apply plugin: 'java'
     apply plugin: 'maven'
 
     group = 'org.spine3'
@@ -21,6 +24,19 @@ allprojects {
 project.ext {
     PROTOBUF_VERSION = '3.0.0-alpha-3'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
+
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
+}
+
+def repositoryUserName = null
+def repositoryUserPassword = null
+Properties properties = new Properties()
+File credentialsFile = file(CREDENTIALS_LOCATION)
+if (credentialsFile.exists()) {
+    properties.load(credentialsFile.newDataInputStream())
+
+    repositoryUserName = properties.getProperty("user.name")
+    repositoryUserPassword = properties.getProperty("user.password")
 }
 
 task removeSavedProtoNames << {
@@ -44,6 +60,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: "idea"
     apply plugin: 'com.google.protobuf'
+    apply plugin: 'maven-publish'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -149,14 +166,57 @@ subprojects {
     }
 
     compileJava.dependsOn saveProtoNames
-}
 
-task removeProtoNames << {
-    File propsFile = file(protoPropertiesFilePath())
-    if (propsFile.exists()) {
-        propsFile.delete();
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId "${group}"
+                artifactId "${project.name}"
+                version "${project.version}"
+
+                from components.java
+            }
+        }
+    }
+    publishing {
+        repositories {
+            maven {
+                credentials {
+//                    username project.extensions.extraProperties.properties.get("repositoryUserName")
+//                    password project.extensions.extraProperties.properties.get("repositoryUserPassword")
+                    username "${repositoryUserName}"
+                    password "${repositoryUserPassword}"
+                }
+                url "${project.MAVEN_REPOSITORY_URL}"
+            }
+        }
     }
 }
 
-clean.dependsOn removeProtoNames
+task removeProtoNames << {
+    File propsFile = file(getProtoPropertiesFilePath())
+    if (propsFile.exists()) {
+        propsFile.delete();
+    }
+    println "Publishing build as ${repositoryUserName}"
+}
+
+task readPublishingCredentials << {
+    if (repositoryUserName == null || repositoryUserPassword == null) {
+        throw new InvalidUserDataException("Please set up valid credentials.")
+    }
+    println "Publishing build as ${repositoryUserName}"
+}
+
+task publish << {}
+
+subprojects.each { project ->
+    def credentialsTask = getTasksByName("readPublishingCredentials", false)
+    project.getTasksByName("publish", false).each { task ->
+        task.dependsOn credentialsTask
+    }
+    publish.dependsOn project.getTasksByName("publish", false)
+}
+
+clean.dependsOn removeSavedProtoNames
 
