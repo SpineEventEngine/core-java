@@ -1,7 +1,7 @@
 description = ''
 dependencies {
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: "${project.PROTOBUF_VERSION}"
-    compile group: 'io.grpc', name: 'grpc-all', version: '0.7.1'
+    compile group: 'io.grpc', name: 'grpc-all', version: '0.8.0'
 
     compile project(':core-java')
 }
@@ -20,7 +20,7 @@ sourceSets {
 protobuf {
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:0.7.1'
+            artifact = 'io.grpc:protoc-gen-grpc-java:0.8.0'
         }
     }
     generateProtoTasks {

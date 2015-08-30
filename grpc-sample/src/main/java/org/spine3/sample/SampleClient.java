@@ -21,8 +21,8 @@
 package org.spine3.sample;
 
 import io.grpc.ChannelImpl;
-import io.grpc.transport.netty.NegotiationType;
-import io.grpc.transport.netty.NettyChannelBuilder;
+import io.grpc.netty.NegotiationType;
+import io.grpc.netty.NettyChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
@@ -64,7 +64,7 @@ public class SampleClient {
     }
 
     public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTerminated(5, TimeUnit.SECONDS);
+        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
     private void createOrder(UserId userId, OrderId orderId) {
