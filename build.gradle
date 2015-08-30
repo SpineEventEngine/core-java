@@ -26,6 +26,7 @@ project.ext {
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
 
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
+    GENERATED_RESOURCES = "/src/generated/main/resources/"
 }
 
 def repositoryUserName = null
@@ -49,7 +50,7 @@ task removeSavedProtoNames << {
 build.dependsOn removeSavedProtoNames
 
 String protoPropertiesFilePath() {
-    return "${project(":core-java").projectDir}/src/res/protos.properties";
+    return "${project(":core-java").projectDir}" + project.GENERATED_RESOURCES + "protos.properties";
 }
 
 String replaceFileSeparatorWithDot(String filePath) {
@@ -100,7 +101,10 @@ subprojects {
     sourceSets {
         main {
             proto.srcDirs = ["src/main/proto"]
+            //TODO:2015-08-30:alexander.yevsyukov: Why don't we have the $projectDir prefix in the 2nd item?
             java.srcDirs = ["$projectDir/src/generated/main/java", "src/main/java"]
+
+            resources.srcDirs = ["src/generated/main/resources"]
         }
     }
 
@@ -114,13 +118,16 @@ subprojects {
     task saveProtoNames << {
         String javaSuffix = ".java"
         String orBuilderSuffix = "OrBuilder" + javaSuffix
-        ["$projectDir/src/generated/main/java", "$projectDir/src/generated/test/java"].each { String rootDirPath ->
+
+        ["$projectDir/src/generated/main/java",
+         "$projectDir/src/generated/test/java"].each { String rootDirPath ->
             File rootDir = file(rootDirPath)
             if (!rootDir.exists()) {
                 return
             }
 
-            File propsFileFolder = file("${project(":core-java").projectDir}/src/res")
+            //TODO: avoid duplication of constant of the path to generated resources.
+            File propsFileFolder = file("${project(":core-java").projectDir}/src/generated/main/resources/")
             if (!propsFileFolder.exists()) {
                 propsFileFolder.mkdirs();
             }

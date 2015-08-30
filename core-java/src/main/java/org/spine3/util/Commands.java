@@ -25,7 +25,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandRequestOrBuilder;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
@@ -118,7 +118,6 @@ public class Commands {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types converted in this way.
     public static String idToString(CommandId id) {
-        final String result = JsonFormat.printToString(id);
-        return result;
+        return Messages.toJson(id);
     }
 }

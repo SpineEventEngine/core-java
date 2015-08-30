@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
@@ -152,8 +153,26 @@ public class Messages {
      */
     public static String toJson(Message message) {
         checkNotNull(message);
-        final String result = JsonFormat.printToString(message);
+        String result = null;
+        try {
+            result = JsonPrinter.instance().print(message);
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
+        }
+        checkState(result != null);
         return result;
+    }
+
+    private enum JsonPrinter {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final com.google.protobuf.util.JsonFormat.Printer value = com.google.protobuf.util.JsonFormat.printer();
+
+        private static com.google.protobuf.util.JsonFormat.Printer instance() {
+            return INSTANCE.value;
+        }
+
     }
 
     /**

@@ -19,6 +19,7 @@
  */
 package org.spine3.protobuf;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.TimeUtil;
@@ -37,9 +38,23 @@ import java.util.Date;
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
 
-    private static final long THOUSAND = 1_000;
+    private static final long NANOS_PER_SECOND = 1_000_000_000;
+    private static final long NANOS_PER_MILLISECOND = 1_000_000;
+    private static final long NANOS_PER_MICROSECOND = 1000;
+    private static final long MILLIS_PER_SECOND = 1000;
+    private static final long MICROS_PER_SECOND = 1000000;
+    private static final int SECONDS_PER_MINUTE = 60;
+
     private static final long MILLION = 1_000_000;
-    private static final long BILLION = 1_000_000_000;
+
+    /**
+     * @return timestamp of the moment a minute ago from now.
+     */
+    public static Timestamp minuteAgo() {
+        Duration minute = TimeUtil.createDurationFromMillis(MICROS_PER_SECOND * SECONDS_PER_MINUTE * -1);
+        Timestamp result = TimeUtil.add(TimeUtil.getCurrentTime(), minute);
+        return result;
+    }
 
     @SuppressWarnings("TypeMayBeWeakened")
     public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {
@@ -51,14 +66,16 @@ public class Timestamps {
         }
 
         int result = Long.compare(t1.getSeconds(), t2.getSeconds());
-        return result == 0
+        result = result == 0
                 ? Integer.compare(t1.getNanos(), t2.getNanos())
                 : result;
+        return result;
     }
 
-    public static boolean isBetween(Timestamp timestamp, Timestamp from, Timestamp to) {
-        return (compare(from, timestamp) < 0)
-                && (compare(timestamp, to) < 0);
+    public static boolean isBetween(Timestamp timestamp, Timestamp start, Timestamp finish) {
+        final boolean isAfterStart = compare(start, timestamp) < 0;
+        final boolean isBeforeFinish = compare(timestamp, finish) < 0;
+        return isAfterStart && isBeforeFinish;
     }
 
     public static boolean isAfter(Timestamp timestamp, Timestamp from) {
@@ -69,22 +86,11 @@ public class Timestamps {
         return new TimestampComparator();
     }
 
+    //TODO:2015-08-30:alexander.yevsyukov: Test this. It doesn't seem to be correct.
     public static Date convertToDate(TimestampOrBuilder timestamp) {
         final long millis = timestamp.getNanos() / MILLION * timestamp.getSeconds();
         final Date date = new Date(millis);
         return date;
-    }
-
-    public static Timestamp parseFromDate(Date date) {
-        final long time = date.getTime();
-        //noinspection NumericCastThatLosesPrecision
-        final int nanos = (int) ((time * MILLION) % BILLION);
-
-        Timestamp timestamp = Timestamp.newBuilder()
-                .setSeconds(time / THOUSAND)
-                .setNanos(nanos)
-                .build();
-        return timestamp;
     }
 
     private static class TimestampComparator implements Comparator<Timestamp>, Serializable {

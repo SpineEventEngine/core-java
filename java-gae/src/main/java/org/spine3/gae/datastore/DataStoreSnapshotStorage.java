@@ -24,13 +24,14 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.TypeName;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotStorage;
-import org.spine3.protobuf.JsonFormat;
-import org.spine3.protobuf.Messages;
-import org.spine3.TypeName;
 
-import static org.spine3.gae.datastore.DataStoreHelper.*;
+import static org.spine3.gae.datastore.DataStoreHelper.TYPE_KEY;
+import static org.spine3.gae.datastore.DataStoreHelper.VALUE_KEY;
+import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * DataStore-based {@link SnapshotStorage} implementation.
@@ -53,7 +54,7 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
 
     @Override
     public void store(Snapshot snapshot, Message parentId) {
-        final Entity dataStoreEntity = new Entity(entityKind.toString(), JsonFormat.printToString(parentId));
+        final Entity dataStoreEntity = new Entity(entityKind.toString(), toJson(parentId));
 
         final Any any = Messages.toAny(snapshot);
 
@@ -65,6 +66,6 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
 
     @Override
     public Snapshot read(Message parentId) {
-        return dataStoreHelper.read(entityKind, JsonFormat.printToString(parentId));
+        return dataStoreHelper.read(entityKind, toJson(parentId));
     }
 }

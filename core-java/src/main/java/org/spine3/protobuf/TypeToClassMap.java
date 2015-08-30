@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.base.Preconditions;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.ClassName;
@@ -56,6 +57,7 @@ public class TypeToClassMap {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
 
+        Preconditions.checkState(resourceStream != null, "Unable to load resource: " + PROPERTIES_FILE_NAME);
         try {
             properties.load(resourceStream);
         } catch (IOException e) {

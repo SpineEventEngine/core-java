@@ -26,7 +26,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
@@ -131,7 +131,6 @@ public class Events {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
-        final String result = JsonFormat.printToString(id);
-        return result;
+        return Messages.toJson(id);
     }
 }
