@@ -20,9 +20,9 @@
 
 package org.spine3.testutil;
 
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
 import com.google.protobuf.Timestamp;
@@ -40,7 +40,7 @@ public class ContextFactory {
     }
 
     public static CommandContext getCommandContext(UserId userId) {
-        return getCommandContext(userId, Timestamps.now());
+        return getCommandContext(userId, TimeUtil.getCurrentTime());
     }
 
     public static CommandContext getCommandContext(UserId userId, Timestamp when) {
@@ -55,7 +55,7 @@ public class ContextFactory {
     }
 
     public static EventContext getEventContext(int version) {
-        final Timestamp now = Timestamps.now();
+        final Timestamp now = TimeUtil.getCurrentTime();
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(UserId.getDefaultInstance())
                 .setTimestamp(now)

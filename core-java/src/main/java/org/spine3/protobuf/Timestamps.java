@@ -21,6 +21,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
+import com.google.protobuf.util.TimeUtil;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -31,6 +32,7 @@ import java.util.Date;
  * Utility class for working with timestamps.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
@@ -38,26 +40,6 @@ public class Timestamps {
     private static final long THOUSAND = 1_000;
     private static final long MILLION = 1_000_000;
     private static final long BILLION = 1_000_000_000;
-
-    /**
-     * Returns current system time as a {@link Timestamp} object.
-     * <p/>
-     * Timestamp is represented as the combination of milliseconds and nanoseconds.
-     * <p/>
-     * Current implementation is based on {@link System#nanoTime()}
-     * that is native, so it's behavior and result may vary on different platforms.
-     *
-     * @return current system time as {@link Timestamp}
-     */
-    public static Timestamp now() {
-        long nanoTime = System.nanoTime();
-
-        //noinspection NumericCastThatLosesPrecision
-        return Timestamp.newBuilder()
-                .setSeconds(nanoTime / BILLION)
-                .setNanos((int) (nanoTime % BILLION))
-                .build();
-    }
 
     @SuppressWarnings("TypeMayBeWeakened")
     public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {

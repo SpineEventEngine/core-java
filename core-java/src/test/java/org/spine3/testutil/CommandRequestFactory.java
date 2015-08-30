@@ -22,11 +22,11 @@ package org.spine3.testutil;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandRequest;
 
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.test.order.command.CreateOrder;
 
 /**
@@ -53,7 +53,7 @@ public class CommandRequestFactory {
     }
 
     public static CommandRequest create() {
-        return create(Timestamps.now());
+        return create(TimeUtil.getCurrentTime());
     }
 
 }

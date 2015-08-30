@@ -21,12 +21,12 @@ package org.spine3.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class CommandsShould {
 
     @Test
     public void return_correct_were_after_predicate() {
-        final Timestamp timestamp = Timestamps.now();
+        final Timestamp timestamp = TimeUtil.getCurrentTime();
         final CommandRequest commandRequest = CommandRequestFactory.create(timestamp);
         final CommandRequest commandRequestAfter = CommandRequestFactory.create();
 
@@ -114,9 +114,9 @@ public class CommandsShould {
     @Test
     public void return_correct_were_within_period_predicate() {
         final CommandRequest commandRequest1 = CommandRequestFactory.create();
-        final Timestamp from = Timestamps.now();
+        final Timestamp from = TimeUtil.getCurrentTime();
         final CommandRequest commandRequest2 = CommandRequestFactory.create();
-        final Timestamp to = Timestamps.now();
+        final Timestamp to = TimeUtil.getCurrentTime();
 
         final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
                 .add(commandRequest1)

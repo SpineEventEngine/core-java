@@ -22,10 +22,9 @@ package org.spine3.testutil;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.test.order.event.OrderCreated;
 
 /**
@@ -49,6 +48,6 @@ public class EventRecordFactory {
     }
 
     public static EventRecord create() {
-        return create(Timestamps.now());
+        return create(TimeUtil.getCurrentTime());
     }
 }

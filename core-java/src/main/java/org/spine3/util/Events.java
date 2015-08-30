@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -59,7 +60,7 @@ public class Events {
 
         return EventId.newBuilder()
                 .setCommandId(commandId)
-                .setTimestamp(Timestamps.now())
+                .setTimestamp(getCurrentTime())
                 .build();
     }
 
