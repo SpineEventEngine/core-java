@@ -182,8 +182,6 @@ subprojects {
         repositories {
             maven {
                 credentials {
-//                    username project.extensions.extraProperties.properties.get("repositoryUserName")
-//                    password project.extensions.extraProperties.properties.get("repositoryUserPassword")
                     username "${repositoryUserName}"
                     password "${repositoryUserPassword}"
                 }
