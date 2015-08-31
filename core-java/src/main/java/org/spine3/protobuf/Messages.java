@@ -52,9 +52,7 @@ public class Messages {
     private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
     private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
 
-    private Messages() {
-        // Prevent instantiation.
-    }
+    private Messages() {}
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
