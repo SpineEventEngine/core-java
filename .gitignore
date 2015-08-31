@@ -4,3 +4,4 @@
 .idea/*.xml
 */src/generated
 core-java/src/res/protos.properties
+credentials.properties
