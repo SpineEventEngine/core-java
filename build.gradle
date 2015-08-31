@@ -170,7 +170,8 @@ subprojects {
 
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
-        throw new InvalidUserDataException("Please set up valid credentials.")
+        throw new InvalidUserDataException("Please set up valid credentials. " +
+                "Credentials should be set in ${CREDENTIALS_LOCATION} file in project\'s root.")
     }
     println "Publishing build as ${repositoryUserName}"
 }
