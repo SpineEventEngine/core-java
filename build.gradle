@@ -207,7 +207,7 @@ task removeProtoNames << {
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in project\'s root.")
+                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.")
     }
     println "Publishing build as ${repositoryUserName}"
 }
