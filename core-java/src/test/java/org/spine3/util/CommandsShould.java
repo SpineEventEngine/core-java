@@ -21,6 +21,7 @@ package org.spine3.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
@@ -72,9 +73,10 @@ public class CommandsShould {
     }
 
     @Test
-    public void return_correct_were_after_predicate() {
-        final Timestamp timestamp = Timestamps.now();
+    public void return_correct_were_after_predicate() throws InterruptedException {
+        final Timestamp timestamp = TimeUtil.getCurrentTime();
         final CommandRequest commandRequest = CommandRequestFactory.create(timestamp);
+        Thread.sleep(100);
         final CommandRequest commandRequestAfter = CommandRequestFactory.create();
 
         final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
@@ -111,22 +113,24 @@ public class CommandsShould {
         assertEquals(sortedList, unSortedList);
     }
 
+    @SuppressWarnings("MagicNumber")
     @Test
-    public void return_correct_were_within_period_predicate() {
-        final CommandRequest commandRequest1 = CommandRequestFactory.create();
-        final Timestamp from = Timestamps.now();
-        final CommandRequest commandRequest2 = CommandRequestFactory.create();
-        final Timestamp to = Timestamps.now();
+    public void return_correct_were_within_period_predicate() throws InterruptedException {
+        final CommandRequest req1 = CommandRequestFactory.create();
+        final Timestamp from = TimeUtil.getCurrentTime();
+        Thread.sleep(100);
+        final CommandRequest req2 = CommandRequestFactory.create();
+        Thread.sleep(100);
+        final Timestamp to = TimeUtil.getCurrentTime();
 
         final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
-                .add(commandRequest1)
-                .add(commandRequest2)
+                .add(req1)
+                .add(req2)
                 .build();
 
-        final List<CommandRequest> filteredList = filter(commandList, Commands.wereWithinPeriod(
-                from, to));
+        final List<CommandRequest> filteredList = filter(commandList, Commands.wereWithinPeriod(from, to));
 
         assertEquals(1, filteredList.size());
-        assertEquals(commandRequest2, filteredList.get(0));
+        assertEquals(req2, filteredList.get(0));
     }
 }

@@ -21,7 +21,7 @@ package org.spine3.sample.server;
 
 import io.grpc.ServerImpl;
 import io.grpc.stub.StreamObserver;
-import io.grpc.transport.netty.NettyServerBuilder;
+import io.grpc.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.spine3.CommandStore;
 import org.spine3.Engine;

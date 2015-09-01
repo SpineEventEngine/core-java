@@ -31,6 +31,7 @@
 
 # Gradle build files
 *.gradle text
+gradlew.bat
 
 # Google protocol buffers
 *.proto text

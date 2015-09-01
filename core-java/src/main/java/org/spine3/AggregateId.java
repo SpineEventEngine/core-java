@@ -22,9 +22,8 @@ package org.spine3;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.JsonFormat;
-import org.spine3.util.MessageValue;
 import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 import org.spine3.util.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,7 +59,7 @@ public final class AggregateId extends MessageValue {
     }
 
     public static String idToString(Message aggregateRootId) {
-        return JsonFormat.printToString(aggregateRootId);
+        return Messages.toJson(aggregateRootId);
     }
 
     @Override

@@ -26,7 +26,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.JsonFormat;
+import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -59,7 +60,7 @@ public class Events {
 
         return EventId.newBuilder()
                 .setCommandId(commandId)
-                .setTimestamp(Timestamps.now())
+                .setTimestamp(getCurrentTime())
                 .build();
     }
 
@@ -130,7 +131,6 @@ public class Events {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
-        final String result = JsonFormat.printToString(id);
-        return result;
+        return Messages.toJson(id);
     }
 }

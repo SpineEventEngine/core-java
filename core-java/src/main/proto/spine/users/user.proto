@@ -19,62 +19,39 @@
 //
 syntax = "proto3";
 
-package spine3.time;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "TimeProto";
-option java_package = "org.spine3.time";
+option java_outer_classname = "UserProto";
+option java_package = "org.spine3.users";
 
-//TODO:2015-04-28:alexander.yevsyukov: Document
+import "spine/base/user_id.proto";
+import "spine/base/email.proto";
 
-message ZoneOffset {
-    int32 amountSeconds = 1;
-    string id = 2;
+// A link to the user's photo.
+message PhotoLink {
+  // The address of an image in one of the popular image formats.
+  string url = 1;
 }
 
-enum MonthOfYear {
-    UNDEFINED = 0;
-    JANUARY = 1;
-    FEBRUARY = 2;
-    MARCH = 3;
-    APRIL = 4;
-    MAY = 5;
-    JUNE = 6;
-    JULY = 7;
-    AUGUST = 8;
-    SEPTEMBER = 9;
-    OCTOBER = 10;
-    NOVEMBER = 11;
-    DECEMBER = 12;
-}
+// General information about a human user.
+message User {
+  // An identifier of the user in the system.
+  UserId id = 1;
 
-message LocalDate {
-    int32 year = 1;
-    MonthOfYear month = 2;
-    int32 day = 3;
-}
+  // A user name to be displayed on the screen.
+  string given_name = 2;
 
-message LocalTime {
-    int32 hours = 1;
-    int32 minutes = 2;
-    int32 seconds = 3;
-    int32 millis = 4;
-    int64 nanos = 5;
-}
+  // A family name of the user.
+  string family_name = 3;
 
-message OffsetDate {
-    LocalDate date = 1;
-    ZoneOffset offset = 2;
-}
+  // Email address of the user;
+  EmailAddress email = 4;
 
-message OffsetTime {
-    LocalTime time = 1;
-    ZoneOffset offset = 2;
-}
+  // A reference to the user photo.
+  PhotoLink photo = 5;
 
-message OffsetDateTime {
-    LocalDate date = 1;
-    LocalTime time = 2;
-    ZoneOffset offset = 3;
+  // Flag to say if this user is the administrator of the domain.
+  bool domain_admin = 6;
 }

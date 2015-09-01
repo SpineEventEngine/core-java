@@ -29,13 +29,14 @@ import org.spine3.CommandDispatcher;
 import org.spine3.Event;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
-import org.spine3.util.Events;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
+import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Abstract base for aggregate roots.
@@ -58,7 +59,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     private S state;
     private int version = 0;
-    private Timestamp whenLastModified = Timestamps.now();
+    private Timestamp whenLastModified = getCurrentTime();
 
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
@@ -327,7 +328,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     private int incrementVersion() {
         ++version;
-        whenLastModified = Timestamps.now();
+        whenLastModified = getCurrentTime();
 
         return version;
     }

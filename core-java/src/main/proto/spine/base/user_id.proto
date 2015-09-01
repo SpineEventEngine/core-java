@@ -19,29 +19,16 @@
 //
 syntax = "proto3";
 
-package spine3.test.order.event;
+package spine.base;
 
-import "spine3/test/order/order.proto";
-
-option java_package="org.spine3.test.order.event";
-option java_outer_classname = "EventsProto";
+option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
+option java_outer_classname = "UserIdProto";
+option java_package = "org.spine3.base";
 
-message OrderCreated {
-    OrderId order_id = 1;
+// A string-based identifier of the user.
+message UserId {
+  // User ID value.
+  string value = 1;
 }
 
-message OrderLineAdded {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message OrderLineRemoved {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message OrderPayed {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
-}

@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine3.sample.order.command;
+package spine.sample.order.command;
 
 import "sample/order/order.proto";
 

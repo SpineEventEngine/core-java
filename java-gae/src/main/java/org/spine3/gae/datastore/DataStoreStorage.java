@@ -20,19 +20,21 @@
 
 package org.spine3.gae.datastore;
 
-import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Query;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.server.StorageWithTimelineAndVersion;
-import org.spine3.protobuf.JsonFormat;
-import org.spine3.protobuf.Messages;
 import org.spine3.TypeName;
+import org.spine3.protobuf.Messages;
+import org.spine3.server.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
-import static org.spine3.gae.datastore.DataStoreHelper.*;
+import static org.spine3.gae.datastore.DataStoreHelper.PARENT_ID_KEY;
+import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
+import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * DataStore-based {@link StorageWithTimelineAndVersion} implementation.
@@ -82,7 +84,7 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
     @Override
     public List<M> read(Message parentId) {
         return dataStoreHelper.readByFilter(type.toString(), new Query.FilterPredicate(
-                PARENT_ID_KEY, EQUAL, JsonFormat.printToString(parentId)));
+                PARENT_ID_KEY, EQUAL, toJson(parentId)));
     }
 
     @Override
