@@ -5,6 +5,5 @@
 */src/generated
 build/*
 */build/*
-core-java/src/res/protos.properties
 credentials.properties
 gradle.properties
