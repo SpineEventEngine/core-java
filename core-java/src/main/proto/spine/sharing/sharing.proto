@@ -19,15 +19,15 @@
 //
 syntax = "proto3";
 
-package spine.users;
+package spine.sharing;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "SharingProto";
-option java_package = "org.spine3.users";
+option java_package = "org.spine3.sharing";
 
 import "spine/base/user_id.proto";
-import "spine/users/group.proto";
+import "spine/sharing/group.proto";
 
 
 message Subject {
