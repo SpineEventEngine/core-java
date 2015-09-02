@@ -26,10 +26,10 @@ option java_multiple_files = true;
 option java_outer_classname = "SharingProto";
 option java_package = "org.spine3.sharing";
 
-import "spine/base/user_id.proto";
-import "spine/sharing/group.proto";
+import public "spine/base/user_id.proto";
+import public "spine/sharing/group.proto";
 
-
+// An object can be shared with a user or a group of users.
 message Subject {
     oneof kind {
         spine.base.UserId user = 1;
@@ -37,20 +37,36 @@ message Subject {
     }
 }
 
+// A level of access to a shared object.
 enum SharingLevel {
+    // No access to corresponding objects.
     NONE = 0;
+
+    // Ability to view shared objects.
     VIEW = 1;
+
+    // Ability to comment on shared objects.
     COMMENT = 2;
-    MODIFY = 3;
+
+    // Ability to modify shared documents.
+    EDIT = 3;
+
+    // Ability to add and remove regular users.
     MODERATE = 4;
+
+    // Ability to add and remove administrators.
+    ADMINISTRATE = 5;
 }
 
+// Permission is a definition of access level for a user or a group.
 message Permission {
     Subject subject = 1;
     SharingLevel level = 2;
 }
 
+// Definition of access levels for an object to users and groups.
+//
+// If a user or a group is not added to the sharing schema, the level is [SharingLevel.NONE].
 message Sharing {
-    spine.base.UserId owner = 1;
     repeated Permission permissions = 2;
 }
