@@ -23,35 +23,12 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "UserProto";
+option java_outer_classname = "ColorProto";
 option java_package = "org.spine3.base";
 
-import public "spine/base/user_id.proto";
-import public "spine/base/email.proto";
-
-// A link to the user's photo.
-message PhotoLink {
-  // The address of an image in one of the popular image formats.
-  string url = 1;
-}
-
-// General information about a human user.
-message User {
-  // An identifier of the user in the system.
-  UserId id = 1;
-
-  // A user name to be displayed on the screen.
-  string given_name = 2;
-
-  // A family name of the user.
-  string family_name = 3;
-
-  // Email address of the user;
-  EmailAddress email = 4;
-
-  // A reference to the user photo.
-  PhotoLink photo = 5;
-
-  // Flag to say if this user is the administrator of the domain.
-  bool domain_admin = 6;
+// RGB definition of a color.
+message Color {
+    int32 red = 1;
+    int32 green = 2;
+    int32 blue = 3;
 }
