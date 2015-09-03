@@ -3,11 +3,11 @@
 .idea/libraries
 .idea/*.xml
 
-# Generated source code
-*/generated/*
-
 # Gradle interim configs
 .gradle/*
+
+# Generated source code
+*/generated/*
 
 # Gradle build files
 */build/*
