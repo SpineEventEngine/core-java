@@ -1,9 +1,32 @@
+# IntelliJ IDEA modules and interim config files.
 *.iml
 .idea/libraries
 .idea/*.xml
-.gradle/*
+
+# Generated source code
 */src/generated
+
+# Gradle interim configs
+.gradle/*
+
+# Gradle build files
 build/*
 */build/*
+
+# Login details to Maven repository.
+# Each workstation should have developer's login defined in this file.
 credentials.properties
+
+#
+# The gradle.properties file should contain settings specific to a developer's workstation.
+#
+# See sample file for a Mac OS X workstation below.
+# -------
+# # Set Java home to point to JDK7. This is need to generate classes working with Java7 API.
+# # Otherwise the following warning appears during the build:
+# #     warning: [options] bootstrap class path not set in conjunction with -source 1.7
+# #
+# # suppress inspection "UnusedProperty"
+# org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
+# -------
 gradle.properties
