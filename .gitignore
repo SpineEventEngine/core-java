@@ -4,7 +4,7 @@
 .idea/*.xml
 
 # Generated source code
-*/src/generated
+*/generated/*
 
 # Gradle interim configs
 .gradle/*
