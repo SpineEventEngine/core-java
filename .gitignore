@@ -1,7 +1,9 @@
 *.iml
 .idea/libraries
 .idea/*.xml
+.gradle/*
 */src/generated
-core-java/src/res/protos.properties
+build/*
+*/build/*
 credentials.properties
 gradle.properties

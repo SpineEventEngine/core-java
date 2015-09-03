@@ -19,26 +19,16 @@
 //
 syntax = "proto3";
 
-package spine.users;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "GroupProto";
-option java_package = "org.spine3.users";
+option java_outer_classname = "ColorProto";
+option java_package = "org.spine3.base";
 
-import "spine/base/user_id.proto";
-
-message GroupId {
-    string value = 1;
-}
-
-// A user group can hold users and other groups.
-message Group {
-
-    GroupId id = 1;
-
-    repeated spine.base.UserId users = 2;
-
-    repeated GroupId groups = 3;
-
+// RGB definition of a color.
+message Color {
+    int32 red = 1;
+    int32 green = 2;
+    int32 blue = 3;
 }
