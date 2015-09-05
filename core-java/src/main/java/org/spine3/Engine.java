@@ -27,6 +27,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryEventStore;
 import org.spine3.util.Events;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,12 +76,12 @@ public final class Engine {
         engine.eventStore = eventStore;
     }
 
-    public void register(Repository repository) {
-        dispatcher.register(repository);
-    }
-
     public void register(CommandHandler handler) {
         dispatcher.register(handler);
+    }
+
+    public void register(ManyCommandHandler repository) {
+        dispatcher.register(repository);
     }
 
     /**
@@ -114,7 +115,7 @@ public final class Engine {
 
             CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
-        } catch (Exception e) {
+        } catch (InvocationTargetException | RuntimeException e) {
             //TODO:2015-06-15:mikhail.melnik: handle errors
             CommandResult result = Events.toCommandResult(
                     Collections.<EventRecord>emptyList(),

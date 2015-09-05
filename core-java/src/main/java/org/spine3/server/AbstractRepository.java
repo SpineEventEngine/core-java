@@ -19,9 +19,12 @@
  */
 package org.spine3.server;
 
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.AggregateCommand;
+import org.spine3.CommandClass;
+import org.spine3.MessageSubscriber;
 import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
@@ -31,6 +34,8 @@ import org.spine3.util.Methods;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -53,7 +58,36 @@ public abstract class AbstractRepository<I extends Message,
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
+
     private RepositoryEventStore eventStore;
+
+    public Map<CommandClass, MessageSubscriber> getSubscribers() {
+        // Create subscribers that call dispatch() on message classes handled by the aggregate root.
+        Map<CommandClass, MessageSubscriber> subscribers = createDelegatingSubscribers();
+
+        // Add command handlers belonging to this repository.
+        Map<CommandClass, MessageSubscriber> repoSubscribers = Methods.scanForCommandHandlers(this);
+        subscribers.putAll(repoSubscribers);
+
+        return subscribers;
+    }
+
+    /**
+     * Creates a map of subscribers that call {@link Repository#dispatch(Message, CommandContext)}
+     * method for all commands of the aggregate root class of this repository.
+     */
+    private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
+        Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
+
+        Class<? extends AggregateRoot> rootClass = Methods.getRepositoryAggregateRootClass(this);
+        Set<CommandClass> commandClasses = Methods.getCommandClasses(rootClass);
+
+        MessageSubscriber subscriber = Converter.toMessageSubscriber(this);
+        for (CommandClass commandClass : commandClasses) {
+            result.put(commandClass, subscriber);
+        }
+        return result;
+    }
 
     /**
      * Configures repository with passed implementation of the aggregate storage.

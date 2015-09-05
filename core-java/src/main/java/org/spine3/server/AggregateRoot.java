@@ -24,18 +24,20 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Command;
-import org.spine3.CommandDispatcher;
-import org.spine3.Event;
+import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
+import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -66,6 +68,40 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     protected AggregateRoot(I id) {
         this.id = id;
         this.idAsAny = Messages.toAny(id);
+    }
+
+    /**
+     * Directs a command to the corresponding aggregate handler.
+     *
+     * @param command the command to be processed
+     * @param context the context of the command
+     * @return a list of the event messages that were produced as the result of handling the command
+     * @throws InvocationTargetException if an exception occurs during command handling
+     */
+    private List<? extends Message> dispatch(Command command, CommandContext context)
+            throws InvocationTargetException {
+
+        checkNotNull(command);
+        checkNotNull(context);
+
+        MessageSubscriber subscriber = dispatcher.getSubscriber(command.getCommandClass());
+
+        Object handlingResult = subscriber.handle(command.value(), context);
+
+        //noinspection IfMayBeConditional
+        if (List.class.isAssignableFrom(handlingResult.getClass())) {
+            // Cast to list of messages as it is one of the return types we expect by methods we can call.
+            //noinspection unchecked
+            return (List<? extends Message>) handlingResult;
+        } else {
+            // Another type of result is single event (as Message).
+            return Collections.singletonList((Message) handlingResult);
+        }
+    }
+
+    public Map<CommandClass, MessageSubscriber> getCommandHandlers() {
+        Map<CommandClass, MessageSubscriber> result = Methods.scanForCommandHandlers(this);
+        return result;
     }
 
     //TODO:2015-07-28:alexander.yevsyukov: Migrate API to use Event and Command instead of Message
@@ -206,11 +242,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
     protected void init() {
         if (!initialized) {
-            dispatcher = new CommandDispatcher();
-            applier = new EventApplierMap();
-
-            dispatcher.register(this);
-            applier.register(this);
+            initCommandDispatcher();
+            initEventApplier();
 
             if (state == null) {
                 state = getDefaultState();
@@ -218,6 +251,17 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
 
             initialized = true;
         }
+    }
+
+    private void initCommandDispatcher() {
+        dispatcher = new CommandDispatcher();
+        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        dispatcher.register(subscribers);
+    }
+
+    private void initEventApplier() {
+        applier = new EventApplierMap();
+        applier.register(this);
     }
 
     @CheckReturnValue
@@ -322,7 +366,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
 
-        List<? extends Message> result = dispatcher.dispatchToAggregate(Command.of(command), context);
+        List<? extends Message> result = dispatch(Command.of(command), context);
         return result;
     }
 

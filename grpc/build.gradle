@@ -12,7 +12,7 @@ sourceSets {
             srcDirs += ["${project(":core-java").projectDir}/src/main/proto"]
         }
         java {
-            srcDir "$projectDir/src/generated/main/grpc"
+            srcDir "$projectDir/generated/main/grpc"
         }
     }
 }

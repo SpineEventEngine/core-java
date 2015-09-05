@@ -20,19 +20,15 @@
 package org.spine3;
 
 import com.google.common.collect.Maps;
-import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.error.UnsupportedCommandException;
-import org.spine3.server.AggregateRoot;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,77 +48,34 @@ public class CommandDispatcher {
      * @param handler a command handler object
      */
     public void register(CommandHandler handler) {
+        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(checkNotNull(handler));
+        register(subscribers);
+    }
+
+    /**
+     * Registers the passed hander of many commands in the dispatcher.
+     *
+     * @param handler a {@code non-null} handler
+     */
+    public void register(ManyCommandHandler handler) {
         checkNotNull(handler);
-
-        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(handler);
-        checkSubscribers(subscribers);
-
-        putAll(subscribers);
+        Map<CommandClass, MessageSubscriber> subscribers = handler.getSubscribers();
+        register(subscribers);
     }
 
     /**
-     * Registers the passed repository in the dispatcher.
+     * Registers the passed subscribers with the dispatcher.
      *
-     * @param repository a repository object
+     * @param subscribers map from command classes to corresponding subscribers
      */
-    public void register(Repository repository) {
-        checkNotNull(repository);
-
-        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(repository);
+    public void register(Map<CommandClass, MessageSubscriber> subscribers) {
         checkSubscribers(subscribers);
-
-        putAll(subscribers);
-    }
-
-    /**
-     * Registers an aggregated root in the dispatcher.
-     *
-     * @param aggregateRoot the aggregate root object
-     */
-    public void register(AggregateRoot aggregateRoot) {
-        checkNotNull(aggregateRoot);
-
-        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(aggregateRoot);
-        checkSubscribers(subscribers);
-
         putAll(subscribers);
     }
 
     private static Map<CommandClass, MessageSubscriber> getSubscribers(CommandHandler handler) {
         Map<CommandClass, MessageSubscriber> subscribers = Methods.scanForCommandHandlers(handler);
         return subscribers;
-    }
-
-    private static Map<CommandClass, MessageSubscriber> getSubscribers(Repository repository) {
-        /*
-           The order inside this method is important!
-
-           At first we add all subscribers from the aggregate root
-           and after that register directly Repository's subscribers.
-         */
-        Map<CommandClass, MessageSubscriber> subscribers = getSubscribersFromRepositoryRoot(repository);
-        Map<CommandClass, MessageSubscriber> repoSubscribers = Methods.scanForCommandHandlers(repository);
-        subscribers.putAll(repoSubscribers);
-
-        return subscribers;
-    }
-
-    private static Map<CommandClass, MessageSubscriber> getSubscribersFromRepositoryRoot(Repository repository) {
-        Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
-
-        Class<? extends AggregateRoot> rootClass = Methods.getRepositoryAggregateRootClass(repository);
-        Set<CommandClass> commandClasses = Methods.getCommandClasses(rootClass);
-
-        MessageSubscriber subscriber = Repository.Converter.toMessageSubscriber(repository);
-        for (CommandClass commandClass : commandClasses) {
-            result.put(commandClass, subscriber);
-        }
-        return result;
-    }
-
-    private static Map<CommandClass, MessageSubscriber> getSubscribers(AggregateRoot aggregateRoot) {
-        Map<CommandClass, MessageSubscriber> result = Methods.scanForCommandHandlers(aggregateRoot);
-        return result;
     }
 
     private void checkSubscribers(Map<CommandClass, MessageSubscriber> subscribers) {
@@ -160,44 +113,15 @@ public class CommandDispatcher {
         return result;
     }
 
-    /**
-     * Directs a command to the corresponding aggregate handler.
-     *
-     * @param command the command to be processed
-     * @param context the context of the command
-     * @return a list of the event messages that were produced as the result of handling the command
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    public List<? extends Message> dispatchToAggregate(Command command, CommandContext context)
-            throws InvocationTargetException {
-
-        checkNotNull(command);
-        checkNotNull(context);
-
-        MessageSubscriber subscriber = getSubscriber(command.getCommandClass());
-
-        Object handlingResult = subscriber.handle(command.value(), context);
-
-        //noinspection IfMayBeConditional
-        if (List.class.isAssignableFrom(handlingResult.getClass())) {
-            // Cast to list of messages as it is one of the return types we expect by methods we can call.
-            //noinspection unchecked
-            return (List<? extends Message>) handlingResult;
-        } else {
-            // Another type of result is single event (as Message).
-            return Collections.singletonList((Message) handlingResult);
-        }
-    }
-
     private void putAll(Map<CommandClass, MessageSubscriber> subscribers) {
         subscribersByType.putAll(subscribers);
     }
 
-    private MessageSubscriber getSubscriber(CommandClass cls) {
+    public MessageSubscriber getSubscriber(CommandClass cls) {
         return subscribersByType.get(cls);
     }
 
-    private boolean subscriberRegistered(CommandClass cls) {
+    public boolean subscriberRegistered(CommandClass cls) {
         return subscribersByType.containsKey(cls);
     }
 
