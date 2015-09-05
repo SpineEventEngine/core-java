@@ -33,21 +33,19 @@ import org.spine3.util.Methods;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
 
-//TODO:2015-07-30:alexander.yevsyukov: Make creation command a part of AggregateRoot API.
-// This way all the commands will be handled by aggregate roots.
-
 /**
  * Abstract base for aggregate root repositories.
  *
  * @param <R> the type of the aggregated root
  * @param <I> the type of the aggregated root id
- * @param <C> the type of the command to create aggregate root instance
+ * @param <C> the type of the command to create a new aggregate root instance
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -58,6 +56,8 @@ public abstract class AbstractRepository<I extends Message,
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
+
+    private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     private RepositoryEventStore eventStore;
 
@@ -73,6 +73,21 @@ public abstract class AbstractRepository<I extends Message,
     }
 
     /**
+     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
+     *
+     * @return reference to the method
+     */
+    private MessageSubscriber toMessageSubscriber() {
+        try {
+            Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
+            final MessageSubscriber result = new MessageSubscriber(this, method);
+            return result;
+        } catch (NoSuchMethodException e) {
+            throw propagate(e);
+        }
+    }
+
+    /**
      * Creates a map of subscribers that call {@link Repository#dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class of this repository.
      */
@@ -82,12 +97,14 @@ public abstract class AbstractRepository<I extends Message,
         Class<? extends AggregateRoot> rootClass = Methods.getRepositoryAggregateRootClass(this);
         Set<CommandClass> commandClasses = Methods.getCommandClasses(rootClass);
 
-        MessageSubscriber subscriber = Converter.toMessageSubscriber(this);
+        MessageSubscriber subscriber = toMessageSubscriber();
         for (CommandClass commandClass : commandClasses) {
             result.put(commandClass, subscriber);
         }
         return result;
     }
+
+    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
 
     /**
      * Configures repository with passed implementation of the aggregate storage.
@@ -138,9 +155,13 @@ public abstract class AbstractRepository<I extends Message,
      */
     @Override
     public void store(R aggregateRoot) {
+        //TODO:2015-09-05:alexander.yevsyukov: It's too late to check it at this stage.
         if (eventStore == null) {
             throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
         }
+
+        //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which
+        // should be configured at the repository's level.
 
         Snapshot snapshot = Snapshot.newBuilder()
                 .setState(Messages.toAny(aggregateRoot.getState()))
@@ -155,6 +176,8 @@ public abstract class AbstractRepository<I extends Message,
 
     @Override
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
+        //TODO:2015-09-05:alexander.yevsyukov: Where do we handle a command processed by a repository's method?
+
         I aggregateId = getAggregateId(command);
         R aggregateRoot = load(aggregateId);
 
@@ -172,7 +195,7 @@ public abstract class AbstractRepository<I extends Message,
     /**
      * Creates, initializes, and stores a new aggregated root.
      * <p/>
-     * The initial state of the aggregate root is taken from the creation command.
+     * The command is passed to the newly created root with the default state.
      *
      * @param command creation command
      * @param context creation command context
@@ -232,8 +255,7 @@ public abstract class AbstractRepository<I extends Message,
 
             aggregateRootConstructor = rootClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
-            //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
-            throw new Error(e);
+            throw propagate(e);
         }
     }
 

@@ -104,7 +104,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         return result;
     }
 
-    //TODO:2015-07-28:alexander.yevsyukov: Migrate API to use Event and Command instead of Message
+    //TODO:2015-07-28:alexander.yevsyukov: Decide if we use Event and Command instead of Message.
 
     /**
      * Dispatches commands, generates events and apply them to the aggregate root.

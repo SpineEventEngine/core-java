@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * Wraps a subscriber method on a specific object.
@@ -42,13 +43,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mikhail Melnik
  */
 public class MessageSubscriber {
-
-    /**
-     * This code is based on Guava's {@link com.google.common.eventbus.EventSubscriber}.
-     */
-
-    private static final String ARGUMENT_REJECTED = "Method rejected target/argument: ";
-    private static final String MSG_UNABLE_TO_ACCESS = "Unable to call a method of the message: ";
 
     /**
      * Object sporting the subscriber method.
@@ -94,16 +88,8 @@ public class MessageSubscriber {
             @SuppressWarnings("unchecked")
             final T result = (T) method.invoke(target, message, context);
             return result;
-        } catch (IllegalArgumentException e) {
-            throw new Error(ARGUMENT_REJECTED + message, e);
-        } catch (IllegalAccessException e) {
-            throw new Error(MSG_UNABLE_TO_ACCESS + message, e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw (Error) e.getCause();
-            }
-            throw e;
+        }  catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw propagate(e);
         }
     }
 
@@ -124,16 +110,8 @@ public class MessageSubscriber {
             @SuppressWarnings("unchecked")
             T result = (T) method.invoke(target, message);
             return result;
-        } catch (IllegalArgumentException e) {
-            throw new Error(ARGUMENT_REJECTED + message, e);
-        } catch (IllegalAccessException e) {
-            throw new Error(MSG_UNABLE_TO_ACCESS + message, e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw (Error) e.getCause();
-            }
-            throw e;
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw propagate(e);
         }
     }
 

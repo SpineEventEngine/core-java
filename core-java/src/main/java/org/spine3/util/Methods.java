@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * Utility class for working with methods.
@@ -243,8 +244,7 @@ public class Methods {
 
             return result;
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            //noinspection ProhibitedExceptionThrown // these exceptions cannot occur, otherwise it is a fatal error
-            throw new Error(e);
+            throw propagate(e);
         }
     }
 
