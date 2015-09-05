@@ -99,7 +99,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         }
     }
 
-    public Map<CommandClass, MessageSubscriber> getCommandHandlers() {
+    private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
         Map<CommandClass, MessageSubscriber> result = Methods.scanForCommandHandlers(this);
         return result;
     }
