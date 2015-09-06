@@ -20,7 +20,6 @@
 package org.spine3.server;
 
 import org.spine3.EventClass;
-import org.spine3.server.MessageSubscriber;
 
 /**
  * Exception that is thrown when more than one applier
