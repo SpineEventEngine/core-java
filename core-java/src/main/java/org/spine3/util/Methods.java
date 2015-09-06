@@ -119,6 +119,35 @@ public class Methods {
                 && (returnsMessageList || returnsMessage);
     }
 
+    /**
+     * Checks if the passed method is an event handlers.
+     * <p/>
+     * An event handler must accept a type derived from {@link Message} as the first parameter,
+     * have {@link EventContext} value as the second parameter, and return {@code void}.
+     *
+     * @param method a method to check
+     * @return {@code true} if the method matches event handler convetions, {@code false} otherwise
+     */
+    public static boolean isEventHandler(Method method) {
+        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+
+        //noinspection LocalVariableNamingConvention
+        boolean acceptsMessageAndEventContext =
+                parameterTypes.length == 2
+                        && Message.class.isAssignableFrom(parameterTypes[0])
+                        && EventContext.class.equals(parameterTypes[1]);
+
+        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+
+        return isAnnotated
+                && acceptsMessageAndEventContext
+                && returnsNothing;
+
+
+    }
+
     private static final Predicate<Method> isEventApplierPredicate = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
@@ -132,6 +161,14 @@ public class Methods {
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
             return isCommandHandler(method);
+        }
+    };
+
+    private static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isEventHandler(method);
         }
     };
 
@@ -265,13 +302,29 @@ public class Methods {
     }
 
     /**
-     * Returns a map of the {@link MessageSubscriber} objects to the corresponding event class.
+     * Scans for event applier methods the passed object.
      *
      * @param eventApplier the object that keeps event applier methods
      * @return immutable map of event appliers
      */
     public static Map<EventClass, MessageSubscriber> scanForEventAppliers(Object eventApplier) {
         Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventApplier, isEventApplierPredicate);
+
+        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+            builder.put(EventClass.of(entry.getKey()), entry.getValue());
+        }
+        return builder.build();
+    }
+
+    /**
+     * Scands for event handlers the passed object.
+     *
+     * @param eventHandler the object to scan
+     * @return immutable map of event handling methods
+     */
+    public static Map<EventClass, MessageSubscriber> scanForEventHandlers(Object eventHandler) {
+        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventHandler, isEventHandlerPredicate);
 
         final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {

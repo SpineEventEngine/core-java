@@ -40,6 +40,7 @@ import static org.spine3.util.Methods.scanForEventAppliers;
  */
 class EventApplierMap {
 
+    //TODO:2015-09-06:alexander.yevsyukov: Why concurrent?
     private final Map<EventClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
 
     /**
@@ -50,15 +51,10 @@ class EventApplierMap {
     public void register(AggregateRoot aggregateRoot) {
         checkNotNull(aggregateRoot);
 
-        Map<EventClass, MessageSubscriber> subscribers = getEventSubscribers(aggregateRoot);
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(aggregateRoot);
         checkSubscribers(subscribers);
 
         putAll(subscribers);
-    }
-
-    private static Map<EventClass, MessageSubscriber> getEventSubscribers(AggregateRoot aggregateRoot) {
-        Map<EventClass, MessageSubscriber> result = scanForEventAppliers(aggregateRoot);
-        return result;
     }
 
     private void checkSubscribers(Map<EventClass, MessageSubscriber> subscribers) {
@@ -78,7 +74,7 @@ class EventApplierMap {
      * @param event the event to be applied
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    public void apply(Event event) throws InvocationTargetException {
+    void apply(Event event) throws InvocationTargetException {
         checkNotNull(event);
 
         EventClass eventClass = event.getEventClass();

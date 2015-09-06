@@ -33,7 +33,8 @@ import org.spine3.sample.order.event.OrderPayed;
 /**
  * @author Mikhail Melnik
  */
-@SuppressWarnings("TypeMayBeWeakened")  // Use command and event classes passed as parameters instead of SomethingOrBuilder
+@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic"})
+// Use command and event classes passed as parameters instead of SomethingOrBuilder
 public class OrderRoot extends AggregateRoot<OrderId, Order> {
 
     public static final String NEW = "NEW";
@@ -48,7 +49,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         return Order.getDefaultInstance();
     }
 
-    @SuppressWarnings({"unused", "MethodMayBeStatic"}) // the method is invoked by annotation.
     @Subscribe
     private Message handle(CreateOrder cmd, CommandContext ctx) {
         OrderCreated result = generateEvent(cmd);
@@ -56,7 +56,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         return result;
     }
 
-    @SuppressWarnings({"unused", "MethodMayBeStatic"}) // the method is invoked by annotation.
     @Subscribe
     private Message handle(AddOrderLine cmd, CommandContext ctx) {
         validateCommand(cmd);
@@ -68,7 +67,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
 
     //TODO:2015-06-29:alexander.yevsyukov: Consider renaming PayOrder command.
 
-    @SuppressWarnings({"unused", "MethodMayBeStatic"}) // the method is invoked by annotation.
     @Subscribe
     private Message handle(PayOrder cmd, CommandContext ctx) {
         validateCommand(cmd);
@@ -78,7 +76,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         return result;
     }
 
-    @SuppressWarnings("unused") // the method is invoked by annotation.
     @Subscribe
     private void on(OrderCreated event) {
         Order newState = prepareState(event);
@@ -88,7 +85,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         setState(newState);
     }
 
-    @SuppressWarnings("unused") // the method is invoked by annotation.
     @Subscribe
     private void on(OrderLineAdded event) {
         Order newState = prepareState(event);
@@ -98,7 +94,6 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         setState(newState);
     }
 
-    @SuppressWarnings("unused") // the method is invoked by annotation.
     @Subscribe
     private void on(OrderPayed event) {
         Order newState = prepareState(event);

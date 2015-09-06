@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Abstract base for aggregate roots.
@@ -49,25 +48,18 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
-public abstract class AggregateRoot<I extends Message, S extends Message> {
+public abstract class AggregateRoot<I extends Message, S extends Message>
+    extends StoredObject<I, S> {
+
+    private volatile boolean initialized = false;
 
     private CommandDispatcher dispatcher;
     private EventApplierMap applier;
 
-    private final I id;
-    private final Any idAsAny;
-
-    private volatile boolean initialized = false;
-
-    private S state;
-    private int version = 0;
-    private Timestamp whenLastModified = getCurrentTime();
-
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
     protected AggregateRoot(I id) {
-        this.id = id;
-        this.idAsAny = Messages.toAny(id);
+        super(id);
     }
 
     /**
@@ -192,81 +184,38 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         return result;
     }
 
-    @CheckReturnValue
-    public I getId() {
-        return id;
-    }
-
-    @CheckReturnValue
-    public S getState() {
-        // The EventDispatcher.apply() method waits till the events are processed.
-        // So once apply() finishes, it's safe to return the state.
-        return state;
-    }
-
-    /**
-     * Validates the passed state.
-     * <p/>
-     * Does nothing by default. Aggregate roots may override this method to
-     * specify logic of validating initial or intermediate state of the root.
-     *
-     * @param state a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
-    // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
-        // Do nothing by default.
-    }
-
-    protected void setState(S state) {
-        validate(state);
-        this.state = state;
-    }
-
-    protected void setVersion(int version) {
-        this.version = version;
-    }
-
-    protected void setWhenLastModified(Timestamp whenLastModified) {
-        this.whenLastModified = whenLastModified;
-    }
-
-    /**
-     * @return current version number of the aggregate.
-     */
-    @CheckReturnValue
-    public int getVersion() {
-        return version;
-    }
-
     protected void init() {
-        if (!initialized) {
+        if (!isInitialized()) {
             initCommandDispatcher();
             initEventApplier();
 
-            if (state == null) {
-                state = getDefaultState();
+            if (getState() == null) {
+                setState(getDefaultState());
             }
 
-            initialized = true;
+            setInitialized();
         }
-    }
-
-    private void initCommandDispatcher() {
-        dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
-        dispatcher.register(subscribers);
-    }
-
-    private void initEventApplier() {
-        applier = new EventApplierMap();
-        applier.register(this);
     }
 
     @CheckReturnValue
     protected boolean isInitialized() {
         return initialized;
+    }
+
+    protected void setInitialized() {
+        initialized = true;
+    }
+
+    protected void initEventApplier() {
+        applier = new EventApplierMap();
+        applier.register(this);
+    }
+
+
+    private void initCommandDispatcher() {
+        dispatcher = new CommandDispatcher();
+        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        dispatcher.register(subscribers);
     }
 
     /**
@@ -278,19 +227,11 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     }
 
     @CheckReturnValue
-    public Timestamp whenLastModified() {
-        return this.whenLastModified;
-    }
-
-    @CheckReturnValue
     public List<EventRecord> commitEvents() {
         List<EventRecord> result = ImmutableList.copyOf(eventRecords);
         eventRecords.clear();
         return result;
     }
-
-    @CheckReturnValue
-    protected abstract S getDefaultState();
 
     /**
      * Creates a context for an event.
@@ -318,7 +259,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
-                .setAggregateId(idAsAny);
+                .setAggregateId(getIdAsAny());
 
         if (eventContextHasState()) {
             builder.setAggregateState(state);
@@ -370,10 +311,4 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         return result;
     }
 
-    private int incrementVersion() {
-        ++version;
-        whenLastModified = getCurrentTime();
-
-        return version;
-    }
 }
