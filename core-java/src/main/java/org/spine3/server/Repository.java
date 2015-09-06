@@ -88,4 +88,32 @@ public interface Repository<I extends Message,
     @Subscribe
     List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
 
+    //TODO:2015-09-06:alexander.yevsyukov: In order to remove this method, we need to have loadOrCreate which
+    // would serve for finding an object when it's already stored or created when it's not.
+
+    class TypeInfo {
+
+        public static final int AGGREGATE_ID_CLASS_GENERIC_INDEX = 0;
+        public static final int AGGREGATE_ROOT_CLASS_GENERIC_IDEX = 1;
+
+        private TypeInfo() {}
+
+        /**
+         * Returns {@link Class} object representing the aggregate id type of the given repository.
+         *
+         * @return the aggregate id {@link Class}
+         */
+        public static <I extends Message> Class<I> getAggregateIdClass(Repository repository) {
+            return ServerMethods.getGenericParameterType(repository, AGGREGATE_ID_CLASS_GENERIC_INDEX);
+        }
+
+        /**
+         * Returns {@link Class} object representing the aggregate root type of the given repository.
+         *
+         * @return the aggregate root {@link Class}
+         */
+        public static <R extends AggregateRoot> Class<R> getAggregateRootClass(Repository repository) {
+            return ServerMethods.getGenericParameterType(repository, AGGREGATE_ROOT_CLASS_GENERIC_IDEX);
+        }
+    }
 }

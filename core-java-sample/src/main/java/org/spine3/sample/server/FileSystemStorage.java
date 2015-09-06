@@ -20,7 +20,6 @@
 package org.spine3.sample.server;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
@@ -35,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.ListFilters.filter;
+import static org.spine3.util.Lists.filter;
 
 /**
  * Test file system based implementation of the {@link Message} repository.

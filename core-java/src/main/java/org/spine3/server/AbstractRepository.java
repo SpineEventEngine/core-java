@@ -91,7 +91,7 @@ public abstract class AbstractRepository<I extends Message,
     private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
         Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
 
-        Class<? extends AggregateRoot> rootClass = Repositories.getAggregateRootClass(this);
+        Class<? extends AggregateRoot> rootClass = TypeInfo.getAggregateRootClass(this);
         Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
 
         MessageSubscriber subscriber = toMessageSubscriber();
@@ -247,8 +247,8 @@ public abstract class AbstractRepository<I extends Message,
     @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
     protected AbstractRepository() {
         try {
-            Class<R> rootClass = Repositories.getAggregateRootClass(this);
-            Class<I> idClass = Repositories.getAggregateIdClass(this);
+            Class<R> rootClass = TypeInfo.getAggregateRootClass(this);
+            Class<I> idClass = TypeInfo.getAggregateIdClass(this);
 
             aggregateRootConstructor = rootClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {

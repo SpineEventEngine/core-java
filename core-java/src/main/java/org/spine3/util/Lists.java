@@ -18,40 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.util;
 
-import com.google.protobuf.Message;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Utilities for working with repositories.
+ * Provides utility for filtering lists with predicates.
  *
- * @author Alexander Yevsyukov
+ * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class Repositories {
+public class Lists {
 
-    public static final int AGGREGATE_ID_CLASS_GENERIC_INDEX = 0;
-
-    public static final int AGGREGATE_ROOT_CLASS_GENERIC_IDEX = 1;
-
-    private Repositories() {}
-
-
-    /**
-     * Returns {@link Class} object representing the aggregate id type of the given repository.
-     *
-     * @return the aggregate id {@link Class}
-     */
-    public static <I extends Message> Class<I> getAggregateIdClass(Repository repository) {
-        return ServerMethods.getGenericParameterType(repository, AGGREGATE_ID_CLASS_GENERIC_INDEX);
+    private Lists() {
     }
 
+    //TODO:2015-09-06:alexander.yevsyukov: Don't we have this in Interables already?
+
     /**
-     * Returns {@link Class} object representing the aggregate root type of the given repository.
+     * Filters list with a predicate.
      *
-     * @return the aggregate root {@link Class}
+     * @param list      a list to filter
+     * @param predicate a predicate to filter list
+     * @param <T>       list object type
+     * @return immutable list
      */
-    public static <R extends AggregateRoot> Class<R> getAggregateRootClass(Repository repository) {
-        return ServerMethods.getGenericParameterType(repository, AGGREGATE_ROOT_CLASS_GENERIC_IDEX);
+    public static <T> ImmutableList<T> filter(Iterable<T> list, Predicate<T> predicate) {
+        return FluentIterable.from(list).filter(predicate).toList();
     }
 }

@@ -39,7 +39,7 @@ public class UtilitiesShould {
 
     @Test
     public void have_private_constructors() {
-        checkPrivateConstructor(ListFilters.class);
+        checkPrivateConstructor(Lists.class);
         checkPrivateConstructor(UserIds.class);
         checkPrivateConstructor(Commands.class);
     }
