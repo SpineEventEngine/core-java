@@ -251,25 +251,7 @@ public class Methods {
         return result;
     }
 
-    /**
-     * Returns {@link Class} object representing the aggregate id type of the given repository.
-     *
-     * @return the aggregate id {@link Class}
-     */
-    public static <I extends Message> Class<I> getRepositoryAggregateIdClass(Repository repository) {
-        return getGenericParameterType(repository, 0);
-    }
-
-    /**
-     * Returns {@link Class} object representing the aggregate root type of the given repository.
-     *
-     * @return the aggregate root {@link Class}
-     */
-    public static <R extends AggregateRoot> Class<R> getRepositoryAggregateRootClass(Repository repository) {
-        return getGenericParameterType(repository, 1);
-    }
-
-    private static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
+    public static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
         try {
             Type genericSuperclass = object.getClass().getGenericSuperclass();
             Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");

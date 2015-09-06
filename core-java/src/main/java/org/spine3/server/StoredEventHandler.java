@@ -70,6 +70,4 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
         this.handlers = builder.build();
     }
 
-    //TODO:2015-09-06:alexander.yevsyukov: Add repository for storing such objects.
-    // Think of a better name.
 }
