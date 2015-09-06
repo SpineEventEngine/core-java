@@ -9,6 +9,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
 import com.google.protobuf.util.TimeUtil;
 
+import javax.annotation.Nullable;
+
 import static com.google.protobuf.util.TimeUtil.createDurationFromMillis;
 import static com.google.protobuf.util.TimeUtil.toMillis;
 import static org.spine3.util.Math.floorDiv;
@@ -107,13 +109,33 @@ public class Durations {
     }
 
     /**
-     * Add two durations.
+     * Adds two durations one of which or both can be {@code null}.
+     * @param d1 a duration to add, could be {@code null}
+     * @param d2 another duration to add, could be {@code null}
+     * @return
+     *      <ul>
+     *          <li>sum of two durations if both of them are {@code non-null}</li>
+     *          <li>another {@code non-null} value, if one is {@code null}</li>
+     *          <li>{@link #ZERO} if both values are {@code null}</li>
+     *      </ul>
+     *
      */
-    public static Duration add(Duration d1, Duration d2) {
-        /* The sole purpose of this method is minimize the dependencies of the classes
-           working with durations. */
+    public static Duration add(@Nullable Duration d1, @Nullable Duration d2) {
+        if (d1 == null && d2 == null) {
+            return ZERO;
+        }
+
+        if (d1 == null) {
+            return d2;
+        }
+
+        if (d2 == null) {
+            return d1;
+        }
+
         return TimeUtil.add(d1, d2);
     }
+
 
     /**
      * Subtract a duration from another.
