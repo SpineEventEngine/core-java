@@ -26,15 +26,12 @@ import com.google.protobuf.Message;
  *
  * @param <O> the type of the stored object
  * @param <I> the type of the IDs of stored objects
- * @param <C> the type of the command to create stored objects
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 public interface Repository<I extends Message,
-                            O extends StoredObject,
-                            C extends Message> extends ManyCommandHandler {
-
+                            O extends StoredObject> extends ManyCommandHandler {
     /**
      * Stores the passed object.
      *

@@ -33,9 +33,8 @@ import java.util.List;
  *
  * @author Alexander Yevsyukov
  */
-public interface AggregateRootRepository<I extends Message,
-        R extends AggregateRoot,
-        C extends Message> extends Repository<I, R, C> {
+public interface AggregateRootRepository<I extends Message, R extends AggregateRoot, C extends Message>
+        extends Repository<I, R> {
     /**
      * Processes the command by dispatching it one of the repository methods or
      * to a method of an aggregate root.
