@@ -17,14 +17,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.common.collect.Maps;
+import org.spine3.Command;
+import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.error.UnsupportedCommandException;
-import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -74,7 +74,7 @@ public class CommandDispatcher {
     }
 
     private static Map<CommandClass, MessageSubscriber> getSubscribers(CommandHandler handler) {
-        Map<CommandClass, MessageSubscriber> subscribers = Methods.scanForCommandHandlers(handler);
+        Map<CommandClass, MessageSubscriber> subscribers = ServerMethods.scanForCommandHandlers(handler);
         return subscribers;
     }
 

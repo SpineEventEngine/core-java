@@ -17,13 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.AggregateRoot;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;

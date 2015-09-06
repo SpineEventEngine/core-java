@@ -23,9 +23,7 @@ package org.spine3.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
-import org.spine3.MessageSubscriber;
 import org.spine3.base.EventContext;
-import org.spine3.util.Methods;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -66,7 +64,7 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
 
     protected void init() {
         final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
-        builder.putAll(Methods.scanForEventHandlers(this));
+        builder.putAll(ServerMethods.scanForEventHandlers(this));
         this.handlers = builder.build();
     }
 

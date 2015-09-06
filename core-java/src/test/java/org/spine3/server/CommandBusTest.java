@@ -19,8 +19,6 @@
  */
 package org.spine3.server;
 
-import org.spine3.CommandDispatcher;
-
 /**
  * @author Mikhail Melnik
  */

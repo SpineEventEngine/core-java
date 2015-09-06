@@ -24,12 +24,9 @@ import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.AggregateCommand;
 import org.spine3.CommandClass;
-import org.spine3.MessageSubscriber;
-import org.spine3.Repository;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.Methods;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -66,7 +63,7 @@ public abstract class AbstractRepository<I extends Message,
         Map<CommandClass, MessageSubscriber> subscribers = createDelegatingSubscribers();
 
         // Add command handlers belonging to this repository.
-        Map<CommandClass, MessageSubscriber> repoSubscribers = Methods.scanForCommandHandlers(this);
+        Map<CommandClass, MessageSubscriber> repoSubscribers = ServerMethods.scanForCommandHandlers(this);
         subscribers.putAll(repoSubscribers);
 
         return subscribers;
@@ -95,7 +92,7 @@ public abstract class AbstractRepository<I extends Message,
         Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
 
         Class<? extends AggregateRoot> rootClass = Repositories.getAggregateRootClass(this);
-        Set<CommandClass> commandClasses = Methods.getCommandClasses(rootClass);
+        Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
 
         MessageSubscriber subscriber = toMessageSubscriber();
         for (CommandClass commandClass : commandClasses) {

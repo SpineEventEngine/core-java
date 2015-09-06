@@ -23,7 +23,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Engine;
+import org.spine3.server.Engine;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;

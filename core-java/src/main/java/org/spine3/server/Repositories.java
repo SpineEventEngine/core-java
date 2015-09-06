@@ -21,8 +21,6 @@
 package org.spine3.server;
 
 import com.google.protobuf.Message;
-import org.spine3.Repository;
-import org.spine3.util.Methods;
 
 /**
  * Utilities for working with repositories.
@@ -45,7 +43,7 @@ public class Repositories {
      * @return the aggregate id {@link Class}
      */
     public static <I extends Message> Class<I> getAggregateIdClass(Repository repository) {
-        return Methods.getGenericParameterType(repository, AGGREGATE_ID_CLASS_GENERIC_INDEX);
+        return ServerMethods.getGenericParameterType(repository, AGGREGATE_ID_CLASS_GENERIC_INDEX);
     }
 
     /**
@@ -54,6 +52,6 @@ public class Repositories {
      * @return the aggregate root {@link Class}
      */
     public static <R extends AggregateRoot> Class<R> getAggregateRootClass(Repository repository) {
-        return Methods.getGenericParameterType(repository, AGGREGATE_ROOT_CLASS_GENERIC_IDEX);
+        return ServerMethods.getGenericParameterType(repository, AGGREGATE_ROOT_CLASS_GENERIC_IDEX);
     }
 }

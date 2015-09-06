@@ -17,32 +17,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server;
 
-package org.spine3;
-
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.server.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
 /**
- * Interface for command handler classes.
+ * Stores and loads the events.
  *
- * @author Alexander Yevsyukov
- * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
-public interface CommandHandler<T extends Message> {
+public class EventStore {
+
+    private final StorageWithTimelineAndVersion<EventRecord> storage;
+
+    public EventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
+        this.storage = storage;
+    }
 
     /**
-     * Handles incoming command of the {@link T} type.
+     * Stores the event record.
      *
-     * @param command the command to handle
-     * @param context the context of the command
-     * @return a list of the event records
+     * @param record event record to store
      */
-    @Subscribe
-    List<EventRecord> handle(T command, CommandContext context);
+    public void store(EventRecord record) {
+        storage.store(record);
+    }
+
+    /**
+     * Loads all events from given timestamp.
+     *
+     * @param from timestamp to load events from
+     * @param <ID> aggregate id type
+     * @return list of events
+     */
+    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
+        List<EventRecord> result = storage.read(from);
+        return result;
+    }
 
 }

@@ -23,13 +23,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
-import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -92,7 +90,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
-        Map<CommandClass, MessageSubscriber> result = Methods.scanForCommandHandlers(this);
+        Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
         return result;
     }
 

@@ -22,15 +22,13 @@ package org.spine3.server;
 import com.google.common.collect.Maps;
 import org.spine3.Event;
 import org.spine3.EventClass;
-import org.spine3.MessageSubscriber;
-import org.spine3.error.DuplicateApplierException;
 import org.spine3.error.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Methods.scanForEventAppliers;
+import static org.spine3.server.ServerMethods.scanForEventAppliers;
 
 /**
  * Dispatches the incoming events to the corresponding applier method of an aggregate root.

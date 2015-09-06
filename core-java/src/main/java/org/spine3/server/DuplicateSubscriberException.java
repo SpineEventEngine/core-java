@@ -17,39 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server;
 
-import org.spine3.EventClass;
-import org.spine3.MessageSubscriber;
+import com.google.protobuf.Message;
+import org.spine3.server.MessageSubscriber;
 
 /**
- * Exception that is thrown when more than one applier
- * of the same event class is found in a declaring class.
+ * Indicates that more than one subscriber for the same message class are present in a declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class DuplicateApplierException extends RuntimeException {
+public class DuplicateSubscriberException extends RuntimeException {
 
-    /**
-     * Creates new exception.
-     *
-     * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered
-     * @param discoveredSubscriber another applier method for the same event class
-     */
-    public DuplicateApplierException(
-            EventClass eventClass,
+    public DuplicateSubscriberException(
+            Class<? extends Message> messageClass,
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
 
-        super(String.format("The class %s defines more than one applier method for the event class %s. " +
-                            "Applier methods encountered: %s, %s.",
-                currentSubscriber.getTargetClass(),
-                eventClass,
-                currentSubscriber,
-                discoveredSubscriber));
+        super(String.format(
+                "The %s class defines more than one subscriber method for the message class %s." +
+                        " Subscribers encountered: %s, %s.",
+                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
+                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
     }
 
     private static final long serialVersionUID = 0L;
+
 }

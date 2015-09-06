@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
 import org.spine3.util.Methods;
@@ -42,7 +42,7 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Mikhail Melnik
  */
-public class MessageSubscriber {
+class MessageSubscriber {
 
     /**
      * Object sporting the subscriber method.
@@ -59,7 +59,7 @@ public class MessageSubscriber {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public MessageSubscriber(Object target, Method method) {
+    MessageSubscriber(Object target, Method method) {
         checkNotNull(target, "target cannot be null.");
         checkNotNull(method, "method cannot be null.");
 
