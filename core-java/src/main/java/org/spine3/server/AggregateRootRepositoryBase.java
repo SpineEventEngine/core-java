@@ -47,9 +47,9 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
-public abstract class AbstractRepository<I extends Message,
+public abstract class AggregateRootRepositoryBase<I extends Message,
         R extends AggregateRoot,
-        C extends Message> implements Repository<I, R, C> {
+        C extends Message> implements AggregateRootRepository<I, R, C> {
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
@@ -91,7 +91,7 @@ public abstract class AbstractRepository<I extends Message,
     private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
         Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
 
-        Class<? extends AggregateRoot> rootClass = TypeInfo.getAggregateRootClass(this);
+        Class<? extends AggregateRoot> rootClass = TypeInfo.getStoredObjectClass(this);
         Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
 
         MessageSubscriber subscriber = toMessageSubscriber();
@@ -245,10 +245,10 @@ public abstract class AbstractRepository<I extends Message,
     private final Constructor<R> aggregateRootConstructor;
 
     @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
-    protected AbstractRepository() {
+    protected AggregateRootRepositoryBase() {
         try {
-            Class<R> rootClass = TypeInfo.getAggregateRootClass(this);
-            Class<I> idClass = TypeInfo.getAggregateIdClass(this);
+            Class<R> rootClass = TypeInfo.getStoredObjectClass(this);
+            Class<I> idClass = TypeInfo.getStoredObjectIdClass(this);
 
             aggregateRootConstructor = rootClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {

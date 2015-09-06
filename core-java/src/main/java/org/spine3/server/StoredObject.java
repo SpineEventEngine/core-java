@@ -30,11 +30,14 @@ import javax.annotation.CheckReturnValue;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * A
+ * A business object stored by a repository.
+ *
  * @param <I> the type of object IDs
  * @param <S> the type of object states.
  */
 public abstract class StoredObject<I extends Message, S extends Message> {
+
+    //TODO:2015-09-07:alexander.yevsyukov: Rename this class to Entity?
 
     private final I id;
     private final Any idAsAny;

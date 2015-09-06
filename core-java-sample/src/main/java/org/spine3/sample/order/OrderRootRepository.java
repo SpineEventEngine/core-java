@@ -22,7 +22,7 @@ package org.spine3.sample.order;
 import com.google.common.eventbus.Subscribe;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.AbstractRepository;
+import org.spine3.server.AggregateRootRepositoryBase;
 import org.spine3.sample.order.command.CreateOrder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * @author Mikhail Melnik
  */
-public class OrderRootRepository extends AbstractRepository<OrderId, OrderRoot, CreateOrder> {
+public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
 
     @Subscribe
     @Override
