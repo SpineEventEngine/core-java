@@ -17,47 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
+package org.spine3.server;
 
-import java.util.List;
+import org.spine3.CommandClass;
+
+import java.util.Map;
 
 /**
- * Stores and loads the events.
+ * The common inferface for classes handling more than one command.
  *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
+ * @see CommandHandler
  */
-public class EventStore {
+public interface ManyCommandHandler {
 
-    private final StorageWithTimelineAndVersion<EventRecord> storage;
-
-    public EventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
-        this.storage = storage;
-    }
-
-    /**
-     * Stores the event record.
-     *
-     * @param record event record to store
-     */
-    public void store(EventRecord record) {
-        storage.store(record);
-    }
-
-    /**
-     * Loads all events from given timestamp.
-     *
-     * @param from timestamp to load events from
-     * @param <ID> aggregate id type
-     * @return list of events
-     */
-    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.read(from);
-        return result;
-    }
-
+    Map<CommandClass, MessageSubscriber> getSubscribers();
 }

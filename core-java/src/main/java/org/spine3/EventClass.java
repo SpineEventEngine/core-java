@@ -45,4 +45,12 @@ public final class EventClass extends ClassTypeValue {
         return new EventClass(checkNotNull(value));
     }
 
+    /**
+     * Creates a new instance of the event class by passed event instance.
+     * @param event an event instance
+     * @return new instance
+     */
+    public static EventClass of(Message event) {
+        return of(checkNotNull(event).getClass());
+    }
 }

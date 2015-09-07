@@ -20,7 +20,7 @@
 package org.spine3.error;
 
 import org.spine3.server.AggregateRoot;
-import org.spine3.Repository;
+import org.spine3.server.Repository;
 import org.spine3.util.Methods;
 
 import java.lang.reflect.Method;

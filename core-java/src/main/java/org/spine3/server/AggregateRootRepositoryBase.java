@@ -19,41 +19,89 @@
  */
 package org.spine3.server;
 
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.AggregateCommand;
-import org.spine3.Repository;
+import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.Methods;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
-
-//TODO:2015-07-30:alexander.yevsyukov: Make creation command a part of AggregateRoot API.
-// This way all the commands will be handled by aggregate roots.
 
 /**
  * Abstract base for aggregate root repositories.
  *
  * @param <R> the type of the aggregated root
  * @param <I> the type of the aggregated root id
- * @param <C> the type of the command to create aggregate root instance
+ * @param <C> the type of the command to create a new aggregate root instance
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
-public abstract class AbstractRepository<I extends Message,
+public abstract class AggregateRootRepositoryBase<I extends Message,
         R extends AggregateRoot,
-        C extends Message> implements Repository<I, R, C> {
+        C extends Message> implements AggregateRootRepository<I, R, C> {
 
     public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
             + "Call the configure() method before trying to load/save the aggregate root.";
+
+    private static final String DISPATCH_METHOD_NAME = "dispatch";
+
     private RepositoryEventStore eventStore;
+
+    public Map<CommandClass, MessageSubscriber> getSubscribers() {
+        // Create subscribers that call dispatch() on message classes handled by the aggregate root.
+        Map<CommandClass, MessageSubscriber> subscribers = createDelegatingSubscribers();
+
+        // Add command handlers belonging to this repository.
+        Map<CommandClass, MessageSubscriber> repoSubscribers = ServerMethods.scanForCommandHandlers(this);
+        subscribers.putAll(repoSubscribers);
+
+        return subscribers;
+    }
+
+    /**
+     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
+     *
+     * @return reference to the method
+     */
+    private MessageSubscriber toMessageSubscriber() {
+        try {
+            Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
+            final MessageSubscriber result = new MessageSubscriber(this, method);
+            return result;
+        } catch (NoSuchMethodException e) {
+            throw propagate(e);
+        }
+    }
+
+    /**
+     * Creates a map of subscribers that call {@link Repository#dispatch(Message, CommandContext)}
+     * method for all commands of the aggregate root class of this repository.
+     */
+    private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
+        Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
+
+        Class<? extends AggregateRoot> rootClass = TypeInfo.getStoredObjectClass(this);
+        Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
+
+        MessageSubscriber subscriber = toMessageSubscriber();
+        for (CommandClass commandClass : commandClasses) {
+            result.put(commandClass, subscriber);
+        }
+        return result;
+    }
+
+    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
 
     /**
      * Configures repository with passed implementation of the aggregate storage.
@@ -104,9 +152,13 @@ public abstract class AbstractRepository<I extends Message,
      */
     @Override
     public void store(R aggregateRoot) {
+        //TODO:2015-09-05:alexander.yevsyukov: It's too late to check it at this stage.
         if (eventStore == null) {
             throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
         }
+
+        //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which
+        // should be configured at the repository's level.
 
         Snapshot snapshot = Snapshot.newBuilder()
                 .setState(Messages.toAny(aggregateRoot.getState()))
@@ -121,6 +173,8 @@ public abstract class AbstractRepository<I extends Message,
 
     @Override
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
+        //TODO:2015-09-05:alexander.yevsyukov: Where do we handle a command processed by a repository's method?
+
         I aggregateId = getAggregateId(command);
         R aggregateRoot = load(aggregateId);
 
@@ -138,7 +192,7 @@ public abstract class AbstractRepository<I extends Message,
     /**
      * Creates, initializes, and stores a new aggregated root.
      * <p/>
-     * The initial state of the aggregate root is taken from the creation command.
+     * The command is passed to the newly created root with the default state.
      *
      * @param command creation command
      * @param context creation command context
@@ -191,15 +245,14 @@ public abstract class AbstractRepository<I extends Message,
     private final Constructor<R> aggregateRootConstructor;
 
     @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
-    protected AbstractRepository() {
+    protected AggregateRootRepositoryBase() {
         try {
-            Class<R> rootClass = Methods.getRepositoryAggregateRootClass(this);
-            Class<I> idClass = Methods.getRepositoryAggregateIdClass(this);
+            Class<R> rootClass = TypeInfo.getStoredObjectClass(this);
+            Class<I> idClass = TypeInfo.getStoredObjectIdClass(this);
 
             aggregateRootConstructor = rootClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
-            //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
-            throw new Error(e);
+            throw propagate(e);
         }
     }
 

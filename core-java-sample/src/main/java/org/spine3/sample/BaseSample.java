@@ -22,16 +22,12 @@ package org.spine3.sample;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
-import org.spine3.*;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.server.RepositoryEventStore;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.*;
 import org.spine3.util.UserIds;
 
 import java.util.List;

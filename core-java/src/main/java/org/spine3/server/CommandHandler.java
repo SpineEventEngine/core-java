@@ -17,31 +17,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
 
+package org.spine3.server;
+
+import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.MessageSubscriber;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventRecord;
+
+import java.util.List;
 
 /**
- * Indicates that more than one subscriber for the same message class are present in a declaring class.
+ * Interface for command handler classes.
  *
- * @author Mikhail Melnik
  * @author Alexander Yevsyukov
+ * @author Mikhail Melnik
  */
-public class DuplicateSubscriberException extends RuntimeException {
+public interface CommandHandler<T extends Message> {
 
-    public DuplicateSubscriberException(
-            Class<? extends Message> messageClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
-
-        super(String.format(
-                "The %s class defines more than one subscriber method for the message class %s." +
-                        " Subscribers encountered: %s, %s.",
-                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
-                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
-    }
-
-    private static final long serialVersionUID = 0L;
+    /**
+     * Handles incoming command of the {@link T} type.
+     *
+     * @param command the command to handle
+     * @param context the context of the command
+     * @return a list of the event records
+     */
+    @Subscribe
+    List<EventRecord> handle(T command, CommandContext context);
 
 }

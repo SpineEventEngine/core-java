@@ -17,49 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+
+package org.spine3.server;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.AggregateRoot;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Base interface for aggregate root repositories.
+ * The common interface for aggregate root repositories.
  *
- * @param <R> the type of the aggregated root
- * @param <I> the type of the aggregated root id
- * @param <C> the type of the command to create aggregate root instance
- *
- * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I extends Message,
-                            R extends AggregateRoot,
-                            C extends Message> {
-
-    /**
-     * Stores the passed aggregate root.
-     *
-     * @param aggregateRoot an instance to store
-     */
-    void store(R aggregateRoot);
-
-    /**
-     * Loads the an aggregate by given id.
-     *
-     * @param aggregateId id of the aggregate to load
-     * @return the loaded object
-     */
-    R load(I aggregateId);
-
+public interface AggregateRootRepository<I extends Message, R extends AggregateRoot, C extends Message>
+        extends Repository<I, R> {
     /**
      * Processes the command by dispatching it one of the repository methods or
      * to a method of an aggregate root.
@@ -76,10 +51,11 @@ public interface Repository<I extends Message,
      * @throws InvocationTargetException if an exception occurs during command dispatching
      *
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
-     *
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
+    //TODO:2015-09-06:alexander.yevsyukov: In order to remove this method, we need to have loadOrCreate which
+    // would serve for finding an object when it's already stored or created when it's not.
     /**
      * Creates, initializes, and stores a new aggregated root.
      * <p>
@@ -92,35 +68,4 @@ public interface Repository<I extends Message,
      */
     @Subscribe
     List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
-
-
-    /**
-     * Helper class for wiring repositories into command processing.
-     */
-    @SuppressWarnings("UtilityClass")
-    class Converter {
-
-        private static final String DISPATCH_METHOD_NAME = "dispatch";
-
-        /**
-         * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
-         * @param repository the repository instance to inspect
-         * @return reference to the method
-         */
-        public static MessageSubscriber toMessageSubscriber(Repository repository) {
-            checkNotNull(repository);
-
-            try {
-                Method method = repository.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-                final MessageSubscriber result = new MessageSubscriber(repository, method);
-                return result;
-            } catch (NoSuchMethodException e) {
-                //noinspection ProhibitedExceptionThrown // this exception cannot occur, otherwise it is a fatal error
-                throw new Error(e);
-            }
-        }
-
-        private Converter() {
-        }
-    }
 }

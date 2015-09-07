@@ -17,37 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server;
 
-import org.spine3.CommandClass;
-import org.spine3.MessageSubscriber;
+import org.spine3.EventClass;
 
 /**
- * Exception that is thrown when more than one handler
- * of the same command type were found in the command dispatcher instance.
+ * Exception that is thrown when more than one applier
+ * of the same event class is found in a declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
+public class DuplicateApplierException extends RuntimeException {
 
     /**
-     * Accepts event type and both old and new handlers.
+     * Creates new exception.
      *
-     * @param commandClass         the class of the command
-     * @param currentSubscriber    a method currently registered for the given message type
-     * @param discoveredSubscriber a new subscriber for the command type
+     * @param eventClass           a class of the event
+     * @param currentSubscriber    a method currently registered
+     * @param discoveredSubscriber another applier method for the same event class
      */
-    public CommandHandlerAlreadyRegisteredException(
-            CommandClass commandClass,
+    public DuplicateApplierException(
+            EventClass eventClass,
             MessageSubscriber currentSubscriber,
             MessageSubscriber discoveredSubscriber) {
 
-        super(String.format("The command %s already has associated handler method %s. "
-                        + " There can be only one handler per command class. "
-                        + " Duplicating handler encountered: %s. "
-                        + " Consider un-registering the current handler first.",
-                commandClass, currentSubscriber.getFullName(), discoveredSubscriber.getFullName()));
+        super(String.format("The class %s defines more than one applier method for the event class %s. " +
+                            "Applier methods encountered: %s, %s.",
+                currentSubscriber.getTargetClass(),
+                eventClass,
+                currentSubscriber,
+                discoveredSubscriber));
     }
 
     private static final long serialVersionUID = 0L;

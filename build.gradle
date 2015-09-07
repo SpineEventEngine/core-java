@@ -23,7 +23,7 @@ project.ext {
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
 
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
-    GENERATED_RESOURCES = "/src/generated/main/resources/"
+    GENERATED_RESOURCES = "/generated/main/resources/"
 }
 
 def repositoryUserName = null
@@ -91,22 +91,22 @@ subprojects {
     }
 
     idea.module {
-        generatedSourceDirs += file("$projectDir/src/generated/main/java")
-        testSourceDirs += file("$projectDir/src/generated/test/java")
+        generatedSourceDirs += file("$projectDir/generated/main/java")
+        testSourceDirs += file("$projectDir/generated/test/java")
     }
 
     sourceSets {
         main {
             proto.srcDirs = ["src/main/proto"]
             //TODO:2015-08-30:alexander.yevsyukov: Why don't we have the $projectDir prefix in the 2nd item?
-            java.srcDirs = ["$projectDir/src/generated/main/java", "src/main/java"]
+            java.srcDirs = ["$projectDir/generated/main/java", "src/main/java"]
 
-            resources.srcDirs = ["src/generated/main/resources"]
+            resources.srcDirs = ["generated/main/resources"]
         }
     }
 
     protobuf {
-        generatedFilesBaseDir = "$projectDir/src/generated"
+        generatedFilesBaseDir = "$projectDir/generated"
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
         }
@@ -116,15 +116,15 @@ subprojects {
         String javaSuffix = ".java"
         String orBuilderSuffix = "OrBuilder" + javaSuffix
 
-        ["$projectDir/src/generated/main/java",
-         "$projectDir/src/generated/test/java"].each { String rootDirPath ->
+        ["$projectDir/generated/main/java",
+         "$projectDir/generated/test/java"].each { String rootDirPath ->
             File rootDir = file(rootDirPath)
             if (!rootDir.exists()) {
                 return
             }
 
             //TODO: avoid duplication of constant of the path to generated resources.
-            File propsFileFolder = file("${project(":core-java").projectDir}/src/generated/main/resources/")
+            File propsFileFolder = file("${project(":core-java").projectDir}/generated/main/resources/")
             if (!propsFileFolder.exists()) {
                 propsFileFolder.mkdirs();
             }

@@ -17,10 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3;
+package org.spine3.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.spine3.Event;
+import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.error.MissingEventApplierException;
@@ -31,10 +33,10 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.util.Methods.scanForEventAppliers;
+import static org.spine3.server.ServerMethods.*;
 
 /**
- * Manages incoming events to the appropriate registered applier
+ * Manages incoming events to the appropriate registered handler
  * according to the type of incoming event.
  *
  * @author Mikhail Melnik
@@ -42,7 +44,7 @@ import static org.spine3.util.Methods.scanForEventAppliers;
  */
 public class EventBus {
 
-    /** This code is based on Guava {@link com.google.common.eventbus.EventBus} class. */
+    /* This code is based on Guava {@link com.google.common.eventbus.EventBus} class. */
 
     private final Multimap<EventClass, MessageSubscriber> subscribersByType = HashMultimap.create();
     private final ReadWriteLock subscribersByTypeLock = new ReentrantReadWriteLock();
@@ -58,7 +60,7 @@ public class EventBus {
      * @param eventHandler the event applier object whose subscriber methods should be registered
      */
     public void register(Object eventHandler) {
-        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(eventHandler);
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventHandlers(eventHandler);
 
         putSubscribersToBus(subscribers);
     }
@@ -81,7 +83,7 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object eventHandler) {
-        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(eventHandler);
+        Map<EventClass, MessageSubscriber> subscribers = scanForEventHandlers(eventHandler);
 
         unsubscribe(subscribers);
     }

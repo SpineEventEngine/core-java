@@ -27,7 +27,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
-import static org.spine3.util.ListFilters.*;
+import static org.spine3.util.Lists.*;
 
 /**
  * @author Mikhail Melnik

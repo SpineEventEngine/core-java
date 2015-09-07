@@ -33,6 +33,8 @@ import java.util.List;
  */
 public interface Storage<M extends Message> {
 
+    //TODO:2015-09-06:alexander.yevsyukov: Have Id as another parameterizing type.
+
     /**
      * Reads Messages of type {@link M} with appropriate Parent Id from storage.
      *
@@ -47,6 +49,9 @@ public interface Storage<M extends Message> {
      * @return read messages
      */
     List<M> readAll();
+
+    //TODO:2015-09-06:alexander.yevsyukov: We need to define a method, which gets ID by the message.
+    // Otherwise it would be hard to create storage implementations.
 
     /**
      * Stores message to storage. Storage should determine parent id by itself.

@@ -23,10 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.Command;
-import org.spine3.CommandDispatcher;
-import org.spine3.Event;
+import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
@@ -34,9 +31,11 @@ import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract base for aggregate roots.
@@ -47,28 +46,55 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
-public abstract class AggregateRoot<I extends Message, S extends Message> {
+public abstract class AggregateRoot<I extends Message, S extends Message>
+    extends StoredObject<I, S> {
+
+    private volatile boolean initialized = false;
 
     private CommandDispatcher dispatcher;
     private EventApplierMap applier;
 
-    private final I id;
-    private final Any idAsAny;
-
-    private volatile boolean initialized = false;
-
-    private S state;
-    private int version = 0;
-    private Timestamp whenLastModified = getCurrentTime();
-
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
     protected AggregateRoot(I id) {
-        this.id = id;
-        this.idAsAny = Messages.toAny(id);
+        super(id);
     }
 
-    //TODO:2015-07-28:alexander.yevsyukov: Migrate API to use Event and Command instead of Message
+    /**
+     * Directs a command to the corresponding aggregate handler.
+     *
+     * @param command the command to be processed
+     * @param context the context of the command
+     * @return a list of the event messages that were produced as the result of handling the command
+     * @throws InvocationTargetException if an exception occurs during command handling
+     */
+    private List<? extends Message> dispatch(Command command, CommandContext context)
+            throws InvocationTargetException {
+
+        checkNotNull(command);
+        checkNotNull(context);
+
+        MessageSubscriber subscriber = dispatcher.getSubscriber(command.getCommandClass());
+
+        Object handlingResult = subscriber.handle(command.value(), context);
+
+        //noinspection IfMayBeConditional
+        if (List.class.isAssignableFrom(handlingResult.getClass())) {
+            // Cast to list of messages as it is one of the return types we expect by methods we can call.
+            //noinspection unchecked
+            return (List<? extends Message>) handlingResult;
+        } else {
+            // Another type of result is single event (as Message).
+            return Collections.singletonList((Message) handlingResult);
+        }
+    }
+
+    private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
+        Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
+        return result;
+    }
+
+    //TODO:2015-07-28:alexander.yevsyukov: Decide if we use Event and Command instead of Message.
 
     /**
      * Dispatches commands, generates events and apply them to the aggregate root.
@@ -156,73 +182,38 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         return result;
     }
 
-    @CheckReturnValue
-    public I getId() {
-        return id;
-    }
-
-    @CheckReturnValue
-    public S getState() {
-        // The EventDispatcher.apply() method waits till the events are processed.
-        // So once apply() finishes, it's safe to return the state.
-        return state;
-    }
-
-    /**
-     * Validates the passed state.
-     * <p/>
-     * Does nothing by default. Aggregate roots may override this method to
-     * specify logic of validating initial or intermediate state of the root.
-     *
-     * @param state a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
-    // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
-        // Do nothing by default.
-    }
-
-    protected void setState(S state) {
-        validate(state);
-        this.state = state;
-    }
-
-    protected void setVersion(int version) {
-        this.version = version;
-    }
-
-    protected void setWhenLastModified(Timestamp whenLastModified) {
-        this.whenLastModified = whenLastModified;
-    }
-
-    /**
-     * @return current version number of the aggregate.
-     */
-    @CheckReturnValue
-    public int getVersion() {
-        return version;
-    }
-
     protected void init() {
-        if (!initialized) {
-            dispatcher = new CommandDispatcher();
-            applier = new EventApplierMap();
+        if (!isInitialized()) {
+            initCommandDispatcher();
+            initEventApplier();
 
-            dispatcher.register(this);
-            applier.register(this);
-
-            if (state == null) {
-                state = getDefaultState();
+            if (getState() == null) {
+                setState(getDefaultState());
             }
 
-            initialized = true;
+            setInitialized();
         }
     }
 
     @CheckReturnValue
     protected boolean isInitialized() {
         return initialized;
+    }
+
+    protected void setInitialized() {
+        initialized = true;
+    }
+
+    protected void initEventApplier() {
+        applier = new EventApplierMap();
+        applier.register(this);
+    }
+
+
+    private void initCommandDispatcher() {
+        dispatcher = new CommandDispatcher();
+        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        dispatcher.register(subscribers);
     }
 
     /**
@@ -234,19 +225,11 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     }
 
     @CheckReturnValue
-    public Timestamp whenLastModified() {
-        return this.whenLastModified;
-    }
-
-    @CheckReturnValue
     public List<EventRecord> commitEvents() {
         List<EventRecord> result = ImmutableList.copyOf(eventRecords);
         eventRecords.clear();
         return result;
     }
-
-    @CheckReturnValue
-    protected abstract S getDefaultState();
 
     /**
      * Creates a context for an event.
@@ -274,7 +257,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
         EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
-                .setAggregateId(idAsAny);
+                .setAggregateId(getIdAsAny());
 
         if (eventContextHasState()) {
             builder.setAggregateState(state);
@@ -322,14 +305,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message> {
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
 
-        List<? extends Message> result = dispatcher.dispatchToAggregate(Command.of(command), context);
+        List<? extends Message> result = dispatch(Command.of(command), context);
         return result;
     }
 
-    private int incrementVersion() {
-        ++version;
-        whenLastModified = getCurrentTime();
-
-        return version;
-    }
 }

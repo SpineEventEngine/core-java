@@ -18,31 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.util;
 
-import com.google.common.eventbus.Subscribe;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 
 /**
- * Interface for command handler classes.
+ * Provides utility for filtering lists with predicates.
  *
- * @author Alexander Yevsyukov
- * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
-public interface CommandHandler<T extends Message> {
+@SuppressWarnings("UtilityClass")
+public class Lists {
+
+    private Lists() {
+    }
+
+    //TODO:2015-09-06:alexander.yevsyukov: Don't we have this in Interables already?
 
     /**
-     * Handles incoming command of the {@link T} type.
+     * Filters list with a predicate.
      *
-     * @param command the command to handle
-     * @param context the context of the command
-     * @return a list of the event records
+     * @param list      a list to filter
+     * @param predicate a predicate to filter list
+     * @param <T>       list object type
+     * @return immutable list
      */
-    @Subscribe
-    List<EventRecord> handle(T command, CommandContext context);
-
+    public static <T> ImmutableList<T> filter(Iterable<T> list, Predicate<T> predicate) {
+        return FluentIterable.from(list).filter(predicate).toList();
+    }
 }
