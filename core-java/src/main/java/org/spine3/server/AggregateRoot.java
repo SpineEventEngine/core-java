@@ -19,9 +19,9 @@
  */
 package org.spine3.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.*;
 import org.spine3.base.*;
@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
 public abstract class AggregateRoot<I extends Message, S extends Message>
-    extends StoredObject<I, S> {
+        extends StoredObject<I, S> {
 
     private volatile boolean initialized = false;
 
@@ -60,23 +60,74 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         super(id);
     }
 
+    private void init() {
+        if (!isInitialized()) {
+            initCommandDispatcher();
+            initEventApplier();
+
+            if (getState() == null) {
+                setState(getDefaultState());
+            }
+
+            setInitialized();
+        }
+    }
+
+    @CheckReturnValue
+    private boolean isInitialized() {
+        return initialized;
+    }
+
+    private void setInitialized() {
+        initialized = true;
+    }
+
+    private void initEventApplier() {
+        applier = new EventApplierMap();
+        applier.register(this);
+    }
+
+    private void initCommandDispatcher() {
+        dispatcher = new CommandDispatcher();
+        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        dispatcher.register(subscribers);
+    }
+
     /**
-     * Directs a command to the corresponding aggregate handler.
+     * Dispatches commands, generates events and apply them to the aggregate root.
+     *
+     * @param command the command to be executed on aggregate root
+     * @param context of the command
+     * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
+     */
+    @VisibleForTesting  // otherwise this method would have package access.
+    protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
+        init();
+
+        List<? extends Message> events = generateEvents(command, context);
+
+        CommandId commandId = context.getCommandId();
+
+        apply(events, commandId);
+    }
+
+    /**
+     * Directs the passed command to the corresponding command handler method of the aggregate.
      *
      * @param command the command to be processed
      * @param context the context of the command
      * @return a list of the event messages that were produced as the result of handling the command
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    private List<? extends Message> dispatch(Command command, CommandContext context)
+    private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
 
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageSubscriber subscriber = dispatcher.getSubscriber(command.getCommandClass());
+        MessageSubscriber subscriber = dispatcher.getSubscriber(CommandClass.of(command));
 
-        Object handlingResult = subscriber.handle(command.value(), context);
+        Object handlingResult = subscriber.handle(command, context);
 
         //noinspection IfMayBeConditional
         if (List.class.isAssignableFrom(handlingResult.getClass())) {
@@ -92,24 +143,6 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
         Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
         return result;
-    }
-
-    //TODO:2015-07-28:alexander.yevsyukov: Decide if we use Event and Command instead of Message.
-
-    /**
-     * Dispatches commands, generates events and apply them to the aggregate root.
-     *
-     * @param command the command to be executed on aggregate root
-     * @param context of the command
-     * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
-     */
-    protected void dispatch(Message command, CommandContext context) throws InvocationTargetException {
-        init();
-        List<? extends Message> events = generateEvents(command, context);
-
-        CommandId commandId = context.getCommandId();
-
-        apply(events, commandId);
     }
 
     /**
@@ -155,8 +188,11 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
             restore((Snapshot) event);
             return;
         }
-
         applier.apply(event);
+    }
+
+    private void putUncommitted(EventRecord record) {
+        eventRecords.add(record);
     }
 
     /**
@@ -182,40 +218,6 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         return result;
     }
 
-    protected void init() {
-        if (!isInitialized()) {
-            initCommandDispatcher();
-            initEventApplier();
-
-            if (getState() == null) {
-                setState(getDefaultState());
-            }
-
-            setInitialized();
-        }
-    }
-
-    @CheckReturnValue
-    protected boolean isInitialized() {
-        return initialized;
-    }
-
-    protected void setInitialized() {
-        initialized = true;
-    }
-
-    protected void initEventApplier() {
-        applier = new EventApplierMap();
-        applier.register(this);
-    }
-
-
-    private void initCommandDispatcher() {
-        dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
-        dispatcher.register(subscribers);
-    }
-
     /**
      * @return immutable view of records for uncommitted events
      */
@@ -234,9 +236,6 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     /**
      * Creates a context for an event.
      * <p>
-     * The created context will hold the state of the root, if {@link #eventContextHasState()} returns {@code true}
-     * (which is the default behaviour).
-     * <p>
      * The context may optionally have custom attributes are added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
@@ -245,40 +244,20 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
      * @param currentState   the state of the aggregated root after the event was applied
      * @param currentVersion the version of the aggregate root after the event was applied
      * @return new instance of the {@code EventContext}
-     * @see #eventContextHasState()
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
     protected EventContext createEventContext(CommandId commandId, Message event, S currentState, int currentVersion) {
 
         EventId eventId = Events.generateId(commandId);
 
-        Any state = Messages.toAny(currentState);
-
         EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
 
-        if (eventContextHasState()) {
-            builder.setAggregateState(state);
-        }
-
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
 
         return builder.build();
-    }
-
-    /**
-     * This method controls inclusion of the aggregate root state into an event context.
-     * <p>
-     * By default this method always return {@code true} making event contexts always include states.
-     * Override this method to control the inclusion.
-     *
-     * @return always {@code true}
-     * @see #createEventContext(CommandId, Message, Message, int)
-     */
-    protected boolean eventContextHasState() {
-        return true;
     }
 
     /**
@@ -296,17 +275,6 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     protected void addEventContextAttributes(EventContext.Builder builder,
                                              CommandId commandId, Message event, S currentState, int currentVersion) {
         // Do nothing.
-    }
-
-    private void putUncommitted(EventRecord record) {
-        eventRecords.add(record);
-    }
-
-    private List<? extends Message> generateEvents(Message command, CommandContext context)
-            throws InvocationTargetException {
-
-        List<? extends Message> result = dispatch(Command.of(command), context);
-        return result;
     }
 
 }
