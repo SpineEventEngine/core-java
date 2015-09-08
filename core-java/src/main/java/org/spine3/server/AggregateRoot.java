@@ -24,14 +24,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.TimeUtil;
-import org.spine3.*;
+import com.google.protobuf.Timestamp;
+import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class AggregateRoot<I extends Message, S extends Message>
         extends StoredObject<I, S> {
 
-    /** Cached value of the ID in the form of Any instance. */
+    /**
+     * Cached value of the ID in the form of Any instance.
+     */
     private final Any idAsAny;
 
     private volatile boolean initialized = false;
@@ -66,29 +69,57 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     private void init() {
-        if (!isInitialized()) {
+        if (!this.initialized) {
             initCommandDispatcher();
             initEventApplier();
 
-            if (getState() == null) {
-                setState(getDefaultState(), 0, TimeUtil.getCurrentTime());
+            if (super.getState() == null) {
+                setDefault();
             }
 
-            setInitialized();
+            this.initialized = true;
         }
+    }
+
+    /**
+     * Returns the current state of the aggregate root.
+     *
+     * @return a non-null state object or default state instance
+     */
+    @Nonnull
+    @Override
+    public S getState() {
+        init();
+        final S state = super.getState();
+        // An aggregate root when initialized may not have a null state because:
+        // 1. Its initialization sets the state to default.
+        // 2. Modifications are performed via command handlers or event appliers,
+        //     which involves prior initialization.
+        assert state != null;
+        return state;
+    }
+
+    /**
+     * Returns a non-null timestamp of the last modification.
+     *
+     * @return a non-null instance, which is the timestamp of the last modification or
+     *         the timestamp of the object creation of the root is in the default state
+     */
+    @Nonnull
+    @Override
+    public Timestamp whenLastModified() {
+        init();
+        final Timestamp lastModified = super.whenLastModified();
+        // An aggregate root when initialized may not have a null modification timestamp because:
+        // 1. Its initialization sets the timestamp.
+        // 2. Modifications are performed via command handlers or event appliers,
+        //     which involves prior initialization.
+        assert lastModified != null;
+        return lastModified;
     }
 
     private Any getIdAsAny() {
         return idAsAny;
-    }
-
-    @CheckReturnValue
-    private boolean isInitialized() {
-        return initialized;
-    }
-
-    private void setInitialized() {
-        initialized = true;
     }
 
     private void initEventApplier() {
@@ -184,7 +215,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Applies an event to the aggregate root.
-     * <p>
+     * <p/>
      * If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
@@ -245,7 +276,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Creates a context for an event.
-     * <p>
+     * <p/>
      * The context may optionally have custom attributes are added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
@@ -272,7 +303,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p>
+     * <p/>
      * Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
@@ -286,4 +317,23 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
                                              CommandId commandId, Message event, S currentState, int currentVersion) {
         // Do nothing.
     }
+
+    /**
+     * Transforms the current state of the aggregate root into the snapshot event.
+     *
+     * @return new snapshot
+     */
+    public Snapshot toSnapshot() {
+        final Any state = Messages.toAny(getState());
+        final int version = getVersion();
+        final Timestamp whenModified = whenLastModified();
+        Snapshot.Builder builder = Snapshot.newBuilder()
+                .setState(state)
+                .setVersion(version)
+                .setWhenLastModified(whenModified);
+
+        return builder.build();
+    }
+
+
 }

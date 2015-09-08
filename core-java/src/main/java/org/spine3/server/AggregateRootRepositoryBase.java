@@ -173,11 +173,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
         //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which should be configured at the repository's level.
 
-        Snapshot snapshot = Snapshot.newBuilder()
-                .setState(Messages.toAny(aggregateRoot.getState()))
-                .setVersion(aggregateRoot.getVersion())
-                .setWhenLastModified(aggregateRoot.whenLastModified())
-                .build();
+        Snapshot snapshot = aggregateRoot.toSnapshot();
 
         //noinspection unchecked
         final I aggregateRootId = (I) aggregateRoot.getId();

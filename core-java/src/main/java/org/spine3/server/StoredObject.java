@@ -22,6 +22,7 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ public abstract class StoredObject<I extends Message, S extends Message> {
     private final I id;
 
     private S state;
-    private Timestamp whenLastModified = getCurrentTime();
-    private int version = 0;
+    private Timestamp whenLastModified;
+    private int version;
 
     protected StoredObject(I id) {
         this.id = id;
@@ -84,6 +85,22 @@ public abstract class StoredObject<I extends Message, S extends Message> {
         this.state = state;
         this.version = version;
         this.whenLastModified = whenLastModified;
+    }
+
+    /**
+     * Sets the object into the default state.
+     * <p>
+     * Results of this method call are:
+     * <ul>
+     *     <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
+     *     <li>The version number is set to zero.</li>
+     *     <li>The timestamp is set to the system time of the call.</li>
+     * </ul>
+     *
+     *     The timestamp is set to current system time.
+     */
+    protected void setDefault() {
+        setState(getDefaultState(), 0, TimeUtil.getCurrentTime());
     }
 
     /**
