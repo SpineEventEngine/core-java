@@ -19,7 +19,7 @@
  */
 package org.spine3.error;
 
-import org.spine3.Event;
+import com.google.protobuf.Message;
 
 /**
  * This exception is thrown on a discovery of an event class, which is not handled by any of
@@ -29,8 +29,8 @@ import org.spine3.Event;
  */
 public class MissingEventApplierException extends RuntimeException {
 
-    public MissingEventApplierException(Event event) {
-        super("There is no registered applier for the event: " + event.getEventClass());
+    public MissingEventApplierException(Message event) {
+        super("There is no registered applier for the event: " + event.getClass());
     }
 
     private static final long serialVersionUID = 0L;

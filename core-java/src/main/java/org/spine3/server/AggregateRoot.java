@@ -156,7 +156,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
             return;
         }
 
-        applier.apply(Event.of(event));
+        applier.apply(event);
     }
 
     /**
