@@ -25,7 +25,7 @@ import org.spine3.util.Commands;
 /**
  * Exception is thrown if a command, which is intended to be used for an aggregate
  * does not have {@code getAggregateId()} method.
- * <p/>
+ * <p>
  * To have this method in Java, corresponding Protobuf message definition must have
  * the property called {@code aggregate_id}.
  *

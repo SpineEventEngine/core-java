@@ -62,7 +62,7 @@ public class AggregateCommand extends AbstractCommand {
 
     /**
      * Obtains an aggregate id from the passed command instance.
-     * <p/>
+     * <p>
      * The id value must be the first field of the proto file. Its name must end with "id".
      *
      * @param command the command to get id from

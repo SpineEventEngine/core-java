@@ -77,7 +77,7 @@ public class Messages {
      * Unwraps {@link Any} instance object to {@link Message}
      * that was put inside it and returns as the instance of object
      * with described by {@link Any#getTypeUrl()}.
-     * <p/>
+     * <p>
      * NOTE: This is temporary solution and should be reworked in the future
      * when Protobuf provides means for working with {@link Any}.
      *
@@ -116,7 +116,7 @@ public class Messages {
 
     /**
      * Returns message {@link Class} for the given Protobuf message type.
-     * <p/>
+     * <p>
      * This method is temporary until full support of {@link Any} is provided.
      *
      * @param messageType full type name defined in the proto files
