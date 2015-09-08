@@ -142,7 +142,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Applies an event to the aggregate root.
-     * <p/>
+     * <p>
      * If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
@@ -233,10 +233,10 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Creates a context for an event.
-     * <p/>
+     * <p>
      * The created context will hold the state of the root, if {@link #eventContextHasState()} returns {@code true}
      * (which is the default behaviour).
-     * <p/>
+     * <p>
      * The context may optionally have custom attributes are added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
@@ -270,7 +270,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * This method controls inclusion of the aggregate root state into an event context.
-     * <p/>
+     * <p>
      * By default this method always return {@code true} making event contexts always include states.
      * Override this method to control the inclusion.
      *
@@ -283,7 +283,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p/>
+     * <p>
      * Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context

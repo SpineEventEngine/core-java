@@ -61,7 +61,7 @@ public abstract class StoredObject<I extends Message, S extends Message> {
 
     /**
      * Validates the passed state.
-     * <p/>
+     * <p>
      * Does nothing by default. Aggregate roots may override this method to
      * specify logic of validating initial or intermediate state of the root.
      *

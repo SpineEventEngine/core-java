@@ -106,7 +106,7 @@ class ServerMethods {
 
     /**
      * Checks if the passed method is an event handlers.
-     * <p/>
+     * <p>
      * An event handler must accept a type derived from {@link Message} as the first parameter,
      * have {@link EventContext} value as the second parameter, and return {@code void}.
      *
@@ -224,7 +224,7 @@ class ServerMethods {
 
     /**
      * Returns the first param type of the passed method object.
-     * <p/>
+     * <p>
      * It is expected that the first parameter of a handler or an applier method is always of {@code Message} class.
      *
      * @param handler the method object to take first parameter type from

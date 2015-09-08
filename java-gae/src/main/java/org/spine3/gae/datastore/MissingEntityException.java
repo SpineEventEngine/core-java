@@ -25,7 +25,7 @@ import org.spine3.util.Commands;
 
 /**
  * Exception is thrown if the data store could not read entity by id.
- * <p/>
+ * <p>
  * To be found entity should first be stored into data store.
  *
  * @author Mikhail Meikhaylov

@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Value object for aggregate root IDs.
- * <p/>
+ * <p>
  * An aggregate root ID can be defined as any valid Protobuf message, which content fits the business
  * logic of an application. The purpose of this class is to provide type safety for these messages.
  *

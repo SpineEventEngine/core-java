@@ -191,7 +191,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
     /**
      * Creates, initializes, and stores a new aggregated root.
-     * <p/>
+     * <p>
      * The command is passed to the newly created root with the default state.
      *
      * @param command creation command
