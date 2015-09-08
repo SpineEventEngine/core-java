@@ -85,7 +85,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
-     * Creates a map of subscribers that call {@link Repository#dispatch(Message, CommandContext)}
+     * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class of this repository.
      */
     private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
@@ -157,8 +157,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
             throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
         }
 
-        //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which
-        // should be configured at the repository's level.
+        //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which should be configured at the repository's level.
 
         Snapshot snapshot = Snapshot.newBuilder()
                 .setState(Messages.toAny(aggregateRoot.getState()))
