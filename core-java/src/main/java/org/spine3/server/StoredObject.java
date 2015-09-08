@@ -22,7 +22,6 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -109,7 +108,7 @@ public abstract class StoredObject<I extends Message, S extends Message> {
      *     The timestamp is set to current system time.
      */
     protected void setDefault() {
-        setState(getDefaultState(), 0, TimeUtil.getCurrentTime());
+        setState(getDefaultState(), 0, getCurrentTime());
     }
 
     /**
