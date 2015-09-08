@@ -37,10 +37,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  */
 public abstract class StoredObject<I extends Message, S extends Message> {
 
-    //TODO:2015-09-07:alexander.yevsyukov: Rename this class to Entity?
-
     private final I id;
-    private final Any idAsAny;
 
     private S state;
     private Timestamp whenLastModified = getCurrentTime();
@@ -48,7 +45,6 @@ public abstract class StoredObject<I extends Message, S extends Message> {
 
     protected StoredObject(I id) {
         this.id = id;
-        this.idAsAny = Messages.toAny(id);
     }
 
     @CheckReturnValue
@@ -105,10 +101,6 @@ public abstract class StoredObject<I extends Message, S extends Message> {
     @CheckReturnValue
     public I getId() {
         return id;
-    }
-
-    public Any getIdAsAny() {
-        return idAsAny;
     }
 
     @CheckReturnValue

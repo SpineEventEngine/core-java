@@ -21,6 +21,7 @@
 package org.spine3.server;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;

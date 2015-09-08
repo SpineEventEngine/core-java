@@ -19,10 +19,8 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
@@ -52,10 +50,9 @@ public class EventStore {
      * Loads all events from given timestamp.
      *
      * @param from timestamp to load events from
-     * @param <ID> aggregate id type
      * @return list of events
      */
-    public <ID extends Message> List<EventRecord> getEvents(Timestamp from) {
+    public List<EventRecord> getEvents(Timestamp from) {
         List<EventRecord> result = storage.read(from);
         return result;
     }

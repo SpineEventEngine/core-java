@@ -48,15 +48,38 @@ import static com.google.common.base.Throwables.propagate;
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRootRepositoryBase<I extends Message,
-        R extends AggregateRoot,
-        C extends Message> implements AggregateRootRepository<I, R, C> {
-
-    public static final String REPOSITORY_NOT_CONFIGURED = "Repository instance is not configured."
-            + "Call the configure() method before trying to load/save the aggregate root.";
+                                                  R extends AggregateRoot,
+                                                  C extends Message> implements AggregateRootRepository<I, R, C> {
 
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     private RepositoryEventStore eventStore;
+
+    private final Constructor<R> aggregateRootConstructor;
+
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
+    protected AggregateRootRepositoryBase() {
+        try {
+            Class<R> rootClass = TypeInfo.getStoredObjectClass(this);
+            Class<I> idClass = TypeInfo.getStoredObjectIdClass(this);
+
+            aggregateRootConstructor = rootClass.getConstructor(idClass);
+        } catch (NoSuchMethodException e) {
+            throw propagate(e);
+        }
+    }
+
+    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
+    /**
+     * Configures repository with passed implementation of the aggregate storage.
+     * It is used for storing and loading aggregated root during handling
+     * of the incoming commands.
+     *
+     * @param eventStore the event store implementation
+     */
+    public void configure(RepositoryEventStore eventStore) {
+        this.eventStore = eventStore;
+    }
 
     public Map<CommandClass, MessageSubscriber> getSubscribers() {
         // Create subscribers that call dispatch() on message classes handled by the aggregate root.
@@ -101,30 +124,16 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         return result;
     }
 
-    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
-
-    /**
-     * Configures repository with passed implementation of the aggregate storage.
-     * It is used for storing and loading aggregated root during handling
-     * of the incoming commands.
-     *
-     * @param eventStore the event store implementation
-     */
-    public void configure(RepositoryEventStore eventStore) {
-        this.eventStore = eventStore;
-    }
-
     /**
      * Loads the an aggregate by given id.
      *
      * @param aggregateId id of the aggregate to load
      * @return the loaded object
+     * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
     @Override
     public R load(I aggregateId) throws IllegalStateException {
-        if (eventStore == null) {
-            throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
-        }
+        checkConfigured();
 
         try {
             Snapshot snapshot = eventStore.getLastSnapshot(aggregateId);
@@ -145,6 +154,13 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         }
     }
 
+    private void checkConfigured() {
+        if (eventStore == null) {
+            throw new IllegalStateException("Repository instance is not configured."
+                    + "Call the configure() method before trying to load/save the aggregate root.");
+        }
+    }
+
     /**
      * Stores the passed aggregate root.
      *
@@ -153,9 +169,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     @Override
     public void store(R aggregateRoot) {
         //TODO:2015-09-05:alexander.yevsyukov: It's too late to check it at this stage.
-        if (eventStore == null) {
-            throw new IllegalStateException(REPOSITORY_NOT_CONFIGURED);
-        }
+        checkConfigured();
 
         //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which should be configured at the repository's level.
 
@@ -237,20 +251,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw propagate(e);
-        }
-    }
-
-    private final Constructor<R> aggregateRootConstructor;
-
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
-    protected AggregateRootRepositoryBase() {
-        try {
-            Class<R> rootClass = TypeInfo.getStoredObjectClass(this);
-            Class<I> idClass = TypeInfo.getStoredObjectIdClass(this);
-
-            aggregateRootConstructor = rootClass.getConstructor(idClass);
-        } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
     }

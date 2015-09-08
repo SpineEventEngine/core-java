@@ -22,6 +22,7 @@ package org.spine3.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.*;
 import org.spine3.base.*;
@@ -49,8 +50,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class AggregateRoot<I extends Message, S extends Message>
         extends StoredObject<I, S> {
 
-    private volatile boolean initialized = false;
+    /** Cached value of the ID in the form of Any instance. */
+    private final Any idAsAny;
 
+    private volatile boolean initialized = false;
     private CommandDispatcher dispatcher;
     private EventApplierMap applier;
 
@@ -58,6 +61,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     protected AggregateRoot(I id) {
         super(id);
+        this.idAsAny = Messages.toAny(id);
     }
 
     private void init() {
@@ -71,6 +75,10 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
             setInitialized();
         }
+    }
+
+    private Any getIdAsAny() {
+        return idAsAny;
     }
 
     @CheckReturnValue
@@ -226,6 +234,11 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         return ImmutableList.copyOf(eventRecords);
     }
 
+    /**
+     * Returns and clears the events that were uncommitted before the call of this method.
+     *
+     * @return the list of event records
+     */
     @CheckReturnValue
     public List<EventRecord> commitEvents() {
         List<EventRecord> result = ImmutableList.copyOf(eventRecords);
@@ -276,5 +289,4 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
                                              CommandId commandId, Message event, S currentState, int currentVersion) {
         // Do nothing.
     }
-
 }
