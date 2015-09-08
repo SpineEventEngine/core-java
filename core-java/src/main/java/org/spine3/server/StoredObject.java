@@ -20,17 +20,16 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * A business object stored by a repository.
+ * A server-side wrapper for message objects with identity stored by a repository.
  *
  * @param <I> the type of object IDs
  * @param <S> the type of object states.
@@ -50,7 +49,11 @@ public abstract class StoredObject<I extends Message, S extends Message> {
     @CheckReturnValue
     protected abstract S getDefaultState();
 
+    /**
+     * @return the current state object or {@code null} if the state wasn't set
+     */
     @CheckReturnValue
+    @Nullable
     public S getState() {
         return state;
     }
@@ -70,19 +73,32 @@ public abstract class StoredObject<I extends Message, S extends Message> {
         // Do nothing by default.
     }
 
-    protected void setState(S state) {
+    /**
+     * Validates and sets the state.
+     *
+     * @param state the state object to set
+     * @see #validate(S)
+     */
+    protected void setState(S state, int version, Timestamp whenLastModified) {
         validate(state);
         this.state = state;
+        this.version = version;
+        this.whenLastModified = whenLastModified;
     }
 
     /**
-     * @return current version number of the aggregate.
+     * @return current version number
      */
     @CheckReturnValue
     public int getVersion() {
         return version;
     }
 
+    /**
+     * Advances the current version by one and records the time of the modification.
+     *
+     * @return new version number
+     */
     protected int incrementVersion() {
         ++version;
         whenLastModified = getCurrentTime();
@@ -90,20 +106,19 @@ public abstract class StoredObject<I extends Message, S extends Message> {
         return version;
     }
 
-    protected void setVersion(int version) {
-        this.version = version;
-    }
-
-    protected void setWhenLastModified(Timestamp whenLastModified) {
-        this.whenLastModified = whenLastModified;
-    }
-
     @CheckReturnValue
     public I getId() {
         return id;
     }
 
+    /**
+     * Obtains the timestamp of the last modification.
+     *
+     * @return the timestamp instance or {@code null} if the state wasn't set
+     * @see #setState(Message, int, Timestamp)
+     */
     @CheckReturnValue
+    @Nullable
     public Timestamp whenLastModified() {
         return this.whenLastModified;
     }

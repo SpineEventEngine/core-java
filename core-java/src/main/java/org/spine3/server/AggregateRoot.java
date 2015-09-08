@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.*;
 import org.spine3.base.*;
 import org.spine3.error.MissingEventApplierException;
@@ -70,7 +71,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
             initEventApplier();
 
             if (getState() == null) {
-                setState(getDefaultState());
+                setState(getDefaultState(), 0, TimeUtil.getCurrentTime());
             }
 
             setInitialized();
@@ -208,14 +209,10 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
      *
      * @param snapshot the snapshot with the state to restore
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Have this type to make API more obvious.
-    public void restore(Snapshot snapshot) {
-        setVersion(snapshot.getVersion());
-
+    public void restore(SnapshotOrBuilder snapshot) {
         S stateToRestore = Messages.fromAny(snapshot.getState());
-        setState(stateToRestore);
 
-        setWhenLastModified(snapshot.getWhenLastModified());
+        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenLastModified());
     }
 
     private static EventRecord createEventRecord(Message event, EventContext context) {
