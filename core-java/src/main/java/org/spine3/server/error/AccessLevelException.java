@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.error;
 
 import org.spine3.server.AggregateRoot;
 import org.spine3.server.Repository;
@@ -45,7 +45,7 @@ public class AccessLevelException extends RuntimeException {
     }
 
     public static AccessLevelException forRepositoryCommandHandler(Repository repository, Method method) {
-        return new AccessLevelException(messageForRepositryCommandHandler(repository, method));
+        return new AccessLevelException(messageForRepositoryCommandHandler(repository, method));
     }
 
     public static AccessLevelException forEventApplier(AggregateRoot aggregate, Method method) {
@@ -72,7 +72,7 @@ public class AccessLevelException extends RuntimeException {
                 MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
     }
 
-    private static String messageForRepositryCommandHandler(Object repository, Method method) {
+    private static String messageForRepositoryCommandHandler(Object repository, Method method) {
         return "Command handler of the repository " + Methods.getFullMethodName(repository, method) +
                 MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
     }

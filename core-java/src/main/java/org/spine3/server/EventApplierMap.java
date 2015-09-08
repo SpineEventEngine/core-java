@@ -22,7 +22,7 @@ package org.spine3.server;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
-import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.error.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

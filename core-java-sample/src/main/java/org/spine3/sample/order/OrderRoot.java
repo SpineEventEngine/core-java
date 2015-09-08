@@ -81,8 +81,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         Order newState = prepareState(event);
 
         validate(newState);
-
-        setState(newState);
+        incrementState(newState);
     }
 
     @Subscribe
@@ -90,8 +89,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         Order newState = prepareState(event);
 
         validate(newState);
-
-        setState(newState);
+        incrementState(newState);
     }
 
     @Subscribe
@@ -99,8 +97,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         Order newState = prepareState(event);
 
         validate(newState);
-
-        setState(newState);
+        incrementState(newState);
     }
 
     private static void validateCommand(AddOrderLine cmd) {

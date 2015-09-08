@@ -88,6 +88,15 @@ public abstract class StoredObject<I extends Message, S extends Message> {
     }
 
     /**
+     * Updates the state incrementing the version number and recording time of the modification
+     *
+     * @param newState a new state to set
+     */
+    protected void incrementState(S newState) {
+        setState(newState, incrementVersion(), getCurrentTime());
+    }
+
+    /**
      * Sets the object into the default state.
      * <p>
      * Results of this method call are:

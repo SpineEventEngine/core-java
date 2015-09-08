@@ -25,9 +25,10 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
-import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
 
@@ -318,6 +319,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         // Do nothing.
     }
 
+
     /**
      * Transforms the current state of the aggregate root into the snapshot event.
      *
@@ -334,6 +336,4 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
         return builder.build();
     }
-
-
 }

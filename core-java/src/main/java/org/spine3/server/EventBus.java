@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 
 import java.lang.reflect.InvocationTargetException;
