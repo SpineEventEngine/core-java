@@ -24,20 +24,20 @@ import com.google.protobuf.Message;
 /**
  * Base interface for repositories.
  *
- * @param <O> the type of the stored object
+ * @param <E> the type of the stored object
  * @param <I> the type of the IDs of stored objects
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 public interface Repository<I extends Message,
-                            O extends StoredObject> extends ManyCommandHandler {
+                            E extends Entity<I, ?>> extends ManyCommandHandler {
     /**
      * Stores the passed object.
      *
      * @param obj an instance to store
      */
-    void store(O obj);
+    void store(E obj);
 
     /**
      * Loads the an aggregate by given id.
@@ -45,7 +45,7 @@ public interface Repository<I extends Message,
      * @param objectId id of the aggregate to load
      * @return the loaded object
      */
-    O load(I objectId);
+    E load(I objectId);
 
     @SuppressWarnings("UtilityClass")
     class TypeInfo {

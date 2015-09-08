@@ -26,7 +26,6 @@ import org.spine3.AggregateCommand;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.Messages;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +47,7 @@ import static com.google.common.base.Throwables.propagate;
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRootRepositoryBase<I extends Message,
-                                                  R extends AggregateRoot,
+                                                  R extends AggregateRoot<I, ?>,
                                                   C extends Message> implements AggregateRootRepository<I, R, C> {
 
     private static final String DISPATCH_METHOD_NAME = "dispatch";

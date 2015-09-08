@@ -21,7 +21,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
@@ -35,11 +34,11 @@ import java.util.Map;
  * @param <I> the type of the IDs of the stateful handlers
  * @param <S> the type of the state objects
  */
-public abstract class StoredEventHandler<I extends Message, S extends Message> extends StoredObject<I, S> {
+public abstract class EventHandlingEntity<I extends Message, S extends Message> extends Entity<I, S> {
 
     private Map<EventClass, MessageSubscriber> handlers;
 
-    protected StoredEventHandler(I id) {
+    protected EventHandlingEntity(I id) {
         super(id);
     }
 

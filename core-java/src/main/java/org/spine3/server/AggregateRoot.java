@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.server.error.MissingEventApplierException;
@@ -51,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
 public abstract class AggregateRoot<I extends Message, S extends Message>
-        extends StoredObject<I, S> {
+        extends Entity<I, S> {
 
     /**
      * Cached value of the ID in the form of Any instance.
