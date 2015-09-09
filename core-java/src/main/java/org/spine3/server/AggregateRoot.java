@@ -128,7 +128,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     private void initCommandDispatcher() {
         dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        Map<CommandClass, MessageHandler> subscribers = getCommandHandlers();
         dispatcher.register(subscribers);
     }
 
@@ -164,7 +164,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageSubscriber subscriber = dispatcher.getSubscriber(CommandClass.of(command));
+        MessageHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
@@ -179,8 +179,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         }
     }
 
-    private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
-        Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
+    private Map<CommandClass, MessageHandler> getCommandHandlers() {
+        Map<CommandClass, MessageHandler> result = ServerMethods.scanForCommandHandlers(this);
         return result;
     }
 

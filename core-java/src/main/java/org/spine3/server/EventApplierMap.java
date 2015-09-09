@@ -39,7 +39,7 @@ import static org.spine3.server.ServerMethods.scanForEventAppliers;
  */
 class EventApplierMap {
 
-    private final Map<EventClass, MessageSubscriber> subscribersByType;
+    private final Map<EventClass, MessageHandler> subscribersByType;
 
     /**
      * Constructs a new instance for the passed aggregated root.
@@ -49,18 +49,18 @@ class EventApplierMap {
     EventApplierMap(AggregateRoot aggregateRoot) {
         checkNotNull(aggregateRoot);
 
-        Map<EventClass, MessageSubscriber> appliers = scanForEventAppliers(aggregateRoot);
+        Map<EventClass, MessageHandler> appliers = scanForEventAppliers(aggregateRoot);
         checkDuplicates(appliers);
 
-        this.subscribersByType = ImmutableMap.<EventClass, MessageSubscriber>builder().putAll(appliers).build();
+        this.subscribersByType = ImmutableMap.<EventClass, MessageHandler>builder().putAll(appliers).build();
     }
 
-    private void checkDuplicates(Map<EventClass, MessageSubscriber> appliers) {
-        for (Map.Entry<EventClass, MessageSubscriber> entry : appliers.entrySet()) {
+    private void checkDuplicates(Map<EventClass, MessageHandler> appliers) {
+        for (Map.Entry<EventClass, MessageHandler> entry : appliers.entrySet()) {
             EventClass eventClass = entry.getKey();
 
             if (subscriberRegistered(eventClass)) {
-                final MessageSubscriber alreadyAddedApplier = getSubscriber(eventClass);
+                final MessageHandler alreadyAddedApplier = getSubscriber(eventClass);
                 throw new DuplicateApplierException(alreadyAddedApplier.getTargetClass(),
                         eventClass, alreadyAddedApplier.getShortName(), entry.getValue().getShortName());
             }
@@ -81,11 +81,11 @@ class EventApplierMap {
             throw new MissingEventApplierException(event);
         }
 
-        MessageSubscriber subscriber = getSubscriber(eventClass);
+        MessageHandler subscriber = getSubscriber(eventClass);
         subscriber.handle(event);
     }
 
-    private MessageSubscriber getSubscriber(EventClass eventClass) {
+    private MessageHandler getSubscriber(EventClass eventClass) {
         return subscribersByType.get(eventClass);
     }
 

@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    private final Map<CommandClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
+    private final Map<CommandClass, MessageHandler> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
      * Register the passed command handler in the dispatcher.
@@ -49,7 +49,7 @@ public class CommandDispatcher {
      * @param handler a command handler object
      */
     public void register(CommandHandler handler) {
-        Map<CommandClass, MessageSubscriber> subscribers = getSubscribers(checkNotNull(handler));
+        Map<CommandClass, MessageHandler> subscribers = getHandlers(checkNotNull(handler));
         register(subscribers);
     }
 
@@ -60,31 +60,31 @@ public class CommandDispatcher {
      */
     public void register(ManyCommandHandler handler) {
         checkNotNull(handler);
-        Map<CommandClass, MessageSubscriber> subscribers = handler.getSubscribers();
+        Map<CommandClass, MessageHandler> subscribers = handler.getHandlers();
         register(subscribers);
     }
 
     /**
-     * Registers the passed subscribers with the dispatcher.
+     * Registers the passed handlers with the dispatcher.
      *
-     * @param subscribers map from command classes to corresponding subscribers
+     * @param handlers map from command classes to corresponding handlers
      */
-    public void register(Map<CommandClass, MessageSubscriber> subscribers) {
-        checkSubscribers(subscribers);
-        putAll(subscribers);
+    public void register(Map<CommandClass, MessageHandler> handlers) {
+        checkDuplicates(handlers);
+        putAll(handlers);
     }
 
-    private static Map<CommandClass, MessageSubscriber> getSubscribers(CommandHandler handler) {
-        Map<CommandClass, MessageSubscriber> subscribers = ServerMethods.scanForCommandHandlers(handler);
+    private static Map<CommandClass, MessageHandler> getHandlers(CommandHandler handler) {
+        Map<CommandClass, MessageHandler> subscribers = ServerMethods.scanForCommandHandlers(handler);
         return subscribers;
     }
 
-    private void checkSubscribers(Map<CommandClass, MessageSubscriber> subscribers) {
-        for (Map.Entry<CommandClass, MessageSubscriber> entry : subscribers.entrySet()) {
+    private void checkDuplicates(Map<CommandClass, MessageHandler> handlers) {
+        for (Map.Entry<CommandClass, MessageHandler> entry : handlers.entrySet()) {
             CommandClass commandClass = entry.getKey();
 
-            if (subscriberRegistered(commandClass)) {
-                final MessageSubscriber alreadyAddedHandler = getSubscriber(commandClass);
+            if (handlerRegistered(commandClass)) {
+                final MessageHandler alreadyAddedHandler = getHandler(commandClass);
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
                                                                    alreadyAddedHandler.getFullName(),
                                                                    entry.getValue().getFullName());
@@ -99,6 +99,7 @@ public class CommandDispatcher {
      * @param context the context of the command
      * @return a list of the event records as the result of handling the command
      * @throws InvocationTargetException if an exception occurs during command handling
+     * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
      */
     public List<EventRecord> dispatch(Message command, CommandContext context)
             throws InvocationTargetException {
@@ -107,25 +108,25 @@ public class CommandDispatcher {
         checkNotNull(context);
 
         CommandClass commandClass = CommandClass.of(command);
-        if (!subscriberRegistered(commandClass)) {
+        if (!handlerRegistered(commandClass)) {
             throw new UnsupportedCommandException(command);
         }
 
-        MessageSubscriber subscriber = getSubscriber(commandClass);
+        MessageHandler subscriber = getHandler(commandClass);
         List<EventRecord> result = subscriber.handle(command, context);
         return result;
     }
 
-    private void putAll(Map<CommandClass, MessageSubscriber> subscribers) {
-        subscribersByType.putAll(subscribers);
+    private void putAll(Map<CommandClass, MessageHandler> subscribers) {
+        handlersByCommandClass.putAll(subscribers);
     }
 
-    public MessageSubscriber getSubscriber(CommandClass cls) {
-        return subscribersByType.get(cls);
+    public MessageHandler getHandler(CommandClass cls) {
+        return handlersByCommandClass.get(cls);
     }
 
-    public boolean subscriberRegistered(CommandClass cls) {
-        return subscribersByType.containsKey(cls);
+    public boolean handlerRegistered(CommandClass cls) {
+        return handlersByCommandClass.containsKey(cls);
     }
 
 }

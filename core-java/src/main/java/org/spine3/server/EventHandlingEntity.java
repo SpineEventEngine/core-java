@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public abstract class EventHandlingEntity<I extends Message, S extends Message> extends Entity<I, S> {
 
-    private Map<EventClass, MessageSubscriber> handlers;
+    private Map<EventClass, MessageHandler> handlers;
 
     protected EventHandlingEntity(I id) {
         super(id);
@@ -52,7 +52,7 @@ public abstract class EventHandlingEntity<I extends Message, S extends Message> 
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
-        MessageSubscriber method = handlers.get(EventClass.of(event));
+        MessageHandler method = handlers.get(EventClass.of(event));
         if (method != null) {
             method.handle(event, ctx);
         }
@@ -63,7 +63,7 @@ public abstract class EventHandlingEntity<I extends Message, S extends Message> 
     }
 
     protected void init() {
-        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
         builder.putAll(ServerMethods.scanForEventHandlers(this));
         this.handlers = builder.build();
     }

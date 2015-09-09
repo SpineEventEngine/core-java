@@ -25,12 +25,12 @@ import org.spine3.CommandClass;
 import java.util.Map;
 
 /**
- * The common inferface for classes handling more than one command.
+ * The common interface for classes handling more than one command.
  *
  * @author Alexander Yevsyukov
  * @see CommandHandler
  */
 public interface ManyCommandHandler {
 
-    Map<CommandClass, MessageSubscriber> getSubscribers();
+    Map<CommandClass, MessageHandler> getHandlers();
 }
