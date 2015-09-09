@@ -17,12 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+package org.spine3.internal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.error.AccessLevelException;
+import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

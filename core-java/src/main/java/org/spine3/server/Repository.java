@@ -28,12 +28,10 @@ import org.spine3.util.Classes;
  *
  * @param <E> the type of the stored object
  * @param <I> the type of the IDs of stored objects
- *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I extends Message,
-                            E extends Entity<I, ?>> extends ManyCommandHandler {
+public interface Repository<I extends Message, E extends Entity<I, ?>> {
     /**
      * Stores the passed object.
      *
@@ -55,7 +53,8 @@ public interface Repository<I extends Message,
         public static final int STORED_OBJECT_ID_CLASS_GENERIC_INDEX = 0;
         public static final int STORED_OBJECT_CLASS_GENERIC_INDEX = 1;
 
-        private TypeInfo() {}
+        private TypeInfo() {
+        }
 
         /**
          * Returns {@link Class} object representing the aggregate id type of the given repository.

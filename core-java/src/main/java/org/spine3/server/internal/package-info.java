@@ -17,17 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
 
 /**
- * @author Mikhail Melnik
+ * Classes and interfaces in this package are for internal use of the framework.
  */
-public class CommandBusTest {
+@ParametersAreNonnullByDefault package org.spine3.server.internal;
 
-    private CommandDispatcher commandBus;
-
-    public CommandBusTest() {
-        commandBus = new CommandDispatcher();
-    }
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

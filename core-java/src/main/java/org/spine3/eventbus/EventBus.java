@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.internal.EventHandler;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.eventbus.EventHandler.scan;
+import static org.spine3.internal.EventHandler.scan;
 
 /**
  * Manages incoming events to the appropriate registered handler

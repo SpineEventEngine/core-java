@@ -24,8 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.eventbus.EventHandler;
-import org.spine3.util.MessageHandler;
+import org.spine3.internal.EventHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

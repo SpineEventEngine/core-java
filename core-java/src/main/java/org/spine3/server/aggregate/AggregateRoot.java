@@ -32,8 +32,10 @@ import org.spine3.base.*;
 import org.spine3.server.*;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.internal.CommandDispatcher;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.util.Events;
-import org.spine3.util.MessageHandler;
+import org.spine3.internal.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -198,8 +201,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     private void initCommandDispatcher() {
         dispatcher = new CommandDispatcher();
-        java.util.Map subscribers = getCommandHandlers();
-        dispatcher.register(subscribers);
+        dispatcher.register(this);
     }
 
     /**
@@ -249,8 +251,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         }
     }
 
-    private java.util.Map getCommandHandlers() {
-        java.util.Map result = CommandHandler.scan(this);
+    private Map<CommandClass, CommandHandler> getCommandHandlers() {
+        Map<CommandClass, CommandHandler> result = CommandHandler.scan(this);
         return result;
     }
 

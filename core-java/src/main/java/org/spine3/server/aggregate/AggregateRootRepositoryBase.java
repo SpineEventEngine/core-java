@@ -25,7 +25,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.Assign;
-import org.spine3.server.CommandHandler;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
 
@@ -80,17 +80,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     public void configure(RepositoryEventStore eventStore) {
         this.eventStore = eventStore;
-    }
-
-    public Map<CommandClass, CommandHandler> getHandlers() {
-        // Create subscribers that call dispatch() on message classes handled by the aggregate root.
-        Map<CommandClass, CommandHandler> subscribers = createDelegatingSubscribers();
-
-        // Add command handlers belonging to this repository.
-        Map<CommandClass, CommandHandler> repoSubscribers = CommandHandler.scan(this);
-        subscribers.putAll(repoSubscribers);
-
-        return subscribers;
     }
 
     /**

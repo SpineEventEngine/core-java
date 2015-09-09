@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.internal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -26,8 +26,10 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.error.AccessLevelException;
+import org.spine3.server.Assign;
+import org.spine3.server.Repository;
 import org.spine3.server.aggregate.AggregateRoot;
-import org.spine3.util.MessageHandler;
+import org.spine3.internal.MessageHandler;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;

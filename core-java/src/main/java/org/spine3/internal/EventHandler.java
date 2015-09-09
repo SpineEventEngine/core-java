@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.eventbus;
+package org.spine3.internal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
@@ -26,8 +26,8 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
+import org.spine3.eventbus.Subscribe;
 import org.spine3.server.Repository;
-import org.spine3.util.MessageHandler;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;

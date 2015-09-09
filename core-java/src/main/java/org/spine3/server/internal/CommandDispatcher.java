@@ -17,16 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.internal;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.internal.MessageHandler;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -45,14 +45,20 @@ public class CommandDispatcher {
     private final Map<CommandClass, CommandHandler> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
-     * Registers the passed hander of many commands in the dispatcher.
+     * Registers the passed object of many commands in the dispatcher.
      *
-     * @param handler a {@code non-null} handler
+     * @param object a {@code non-null} object
      */
-    public void register(ManyCommandHandler handler) {
-        checkNotNull(handler);
-        Map<CommandClass, CommandHandler> subscribers = handler.getHandlers();
-        register(subscribers);
+    public void register(Object object) {
+        checkNotNull(object);
+        Map<CommandClass, CommandHandler> subscribers = CommandHandler.scan(object);
+        registerMap(subscribers);
+    }
+
+    public void unregister(Object object) {
+        checkNotNull(object);
+        Map<CommandClass, CommandHandler> subscribers = CommandHandler.scan(object);
+        unregisterMap(subscribers);
     }
 
     /**
@@ -60,9 +66,26 @@ public class CommandDispatcher {
      *
      * @param handlers map from command classes to corresponding handlers
      */
-    public void register(Map<CommandClass, CommandHandler> handlers) {
+    private void registerMap(Map<CommandClass, CommandHandler> handlers) {
         checkDuplicates(handlers);
         putAll(handlers);
+    }
+
+    private void unregisterMap(Map<CommandClass, CommandHandler> handlers) {
+        for (Map.Entry<CommandClass, CommandHandler> entry : handlers.entrySet()) {
+            final CommandClass commandClass = entry.getKey();
+            if (handlerRegistered(commandClass)) {
+                CommandHandler registered = getHandler(commandClass);
+                CommandHandler passed = entry.getValue();
+                if (registered.equals(passed)) {
+                    removeFor(commandClass);
+                }
+            }
+        }
+    }
+
+    private void removeFor(CommandClass commandClass) {
+        handlersByCommandClass.remove(commandClass);
     }
 
     private void checkDuplicates(Map<CommandClass, CommandHandler> handlers) {

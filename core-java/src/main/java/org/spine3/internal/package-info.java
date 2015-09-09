@@ -18,19 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import org.spine3.CommandClass;
-import org.spine3.util.MessageHandler;
-
-import java.util.Map;
-
 /**
- * The common interface for classes handling more than one command.
- *
- * @author Alexander Yevsyukov
+ * Classes and interfaces in this package are for internal use of the framework.
  */
-public interface ManyCommandHandler {
+@ParametersAreNonnullByDefault
+package org.spine3.internal;
 
-    Map<CommandClass, CommandHandler> getHandlers();
-}
+import javax.annotation.ParametersAreNonnullByDefault;
