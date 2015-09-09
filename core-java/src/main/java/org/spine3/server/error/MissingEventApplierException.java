@@ -17,51 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3;
+package org.spine3.server.error;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-
-import javax.annotation.Nonnull;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A command in the system.
+ * This exception is thrown on a discovery of an event class, which is not handled by any of
+ * the applier methods of an aggregate root class.
  *
- * @author Alexander Yevsyukov
+ * @author Mikhail Melnik
  */
-public final class Command extends AbstractCommand {
+public class MissingEventApplierException extends RuntimeException {
 
-    private Command(Message value) {
-        super(value);
+    public MissingEventApplierException(Message event) {
+        super("There is no registered applier for the event: " + event.getClass());
     }
 
-    public static Command of(Message value) {
-        return new Command(checkNotNull(value));
-    }
+    private static final long serialVersionUID = 0L;
 
-    public static Command from(CommandRequest cr) {
-        return new Command(getCommandValue(checkNotNull(cr)));
-    }
-
-    /**
-     * @return the class of the command message
-     */
-    public CommandClass getCommandClass() {
-        Message value = value();
-        return CommandClass.of(value.getClass());
-    }
-
-    /**
-     * @return contained command message
-     */
-    @Nonnull
-    @Override
-    public Message value() {
-        final Message value = super.value();
-        assert value != null; // as we prevent null value initialization.
-        return value;
-    }
 }

@@ -37,12 +37,23 @@ public class CommandClass extends ClassTypeValue {
     }
 
     /**
-     * Creates a new instance for the passed class value
+     * Creates a new instance for the passed class value.
+     *
      * @param value class reference
      * @return new instance
      */
     public static CommandClass of(Class<? extends Message> value) {
         return new CommandClass(checkNotNull(value));
+    }
+
+    /**
+     * Creates a new instance for the class of the passed command.
+     *
+     * @param command a command for which to get the class
+     * @return new instance
+     */
+    public static CommandClass of(Message command) {
+        return of(checkNotNull(command).getClass());
     }
 
 }

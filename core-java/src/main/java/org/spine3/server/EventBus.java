@@ -21,11 +21,12 @@ package org.spine3.server;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.spine3.Event;
+import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.error.MissingEventApplierException;
+import org.spine3.protobuf.Messages;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.server.ServerMethods.*;
+import static org.spine3.server.ServerMethods.scanForEventHandlers;
 
 /**
  * Manages incoming events to the appropriate registered handler
@@ -118,15 +119,15 @@ public class EventBus {
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public void post(EventRecord eventRecord) {
-        Event event = Event.from(eventRecord);
+        Message event = Messages.fromAny(eventRecord.getEvent());
         EventContext context = eventRecord.getContext();
 
         post(event, context);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private void post(Event event, EventContext context) {
-        Collection<MessageSubscriber> subscribers = getSubscribers(event.getEventClass());
+    private void post(Message event, EventContext context) {
+        Collection<MessageSubscriber> subscribers = getSubscribers(EventClass.of(event));
 
         if (subscribers.isEmpty()) {
             throw new MissingEventApplierException(event);
@@ -134,7 +135,7 @@ public class EventBus {
 
         for (MessageSubscriber subscriber : subscribers) {
             try {
-                subscriber.handle(event.value(), context);
+                subscriber.handle(event, context);
             } catch (InvocationTargetException e) {
                 //NOP
             }

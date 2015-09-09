@@ -20,11 +20,11 @@
 package org.spine3.server;
 
 import com.google.common.collect.Maps;
-import org.spine3.Command;
+import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.error.UnsupportedCommandException;
+import org.spine3.server.error.UnsupportedCommandException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -97,19 +97,19 @@ public class CommandDispatcher {
      * @return a list of the event records as the result of handling the command
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    public List<EventRecord> dispatch(Command command, CommandContext context)
+    public List<EventRecord> dispatch(Message command, CommandContext context)
             throws InvocationTargetException {
 
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandClass commandClass = command.getCommandClass();
+        CommandClass commandClass = CommandClass.of(command);
         if (!subscriberRegistered(commandClass)) {
-            throw new UnsupportedCommandException(command.value());
+            throw new UnsupportedCommandException(command);
         }
 
         MessageSubscriber subscriber = getSubscriber(commandClass);
-        List<EventRecord> result = subscriber.handle(command.value(), context);
+        List<EventRecord> result = subscriber.handle(command, context);
         return result;
     }
 

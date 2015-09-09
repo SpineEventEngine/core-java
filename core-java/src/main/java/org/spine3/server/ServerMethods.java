@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
-import org.spine3.error.AccessLevelException;
+import org.spine3.server.error.AccessLevelException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
