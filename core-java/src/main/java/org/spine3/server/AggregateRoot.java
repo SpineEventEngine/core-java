@@ -30,6 +30,7 @@ import org.spine3.base.*;
 import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
+import org.spine3.util.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

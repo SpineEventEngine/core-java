@@ -29,6 +29,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.server.error.AccessLevelException;
 import org.spine3.server.error.DuplicateHandlerMethodException;
+import org.spine3.util.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -260,7 +261,7 @@ class ServerMethods {
      * @return immutable map of command handler methods
      */
     public static Map<CommandClass, MessageHandler> scanForCommandHandlers(Object commandHandler) {
-        Map<Class<? extends Message>, MessageHandler> subscribers = scanForSubscribers(commandHandler, isCommandHandlerPredicate);
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(commandHandler, isCommandHandlerPredicate);
 
         final ImmutableMap.Builder<CommandClass, MessageHandler> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
@@ -276,7 +277,7 @@ class ServerMethods {
      * @return immutable map of event appliers
      */
     public static Map<EventClass, MessageHandler> scanForEventAppliers(Object eventApplier) {
-        Map<Class<? extends Message>, MessageHandler> subscribers = scanForSubscribers(eventApplier, isEventApplierPredicate);
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(eventApplier, isEventApplierPredicate);
 
         final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
@@ -292,7 +293,7 @@ class ServerMethods {
      * @return immutable map of event handling methods
      */
     public static Map<EventClass, MessageHandler> scanForEventHandlers(Object eventHandler) {
-        Map<Class<? extends Message>, MessageHandler> subscribers = scanForSubscribers(eventHandler, isEventHandlerPredicate);
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(eventHandler, isEventHandlerPredicate);
 
         final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
@@ -308,7 +309,7 @@ class ServerMethods {
      * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      */
-    private static Map<Class<? extends Message>, MessageHandler> scanForSubscribers(
+    public static Map<Class<? extends Message>, MessageHandler> scanForHandlers(
             Object object, Predicate<Method> filter) {
 
         Map<Class<? extends Message>, MessageHandler> result = Maps.newHashMap();

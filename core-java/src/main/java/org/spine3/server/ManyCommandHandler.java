@@ -21,6 +21,7 @@
 package org.spine3.server;
 
 import org.spine3.CommandClass;
+import org.spine3.util.MessageHandler;
 
 import java.util.Map;
 

@@ -27,6 +27,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -90,11 +91,11 @@ public class EventBus {
     }
 
     /**
-     * Removes passed event subscribers from the bus.
-     * @param subscribers a map of the event subscribers to remove
+     * Removes passed event handlers from the bus.
+     * @param handlers a map of the event handlers to remove
      */
-    private void unsubscribe(Map<EventClass, MessageHandler> subscribers) {
-        for (Map.Entry<EventClass, MessageHandler> entry : subscribers.entrySet()) {
+    private void unsubscribe(Map<EventClass, MessageHandler> handlers) {
+        for (Map.Entry<EventClass, MessageHandler> entry : handlers.entrySet()) {
             final EventClass c = entry.getKey();
             MessageHandler subscriber = entry.getValue();
 
@@ -127,9 +128,10 @@ public class EventBus {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void post(Message event, EventContext context) {
-        Collection<MessageHandler> subscribers = getSubscribers(EventClass.of(event));
+        Collection<MessageHandler> subscribers = getHandlers(EventClass.of(event));
 
         if (subscribers.isEmpty()) {
+            //TODO:2015-09-09:alexander.yevsyukov: This must be missing event handler
             throw new MissingEventApplierException(event);
         }
 
@@ -142,7 +144,7 @@ public class EventBus {
         }
     }
 
-    private Collection<MessageHandler> getSubscribers(EventClass c) {
+    private Collection<MessageHandler> getHandlers(EventClass c) {
         return subscribersByType.get(c);
     }
 

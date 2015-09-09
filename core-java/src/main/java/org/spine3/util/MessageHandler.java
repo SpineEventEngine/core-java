@@ -17,10 +17,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.util;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +60,7 @@ public class MessageHandler {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    MessageHandler(Object target, Method method) {
+    public MessageHandler(Object target, Method method) {
         checkNotNull(target, "target cannot be null.");
         checkNotNull(method, "method cannot be null.");
 

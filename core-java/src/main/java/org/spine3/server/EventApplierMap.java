@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.server.error.DuplicateApplierException;
 import org.spine3.server.error.MissingEventApplierException;
+import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

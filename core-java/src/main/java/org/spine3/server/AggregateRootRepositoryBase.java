@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
