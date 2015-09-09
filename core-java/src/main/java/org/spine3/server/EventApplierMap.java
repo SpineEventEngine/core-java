@@ -20,7 +20,7 @@
 package org.spine3.server;
 
 import com.google.common.collect.Maps;
-import org.spine3.Event;
+import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.error.MissingEventApplierException;
 
@@ -72,16 +72,16 @@ class EventApplierMap {
      * @param event the event to be applied
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    void apply(Event event) throws InvocationTargetException {
+    void apply(Message event) throws InvocationTargetException {
         checkNotNull(event);
 
-        EventClass eventClass = event.getEventClass();
+        EventClass eventClass = EventClass.of(event);
         if (!subscriberRegistered(eventClass)) {
             throw new MissingEventApplierException(event);
         }
 
         MessageSubscriber subscriber = getSubscriber(eventClass);
-        subscriber.handle(event.value());
+        subscriber.handle(event);
     }
 
     private void putAll(Map<EventClass, MessageSubscriber> subscribers) {

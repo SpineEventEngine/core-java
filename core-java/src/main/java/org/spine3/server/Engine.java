@@ -20,11 +20,12 @@
 package org.spine3.server;
 
 import com.google.protobuf.Any;
-import org.spine3.Command;
+import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
+import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
@@ -108,7 +109,7 @@ public final class Engine {
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         try {
-            Command command = Command.from(request);
+            Message command = Messages.fromAny(request.getCommand());
             CommandContext context = request.getContext();
 
             List<EventRecord> eventRecords = dispatcher.dispatch(command, context);

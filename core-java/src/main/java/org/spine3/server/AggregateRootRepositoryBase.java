@@ -85,7 +85,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
-     * Creates a map of subscribers that call {@link Repository#dispatch(Message, CommandContext)}
+     * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class of this repository.
      */
     private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
