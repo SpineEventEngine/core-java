@@ -18,19 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.util;
 
-import org.spine3.CommandClass;
-import org.spine3.util.MessageHandler;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
-import java.util.Map;
+import static com.google.common.base.Throwables.propagate;
 
 /**
- * The common interface for classes handling more than one command.
+ * Utilities for working with classes.
  *
+ * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface ManyCommandHandler {
+@SuppressWarnings("UtilityClass")
+public class Classes {
 
-    Map<CommandClass, CommandHandler> getHandlers();
+    private Classes() {}
+
+    public static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
+        try {
+            Type genericSuperclass = object.getClass().getGenericSuperclass();
+            Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
+
+            actualTypeArguments.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
+            actualTypeArguments.setAccessible(false);
+
+            return result;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw propagate(e);
+        }
+    }
 }

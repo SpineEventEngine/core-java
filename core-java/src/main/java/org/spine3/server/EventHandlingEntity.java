@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.eventbus.EventHandler;
 import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public abstract class EventHandlingEntity<I extends Message, S extends Message> extends Entity<I, S> {
 
-    private Map<EventClass, MessageHandler> handlers;
+    private Map<EventClass, EventHandler> handlers;
 
     protected EventHandlingEntity(I id) {
         super(id);
@@ -53,7 +54,7 @@ public abstract class EventHandlingEntity<I extends Message, S extends Message> 
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
-        MessageHandler method = handlers.get(EventClass.of(event));
+        EventHandler method = handlers.get(EventClass.of(event));
         if (method != null) {
             method.handle(event, ctx);
         }
@@ -64,8 +65,8 @@ public abstract class EventHandlingEntity<I extends Message, S extends Message> 
     }
 
     protected void init() {
-        final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
-        builder.putAll(ServerMethods.scanForEventHandlers(this));
+        final ImmutableMap.Builder<EventClass, EventHandler> builder = ImmutableMap.builder();
+        builder.putAll(EventHandler.scan(this));
         this.handlers = builder.build();
     }
 

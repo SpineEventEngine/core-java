@@ -25,7 +25,7 @@ import io.grpc.netty.NettyServerBuilder;
 import org.slf4j.Logger;
 import org.spine3.server.CommandStore;
 import org.spine3.server.Engine;
-import org.spine3.server.EventBus;
+import org.spine3.eventbus.EventBus;
 import org.spine3.server.EventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;

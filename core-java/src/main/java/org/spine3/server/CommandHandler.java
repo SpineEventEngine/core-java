@@ -20,29 +20,145 @@
 
 package org.spine3.server;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
+import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
+import org.spine3.error.AccessLevelException;
+import org.spine3.util.MessageHandler;
+import org.spine3.util.Methods;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Interface for command handler classes.
+ * The wrapper for a command handler method.
  *
  * @author Alexander Yevsyukov
- * @author Mikhail Melnik
  */
-public interface CommandHandler<T extends Message> {
+public class CommandHandler extends MessageHandler<Object, CommandContext> {
+
+    static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isCommandHandler(method);
+        }
+    };
 
     /**
-     * Handles incoming command of the {@link T} type.
+     * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param command the command to handle
-     * @param context the context of the command
-     * @return a list of the event records
+     * @param target object to which the method applies
+     * @param method subscriber method
      */
-    @Subscribe
-    List<EventRecord> handle(T command, CommandContext context);
+    protected CommandHandler(Object target, Method method) {
+        super(target, method);
+    }
 
+    /**
+     * Checks if a method is a command handler.
+     *
+     * @param method a method to check
+     * @return {@code true} if the method is a command handler, {@code false} otherwise
+     */
+    public static boolean isCommandHandler(Method method) {
+
+        //TODO:2015-09-09:alexander.yevsyukov: Have @Assign annotation here
+
+        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+
+        Class<?>[] parameterTypes = method.getParameterTypes();
+
+        //noinspection LocalVariableNamingConvention
+        boolean acceptsMessageAndCommandContext =
+                parameterTypes.length == 2
+                        && Message.class.isAssignableFrom(parameterTypes[0])
+                        && CommandContext.class.equals(parameterTypes[1]);
+
+        boolean returnsMessageList = List.class.equals(method.getReturnType());
+        boolean returnsMessage = Message.class.equals(method.getReturnType());
+
+        //noinspection OverlyComplexBooleanExpression
+        return isAnnotated
+                && acceptsMessageAndCommandContext
+                && (returnsMessageList || returnsMessage);
+    }
+
+    /**
+     * Returns a map of the command handler methods from the passed instance.
+     *
+     * @param object the object that keeps command handler methods
+     * @return immutable map
+     */
+    public static Map<CommandClass, CommandHandler> scan(Object object) {
+        Map<Class<? extends Message>, Method> subscribers = scan(object, isCommandHandlerPredicate);
+
+        final ImmutableMap.Builder<CommandClass, CommandHandler> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
+            final CommandHandler handler = new CommandHandler(object, entry.getValue());
+            handler.checkModifier();
+            builder.put(CommandClass.of(entry.getKey()), handler);
+        }
+        return builder.build();
+    }
+
+    public static AccessLevelException forRepositoryCommandHandler(Repository repository, Method method) {
+        return new AccessLevelException(messageForRepositoryCommandHandler(repository, method));
+    }
+
+    public static String messageForAggregateCommandHandler(Object aggregate, Method method) {
+        return "Command handler of the aggregate " + Methods.getFullMethodName(aggregate, method) +
+                " must be declared 'public'. It is part of the public API of the aggregate.";
+    }
+
+    public static final String MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER = " must be declared 'public' to be called by CommandDispatcher.";
+
+    private static String messageForRepositoryCommandHandler(Object repository, Method method) {
+        return "Command handler of the repository " + Methods.getFullMethodName(repository, method) +
+                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
+    }
+
+    public static AccessLevelException forAggregateCommandHandler(AggregateRoot aggregate, Method method) {
+        return new AccessLevelException(messageForAggregateCommandHandler(aggregate, method));
+    }
+
+    public static AccessLevelException forCommandHandler(Object handler, Method method) {
+        return new AccessLevelException(messageForCommandHandler(handler, method));
+    }
+
+    private static String messageForCommandHandler(Object handler, Method method) {
+        return "Command handler " + Methods.getFullMethodName(handler, method) +
+                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
+    }
+
+    @Override
+    protected void checkModifier() {
+        final Method method = getMethod();
+        final Object target = getTarget();
+
+        boolean methodIsPublic = isPublic();
+
+        boolean isAggregateRoot = target instanceof AggregateRoot;
+        if (isAggregateRoot && !methodIsPublic) {
+            throw forAggregateCommandHandler((AggregateRoot) target, method);
+        }
+
+        boolean isRepository = target instanceof Repository;
+        if (isRepository && !methodIsPublic) {
+            throw forRepositoryCommandHandler((Repository) target, method);
+        }
+    }
+
+    @Override
+    protected <R> R handle(Message message, CommandContext context) throws InvocationTargetException {
+        return super.handle(message, context);
+    }
 }

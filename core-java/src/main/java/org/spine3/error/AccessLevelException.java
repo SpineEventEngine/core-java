@@ -17,20 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.error;
 
-package org.spine3.server;
+import org.spine3.eventbus.EventHandler;
+import org.spine3.server.AggregateRoot;
+import org.spine3.server.CommandHandler;
+import org.spine3.server.Repository;
+import org.spine3.util.Methods;
 
-import org.spine3.CommandClass;
-import org.spine3.util.MessageHandler;
-
-import java.util.Map;
+import java.lang.reflect.Method;
 
 /**
- * The common interface for classes handling more than one command.
+ * This exception is thrown if a handler method is defined with wrong access level modifier.
  *
  * @author Alexander Yevsyukov
  */
-public interface ManyCommandHandler {
+public class AccessLevelException extends RuntimeException {
 
-    Map<CommandClass, CommandHandler> getHandlers();
+    public AccessLevelException(String message) {
+        super(message);
+    }
+
+    private static final long serialVersionUID = 0L;
 }

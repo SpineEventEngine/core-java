@@ -19,11 +19,16 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
+import org.spine3.error.AccessLevelException;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,13 +46,16 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
+
+ * @param <T> the type of the target object
+ * @param <C> the type of the message context or {@code Void} if context is not used
  */
-public class MessageHandler {
+public abstract class MessageHandler<T, C> {
 
     /**
      * Object sporting the handler method.
      */
-    private final Object target;
+    private final T target;
 
     /**
      * Handler method.
@@ -60,7 +68,7 @@ public class MessageHandler {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public MessageHandler(Object target, Method method) {
+    protected MessageHandler(T target, Method method) {
         checkNotNull(target, "target cannot be null.");
         checkNotNull(method, "method cannot be null.");
 
@@ -70,22 +78,83 @@ public class MessageHandler {
     }
 
     /**
+     * Returns the first param type of the passed method object.
+     * <p>
+     * It is expected that the first parameter of a handler or an applier method is always of {@code Message} class.
+     *
+     * @param handler the method object to take first parameter type from
+     * @return the {@link Class} of the first method parameter
+     */
+    public static Class<? extends Message> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
+                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        return result;
+    }
+
+    /**
+     * Returns a map of the {@link MessageHandler} objects to the corresponding message class.
+     *
+     * @param object   the object that keeps subscribed methods
+     * @param filter the predicate that defines rules for subscriber scanning
+     * @return the map of message subscribers
+     */
+    public static Map<Class<? extends Message>, Method> scan(Object object, Predicate<Method> filter) {
+
+        Map<Class<? extends Message>, Method> result = Maps.newHashMap();
+
+        for (Method method : object.getClass().getDeclaredMethods()) {
+            if (filter.apply(method)) {
+
+                Class<? extends Message> messageClass = getFirstParamType(method);
+
+                result.put(messageClass, method);
+            }
+        }
+        return result;
+    }
+
+    //TODO:2015-09-09:alexander.yevsyukov: Document
+
+    /**
+     * @throws AccessLevelException
+     */
+    protected abstract void checkModifier();
+
+    protected T getTarget() {
+        return target;
+    }
+
+    protected Method getMethod() {
+        return method;
+    }
+
+    protected boolean isPublic() {
+        final boolean result = Modifier.isPublic(getMethod().getModifiers());
+        return result;
+    }
+
+    protected boolean isPrivate() {
+        final boolean result = Modifier.isPrivate(getMethod().getModifiers());
+        return result;
+    }
+
+    /**
      * Invokes the wrapped subscriber method to handle {@code message} with the {@code context}.
      *
-     * @param <T>     the type of the expected handler invocation result
+     * @param <R>     the type of the expected handler invocation result
      * @param message the message to handle
      * @param context the context of the message
      * @return the result of message handling
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    public <T> T handle(Message message, Message context) throws InvocationTargetException {
+    protected <R> R handle(Message message, C context) throws InvocationTargetException {
 
         checkNotNull(message);
         checkNotNull(context);
         try {
             @SuppressWarnings("unchecked")
-            final T result = (T) method.invoke(target, message, context);
+            final R result = (R) method.invoke(target, message, context);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
@@ -101,17 +170,17 @@ public class MessageHandler {
     /**
      * Invokes the wrapped subscriber method to handle {@code message}.
      *
-     * @param <T>     the type of the expected handler invocation result
+     * @param <R>     the type of the expected handler invocation result
      * @param message a message to handle
      * @return the result of message handling
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    public <T> T handle(Message message) throws InvocationTargetException {
+    protected <R> R handle(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")
-            T result = (T) method.invoke(target, message);
+            R result = (R) method.invoke(target, message);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
@@ -125,7 +194,7 @@ public class MessageHandler {
     }
 
     /**
-     * Returns a full name of the subscriber method.
+     * Returns a full name of the handler method.
      * <p/>
      * The full name consists of a fully qualified class name of the target object and
      * the method name separated with a dot character.
@@ -137,7 +206,7 @@ public class MessageHandler {
     }
 
     /**
-     * @return the name of the subscriber method itself, without parameters
+     * @return the name of the handler method itself, without parameters
      */
     public String getShortName() {
         return method.getName() + "()";
@@ -151,7 +220,7 @@ public class MessageHandler {
     }
 
     /**
-     * @return full name of the subscriber method
+     * @return full name of the handler method
      * @see #getFullName()
      */
     @Override

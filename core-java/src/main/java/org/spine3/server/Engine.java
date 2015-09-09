@@ -25,6 +25,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
+import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
 
@@ -75,10 +76,6 @@ public final class Engine {
         final Engine engine = instance();
         engine.commandStore = commandStore;
         engine.eventStore = eventStore;
-    }
-
-    public void register(CommandHandler handler) {
-        dispatcher.register(handler);
     }
 
     public void register(ManyCommandHandler repository) {

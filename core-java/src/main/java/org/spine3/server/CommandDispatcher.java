@@ -42,17 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    private final Map<CommandClass, MessageHandler> handlersByCommandClass = Maps.newConcurrentMap();
-
-    /**
-     * Register the passed command handler in the dispatcher.
-     *
-     * @param handler a command handler object
-     */
-    public void register(CommandHandler handler) {
-        Map<CommandClass, MessageHandler> subscribers = getHandlers(checkNotNull(handler));
-        register(subscribers);
-    }
+    private final Map<CommandClass, CommandHandler> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
      * Registers the passed hander of many commands in the dispatcher.
@@ -61,7 +51,7 @@ public class CommandDispatcher {
      */
     public void register(ManyCommandHandler handler) {
         checkNotNull(handler);
-        Map<CommandClass, MessageHandler> subscribers = handler.getHandlers();
+        Map<CommandClass, CommandHandler> subscribers = handler.getHandlers();
         register(subscribers);
     }
 
@@ -70,18 +60,13 @@ public class CommandDispatcher {
      *
      * @param handlers map from command classes to corresponding handlers
      */
-    public void register(Map<CommandClass, MessageHandler> handlers) {
+    public void register(Map<CommandClass, CommandHandler> handlers) {
         checkDuplicates(handlers);
         putAll(handlers);
     }
 
-    private static Map<CommandClass, MessageHandler> getHandlers(CommandHandler handler) {
-        Map<CommandClass, MessageHandler> subscribers = ServerMethods.scanForCommandHandlers(handler);
-        return subscribers;
-    }
-
-    private void checkDuplicates(Map<CommandClass, MessageHandler> handlers) {
-        for (Map.Entry<CommandClass, MessageHandler> entry : handlers.entrySet()) {
+    private void checkDuplicates(Map<CommandClass, CommandHandler> handlers) {
+        for (Map.Entry<CommandClass, CommandHandler> entry : handlers.entrySet()) {
             CommandClass commandClass = entry.getKey();
 
             if (handlerRegistered(commandClass)) {
@@ -113,16 +98,16 @@ public class CommandDispatcher {
             throw new UnsupportedCommandException(command);
         }
 
-        MessageHandler subscriber = getHandler(commandClass);
+        CommandHandler subscriber = getHandler(commandClass);
         List<EventRecord> result = subscriber.handle(command, context);
         return result;
     }
 
-    private void putAll(Map<CommandClass, MessageHandler> subscribers) {
+    private void putAll(Map<CommandClass, CommandHandler> subscribers) {
         handlersByCommandClass.putAll(subscribers);
     }
 
-    public MessageHandler getHandler(CommandClass cls) {
+    public CommandHandler getHandler(CommandClass cls) {
         return handlersByCommandClass.get(cls);
     }
 

@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.protobuf.Message;
+import org.spine3.util.Classes;
 
 /**
  * Base interface for repositories.
@@ -61,7 +62,7 @@ public interface Repository<I extends Message,
          * @return the aggregate id {@link Class}
          */
         public static <I extends Message> Class<I> getStoredObjectIdClass(Repository repository) {
-            return ServerMethods.getGenericParameterType(repository, STORED_OBJECT_ID_CLASS_GENERIC_INDEX);
+            return Classes.getGenericParameterType(repository, STORED_OBJECT_ID_CLASS_GENERIC_INDEX);
         }
 
         /**
@@ -70,7 +71,7 @@ public interface Repository<I extends Message,
          * @return the aggregate root {@link Class}
          */
         public static <R extends AggregateRoot> Class<R> getStoredObjectClass(Repository repository) {
-            return ServerMethods.getGenericParameterType(repository, STORED_OBJECT_CLASS_GENERIC_INDEX);
+            return Classes.getGenericParameterType(repository, STORED_OBJECT_CLASS_GENERIC_INDEX);
         }
     }
 }

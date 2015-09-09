@@ -20,12 +20,14 @@
 package org.spine3.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.CommandClass;
+import org.spine3.EventClass;
 import org.spine3.base.*;
 import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
@@ -34,10 +36,12 @@ import org.spine3.util.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -60,13 +64,77 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     private volatile boolean initialized = false;
     private CommandDispatcher dispatcher;
-    private EventApplierMap applier;
+    private EventApplier.Map applier;
 
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
     protected AggregateRoot(I id) {
         super(id);
         this.idAsAny = Messages.toAny(id);
+    }
+
+    /**
+     * Returns set of the command types handled by a given aggregate root.
+     *
+     * @param clazz {@link Class} of the aggregate root
+     * @return command types handled by aggregate root
+     */
+    @CheckReturnValue
+    public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandler.isCommandHandlerPredicate);
+        Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
+            @Nullable
+            @Override
+            public CommandClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return CommandClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
+    }
+
+    /**
+     * Returns set of the event types handled by a given aggregate root.
+     *
+     * @param aggregateRootClass {@link Class} of the aggregate root
+     * @return immutable set of event classes handled by the aggregate root
+     */
+    @CheckReturnValue
+    public static Set<EventClass> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(aggregateRootClass, EventApplier.isEventApplierPredicate);
+        Iterable<EventClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, EventClass>() {
+            @Nullable
+            @Override
+            public EventClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return EventClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
+    }
+
+    /**
+     * Returns event/command types handled by given AggregateRoot class.
+     */
+    @CheckReturnValue
+    static Set<Class<? extends Message>> getHandledMessageClasses(Class<? extends AggregateRoot> clazz, Predicate<Method> methodPredicate) {
+
+        Set<Class<? extends Message>> result = Sets.newHashSet();
+
+        for (Method method : clazz.getDeclaredMethods()) {
+
+            boolean methodMatches = methodPredicate.apply(method);
+
+            if (methodMatches) {
+                Class<? extends Message> firstParamType = MessageHandler.getFirstParamType(method);
+                result.add(firstParamType);
+            }
+        }
+        return result;
     }
 
     private void init() {
@@ -124,12 +192,12 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     private void initEventApplier() {
-        applier = new EventApplierMap(this);
+        applier = new EventApplier.Map(this);
     }
 
     private void initCommandDispatcher() {
         dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageHandler> subscribers = getCommandHandlers();
+        java.util.Map subscribers = getCommandHandlers();
         dispatcher.register(subscribers);
     }
 
@@ -165,7 +233,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
+        CommandHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
@@ -180,8 +248,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         }
     }
 
-    private Map<CommandClass, MessageHandler> getCommandHandlers() {
-        Map<CommandClass, MessageHandler> result = ServerMethods.scanForCommandHandlers(this);
+    private java.util.Map getCommandHandlers() {
+        java.util.Map result = CommandHandler.scan(this);
         return result;
     }
 
