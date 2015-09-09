@@ -29,7 +29,7 @@ import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
 import org.spine3.server.internal.CommandHandler;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -43,14 +43,12 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @param <R> the type of the aggregated root
  * @param <I> the type of the aggregated root id
- * @param <C> the type of the command to create a new aggregate root instance
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRootRepositoryBase<I extends Message,
-                                                  R extends AggregateRoot<I, ?>,
-                                                  C extends Message>
+                                                  R extends AggregateRoot<I, ?>>
         extends RepositoryBase<I, R> implements AggregateRootRepository<I, R> {
 
     private static final String DISPATCH_METHOD_NAME = "dispatch";
@@ -74,9 +72,24 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
+     * Creates a map of handlers that call {@link #dispatch(Message, CommandContext)}
+     * method for all commands of the aggregate root class.
+     */
+    public Map<CommandClass, CommandHandler> getCommandHandlers() {
+        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
+
+        Class<? extends AggregateRoot> rootClass = TypeInfo.getEntityClass(this);
+        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
+
+        CommandHandler handler = toCommandHandler();
+        for (CommandClass commandClass : commandClasses) {
+            result.put(commandClass, handler);
+        }
+        return result;
+    }
+
+    /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
-     *
-     * @return reference to the method
      */
     private CommandHandler toCommandHandler() {
         try {
@@ -89,48 +102,28 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
-     * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
-     * method for all commands of the aggregate root class of this repository.
-     */
-    private Map<CommandClass, CommandHandler> createDelegatingSubscribers() {
-        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
-
-        Class<? extends AggregateRoot> rootClass = TypeInfo.getEntityClass(this);
-        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
-
-        CommandHandler subscriber = toCommandHandler();
-        for (CommandClass commandClass : commandClasses) {
-            result.put(commandClass, subscriber);
-        }
-        return result;
-    }
-
-    /**
      * Loads the an aggregate by given id.
      *
-     * @param aggregateId id of the aggregate to load
+     * @param id id of the aggregate to load
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
-    @Nullable
+    @Nonnull
     @Override
-    public R load(I aggregateId) throws IllegalStateException {
+    public R load(I id) throws IllegalStateException {
         checkConfigured();
 
         try {
-            Snapshot snapshot = eventStore.getLastSnapshot(aggregateId);
+            Snapshot snapshot = eventStore.getLastSnapshot(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStore.getEvents(aggregateId, snapshot.getVersion());
-                R result = create(aggregateId);
+                List<EventRecord> trail = eventStore.getEvents(id, snapshot.getVersion());
+                R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = eventStore.getAllEvents(aggregateId);
-                if (events.isEmpty()) {
-                    return null;
-                }
-                R result = create(aggregateId);
+                List<EventRecord> events = eventStore.getAllEvents(id);
+                R result = create(id);
                 result.play(events);
                 return result;
             }
@@ -170,11 +163,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
         I aggregateId = getAggregateId(command);
         R aggregateRoot = load(aggregateId);
-
-        // Create a new root if it's not there. This way we handle creation commands in the same way.
-        if (aggregateRoot == null) {
-            aggregateRoot = create(aggregateId);
-        }
 
         aggregateRoot.dispatch(command, context);
 

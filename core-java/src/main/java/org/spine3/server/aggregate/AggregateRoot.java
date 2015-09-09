@@ -23,9 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.*;
 import org.spine3.CommandClass;
 import org.spine3.EventClass;
 import org.spine3.base.*;
@@ -52,14 +50,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for aggregate roots.
  *
- * @param <I> the type for ID of the aggregate root
+ * @param <I> the type for ID of the aggregate root. Supported types are:
+ *           <ul>
+ *              <li>Classes implementing {@link Message}</li>
+ *              <li>String</li>
+ *              <li>Integer</li>
+ *              <li>Long</li>
+ *           </ul>
  * @param <S> the type of the state held by the root
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
-public abstract class AggregateRoot<I extends Message, S extends Message>
-        extends Entity<I, S> {
+public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -72,9 +75,30 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
+    /**
+     * Creates a new instance.
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     */
     protected AggregateRoot(I id) {
         super(id);
-        this.idAsAny = Messages.toAny(id);
+
+        //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
+        if (id instanceof Message) {
+            Message message = (Message) id;
+            this.idAsAny = Messages.toAny(message);
+        } else if (id instanceof String) {
+            String s = (String) id;
+            this.idAsAny = Messages.toAny(StringValue.newBuilder().setValue(s).build());
+        } else if (id instanceof Integer) {
+            Integer intValue = (Integer) id;
+            this.idAsAny = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
+        } else if (id instanceof Long) {
+            Long longValue = (Long) id;
+            this.idAsAny = Messages.toAny(UInt64Value.newBuilder().setValue(longValue).build());
+        } else {
+            throw new IllegalArgumentException("ID of unsupported type encountered: " + id);
+        }
     }
 
     /**

@@ -35,7 +35,7 @@ import java.util.Map;
  * @param <I> the type of the IDs of the stateful handlers
  * @param <S> the type of the state objects
  */
-public abstract class Projection<I extends Message, S extends Message> extends Entity<I, S> {
+public abstract class Projection<I, S extends Message> extends Entity<I, S> {
 
     private Map<EventClass, EventHandler> handlers;
 

@@ -93,10 +93,10 @@ public class EventApplier extends MessageHandler<AggregateRoot, Void> {
      * @return immutable map of event appliers
      */
     public static java.util.Map<EventClass, EventApplier> scan(AggregateRoot aggregateRoot) {
-        java.util.Map<Class<? extends Message>, Method> subscribers = scan(aggregateRoot, isEventApplierPredicate);
+        java.util.Map<Class<? extends Message>, Method> appliers = scan(aggregateRoot, isEventApplierPredicate);
 
         final ImmutableMap.Builder<EventClass, EventApplier> builder = ImmutableMap.builder();
-        for (java.util.Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
+        for (java.util.Map.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {
             final EventApplier applier = new EventApplier(aggregateRoot, entry.getValue());
             applier.checkModifier();
             builder.put(EventClass.of(entry.getKey()), applier);
@@ -142,21 +142,7 @@ public class EventApplier extends MessageHandler<AggregateRoot, Void> {
             checkNotNull(aggregateRoot);
 
             java.util.Map<EventClass, EventApplier> appliers = scan(aggregateRoot);
-            checkDuplicates(appliers);
-
             this.subscribersByType = ImmutableMap.<EventClass, EventApplier>builder().putAll(appliers).build();
-        }
-
-        private void checkDuplicates(java.util.Map<EventClass, EventApplier> appliers) {
-            for (java.util.Map.Entry<EventClass, EventApplier> entry : appliers.entrySet()) {
-                EventClass eventClass = entry.getKey();
-
-                if (subscriberRegistered(eventClass)) {
-                    final MessageHandler alreadyAddedApplier = findApplier(eventClass);
-                    throw new DuplicateApplierException(alreadyAddedApplier.getTargetClass(),
-                            eventClass, alreadyAddedApplier.getShortName(), entry.getValue().getShortName());
-                }
-            }
         }
 
         /**

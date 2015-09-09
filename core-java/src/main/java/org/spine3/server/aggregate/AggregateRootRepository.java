@@ -40,13 +40,13 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
     /**
      * Loads or creates a root with the passed ID.
      *
-     * @param objectId id of the aggregate to load
+     * @param id the id of the aggregate
      * @return loaded or newly created instance of the aggregate root
      */
     @SuppressWarnings({"AbstractMethodOverridesAbstractMethod",
                        "NullableProblems" /* We override the default behavior of loading. */})
     @Nonnull
-    R load(I objectId);
+    R load(I id);
 
     /**
      * Processes the command by dispatching it one of the repository methods or

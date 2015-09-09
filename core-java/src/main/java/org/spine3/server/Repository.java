@@ -19,12 +19,9 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Message;
 import org.spine3.util.Classes;
 
 import javax.annotation.Nullable;
-
-//TODO:2015-09-09:alexander.yevsyukov: Having type extending Message is too restrictive. People may want to have just strings or longs.
 
 /**
  * Base interface for repositories.
@@ -34,7 +31,7 @@ import javax.annotation.Nullable;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I extends Message, E extends Entity<I, ?>> {
+public interface Repository<I, E extends Entity<I, ?>> {
 
     /**
      * Create a new entity instance with its default state.
@@ -54,11 +51,11 @@ public interface Repository<I extends Message, E extends Entity<I, ?>> {
     /**
      * Loads the entity with the passed ID.
      *
-     * @param objectId id of the aggregate to load
+     * @param id the id of the entity to load
      * @return the entity or {@code null} if there's no entity with such id
      */
     @Nullable
-    E load(I objectId);
+    E load(I id);
 
     @SuppressWarnings("UtilityClass")
     class TypeInfo {
@@ -75,11 +72,11 @@ public interface Repository<I extends Message, E extends Entity<I, ?>> {
         }
 
         /**
-         * Returns {@link Class} object representing the aggregate id type of the given repository.
+         * Returns {@link Class} of entity IDs of the passed repository.
          *
          * @return the aggregate id {@link Class}
          */
-        public static <I extends Message> Class<I> getIdClass(Repository repository) {
+        public static <I> Class<I> getIdClass(Repository repository) {
             return Classes.getGenericParameterType(repository, ID_CLASS_GENERIC_INDEX);
         }
 
