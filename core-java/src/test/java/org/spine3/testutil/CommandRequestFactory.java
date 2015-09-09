@@ -23,11 +23,14 @@ package org.spine3.testutil;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
-
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.test.order.command.CreateOrder;
+import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.command.CreateProject;
+
+import static org.spine3.testutil.ContextFactory.getCommandContext;
 
 /**
  * The utility class which is used for creating CommandRequests for tests.
@@ -42,11 +45,11 @@ public class CommandRequestFactory {
 
     public static CommandRequest create(Timestamp when) {
         final UserId userId = UserId.getDefaultInstance();
-        final Any command = Messages.toAny(CreateOrder.newBuilder().setOrderId(
+        final Any command = Messages.toAny(CreateProject.newBuilder().setProjectId(
                 AggregateIdFactory.createCommon()).build());
 
         final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
-                .setContext(ContextFactory.getCommandContext(userId, when))
+                .setContext(getCommandContext(userId, when))
                 .setCommand(command)
                 .build();
         return dummyCommandRequest;
@@ -54,6 +57,22 @@ public class CommandRequestFactory {
 
     public static CommandRequest create() {
         return create(TimeUtil.getCurrentTime());
+    }
+
+    public static CommandRequest createProject(UserId userId, ProjectId orderId) {
+
+        CreateProject createOrder = CreateProject.newBuilder()
+                .setProjectId(orderId)
+                .build();
+
+        CommandContext context = getCommandContext(userId);
+
+        CommandRequest result = CommandRequest.newBuilder()
+                .setCommand(Messages.toAny(createOrder))
+                .setContext(context)
+                .build();
+
+        return result;
     }
 
 }
