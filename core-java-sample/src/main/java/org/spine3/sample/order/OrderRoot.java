@@ -19,16 +19,17 @@
  */
 package org.spine3.sample.order;
 
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.server.AggregateRoot;
 import org.spine3.base.CommandContext;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.sample.order.command.PayOrder;
+import org.spine3.sample.order.command.PayForOrder;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
-import org.spine3.sample.order.event.OrderPayed;
+import org.spine3.sample.order.event.OrderPaid;
+import org.spine3.server.Assign;
+import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.server.aggregate.Apply;
 
 /**
  * @author Mikhail Melnik
@@ -49,15 +50,15 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         return Order.getDefaultInstance();
     }
 
-    @Subscribe
-    private Message handle(CreateOrder cmd, CommandContext ctx) {
+    @Assign
+    public Message handle(CreateOrder cmd, CommandContext ctx) {
         OrderCreated result = generateEvent(cmd);
 
         return result;
     }
 
-    @Subscribe
-    private Message handle(AddOrderLine cmd, CommandContext ctx) {
+    @Assign
+    public Message handle(AddOrderLine cmd, CommandContext ctx) {
         validateCommand(cmd);
 
         OrderLineAdded result = generateEvent(cmd);
@@ -67,33 +68,33 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
 
     //TODO:2015-06-29:alexander.yevsyukov: Consider renaming PayOrder command.
 
-    @Subscribe
-    private Message handle(PayOrder cmd, CommandContext ctx) {
+    @Assign
+    public Message handle(PayForOrder cmd, CommandContext ctx) {
         validateCommand(cmd);
 
-        OrderPayed result = generateEvent(cmd);
+        OrderPaid result = generateEvent(cmd);
 
         return result;
     }
 
-    @Subscribe
-    private void on(OrderCreated event) {
+    @Apply
+    private void event(OrderCreated event) {
         Order newState = prepareState(event);
 
         validate(newState);
         incrementState(newState);
     }
 
-    @Subscribe
-    private void on(OrderLineAdded event) {
+    @Apply
+    private void event(OrderLineAdded event) {
         Order newState = prepareState(event);
 
         validate(newState);
         incrementState(newState);
     }
 
-    @Subscribe
-    private void on(OrderPayed event) {
+    @Apply
+    private void event(OrderPaid event) {
         Order newState = prepareState(event);
 
         validate(newState);
@@ -114,7 +115,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         }
     }
 
-    private static void validateCommand(PayOrder cmd) {
+    private static void validateCommand(PayForOrder cmd) {
         // Billing info validation is here.
     }
 
@@ -131,8 +132,8 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
                 .build();
     }
 
-    private static OrderPayed generateEvent(PayOrder cmd) {
-        OrderPayed result = OrderPayed.newBuilder()
+    private static OrderPaid generateEvent(PayForOrder cmd) {
+        OrderPaid result = OrderPaid.newBuilder()
                 .setBillingInfo(cmd.getBillingInfo())
                 .setOrderId(cmd.getOrderId())
                 .build();
@@ -156,7 +157,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
                 .build();
     }
 
-    private Order prepareState(OrderPayed event) {
+    private Order prepareState(OrderPaid event) {
         Order currentState = getState();
         Order result = Order.newBuilder(currentState)
                 .setBillingInfo(event.getBillingInfo())

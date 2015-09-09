@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.protobuf.Message;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.util.Classes;
 
 /**

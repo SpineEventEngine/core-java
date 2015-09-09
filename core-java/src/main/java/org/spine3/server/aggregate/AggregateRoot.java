@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -29,7 +29,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.CommandClass;
 import org.spine3.EventClass;
 import org.spine3.base.*;
-import org.spine3.server.error.MissingEventApplierException;
+import org.spine3.server.*;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
 import org.spine3.util.MessageHandler;

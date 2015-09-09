@@ -22,7 +22,6 @@ package org.spine3.eventbus;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
@@ -42,10 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class EventHandler extends MessageHandler<Object, EventContext> {
-
-    //TODO:2015-09-09:alexander.yevsyukov: Analyze usage and encapsulate.
-
-    public static final String MUST_BE_PUBLIC_FOR_EVENT_BUS = " must be declared 'public' to be called by EventBus.";
 
     private static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
         @Override
@@ -75,8 +70,6 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
      * @return {@code true} if the method matches event handler conventions, {@code false} otherwise
      */
     public static boolean isEventHandler(Method method) {
-
-        //TODO:2015-09-09:alexander.yevsyukov: Have our own @Subscribe
 
         boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
 
@@ -114,6 +107,8 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
         }
         return builder.build();
     }
+
+    private static final String MUST_BE_PUBLIC_FOR_EVENT_BUS = " must be declared 'public' to be called by EventBus.";
 
     private static AccessLevelException forEventHandler(Object handler, Method method) {
         return new AccessLevelException(messageForEventHandler(handler, method));

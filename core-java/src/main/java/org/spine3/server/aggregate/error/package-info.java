@@ -17,22 +17,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
 
-import com.google.protobuf.Message;
+@ParametersAreNonnullByDefault
+package org.spine3.server.aggregate.error;
 
-/**
- * This exception is thrown on a discovery of an event class, which is not handled by any of
- * the applier methods of an aggregate root class.
- *
- * @author Mikhail Melnik
- */
-public class MissingEventApplierException extends RuntimeException {
-
-    public MissingEventApplierException(Message event) {
-        super("There is no registered applier for the event: " + event.getClass());
-    }
-
-    private static final long serialVersionUID = 0L;
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

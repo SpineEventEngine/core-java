@@ -20,28 +20,19 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.util.MessageValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
+//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
- * Abstract base for command classes.
+ * Marks a method as command handler.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
-abstract class AbstractCommand extends MessageValue {
-
-    protected AbstractCommand(Message value) {
-        super(value);
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
-    public static Message getCommandValue(CommandRequest commandRequest) {
-        final Any command = commandRequest.getCommand();
-        final Message result = Messages.fromAny(command);
-        return result;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Assign {
 }
+

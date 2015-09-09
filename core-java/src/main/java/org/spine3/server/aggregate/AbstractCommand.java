@@ -17,26 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
 
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.server.Assign;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+package org.spine3.server.aggregate;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 
 /**
- * @author Mikhail Melnik
+ * Abstract base for command classes.
+ *
+ * @author Alexander Yevsyukov
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+abstract class AbstractCommand extends MessageValue {
 
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
-        return super.handleCreate(command, context);
+    protected AbstractCommand(Message value) {
+        super(value);
     }
 
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
+        return result;
+    }
 }

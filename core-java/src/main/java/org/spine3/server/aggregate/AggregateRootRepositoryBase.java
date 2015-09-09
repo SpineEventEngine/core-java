@@ -17,14 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.Assign;
+import org.spine3.server.CommandHandler;
+import org.spine3.server.RepositoryEventStore;
+import org.spine3.server.Snapshot;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -206,7 +209,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    @Subscribe
+    @Assign
     @Override
     public List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException {
         I id = getAggregateId(command);

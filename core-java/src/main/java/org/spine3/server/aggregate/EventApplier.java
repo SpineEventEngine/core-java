@@ -18,17 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
-import org.spine3.server.error.DuplicateApplierException;
-import org.spine3.server.error.MissingEventApplierException;
+import org.spine3.server.aggregate.error.DuplicateApplierException;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.util.MessageHandler;
 import org.spine3.util.Methods;
 
@@ -74,9 +73,7 @@ public class EventApplier extends MessageHandler<AggregateRoot, Void> {
     public static boolean isEventApplier(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
-        //TODO:2015-09-09:alexander.yevsyukov: Use @Applier annotation here.
-
-        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+        boolean isAnnotated = method.isAnnotationPresent(Apply.class);
         boolean acceptsMessage = parameterTypes.length == 1 && Message.class.isAssignableFrom(parameterTypes[0]);
         //noinspection LocalVariableNamingConvention
         boolean acceptsMessageAndEventContext =

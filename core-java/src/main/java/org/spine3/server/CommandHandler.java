@@ -22,11 +22,11 @@ package org.spine3.server;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.error.AccessLevelException;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.util.MessageHandler;
 import org.spine3.util.Methods;
 
@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandHandler extends MessageHandler<Object, CommandContext> {
 
-    static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
+    public static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -59,7 +59,7 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected CommandHandler(Object target, Method method) {
+    public CommandHandler(Object target, Method method) {
         super(target, method);
     }
 
@@ -71,9 +71,7 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
      */
     public static boolean isCommandHandler(Method method) {
 
-        //TODO:2015-09-09:alexander.yevsyukov: Have @Assign annotation here
-
-        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+        boolean isAnnotated = method.isAnnotationPresent(Assign.class);
 
         Class<?>[] parameterTypes = method.getParameterTypes();
 
@@ -155,10 +153,14 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
         if (isRepository && !methodIsPublic) {
             throw forRepositoryCommandHandler((Repository) target, method);
         }
+
+        if (!methodIsPublic) {
+            throw forCommandHandler(target, method);
+        }
     }
 
     @Override
-    protected <R> R handle(Message message, CommandContext context) throws InvocationTargetException {
+    public <R> R handle(Message message, CommandContext context) throws InvocationTargetException {
         return super.handle(message, context);
     }
 }
