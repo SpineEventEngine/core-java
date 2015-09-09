@@ -26,9 +26,8 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
-import org.spine3.server.aggregate.error.DuplicateApplierException;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.internal.MessageHandler;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
