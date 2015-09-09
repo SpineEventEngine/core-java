@@ -123,8 +123,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     private void initEventApplier() {
-        applier = new EventApplierMap();
-        applier.register(this);
+        applier = new EventApplierMap(this);
     }
 
     private void initCommandDispatcher() {

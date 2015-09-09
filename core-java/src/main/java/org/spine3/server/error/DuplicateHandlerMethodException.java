@@ -17,38 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.error;
 
-import org.spine3.EventClass;
+import com.google.protobuf.Message;
 
 /**
- * Exception that is thrown when more than one applier
- * of the same event class is found in a declaring class.
+ * Indicates that more than one handling method for the same message class are present in the declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class DuplicateApplierException extends RuntimeException {
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-    /**
-     * Creates new exception.
-     *
-     * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered
-     * @param discoveredSubscriber another applier method for the same event class
-     */
-    public DuplicateApplierException(
-            EventClass eventClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
 
-        super(String.format("The class %s defines more than one applier method for the event class %s. " +
-                            "Applier methods encountered: %s, %s.",
-                currentSubscriber.getTargetClass(),
-                eventClass,
-                currentSubscriber,
-                discoveredSubscriber));
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
     }
 
     private static final long serialVersionUID = 0L;
+
 }

@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -84,7 +85,9 @@ public class CommandDispatcher {
 
             if (subscriberRegistered(commandClass)) {
                 final MessageSubscriber alreadyAddedHandler = getSubscriber(commandClass);
-                throw new CommandHandlerAlreadyRegisteredException(commandClass, alreadyAddedHandler, entry.getValue());
+                throw new CommandHandlerAlreadyRegisteredException(commandClass,
+                                                                   alreadyAddedHandler.getFullName(),
+                                                                   entry.getValue().getFullName());
             }
         }
     }

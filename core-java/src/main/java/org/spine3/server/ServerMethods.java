@@ -28,6 +28,7 @@ import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.server.error.AccessLevelException;
+import org.spine3.server.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -303,30 +304,30 @@ class ServerMethods {
     /**
      * Returns a map of the {@link MessageSubscriber} objects to the corresponding message class.
      *
-     * @param subscribersHolder   the object that keeps subscribed methods
-     * @param subscriberPredicate the predicate that defines rules for subscriber scanning
+     * @param object   the object that keeps subscribed methods
+     * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      */
     private static Map<Class<? extends Message>, MessageSubscriber> scanForSubscribers(
-            Object subscribersHolder, Predicate<Method> subscriberPredicate) {
+            Object object, Predicate<Method> filter) {
 
         Map<Class<? extends Message>, MessageSubscriber> result = Maps.newHashMap();
 
-        for (Method method : subscribersHolder.getClass().getDeclaredMethods()) {
-            if (subscriberPredicate.apply(method)) {
+        for (Method method : object.getClass().getDeclaredMethods()) {
+            if (filter.apply(method)) {
                 /*
                    This check must be performed after
-                   subscriberPredicate.apply(method) is true,
-                   otherwise it will be performed for the all methods from the subscribersHolder.
+                   filter.apply(method) is true,
+                   otherwise it will be performed for the all methods from the object.
                  */
-                checkModifier(subscribersHolder, method);
+                checkModifier(object, method);
 
-                MessageSubscriber subscriber = new MessageSubscriber(subscribersHolder, method);
+                MessageSubscriber subscriber = new MessageSubscriber(object, method);
 
                 Class<? extends Message> messageClass = getFirstParamType(method);
                 if (result.containsKey(messageClass)) {
                     final MessageSubscriber firstMethod = result.get(messageClass);
-                    throw new DuplicateSubscriberException(messageClass, firstMethod, subscriber);
+                    throw new DuplicateHandlerMethodException(object.getClass(), messageClass, firstMethod.getShortName(), subscriber.getShortName());
                 }
                 result.put(messageClass, subscriber);
             }
