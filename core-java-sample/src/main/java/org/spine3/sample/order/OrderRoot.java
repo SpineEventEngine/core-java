@@ -38,9 +38,6 @@ import org.spine3.server.aggregate.Apply;
 // Use command and event classes passed as parameters instead of SomethingOrBuilder
 public class OrderRoot extends AggregateRoot<OrderId, Order> {
 
-    public static final String NEW = "NEW";
-    public static final String PAID = "PAID";
-
     public OrderRoot(OrderId id) {
         super(id);
     }
@@ -85,7 +82,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
     private void event(OrderCreated event) {
         Order newState = Order.newBuilder(getState())
                 .setOrderId(event.getOrderId())
-                .setStatus(NEW)
+                .setStatus(Order.Status.NEW)
                 .build();
 
         validate(newState);
@@ -111,7 +108,7 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         Order currentState = getState();
         Order newState = Order.newBuilder(currentState)
                 .setBillingInfo(event.getBillingInfo())
-                .setStatus(PAID)
+                .setStatus(Order.Status.PAID)
                 .build();
 
         validate(newState);
