@@ -134,7 +134,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     /**
-     * Dispatches commands, generates events and apply them to the aggregate root.
+     * Dispatches commands, generates events and applies them to the aggregate root.
      *
      * @param command the command to be executed on aggregate root
      * @param context of the command
