@@ -22,7 +22,6 @@ package org.spine3.server;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.AggregateCommand;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
@@ -230,7 +229,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     // A better way would be to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile-time.
     private I getAggregateId(Message command) {
-        return (I) AggregateCommand.getAggregateId(command);
+        return (I) AggregateCommand.getAggregateId(command).value();
     }
 
     /**

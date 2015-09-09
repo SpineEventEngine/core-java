@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.MessageValue;
-import org.spine3.util.StringTypeValue;
+
+import javax.annotation.Nonnull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class AggregateId extends MessageValue {
 
     private AggregateId(Message value) {
-        super(value);
+        super(checkNotNull(value));
     }
 
     /**
@@ -50,7 +51,7 @@ public final class AggregateId extends MessageValue {
      * @return new instance
      */
     public static AggregateId of(Message value) {
-        return new AggregateId(checkNotNull(value));
+        return new AggregateId(value);
     }
 
     @SuppressWarnings("TypeMayBeWeakened") // We want already built instances on this level of API.
@@ -65,6 +66,15 @@ public final class AggregateId extends MessageValue {
     @Override
     public String toString() {
         final Message value = value();
-        return (value != null ? idToString(value) : StringTypeValue.NULL);
+        return (idToString(value));
+    }
+
+    @Nonnull
+    @Override
+    public Message value() {
+        final Message result = super.value();
+        // We check this in constructor.
+        assert result != null;
+        return result;
     }
 }
