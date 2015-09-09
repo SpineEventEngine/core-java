@@ -33,10 +33,4 @@ import java.util.List;
  */
 public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
 
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
-        return super.handleCreate(command, context);
-    }
-
 }

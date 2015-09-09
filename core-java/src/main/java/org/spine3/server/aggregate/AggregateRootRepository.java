@@ -23,9 +23,9 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Assign;
 import org.spine3.server.Repository;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -34,8 +34,20 @@ import java.util.List;
  *
  * @author Alexander Yevsyukov
  */
-public interface AggregateRootRepository<I extends Message, R extends AggregateRoot<I, ?>, C extends Message>
+public interface AggregateRootRepository<I extends Message, R extends AggregateRoot<I, ?>>
         extends Repository<I, R> {
+
+    /**
+     * Loads or creates a root with the passed ID.
+     *
+     * @param objectId id of the aggregate to load
+     * @return loaded or newly created instance of the aggregate root
+     */
+    @SuppressWarnings({"AbstractMethodOverridesAbstractMethod",
+                       "NullableProblems" /* We override the default behavior of loading. */})
+    @Nonnull
+    R load(I objectId);
+
     /**
      * Processes the command by dispatching it one of the repository methods or
      * to a method of an aggregate root.
@@ -55,18 +67,4 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
-    //TODO:2015-09-06:alexander.yevsyukov: In order to remove this method, we need to have loadOrCreate which
-    // would serve for finding an object when it's already stored or created when it's not.
-    /**
-     * Creates, initializes, and stores a new aggregated root.
-     * <p>
-     * The initial state of the aggregate root is taken from the creation command.
-     *
-     * @param command creation command
-     * @param context creation command context
-     * @return a list of the event records
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    @Assign
-    List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
 }
