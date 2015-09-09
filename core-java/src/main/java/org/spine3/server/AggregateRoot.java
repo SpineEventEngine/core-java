@@ -30,6 +30,7 @@ import org.spine3.base.*;
 import org.spine3.server.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.Events;
+import org.spine3.util.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -123,13 +124,12 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
     }
 
     private void initEventApplier() {
-        applier = new EventApplierMap();
-        applier.register(this);
+        applier = new EventApplierMap(this);
     }
 
     private void initCommandDispatcher() {
         dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
+        Map<CommandClass, MessageHandler> subscribers = getCommandHandlers();
         dispatcher.register(subscribers);
     }
 
@@ -165,7 +165,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageSubscriber subscriber = dispatcher.getSubscriber(CommandClass.of(command));
+        MessageHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
@@ -180,8 +180,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         }
     }
 
-    private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
-        Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
+    private Map<CommandClass, MessageHandler> getCommandHandlers() {
+        Map<CommandClass, MessageHandler> result = ServerMethods.scanForCommandHandlers(this);
         return result;
     }
 

@@ -22,10 +22,10 @@ package org.spine3.server;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.AggregateCommand;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -80,12 +80,12 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         this.eventStore = eventStore;
     }
 
-    public Map<CommandClass, MessageSubscriber> getSubscribers() {
+    public Map<CommandClass, MessageHandler> getHandlers() {
         // Create subscribers that call dispatch() on message classes handled by the aggregate root.
-        Map<CommandClass, MessageSubscriber> subscribers = createDelegatingSubscribers();
+        Map<CommandClass, MessageHandler> subscribers = createDelegatingSubscribers();
 
         // Add command handlers belonging to this repository.
-        Map<CommandClass, MessageSubscriber> repoSubscribers = ServerMethods.scanForCommandHandlers(this);
+        Map<CommandClass, MessageHandler> repoSubscribers = ServerMethods.scanForCommandHandlers(this);
         subscribers.putAll(repoSubscribers);
 
         return subscribers;
@@ -96,10 +96,10 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      *
      * @return reference to the method
      */
-    private MessageSubscriber toMessageSubscriber() {
+    private MessageHandler toMessageSubscriber() {
         try {
             Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            final MessageSubscriber result = new MessageSubscriber(this, method);
+            final MessageHandler result = new MessageHandler(this, method);
             return result;
         } catch (NoSuchMethodException e) {
             throw propagate(e);
@@ -110,13 +110,13 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class of this repository.
      */
-    private Map<CommandClass, MessageSubscriber> createDelegatingSubscribers() {
-        Map<CommandClass, MessageSubscriber> result = Maps.newHashMap();
+    private Map<CommandClass, MessageHandler> createDelegatingSubscribers() {
+        Map<CommandClass, MessageHandler> result = Maps.newHashMap();
 
         Class<? extends AggregateRoot> rootClass = TypeInfo.getStoredObjectClass(this);
         Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
 
-        MessageSubscriber subscriber = toMessageSubscriber();
+        MessageHandler subscriber = toMessageSubscriber();
         for (CommandClass commandClass : commandClasses) {
             result.put(commandClass, subscriber);
         }
@@ -230,7 +230,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     // A better way would be to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile-time.
     private I getAggregateId(Message command) {
-        return (I) AggregateCommand.getAggregateId(command);
+        return (I) AggregateCommand.getAggregateId(command).value();
     }
 
     /**

@@ -28,6 +28,8 @@ import org.spine3.*;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.server.error.AccessLevelException;
+import org.spine3.server.error.DuplicateHandlerMethodException;
+import org.spine3.util.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -253,16 +255,16 @@ class ServerMethods {
     }
 
     /**
-     * Returns a map of the {@link MessageSubscriber} objects to the corresponding command class.
+     * Returns a map of the {@link MessageHandler} objects to the corresponding command class.
      *
      * @param commandHandler the object that keeps command handler methods
      * @return immutable map of command handler methods
      */
-    public static Map<CommandClass, MessageSubscriber> scanForCommandHandlers(Object commandHandler) {
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(commandHandler, isCommandHandlerPredicate);
+    public static Map<CommandClass, MessageHandler> scanForCommandHandlers(Object commandHandler) {
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(commandHandler, isCommandHandlerPredicate);
 
-        final ImmutableMap.Builder<CommandClass, MessageSubscriber> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+        final ImmutableMap.Builder<CommandClass, MessageHandler> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
             builder.put(CommandClass.of(entry.getKey()), entry.getValue());
         }
         return builder.build();
@@ -274,11 +276,11 @@ class ServerMethods {
      * @param eventApplier the object that keeps event applier methods
      * @return immutable map of event appliers
      */
-    public static Map<EventClass, MessageSubscriber> scanForEventAppliers(Object eventApplier) {
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventApplier, isEventApplierPredicate);
+    public static Map<EventClass, MessageHandler> scanForEventAppliers(Object eventApplier) {
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(eventApplier, isEventApplierPredicate);
 
-        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+        final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
             builder.put(EventClass.of(entry.getKey()), entry.getValue());
         }
         return builder.build();
@@ -290,43 +292,43 @@ class ServerMethods {
      * @param eventHandler the object to scan
      * @return immutable map of event handling methods
      */
-    public static Map<EventClass, MessageSubscriber> scanForEventHandlers(Object eventHandler) {
-        Map<Class<? extends Message>, MessageSubscriber> subscribers = scanForSubscribers(eventHandler, isEventHandlerPredicate);
+    public static Map<EventClass, MessageHandler> scanForEventHandlers(Object eventHandler) {
+        Map<Class<? extends Message>, MessageHandler> subscribers = scanForHandlers(eventHandler, isEventHandlerPredicate);
 
-        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, MessageSubscriber> entry : subscribers.entrySet()) {
+        final ImmutableMap.Builder<EventClass, MessageHandler> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, MessageHandler> entry : subscribers.entrySet()) {
             builder.put(EventClass.of(entry.getKey()), entry.getValue());
         }
         return builder.build();
     }
 
     /**
-     * Returns a map of the {@link MessageSubscriber} objects to the corresponding message class.
+     * Returns a map of the {@link MessageHandler} objects to the corresponding message class.
      *
-     * @param subscribersHolder   the object that keeps subscribed methods
-     * @param subscriberPredicate the predicate that defines rules for subscriber scanning
+     * @param object   the object that keeps subscribed methods
+     * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      */
-    private static Map<Class<? extends Message>, MessageSubscriber> scanForSubscribers(
-            Object subscribersHolder, Predicate<Method> subscriberPredicate) {
+    public static Map<Class<? extends Message>, MessageHandler> scanForHandlers(
+            Object object, Predicate<Method> filter) {
 
-        Map<Class<? extends Message>, MessageSubscriber> result = Maps.newHashMap();
+        Map<Class<? extends Message>, MessageHandler> result = Maps.newHashMap();
 
-        for (Method method : subscribersHolder.getClass().getDeclaredMethods()) {
-            if (subscriberPredicate.apply(method)) {
+        for (Method method : object.getClass().getDeclaredMethods()) {
+            if (filter.apply(method)) {
                 /*
                    This check must be performed after
-                   subscriberPredicate.apply(method) is true,
-                   otherwise it will be performed for the all methods from the subscribersHolder.
+                   filter.apply(method) is true,
+                   otherwise it will be performed for the all methods from the object.
                  */
-                checkModifier(subscribersHolder, method);
+                checkModifier(object, method);
 
-                MessageSubscriber subscriber = new MessageSubscriber(subscribersHolder, method);
+                MessageHandler subscriber = new MessageHandler(object, method);
 
                 Class<? extends Message> messageClass = getFirstParamType(method);
                 if (result.containsKey(messageClass)) {
-                    final MessageSubscriber firstMethod = result.get(messageClass);
-                    throw new DuplicateSubscriberException(messageClass, firstMethod, subscriber);
+                    final MessageHandler firstMethod = result.get(messageClass);
+                    throw new DuplicateHandlerMethodException(object.getClass(), messageClass, firstMethod.getShortName(), subscriber.getShortName());
                 }
                 result.put(messageClass, subscriber);
             }

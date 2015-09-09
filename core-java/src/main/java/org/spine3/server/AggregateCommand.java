@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
-import org.spine3.error.MissingAggregateIdException;
+import org.spine3.server.error.MissingAggregateIdException;
 import org.spine3.util.Commands;
 import org.spine3.protobuf.Messages;
 
@@ -36,13 +36,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
 public class AggregateCommand extends AbstractCommand {
 
-    public static final int AGGREGATE_STATE_FIELD_INDEX = 1;
+    public static final int AGGREGATE_ID_FIELD_INDEX = 0;
 
     private final AggregateId aggregateId;
 
     protected AggregateCommand(Message value) {
         super(value);
-        this.aggregateId = AggregateId.of(getAggregateId(value));
+        this.aggregateId = getAggregateId(value);
     }
 
     public static AggregateCommand of(Message value) {
@@ -58,8 +58,6 @@ public class AggregateCommand extends AbstractCommand {
         return this.aggregateId;
     }
 
-    //TODO:2015-07-28:alexander.yevsyukov: Migrate to accepting AggregateCommand and returning AggregateId.
-
     /**
      * Obtains an aggregate id from the passed command instance.
      * <p>
@@ -68,41 +66,18 @@ public class AggregateCommand extends AbstractCommand {
      * @param command the command to get id from
      * @return value of the id
      */
-    public static Message getAggregateId(Message command) {
-        String fieldName = Messages.getFieldName(command, 0);
+    public static AggregateId getAggregateId(Message command) {
+        String fieldName = Messages.getFieldName(command, AGGREGATE_ID_FIELD_INDEX);
         if (!fieldName.endsWith(Commands.ID_PROPERTY_SUFFIX)) {
             throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
         }
 
         try {
-            Message result = (Message) Messages.getFieldValue(command, 0);
-            return result;
+            Message value = (Message) Messages.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX);
+            return AggregateId.of(value);
         } catch (RuntimeException e) {
             throw new MissingAggregateIdException(command, Messages.toAccessorMethodName(fieldName), e);
         }
     }
 
-    //TODO:2015-07-28:alexander.yevsyukov: Accept AggregateCommand here.
-    //TODO:2015-07-28:alexander.yevsyukov: Return AggregateState instance instead.
-
-    /**
-     * Obtains initial aggregate root state from the creation command.
-     * <p>
-     * The state must be the second field of the Protobuf message, and must match
-     * the message type of the corresponding aggregated root state.
-     *
-     * @param creationCommand the command to inspect
-     * @return initial aggregated root state
-     * @throws IllegalStateException if the field value is not a {@link Message} instance
-     */
-    public static Message getAggregateState(Message creationCommand) {
-        Object state = Messages.getFieldValue(creationCommand, AGGREGATE_STATE_FIELD_INDEX);
-        Message result;
-        try {
-            result = (Message) state;
-        } catch (ClassCastException ignored) {
-            throw new IllegalStateException("The second field of the aggregate creation command must be Protobuf message. Found: " + state.getClass());
-        }
-        return result;
-    }
 }

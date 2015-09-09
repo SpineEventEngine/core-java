@@ -17,37 +17,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.error;
 
-import org.spine3.EventClass;
+import com.google.protobuf.Message;
+import org.spine3.util.Commands;
 
 /**
- * Exception that is thrown when more than one applier
- * of the same event class is found in a declaring class.
+ * Exception is thrown if a command, which is intended to be used for an aggregate
+ * does not have {@code getAggregateId()} method.
+ * <p>
+ * To have this method in Java, corresponding Protobuf message definition must have
+ * the property called {@code aggregate_id}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class DuplicateApplierException extends RuntimeException {
+public class MissingAggregateIdException extends RuntimeException {
 
-    /**
-     * Creates new exception.
-     *
-     * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered
-     * @param discoveredSubscriber another applier method for the same event class
-     */
-    public DuplicateApplierException(
-            EventClass eventClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
+    public MissingAggregateIdException(Message command, String methodName, Throwable cause) {
+        super(createMessage(command, methodName), cause);
+    }
 
-        super(String.format("The class %s defines more than one applier method for the event class %s. " +
-                            "Applier methods encountered: %s, %s.",
-                currentSubscriber.getTargetClass(),
-                eventClass,
-                currentSubscriber,
-                discoveredSubscriber));
+    private static String createMessage(Message command, String methodName) {
+        return "Unable to call ID accessor method " + methodName + " from the command of class "
+                + command.getClass().getName();
+    }
+
+    public MissingAggregateIdException(String commandClassName, String propertyName) {
+        super("The first property of the aggregate command " + commandClassName +
+                " must define aggregate ID with a name ending with '" + Commands.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
     }
 
     private static final long serialVersionUID = 0L;

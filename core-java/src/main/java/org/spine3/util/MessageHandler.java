@@ -17,10 +17,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.util;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -31,35 +30,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Wraps a subscriber method on a specific object.
- * <p>
- * <p>This class only verifies the suitability of the method and event type if
+ * Wraps a handler method on a specific object.
+ * <p/>
+ * This class only verifies the suitability of the method and event type if
  * something fails.  Callers are expected to verify their uses of this class.
- * <p>
- * <p>Two EventSubscribers are equivalent when they refer to the same method on the
- * same object (not class).   This property is used to ensure that no subscriber
+ * <p/>
+ * Two message handlers are equivalent when they refer to the same method on the
+ * same object (not class).   This property is used to ensure that no handler
  * method is registered more than once.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-class MessageSubscriber {
+public class MessageHandler {
 
     /**
-     * Object sporting the subscriber method.
+     * Object sporting the handler method.
      */
     private final Object target;
+
     /**
-     * Subscriber method.
+     * Handler method.
      */
     private final Method method;
 
     /**
-     * Creates a new MessageSubscriber to wrap {@code method} on {@code target}.
+     * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    MessageSubscriber(Object target, Method method) {
+    public MessageHandler(Object target, Method method) {
         checkNotNull(target, "target cannot be null.");
         checkNotNull(method, "method cannot be null.");
 
@@ -69,17 +70,15 @@ class MessageSubscriber {
     }
 
     /**
-     * Invokes the wrapped subscriber method to handle {@code protoMessage}.
+     * Invokes the wrapped subscriber method to handle {@code message} with the {@code context}.
      *
      * @param <T>     the type of the expected handler invocation result
-     * @param message protoMessage to handle
-     * @param context context of the protoMessage
+     * @param message the message to handle
+     * @param context the context of the message
      * @return the result of message handling
-     * @throws java.lang.reflect.InvocationTargetException if the wrapped method
-     *                                                     throws any {@link Throwable} that is not an {@link Error} ({@code Error}
-     *                                                     instances are propagated as-is).
+     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
+     *                                   {@code Error} instances are propagated as-is.
      */
-    @SuppressWarnings("ProhibitedExceptionThrown")
     public <T> T handle(Message message, Message context) throws InvocationTargetException {
 
         checkNotNull(message);
@@ -88,36 +87,46 @@ class MessageSubscriber {
             @SuppressWarnings("unchecked")
             final T result = (T) method.invoke(target, message, context);
             return result;
-        }  catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+        } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof Error) {
+                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
+                throw (Error) e.getCause();
+            }
+            throw e;
         }
     }
 
     /**
-     * Invokes the wrapped subscriber method to handle {@code protoMessage}.
+     * Invokes the wrapped subscriber method to handle {@code message}.
      *
      * @param <T>     the type of the expected handler invocation result
-     * @param message protoMessage to handle
+     * @param message a message to handle
      * @return the result of message handling
-     * @throws java.lang.reflect.InvocationTargetException if the wrapped method
-     *                                                     throws any {@link Throwable} that is not an {@link Error} ({@code Error}
-     *                                                     instances are propagated as-is).
+     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
+     *                                   {@code Error} instances are propagated as-is.
      */
-    @SuppressWarnings("ProhibitedExceptionThrown")
     public <T> T handle(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")
             T result = (T) method.invoke(target, message);
             return result;
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+        } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof Error) {
+                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
+                throw (Error) e.getCause();
+            }
+            throw e;
         }
     }
 
     /**
      * Returns a full name of the subscriber method.
-     * <p>
+     * <p/>
      * The full name consists of a fully qualified class name of the target object and
      * the method name separated with a dot character.
      *
@@ -152,7 +161,10 @@ class MessageSubscriber {
 
     @Override
     public int hashCode() {
-        return Objects.hash(target, method);
+        final int prime = 31;
+        // We need to hash only by the target's identity.
+        return (prime + method.hashCode()) * prime
+                + System.identityHashCode(target);
     }
 
     @Override
@@ -163,8 +175,11 @@ class MessageSubscriber {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final MessageSubscriber other = (MessageSubscriber) obj;
-        return Objects.equals(this.target, other.target)
+        final MessageHandler other = (MessageHandler) obj;
+
+        // Use == to verify that the instances of the target objects are the same.
+        // This way we'd allow having handlers for target objects that are otherwise equal.
+        return (this.target == other.target)
                 && Objects.equals(this.method, other.method);
     }
 }

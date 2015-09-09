@@ -19,10 +19,12 @@
  */
 package org.spine3.server;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
+import org.spine3.server.error.DuplicateApplierException;
 import org.spine3.server.error.MissingEventApplierException;
+import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -38,30 +40,30 @@ import static org.spine3.server.ServerMethods.scanForEventAppliers;
  */
 class EventApplierMap {
 
-    //TODO:2015-09-06:alexander.yevsyukov: Why concurrent?
-    private final Map<EventClass, MessageSubscriber> subscribersByType = Maps.newConcurrentMap();
+    private final Map<EventClass, MessageHandler> subscribersByType;
 
     /**
-     * This method is used to register an aggregated root.
+     * Constructs a new instance for the passed aggregated root.
      *
      * @param aggregateRoot the aggregate root object
      */
-    public void register(AggregateRoot aggregateRoot) {
+    EventApplierMap(AggregateRoot aggregateRoot) {
         checkNotNull(aggregateRoot);
 
-        Map<EventClass, MessageSubscriber> subscribers = scanForEventAppliers(aggregateRoot);
-        checkSubscribers(subscribers);
+        Map<EventClass, MessageHandler> appliers = scanForEventAppliers(aggregateRoot);
+        checkDuplicates(appliers);
 
-        putAll(subscribers);
+        this.subscribersByType = ImmutableMap.<EventClass, MessageHandler>builder().putAll(appliers).build();
     }
 
-    private void checkSubscribers(Map<EventClass, MessageSubscriber> subscribers) {
-        for (Map.Entry<EventClass, MessageSubscriber> entry : subscribers.entrySet()) {
+    private void checkDuplicates(Map<EventClass, MessageHandler> appliers) {
+        for (Map.Entry<EventClass, MessageHandler> entry : appliers.entrySet()) {
             EventClass eventClass = entry.getKey();
 
             if (subscriberRegistered(eventClass)) {
-                final MessageSubscriber alreadyAddedApplier = getSubscriber(eventClass);
-                throw new DuplicateApplierException(eventClass, alreadyAddedApplier, entry.getValue());
+                final MessageHandler alreadyAddedApplier = getSubscriber(eventClass);
+                throw new DuplicateApplierException(alreadyAddedApplier.getTargetClass(),
+                        eventClass, alreadyAddedApplier.getShortName(), entry.getValue().getShortName());
             }
         }
     }
@@ -80,15 +82,11 @@ class EventApplierMap {
             throw new MissingEventApplierException(event);
         }
 
-        MessageSubscriber subscriber = getSubscriber(eventClass);
+        MessageHandler subscriber = getSubscriber(eventClass);
         subscriber.handle(event);
     }
 
-    private void putAll(Map<EventClass, MessageSubscriber> subscribers) {
-        subscribersByType.putAll(subscribers);
-    }
-
-    private MessageSubscriber getSubscriber(EventClass eventClass) {
+    private MessageHandler getSubscriber(EventClass eventClass) {
         return subscribersByType.get(eventClass);
     }
 
