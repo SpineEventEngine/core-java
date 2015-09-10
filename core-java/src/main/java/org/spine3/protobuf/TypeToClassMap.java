@@ -20,7 +20,6 @@
 
 package org.spine3.protobuf;
 
-import com.google.common.base.Preconditions;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.ClassName;
@@ -28,9 +27,8 @@ import org.spine3.TypeName;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Utility class for reading real proto class names from properties file.
@@ -43,31 +41,33 @@ public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
+    //TODO:2015-09-09:mikhail.mikhaylov: Find a way to read it from gradle properties.
     /**
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PROPERTIES_FILE_NAME = "protos.properties";
+    private static final String PROPERTIES_FILES_PATH = "protos/properties/";
 
     private static final Map<TypeName, ClassName> namesMap = new HashMap<>();
 
     static {
-        Properties properties = new Properties();
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream resourceStream = classLoader.getResourceAsStream(PROPERTIES_FILE_NAME);
-
-        Preconditions.checkState(resourceStream != null, "Unable to load resource: " + PROPERTIES_FILE_NAME);
+        Enumeration<URL> resources = null;
         try {
-            properties.load(resourceStream);
-        } catch (IOException e) {
-            //NOP
+            resources = classLoader.getResources(PROPERTIES_FILES_PATH + "proto.properties");
+        } catch (IOException ignored) {
         }
 
-        for (String key : properties.stringPropertyNames()) {
-            final TypeName typeName = TypeName.of(key);
-            final ClassName className = ClassName.of(properties.getProperty(key));
-            namesMap.put(typeName, className);
+        if (resources != null) {
+            while (resources.hasMoreElements()) {
+                final URL resourceUrl = resources.nextElement();
+                try {
+                    readPropertiesFromStream(resourceUrl.openStream());
+                } catch (IOException ignored) {
+                }
+            }
+
         }
     }
 
@@ -88,6 +88,32 @@ public class TypeToClassMap {
         }
         final ClassName result = namesMap.get(protoType);
         return result;
+    }
+
+    private static void readPropertiesFromStream(InputStream stream) {
+        Properties properties = new Properties();
+
+        try {
+            properties.load(stream);
+        } catch (IOException e) {
+            //NOP
+        }
+
+        readProperties(properties);
+    }
+
+    /**
+     * Adds all data from properties file into memory. Properties file should contain proto type urls and
+     * appropriate java class names.
+     *
+     * @param properties Properties file to read params from
+     */
+    private static void readProperties(Properties properties) {
+        for (String key : properties.stringPropertyNames()) {
+            final TypeName typeName = TypeName.of(key);
+            final ClassName className = ClassName.of(properties.getProperty(key));
+            namesMap.put(typeName, className);
+        }
     }
 
     private static ClassName searchAsSubclass(TypeName lookupTypeName) {
