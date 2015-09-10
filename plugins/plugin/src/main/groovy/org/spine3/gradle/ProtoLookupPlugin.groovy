@@ -43,7 +43,7 @@ class ProtoLookupPlugin implements Plugin<Project> {
                 return
             }
 
-            File propsFileFolder = new File(rootDirPath + "/" + PROPERTIES_PATH_SUFFIX)
+            File propsFileFolder = new File("generated/main/" + PROPERTIES_PATH_SUFFIX)
             if (!propsFileFolder.exists()) {
                 propsFileFolder.mkdirs();
             }
