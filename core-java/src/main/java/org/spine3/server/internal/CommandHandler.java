@@ -84,7 +84,7 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
                         && CommandContext.class.equals(parameterTypes[1]);
 
         boolean returnsMessageList = List.class.equals(method.getReturnType());
-        boolean returnsMessage = Message.class.equals(method.getReturnType());
+        boolean returnsMessage = Message.class.isAssignableFrom(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
         return isAnnotated

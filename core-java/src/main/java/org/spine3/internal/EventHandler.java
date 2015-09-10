@@ -130,9 +130,7 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
 
     @Override
     protected void checkModifier() {
-        boolean isPublic = isPublic();
-
-        if (!isPublic) {
+        if (!isPublic()) {
             Object target = getTarget();
             Method method = getMethod();
 

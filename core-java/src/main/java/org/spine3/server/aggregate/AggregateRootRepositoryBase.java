@@ -24,12 +24,12 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Assign;
-import org.spine3.server.internal.CommandHandler;
+import org.spine3.server.RepositoryBase;
 import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
+import org.spine3.server.internal.CommandHandler;
 
-import java.lang.reflect.Constructor;
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -43,31 +43,20 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @param <R> the type of the aggregated root
  * @param <I> the type of the aggregated root id
- * @param <C> the type of the command to create a new aggregate root instance
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRootRepositoryBase<I extends Message,
-                                                  R extends AggregateRoot<I, ?>,
-                                                  C extends Message> implements AggregateRootRepository<I, R, C> {
+                                                  R extends AggregateRoot<I, ?>>
+        extends RepositoryBase<I, R> implements AggregateRootRepository<I, R> {
 
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     private RepositoryEventStore eventStore;
 
-    private final Constructor<R> aggregateRootConstructor;
-
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // as we need 'this' to get the runtime generic type values
     protected AggregateRootRepositoryBase() {
-        try {
-            Class<R> rootClass = TypeInfo.getStoredObjectClass(this);
-            Class<I> idClass = TypeInfo.getStoredObjectIdClass(this);
-
-            aggregateRootConstructor = rootClass.getConstructor(idClass);
-        } catch (NoSuchMethodException e) {
-            throw propagate(e);
-        }
+        super();
     }
 
     //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
@@ -83,9 +72,24 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
-     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
-     *
-     * @return reference to the method
+     * Creates a map of handlers that call {@link #dispatch(Message, CommandContext)}
+     * method for all commands of the aggregate root class.
+     */
+    public Map<CommandClass, CommandHandler> getCommandHandlers() {
+        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
+
+        Class<? extends AggregateRoot> rootClass = TypeInfo.getEntityClass(this);
+        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
+
+        CommandHandler handler = toCommandHandler();
+        for (CommandClass commandClass : commandClasses) {
+            result.put(commandClass, handler);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
     private CommandHandler toCommandHandler() {
         try {
@@ -98,44 +102,28 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
-     * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
-     * method for all commands of the aggregate root class of this repository.
-     */
-    private Map<CommandClass, CommandHandler> createDelegatingSubscribers() {
-        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
-
-        Class<? extends AggregateRoot> rootClass = TypeInfo.getStoredObjectClass(this);
-        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
-
-        CommandHandler subscriber = toCommandHandler();
-        for (CommandClass commandClass : commandClasses) {
-            result.put(commandClass, subscriber);
-        }
-        return result;
-    }
-
-    /**
      * Loads the an aggregate by given id.
      *
-     * @param aggregateId id of the aggregate to load
+     * @param id id of the aggregate to load
      * @return the loaded object
      * @throws IllegalStateException if the repository wasn't configured prior to calling this method
      */
+    @Nonnull
     @Override
-    public R load(I aggregateId) throws IllegalStateException {
+    public R load(I id) throws IllegalStateException {
         checkConfigured();
 
         try {
-            Snapshot snapshot = eventStore.getLastSnapshot(aggregateId);
+            Snapshot snapshot = eventStore.getLastSnapshot(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStore.getEvents(aggregateId, snapshot.getVersion());
-                R result = create(aggregateId);
+                List<EventRecord> trail = eventStore.getEvents(id, snapshot.getVersion());
+                R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = eventStore.getAllEvents(aggregateId);
-                R result = create(aggregateId);
+                List<EventRecord> events = eventStore.getAllEvents(id);
+                R result = create(id);
                 result.play(events);
                 return result;
             }
@@ -158,7 +146,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     @Override
     public void store(R aggregateRoot) {
-        //TODO:2015-09-05:alexander.yevsyukov: It's too late to check it at this stage.
         checkConfigured();
 
         //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which should be configured at the repository's level.
@@ -166,7 +153,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         Snapshot snapshot = aggregateRoot.toSnapshot();
 
         //noinspection unchecked
-        final I aggregateRootId = (I) aggregateRoot.getId();
+        final I aggregateRootId = aggregateRoot.getId();
         eventStore.storeSnapshot(aggregateRootId, snapshot);
     }
 
@@ -176,34 +163,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
         I aggregateId = getAggregateId(command);
         R aggregateRoot = load(aggregateId);
-
-        aggregateRoot.dispatch(command, context);
-
-        //noinspection unchecked
-        final List<EventRecord> eventRecords = aggregateRoot.getUncommittedEvents();
-
-        //TODO:2015-06-24:mikhail.melnik: possibly we do not need to store every state change.
-        store(aggregateRoot);
-
-        return eventRecords;
-    }
-
-    /**
-     * Creates, initializes, and stores a new aggregated root.
-     * <p>
-     * The command is passed to the newly created root with the default state.
-     *
-     * @param command creation command
-     * @param context creation command context
-     * @return a list of the event records
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException {
-        I id = getAggregateId(command);
-
-        R aggregateRoot = create(id);
 
         aggregateRoot.dispatch(command, context);
 
@@ -222,23 +181,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     // correctness of the type on compile-time.
     private I getAggregateId(Message command) {
         return (I) AggregateCommand.getAggregateId(command).value();
-    }
-
-    /**
-     * Returns a new instance of the aggregate root object
-     * with id equals to passed id parameter and all field values set by default,
-     *
-     * @param id the id of the aggregate root to be created
-     * @return the aggregate root instance
-     */
-    protected R create(I id) {
-        try {
-            R result = aggregateRootConstructor.newInstance(id);
-
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw propagate(e);
-        }
     }
 
 }

@@ -34,7 +34,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  * @param <I> the type of object IDs
  * @param <S> the type of object states.
  */
-public abstract class Entity<I extends Message, S extends Message> {
+public abstract class Entity<I, S extends Message> {
 
     private final I id;
 

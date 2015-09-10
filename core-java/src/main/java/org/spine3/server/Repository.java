@@ -19,19 +19,28 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.util.Classes;
+
+import javax.annotation.Nullable;
 
 /**
  * Base interface for repositories.
  *
+ * @param <I> the type of the IDs of entity objects
  * @param <E> the type of the stored object
- * @param <I> the type of the IDs of stored objects
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I extends Message, E extends Entity<I, ?>> {
+public interface Repository<I, E extends Entity<I, ?>> {
+
+    /**
+     * Create a new entity instance with its default state.
+     *
+     * @param id the id of the entity
+     * @return new entity instance
+     */
+    E create(I id);
+
     /**
      * Stores the passed object.
      *
@@ -40,29 +49,35 @@ public interface Repository<I extends Message, E extends Entity<I, ?>> {
     void store(E obj);
 
     /**
-     * Loads the an aggregate by given id.
+     * Loads the entity with the passed ID.
      *
-     * @param objectId id of the aggregate to load
-     * @return the loaded object
+     * @param id the id of the entity to load
+     * @return the entity or {@code null} if there's no entity with such id
      */
-    E load(I objectId);
+    @Nullable
+    E load(I id);
 
     @SuppressWarnings("UtilityClass")
     class TypeInfo {
-
-        public static final int STORED_OBJECT_ID_CLASS_GENERIC_INDEX = 0;
-        public static final int STORED_OBJECT_CLASS_GENERIC_INDEX = 1;
+        /**
+         * The index of the declaration of the generic type {@code I} in the {@link Repository} interface.
+         */
+        private static final int ID_CLASS_GENERIC_INDEX = 0;
+        /**
+         * The index of the declaration of the generic type {@code E} in the {@link Repository} interface.
+         */
+        private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
 
         private TypeInfo() {
         }
 
         /**
-         * Returns {@link Class} object representing the aggregate id type of the given repository.
+         * Returns {@link Class} of entity IDs of the passed repository.
          *
          * @return the aggregate id {@link Class}
          */
-        public static <I extends Message> Class<I> getStoredObjectIdClass(Repository repository) {
-            return Classes.getGenericParameterType(repository, STORED_OBJECT_ID_CLASS_GENERIC_INDEX);
+        public static <I> Class<I> getIdClass(Repository repository) {
+            return Classes.getGenericParameterType(repository, ID_CLASS_GENERIC_INDEX);
         }
 
         /**
@@ -70,8 +85,8 @@ public interface Repository<I extends Message, E extends Entity<I, ?>> {
          *
          * @return the aggregate root {@link Class}
          */
-        public static <R extends AggregateRoot> Class<R> getStoredObjectClass(Repository repository) {
-            return Classes.getGenericParameterType(repository, STORED_OBJECT_CLASS_GENERIC_INDEX);
+        public static <E extends Entity> Class<E> getEntityClass(Repository repository) {
+            return Classes.getGenericParameterType(repository, ENTITY_CLASS_GENERIC_INDEX);
         }
     }
 }

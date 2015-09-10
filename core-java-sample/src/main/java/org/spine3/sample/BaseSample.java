@@ -39,7 +39,7 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
-        registerEventSubscribers();
+        registerEventHandlers();
         prepareEngine();
 
         List<CommandRequest> requests = prepareRequests();
@@ -69,7 +69,7 @@ public abstract class BaseSample {
         return result;
     }
 
-    protected static void registerEventSubscribers() {
+    protected static void registerEventHandlers() {
         EventBus.instance().register(new EventLogger());
     }
 
