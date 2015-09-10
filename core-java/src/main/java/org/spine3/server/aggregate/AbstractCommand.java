@@ -17,22 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
 
+package org.spine3.server.aggregate;
+
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 
 /**
- * This exception is thrown on a discovery of an event class, which is not handled by any of
- * the applier methods of an aggregate root class.
+ * Abstract base for command classes.
  *
- * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class MissingEventApplierException extends RuntimeException {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+abstract class AbstractCommand extends MessageValue {
 
-    public MissingEventApplierException(Message event) {
-        super("There is no registered applier for the event: " + event.getClass());
+    protected AbstractCommand(Message value) {
+        super(value);
     }
 
-    private static final long serialVersionUID = 0L;
-
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
+        return result;
+    }
 }

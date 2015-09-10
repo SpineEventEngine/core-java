@@ -30,7 +30,7 @@ import org.spine3.sample.order.BookId;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.sample.order.command.PayOrder;
+import org.spine3.sample.order.command.PayForOrder;
 import org.spine3.time.ZoneOffset;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -63,7 +63,7 @@ public class Requests {
         //noinspection MagicNumber
         Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
-                .setAuthor("Eric Ewans")
+                .setAuthor("Eric Evans")
                 .setTitle("Domain Driven Design.")
                 .setPrice(51.33)
                 .build();
@@ -88,9 +88,9 @@ public class Requests {
     }
 
     public static CommandRequest payOrder(UserId userId, OrderId orderId) {
-        BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Paying info is here.").build();
+        BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
 
-        PayOrder cmd = PayOrder.newBuilder()
+        PayForOrder cmd = PayForOrder.newBuilder()
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();

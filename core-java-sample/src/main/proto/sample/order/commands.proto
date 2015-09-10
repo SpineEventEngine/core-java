@@ -41,7 +41,7 @@ message RemoveOrderLine {
     OrderLine order_line = 2;
 }
 
-message PayOrder {
+message PayForOrder {
     OrderId order_id = 1;
     BillingInfo billing_info = 2;
 }

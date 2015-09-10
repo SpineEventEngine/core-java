@@ -17,20 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.error;
 
 import com.google.protobuf.Message;
 
 /**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
+ * Indicates that more than one handling method for the same message class are present in the declaring class.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class UnsupportedCommandException extends RuntimeException {
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler for the command: " + command.getClass().getName());
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
+
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
     }
 
     private static final long serialVersionUID = 0L;

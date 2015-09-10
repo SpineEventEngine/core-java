@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.internal.EventHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -34,11 +35,11 @@ import java.util.Map;
  * @param <I> the type of the IDs of the stateful handlers
  * @param <S> the type of the state objects
  */
-public abstract class StoredEventHandler<I extends Message, S extends Message> extends StoredObject<I, S> {
+public abstract class EventHandlingEntity<I extends Message, S extends Message> extends Entity<I, S> {
 
-    private Map<EventClass, MessageSubscriber> handlers;
+    private Map<EventClass, EventHandler> handlers;
 
-    protected StoredEventHandler(I id) {
+    protected EventHandlingEntity(I id) {
         super(id);
     }
 
@@ -52,7 +53,7 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
-        MessageSubscriber method = handlers.get(EventClass.of(event));
+        EventHandler method = handlers.get(EventClass.of(event));
         if (method != null) {
             method.handle(event, ctx);
         }
@@ -63,8 +64,8 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
     }
 
     protected void init() {
-        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
-        builder.putAll(ServerMethods.scanForEventHandlers(this));
+        final ImmutableMap.Builder<EventClass, EventHandler> builder = ImmutableMap.builder();
+        builder.putAll(EventHandler.scan(this));
         this.handlers = builder.build();
     }
 

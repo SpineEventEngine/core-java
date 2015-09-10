@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
+import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.server.*;

@@ -24,10 +24,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.spine3.AggregateCommand;
+import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.AggregateId;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -214,8 +215,8 @@ public class FileSystemHelper {
         @Override
         protected void write(CommandRequest message) {
             Message command = AggregateCommand.getCommandValue(message);
-            Message aggregateId = AggregateCommand.getAggregateId(command);
-            File file = FileSystemHelper.getFile(aggregateId, getFileNameSuffix());
+            AggregateId aggregateId = AggregateCommand.getAggregateId(command);
+            File file = FileSystemHelper.getFile(aggregateId.value(), getFileNameSuffix());
 
             writeMessage(file, message);
         }

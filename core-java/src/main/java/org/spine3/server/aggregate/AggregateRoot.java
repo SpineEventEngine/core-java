@@ -17,23 +17,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.*;
+import com.google.protobuf.Timestamp;
+import org.spine3.CommandClass;
+import org.spine3.EventClass;
 import org.spine3.base.*;
-import org.spine3.error.MissingEventApplierException;
+import org.spine3.server.*;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.internal.CommandDispatcher;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.util.Events;
+import org.spine3.internal.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -47,50 +59,149 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
 public abstract class AggregateRoot<I extends Message, S extends Message>
-        extends StoredObject<I, S> {
+        extends Entity<I, S> {
+
+    /**
+     * Cached value of the ID in the form of Any instance.
+     */
+    private final Any idAsAny;
 
     private volatile boolean initialized = false;
-
     private CommandDispatcher dispatcher;
-    private EventApplierMap applier;
+    private EventApplier.Map applier;
 
     private final List<EventRecord> eventRecords = Lists.newLinkedList();
 
     protected AggregateRoot(I id) {
         super(id);
+        this.idAsAny = Messages.toAny(id);
+    }
+
+    /**
+     * Returns set of the command types handled by a given aggregate root.
+     *
+     * @param clazz {@link Class} of the aggregate root
+     * @return command types handled by aggregate root
+     */
+    @CheckReturnValue
+    public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandler.isCommandHandlerPredicate);
+        Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
+            @Nullable
+            @Override
+            public CommandClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return CommandClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
+    }
+
+    /**
+     * Returns set of the event types handled by a given aggregate root.
+     *
+     * @param aggregateRootClass {@link Class} of the aggregate root
+     * @return immutable set of event classes handled by the aggregate root
+     */
+    @CheckReturnValue
+    public static Set<EventClass> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
+        Set<Class<? extends Message>> types = getHandledMessageClasses(aggregateRootClass, EventApplier.isEventApplierPredicate);
+        Iterable<EventClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, EventClass>() {
+            @Nullable
+            @Override
+            public EventClass apply(@Nullable Class<? extends Message> input) {
+                if (input == null) {
+                    return null;
+                }
+                return EventClass.of(input);
+            }
+        });
+        return ImmutableSet.copyOf(transformed);
+    }
+
+    /**
+     * Returns event/command types handled by given AggregateRoot class.
+     */
+    @CheckReturnValue
+    static Set<Class<? extends Message>> getHandledMessageClasses(Class<? extends AggregateRoot> clazz, Predicate<Method> methodPredicate) {
+
+        Set<Class<? extends Message>> result = Sets.newHashSet();
+
+        for (Method method : clazz.getDeclaredMethods()) {
+
+            boolean methodMatches = methodPredicate.apply(method);
+
+            if (methodMatches) {
+                Class<? extends Message> firstParamType = MessageHandler.getFirstParamType(method);
+                result.add(firstParamType);
+            }
+        }
+        return result;
     }
 
     private void init() {
-        if (!isInitialized()) {
+        if (!this.initialized) {
             initCommandDispatcher();
             initEventApplier();
 
-            if (getState() == null) {
-                setState(getDefaultState());
+            if (super.getState() == null) {
+                setDefault();
             }
 
-            setInitialized();
+            this.initialized = true;
         }
     }
 
-    @CheckReturnValue
-    private boolean isInitialized() {
-        return initialized;
+    /**
+     * Returns the current state of the aggregate root.
+     *
+     * @return a non-null state object or default state instance
+     */
+    @Nonnull
+    @Override
+    public S getState() {
+        init();
+        final S state = super.getState();
+        // An aggregate root when initialized may not have a null state because:
+        // 1. Its initialization sets the state to default.
+        // 2. Modifications are performed via command handlers or event appliers,
+        //     which involves prior initialization.
+        assert state != null;
+        return state;
     }
 
-    private void setInitialized() {
-        initialized = true;
+    /**
+     * Returns a non-null timestamp of the last modification.
+     *
+     * @return a non-null instance, which is the timestamp of the last modification or
+     *         the timestamp of the object creation of the root is in the default state
+     */
+    @Nonnull
+    @Override
+    public Timestamp whenLastModified() {
+        init();
+        final Timestamp lastModified = super.whenLastModified();
+        // An aggregate root when initialized may not have a null modification timestamp because:
+        // 1. Its initialization sets the timestamp.
+        // 2. Modifications are performed via command handlers or event appliers,
+        //     which involves prior initialization.
+        assert lastModified != null;
+        return lastModified;
+    }
+
+    private Any getIdAsAny() {
+        return idAsAny;
     }
 
     private void initEventApplier() {
-        applier = new EventApplierMap();
-        applier.register(this);
+        applier = new EventApplier.Map(this);
     }
 
     private void initCommandDispatcher() {
         dispatcher = new CommandDispatcher();
-        Map<CommandClass, MessageSubscriber> subscribers = getCommandHandlers();
-        dispatcher.register(subscribers);
+        dispatcher.register(this);
     }
 
     /**
@@ -125,7 +236,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         checkNotNull(command);
         checkNotNull(context);
 
-        MessageSubscriber subscriber = dispatcher.getSubscriber(CommandClass.of(command));
+        CommandHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
@@ -140,8 +251,8 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         }
     }
 
-    private Map<CommandClass, MessageSubscriber> getCommandHandlers() {
-        Map<CommandClass, MessageSubscriber> result = ServerMethods.scanForCommandHandlers(this);
+    private Map<CommandClass, CommandHandler> getCommandHandlers() {
+        Map<CommandClass, CommandHandler> result = CommandHandler.scan(this);
         return result;
     }
 
@@ -175,7 +286,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Applies an event to the aggregate root.
-     * <p>
+     * <p/>
      * If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
@@ -200,14 +311,10 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
      *
      * @param snapshot the snapshot with the state to restore
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Have this type to make API more obvious.
-    public void restore(Snapshot snapshot) {
-        setVersion(snapshot.getVersion());
-
+    public void restore(SnapshotOrBuilder snapshot) {
         S stateToRestore = Messages.fromAny(snapshot.getState());
-        setState(stateToRestore);
 
-        setWhenLastModified(snapshot.getWhenLastModified());
+        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenLastModified());
     }
 
     private static EventRecord createEventRecord(Message event, EventContext context) {
@@ -226,6 +333,11 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         return ImmutableList.copyOf(eventRecords);
     }
 
+    /**
+     * Returns and clears the events that were uncommitted before the call of this method.
+     *
+     * @return the list of event records
+     */
     @CheckReturnValue
     public List<EventRecord> commitEvents() {
         List<EventRecord> result = ImmutableList.copyOf(eventRecords);
@@ -235,7 +347,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Creates a context for an event.
-     * <p>
+     * <p/>
      * The context may optionally have custom attributes are added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
@@ -262,7 +374,7 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p>
+     * <p/>
      * Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
@@ -277,4 +389,21 @@ public abstract class AggregateRoot<I extends Message, S extends Message>
         // Do nothing.
     }
 
+
+    /**
+     * Transforms the current state of the aggregate root into the snapshot event.
+     *
+     * @return new snapshot
+     */
+    public Snapshot toSnapshot() {
+        final Any state = Messages.toAny(getState());
+        final int version = getVersion();
+        final Timestamp whenModified = whenLastModified();
+        Snapshot.Builder builder = Snapshot.newBuilder()
+                .setState(state)
+                .setVersion(version)
+                .setWhenLastModified(whenModified);
+
+        return builder.build();
+    }
 }

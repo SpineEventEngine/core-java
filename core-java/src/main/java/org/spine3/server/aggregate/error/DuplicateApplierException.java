@@ -17,35 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.aggregate.error;
 
-import com.google.protobuf.Message;
-import org.spine3.util.Commands;
+import org.spine3.EventClass;
 
 /**
- * Exception is thrown if a command, which is intended to be used for an aggregate
- * does not have {@code getAggregateId()} method.
- * <p>
- * To have this method in Java, corresponding Protobuf message definition must have
- * the property called {@code aggregate_id}.
+ * Exception that is thrown when more than one applier
+ * of the same event class is found in a declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class MissingAggregateIdException extends RuntimeException {
+public class DuplicateApplierException extends RuntimeException {
 
-    public MissingAggregateIdException(Message command, String methodName, Throwable cause) {
-        super(createMessage(command, methodName), cause);
-    }
+    /**
+     * Creates new exception.
+     *
+     * @param eventClass        a class of the event
+     * @param currentApplier    a name of the method currently registered
+     * @param discoveredApplier another applier method name for the same event class
+     */
+    public DuplicateApplierException(
+            Class<?> declaringClass,
+            EventClass eventClass,
+            String currentApplier,
+            String discoveredApplier) {
 
-    private static String createMessage(Message command, String methodName) {
-        return "Unable to call ID accessor method " + methodName + " from the command of class "
-                + command.getClass().getName();
-    }
-
-    public MissingAggregateIdException(String commandClassName, String propertyName) {
-        super("The first property of the aggregate command " + commandClassName +
-                " must define aggregate ID with a name ending with '" + Commands.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
+        super(String.format("The class %s defines more than one applier method for the event class %s. " +
+                        "Applier methods encountered: %s, %s.",
+                declaringClass.getName(),
+                eventClass,
+                currentApplier,
+                discoveredApplier));
     }
 
     private static final long serialVersionUID = 0L;

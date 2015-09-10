@@ -17,38 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.error;
 
-import org.spine3.EventClass;
+import com.google.protobuf.Message;
 
 /**
- * Exception that is thrown when more than one applier
- * of the same event class is found in a declaring class.
+ * Exception that is thrown when unsupported command is obtained
+ * or in case there is no class for given Protobuf command message.
  *
  * @author Mikhail Melnik
- * @author Alexander Yevsyukov
  */
-public class DuplicateApplierException extends RuntimeException {
+public class UnsupportedCommandException extends RuntimeException {
 
-    /**
-     * Creates new exception.
-     *
-     * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered
-     * @param discoveredSubscriber another applier method for the same event class
-     */
-    public DuplicateApplierException(
-            EventClass eventClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
-
-        super(String.format("The class %s defines more than one applier method for the event class %s. " +
-                            "Applier methods encountered: %s, %s.",
-                currentSubscriber.getTargetClass(),
-                eventClass,
-                currentSubscriber,
-                discoveredSubscriber));
+    public UnsupportedCommandException(Message command) {
+        super("There is no registered handler for the command: " + command.getClass().getName());
     }
 
     private static final long serialVersionUID = 0L;
+
 }
