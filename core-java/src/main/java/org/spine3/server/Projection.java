@@ -30,16 +30,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
- * Stateful handlers react on domain events and update their state accordingly.
+ * Creates data projection from incoming events.
  *
  * @param <I> the type of the IDs of the stateful handlers
  * @param <S> the type of the state objects
  */
-public abstract class EventHandlingEntity<I extends Message, S extends Message> extends Entity<I, S> {
+public abstract class Projection<I, S extends Message> extends Entity<I, S> {
 
     private Map<EventClass, EventHandler> handlers;
 
-    protected EventHandlingEntity(I id) {
+    protected Projection(I id) {
         super(id);
     }
 

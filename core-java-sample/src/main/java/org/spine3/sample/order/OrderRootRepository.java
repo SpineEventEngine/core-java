@@ -19,24 +19,11 @@
  */
 package org.spine3.sample.order;
 
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.server.Assign;
 import org.spine3.server.aggregate.AggregateRootRepositoryBase;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 /**
  * @author Mikhail Melnik
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
-
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
-        return super.handleCreate(command, context);
-    }
+public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot> {
 
 }

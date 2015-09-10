@@ -20,9 +20,11 @@
 package org.spine3.internal;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.error.AccessLevelException;
+import org.spine3.server.error.DuplicateHandlerMethodException;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
@@ -98,20 +100,27 @@ public abstract class MessageHandler<T, C> {
      * @param object   the object that keeps subscribed methods
      * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
+     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
      */
     public static Map<Class<? extends Message>, Method> scan(Object object, Predicate<Method> filter) {
+        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
 
-        Map<Class<? extends Message>, Method> result = Maps.newHashMap();
-
+        Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
         for (Method method : object.getClass().getDeclaredMethods()) {
             if (filter.apply(method)) {
 
                 Class<? extends Message> messageClass = getFirstParamType(method);
 
-                result.put(messageClass, method);
+                if (tempMap.containsKey(messageClass)) {
+                    Method alreadyPresent = tempMap.get(messageClass);
+                    throw new DuplicateHandlerMethodException(object.getClass(), messageClass,
+                            alreadyPresent.getName(), method.getName());
+                }
+                tempMap.put(messageClass, method);
             }
         }
-        return result;
+        builder.putAll(tempMap);
+        return builder.build();
     }
 
     //TODO:2015-09-09:alexander.yevsyukov: Document
