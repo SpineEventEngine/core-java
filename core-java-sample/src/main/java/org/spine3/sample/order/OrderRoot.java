@@ -19,26 +19,24 @@
  */
 package org.spine3.sample.order;
 
-import com.google.common.eventbus.Subscribe;
-import com.google.protobuf.Message;
-import org.spine3.server.AggregateRoot;
 import org.spine3.base.CommandContext;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.sample.order.command.PayOrder;
+import org.spine3.sample.order.command.PayForOrder;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
-import org.spine3.sample.order.event.OrderPayed;
+import org.spine3.sample.order.event.OrderPaid;
+import org.spine3.server.Assign;
+import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.server.aggregate.Apply;
 
 /**
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic"})
 // Use command and event classes passed as parameters instead of SomethingOrBuilder
 public class OrderRoot extends AggregateRoot<OrderId, Order> {
-
-    public static final String NEW = "NEW";
-    public static final String PAID = "PAID";
 
     public OrderRoot(OrderId id) {
         super(id);
@@ -49,52 +47,69 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         return Order.getDefaultInstance();
     }
 
-    @Subscribe
-    private Message handle(CreateOrder cmd, CommandContext ctx) {
-        OrderCreated result = generateEvent(cmd);
-
+    @Assign
+    public OrderCreated handle(CreateOrder cmd, CommandContext ctx) {
+        OrderCreated result = OrderCreated.newBuilder()
+                .setOrderId(cmd.getOrderId())
+                .build();
         return result;
     }
 
-    @Subscribe
-    private Message handle(AddOrderLine cmd, CommandContext ctx) {
+    @Assign
+    public OrderLineAdded handle(AddOrderLine cmd, CommandContext ctx) {
         validateCommand(cmd);
 
-        OrderLineAdded result = generateEvent(cmd);
-
+        OrderLine orderLine = cmd.getOrderLine();
+        OrderLineAdded result = OrderLineAdded.newBuilder()
+                .setOrderId(cmd.getOrderId())
+                .setOrderLine(orderLine)
+                .build();
         return result;
     }
 
-    //TODO:2015-06-29:alexander.yevsyukov: Consider renaming PayOrder command.
-
-    @Subscribe
-    private Message handle(PayOrder cmd, CommandContext ctx) {
+    @Assign
+    public OrderPaid handle(PayForOrder cmd, CommandContext ctx) {
         validateCommand(cmd);
 
-        OrderPayed result = generateEvent(cmd);
-
+        OrderPaid result = OrderPaid.newBuilder()
+                .setBillingInfo(cmd.getBillingInfo())
+                .setOrderId(cmd.getOrderId())
+                .build();
         return result;
     }
 
-    @Subscribe
-    private void on(OrderCreated event) {
-        Order newState = prepareState(event);
+    @Apply
+    private void event(OrderCreated event) {
+        Order newState = Order.newBuilder(getState())
+                .setOrderId(event.getOrderId())
+                .setStatus(Order.Status.NEW)
+                .build();
 
         validate(newState);
         incrementState(newState);
     }
 
-    @Subscribe
-    private void on(OrderLineAdded event) {
-        Order newState = prepareState(event);
+    @Apply
+    private void event(OrderLineAdded event) {
+        OrderLine orderLine = event.getOrderLine();
+        Order currentState = getState();
+        Order newState = Order.newBuilder(currentState)
+                .setOrderId(event.getOrderId())
+                .addOrderLine(orderLine)
+                .setTotal(currentState.getTotal() + orderLine.getTotal())
+                .build();
 
         validate(newState);
         incrementState(newState);
     }
 
-    @Subscribe
-    private void on(OrderPayed event) {
-        Order newState = prepareState(event);
+    @Apply
+    private void event(OrderPaid event) {
+        Order currentState = getState();
+        Order newState = Order.newBuilder(currentState)
+                .setBillingInfo(event.getBillingInfo())
+                .setStatus(Order.Status.PAID)
+                .build();
 
         validate(newState);
         incrementState(newState);
@@ -114,55 +129,10 @@ public class OrderRoot extends AggregateRoot<OrderId, Order> {
         }
     }
 
-    private static void validateCommand(PayOrder cmd) {
-        // Billing info validation is here.
-    }
-
-    private static OrderCreated generateEvent(CreateOrder cmd) {
-        OrderCreated result = OrderCreated.newBuilder().setOrderId(cmd.getOrderId()).build();
-        return result;
-    }
-
-    private static OrderLineAdded generateEvent(AddOrderLine cmd) {
-        OrderLine orderLine = cmd.getOrderLine();
-        return OrderLineAdded.newBuilder()
-                .setOrderId(cmd.getOrderId())
-                .setOrderLine(orderLine)
-                .build();
-    }
-
-    private static OrderPayed generateEvent(PayOrder cmd) {
-        OrderPayed result = OrderPayed.newBuilder()
-                .setBillingInfo(cmd.getBillingInfo())
-                .setOrderId(cmd.getOrderId())
-                .build();
-        return result;
-    }
-
-    private Order prepareState(OrderCreated event) {
-        return Order.newBuilder(getState())
-                .setOrderId(event.getOrderId())
-                .setStatus(NEW)
-                .build();
-    }
-
-    private Order prepareState(OrderLineAdded event) {
-        OrderLine orderLine = event.getOrderLine();
-        Order currentState = getState();
-        return Order.newBuilder(currentState)
-                .setOrderId(event.getOrderId())
-                .addOrderLine(orderLine)
-                .setTotal(currentState.getTotal() + orderLine.getTotal())
-                .build();
-    }
-
-    private Order prepareState(OrderPayed event) {
-        Order currentState = getState();
-        Order result = Order.newBuilder(currentState)
-                .setBillingInfo(event.getBillingInfo())
-                .setStatus(PAID)
-                .build();
-        return result;
+    private static void validateCommand(PayForOrder cmd) {
+        if (!cmd.hasOrderId()) {
+            throw new IllegalArgumentException("Order ID is missing: " + cmd);
+        }
     }
 
 }

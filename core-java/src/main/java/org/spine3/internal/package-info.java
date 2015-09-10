@@ -18,30 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.util.MessageValue;
-
 /**
- * Abstract base for command classes.
- *
- * @author Alexander Yevsyukov
+ * Classes and interfaces in this package are for internal use of the framework.
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
-abstract class AbstractCommand extends MessageValue {
+@ParametersAreNonnullByDefault
+package org.spine3.internal;
 
-    protected AbstractCommand(Message value) {
-        super(value);
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
-    public static Message getCommandValue(CommandRequest commandRequest) {
-        final Any command = commandRequest.getCommand();
-        final Message result = Messages.fromAny(command);
-        return result;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

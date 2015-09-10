@@ -17,26 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
 
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.server.Assign;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+package org.spine3.util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
+ * Utilities for working with classes.
+ *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
+@SuppressWarnings("UtilityClass")
+public class Classes {
 
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
-        return super.handleCreate(command, context);
+    private Classes() {}
+
+    public static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
+        try {
+            Type genericSuperclass = object.getClass().getGenericSuperclass();
+            Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
+
+            actualTypeArguments.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
+            actualTypeArguments.setAccessible(false);
+
+            return result;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw propagate(e);
+        }
     }
-
 }

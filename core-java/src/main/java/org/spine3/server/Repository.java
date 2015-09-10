@@ -20,18 +20,18 @@
 package org.spine3.server;
 
 import com.google.protobuf.Message;
+import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.util.Classes;
 
 /**
  * Base interface for repositories.
  *
  * @param <E> the type of the stored object
  * @param <I> the type of the IDs of stored objects
- *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I extends Message,
-                            E extends Entity<I, ?>> extends ManyCommandHandler {
+public interface Repository<I extends Message, E extends Entity<I, ?>> {
     /**
      * Stores the passed object.
      *
@@ -53,7 +53,8 @@ public interface Repository<I extends Message,
         public static final int STORED_OBJECT_ID_CLASS_GENERIC_INDEX = 0;
         public static final int STORED_OBJECT_CLASS_GENERIC_INDEX = 1;
 
-        private TypeInfo() {}
+        private TypeInfo() {
+        }
 
         /**
          * Returns {@link Class} object representing the aggregate id type of the given repository.
@@ -61,7 +62,7 @@ public interface Repository<I extends Message,
          * @return the aggregate id {@link Class}
          */
         public static <I extends Message> Class<I> getStoredObjectIdClass(Repository repository) {
-            return ServerMethods.getGenericParameterType(repository, STORED_OBJECT_ID_CLASS_GENERIC_INDEX);
+            return Classes.getGenericParameterType(repository, STORED_OBJECT_ID_CLASS_GENERIC_INDEX);
         }
 
         /**
@@ -70,7 +71,7 @@ public interface Repository<I extends Message,
          * @return the aggregate root {@link Class}
          */
         public static <R extends AggregateRoot> Class<R> getStoredObjectClass(Repository repository) {
-            return ServerMethods.getGenericParameterType(repository, STORED_OBJECT_CLASS_GENERIC_INDEX);
+            return Classes.getGenericParameterType(repository, STORED_OBJECT_CLASS_GENERIC_INDEX);
         }
     }
 }

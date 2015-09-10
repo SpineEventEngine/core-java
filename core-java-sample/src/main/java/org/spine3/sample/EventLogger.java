@@ -19,43 +19,41 @@
  */
 package org.spine3.sample;
 
-import com.google.common.eventbus.Subscribe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
+import org.spine3.eventbus.Subscribe;
 import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
-import org.spine3.sample.order.event.OrderPayed;
+import org.spine3.sample.order.event.OrderPaid;
 
 /**
  * Sample Spine event subscriber implementation.
  *
  * @author Mikhail Melnik
  */
+@SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
 public class EventLogger {
 
     public static final String NEW_LINE = System.lineSeparator();
 
     @Subscribe
-    @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
     public void on(OrderCreated event, EventContext context) {
-        log().info("Order has been created! " + NEW_LINE
+        log().info("Order has been created. " + NEW_LINE
                 + Messages.toText(event.getOrderId()));
     }
 
     @Subscribe
-    @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
     public void on(OrderLineAdded event, EventContext context) {
-        log().info("Order line was added! " + NEW_LINE
+        log().info("Order line was added. " + NEW_LINE
                 + Messages.toText(event.getOrderId())
                 + Messages.toText(event.getOrderLine()));
     }
 
     @Subscribe
-    @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
-    public void on(OrderPayed event, EventContext context) {
-        log().info("Order was payed! It is waiting to be shipped now. " + NEW_LINE
+    public void on(OrderPaid event, EventContext context) {
+        log().info("Order was paid. It is waiting to be shipped now. " + NEW_LINE
                 + Messages.toText(event.getOrderId())
                 + Messages.toText(event.getBillingInfo()));
     }

@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.Assign;
+import org.spine3.server.Repository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -66,6 +67,6 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    @Subscribe
+    @Assign
     List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException;
 }

@@ -18,20 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
-import org.spine3.CommandClass;
-import org.spine3.util.MessageHandler;
-
-import java.util.Map;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandRequest;
+import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 
 /**
- * The common interface for classes handling more than one command.
+ * Abstract base for command classes.
  *
  * @author Alexander Yevsyukov
- * @see CommandHandler
  */
-public interface ManyCommandHandler {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+abstract class AbstractCommand extends MessageValue {
 
-    Map<CommandClass, MessageHandler> getHandlers();
+    protected AbstractCommand(Message value) {
+        super(value);
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
+        return result;
+    }
 }

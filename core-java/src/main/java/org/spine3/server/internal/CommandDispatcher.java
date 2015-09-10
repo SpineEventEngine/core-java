@@ -17,16 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.internal;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.internal.MessageHandler;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.util.MessageHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -42,27 +42,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    private final Map<CommandClass, MessageHandler> handlersByCommandClass = Maps.newConcurrentMap();
+    private final Map<CommandClass, CommandHandler> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
-     * Register the passed command handler in the dispatcher.
+     * Registers the passed object of many commands in the dispatcher.
      *
-     * @param handler a command handler object
+     * @param object a {@code non-null} object
      */
-    public void register(CommandHandler handler) {
-        Map<CommandClass, MessageHandler> subscribers = getHandlers(checkNotNull(handler));
-        register(subscribers);
+    public void register(Object object) {
+        checkNotNull(object);
+        Map<CommandClass, CommandHandler> subscribers = CommandHandler.scan(object);
+        registerMap(subscribers);
     }
 
-    /**
-     * Registers the passed hander of many commands in the dispatcher.
-     *
-     * @param handler a {@code non-null} handler
-     */
-    public void register(ManyCommandHandler handler) {
-        checkNotNull(handler);
-        Map<CommandClass, MessageHandler> subscribers = handler.getHandlers();
-        register(subscribers);
+    public void unregister(Object object) {
+        checkNotNull(object);
+        Map<CommandClass, CommandHandler> subscribers = CommandHandler.scan(object);
+        unregisterMap(subscribers);
     }
 
     /**
@@ -70,18 +66,30 @@ public class CommandDispatcher {
      *
      * @param handlers map from command classes to corresponding handlers
      */
-    public void register(Map<CommandClass, MessageHandler> handlers) {
+    private void registerMap(Map<CommandClass, CommandHandler> handlers) {
         checkDuplicates(handlers);
         putAll(handlers);
     }
 
-    private static Map<CommandClass, MessageHandler> getHandlers(CommandHandler handler) {
-        Map<CommandClass, MessageHandler> subscribers = ServerMethods.scanForCommandHandlers(handler);
-        return subscribers;
+    private void unregisterMap(Map<CommandClass, CommandHandler> handlers) {
+        for (Map.Entry<CommandClass, CommandHandler> entry : handlers.entrySet()) {
+            final CommandClass commandClass = entry.getKey();
+            if (handlerRegistered(commandClass)) {
+                CommandHandler registered = getHandler(commandClass);
+                CommandHandler passed = entry.getValue();
+                if (registered.equals(passed)) {
+                    removeFor(commandClass);
+                }
+            }
+        }
     }
 
-    private void checkDuplicates(Map<CommandClass, MessageHandler> handlers) {
-        for (Map.Entry<CommandClass, MessageHandler> entry : handlers.entrySet()) {
+    private void removeFor(CommandClass commandClass) {
+        handlersByCommandClass.remove(commandClass);
+    }
+
+    private void checkDuplicates(Map<CommandClass, CommandHandler> handlers) {
+        for (Map.Entry<CommandClass, CommandHandler> entry : handlers.entrySet()) {
             CommandClass commandClass = entry.getKey();
 
             if (handlerRegistered(commandClass)) {
@@ -113,16 +121,16 @@ public class CommandDispatcher {
             throw new UnsupportedCommandException(command);
         }
 
-        MessageHandler subscriber = getHandler(commandClass);
+        CommandHandler subscriber = getHandler(commandClass);
         List<EventRecord> result = subscriber.handle(command, context);
         return result;
     }
 
-    private void putAll(Map<CommandClass, MessageHandler> subscribers) {
+    private void putAll(Map<CommandClass, CommandHandler> subscribers) {
         handlersByCommandClass.putAll(subscribers);
     }
 
-    public MessageHandler getHandler(CommandClass cls) {
+    public CommandHandler getHandler(CommandClass cls) {
         return handlersByCommandClass.get(cls);
     }
 

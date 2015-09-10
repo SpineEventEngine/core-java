@@ -24,11 +24,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.spine3.server.AggregateCommand;
+import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.AggregateId;
+import org.spine3.server.aggregate.AggregateId;
 
 import javax.annotation.Nullable;
 import java.io.*;

@@ -17,26 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
 
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.server.Assign;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+package org.spine3.eventbus;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
+//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
- * @author Mikhail Melnik
+ * Marks a method as an event listener.
+ *
+ * @author Alexander Yevsyukov
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot, CreateOrder> {
-
-    @Assign
-    @Override
-    public List<EventRecord> handleCreate(CreateOrder command, CommandContext context) throws InvocationTargetException {
-        return super.handleCreate(command, context);
-    }
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Subscribe {
 }

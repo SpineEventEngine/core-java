@@ -17,15 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.util.MessageHandler;
+import org.spine3.server.Assign;
+import org.spine3.server.internal.CommandHandler;
+import org.spine3.server.RepositoryEventStore;
+import org.spine3.server.Snapshot;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -80,26 +82,15 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         this.eventStore = eventStore;
     }
 
-    public Map<CommandClass, MessageHandler> getHandlers() {
-        // Create subscribers that call dispatch() on message classes handled by the aggregate root.
-        Map<CommandClass, MessageHandler> subscribers = createDelegatingSubscribers();
-
-        // Add command handlers belonging to this repository.
-        Map<CommandClass, MessageHandler> repoSubscribers = ServerMethods.scanForCommandHandlers(this);
-        subscribers.putAll(repoSubscribers);
-
-        return subscribers;
-    }
-
     /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of the passed repository.
      *
      * @return reference to the method
      */
-    private MessageHandler toMessageSubscriber() {
+    private CommandHandler toCommandHandler() {
         try {
             Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            final MessageHandler result = new MessageHandler(this, method);
+            final CommandHandler result = new CommandHandler(this, method);
             return result;
         } catch (NoSuchMethodException e) {
             throw propagate(e);
@@ -110,13 +101,13 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * Creates a map of subscribers that call {@link AggregateRootRepository#dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class of this repository.
      */
-    private Map<CommandClass, MessageHandler> createDelegatingSubscribers() {
-        Map<CommandClass, MessageHandler> result = Maps.newHashMap();
+    private Map<CommandClass, CommandHandler> createDelegatingSubscribers() {
+        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
 
         Class<? extends AggregateRoot> rootClass = TypeInfo.getStoredObjectClass(this);
-        Set<CommandClass> commandClasses = ServerMethods.getCommandClasses(rootClass);
+        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
 
-        MessageHandler subscriber = toMessageSubscriber();
+        CommandHandler subscriber = toCommandHandler();
         for (CommandClass commandClass : commandClasses) {
             result.put(commandClass, subscriber);
         }
@@ -207,7 +198,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command handling
      */
-    @Subscribe
+    @Assign
     @Override
     public List<EventRecord> handleCreate(C command, CommandContext context) throws InvocationTargetException {
         I id = getAggregateId(command);

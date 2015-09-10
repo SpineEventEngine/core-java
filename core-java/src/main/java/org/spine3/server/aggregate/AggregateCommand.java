@@ -18,18 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
-import org.spine3.server.error.MissingAggregateIdException;
+import org.spine3.server.aggregate.error.MissingAggregateIdException;
 import org.spine3.util.Commands;
 import org.spine3.protobuf.Messages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A command issued for an aggregate root
+ * A command issued for an aggregate root.
  *
  * @author Alexander Yevsyukov
  */
