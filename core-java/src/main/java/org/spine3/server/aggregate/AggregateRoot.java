@@ -25,15 +25,16 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import com.google.protobuf.*;
 import org.spine3.CommandClass;
-import org.spine3.EventClass;
 import org.spine3.base.*;
-import org.spine3.server.*;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.internal.MessageHandler;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.Entity;
+import org.spine3.server.Snapshot;
+import org.spine3.server.SnapshotOrBuilder;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.server.internal.CommandHandler;
 import org.spine3.util.Events;
-import org.spine3.internal.MessageHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,7 +43,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,8 +54,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *           <ul>
  *              <li>Classes implementing {@link Message}</li>
  *              <li>String</li>
- *              <li>Integer</li>
  *              <li>Long</li>
+ *              <li>Integer</li>
+ *           </ul>
+ *           Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ *           if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *           <ul>
+ *              <li>EAN value used in bar codes</li>
+ *              <li>ISBN</li>
+ *              <li>Phone number</li>
+ *              <li>email address as a couple of local-part and domain</li>
  *           </ul>
  * @param <S> the type of the state held by the root
  * @author Mikhail Melnik
@@ -118,28 +126,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
                     return null;
                 }
                 return CommandClass.of(input);
-            }
-        });
-        return ImmutableSet.copyOf(transformed);
-    }
-
-    /**
-     * Returns set of the event types handled by a given aggregate root.
-     *
-     * @param aggregateRootClass {@link Class} of the aggregate root
-     * @return immutable set of event classes handled by the aggregate root
-     */
-    @CheckReturnValue
-    public static Set<EventClass> getEventClasses(Class<? extends AggregateRoot> aggregateRootClass) {
-        Set<Class<? extends Message>> types = getHandledMessageClasses(aggregateRootClass, EventApplier.isEventApplierPredicate);
-        Iterable<EventClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, EventClass>() {
-            @Nullable
-            @Override
-            public EventClass apply(@Nullable Class<? extends Message> input) {
-                if (input == null) {
-                    return null;
-                }
-                return EventClass.of(input);
             }
         });
         return ImmutableSet.copyOf(transformed);
@@ -275,11 +261,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         }
     }
 
-    private Map<CommandClass, CommandHandler> getCommandHandlers() {
-        Map<CommandClass, CommandHandler> result = CommandHandler.scan(this);
-        return result;
-    }
-
     /**
      * Plays passed events on the aggregate.
      *
@@ -412,7 +393,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
                                              CommandId commandId, Message event, S currentState, int currentVersion) {
         // Do nothing.
     }
-
 
     /**
      * Transforms the current state of the aggregate root into the snapshot event.
