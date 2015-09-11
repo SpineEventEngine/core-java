@@ -53,7 +53,7 @@ import static com.google.common.base.Throwables.propagate;
  * @param <T> the type of the target object
  * @param <C> the type of the message context or {@code Void} if context is not used
  */
-public abstract class MessageHandler<T, C> {
+public abstract class MessageHandlerMethod<T, C> {
 
     /**
      * Object sporting the handler method.
@@ -71,7 +71,7 @@ public abstract class MessageHandler<T, C> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected MessageHandler(T target, Method method) {
+    protected MessageHandlerMethod(T target, Method method) {
         checkNotNull(target, "target cannot be null.");
         checkNotNull(method, "method cannot be null.");
 
@@ -95,7 +95,7 @@ public abstract class MessageHandler<T, C> {
     }
 
     /**
-     * Returns a map of the {@link MessageHandler} objects to the corresponding message class.
+     * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
      *
      * @param object   the object that keeps subscribed methods
      * @param filter the predicate that defines rules for subscriber scanning
@@ -158,7 +158,7 @@ public abstract class MessageHandler<T, C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R handle(Message message, C context) throws InvocationTargetException {
+    protected <R> R invoke(Message message, C context) throws InvocationTargetException {
 
         checkNotNull(message);
         checkNotNull(context);
@@ -186,7 +186,7 @@ public abstract class MessageHandler<T, C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R handle(Message message) throws InvocationTargetException {
+    protected <R> R invoke(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")
@@ -254,7 +254,7 @@ public abstract class MessageHandler<T, C> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final MessageHandler other = (MessageHandler) obj;
+        final MessageHandlerMethod other = (MessageHandlerMethod) obj;
 
         // Use == to verify that the instances of the target objects are the same.
         // This way we'd allow having handlers for target objects that are otherwise equal.
