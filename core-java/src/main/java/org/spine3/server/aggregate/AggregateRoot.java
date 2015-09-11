@@ -38,7 +38,6 @@ import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -119,12 +118,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
         Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandler.isCommandHandlerPredicate);
         Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
-            @Nullable
             @Override
-            public CommandClass apply(@Nullable Class<? extends Message> input) {
-                if (input == null) {
-                    return null;
-                }
+            public CommandClass apply(Class<? extends Message> input) {
                 return CommandClass.of(input);
             }
         });
@@ -133,6 +128,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Returns event/command types handled by given AggregateRoot class.
+     * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
     static Set<Class<? extends Message>> getHandledMessageClasses(Class<? extends AggregateRoot> clazz, Predicate<Method> methodPredicate) {
@@ -148,7 +144,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
                 result.add(firstParamType);
             }
         }
-        return result;
+        return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
     }
 
     private void init() {
@@ -186,7 +182,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      * Returns a non-null timestamp of the last modification.
      *
      * @return a non-null instance, which is the timestamp of the last modification or
-     *         the timestamp of the object creation of the root is in the default state
+     *         the timestamp of setting the default state of the aggregate
      */
     @Nonnull
     @Override
