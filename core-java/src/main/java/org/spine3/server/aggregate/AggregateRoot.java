@@ -51,20 +51,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Abstract base for aggregate roots.
  *
  * @param <I> the type for ID of the aggregate root. Supported types are:
- *           <ul>
- *              <li>Classes implementing {@link Message}</li>
- *              <li>String</li>
- *              <li>Long</li>
- *              <li>Integer</li>
- *           </ul>
- *           Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- *           if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *           <ul>
- *              <li>EAN value used in bar codes</li>
- *              <li>ISBN</li>
- *              <li>Phone number</li>
- *              <li>email address as a couple of local-part and domain</li>
- *           </ul>
+ *            <ul>
+ *            <li>Classes implementing {@link Message}</li>
+ *            <li>String</li>
+ *            <li>Long</li>
+ *            <li>Integer</li>
+ *            </ul>
+ *            Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ *            if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *            <ul>
+ *            <li>EAN value used in bar codes</li>
+ *            <li>ISBN</li>
+ *            <li>Phone number</li>
+ *            <li>email address as a couple of local-part and domain</li>
+ *            </ul>
  * @param <S> the type of the state held by the root
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -77,14 +77,31 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     private final Any idAsAny;
 
+    /**
+     * Keeps initialization state of the aggregate root.
+     */
     private volatile boolean initialized = false;
-    private CommandDispatcher dispatcher;
+
+    /**
+     * Internal dispatcher for command handling methods of this aggregate.
+     */
+    private CommandDispatcher internalDispatcher;
+
+    /**
+     * Dispatcher of applier methods of this aggregate.
+     */
     private EventApplier.Map applier;
 
-    private final List<EventRecord> eventRecords = Lists.newLinkedList();
+    /**
+     * Events generated in the process of handling commands that were not yet committed.
+     *
+     * @see #commitEvents()
+     */
+    private final List<EventRecord> uncommittedEvents = Lists.newLinkedList();
 
     /**
      * Creates a new instance.
+     *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
@@ -186,7 +203,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      * Returns a non-null timestamp of the last modification.
      *
      * @return a non-null instance, which is the timestamp of the last modification or
-     *         the timestamp of the object creation of the root is in the default state
+     * the timestamp of the object creation of the root is in the default state
      */
     @Nonnull
     @Override
@@ -210,8 +227,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     }
 
     private void initCommandDispatcher() {
-        dispatcher = new CommandDispatcher();
-        dispatcher.register(this);
+        internalDispatcher = new CommandDispatcher();
+        internalDispatcher.register(this);
     }
 
     /**
@@ -246,7 +263,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandHandlerMethod subscriber = dispatcher.getHandler(CommandClass.of(command));
+        CommandHandlerMethod subscriber = internalDispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
@@ -308,7 +325,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     }
 
     private void putUncommitted(EventRecord record) {
-        eventRecords.add(record);
+        uncommittedEvents.add(record);
     }
 
     /**
@@ -335,7 +352,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     @CheckReturnValue
     public List<EventRecord> getUncommittedEvents() {
-        return ImmutableList.copyOf(eventRecords);
+        return ImmutableList.copyOf(uncommittedEvents);
     }
 
     /**
@@ -345,8 +362,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     @CheckReturnValue
     public List<EventRecord> commitEvents() {
-        List<EventRecord> result = ImmutableList.copyOf(eventRecords);
-        eventRecords.clear();
+        List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
+        uncommittedEvents.clear();
         return result;
     }
 
