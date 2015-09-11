@@ -59,7 +59,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         super();
     }
 
-    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
     /**
      * Configures repository with passed implementation of the aggregate storage.
      * It is used for storing and loading aggregated root during handling
