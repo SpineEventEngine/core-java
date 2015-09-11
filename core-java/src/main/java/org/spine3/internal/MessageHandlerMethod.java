@@ -122,8 +122,6 @@ public abstract class MessageHandlerMethod<T, C> {
         return builder.build();
     }
 
-    //TODO:2015-09-09:alexander.yevsyukov: Document
-
     /**
      * Verifies if the associated method instance has required
      *
@@ -131,10 +129,16 @@ public abstract class MessageHandlerMethod<T, C> {
      */
     protected abstract void checkModifier();
 
+    /**
+     * @return the target object on which the method call is made
+     */
     protected T getTarget() {
         return target;
     }
 
+    /**
+     * @return the handling method
+     */
     protected Method getMethod() {
         return method;
     }

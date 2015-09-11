@@ -76,8 +76,8 @@ public interface Repository<I, E extends Entity<I, ?>> {
          *
          * @return the aggregate id {@link Class}
          */
-        public static <I> Class<I> getIdClass(Repository repository) {
-            return Classes.getGenericParameterType(repository, ID_CLASS_GENERIC_INDEX);
+        public static <I> Class<I> getIdClass(Class<? extends Repository> clazz) {
+            return Classes.getGenericParameterType(clazz, ID_CLASS_GENERIC_INDEX);
         }
 
         /**
@@ -85,8 +85,8 @@ public interface Repository<I, E extends Entity<I, ?>> {
          *
          * @return the aggregate root {@link Class}
          */
-        public static <E extends Entity> Class<E> getEntityClass(Repository repository) {
-            return Classes.getGenericParameterType(repository, ENTITY_CLASS_GENERIC_INDEX);
+        public static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
+            return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
         }
     }
 }

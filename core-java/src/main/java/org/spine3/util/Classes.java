@@ -36,9 +36,9 @@ public class Classes {
 
     private Classes() {}
 
-    public static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
+    public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
         try {
-            Type genericSuperclass = object.getClass().getGenericSuperclass();
+            Type genericSuperclass = clazz.getGenericSuperclass();
             Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
 
             actualTypeArguments.setAccessible(true);

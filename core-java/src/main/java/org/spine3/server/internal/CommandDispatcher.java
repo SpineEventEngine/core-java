@@ -55,8 +55,8 @@ public class CommandDispatcher {
 
         Map<CommandClass, CommandHandlerMethod> handlers;
         if (object instanceof AggregateRootRepositoryBase) {
-            AggregateRootRepositoryBase<?, ?> repo = (AggregateRootRepositoryBase) object;
-            handlers = repo.getCommandHandlers();
+            AggregateRootRepositoryBase<?, ?> repository = (AggregateRootRepositoryBase) object;
+            handlers = repository.getCommandHandlers();
         } else {
             handlers = CommandHandlerMethod.scan(object);
         }

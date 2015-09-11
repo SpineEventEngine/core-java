@@ -49,11 +49,7 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
     R load(I id);
 
     /**
-     * Processes the command by dispatching it one of the repository methods or
-     * to a method of an aggregate root.
-     * <p>
-     * If the passed command is for an aggregate, its instance is loaded by ID
-     * obtained from the passed command.
+     * Processes the command by dispatching it to a method of an aggregate root.
      * <p>
      * For more details on writing aggregate commands read
      * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.

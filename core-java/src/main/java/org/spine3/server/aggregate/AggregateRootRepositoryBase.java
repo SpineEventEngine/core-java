@@ -19,6 +19,7 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
@@ -71,17 +72,30 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     /**
+     * Creates a map which contains command handlers of the repository itself and
+     * handlers dispatching commands to aggregates handled by this repository.
+     *
+     * @return immutable map of command handler methods
+     */
+    public Map<CommandClass, CommandHandlerMethod> getCommandHandlers() {
+        ImmutableMap.Builder<CommandClass, CommandHandlerMethod> handlers = ImmutableMap.builder();
+        handlers.putAll(getDispatchingHandlers());
+        handlers.putAll(CommandHandlerMethod.scan(this));
+        return handlers.build();
+    }
+
+    /**
      * Creates a map of handlers that call {@link #dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class.
      */
-    public Map<CommandClass, CommandHandlerMethod> getCommandHandlers() {
+    private Map<CommandClass, CommandHandlerMethod> getDispatchingHandlers() {
         Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
 
-        Class<? extends AggregateRoot> rootClass = TypeInfo.getEntityClass(this);
-        Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
+        Class<? extends AggregateRoot> aggregateRootClass = TypeInfo.getEntityClass(getClass());
+        Set<CommandClass> aggregateCommands = AggregateRoot.getCommandClasses(aggregateRootClass);
 
-        CommandHandlerMethod handler = toCommandHandler();
-        for (CommandClass commandClass : commandClasses) {
+        CommandHandlerMethod handler = dispatchAsHandler();
+        for (CommandClass commandClass : aggregateCommands) {
             result.put(commandClass, handler);
         }
         return result;
@@ -90,7 +104,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
-    private CommandHandlerMethod toCommandHandler() {
+    private CommandHandlerMethod dispatchAsHandler() {
         try {
             Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
             final CommandHandlerMethod result = new CommandHandlerMethod(this, method);
@@ -158,14 +172,11 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
 
     @Override
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
-        //TODO:2015-09-05:alexander.yevsyukov: Where do we handle a command processed by a repository's method?
-
         I aggregateId = getAggregateId(command);
         R aggregateRoot = load(aggregateId);
 
         aggregateRoot.dispatch(command, context);
 
-        //noinspection unchecked
         final List<EventRecord> eventRecords = aggregateRoot.getUncommittedEvents();
 
         store(aggregateRoot);
