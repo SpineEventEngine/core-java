@@ -23,7 +23,6 @@ package org.spine3.util;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.internal.MessageHandlerMethod;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -41,7 +40,7 @@ public class MethodMap {
 
     public MethodMap(Class<?> clazz, Predicate<Method> filter) {
         this.map = ImmutableMap.<Class<? extends Message>, Method>builder().putAll(
-                MessageHandlerMethod.scan(clazz, filter))
+                Methods.scan(clazz, filter))
                 .build();
     }
 

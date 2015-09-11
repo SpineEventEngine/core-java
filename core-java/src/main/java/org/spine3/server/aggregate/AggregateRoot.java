@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.Snapshot;
@@ -37,6 +36,7 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Events;
+import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -148,7 +148,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             boolean methodMatches = methodPredicate.apply(method);
 
             if (methodMatches) {
-                Class<? extends Message> firstParamType = MessageHandlerMethod.getFirstParamType(method);
+                Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
                 result.add(firstParamType);
             }
         }

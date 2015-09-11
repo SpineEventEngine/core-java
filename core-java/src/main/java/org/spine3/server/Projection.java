@@ -37,6 +37,7 @@ import java.util.Map;
  */
 public abstract class Projection<I, S extends Message> extends Entity<I, S> {
 
+    //TODO:2015-09-11:alexander.yevsyukov: Use MethodMap instead.
     private Map<EventClass, EventHandlerMethod> handlers;
 
     protected Projection(I id) {

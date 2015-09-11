@@ -19,19 +19,14 @@
  */
 package org.spine3.internal;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.error.AccessLevelException;
-import org.spine3.server.error.DuplicateHandlerMethodException;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,48 +73,6 @@ public abstract class MessageHandlerMethod<T, C> {
         this.target = target;
         this.method = method;
         method.setAccessible(true);
-    }
-
-    /**
-     * Returns the first param type of the passed method object.
-     * <p>
-     * It is expected that the first parameter of a handler or an applier method is always of {@code Message} class.
-     *
-     * @param handler the method object to take first parameter type from
-     * @return the {@link Class} of the first method parameter
-     */
-    public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
-                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
-        return result;
-    }
-
-    /**
-     * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
-     *
-     * @param clazz   the class that declares methods to scan
-     * @param filter the predicate that defines rules for subscriber scanning
-     * @return the map of message subscribers
-     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
-     */
-    public static Map<Class<? extends Message>, Method> scan(Class<?> clazz, Predicate<Method> filter) {
-        Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (filter.apply(method)) {
-
-                Class<? extends Message> messageClass = getFirstParamType(method);
-
-                if (tempMap.containsKey(messageClass)) {
-                    Method alreadyPresent = tempMap.get(messageClass);
-                    throw new DuplicateHandlerMethodException(clazz, messageClass,
-                            alreadyPresent.getName(), method.getName());
-                }
-                tempMap.put(messageClass, method);
-            }
-        }
-        ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
-        builder.putAll(tempMap);
-        return builder.build();
     }
 
     /**
