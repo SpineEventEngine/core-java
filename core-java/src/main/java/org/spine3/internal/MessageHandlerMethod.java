@@ -97,28 +97,27 @@ public abstract class MessageHandlerMethod<T, C> {
     /**
      * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
      *
-     * @param object   the object that keeps subscribed methods
+     * @param clazz   the class that declares methods to scan
      * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
      */
-    public static Map<Class<? extends Message>, Method> scan(Object object, Predicate<Method> filter) {
-        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
-
+    public static Map<Class<? extends Message>, Method> scan(Class<?> clazz, Predicate<Method> filter) {
         Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
-        for (Method method : object.getClass().getDeclaredMethods()) {
+        for (Method method : clazz.getDeclaredMethods()) {
             if (filter.apply(method)) {
 
                 Class<? extends Message> messageClass = getFirstParamType(method);
 
                 if (tempMap.containsKey(messageClass)) {
                     Method alreadyPresent = tempMap.get(messageClass);
-                    throw new DuplicateHandlerMethodException(object.getClass(), messageClass,
+                    throw new DuplicateHandlerMethodException(clazz, messageClass,
                             alreadyPresent.getName(), method.getName());
                 }
                 tempMap.put(messageClass, method);
             }
         }
+        ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
         builder.putAll(tempMap);
         return builder.build();
     }
@@ -126,7 +125,9 @@ public abstract class MessageHandlerMethod<T, C> {
     //TODO:2015-09-09:alexander.yevsyukov: Document
 
     /**
-     * @throws AccessLevelException
+     * Verifies if the associated method instance has required
+     *
+     * @throws AccessLevelException if the access level of the method doesn't match that required handlers of implemented type
      */
     protected abstract void checkModifier();
 
@@ -138,11 +139,17 @@ public abstract class MessageHandlerMethod<T, C> {
         return method;
     }
 
+    /**
+     * @return {@code true} if the method is declared {@code public}, {@code false} otherwise
+     */
     protected boolean isPublic() {
         final boolean result = Modifier.isPublic(getMethod().getModifiers());
         return result;
     }
 
+    /**
+     * @return {@code true} if the method is declared {@code private}, {@code false} otherwise
+     */
     protected boolean isPrivate() {
         final boolean result = Modifier.isPrivate(getMethod().getModifiers());
         return result;

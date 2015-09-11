@@ -22,7 +22,7 @@ package org.spine3.protobuf;
 import com.google.protobuf.*;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
-import org.spine3.util.*;
+import org.spine3.util.StringTypeValue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,12 +41,8 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
-    private static final String GETTER_METHOD_PREFIX = "get";
-
     private static final String METHOD_PARSE_FROM = "parseFrom";
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
-
-    private static final char UNDERSCORE_PROPERTY_NAME_SEPARATOR = '_';
 
     private static final String MSG_NO_SUCH_METHOD = "Method %s() is not defined in the class %s.";
     private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
@@ -173,81 +169,6 @@ public class Messages {
 
     }
 
-    /**
-     * Obtains Protobuf field name for the passed message.
-     *
-     * @param msg   a message to inspect
-     * @param index a zero-based index of the field
-     * @return name of the field
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
-    public static String getFieldName(Message msg, int index) {
-        final Descriptors.FieldDescriptor fieldDescriptor = getField(msg, index);
-        final String fieldName = fieldDescriptor.getName();
-        return fieldName;
-    }
-
-    static Descriptors.FieldDescriptor getField(MessageOrBuilder msg, int fieldIndex) {
-        final Descriptors.FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
-        return result;
-    }
-
-    /**
-     * Converts Protobuf field name into Java accessor method name.
-     */
-    public static String toAccessorMethodName(CharSequence fieldName) {
-        StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
-        out.append(GETTER_METHOD_PREFIX);
-        final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));
-        out.append(uppercaseFirstChar);
-
-        boolean nextUpperCase = false;
-        for (int i = 1; i < fieldName.length(); i++) {
-            char c = fieldName.charAt(i);
-            if (UNDERSCORE_PROPERTY_NAME_SEPARATOR == c) {
-                nextUpperCase = true;
-                continue;
-            }
-            out.append(nextUpperCase ? Character.toUpperCase(c) : c);
-            nextUpperCase = false;
-        }
-
-        return out.toString();
-    }
-
-
-    /**
-     * Reads field from the passed message by its index.
-     *
-     * @param command    a message to inspect
-     * @param fieldIndex a zero-based index of the field
-     * @return value a value of the field
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // We are likely to work with already built instances.
-    public static Object getFieldValue(Message command, int fieldIndex) {
-
-        final Class<? extends Message> commandClass = command.getClass();
-        Method method = MethodAccessors.get(commandClass, fieldIndex);
-
-        if (method == null) {
-            final Descriptors.FieldDescriptor fieldDescriptor = getField(command, fieldIndex);
-            final String fieldName = fieldDescriptor.getName();
-            final String methodName = toAccessorMethodName(fieldName);
-
-            try {
-                method = commandClass.getMethod(methodName);
-                MethodAccessors.put(commandClass, fieldIndex, method);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-        }
-        try {
-            Object result = method.invoke(command);
-            return result;
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            throw propagate(e);
-        }
-    }
 
     public static Descriptors.Descriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {

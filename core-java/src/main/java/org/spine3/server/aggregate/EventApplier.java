@@ -92,7 +92,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      * @return immutable map of event appliers
      */
     public static java.util.Map<EventClass, EventApplier> scan(AggregateRoot aggregateRoot) {
-        java.util.Map<Class<? extends Message>, Method> appliers = scan(aggregateRoot, isEventApplierPredicate);
+        java.util.Map<Class<? extends Message>, Method> appliers = scan(aggregateRoot.getClass(), isEventApplierPredicate);
 
         final ImmutableMap.Builder<EventClass, EventApplier> builder = ImmutableMap.builder();
         for (java.util.Map.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {

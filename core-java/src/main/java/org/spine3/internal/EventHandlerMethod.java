@@ -97,7 +97,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @return immutable map of event handling methods
      */
     public static Map<EventClass, EventHandlerMethod> scan(Object target) {
-        Map<Class<? extends Message>, Method> subscribers = scan(target, isEventHandlerPredicate);
+        Map<Class<? extends Message>, Method> subscribers = scan(target.getClass(), isEventHandlerPredicate);
 
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {

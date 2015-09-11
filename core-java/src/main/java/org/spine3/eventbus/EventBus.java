@@ -35,8 +35,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.internal.EventHandlerMethod.scan;
-
 /**
  * Manages incoming events to the appropriate registered handler
  * according to the type of incoming event.
@@ -62,7 +60,7 @@ public class EventBus {
      * @param object the event applier object whose subscriber methods should be registered
      */
     public void register(Object object) {
-        Map<EventClass, EventHandlerMethod> handlers = scan(object);
+        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
 
         putHandlersToBus(handlers);
     }
@@ -79,13 +77,13 @@ public class EventBus {
     }
 
     /**
-     * Unregisters all subscriber methods on a registered {@code eventHandler}.
+     * Unregisters all subscriber methods on a registered {@code object}.
      *
-     * @param eventHandler object whose subscriber methods should be unregistered
+     * @param object the object whose methods should be unregistered
      * @throws IllegalArgumentException if the object was not previously registered
      */
-    public void unregister(Object eventHandler) {
-        Map<EventClass, EventHandlerMethod> handlers = scan(eventHandler);
+    public void unregister(Object object) {
+        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
 
         unsubscribe(handlers);
     }

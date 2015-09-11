@@ -99,7 +99,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @return immutable map
      */
     public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
-        Map<Class<? extends Message>, Method> subscribers = scan(object, isCommandHandlerPredicate);
+        Map<Class<? extends Message>, Method> subscribers = scan(object.getClass(), isCommandHandlerPredicate);
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {

@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.MessageFields;
 import org.spine3.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
@@ -36,9 +36,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
-
 import static org.junit.Assert.assertFalse;
-import static org.spine3.util.Lists.*;
+import static org.spine3.util.Lists.filter;
 
 /**
  * @author Mikhail Melnik
@@ -66,9 +65,9 @@ public class CommandsShould {
 
     @Test
     public void convert_field_name_to_method_name() {
-        assertEquals("getUserId", Messages.toAccessorMethodName("user_id"));
-        assertEquals("getId", Messages.toAccessorMethodName("id"));
-        assertEquals("getAggregateRootId", Messages.toAccessorMethodName("aggregate_root_id"));
+        assertEquals("getUserId", MessageFields.toAccessorMethodName("user_id"));
+        assertEquals("getId", MessageFields.toAccessorMethodName("id"));
+        assertEquals("getAggregateRootId", MessageFields.toAccessorMethodName("aggregate_root_id"));
     }
 
     @Test
