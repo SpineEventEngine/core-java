@@ -27,7 +27,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
 import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
-import org.spine3.server.internal.CommandHandler;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +59,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         super();
     }
 
-    //TODO:2015-09-05:alexander.yevsyukov: This should be hidden!
     /**
      * Configures repository with passed implementation of the aggregate storage.
      * It is used for storing and loading aggregated root during handling
@@ -75,13 +74,13 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * Creates a map of handlers that call {@link #dispatch(Message, CommandContext)}
      * method for all commands of the aggregate root class.
      */
-    public Map<CommandClass, CommandHandler> getCommandHandlers() {
-        Map<CommandClass, CommandHandler> result = Maps.newHashMap();
+    public Map<CommandClass, CommandHandlerMethod> getCommandHandlers() {
+        Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
 
         Class<? extends AggregateRoot> rootClass = TypeInfo.getEntityClass(this);
         Set<CommandClass> commandClasses = AggregateRoot.getCommandClasses(rootClass);
 
-        CommandHandler handler = toCommandHandler();
+        CommandHandlerMethod handler = toCommandHandler();
         for (CommandClass commandClass : commandClasses) {
             result.put(commandClass, handler);
         }
@@ -91,10 +90,10 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
-    private CommandHandler toCommandHandler() {
+    private CommandHandlerMethod toCommandHandler() {
         try {
             Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            final CommandHandler result = new CommandHandler(this, method);
+            final CommandHandlerMethod result = new CommandHandlerMethod(this, method);
             return result;
         } catch (NoSuchMethodException e) {
             throw propagate(e);

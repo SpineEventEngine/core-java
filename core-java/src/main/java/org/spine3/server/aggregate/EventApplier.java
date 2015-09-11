@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
-import org.spine3.internal.MessageHandler;
+import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.util.Methods;
 
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class EventApplier extends MessageHandler<AggregateRoot, Void> {
+class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
 
     static final Predicate<Method> isEventApplierPredicate = new Predicate<Method>() {
         @Override
@@ -159,7 +159,7 @@ public class EventApplier extends MessageHandler<AggregateRoot, Void> {
             }
 
             EventApplier applier = findApplier(eventClass);
-            applier.handle(event);
+            applier.invoke(event);
         }
 
         private EventApplier findApplier(EventClass eventClass) {

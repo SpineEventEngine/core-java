@@ -26,10 +26,10 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.error.AccessLevelException;
+import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.Repository;
 import org.spine3.server.aggregate.AggregateRoot;
-import org.spine3.internal.MessageHandler;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandHandler extends MessageHandler<Object, CommandContext> {
+public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     public static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
         @Override
@@ -61,7 +61,7 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public CommandHandler(Object target, Method method) {
+    public CommandHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 
@@ -98,12 +98,12 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
      * @param object the object that keeps command handler methods
      * @return immutable map
      */
-    public static Map<CommandClass, CommandHandler> scan(Object object) {
+    public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
         Map<Class<? extends Message>, Method> subscribers = scan(object, isCommandHandlerPredicate);
 
-        final ImmutableMap.Builder<CommandClass, CommandHandler> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
-            final CommandHandler handler = new CommandHandler(object, entry.getValue());
+            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
             handler.checkModifier();
             builder.put(CommandClass.of(entry.getKey()), handler);
         }
@@ -162,7 +162,7 @@ public class CommandHandler extends MessageHandler<Object, CommandContext> {
     }
 
     @Override
-    public <R> R handle(Message message, CommandContext context) throws InvocationTargetException {
-        return super.handle(message, context);
+    public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
+        return super.invoke(message, context);
     }
 }

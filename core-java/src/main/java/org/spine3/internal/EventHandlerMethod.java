@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Alexander Yevsyukov
  */
-public class EventHandler extends MessageHandler<Object, EventContext> {
+public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
 
     private static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
         @Override
@@ -56,7 +56,7 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventHandler(Object target, Method method) {
+    protected EventHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 
@@ -96,12 +96,12 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
      * @param target the target to scan
      * @return immutable map of event handling methods
      */
-    public static Map<EventClass, EventHandler> scan(Object target) {
+    public static Map<EventClass, EventHandlerMethod> scan(Object target) {
         Map<Class<? extends Message>, Method> subscribers = scan(target, isEventHandlerPredicate);
 
-        final ImmutableMap.Builder<EventClass, EventHandler> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
-            final EventHandler handler = new EventHandler(target, entry.getValue());
+            final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
             handler.checkModifier();
             builder.put(EventClass.of(entry.getKey()), handler);
         }
@@ -144,8 +144,8 @@ public class EventHandler extends MessageHandler<Object, EventContext> {
     }
 
     @Override
-    public <R> R handle(Message message, EventContext context) throws InvocationTargetException {
-        return super.handle(message, context);
+    public <R> R invoke(Message message, EventContext context) throws InvocationTargetException {
+        return super.invoke(message, context);
     }
 
 }
