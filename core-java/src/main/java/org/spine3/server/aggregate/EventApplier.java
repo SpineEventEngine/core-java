@@ -159,7 +159,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
             }
 
             EventApplier applier = findApplier(eventClass);
-            applier.handle(event);
+            applier.invoke(event);
         }
 
         private EventApplier findApplier(EventClass eventClass) {

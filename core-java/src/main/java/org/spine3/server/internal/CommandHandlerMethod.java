@@ -162,7 +162,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     @Override
-    public <R> R handle(Message message, CommandContext context) throws InvocationTargetException {
-        return super.handle(message, context);
+    public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
+        return super.invoke(message, context);
     }
 }

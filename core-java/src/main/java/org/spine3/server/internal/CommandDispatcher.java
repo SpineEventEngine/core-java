@@ -130,8 +130,8 @@ public class CommandDispatcher {
             throw new UnsupportedCommandException(command);
         }
 
-        CommandHandlerMethod subscriber = getHandler(commandClass);
-        List<EventRecord> result = subscriber.handle(command, context);
+        CommandHandlerMethod method = getHandler(commandClass);
+        List<EventRecord> result = method.invoke(command, context);
         return result;
     }
 

@@ -265,7 +265,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
         CommandHandlerMethod subscriber = internalDispatcher.getHandler(CommandClass.of(command));
 
-        Object handlingResult = subscriber.handle(command, context);
+        Object handlingResult = subscriber.invoke(command, context);
 
         //noinspection IfMayBeConditional
         if (List.class.isAssignableFrom(handlingResult.getClass())) {

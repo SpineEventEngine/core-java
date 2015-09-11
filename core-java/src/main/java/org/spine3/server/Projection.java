@@ -55,7 +55,7 @@ public abstract class Projection<I, S extends Message> extends Entity<I, S> {
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
         EventHandlerMethod method = handlers.get(EventClass.of(event));
         if (method != null) {
-            method.handle(event, ctx);
+            method.invoke(event, ctx);
         }
     }
 

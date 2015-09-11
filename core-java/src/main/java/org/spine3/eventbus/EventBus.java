@@ -137,7 +137,7 @@ public class EventBus {
 
         for (EventHandlerMethod handler : handlers) {
             try {
-                handler.handle(event, context);
+                handler.invoke(event, context);
             } catch (InvocationTargetException e) {
                 //TODO:2015-09-09:alexander.yevsyukov: Don't we want to handle this somehow? At least log?
                 //NOP
