@@ -225,7 +225,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      * @param context of the command
      * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
      */
-    @VisibleForTesting  // otherwise this method would have package access.
+    @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
 

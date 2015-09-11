@@ -52,9 +52,27 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
                                                   R extends AggregateRoot<I, ?>>
         extends RepositoryBase<I, R> implements AggregateRootRepository<I, R> {
 
+    /**
+     * Default number of events to be stored before a next snapshot is made.
+     */
+    public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
-    private RepositoryEventStore eventStore;
+    /**
+     * The store for events and snapshots.
+     */
+    private RepositoryEventStore repositoryEventStore;
+
+    /**
+     * The number of events to store between snapshots.
+     */
+    private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
+
+    /**
+     * The counter of event stored since last snapshot.
+     */
+    private int countSinceLastSnapshot;
 
     protected AggregateRootRepositoryBase() {
         super();
@@ -68,7 +86,15 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      * @param eventStore the event store implementation
      */
     public void configure(RepositoryEventStore eventStore) {
-        this.eventStore = eventStore;
+        this.repositoryEventStore = eventStore;
+    }
+
+    public int getSnapshotTrigger() {
+        return snapshotTrigger;
+    }
+
+    public void setSnapshotTrigger(int snapshotTrigger) {
+        this.snapshotTrigger = snapshotTrigger;
     }
 
     /**
@@ -127,15 +153,15 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         checkConfigured();
 
         try {
-            Snapshot snapshot = eventStore.getLastSnapshot(id);
+            Snapshot snapshot = repositoryEventStore.getLastSnapshot(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStore.getEvents(id, snapshot.getVersion());
+                List<EventRecord> trail = repositoryEventStore.getEvents(id, snapshot.getVersion());
                 R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = eventStore.getAllEvents(id);
+                List<EventRecord> events = repositoryEventStore.getAllEvents(id);
                 R result = create(id);
                 result.play(events);
                 return result;
@@ -146,14 +172,14 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     }
 
     private void checkConfigured() {
-        if (eventStore == null) {
+        if (repositoryEventStore == null) {
             throw new IllegalStateException("Repository instance is not configured."
                     + "Call the configure() method before trying to load/save the aggregate root.");
         }
     }
 
     /**
-     * Stores the passed aggregate root.
+     * Stores the passed aggregate root and commits its uncommitted events.
      *
      * @param aggregateRoot an instance to store
      */
@@ -161,13 +187,28 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     public void store(R aggregateRoot) {
         checkConfigured();
 
-        //TODO:2015-09-05:alexander.yevsyukov: Store snapshots every Xxx messages, which should be configured at the repository's level.
+        final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
+        for (EventRecord event : uncommittedEvents) {
+            storeEvent(event);
 
+            if (countSinceLastSnapshot > snapshotTrigger) {
+                createAndStoreSnapshot(aggregateRoot);
+                countSinceLastSnapshot = 0;
+            }
+        }
+
+        aggregateRoot.commitEvents();
+    }
+
+    private void createAndStoreSnapshot(R aggregateRoot) {
         Snapshot snapshot = aggregateRoot.toSnapshot();
-
-        //noinspection unchecked
         final I aggregateRootId = aggregateRoot.getId();
-        eventStore.storeSnapshot(aggregateRootId, snapshot);
+        repositoryEventStore.storeSnapshot(aggregateRootId, snapshot);
+    }
+
+    private void storeEvent(EventRecord event) {
+        repositoryEventStore.store(event);
+        ++countSinceLastSnapshot;
     }
 
     @Override
@@ -180,7 +221,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         final List<EventRecord> eventRecords = aggregateRoot.getUncommittedEvents();
 
         store(aggregateRoot);
-
         return eventRecords;
     }
 
