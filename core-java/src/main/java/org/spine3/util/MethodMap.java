@@ -25,7 +25,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.internal.MessageHandlerMethod;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A map for storing methods handling messages.
@@ -50,7 +53,11 @@ public class MethodMap {
     }
 
     public boolean containsHandlerFor(Class<? extends Message> messageClass) {
-        final Method method = map.get(messageClass);
-        return method != null;
+        return map.containsKey(checkNotNull(messageClass));
+    }
+
+    @Nullable
+    public Method get(Class<? extends Message> messageClass) {
+        return map.get(checkNotNull(messageClass));
     }
 }

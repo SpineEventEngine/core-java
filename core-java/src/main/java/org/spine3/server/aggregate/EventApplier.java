@@ -130,7 +130,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
     @SuppressWarnings("ClassNamingConvention")
     static class Map {
 
-        private final java.util.Map<EventClass, EventApplier> subscribersByType;
+        private final java.util.Map<EventClass, EventApplier> applierByClass;
 
         /**
          * Constructs a new instance for the passed aggregated root.
@@ -141,7 +141,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
             checkNotNull(aggregateRoot);
 
             java.util.Map<EventClass, EventApplier> appliers = scan(aggregateRoot);
-            this.subscribersByType = ImmutableMap.<EventClass, EventApplier>builder().putAll(appliers).build();
+            this.applierByClass = ImmutableMap.<EventClass, EventApplier>builder().putAll(appliers).build();
         }
 
         /**
@@ -154,7 +154,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
             checkNotNull(event);
 
             EventClass eventClass = EventClass.of(event);
-            if (!subscriberRegistered(eventClass)) {
+            if (!applierRegistered(eventClass)) {
                 throw new MissingEventApplierException(event);
             }
 
@@ -163,11 +163,11 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
         }
 
         private EventApplier findApplier(EventClass eventClass) {
-            return subscribersByType.get(eventClass);
+            return applierByClass.get(eventClass);
         }
 
-        private boolean subscriberRegistered(EventClass eventClass) {
-            return subscribersByType.containsKey(eventClass);
+        private boolean applierRegistered(EventClass eventClass) {
+            return applierByClass.containsKey(eventClass);
         }
 
     }

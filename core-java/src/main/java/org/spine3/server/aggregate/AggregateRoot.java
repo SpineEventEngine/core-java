@@ -23,7 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.internal.MessageHandlerMethod;
@@ -108,22 +110,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     protected AggregateRoot(I id) {
         super(id);
 
-        //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
-        if (id instanceof Message) {
-            Message message = (Message) id;
-            this.idAsAny = Messages.toAny(message);
-        } else if (id instanceof String) {
-            String s = (String) id;
-            this.idAsAny = Messages.toAny(StringValue.newBuilder().setValue(s).build());
-        } else if (id instanceof Integer) {
-            Integer intValue = (Integer) id;
-            this.idAsAny = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
-        } else if (id instanceof Long) {
-            Long longValue = (Long) id;
-            this.idAsAny = Messages.toAny(UInt64Value.newBuilder().setValue(longValue).build());
-        } else {
-            throw new IllegalArgumentException("ID of unsupported type encountered: " + id);
-        }
+        this.idAsAny = Messages.idToAny(id);
     }
 
     /**
