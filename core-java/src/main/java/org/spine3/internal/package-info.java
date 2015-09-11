@@ -17,30 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
-
-import com.google.protobuf.Message;
 
 /**
- * Indicates that more than one subscriber for the same message class are present in a declaring class.
- *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
+ * Classes and interfaces in this package are for internal use of the framework.
  */
-public class DuplicateSubscriberException extends RuntimeException {
+@ParametersAreNonnullByDefault
+package org.spine3.internal;
 
-    public DuplicateSubscriberException(
-            Class<? extends Message> messageClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
-
-        super(String.format(
-                "The %s class defines more than one subscriber method for the message class %s." +
-                        " Subscribers encountered: %s, %s.",
-                currentSubscriber.getTargetClass().getName(), messageClass.getName(),
-                currentSubscriber.getShortName(), discoveredSubscriber.getShortName()));
-    }
-
-    private static final long serialVersionUID = 0L;
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

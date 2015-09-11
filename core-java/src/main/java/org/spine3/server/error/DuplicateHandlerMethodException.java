@@ -17,36 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.error;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Commands;
 
 /**
- * Exception is thrown if a command, which is intended to be used for an aggregate
- * does not have {@code getAggregateId()} method.
- * <p>
- * To have this method in Java, corresponding Protobuf message definition must have
- * the property called {@code aggregate_id}.
+ * Indicates that more than one handling method for the same message class are present in the declaring class.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class MissingAggregateIdException extends RuntimeException {
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-    public MissingAggregateIdException(Message command, String methodName, Throwable cause) {
-        super(createMessage(command, methodName), cause);
-    }
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
 
-    private static String createMessage(Message command, String methodName) {
-        return "Unable to call ID accessor method " + methodName + " from the command of class "
-                + command.getClass().getName();
-    }
-
-    public MissingAggregateIdException(String commandClassName, String propertyName) {
-        super("The first property of the aggregate command " + commandClassName +
-                " must define aggregate ID with a name ending with '" + Commands.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
     }
 
     private static final long serialVersionUID = 0L;
+
 }

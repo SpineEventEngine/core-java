@@ -18,42 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+@ParametersAreNonnullByDefault
+package org.spine3.server.aggregate;
 
-import com.google.protobuf.Message;
-import org.spine3.util.ClassTypeValue;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * A value object for class type references.
- *
- * @author Alexander Yevsyukov
- */
-public class CommandClass extends ClassTypeValue {
-
-    protected CommandClass(Class<? extends Message> value) {
-        super(value);
-    }
-
-    /**
-     * Creates a new instance for the passed class value.
-     *
-     * @param value class reference
-     * @return new instance
-     */
-    public static CommandClass of(Class<? extends Message> value) {
-        return new CommandClass(checkNotNull(value));
-    }
-
-    /**
-     * Creates a new instance for the class of the passed command.
-     *
-     * @param command a command for which to get the class
-     * @return new instance
-     */
-    public static CommandClass of(Message command) {
-        return of(checkNotNull(command).getClass());
-    }
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

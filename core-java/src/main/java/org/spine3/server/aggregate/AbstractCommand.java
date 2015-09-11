@@ -18,50 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.server.aggregate;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
-
-import javax.annotation.Nonnull;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.protobuf.Messages;
+import org.spine3.util.MessageValue;
 
 /**
- * A command in the system.
+ * Abstract base for command classes.
  *
  * @author Alexander Yevsyukov
  */
-public final class Command extends AbstractCommand {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+abstract class AbstractCommand extends MessageValue {
 
-    private Command(Message value) {
+    protected AbstractCommand(Message value) {
         super(value);
     }
 
-    public static Command of(Message value) {
-        return new Command(checkNotNull(value));
-    }
-
-    public static Command from(CommandRequest cr) {
-        return new Command(getCommandValue(checkNotNull(cr)));
-    }
-
-    /**
-     * @return the class of the command message
-     */
-    public CommandClass getCommandClass() {
-        Message value = value();
-        return CommandClass.of(value.getClass());
-    }
-
-    /**
-     * @return contained command message
-     */
-    @Nonnull
-    @Override
-    public Message value() {
-        final Message value = super.value();
-        assert value != null; // as we prevent null value initialization.
-        return value;
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
+        return result;
     }
 }

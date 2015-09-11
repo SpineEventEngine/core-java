@@ -20,11 +20,14 @@
 package org.spine3.server;
 
 import com.google.protobuf.Any;
-import org.spine3.Command;
+import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
+import org.spine3.eventbus.EventBus;
+import org.spine3.protobuf.Messages;
+import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
@@ -76,12 +79,12 @@ public final class Engine {
         engine.eventStore = eventStore;
     }
 
-    public void register(CommandHandler handler) {
-        dispatcher.register(handler);
+    public void register(Object commandHandler) {
+        dispatcher.register(commandHandler);
     }
 
-    public void register(ManyCommandHandler repository) {
-        dispatcher.register(repository);
+    public void unregister(Object commandHandler) {
+        dispatcher.unregister(commandHandler);
     }
 
     /**
@@ -108,7 +111,7 @@ public final class Engine {
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         try {
-            Command command = Command.from(request);
+            Message command = Messages.fromAny(request.getCommand());
             CommandContext context = request.getContext();
 
             List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
@@ -126,9 +129,10 @@ public final class Engine {
     }
 
     private void storeAndPost(Iterable<EventRecord> records) {
+        final EventBus eventBus = EventBus.instance();
         for (EventRecord record : records) {
             eventStore.store(record);
-            EventBus.instance().post(record);
+            eventBus.post(record);
         }
     }
 

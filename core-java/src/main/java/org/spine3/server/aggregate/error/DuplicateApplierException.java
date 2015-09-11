@@ -17,22 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.error;
+package org.spine3.server.aggregate.error;
 
-import org.spine3.Event;
+import org.spine3.EventClass;
 
 /**
- * This exception is thrown on a discovery of an event class, which is not handled by any of
- * the applier methods of an aggregate root class.
+ * Exception that is thrown when more than one applier
+ * of the same event class is found in a declaring class.
  *
  * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class MissingEventApplierException extends RuntimeException {
+public class DuplicateApplierException extends RuntimeException {
 
-    public MissingEventApplierException(Event event) {
-        super("There is no registered applier for the event: " + event.getEventClass());
+    /**
+     * Creates new exception.
+     *
+     * @param eventClass        a class of the event
+     * @param currentApplier    a name of the method currently registered
+     * @param discoveredApplier another applier method name for the same event class
+     */
+    public DuplicateApplierException(
+            Class<?> declaringClass,
+            EventClass eventClass,
+            String currentApplier,
+            String discoveredApplier) {
+
+        super(String.format("The class %s defines more than one applier method for the event class %s. " +
+                        "Applier methods encountered: %s, %s.",
+                declaringClass.getName(),
+                eventClass,
+                currentApplier,
+                discoveredApplier));
     }
 
     private static final long serialVersionUID = 0L;
-
 }

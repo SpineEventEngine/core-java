@@ -24,21 +24,22 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
+import org.spine3.internal.EventHandlerMethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
- * Stateful handlers react on domain events and update their state accordingly.
+ * Creates data projection from incoming events.
  *
  * @param <I> the type of the IDs of the stateful handlers
  * @param <S> the type of the state objects
  */
-public abstract class StoredEventHandler<I extends Message, S extends Message> extends StoredObject<I, S> {
+public abstract class Projection<I, S extends Message> extends Entity<I, S> {
 
-    private Map<EventClass, MessageSubscriber> handlers;
+    private Map<EventClass, EventHandlerMethod> handlers;
 
-    protected StoredEventHandler(I id) {
+    protected Projection(I id) {
         super(id);
     }
 
@@ -52,9 +53,9 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
-        MessageSubscriber method = handlers.get(EventClass.of(event));
+        EventHandlerMethod method = handlers.get(EventClass.of(event));
         if (method != null) {
-            method.handle(event, ctx);
+            method.invoke(event, ctx);
         }
     }
 
@@ -63,8 +64,8 @@ public abstract class StoredEventHandler<I extends Message, S extends Message> e
     }
 
     protected void init() {
-        final ImmutableMap.Builder<EventClass, MessageSubscriber> builder = ImmutableMap.builder();
-        builder.putAll(ServerMethods.scanForEventHandlers(this));
+        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
+        builder.putAll(EventHandlerMethod.scan(this));
         this.handlers = builder.build();
     }
 

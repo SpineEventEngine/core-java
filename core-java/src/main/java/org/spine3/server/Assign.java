@@ -17,10 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.server;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
- * @author Mikhail Melnik
+ * Marks a method as command handler.
+ *
+ * @author Alexander Yevsyukov
  */
-public class MessageSubscriberTest {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Assign {
 }
+

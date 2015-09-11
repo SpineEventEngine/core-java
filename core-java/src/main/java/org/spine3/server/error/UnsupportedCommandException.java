@@ -17,32 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.error;
 
-package org.spine3.server;
-
-import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-
-import java.util.List;
 
 /**
- * Interface for command handler classes.
+ * Exception that is thrown when unsupported command is obtained
+ * or in case there is no class for given Protobuf command message.
  *
- * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public interface CommandHandler<T extends Message> {
+public class UnsupportedCommandException extends RuntimeException {
 
-    /**
-     * Handles incoming command of the {@link T} type.
-     *
-     * @param command the command to handle
-     * @param context the context of the command
-     * @return a list of the event records
-     */
-    @Subscribe
-    List<EventRecord> handle(T command, CommandContext context);
+    public UnsupportedCommandException(Message command) {
+        super("There is no registered handler for the command: " + command.getClass().getName());
+    }
+
+    private static final long serialVersionUID = 0L;
 
 }

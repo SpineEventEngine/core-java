@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
+import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.server.*;
@@ -38,7 +39,7 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
-        registerEventSubscribers();
+        registerEventHandlers();
         prepareEngine();
 
         List<CommandRequest> requests = prepareRequests();
@@ -68,7 +69,7 @@ public abstract class BaseSample {
         return result;
     }
 
-    protected static void registerEventSubscribers() {
+    protected static void registerEventHandlers() {
         EventBus.instance().register(new EventLogger());
     }
 

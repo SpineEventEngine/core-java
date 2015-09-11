@@ -20,41 +20,40 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * A business object stored by a repository.
+ * A server-side wrapper for message objects with identity stored by a repository.
  *
  * @param <I> the type of object IDs
  * @param <S> the type of object states.
  */
-public abstract class StoredObject<I extends Message, S extends Message> {
-
-    //TODO:2015-09-07:alexander.yevsyukov: Rename this class to Entity?
+public abstract class Entity<I, S extends Message> {
 
     private final I id;
-    private final Any idAsAny;
 
     private S state;
-    private Timestamp whenLastModified = getCurrentTime();
-    private int version = 0;
+    private Timestamp whenLastModified;
+    private int version;
 
-    protected StoredObject(I id) {
+    protected Entity(I id) {
         this.id = id;
-        this.idAsAny = Messages.toAny(id);
     }
 
     @CheckReturnValue
     protected abstract S getDefaultState();
 
+    /**
+     * @return the current state object or {@code null} if the state wasn't set
+     */
     @CheckReturnValue
+    @Nullable
     public S getState() {
         return state;
     }
@@ -74,19 +73,57 @@ public abstract class StoredObject<I extends Message, S extends Message> {
         // Do nothing by default.
     }
 
-    protected void setState(S state) {
+    /**
+     * Validates and sets the state.
+     *
+     * @param state the state object to set
+     * @see #validate(S)
+     */
+    protected void setState(S state, int version, Timestamp whenLastModified) {
         validate(state);
         this.state = state;
+        this.version = version;
+        this.whenLastModified = whenLastModified;
     }
 
     /**
-     * @return current version number of the aggregate.
+     * Updates the state incrementing the version number and recording time of the modification
+     *
+     * @param newState a new state to set
+     */
+    protected void incrementState(S newState) {
+        setState(newState, incrementVersion(), getCurrentTime());
+    }
+
+    /**
+     * Sets the object into the default state.
+     * <p>
+     * Results of this method call are:
+     * <ul>
+     *     <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
+     *     <li>The version number is set to zero.</li>
+     *     <li>The timestamp is set to the system time of the call.</li>
+     * </ul>
+     *
+     *     The timestamp is set to current system time.
+     */
+    protected void setDefault() {
+        setState(getDefaultState(), 0, getCurrentTime());
+    }
+
+    /**
+     * @return current version number
      */
     @CheckReturnValue
     public int getVersion() {
         return version;
     }
 
+    /**
+     * Advances the current version by one and records the time of the modification.
+     *
+     * @return new version number
+     */
     protected int incrementVersion() {
         ++version;
         whenLastModified = getCurrentTime();
@@ -94,24 +131,19 @@ public abstract class StoredObject<I extends Message, S extends Message> {
         return version;
     }
 
-    protected void setVersion(int version) {
-        this.version = version;
-    }
-
-    protected void setWhenLastModified(Timestamp whenLastModified) {
-        this.whenLastModified = whenLastModified;
-    }
-
     @CheckReturnValue
     public I getId() {
         return id;
     }
 
-    public Any getIdAsAny() {
-        return idAsAny;
-    }
-
+    /**
+     * Obtains the timestamp of the last modification.
+     *
+     * @return the timestamp instance or {@code null} if the state wasn't set
+     * @see #setState(Message, int, Timestamp)
+     */
     @CheckReturnValue
+    @Nullable
     public Timestamp whenLastModified() {
         return this.whenLastModified;
     }

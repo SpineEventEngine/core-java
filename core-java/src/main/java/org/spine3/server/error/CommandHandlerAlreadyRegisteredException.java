@@ -17,10 +17,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.error;
 
 import org.spine3.CommandClass;
-import org.spine3.server.MessageSubscriber;
 
 /**
  * Exception that is thrown when more than one handler
@@ -35,19 +34,19 @@ public class CommandHandlerAlreadyRegisteredException extends RuntimeException {
      * Accepts event type and both old and new handlers.
      *
      * @param commandClass         the class of the command
-     * @param currentSubscriber    a method currently registered for the given message type
-     * @param discoveredSubscriber a new subscriber for the command type
+     * @param currentHandler    a method name of the currently registered for the given message type
+     * @param discoveredHandler another method name discovered for the command type
      */
     public CommandHandlerAlreadyRegisteredException(
             CommandClass commandClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
+            String currentHandler,
+            String discoveredHandler) {
 
         super(String.format("The command %s already has associated handler method %s. "
                         + " There can be only one handler per command class. "
                         + " Duplicating handler encountered: %s. "
                         + " Consider un-registering the current handler first.",
-                commandClass, currentSubscriber.getFullName(), discoveredSubscriber.getFullName()));
+                commandClass, currentHandler, discoveredHandler));
     }
 
     private static final long serialVersionUID = 0L;

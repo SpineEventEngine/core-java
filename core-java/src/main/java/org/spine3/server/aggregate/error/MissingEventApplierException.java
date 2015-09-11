@@ -17,20 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.aggregate.error;
 
-package org.spine3.server;
-
-import org.spine3.CommandClass;
-
-import java.util.Map;
+import com.google.protobuf.Message;
 
 /**
- * The common inferface for classes handling more than one command.
+ * This exception is thrown on a discovery of an event class, which is not handled by any of
+ * the applier methods of an aggregate root class.
  *
- * @author Alexander Yevsyukov
- * @see CommandHandler
+ * @author Mikhail Melnik
  */
-public interface ManyCommandHandler {
+public class MissingEventApplierException extends RuntimeException {
 
-    Map<CommandClass, MessageSubscriber> getSubscribers();
+    public MissingEventApplierException(Message event) {
+        super("There is no registered applier for the event: " + event.getClass());
+    }
+
+    private static final long serialVersionUID = 0L;
+
 }

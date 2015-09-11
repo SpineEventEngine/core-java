@@ -17,38 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
 
-import org.spine3.EventClass;
+package org.spine3.util;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
- * Exception that is thrown when more than one applier
- * of the same event class is found in a declaring class.
+ * Utilities for working with classes.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class DuplicateApplierException extends RuntimeException {
+@SuppressWarnings("UtilityClass")
+public class Classes {
 
-    /**
-     * Creates new exception.
-     *
-     * @param eventClass           a class of the event
-     * @param currentSubscriber    a method currently registered
-     * @param discoveredSubscriber another applier method for the same event class
-     */
-    public DuplicateApplierException(
-            EventClass eventClass,
-            MessageSubscriber currentSubscriber,
-            MessageSubscriber discoveredSubscriber) {
+    private Classes() {}
 
-        super(String.format("The class %s defines more than one applier method for the event class %s. " +
-                            "Applier methods encountered: %s, %s.",
-                currentSubscriber.getTargetClass(),
-                eventClass,
-                currentSubscriber,
-                discoveredSubscriber));
+    public static <T> Class<T> getGenericParameterType(Object object, int paramNumber) {
+        try {
+            Type genericSuperclass = object.getClass().getGenericSuperclass();
+            Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
+
+            actualTypeArguments.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
+            actualTypeArguments.setAccessible(false);
+
+            return result;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw propagate(e);
+        }
     }
-
-    private static final long serialVersionUID = 0L;
 }
