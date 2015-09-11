@@ -25,9 +25,9 @@ import com.google.protobuf.Message;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.internal.EventHandler;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.internal.EventHandlerMethod;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.error.MissingEventApplierException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static org.spine3.internal.EventHandler.scan;
+import static org.spine3.internal.EventHandlerMethod.scan;
 
 /**
  * Manages incoming events to the appropriate registered handler
@@ -48,8 +48,8 @@ public class EventBus {
 
     /* This code is based on Guava {@link com.google.common.eventbus.EventBus} class. */
 
-    private final Multimap<EventClass, EventHandler> subscribersByType = HashMultimap.create();
-    private final ReadWriteLock subscribersByTypeLock = new ReentrantReadWriteLock();
+    private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
+    private final ReadWriteLock lockOnHandlersByClass = new ReentrantReadWriteLock();
 
     private EventBus() {
         // Prevent instantiation from outside.
@@ -62,19 +62,19 @@ public class EventBus {
      * @param object the event applier object whose subscriber methods should be registered
      */
     public void register(Object object) {
-        Map<EventClass, EventHandler> handlers = scan(object);
+        Map<EventClass, EventHandlerMethod> handlers = scan(object);
 
         putHandlersToBus(handlers);
     }
 
-    private void putHandlersToBus(Map<EventClass, EventHandler> handlers) {
-        subscribersByTypeLock.writeLock().lock();
+    private void putHandlersToBus(Map<EventClass, EventHandlerMethod> handlers) {
+        lockOnHandlersByClass.writeLock().lock();
         try {
-            for (Map.Entry<EventClass, EventHandler> subscriber : handlers.entrySet()) {
-                subscribersByType.put(subscriber.getKey(), subscriber.getValue());
+            for (Map.Entry<EventClass, EventHandlerMethod> handler : handlers.entrySet()) {
+                handlersByClass.put(handler.getKey(), handler.getValue());
             }
         } finally {
-            subscribersByTypeLock.writeLock().unlock();
+            lockOnHandlersByClass.writeLock().unlock();
         }
     }
 
@@ -85,30 +85,30 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object eventHandler) {
-        Map<EventClass, EventHandler> subscribers = scan(eventHandler);
+        Map<EventClass, EventHandlerMethod> handlers = scan(eventHandler);
 
-        unsubscribe(subscribers);
+        unsubscribe(handlers);
     }
 
     /**
      * Removes passed event handlers from the bus.
      * @param handlers a map of the event handlers to remove
      */
-    private void unsubscribe(Map<EventClass, EventHandler> handlers) {
-        for (Map.Entry<EventClass, EventHandler> entry : handlers.entrySet()) {
+    private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
+        for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
             final EventClass c = entry.getKey();
-            EventHandler subscriber = entry.getValue();
+            EventHandlerMethod handler = entry.getValue();
 
-            subscribersByTypeLock.writeLock().lock();
+            lockOnHandlersByClass.writeLock().lock();
             try {
-                Collection<EventHandler> currentSubscribers = subscribersByType.get(c);
-                if (!currentSubscribers.contains(subscriber)) {
+                Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
+                if (!currentSubscribers.contains(handler)) {
                     throw new IllegalArgumentException(
-                            "missing event subscriber for the annotated method. Is " + subscriber.getFullName() + " registered?");
+                            "missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
                 }
-                currentSubscribers.remove(subscriber);
+                currentSubscribers.remove(handler);
             } finally {
-                subscribersByTypeLock.writeLock().unlock();
+                lockOnHandlersByClass.writeLock().unlock();
             }
         }
     }
@@ -128,14 +128,14 @@ public class EventBus {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void post(Message event, EventContext context) {
-        Collection<EventHandler> handlers = getHandlers(EventClass.of(event));
+        Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             //TODO:2015-09-09:alexander.yevsyukov: This must be missing event handler
             throw new MissingEventApplierException(event);
         }
 
-        for (EventHandler handler : handlers) {
+        for (EventHandlerMethod handler : handlers) {
             try {
                 handler.handle(event, context);
             } catch (InvocationTargetException e) {
@@ -145,8 +145,8 @@ public class EventBus {
         }
     }
 
-    private Collection<EventHandler> getHandlers(EventClass c) {
-        return subscribersByType.get(c);
+    private Collection<EventHandlerMethod> getHandlers(EventClass c) {
+        return handlersByClass.get(c);
     }
 
     /**

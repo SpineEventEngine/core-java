@@ -26,14 +26,14 @@ import com.google.common.collect.*;
 import com.google.protobuf.*;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
-import org.spine3.internal.MessageHandler;
+import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotOrBuilder;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandDispatcher;
-import org.spine3.server.internal.CommandHandler;
+import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
@@ -117,7 +117,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
-        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandler.isCommandHandlerPredicate);
+        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
         Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
             @Nullable
             @Override
@@ -144,7 +144,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             boolean methodMatches = methodPredicate.apply(method);
 
             if (methodMatches) {
-                Class<? extends Message> firstParamType = MessageHandler.getFirstParamType(method);
+                Class<? extends Message> firstParamType = MessageHandlerMethod.getFirstParamType(method);
                 result.add(firstParamType);
             }
         }
@@ -246,7 +246,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandHandler subscriber = dispatcher.getHandler(CommandClass.of(command));
+        CommandHandlerMethod subscriber = dispatcher.getHandler(CommandClass.of(command));
 
         Object handlingResult = subscriber.handle(command, context);
 
