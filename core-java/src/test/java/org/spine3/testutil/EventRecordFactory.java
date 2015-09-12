@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
-import org.spine3.test.order.event.OrderCreated;
+import org.spine3.test.project.event.ProjectCreated;
 
 /**
  * The utility class which is used for creating EventRecords for tests.
@@ -36,9 +36,11 @@ import org.spine3.test.order.event.OrderCreated;
 public class EventRecordFactory {
 
     public static EventRecord create(Timestamp when) {
+
         //todo:2015-08-10:mikhail.mikhaylov: check it.
-        final Any event = Messages.toAny(OrderCreated.newBuilder().setOrderId(
-                AggregateIdFactory.createCommon()).build());
+        final Any event = Messages.toAny(
+                ProjectCreated.newBuilder().setProjectId(AggregateIdFactory.createCommon()).build()
+        );
 
         final EventRecord eventRecord = EventRecord.newBuilder()
                 .setContext(ContextFactory.getEventContext(0))
