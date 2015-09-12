@@ -28,8 +28,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.error.AccessLevelException;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
-import org.spine3.server.Repository;
-import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -47,6 +45,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+
+    private static final int MESSAGE_PARAM_INDEX = 0;
+    private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
     public static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
         @Override
@@ -74,23 +75,23 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     public static boolean isCommandHandler(Method method) {
 
-        boolean isAnnotated = method.isAnnotationPresent(Assign.class);
+        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
 
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
 
         //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndCommandContext =
+        final boolean acceptsMessageAndCommandContext =
                 parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && CommandContext.class.equals(parameterTypes[1]);
+                        && Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX])
+                        && CommandContext.class.equals(parameterTypes[COMMAND_CONTEXT_PARAM_INDEX]);
 
-        boolean returnsMessageList = List.class.equals(method.getReturnType());
-        boolean returnsMessage = Message.class.isAssignableFrom(method.getReturnType());
+        final boolean returnsMessageList = List.class.equals(method.getReturnType());
+        final boolean returnsMessage = Message.class.isAssignableFrom(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
         return isAnnotated
-                && acceptsMessageAndCommandContext
-                && (returnsMessageList || returnsMessage);
+                  && acceptsMessageAndCommandContext
+                    && (returnsMessageList || returnsMessage);
     }
 
     /**
@@ -113,54 +114,13 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         return builder.build();
     }
 
-    public static AccessLevelException forRepositoryCommandHandler(Repository repository, Method method) {
-        return new AccessLevelException(messageForRepositoryCommandHandler(repository, method));
-    }
-
-    public static String messageForAggregateCommandHandler(Object aggregate, Method method) {
-        return "Command handler of the aggregate " + Methods.getFullMethodName(aggregate, method) +
-                " must be declared 'public'. It is part of the public API of the aggregate.";
-    }
-
-    public static final String MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER = " must be declared 'public' to be called by CommandDispatcher.";
-
-    private static String messageForRepositoryCommandHandler(Object repository, Method method) {
-        return "Command handler of the repository " + Methods.getFullMethodName(repository, method) +
-                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
-    }
-
-    public static AccessLevelException forAggregateCommandHandler(AggregateRoot aggregate, Method method) {
-        return new AccessLevelException(messageForAggregateCommandHandler(aggregate, method));
-    }
-
-    public static AccessLevelException forCommandHandler(Object handler, Method method) {
-        return new AccessLevelException(messageForCommandHandler(handler, method));
-    }
-
-    private static String messageForCommandHandler(Object handler, Method method) {
-        return "Command handler " + Methods.getFullMethodName(handler, method) +
-                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
-    }
-
     @Override
     protected void checkModifier() {
-        final Method method = getMethod();
-        final Object target = getTarget();
-
         boolean methodIsPublic = isPublic();
 
-        boolean isAggregateRoot = target instanceof AggregateRoot;
-        if (isAggregateRoot && !methodIsPublic) {
-            throw forAggregateCommandHandler((AggregateRoot) target, method);
-        }
-
-        boolean isRepository = target instanceof Repository;
-        if (isRepository && !methodIsPublic) {
-            throw forRepositoryCommandHandler((Repository) target, method);
-        }
-
         if (!methodIsPublic) {
-            throw forCommandHandler(target, method);
+            throw new AccessLevelException(String.format("Command handler %s must be declared 'public'.",
+                    Methods.getFullMethodName(getTarget(), getMethod())));
         }
     }
 

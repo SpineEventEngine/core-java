@@ -446,6 +446,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         private final MethodMap.Registry<AggregateRoot> commandHandlers = new MethodMap.Registry<>();
 
         private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
+
         void register(Class<? extends AggregateRoot> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
             eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);

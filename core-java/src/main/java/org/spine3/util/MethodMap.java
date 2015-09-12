@@ -71,14 +71,34 @@ public class MethodMap {
         return map.get(checkNotNull(messageClass));
     }
 
+    /**
+     * The registry of message maps by class.
+     *
+     * @param <T> the type of objects tracked by the registry
+     */
     public static class Registry<T> {
+
         private final Map<Class<? extends T>, MethodMap> entries = Maps.newConcurrentMap();
 
+        /**
+         * Verifies if the class is already registered.
+         *
+         * @param clazz the class to check
+         * @return {@code true} if there is a message map for the passed class, {@code false} otherwise
+         */
         public boolean contains(Class<? extends T> clazz) {
             boolean result = entries.containsKey(clazz);
             return result;
         }
 
+        /**
+         * Registers methods of the class in the registry.
+         *
+         * @param clazz the class to register
+         * @param filter a filter for selecting methods to register
+         * @throws IllegalArgumentException if the class was already registered
+         * @see #contains(Class)
+         */
         public void register(Class<? extends T> clazz, Predicate<Method> filter) {
             if (contains(clazz)) {
                 throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
@@ -88,6 +108,9 @@ public class MethodMap {
             entries.put(clazz, entry);
         }
 
+        /**
+         * Obtains method map for the passed class.
+         */
         public MethodMap get(Class<? extends T> clazz) {
             MethodMap result = entries.get(clazz);
             return result;

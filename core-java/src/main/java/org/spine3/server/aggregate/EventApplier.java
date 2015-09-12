@@ -21,18 +21,13 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.EventClass;
-import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,6 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
+
+    private static final int EVENT_PARAM_INDEX = 0;
 
     static final Predicate<Method> isEventApplierPredicate = new Predicate<Method>() {
         @Override
@@ -69,54 +66,28 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      */
     @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
     public static boolean isEventApplier(Method method) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
 
         boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-        boolean acceptsMessage = parameterTypes.length == 1 && Message.class.isAssignableFrom(parameterTypes[0]);
-        //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndEventContext =
-                parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && EventContext.class.equals(parameterTypes[1]);
-        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+        final boolean hasOneParam = parameterTypes.length == 1;
+        final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
+        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
         //noinspection OverlyComplexBooleanExpression
-        return isAnnotated && (acceptsMessage || acceptsMessageAndEventContext) && returnsNothing;
-    }
-
-    /**
-     * Scans for event applier methods the passed aggregate root object.
-     *
-     * @param aggregateRoot the object that keeps event applier methods
-     * @return immutable map of event appliers
-     */
-    public static java.util.Map<EventClass, EventApplier> scan(AggregateRoot aggregateRoot) {
-        MethodMap appliers = new MethodMap(aggregateRoot.getClass(), isEventApplierPredicate);
-
-        final ImmutableMap.Builder<EventClass, EventApplier> builder = ImmutableMap.builder();
-        for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {
-            final EventApplier applier = new EventApplier(aggregateRoot, entry.getValue());
-            applier.checkModifier();
-            builder.put(EventClass.of(entry.getKey()), applier);
-        }
-        return builder.build();
-    }
-
-    public static AccessLevelException forEventApplier(AggregateRoot aggregate, Method method) {
-        return new AccessLevelException(messageForEventApplier(aggregate, method));
-    }
-
-    private static String messageForEventApplier(AggregateRoot aggregate, Method method) {
-        return "Event applier method of the aggregate " + Methods.getFullMethodName(aggregate, method) +
-                " must be declared 'private'. It is not supposed to be called from outside the aggregate.";
+        return isAnnotated
+                    && hasOneParam
+                    && firstParamIsMessage
+                    && returnsNothing;
     }
 
     @Override
     protected void checkModifier() {
-        boolean methodIsPrivate = Modifier.isPrivate(getMethod().getModifiers());
+        boolean methodIsPrivate = isPrivate();
 
         if (!methodIsPrivate) {
-            throw forEventApplier(getTarget(), getMethod());
+            throw new AccessLevelException(String.format(
+                    "Event applier method %s must be declared 'private'.",
+                     Methods.getFullMethodName(getTarget(), getMethod())));
         }
     }
 

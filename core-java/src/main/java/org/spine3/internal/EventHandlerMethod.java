@@ -27,7 +27,6 @@ import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
 import org.spine3.eventbus.Subscribe;
-import org.spine3.server.Repository;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -107,38 +106,14 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return builder.build();
     }
 
-    private static final String MUST_BE_PUBLIC_FOR_EVENT_BUS = " must be declared 'public' to be called by EventBus.";
-
-    private static AccessLevelException forEventHandler(Object handler, Method method) {
-        return new AccessLevelException(messageForEventHandler(handler, method));
-    }
-
-    private static String messageForEventHandler(Object handler, Method method) {
-        return "Event handler " + Methods.getFullMethodName(handler, method) +
-                MUST_BE_PUBLIC_FOR_EVENT_BUS;
-    }
-
-    private static AccessLevelException forRepositoryEventHandler(Repository repository, Method method) {
-        return new AccessLevelException(messageForRepositoryEventHandler(repository, method));
-    }
-
-    private static String messageForRepositoryEventHandler(Object repository, Method method) {
-        return "Event handler of the repository " + Methods.getFullMethodName(repository, method) +
-                MUST_BE_PUBLIC_FOR_EVENT_BUS;
-    }
-
     @Override
     protected void checkModifier() {
         if (!isPublic()) {
             Object target = getTarget();
             Method method = getMethod();
 
-            if (target instanceof Repository) {
-                Repository repository = (Repository) target;
-                throw forRepositoryEventHandler(repository, method);
-            }
-
-            throw forEventHandler(target, method);
+            throw new AccessLevelException(String.format(
+                    "Event handler %s must be declared 'public'", Methods.getFullMethodName(target, method)));
         }
     }
 
