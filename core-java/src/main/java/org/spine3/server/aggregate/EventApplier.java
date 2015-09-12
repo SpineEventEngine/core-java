@@ -27,6 +27,7 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,6 +57,11 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      */
     protected EventApplier(AggregateRoot target, Method method) {
         super(target, method);
+    }
+
+    @Override
+    protected <R> R invoke(Message message) throws InvocationTargetException {
+        return super.invoke(message);
     }
 
     /**

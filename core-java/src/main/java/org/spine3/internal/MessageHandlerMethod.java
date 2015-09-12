@@ -35,7 +35,7 @@ import static com.google.common.base.Throwables.propagate;
 /**
  * Wraps a handler method on a specific object.
  *
- * <p>This class only verifies the suitability of the method and event type if
+ * <p>This class only verifies the suitability of the method and message type if
  * something fails.  Callers are expected to verify their uses of this class.
  *
  * <p>Two message handlers are equivalent when they refer to the same method on the
@@ -150,7 +150,7 @@ public abstract class MessageHandlerMethod<T, C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    public <R> R invoke(Message message) throws InvocationTargetException {
+    protected <R> R invoke(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")
