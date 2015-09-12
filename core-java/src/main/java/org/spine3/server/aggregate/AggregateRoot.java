@@ -182,9 +182,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         final Class<? extends Message> commandClass = command.getClass();
         Method method = commandHandlers.get(commandClass);
         if (method == null) {
-            throw new IllegalStateException(
-                    String.format("Missing handler for command class %s in aggregate root class %s",
-                    commandClass.getName(), getClass().getName()));
+            throw missingCommandHandler(commandClass);
         }
         CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final Object result = commandHandler.invoke(command, context);
@@ -195,9 +193,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         final Class<? extends Message> eventClass = event.getClass();
         Method method = eventAppliers.get(eventClass);
         if (method == null) {
-            throw new IllegalStateException(
-                    String.format("Missing event applier for event class %s in aggregate root class %s",
-                            eventClass.getName(), getClass().getName()));
+            throw missingEventApplier(eventClass);
         }
 
         EventApplier applier = new EventApplier(this, method);
@@ -245,7 +241,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         return idAsAny;
     }
 
-
     /**
      * Dispatches commands, generates events and applies them to the aggregate root.
      *
@@ -260,6 +255,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         CommandId commandId = context.getCommandId();
         apply(events, commandId);
     }
+
 
     /**
      * Directs the passed command to the corresponding command handler method of the aggregate.
@@ -318,8 +314,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Applies an event to the aggregate root.
-     * <p/>
-     * If the event is {@link Snapshot} its state is copied. Otherwise, the event
+     *
+     * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
      * @param event the event to apply
@@ -380,8 +376,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Creates a context for an event.
-     * <p/>
-     * The context may optionally have custom attributes are added by
+     *
+     * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
@@ -407,14 +403,15 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p/>
-     * Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     *
+     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
      * @param commandId      the id of the command, which cased the event
      * @param event          the event message
      * @param currentState   the current state of the aggregate root after the event was applied
-     * @param currentVersion the version of the aggregate root after the event was applied   @see #createEventContext(CommandId, Message, Message, int)
+     * @param currentVersion the version of the aggregate root after the event was applied
+     * @see #createEventContext(CommandId, Message, Message, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
@@ -441,15 +438,14 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * The registry of method maps for all aggregate root classes.
-     * <p>
-     * The instances of {@code AggregateRoot} class register the classes in {@link AggregateRoot#init()}
-     * method.
+     *
+     * <p>The instances of {@code AggregateRoot} class register their classes in {@link AggregateRoot#init()} method.
      */
     private static class Registry {
 
         private final MethodMap.Registry<AggregateRoot> commandHandlers = new MethodMap.Registry<>();
-        private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
 
+        private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
         void register(Class<? extends AggregateRoot> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
             eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
@@ -481,7 +477,23 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
             private final Registry value = new Registry();
+
         }
+    }
+
+    // Factory methods for exceptions
+    //------------------------------------
+
+    private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
+        return new IllegalStateException(
+                String.format("Missing handler for command class %s in aggregate root class %s.",
+                        commandClass.getName(), getClass().getName()));
+    }
+
+    private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
+        return new IllegalStateException(
+                String.format("Missing event applier for event class %s in aggregate root class %s.",
+                        eventClass.getName(), getClass().getName()));
     }
 
 }

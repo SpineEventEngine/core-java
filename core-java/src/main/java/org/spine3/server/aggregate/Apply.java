@@ -25,9 +25,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
- * Marks a method of an aggregate root as applier.
+ * Marks a method of an aggregate root as an event applier.
+ *
+ * <p>The type of the event will be indicated by the first (and only) parameter.
+ *
+ * <p>Event applier methods are not supposed to be called from outside of the
+ * declaring class. As such they should be declared {@code private}.
  *
  * @author Alexander Yevsyukov
  */

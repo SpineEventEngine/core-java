@@ -34,11 +34,11 @@ import static com.google.common.base.Throwables.propagate;
 
 /**
  * Wraps a handler method on a specific object.
- * <p/>
- * This class only verifies the suitability of the method and event type if
+ *
+ * <p>This class only verifies the suitability of the method and event type if
  * something fails.  Callers are expected to verify their uses of this class.
- * <p/>
- * Two message handlers are equivalent when they refer to the same method on the
+ *
+ * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).   This property is used to ensure that no handler
  * method is registered more than once.
  *
@@ -169,8 +169,8 @@ public abstract class MessageHandlerMethod<T, C> {
 
     /**
      * Returns a full name of the handler method.
-     * <p/>
-     * The full name consists of a fully qualified class name of the target object and
+     *
+     * <p>The full name consists of a fully qualified class name of the target object and
      * the method name separated with a dot character.
      *
      * @return full name of the subscriber

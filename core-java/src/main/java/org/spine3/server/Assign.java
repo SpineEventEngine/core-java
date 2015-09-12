@@ -25,9 +25,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
  * Marks a method as command handler.
+ *
+ * <p>A command handler method mus have two parameters. The class of the command will be
+ * indicated by the first parameter.
+ *
+ * <p>The second parameter of the method must be {@link org.spine3.base.CommandContext}.
+ * If the annotation is applied to a method with less or more than two parameters,
+ * the method will not be registered for command dispatching.
+ *
+ * <p>Objects handing commands are registered using {@link Engine#register(Object)}.
+ *
+ * <p><b>IMPORTANT:</b> an application must have one and only one handler per command class.
+ * Declaring two methods that handle the same command class will result in run-time error.
  *
  * @author Alexander Yevsyukov
  */
