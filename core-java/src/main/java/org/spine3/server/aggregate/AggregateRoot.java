@@ -467,7 +467,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         }
 
         MethodMap getEventAppliers(Class<? extends AggregateRoot> clazz) {
-            MethodMap result = commandHandlers.get(clazz);
+            MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
