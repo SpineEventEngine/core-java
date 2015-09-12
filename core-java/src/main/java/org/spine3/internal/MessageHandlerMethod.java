@@ -150,7 +150,7 @@ public abstract class MessageHandlerMethod<T, C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R invoke(Message message) throws InvocationTargetException {
+    public <R> R invoke(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")

@@ -33,9 +33,9 @@ import org.spine3.server.Entity;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotOrBuilder;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
-import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Events;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
@@ -85,14 +85,18 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     private volatile boolean initialized = false;
 
     /**
-     * Internal dispatcher for command handling methods of this aggregate.
+     * The map of command handling methods for this class.
+     *
+     * @see Registry
      */
-    private CommandDispatcher internalDispatcher;
+    private MethodMap commandHandlers;
 
     /**
-     * Dispatcher of applier methods of this aggregate.
+     * The map of event appliers for this class.
+     *
+     * @see Registry
      */
-    private EventApplier.Map applier;
+    private MethodMap eventAppliers;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -109,7 +113,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     protected AggregateRoot(I id) {
         super(id);
-
         this.idAsAny = Messages.idToAny(id);
     }
 
@@ -155,10 +158,21 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         return result;
     }
 
+    /**
+     * Performs initialization of the instance.
+     */
     private void init() {
         if (!this.initialized) {
-            initCommandDispatcher();
-            initEventApplier();
+            final Registry registry = Registry.instance();
+            final Class<? extends AggregateRoot> thisClass = getClass();
+
+            // Register this aggregate root class if it wasn't.
+            if (!registry.contains(thisClass)) {
+                registry.register(thisClass);
+            }
+
+            commandHandlers = registry.getCommandHandlers(thisClass);
+            eventAppliers = registry.getEventAppliers(thisClass);
 
             if (super.getState() == null) {
                 setDefault();
@@ -166,6 +180,32 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
             this.initialized = true;
         }
+    }
+
+    private Object invokeHandler(Message command, CommandContext context) throws InvocationTargetException {
+        final Class<? extends Message> commandClass = command.getClass();
+        Method method = commandHandlers.get(commandClass);
+        if (method == null) {
+            throw new IllegalStateException(
+                    String.format("Missing handler for command class %s in aggregate root class %s",
+                    commandClass.getName(), getClass().getName()));
+        }
+        CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final Object result = commandHandler.invoke(command, context);
+        return result;
+    }
+
+    private void invokeApplier(Message event) throws InvocationTargetException {
+        final Class<? extends Message> eventClass = event.getClass();
+        Method method = eventAppliers.get(eventClass);
+        if (method == null) {
+            throw new IllegalStateException(
+                    String.format("Missing event applier for event class %s in aggregate root class %s",
+                            eventClass.getName(), getClass().getName()));
+        }
+
+        EventApplier applier = new EventApplier(this, method);
+        applier.invoke(event);
     }
 
     /**
@@ -209,14 +249,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         return idAsAny;
     }
 
-    private void initEventApplier() {
-        applier = new EventApplier.Map(this);
-    }
-
-    private void initCommandDispatcher() {
-        internalDispatcher = new CommandDispatcher();
-        internalDispatcher.register(this);
-    }
 
     /**
      * Dispatches commands, generates events and apply them to the aggregate root.
@@ -228,11 +260,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
-
         List<? extends Message> events = generateEvents(command, context);
-
         CommandId commandId = context.getCommandId();
-
         apply(events, commandId);
     }
 
@@ -250,9 +279,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandHandlerMethod subscriber = internalDispatcher.getHandler(CommandClass.of(command));
-
-        Object handlingResult = subscriber.invoke(command, context);
+        Object handlingResult = invokeHandler(command, context);
 
         //noinspection IfMayBeConditional
         if (List.class.isAssignableFrom(handlingResult.getClass())) {
@@ -308,7 +335,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             restore((Snapshot) event);
             return;
         }
-        applier.apply(event);
+
+        invokeApplier(event);
     }
 
     private void putUncommitted(EventRecord record) {
@@ -414,4 +442,50 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
         return builder.build();
     }
+
+    /**
+     * The registry of method maps for all aggregate root classes.
+     * <p>
+     * The instances of {@code AggregateRoot} class register the classes in {@link AggregateRoot#init()}
+     * method.
+     */
+    private static class Registry {
+
+        private final MethodMap.Registry<AggregateRoot> commandHandlers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
+
+        void register(Class<? extends AggregateRoot> clazz) {
+            commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+            eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
+            //TODO:2015-09-12:alexander.yevsyukov: Handle verification of access modifiers of methods.
+        }
+
+        boolean contains(Class<? extends AggregateRoot> clazz) {
+            boolean result = commandHandlers.contains(clazz);
+            return result;
+        }
+
+        MethodMap getCommandHandlers(Class<? extends AggregateRoot> clazz) {
+            MethodMap result = commandHandlers.get(clazz);
+            return result;
+        }
+
+        MethodMap getEventAppliers(Class<? extends AggregateRoot> clazz) {
+            MethodMap result = commandHandlers.get(clazz);
+            return result;
+        }
+
+        static Registry instance() {
+            return RegistrySingleton.INSTANCE.value;
+        }
+
+        @SuppressWarnings("InnerClassTooDeeplyNested")
+        private enum RegistrySingleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Registry value = new Registry();
+        }
+    }
+
 }

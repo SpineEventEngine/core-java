@@ -22,10 +22,13 @@ package org.spine3.util;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -51,6 +54,14 @@ public class MethodMap {
         return map.isEmpty();
     }
 
+    public ImmutableSet<Class<? extends Message>> keySet() {
+        return map.keySet();
+    }
+
+    public ImmutableSet<Map.Entry<Class<? extends Message>, Method>> entrySet() {
+        return map.entrySet();
+    }
+
     public boolean containsHandlerFor(Class<? extends Message> messageClass) {
         return map.containsKey(checkNotNull(messageClass));
     }
@@ -58,5 +69,28 @@ public class MethodMap {
     @Nullable
     public Method get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
+    }
+
+    public static class Registry<T> {
+        private final Map<Class<? extends T>, MethodMap> entries = Maps.newConcurrentMap();
+
+        public boolean contains(Class<? extends T> clazz) {
+            boolean result = entries.containsKey(clazz);
+            return result;
+        }
+
+        public void register(Class<? extends T> clazz, Predicate<Method> filter) {
+            if (contains(clazz)) {
+                throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
+            }
+
+            MethodMap entry = new MethodMap(clazz, filter);
+            entries.put(clazz, entry);
+        }
+
+        public MethodMap get(Class<? extends T> clazz) {
+            MethodMap result = entries.get(clazz);
+            return result;
+        }
     }
 }

@@ -28,6 +28,7 @@ import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.Repository;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
@@ -42,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
 
-    private static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
+    public static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -56,7 +57,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Object target, Method method) {
+    public EventHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 
@@ -86,8 +87,6 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return isAnnotated
                 && acceptsMessageAndEventContext
                 && returnsNothing;
-
-
     }
 
     /**
@@ -97,10 +96,10 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @return immutable map of event handling methods
      */
     public static Map<EventClass, EventHandlerMethod> scan(Object target) {
-        Map<Class<? extends Message>, Method> subscribers = Methods.scan(target.getClass(), isEventHandlerPredicate);
+        MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
 
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
+        for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
             handler.checkModifier();
             builder.put(EventClass.of(entry.getKey()), handler);

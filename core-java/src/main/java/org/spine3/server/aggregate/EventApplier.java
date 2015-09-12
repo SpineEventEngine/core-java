@@ -27,11 +27,10 @@ import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.error.AccessLevelException;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -92,10 +91,10 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      * @return immutable map of event appliers
      */
     public static java.util.Map<EventClass, EventApplier> scan(AggregateRoot aggregateRoot) {
-        java.util.Map<Class<? extends Message>, Method> appliers = Methods.scan(aggregateRoot.getClass(), isEventApplierPredicate);
+        MethodMap appliers = new MethodMap(aggregateRoot.getClass(), isEventApplierPredicate);
 
         final ImmutableMap.Builder<EventClass, EventApplier> builder = ImmutableMap.builder();
-        for (java.util.Map.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {
+        for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {
             final EventApplier applier = new EventApplier(aggregateRoot, entry.getValue());
             applier.checkModifier();
             builder.put(EventClass.of(entry.getKey()), applier);
@@ -121,54 +120,4 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
         }
     }
 
-    /**
-     * Dispatches the incoming events to the corresponding applier method of an aggregate root.
-     *
-     * @author Alexander Yevsyukov
-     * @author Mikhail Melnik
-     */
-    @SuppressWarnings("ClassNamingConvention")
-    static class Map {
-
-        private final java.util.Map<EventClass, EventApplier> applierByClass;
-
-        /**
-         * Constructs a new instance for the passed aggregated root.
-         *
-         * @param aggregateRoot the aggregate root object
-         */
-        Map(AggregateRoot aggregateRoot) {
-            checkNotNull(aggregateRoot);
-
-            java.util.Map<EventClass, EventApplier> appliers = scan(aggregateRoot);
-            this.applierByClass = ImmutableMap.<EventClass, EventApplier>builder().putAll(appliers).build();
-        }
-
-        /**
-         * Directs the event to the corresponding applier.
-         *
-         * @param event the event to be applied
-         * @throws InvocationTargetException if an exception occurs during event applying
-         */
-        void apply(Message event) throws InvocationTargetException {
-            checkNotNull(event);
-
-            EventClass eventClass = EventClass.of(event);
-            if (!applierRegistered(eventClass)) {
-                throw new MissingEventApplierException(event);
-            }
-
-            EventApplier applier = findApplier(eventClass);
-            applier.invoke(event);
-        }
-
-        private EventApplier findApplier(EventClass eventClass) {
-            return applierByClass.get(eventClass);
-        }
-
-        private boolean applierRegistered(EventClass eventClass) {
-            return applierByClass.containsKey(eventClass);
-        }
-
-    }
 }

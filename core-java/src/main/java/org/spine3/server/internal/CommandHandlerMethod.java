@@ -30,6 +30,7 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.Repository;
 import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
@@ -99,13 +100,15 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @return immutable map
      */
     public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
-        Map<Class<? extends Message>, Method> subscribers = Methods.scan(object.getClass(), isCommandHandlerPredicate);
+        MethodMap handlers = new MethodMap(object.getClass(), isCommandHandlerPredicate);
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
-            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
+        for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
+            Class<? extends Message> commandClass = entry.getKey();
+            Method method = entry.getValue();
+            final CommandHandlerMethod handler = new CommandHandlerMethod(object, method);
             handler.checkModifier();
-            builder.put(CommandClass.of(entry.getKey()), handler);
+            builder.put(CommandClass.of(commandClass), handler);
         }
         return builder.build();
     }

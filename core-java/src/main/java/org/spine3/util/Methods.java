@@ -71,22 +71,25 @@ public class Methods {
     /**
      * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
      *
-     * @param clazz   the class that declares methods to scan
+     * @param declaringClass   the class that declares methods to scan
      * @param filter the predicate that defines rules for subscriber scanning
      * @return the map of message subscribers
      * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
      */
-    public static Map<Class<? extends Message>, Method> scan(Class<?> clazz, Predicate<Method> filter) {
+    public static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass, Predicate<Method> filter) {
         Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : declaringClass.getDeclaredMethods()) {
             if (filter.apply(method)) {
 
                 Class<? extends Message> messageClass = getFirstParamType(method);
 
                 if (tempMap.containsKey(messageClass)) {
                     Method alreadyPresent = tempMap.get(messageClass);
-                    throw new DuplicateHandlerMethodException(clazz, messageClass,
-                            alreadyPresent.getName(), method.getName());
+                    throw new DuplicateHandlerMethodException(
+                            declaringClass,
+                            messageClass,
+                            alreadyPresent.getName(),
+                            method.getName());
                 }
                 tempMap.put(messageClass, method);
             }
