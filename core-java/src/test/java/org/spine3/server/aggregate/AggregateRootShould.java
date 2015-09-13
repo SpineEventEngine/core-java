@@ -23,6 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,8 +192,7 @@ public class AggregateRootShould {
     @Test
     public void return_message_classes_which_are_handled_by_root_case_event_classes() {
 
-        final Set classes = getHandledMessageClasses(ProjectRoot.class, isEventApplierPredicate);
-        //noinspection unchecked
+        final Set<Class<? extends Message>> classes = getHandledMessageClasses(ProjectRoot.class, isEventApplierPredicate);
         assertContainsAllProjectEvents(classes);
     }
 
@@ -340,16 +340,17 @@ public class AggregateRootShould {
         r.dispatch(START_PROJECT, COMMAND_CONTEXT);
     }
 
-    private Collection<Class> eventRecordsToClasses(Collection<EventRecord> events) {
-        return transform(events, new Function<EventRecord, Class>() {
+    private Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
+        return transform(events, new Function<EventRecord, Class<? extends Message>>() {
+            @SuppressWarnings("NullableProblems")
             @Override
-            public Class apply(EventRecord record) {
+            public Class<? extends Message> apply(EventRecord record) {
                 return fromAny(record.getEvent()).getClass();
             }
         });
     }
 
-    private void assertContainsAllProjectEvents(Collection<Class> classes) {
+    private void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
         assertEquals(3, classes.size());
         assertTrue(classes.contains(ProjectCreated.class));
         assertTrue(classes.contains(TaskAdded.class));

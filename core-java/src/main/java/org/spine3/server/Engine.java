@@ -27,7 +27,6 @@ import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
@@ -68,6 +67,14 @@ public final class Engine {
         return engine;
     }
 
+    public CommandDispatcher getCommandDispatcher() {
+        return this.dispatcher;
+    }
+
+    public EventBus getEventBus() {
+        return EventBus.getInstance();
+    }
+
     /**
      * Configures the engine with the passed implementations of command and event stores.
      *
@@ -79,21 +86,15 @@ public final class Engine {
         engine.eventStore = eventStore;
     }
 
-    public void register(Object commandHandler) {
-        dispatcher.register(commandHandler);
-    }
-
-    public void unregister(Object commandHandler) {
-        dispatcher.unregister(commandHandler);
-    }
-
     /**
-     * Handles incoming command requests.
+     * Processed the incoming command requests.
      *
-     * @param request incoming command to handle
+     * <p>This method is the entry point of a command in to a backend of an application.
+     *
+     * @param request incoming command request to handle
      * @return the result of command handling
      */
-    public CommandResult handle(CommandRequest request) {
+    public CommandResult process(CommandRequest request) {
         checkNotNull(request);
 
         store(request);
@@ -129,7 +130,7 @@ public final class Engine {
     }
 
     private void storeAndPost(Iterable<EventRecord> records) {
-        final EventBus eventBus = EventBus.instance();
+        final EventBus eventBus = EventBus.getInstance();
         for (EventRecord record : records) {
             eventStore.store(record);
             eventBus.post(record);

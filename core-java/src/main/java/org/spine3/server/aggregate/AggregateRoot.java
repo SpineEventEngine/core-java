@@ -307,7 +307,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             int currentVersion = incrementVersion();
             final S state = getState();
             EventContext eventContext = createEventContext(commandId, event, state, currentVersion);
-            EventRecord eventRecord = createEventRecord(event, eventContext);
+            EventRecord eventRecord = Events.createEventRecord(event, eventContext);
 
             putUncommitted(eventRecord);
         }
@@ -345,14 +345,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         S stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenLastModified());
-    }
-
-    private static EventRecord createEventRecord(Message event, EventContext context) {
-        EventRecord result = EventRecord.newBuilder()
-                .setEvent(Messages.toAny(event))
-                .setContext(context)
-                .build();
-        return result;
     }
 
     /**

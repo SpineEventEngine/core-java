@@ -26,8 +26,8 @@ import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.EventHandlerMethod;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -112,13 +112,13 @@ public class EventBus {
     }
 
     /**
-     * Posts an event to be processed by registered event appliers.
+     * Posts a record with an event to be processed by registered event handlers.
      *
-     * @param eventRecord the event record to be applied by all subscribers
+     * @param eventRecord the event record to be handled by all subscribers
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public void post(EventRecord eventRecord) {
-        Message event = Messages.fromAny(eventRecord.getEvent());
+        Message event = Events.getEvent(eventRecord);
         EventContext context = eventRecord.getContext();
 
         post(event, context);
@@ -152,7 +152,7 @@ public class EventBus {
      *
      * @return the event bus instance
      */
-    public static EventBus instance() {
+    public static EventBus getInstance() {
         // on demand holder pattern
         return Singleton.INSTANCE.value;
     }

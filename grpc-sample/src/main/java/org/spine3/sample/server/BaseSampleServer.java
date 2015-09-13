@@ -20,23 +20,17 @@
 package org.spine3.sample.server;
 
 import io.grpc.ServerImpl;
-import io.grpc.stub.StreamObserver;
 import io.grpc.netty.NettyServerBuilder;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
-import org.spine3.server.CommandStore;
-import org.spine3.server.Engine;
-import org.spine3.eventbus.EventBus;
-import org.spine3.server.EventStore;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
 import org.spine3.base.EventRecord;
+import org.spine3.eventbus.EventBus;
 import org.spine3.sample.EventLogger;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.server.RepositoryEventStore;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.*;
 
 /**
  * Sample gRPC server implementation.
@@ -46,7 +40,7 @@ import org.spine3.server.StorageWithTimelineAndVersion;
 public abstract class BaseSampleServer {
 
     public void registerEventSubscribers() {
-        EventBus.instance().register(new EventLogger());
+        EventBus.getInstance().register(new EventLogger());
     }
 
     public void prepareEngine() {
@@ -57,7 +51,7 @@ public abstract class BaseSampleServer {
 
         Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
-        engine.register(orderRootRepository);
+        engine.getCommandDispatcher().register(orderRootRepository);
     }
 
     private OrderRootRepository getOrderRootRepository() {
@@ -108,7 +102,7 @@ public abstract class BaseSampleServer {
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
-            CommandResult reply = Engine.getInstance().handle(req);
+            CommandResult reply = Engine.getInstance().process(req);
 
             responseObserver.onValue(reply);
             responseObserver.onCompleted();
