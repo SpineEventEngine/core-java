@@ -23,9 +23,10 @@ package org.spine3.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.error.AccessLevelException;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
@@ -33,6 +34,7 @@ import org.spine3.util.Methods;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,30 +98,47 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      */
     public static Map<EventClass, EventHandlerMethod> scan(Object target) {
         MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
-
+        checkModifiers(handlers);
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
         for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
-            handler.checkModifier();
             builder.put(EventClass.of(entry.getKey()), handler);
         }
         return builder.build();
     }
 
     @Override
-    protected void checkModifier() {
-        if (!isPublic()) {
-            Object target = getTarget();
-            Method method = getMethod();
+    public <R> R invoke(Message message, EventContext context) throws InvocationTargetException {
+        return super.invoke(message, context);
+    }
 
-            throw new AccessLevelException(String.format(
-                    "Event handler %s must be declared 'public'", Methods.getFullMethodName(target, method)));
+    /**
+     * Verifiers modifiers in the methods in the passed map to be 'public'.
+     *
+     * <p>Logs warning for the methods with a non-public modifier.
+     *
+     * @param methods the map of methods to check
+     */
+    public static void checkModifiers(MethodMap methods) {
+        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
+            Method method = entry.getValue();
+            boolean isPublic = Modifier.isPublic(method.getModifiers());
+            if (!isPublic) {
+                log().warn(String.format("Event handler %s must be declared 'public'",
+                        Methods.getFullMethodName(method)));
+            }
         }
     }
 
-    @Override
-    public <R> R invoke(Message message, EventContext context) throws InvocationTargetException {
-        return super.invoke(message, context);
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventHandlerMethod.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

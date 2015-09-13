@@ -20,7 +20,6 @@
 package org.spine3.internal;
 
 import com.google.protobuf.Message;
-import org.spine3.error.AccessLevelException;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
@@ -48,6 +47,7 @@ import static com.google.common.base.Throwables.propagate;
  * @param <T> the type of the target object
  * @param <C> the type of the message context or {@code Void} if context is not used
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 public abstract class MessageHandlerMethod<T, C> {
 
     /**
@@ -74,13 +74,6 @@ public abstract class MessageHandlerMethod<T, C> {
         this.method = method;
         method.setAccessible(true);
     }
-
-    /**
-     * Verifies if the associated method instance has required
-     *
-     * @throws AccessLevelException if the access level of the method doesn't match that required handlers of implemented type
-     */
-    protected abstract void checkModifier();
 
     /**
      * @return the target object on which the method call is made
@@ -176,14 +169,7 @@ public abstract class MessageHandlerMethod<T, C> {
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return Methods.getFullMethodName(target, method);
-    }
-
-    /**
-     * @return the name of the handler method itself, without parameters
-     */
-    public String getShortName() {
-        return method.getName() + "()";
+        return Methods.getFullMethodName(method);
     }
 
     /**

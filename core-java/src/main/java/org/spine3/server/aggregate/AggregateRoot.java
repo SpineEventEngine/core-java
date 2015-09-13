@@ -123,8 +123,9 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
-        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
-        Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
+        Set<Class<? extends Message>> messageClasses = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+        Iterable<CommandClass> transformed = Iterables.transform(messageClasses, new Function<Class<? extends Message>, CommandClass>() {
+            @SuppressWarnings("NullableProblems") // The set we transform cannot have null entries.
             @Override
             public CommandClass apply(Class<? extends Message> input) {
                 return CommandClass.of(input);
@@ -449,8 +450,10 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
         void register(Class<? extends AggregateRoot> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz));
+
             eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
-            //TODO:2015-09-12:alexander.yevsyukov: Handle verification of access modifiers of methods.
+            EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 
         boolean contains(Class<? extends AggregateRoot> clazz) {

@@ -22,13 +22,17 @@ package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
-import org.spine3.error.AccessLevelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.internal.MessageHandlerMethod;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -72,29 +76,50 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      */
     @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
     public static boolean isEventApplier(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
+        final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+        if (!isAnnotated) {
+            return false;
+        }
 
-        boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+        final Class<?>[] parameterTypes = method.getParameterTypes();
         final boolean hasOneParam = parameterTypes.length == 1;
+        if (!hasOneParam) {
+            return false;
+        }
+
         final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
         final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
-        //noinspection OverlyComplexBooleanExpression
-        return isAnnotated
-                    && hasOneParam
-                    && firstParamIsMessage
-                    && returnsNothing;
+        return firstParamIsMessage && returnsNothing;
     }
 
-    @Override
-    protected void checkModifier() {
-        boolean methodIsPrivate = isPrivate();
-
-        if (!methodIsPrivate) {
-            throw new AccessLevelException(String.format(
-                    "Event applier method %s must be declared 'private'.",
-                     Methods.getFullMethodName(getTarget(), getMethod())));
+    /**
+     * Verifiers modifiers in the methods in the passed map to be 'private'.
+     *
+     * <p>Logs warning for the methods with a non-private modifier.
+     *
+     * @param methods the map of methods to check
+     */
+    public static void checkModifiers(MethodMap methods) {
+        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
+            Method method = entry.getValue();
+            boolean isPrivate = Modifier.isPrivate(method.getModifiers());
+            if (!isPrivate) {
+                log().warn(String.format("Event applier method %s must be declared 'private'.",
+                        Methods.getFullMethodName(method)));
+            }
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventApplier.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

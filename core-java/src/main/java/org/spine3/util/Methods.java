@@ -43,14 +43,14 @@ public class Methods {
     /**
      * Returns a full method name without parameters.
      *
-     * @param obj    an object the method belongs to
      * @param method a method to get name for
      * @return full method name
      */
     @SuppressWarnings("TypeMayBeWeakened") // We keep the type to make the API specific.
-    public static String getFullMethodName(Object obj, Method method) {
-        return obj.getClass().getName() + '.' + method.getName() + "()";
+    public static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
+
 
     /**
      * Returns the class of the first parameter of the passed handler method object.
