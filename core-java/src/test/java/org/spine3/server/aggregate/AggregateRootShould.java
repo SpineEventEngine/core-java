@@ -58,6 +58,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.AggregateRoot.getCommandClasses;
 import static org.spine3.server.aggregate.AggregateRoot.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
+import static org.spine3.test.project.Project.*;
 import static org.spine3.testutil.ContextFactory.getCommandContext;
 import static org.spine3.testutil.ContextFactory.getEventContext;
 
@@ -176,6 +177,23 @@ public class AggregateRootShould {
         root.dispatch(START_PROJECT, COMMAND_CONTEXT);
         assertTrue(root.isStartProjectCommandHandled);
         assertTrue(root.isProjectStartedEventApplied);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
+        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(PROJECT_ID);
+        r.dispatch(ADD_TASK, COMMAND_CONTEXT);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_missing_event_applier() throws InvocationTargetException {
+        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(PROJECT_ID);
+        try {
+            r.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        } catch (IllegalStateException e) { // expected exception
+            assertTrue(r.isCreateProjectCommandHandled);
+            throw e;
+        }
     }
 
     @Test
@@ -409,7 +427,7 @@ public class AggregateRootShould {
 
         @Override
         protected Project getDefaultState() {
-            return Project.getDefaultInstance();
+            return getDefaultInstance();
         }
 
         @Assign
@@ -434,7 +452,7 @@ public class AggregateRootShould {
         @Apply
         private void event(ProjectCreated event) {
 
-            Project newState = Project.newBuilder(getState())
+            Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_NEW)
                     .build();
@@ -452,7 +470,7 @@ public class AggregateRootShould {
         @Apply
         private void event(ProjectStarted event) {
 
-            Project newState = Project.newBuilder(getState())
+            Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_STARTED)
                     .build();
@@ -460,6 +478,29 @@ public class AggregateRootShould {
             incrementState(newState);
 
             isProjectStartedEventApplied = true;
+        }
+    }
+
+    /*
+     * Class only for test cases: missing command handler; missing event applier
+     */
+    public static class TestRootForCaseMissingHandlerOrApplier extends AggregateRoot<ProjectId, Project> {
+
+        private boolean isCreateProjectCommandHandled = false;
+
+        public TestRootForCaseMissingHandlerOrApplier(ProjectId id) {
+            super(id);
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            isCreateProjectCommandHandled = true;
+            return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
         }
     }
 
