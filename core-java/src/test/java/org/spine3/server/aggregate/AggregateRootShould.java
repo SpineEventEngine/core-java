@@ -31,7 +31,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
+import org.spine3.protobuf.ZoneOffsets;
 import org.spine3.server.Assign;
 import org.spine3.server.Snapshot;
 import org.spine3.test.project.Project;
@@ -42,6 +42,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.util.UserIds;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -58,51 +59,46 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.AggregateRoot.getCommandClasses;
 import static org.spine3.server.aggregate.AggregateRoot.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
-import static org.spine3.test.project.Project.*;
-import static org.spine3.testutil.ContextFactory.getCommandContext;
+import static org.spine3.test.project.Project.getDefaultInstance;
+import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testutil.ContextFactory.getEventContext;
+import static org.spine3.util.Commands.createCommandContext;
 
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "StaticNonFinalField",
 "ResultOfObjectAllocationIgnored", "MagicNumber", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
 public class AggregateRootShould {
 
-    private static final ProjectId PROJECT_ID;
-    private static final UserId USER_ID;
-    private static final CommandContext COMMAND_CONTEXT;
-    private static final EventContext EVENT_CONTEXT;
-    private static final CreateProject CREATE_PROJECT;
-    private static final AddTask ADD_TASK;
-    private static final StartProject START_PROJECT;
-
+    private ProjectId projectId;
+    private CommandContext commandContext;
+    private EventContext eventContext;
+    private CreateProject createProject;
+    private AddTask addTask;
+    private StartProject startProject;
     private ProjectRoot root;
-
-    static {
-        PROJECT_ID = ProjectId.newBuilder().setId("project_id").build();
-        USER_ID = UserId.newBuilder().setValue("user_id").build();
-        COMMAND_CONTEXT = getCommandContext(USER_ID);
-        EVENT_CONTEXT = getEventContext(0);
-        CREATE_PROJECT = CreateProject.newBuilder().setProjectId(PROJECT_ID).build();
-        ADD_TASK = AddTask.newBuilder().setProjectId(PROJECT_ID).build();
-        START_PROJECT = StartProject.newBuilder().setProjectId(PROJECT_ID).build();
-    }
 
     @Before
     public void setUp() {
-        root = new ProjectRoot(PROJECT_ID);
+        projectId = ProjectId.newBuilder().setId("project_id").build();
+        commandContext = createCommandContext(UserIds.create("user_id"), ZoneOffsets.UTC);
+        eventContext = getEventContext(0);
+        createProject = CreateProject.newBuilder().setProjectId(projectId).build();
+        addTask = AddTask.newBuilder().setProjectId(projectId).build();
+        startProject = StartProject.newBuilder().setProjectId(projectId).build();
+        root = new ProjectRoot(projectId);
     }
 
     @Test
-    public void accept_to_constructor_id_of_type_message() {
+    public void accept_Message_id_to_constructor() {
         try {
-            final ProjectRoot r = new ProjectRoot(PROJECT_ID);
-            assertEquals(PROJECT_ID, r.getId());
+            final ProjectRoot r = new ProjectRoot(projectId);
+            assertEquals(projectId, r.getId());
         } catch (Throwable e) {
             fail();
         }
     }
 
     @Test
-    public void accept_to_constructor_id_of_type_string() {
+    public void accept_String_id_to_constructor() {
         try {
             final String id = "string_id";
             final TestRootWithIdString r = new TestRootWithIdString(id);
@@ -113,7 +109,7 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void accept_to_constructor_id_of_type_integer() {
+    public void accept_Integer_id_to_constructor() {
         try {
             final Integer id = 12;
             final TestRootWithIdInteger r = new TestRootWithIdInteger(id);
@@ -124,7 +120,7 @@ public class AggregateRootShould {
     }
 
     @Test
-    public void accept_to_constructor_id_of_type_long() {
+    public void accept_Long_id_to_constructor() {
         try {
             final Long id = 12L;
             final TestRootWithIdLong r = new TestRootWithIdLong(id);
@@ -142,7 +138,7 @@ public class AggregateRootShould {
     @Test
     public void handle_one_command_and_apply_appropriate_event() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         assertTrue(root.isCreateProjectCommandHandled);
         assertTrue(root.isProjectCreatedEventApplied);
@@ -151,7 +147,7 @@ public class AggregateRootShould {
     @Test
     public void handle_only_appropriate_command() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         assertTrue(root.isCreateProjectCommandHandled);
         assertTrue(root.isProjectCreatedEventApplied);
@@ -166,30 +162,30 @@ public class AggregateRootShould {
     @Test
     public void handle_appropriate_commands_sequentially() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
         assertTrue(root.isCreateProjectCommandHandled);
         assertTrue(root.isProjectCreatedEventApplied);
 
-        root.dispatch(ADD_TASK, COMMAND_CONTEXT);
+        root.dispatch(addTask, commandContext);
         assertTrue(root.isAddTaskCommandHandled);
         assertTrue(root.isTaskAddedEventApplied);
 
-        root.dispatch(START_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(startProject, commandContext);
         assertTrue(root.isStartProjectCommandHandled);
         assertTrue(root.isProjectStartedEventApplied);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
-        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(PROJECT_ID);
-        r.dispatch(ADD_TASK, COMMAND_CONTEXT);
+        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(projectId);
+        r.dispatch(addTask, commandContext);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier() throws InvocationTargetException {
-        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(PROJECT_ID);
+        final TestRootForCaseMissingHandlerOrApplier r = new TestRootForCaseMissingHandlerOrApplier(projectId);
         try {
-            r.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+            r.dispatch(createProject, commandContext);
         } catch (IllegalStateException e) { // expected exception
             assertTrue(r.isCreateProjectCommandHandled);
             throw e;
@@ -224,35 +220,35 @@ public class AggregateRootShould {
     @Test
     public void return_current_state_after_dispatch() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         final Project state = root.getState();
 
-        assertEquals(PROJECT_ID, state.getProjectId());
+        assertEquals(projectId, state.getProjectId());
         assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());
     }
 
     @Test
     public void return_current_state_after_several_dispatches() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
         assertEquals(ProjectRoot.STATUS_NEW, root.getState().getStatus());
 
-        root.dispatch(START_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(startProject, commandContext);
         assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
     }
 
     @Test
     public void return_non_null_time_when_was_last_modified() {
 
-        final Timestamp creationTime = new ProjectRoot(PROJECT_ID).whenLastModified();
+        final Timestamp creationTime = new ProjectRoot(projectId).whenLastModified();
         assertNotNull(creationTime);
     }
 
     @Test
     public void return_time_when_was_last_modified() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
         final Timestamp whenLastModified = root.whenLastModified();
@@ -271,11 +267,11 @@ public class AggregateRootShould {
     @Test
     public void play_snapshot_event_and_restore_state() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         final Snapshot snapshotNewProject = root.toSnapshot();
 
-        root.dispatch(START_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(startProject, commandContext);
         assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
 
         final List<EventRecord> eventRecords = newArrayList(snapshotToEventRecord(snapshotNewProject));
@@ -328,23 +324,23 @@ public class AggregateRootShould {
     @Test
     public void transform_current_state_to_snapshot_event() throws InvocationTargetException, InvalidProtocolBufferException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         final Snapshot snapshot = root.toSnapshot();
         final Project state = fromAny(snapshot.getState());
 
-        assertEquals(PROJECT_ID, state.getProjectId());
+        assertEquals(projectId, state.getProjectId());
         assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());
     }
 
     @Test
     public void restore_state_from_snapshot_event() throws InvocationTargetException {
 
-        root.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(createProject, commandContext);
 
         final Snapshot snapshotNewProject = root.toSnapshot();
 
-        root.dispatch(START_PROJECT, COMMAND_CONTEXT);
+        root.dispatch(startProject, commandContext);
         assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
 
         root.restore(snapshotNewProject);
@@ -353,9 +349,9 @@ public class AggregateRootShould {
 
 
     private void dispatchAllProjectCommands(AggregateRoot r) throws InvocationTargetException {
-        r.dispatch(CREATE_PROJECT, COMMAND_CONTEXT);
-        r.dispatch(ADD_TASK, COMMAND_CONTEXT);
-        r.dispatch(START_PROJECT, COMMAND_CONTEXT);
+        r.dispatch(createProject, commandContext);
+        r.dispatch(addTask, commandContext);
+        r.dispatch(startProject, commandContext);
     }
 
     private Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
@@ -390,22 +386,22 @@ public class AggregateRootShould {
     }
 
     private EventRecord getProjectCreatedEventRecord() {
-        final Any event = toAny(ProjectCreated.newBuilder().setProjectId(PROJECT_ID).build());
-        return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(event).build();
+        final Any event = toAny(ProjectCreated.newBuilder().setProjectId(projectId).build());
+        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
     }
 
     private EventRecord getTaskAddedEventRecord() {
-        final Any event = toAny(TaskAdded.newBuilder().setProjectId(PROJECT_ID).build());
-        return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(event).build();
+        final Any event = toAny(TaskAdded.newBuilder().setProjectId(projectId).build());
+        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
     }
 
     private EventRecord getProjectStartedEventRecord() {
-        final Any event = toAny(ProjectStarted.newBuilder().setProjectId(PROJECT_ID).build());
-        return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(event).build();
+        final Any event = toAny(ProjectStarted.newBuilder().setProjectId(projectId).build());
+        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
     }
 
     private EventRecord snapshotToEventRecord(Snapshot snapshot) {
-        return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(toAny(snapshot)).build();
+        return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
     public static class ProjectRoot extends AggregateRoot<ProjectId, Project> {
