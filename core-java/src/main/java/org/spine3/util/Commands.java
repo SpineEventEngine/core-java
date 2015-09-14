@@ -21,12 +21,10 @@ package org.spine3.util;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandId;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.CommandRequestOrBuilder;
-import org.spine3.base.UserId;
+import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -37,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * Utility class for working with {@link CommandId} objects.
+ * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -119,5 +117,22 @@ public class Commands {
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types converted in this way.
     public static String idToString(CommandId id) {
         return Messages.toJson(id);
+    }
+
+    /**
+     * Creates new Command context with current time
+     * @param userId the actor id
+     * @param offset the timezone offset
+     */
+    public static CommandContext createCommandContext(UserId userId, ZoneOffset offset) {
+
+        CommandId commandId = CommandId.newBuilder()
+                .setActor(userId)
+                .setTimestamp(getCurrentTime())
+                .build();
+        return CommandContext.newBuilder()
+                .setCommandId(commandId)
+                .setZoneOffset(offset)
+                .build();
     }
 }
