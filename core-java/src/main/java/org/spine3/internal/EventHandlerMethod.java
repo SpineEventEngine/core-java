@@ -23,16 +23,18 @@ package org.spine3.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.error.AccessLevelException;
 import org.spine3.eventbus.Subscribe;
-import org.spine3.server.Repository;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
 
-    private static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
+    public static final Predicate<Method> isEventHandlerPredicate = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -56,7 +58,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Object target, Method method) {
+    public EventHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 
@@ -86,8 +88,6 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return isAnnotated
                 && acceptsMessageAndEventContext
                 && returnsNothing;
-
-
     }
 
     /**
@@ -97,55 +97,48 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @return immutable map of event handling methods
      */
     public static Map<EventClass, EventHandlerMethod> scan(Object target) {
-        Map<Class<? extends Message>, Method> subscribers = scan(target, isEventHandlerPredicate);
-
+        MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
+        checkModifiers(handlers);
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
+        for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
-            handler.checkModifier();
             builder.put(EventClass.of(entry.getKey()), handler);
         }
         return builder.build();
     }
 
-    private static final String MUST_BE_PUBLIC_FOR_EVENT_BUS = " must be declared 'public' to be called by EventBus.";
-
-    private static AccessLevelException forEventHandler(Object handler, Method method) {
-        return new AccessLevelException(messageForEventHandler(handler, method));
-    }
-
-    private static String messageForEventHandler(Object handler, Method method) {
-        return "Event handler " + Methods.getFullMethodName(handler, method) +
-                MUST_BE_PUBLIC_FOR_EVENT_BUS;
-    }
-
-    private static AccessLevelException forRepositoryEventHandler(Repository repository, Method method) {
-        return new AccessLevelException(messageForRepositoryEventHandler(repository, method));
-    }
-
-    private static String messageForRepositoryEventHandler(Object repository, Method method) {
-        return "Event handler of the repository " + Methods.getFullMethodName(repository, method) +
-                MUST_BE_PUBLIC_FOR_EVENT_BUS;
-    }
-
-    @Override
-    protected void checkModifier() {
-        if (!isPublic()) {
-            Object target = getTarget();
-            Method method = getMethod();
-
-            if (target instanceof Repository) {
-                Repository repository = (Repository) target;
-                throw forRepositoryEventHandler(repository, method);
-            }
-
-            throw forEventHandler(target, method);
-        }
-    }
-
     @Override
     public <R> R invoke(Message message, EventContext context) throws InvocationTargetException {
         return super.invoke(message, context);
+    }
+
+    /**
+     * Verifiers modifiers in the methods in the passed map to be 'public'.
+     *
+     * <p>Logs warning for the methods with a non-public modifier.
+     *
+     * @param methods the map of methods to check
+     */
+    public static void checkModifiers(MethodMap methods) {
+        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
+            Method method = entry.getValue();
+            boolean isPublic = Modifier.isPublic(method.getModifiers());
+            if (!isPublic) {
+                log().warn(String.format("Event handler %s must be declared 'public'",
+                        Methods.getFullMethodName(method)));
+            }
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventHandlerMethod.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

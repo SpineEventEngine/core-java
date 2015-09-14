@@ -19,29 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.order.event;
+package spine.test.project.event;
 
-import "spine/test/order/order.proto";
+import "spine/test/project/project.proto";
+import "spine/test/project/task.proto";
 
-option java_package="org.spine3.test.order.event";
+option java_package="org.spine3.test.project.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-message OrderCreated {
-    OrderId order_id = 1;
+message ProjectCreated {
+    ProjectId project_id = 1;
 }
 
-message OrderLineAdded {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
+message TaskAdded {
+    ProjectId project_id = 1;
+    Task task = 2;
 }
 
-message OrderLineRemoved {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message OrderPayed {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
+message ProjectStarted {
+    ProjectId project_id = 1;
 }

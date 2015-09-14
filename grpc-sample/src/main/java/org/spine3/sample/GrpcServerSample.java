@@ -23,12 +23,12 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.Engine;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.server.BaseSampleServer;
 import org.spine3.sample.server.DataStoreSampleServer;
+import org.spine3.server.Engine;
 import org.spine3.util.UserIds;
 
 import java.util.List;
@@ -55,7 +55,7 @@ public class GrpcServerSample {
 
         List<CommandRequest> requests = prepareRequests();
         for (CommandRequest request : requests) {
-            Engine.getInstance().handle(request);
+            Engine.getInstance().process(request);
         }
 
         log().info("All the requests were handled.");

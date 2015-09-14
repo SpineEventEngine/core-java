@@ -20,14 +20,13 @@
 
 package org.spine3.server;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
+import org.spine3.util.MethodMap;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.lang.reflect.Method;
 
 /**
  * Creates data projection from incoming events.
@@ -37,26 +36,26 @@ import java.util.Map;
  */
 public abstract class Projection<I, S extends Message> extends Entity<I, S> {
 
-    private Map<EventClass, EventHandlerMethod> handlers;
+    private MethodMap handlers;
 
     protected Projection(I id) {
         super(id);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     protected void handle(Message event, EventContext ctx) throws InvocationTargetException {
-        if (!isInitialized()) {
-            init();
-        }
+        init();
         dispatch(event, ctx);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
-        EventHandlerMethod method = handlers.get(EventClass.of(event));
-        if (method != null) {
-            method.invoke(event, ctx);
+        final Class<? extends Message> eventClass = event.getClass();
+        Method method = handlers.get(eventClass);
+        if (method == null) {
+            throw new IllegalStateException(String.format("Missing event handler for event class %s in the projection class %s",
+                    eventClass, this.getClass()));
         }
+        EventHandlerMethod handler = new EventHandlerMethod(this, method);
+        handler.invoke(event, ctx);
     }
 
     protected boolean isInitialized() {
@@ -64,9 +63,44 @@ public abstract class Projection<I, S extends Message> extends Entity<I, S> {
     }
 
     protected void init() {
-        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
-        builder.putAll(EventHandlerMethod.scan(this));
-        this.handlers = builder.build();
+        if (!isInitialized()) {
+            final Registry registry = Registry.instance();
+            final Class<? extends Projection> thisClass = getClass();
+
+            if (!registry.contains(thisClass)) {
+                registry.register(thisClass);
+            }
+
+            handlers = registry.getEventHandlers(thisClass);
+        }
     }
 
+    private static class Registry {
+        private final MethodMap.Registry<Projection> eventHandlers = new MethodMap.Registry<>();
+
+        boolean contains(Class<? extends Projection> clazz) {
+            return eventHandlers.contains(clazz);
+        }
+
+        void register(Class<? extends Projection> clazz) {
+            eventHandlers.register(clazz, EventHandlerMethod.isEventHandlerPredicate);
+        }
+
+        MethodMap getEventHandlers(Class<? extends Projection> clazz) {
+            MethodMap result = eventHandlers.get(clazz);
+            return result;
+        }
+
+        static Registry instance() {
+            return RegistrySingleton.INSTANCE.value;
+        }
+
+        @SuppressWarnings("InnerClassTooDeeplyNested")
+        private enum RegistrySingleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Registry value = new Registry();
+        }
+    }
 }

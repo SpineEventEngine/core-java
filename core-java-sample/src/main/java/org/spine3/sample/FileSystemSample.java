@@ -30,6 +30,11 @@ import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
 
+import java.io.File;
+import java.io.IOException;
+
+import static com.google.common.base.Throwables.propagate;
+
 /**
  * Entry point for core-java sample without gRPC. Works with FileSystem.
  *
@@ -37,10 +42,27 @@ import org.spine3.server.StorageWithTimelineAndVersion;
  */
 @SuppressWarnings("UtilityClass")
 public class FileSystemSample extends BaseSample {
-    private static final String STORAGE_PATH = "./storage";
+
+    private static final String STORAGE_PATH = "/storage";
+
+    public static File getTempDir() {
+        try {
+            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
+            File result = new File(tmpFile.getParent());
+            if (tmpFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                tmpFile.delete();
+            }
+            return result;
+        } catch (IOException e) {
+            propagate(e);
+        }
+        throw new IllegalStateException("Unable to get temporary directory for storage");
+    }
 
     public static void main(String[] args) {
-        FileSystemHelper.configure(STORAGE_PATH);
+        final String tempDir = getTempDir().getAbsolutePath();
+        FileSystemHelper.configure(tempDir + STORAGE_PATH);
 
         BaseSample sample = new FileSystemSample();
 

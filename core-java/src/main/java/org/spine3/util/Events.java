@@ -21,11 +21,9 @@ package org.spine3.util;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandId;
-import org.spine3.base.CommandResult;
-import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
+import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 
@@ -132,5 +130,25 @@ public class Events {
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
         return Messages.toJson(id);
+    }
+
+    /**
+     * Creates {@code EventRecord} instance with the passed event and context.
+     */
+    public static EventRecord createEventRecord(Message event, EventContext context) {
+        EventRecord result = EventRecord.newBuilder()
+                .setEvent(Messages.toAny(event))
+                .setContext(context)
+                .build();
+        return result;
+    }
+
+    /**
+     * Extracts the event instance from the passed record.
+     */
+    public static Message getEvent(EventRecordOrBuilder eventRecord) {
+        final Any any = eventRecord.getEvent();
+        final Message result = Messages.fromAny(any);
+        return result;
     }
 }

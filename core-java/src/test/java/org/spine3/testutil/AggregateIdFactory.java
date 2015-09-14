@@ -20,7 +20,7 @@
 
 package org.spine3.testutil;
 
-import org.spine3.test.order.OrderId;
+import org.spine3.test.project.ProjectId;
 
 /**
  * The utility class which is used for creating Aggregate Root Ids for tests.
@@ -30,17 +30,17 @@ import org.spine3.test.order.OrderId;
 @SuppressWarnings("UtilityClass")
 public class AggregateIdFactory {
 
-    public static final String DUMMY_ORDER_ID = "dummy_order_id";
+    public static final String DUMMY_PROJECT_ID = "dummy_project_id";
 
     private AggregateIdFactory() {
     }
 
     /**
-     * Generates the same OrderId for each requests.
+     * Generates the same ProjectId for each request.
      *
-     * @return OrderId instance
+     * @return ProjectId instance
      */
-    public static OrderId createCommon() {
-        return OrderId.newBuilder().setValue(DUMMY_ORDER_ID).build();
+    public static ProjectId createCommon() {
+        return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
     }
 }

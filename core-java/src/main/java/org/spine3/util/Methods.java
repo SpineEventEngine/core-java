@@ -20,7 +20,15 @@
 
 package org.spine3.util;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.protobuf.Message;
+import org.spine3.error.DuplicateHandlerMethodException;
+import org.spine3.internal.MessageHandlerMethod;
+
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Utilities for client-side methods.
@@ -35,12 +43,59 @@ public class Methods {
     /**
      * Returns a full method name without parameters.
      *
-     * @param obj    an object the method belongs to
      * @param method a method to get name for
      * @return full method name
      */
     @SuppressWarnings("TypeMayBeWeakened") // We keep the type to make the API specific.
-    public static String getFullMethodName(Object obj, Method method) {
-        return obj.getClass().getName() + '.' + method.getName() + "()";
+    public static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
+    }
+
+
+    /**
+     * Returns the class of the first parameter of the passed handler method object.
+     * <p>
+     * It is expected that the first parameter of the passed method is always of
+     * a class implementing {@link Message}.
+     *
+     * @param handler the method object to take first parameter type from
+     * @return the {@link Class} of the first method parameter
+     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     */
+    public static Class<? extends Message> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
+                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        return result;
+    }
+
+    /**
+     * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
+     *
+     * @param declaringClass   the class that declares methods to scan
+     * @param filter the predicate that defines rules for subscriber scanning
+     * @return the map of message subscribers
+     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
+     */
+    public static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass, Predicate<Method> filter) {
+        Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
+        for (Method method : declaringClass.getDeclaredMethods()) {
+            if (filter.apply(method)) {
+
+                Class<? extends Message> messageClass = getFirstParamType(method);
+
+                if (tempMap.containsKey(messageClass)) {
+                    Method alreadyPresent = tempMap.get(messageClass);
+                    throw new DuplicateHandlerMethodException(
+                            declaringClass,
+                            messageClass,
+                            alreadyPresent.getName(),
+                            method.getName());
+                }
+                tempMap.put(messageClass, method);
+            }
+        }
+        ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
+        builder.putAll(tempMap);
+        return builder.build();
     }
 }

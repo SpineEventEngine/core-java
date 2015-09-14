@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.internal;
+package org.spine3.server;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
@@ -28,6 +28,7 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.aggregate.AggregateRootRepositoryBase;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -55,8 +56,8 @@ public class CommandDispatcher {
 
         Map<CommandClass, CommandHandlerMethod> handlers;
         if (object instanceof AggregateRootRepositoryBase) {
-            AggregateRootRepositoryBase<?, ?> repo = (AggregateRootRepositoryBase) object;
-            handlers = repo.getCommandHandlers();
+            AggregateRootRepositoryBase<?, ?> repository = (AggregateRootRepositoryBase) object;
+            handlers = repository.getCommandHandlers();
         } else {
             handlers = CommandHandlerMethod.scan(object);
         }
@@ -102,9 +103,9 @@ public class CommandDispatcher {
             CommandClass commandClass = entry.getKey();
 
             if (handlerRegistered(commandClass)) {
-                final MessageHandlerMethod alreadyAddedHandler = getHandler(commandClass);
+                final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
-                                                                   alreadyAddedHandler.getFullName(),
+                                                                   alreadyRegistered.getFullName(),
                                                                    entry.getValue().getFullName());
             }
         }
@@ -119,7 +120,7 @@ public class CommandDispatcher {
      * @throws InvocationTargetException if an exception occurs during command handling
      * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
      */
-    public List<EventRecord> dispatch(Message command, CommandContext context)
+    List<EventRecord> dispatch(Message command, CommandContext context)
             throws InvocationTargetException {
 
         checkNotNull(command);

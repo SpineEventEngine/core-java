@@ -25,9 +25,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-//TODO:2015-09-09:alexander.yevsyukov: Finish documentation.
 /**
- * Marks a method as an event listener.
+ * Marks a method as an event subscriber.
+ *
+ * <p>An event subscriber method must have two parameters. The class of the event will be
+ * indicated by the first parameter.
+ *
+ * <p>The second parameter must be {@link org.spine3.base.EventContext}. If the annotation
+ * is applied to a method with less or more than two parameters, the method will not be
+ * registered for event delivery from {@link EventBus}.
  *
  * @author Alexander Yevsyukov
  */
