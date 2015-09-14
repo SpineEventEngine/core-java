@@ -23,18 +23,19 @@ package org.spine3.server.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.error.AccessLevelException;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
-import org.spine3.server.Repository;
-import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+
+    private static final int MESSAGE_PARAM_INDEX = 0;
+    private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
     public static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
         @Override
@@ -72,24 +76,28 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @return {@code true} if the method is a command handler, {@code false} otherwise
      */
     public static boolean isCommandHandler(Method method) {
+        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
+        if (!isAnnotated) {
+            return false;
+        }
 
-        boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        final boolean hasTwoParams = parameterTypes.length == 2;
+        if (!hasTwoParams) {
+            return false;
+        }
 
         //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndCommandContext =
-                parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && CommandContext.class.equals(parameterTypes[1]);
+        final boolean acceptsMessageAndCommandContext =
+                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX])
+                        && CommandContext.class.equals(parameterTypes[COMMAND_CONTEXT_PARAM_INDEX]);
 
-        boolean returnsMessageList = List.class.equals(method.getReturnType());
-        boolean returnsMessage = Message.class.isAssignableFrom(method.getReturnType());
+        final Class<?> returnType = method.getReturnType();
+        final boolean returnsMessageOrList =
+                Message.class.isAssignableFrom(returnType)
+                || List.class.equals(returnType);
 
-        //noinspection OverlyComplexBooleanExpression
-        return isAnnotated
-                && acceptsMessageAndCommandContext
-                && (returnsMessageList || returnsMessage);
+        return acceptsMessageAndCommandContext && returnsMessageOrList;
     }
 
     /**
@@ -99,70 +107,51 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @return immutable map
      */
     public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
-        Map<Class<? extends Message>, Method> subscribers = scan(object, isCommandHandlerPredicate);
+        MethodMap handlers = new MethodMap(object.getClass(), isCommandHandlerPredicate);
+
+        checkModifiers(handlers);
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-        for (Map.Entry<Class<? extends Message>, Method> entry : subscribers.entrySet()) {
-            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
-            handler.checkModifier();
-            builder.put(CommandClass.of(entry.getKey()), handler);
+        for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
+            Class<? extends Message> commandClass = entry.getKey();
+            Method method = entry.getValue();
+            final CommandHandlerMethod handler = new CommandHandlerMethod(object, method);
+            builder.put(CommandClass.of(commandClass), handler);
         }
         return builder.build();
-    }
-
-    public static AccessLevelException forRepositoryCommandHandler(Repository repository, Method method) {
-        return new AccessLevelException(messageForRepositoryCommandHandler(repository, method));
-    }
-
-    public static String messageForAggregateCommandHandler(Object aggregate, Method method) {
-        return "Command handler of the aggregate " + Methods.getFullMethodName(aggregate, method) +
-                " must be declared 'public'. It is part of the public API of the aggregate.";
-    }
-
-    public static final String MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER = " must be declared 'public' to be called by CommandDispatcher.";
-
-    private static String messageForRepositoryCommandHandler(Object repository, Method method) {
-        return "Command handler of the repository " + Methods.getFullMethodName(repository, method) +
-                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
-    }
-
-    public static AccessLevelException forAggregateCommandHandler(AggregateRoot aggregate, Method method) {
-        return new AccessLevelException(messageForAggregateCommandHandler(aggregate, method));
-    }
-
-    public static AccessLevelException forCommandHandler(Object handler, Method method) {
-        return new AccessLevelException(messageForCommandHandler(handler, method));
-    }
-
-    private static String messageForCommandHandler(Object handler, Method method) {
-        return "Command handler " + Methods.getFullMethodName(handler, method) +
-                MUST_BE_PUBLIC_FOR_COMMAND_DISPATCHER;
-    }
-
-    @Override
-    protected void checkModifier() {
-        final Method method = getMethod();
-        final Object target = getTarget();
-
-        boolean methodIsPublic = isPublic();
-
-        boolean isAggregateRoot = target instanceof AggregateRoot;
-        if (isAggregateRoot && !methodIsPublic) {
-            throw forAggregateCommandHandler((AggregateRoot) target, method);
-        }
-
-        boolean isRepository = target instanceof Repository;
-        if (isRepository && !methodIsPublic) {
-            throw forRepositoryCommandHandler((Repository) target, method);
-        }
-
-        if (!methodIsPublic) {
-            throw forCommandHandler(target, method);
-        }
     }
 
     @Override
     public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
         return super.invoke(message, context);
+    }
+
+    /**
+     * Verifiers modifiers in the methods in the passed map to be 'public'.
+     *
+     * <p>Logs warning for the methods with a non-public modifier.
+     *
+     * @param methods the map of methods to check
+     */
+    public static void checkModifiers(MethodMap methods) {
+        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
+            Method method = entry.getValue();
+            boolean isPublic = Modifier.isPublic(method.getModifiers());
+            if (!isPublic) {
+                log().warn(String.format("Command handler %s must be declared 'public'.",
+                                         Methods.getFullMethodName(method)));
+            }
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

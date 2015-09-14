@@ -21,19 +21,18 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.spine3.EventClass;
-import org.spine3.base.EventContext;
-import org.spine3.error.AccessLevelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,6 +42,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
+
+    private static final int EVENT_PARAM_INDEX = 0;
 
     static final Predicate<Method> isEventApplierPredicate = new Predicate<Method>() {
         @Override
@@ -62,6 +63,11 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
         super(target, method);
     }
 
+    @Override
+    protected <R> R invoke(Message message) throws InvocationTargetException {
+        return super.invoke(message);
+    }
+
     /**
      * Checks if a method is an event applier.
      *
@@ -70,105 +76,50 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      */
     @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
     public static boolean isEventApplier(Method method) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+        if (!isAnnotated) {
+            return false;
+        }
 
-        boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-        boolean acceptsMessage = parameterTypes.length == 1 && Message.class.isAssignableFrom(parameterTypes[0]);
-        //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndEventContext =
-                parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && EventContext.class.equals(parameterTypes[1]);
-        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        final boolean hasOneParam = parameterTypes.length == 1;
+        if (!hasOneParam) {
+            return false;
+        }
 
-        //noinspection OverlyComplexBooleanExpression
-        return isAnnotated && (acceptsMessage || acceptsMessageAndEventContext) && returnsNothing;
+        final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
+        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+
+        return firstParamIsMessage && returnsNothing;
     }
 
     /**
-     * Scans for event applier methods the passed aggregate root object.
+     * Verifiers modifiers in the methods in the passed map to be 'private'.
      *
-     * @param aggregateRoot the object that keeps event applier methods
-     * @return immutable map of event appliers
-     */
-    public static java.util.Map<EventClass, EventApplier> scan(AggregateRoot aggregateRoot) {
-        java.util.Map<Class<? extends Message>, Method> appliers = scan(aggregateRoot, isEventApplierPredicate);
-
-        final ImmutableMap.Builder<EventClass, EventApplier> builder = ImmutableMap.builder();
-        for (java.util.Map.Entry<Class<? extends Message>, Method> entry : appliers.entrySet()) {
-            final EventApplier applier = new EventApplier(aggregateRoot, entry.getValue());
-            applier.checkModifier();
-            builder.put(EventClass.of(entry.getKey()), applier);
-        }
-        return builder.build();
-    }
-
-    public static AccessLevelException forEventApplier(AggregateRoot aggregate, Method method) {
-        return new AccessLevelException(messageForEventApplier(aggregate, method));
-    }
-
-    private static String messageForEventApplier(AggregateRoot aggregate, Method method) {
-        return "Event applier method of the aggregate " + Methods.getFullMethodName(aggregate, method) +
-                " must be declared 'private'. It is not supposed to be called from outside the aggregate.";
-    }
-
-    @Override
-    protected void checkModifier() {
-        boolean methodIsPrivate = Modifier.isPrivate(getMethod().getModifiers());
-
-        if (!methodIsPrivate) {
-            throw forEventApplier(getTarget(), getMethod());
-        }
-    }
-
-    /**
-     * Dispatches the incoming events to the corresponding applier method of an aggregate root.
+     * <p>Logs warning for the methods with a non-private modifier.
      *
-     * @author Alexander Yevsyukov
-     * @author Mikhail Melnik
+     * @param methods the map of methods to check
      */
-    @SuppressWarnings("ClassNamingConvention")
-    static class Map {
-
-        private final java.util.Map<EventClass, EventApplier> subscribersByType;
-
-        /**
-         * Constructs a new instance for the passed aggregated root.
-         *
-         * @param aggregateRoot the aggregate root object
-         */
-        Map(AggregateRoot aggregateRoot) {
-            checkNotNull(aggregateRoot);
-
-            java.util.Map<EventClass, EventApplier> appliers = scan(aggregateRoot);
-            this.subscribersByType = ImmutableMap.<EventClass, EventApplier>builder().putAll(appliers).build();
-        }
-
-        /**
-         * Directs the event to the corresponding applier.
-         *
-         * @param event the event to be applied
-         * @throws InvocationTargetException if an exception occurs during event applying
-         */
-        void apply(Message event) throws InvocationTargetException {
-            checkNotNull(event);
-
-            EventClass eventClass = EventClass.of(event);
-            if (!subscriberRegistered(eventClass)) {
-                throw new MissingEventApplierException(event);
+    public static void checkModifiers(MethodMap methods) {
+        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
+            Method method = entry.getValue();
+            boolean isPrivate = Modifier.isPrivate(method.getModifiers());
+            if (!isPrivate) {
+                log().warn(String.format("Event applier method %s must be declared 'private'.",
+                        Methods.getFullMethodName(method)));
             }
-
-            EventApplier applier = findApplier(eventClass);
-            applier.invoke(event);
         }
-
-        private EventApplier findApplier(EventClass eventClass) {
-            return subscribersByType.get(eventClass);
-        }
-
-        private boolean subscriberRegistered(EventClass eventClass) {
-            return subscribersByType.containsKey(eventClass);
-        }
-
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventApplier.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }

@@ -44,7 +44,7 @@ public abstract class BaseSample {
 
         List<CommandRequest> requests = prepareRequests();
         for (CommandRequest request : requests) {
-            Engine.getInstance().handle(request);
+            Engine.getInstance().process(request);
         }
 
         getLog().info("All the requests were handled.");
@@ -70,7 +70,7 @@ public abstract class BaseSample {
     }
 
     protected static void registerEventHandlers() {
-        EventBus.instance().register(new EventLogger());
+        EventBus.getInstance().register(new EventLogger());
     }
 
     protected void prepareEngine() {
@@ -81,7 +81,7 @@ public abstract class BaseSample {
 
         Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
-        engine.register(orderRootRepository);
+        engine.getCommandDispatcher().register(orderRootRepository);
     }
 
     protected abstract Logger getLog();

@@ -22,9 +22,6 @@ package org.spine3.server;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimelineAndVersion;
 
 import java.util.List;
 
@@ -35,7 +32,10 @@ import java.util.List;
  */
 public class RepositoryEventStore {
 
+    private long eventCount;
     private final StorageWithTimelineAndVersion<EventRecord> storage;
+
+    private long snapshotCount;
     private final SnapshotStorage snapshotStorage;
 
     public RepositoryEventStore(StorageWithTimelineAndVersion<EventRecord> storage, SnapshotStorage snapshotStorage) {
@@ -50,6 +50,19 @@ public class RepositoryEventStore {
      */
     public void store(EventRecord record) {
         storage.store(record);
+        ++eventCount;
+    }
+
+    /**
+     * Obtains the number of events stored.
+     * <p>
+     * The number of snapshots is not included into this value.
+     *
+     * @return the number of stored events
+     * @see #getSnapshotCount()
+     */
+    public long getEventCount() {
+        return eventCount;
     }
 
     /**
@@ -60,6 +73,18 @@ public class RepositoryEventStore {
      */
     public void storeSnapshot(Message aggregateId, Snapshot snapshot) {
         snapshotStorage.store(snapshot, aggregateId);
+        ++snapshotCount;
+    }
+
+    /**
+     * @return the number of snapshots stored
+     */
+    public long getSnapshotCount() {
+        return snapshotCount;
+    }
+
+    public void setSnapshotCount(long snapshotCount) {
+        this.snapshotCount = snapshotCount;
     }
 
     /**

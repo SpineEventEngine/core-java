@@ -19,19 +19,13 @@
  */
 package org.spine3.internal;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.error.AccessLevelException;
-import org.spine3.server.error.DuplicateHandlerMethodException;
 import org.spine3.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,11 +33,11 @@ import static com.google.common.base.Throwables.propagate;
 
 /**
  * Wraps a handler method on a specific object.
- * <p/>
- * This class only verifies the suitability of the method and event type if
+ *
+ * <p>This class only verifies the suitability of the method and message type if
  * something fails.  Callers are expected to verify their uses of this class.
- * <p/>
- * Two message handlers are equivalent when they refer to the same method on the
+ *
+ * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).   This property is used to ensure that no handler
  * method is registered more than once.
  *
@@ -53,6 +47,7 @@ import static com.google.common.base.Throwables.propagate;
  * @param <T> the type of the target object
  * @param <C> the type of the message context or {@code Void} if context is not used
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 public abstract class MessageHandlerMethod<T, C> {
 
     /**
@@ -81,68 +76,30 @@ public abstract class MessageHandlerMethod<T, C> {
     }
 
     /**
-     * Returns the first param type of the passed method object.
-     * <p>
-     * It is expected that the first parameter of a handler or an applier method is always of {@code Message} class.
-     *
-     * @param handler the method object to take first parameter type from
-     * @return the {@link Class} of the first method parameter
+     * @return the target object on which the method call is made
      */
-    public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
-                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
-        return result;
-    }
-
-    /**
-     * Returns a map of the {@link MessageHandlerMethod} objects to the corresponding message class.
-     *
-     * @param object   the object that keeps subscribed methods
-     * @param filter the predicate that defines rules for subscriber scanning
-     * @return the map of message subscribers
-     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
-     */
-    public static Map<Class<? extends Message>, Method> scan(Object object, Predicate<Method> filter) {
-        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
-
-        Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
-        for (Method method : object.getClass().getDeclaredMethods()) {
-            if (filter.apply(method)) {
-
-                Class<? extends Message> messageClass = getFirstParamType(method);
-
-                if (tempMap.containsKey(messageClass)) {
-                    Method alreadyPresent = tempMap.get(messageClass);
-                    throw new DuplicateHandlerMethodException(object.getClass(), messageClass,
-                            alreadyPresent.getName(), method.getName());
-                }
-                tempMap.put(messageClass, method);
-            }
-        }
-        builder.putAll(tempMap);
-        return builder.build();
-    }
-
-    //TODO:2015-09-09:alexander.yevsyukov: Document
-
-    /**
-     * @throws AccessLevelException
-     */
-    protected abstract void checkModifier();
-
     protected T getTarget() {
         return target;
     }
 
+    /**
+     * @return the handling method
+     */
     protected Method getMethod() {
         return method;
     }
 
+    /**
+     * @return {@code true} if the method is declared {@code public}, {@code false} otherwise
+     */
     protected boolean isPublic() {
         final boolean result = Modifier.isPublic(getMethod().getModifiers());
         return result;
     }
 
+    /**
+     * @return {@code true} if the method is declared {@code private}, {@code false} otherwise
+     */
     protected boolean isPrivate() {
         final boolean result = Modifier.isPrivate(getMethod().getModifiers());
         return result;
@@ -205,21 +162,14 @@ public abstract class MessageHandlerMethod<T, C> {
 
     /**
      * Returns a full name of the handler method.
-     * <p/>
-     * The full name consists of a fully qualified class name of the target object and
+     *
+     * <p>The full name consists of a fully qualified class name of the target object and
      * the method name separated with a dot character.
      *
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return Methods.getFullMethodName(target, method);
-    }
-
-    /**
-     * @return the name of the handler method itself, without parameters
-     */
-    public String getShortName() {
-        return method.getName() + "()";
+        return Methods.getFullMethodName(method);
     }
 
     /**

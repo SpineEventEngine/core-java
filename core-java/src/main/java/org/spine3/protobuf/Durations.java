@@ -194,7 +194,7 @@ public class Durations {
     }
 
     /**
-     * Returns the only reminder of minutes from the passed duration subtracting
+     * Returns the only remainder of minutes from the passed duration subtracting
      * the amount of full hours.
      *
      * @param value duration

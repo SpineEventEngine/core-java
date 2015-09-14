@@ -23,22 +23,23 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.*;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotOrBuilder;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
-import org.spine3.server.internal.CommandDispatcher;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Events;
+import org.spine3.util.MethodMap;
+import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -83,14 +84,18 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     private volatile boolean initialized = false;
 
     /**
-     * Internal dispatcher for command handling methods of this aggregate.
+     * The map of command handling methods for this class.
+     *
+     * @see Registry
      */
-    private CommandDispatcher internalDispatcher;
+    private MethodMap commandHandlers;
 
     /**
-     * Dispatcher of applier methods of this aggregate.
+     * The map of event appliers for this class.
+     *
+     * @see Registry
      */
-    private EventApplier.Map applier;
+    private MethodMap eventAppliers;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -107,23 +112,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     protected AggregateRoot(I id) {
         super(id);
-
-        //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
-        if (id instanceof Message) {
-            Message message = (Message) id;
-            this.idAsAny = Messages.toAny(message);
-        } else if (id instanceof String) {
-            String s = (String) id;
-            this.idAsAny = Messages.toAny(StringValue.newBuilder().setValue(s).build());
-        } else if (id instanceof Integer) {
-            Integer intValue = (Integer) id;
-            this.idAsAny = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
-        } else if (id instanceof Long) {
-            Long longValue = (Long) id;
-            this.idAsAny = Messages.toAny(UInt64Value.newBuilder().setValue(longValue).build());
-        } else {
-            throw new IllegalArgumentException("ID of unsupported type encountered: " + id);
-        }
+        this.idAsAny = Messages.idToAny(id);
     }
 
     /**
@@ -134,14 +123,11 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
-        Set<Class<? extends Message>> types = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
-        Iterable<CommandClass> transformed = Iterables.transform(types, new Function<Class<? extends Message>, CommandClass>() {
-            @Nullable
+        Set<Class<? extends Message>> messageClasses = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+        Iterable<CommandClass> transformed = Iterables.transform(messageClasses, new Function<Class<? extends Message>, CommandClass>() {
+            @SuppressWarnings("NullableProblems") // The set we transform cannot have null entries.
             @Override
-            public CommandClass apply(@Nullable Class<? extends Message> input) {
-                if (input == null) {
-                    return null;
-                }
+            public CommandClass apply(Class<? extends Message> input) {
                 return CommandClass.of(input);
             }
         });
@@ -150,6 +136,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Returns event/command types handled by given AggregateRoot class.
+     * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
     static Set<Class<? extends Message>> getHandledMessageClasses(Class<? extends AggregateRoot> clazz, Predicate<Method> methodPredicate) {
@@ -161,17 +148,28 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             boolean methodMatches = methodPredicate.apply(method);
 
             if (methodMatches) {
-                Class<? extends Message> firstParamType = MessageHandlerMethod.getFirstParamType(method);
+                Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
                 result.add(firstParamType);
             }
         }
-        return result;
+        return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
     }
 
+    /**
+     * Performs initialization of the instance.
+     */
     private void init() {
         if (!this.initialized) {
-            initCommandDispatcher();
-            initEventApplier();
+            final Registry registry = Registry.instance();
+            final Class<? extends AggregateRoot> thisClass = getClass();
+
+            // Register this aggregate root class if it wasn't.
+            if (!registry.contains(thisClass)) {
+                registry.register(thisClass);
+            }
+
+            commandHandlers = registry.getCommandHandlers(thisClass);
+            eventAppliers = registry.getEventAppliers(thisClass);
 
             if (super.getState() == null) {
                 setDefault();
@@ -179,6 +177,28 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
             this.initialized = true;
         }
+    }
+
+    private Object invokeHandler(Message command, CommandContext context) throws InvocationTargetException {
+        final Class<? extends Message> commandClass = command.getClass();
+        Method method = commandHandlers.get(commandClass);
+        if (method == null) {
+            throw missingCommandHandler(commandClass);
+        }
+        CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final Object result = commandHandler.invoke(command, context);
+        return result;
+    }
+
+    private void invokeApplier(Message event) throws InvocationTargetException {
+        final Class<? extends Message> eventClass = event.getClass();
+        Method method = eventAppliers.get(eventClass);
+        if (method == null) {
+            throw missingEventApplier(eventClass);
+        }
+
+        EventApplier applier = new EventApplier(this, method);
+        applier.invoke(event);
     }
 
     /**
@@ -203,7 +223,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      * Returns a non-null timestamp of the last modification.
      *
      * @return a non-null instance, which is the timestamp of the last modification or
-     * the timestamp of the object creation of the root is in the default state
+     *         the timestamp of setting the default state of the aggregate
      */
     @Nonnull
     @Override
@@ -222,32 +242,21 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         return idAsAny;
     }
 
-    private void initEventApplier() {
-        applier = new EventApplier.Map(this);
-    }
-
-    private void initCommandDispatcher() {
-        internalDispatcher = new CommandDispatcher();
-        internalDispatcher.register(this);
-    }
-
     /**
-     * Dispatches commands, generates events and apply them to the aggregate root.
+     * Dispatches commands, generates events and applies them to the aggregate root.
      *
      * @param command the command to be executed on aggregate root
      * @param context of the command
      * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
      */
-    @VisibleForTesting  // otherwise this method would have package access.
+    @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
-
         List<? extends Message> events = generateEvents(command, context);
-
         CommandId commandId = context.getCommandId();
-
         apply(events, commandId);
     }
+
 
     /**
      * Directs the passed command to the corresponding command handler method of the aggregate.
@@ -263,9 +272,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandHandlerMethod subscriber = internalDispatcher.getHandler(CommandClass.of(command));
-
-        Object handlingResult = subscriber.invoke(command, context);
+        Object handlingResult = invokeHandler(command, context);
 
         //noinspection IfMayBeConditional
         if (List.class.isAssignableFrom(handlingResult.getClass())) {
@@ -300,7 +307,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             int currentVersion = incrementVersion();
             final S state = getState();
             EventContext eventContext = createEventContext(commandId, event, state, currentVersion);
-            EventRecord eventRecord = createEventRecord(event, eventContext);
+            EventRecord eventRecord = Events.createEventRecord(event, eventContext);
 
             putUncommitted(eventRecord);
         }
@@ -308,8 +315,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Applies an event to the aggregate root.
-     * <p/>
-     * If the event is {@link Snapshot} its state is copied. Otherwise, the event
+     *
+     * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
      * @param event the event to apply
@@ -321,7 +328,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             restore((Snapshot) event);
             return;
         }
-        applier.apply(event);
+
+        invokeApplier(event);
     }
 
     private void putUncommitted(EventRecord record) {
@@ -337,14 +345,6 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         S stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenLastModified());
-    }
-
-    private static EventRecord createEventRecord(Message event, EventContext context) {
-        EventRecord result = EventRecord.newBuilder()
-                .setEvent(Messages.toAny(event))
-                .setContext(context)
-                .build();
-        return result;
     }
 
     /**
@@ -369,8 +369,8 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Creates a context for an event.
-     * <p/>
-     * The context may optionally have custom attributes are added by
+     *
+     * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
@@ -396,14 +396,15 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p/>
-     * Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     *
+     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
      * @param commandId      the id of the command, which cased the event
      * @param event          the event message
      * @param currentState   the current state of the aggregate root after the event was applied
-     * @param currentVersion the version of the aggregate root after the event was applied   @see #createEventContext(CommandId, Message, Message, int)
+     * @param currentVersion the version of the aggregate root after the event was applied
+     * @see #createEventContext(CommandId, Message, Message, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
@@ -427,4 +428,68 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
 
         return builder.build();
     }
+
+    /**
+     * The registry of method maps for all aggregate root classes.
+     *
+     * <p>The instances of {@code AggregateRoot} class register their classes in {@link AggregateRoot#init()} method.
+     */
+    private static class Registry {
+
+        private final MethodMap.Registry<AggregateRoot> commandHandlers = new MethodMap.Registry<>();
+
+        private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
+
+        void register(Class<? extends AggregateRoot> clazz) {
+            commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz));
+
+            eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
+            EventApplier.checkModifiers(eventAppliers.get(clazz));
+        }
+
+        boolean contains(Class<? extends AggregateRoot> clazz) {
+            boolean result = commandHandlers.contains(clazz);
+            return result;
+        }
+
+        MethodMap getCommandHandlers(Class<? extends AggregateRoot> clazz) {
+            MethodMap result = commandHandlers.get(clazz);
+            return result;
+        }
+
+        MethodMap getEventAppliers(Class<? extends AggregateRoot> clazz) {
+            MethodMap result = eventAppliers.get(clazz);
+            return result;
+        }
+
+        static Registry instance() {
+            return RegistrySingleton.INSTANCE.value;
+        }
+
+        @SuppressWarnings("InnerClassTooDeeplyNested")
+        private enum RegistrySingleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Registry value = new Registry();
+
+        }
+    }
+
+    // Factory methods for exceptions
+    //------------------------------------
+
+    private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
+        return new IllegalStateException(
+                String.format("Missing handler for command class %s in aggregate root class %s.",
+                        commandClass.getName(), getClass().getName()));
+    }
+
+    private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
+        return new IllegalStateException(
+                String.format("Missing event applier for event class %s in aggregate root class %s.",
+                        eventClass.getName(), getClass().getName()));
+    }
+
 }

@@ -19,29 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.test.order.command;
+package spine.test.project;
 
-import "spine/test/order/order.proto";
-
-option java_package="org.spine3.test.order.command";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.test.project";
 option java_multiple_files = true;
 
-message CreateOrder {
-    OrderId order_id = 1;
+message Task {
+    TaskId task_id = 1;
+    string title = 2;
+    string status = 3;
 }
 
-message AddOrderLine {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message RemoveOrderLine {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message PayOrder {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
+message TaskId {
+    int32 id = 1;
 }

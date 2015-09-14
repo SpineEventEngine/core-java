@@ -38,8 +38,12 @@ public abstract class Entity<I, S extends Message> {
 
     private final I id;
 
+    @Nullable
     private S state;
+
+    @Nullable
     private Timestamp whenLastModified;
+
     private int version;
 
     protected Entity(I id) {

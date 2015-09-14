@@ -46,8 +46,9 @@ public abstract class RepositoryBase<I extends Message, E extends Entity<I, ?>> 
     private Constructor<E> getEntityConstructor() {
         Constructor<E> result;
         try {
-            Class<E> entityClass = TypeInfo.getEntityClass(this);
-            Class<I> idClass = TypeInfo.getIdClass(this);
+            final Class<? extends RepositoryBase> thisClass = getClass();
+            Class<E> entityClass = TypeInfo.getEntityClass(thisClass);
+            Class<I> idClass = TypeInfo.getIdClass(thisClass);
 
             result = entityClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
