@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a method as command handler.
  *
- * <p>A command handler method mus have two parameters. The class of the command will be
+ * <p>A command handler method must have two parameters. The class of the command will be
  * indicated by the first parameter.
  *
  * <p>The second parameter of the method must be {@link org.spine3.base.CommandContext}.
