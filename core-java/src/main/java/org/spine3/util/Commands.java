@@ -130,9 +130,9 @@ public class Commands {
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .build();
-        return CommandContext.newBuilder()
+        final CommandContext.Builder result = CommandContext.newBuilder()
                 .setCommandId(commandId)
-                .setZoneOffset(offset)
-                .build();
+                .setZoneOffset(offset);
+        return result.build();
     }
 }
