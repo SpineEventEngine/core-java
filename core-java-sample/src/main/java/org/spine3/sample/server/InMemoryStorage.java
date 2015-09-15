@@ -39,10 +39,15 @@ import static org.spine3.protobuf.Messages.fromAny;
  */
 public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
 
-    private static final Map<Class, StorageHelper> HELPERS = ImmutableMap.<Class, StorageHelper>builder()
+    private final Map<Class, StorageHelper> storageHelpers = ImmutableMap.<Class, StorageHelper>builder()
             .put(CommandRequest.class, new CommandStorageHelper())
             .put(EventRecord.class, new EventStorageHelper())
             .build();
+
+    private final Map<Message, List<CommandRequest>> commandRequestsMap = newHashMap();
+
+    private final Map<Message, List<EventRecord>> eventRecordsMap = newHashMap();
+
 
     public InMemoryStorage(Class<M> messageClass) {
         super(messageClass);
@@ -51,7 +56,7 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
     @Override
     protected List<M> read(Class<M> messageClass, Message parentId) {
 
-        final StorageHelper helper = HELPERS.get(messageClass);
+        final StorageHelper helper = storageHelpers.get(messageClass);
         //noinspection unchecked
         final List<M> result = helper.get(parentId);
         return result;
@@ -60,7 +65,7 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
     @Override
     protected List<M> readAll(Class<M> messageClass) {
 
-        final StorageHelper helper = HELPERS.get(messageClass);
+        final StorageHelper helper = storageHelpers.get(messageClass);
         //noinspection unchecked
         final List<M> result = helper.getAll();
         return result;
@@ -69,15 +74,13 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
     @Override
     protected void save(M message) {
 
-        final StorageHelper helper = HELPERS.get(message.getClass());
+        final StorageHelper helper = storageHelpers.get(message.getClass());
         //noinspection unchecked
         helper.save(message);
     }
 
 
-    private static class CommandStorageHelper extends StorageHelper<CommandRequest> {
-
-        private static final Map<Message, List<CommandRequest>> COMMAND_REQUESTS_MAP = newHashMap();
+    private class CommandStorageHelper extends StorageHelper<CommandRequest> {
 
         @Override
         protected Message getAggregateId(CommandRequest message) {
@@ -89,13 +92,11 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
         @Override
         @SuppressWarnings("ReturnOfCollectionOrArrayField")
         protected Map<Message, List<CommandRequest>> getStorage() {
-            return COMMAND_REQUESTS_MAP;
+            return commandRequestsMap;
         }
     }
 
-    private static class EventStorageHelper extends StorageHelper<EventRecord> {
-
-        private static final Map<Message, List<EventRecord>> EVENT_RECORDS_MAP = newHashMap();
+    private class EventStorageHelper extends StorageHelper<EventRecord> {
 
         @Override
         protected Message getAggregateId(EventRecord record) {
@@ -106,7 +107,7 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
         @Override
         @SuppressWarnings("ReturnOfCollectionOrArrayField")
         protected Map<Message, List<EventRecord>> getStorage() {
-            return EVENT_RECORDS_MAP;
+            return eventRecordsMap;
         }
     }
 
