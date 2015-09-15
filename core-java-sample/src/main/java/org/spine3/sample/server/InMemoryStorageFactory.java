@@ -27,15 +27,12 @@ import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
- * This class provides factory methods for creating storages based on file system.
- *
- * @author Mikhail Mikhaylov
+ * This class provides factory methods for creating in-memory-storages.
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemStorageFactory {
+public class InMemoryStorageFactory {
 
-    private FileSystemStorageFactory() {
-    }
+    private InMemoryStorageFactory() {}
 
     /**
      * Creates new instance of the event store.
@@ -43,16 +40,7 @@ public class FileSystemStorageFactory {
      * @return new storage instance
      */
     public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return new FileSystemStorage<EventRecord>(EventRecord.class);
-    }
-
-    /**
-     * Creates new snapshot storage.
-     *
-     * @return new storage instance
-     */
-    public static SnapshotStorage createSnapshotStorage() {
-        return new FileSystemSnapshotStorage();
+        return new InMemoryStorage<>(EventRecord.class);
     }
 
     /**
@@ -61,6 +49,15 @@ public class FileSystemStorageFactory {
      * @return new storage instance
      */
     public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return new FileSystemStorage<CommandRequest>(CommandRequest.class);
+        return new InMemoryStorage<>(CommandRequest.class);
+    }
+
+    /**
+     * Creates new snapshot storage.
+     *
+     * @return new storage instance
+     */
+    public static SnapshotStorage createSnapshotStorage() {
+        return new InMemorySnapshotStorage();
     }
 }

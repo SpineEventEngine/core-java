@@ -18,49 +18,58 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.server;
+package org.spine3.sample;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
+import org.spine3.sample.server.InMemoryStorageFactory;
 import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
 
 /**
- * This class provides factory methods for creating storages based on file system.
- *
- * @author Mikhail Mikhaylov
+ * Entry point for core-java sample without gRPC. Works with in-memory-storage.
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemStorageFactory {
+public class InMemorySample extends BaseSample {
 
-    private FileSystemStorageFactory() {
+    public static void main(String[] args) {
+
+        BaseSample sample = new InMemorySample();
+        sample.execute();
     }
 
-    /**
-     * Creates new instance of the event store.
-     *
-     * @return new storage instance
-     */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return new FileSystemStorage<EventRecord>(EventRecord.class);
+    @Override
+    protected Logger getLog() {
+        return LogSingleton.INSTANCE.value;
     }
 
-    /**
-     * Creates new snapshot storage.
-     *
-     * @return new storage instance
-     */
-    public static SnapshotStorage createSnapshotStorage() {
-        return new FileSystemSnapshotStorage();
+    @Override
+    protected StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
+        return InMemoryStorageFactory.createEventStoreStorage();
     }
 
-    /**
-     * Creates new command store.
-     *
-     * @return new storage instance
-     */
-    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return new FileSystemStorage<CommandRequest>(CommandRequest.class);
+    @Override
+    protected StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
+        return InMemoryStorageFactory.createCommandStoreStorage();
     }
+
+    @Override
+    protected SnapshotStorage provideSnapshotStorage() {
+        return InMemoryStorageFactory.createSnapshotStorage();
+    }
+
+    private InMemorySample() {
+    }
+
+    private enum LogSingleton {
+
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
+    }
+
 }

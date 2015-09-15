@@ -17,35 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.sample.server;
 
 import com.google.protobuf.Message;
+import org.spine3.server.Snapshot;
+import org.spine3.server.SnapshotStorage;
 
-import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * Test file system based implementation of the {@link Message} repository.
+ * In-memory-based implementation of the {@link Snapshot} repository.
  */
-public class FileSystemStorage<M extends Message> extends BaseStorage<M> {
+public class InMemorySnapshotStorage implements SnapshotStorage {
 
-    public FileSystemStorage(Class<M> messageClass) {
-        super(messageClass);
+    private static final Map<Message, Snapshot> SNAPSHOTS_MAP = newHashMap();
+
+    @Override
+    public void store(Snapshot snapshot, Message parentId) {
+        checkNotNull(parentId);
+        checkNotNull(snapshot);
+        SNAPSHOTS_MAP.put(parentId, snapshot);
     }
 
     @Override
-    protected List<M> read(Class<M> messageClass, Message parentId) {
-        final List<M> result = FileSystemHelper.read(messageClass, parentId);
-        return result;
-    }
-
-    @Override
-    protected List<M> readAll(Class<M> messageClass) {
-        final List<M> result = FileSystemHelper.readAll(messageClass);
-        return result;
-    }
-
-    @Override
-    protected void save(M message) {
-        FileSystemHelper.write(message);
+    public Snapshot read(Message parentId) {
+        checkNotNull(parentId);
+        final Snapshot snapshot = SNAPSHOTS_MAP.get(parentId);
+        return snapshot;
     }
 }
