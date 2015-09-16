@@ -67,15 +67,6 @@ public interface StorageOfEntityMessages<M extends Message> {
     List<M> loadSince(Message entityId, Timestamp from);
 
     /**
-     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
-     *
-     * @param entityId the ID of the entity to load messages for
-     * @param sinceVersion  sinceVersion to read messages from
-     * @return read message
-     */
-    List<M> loadSince(Message entityId, int sinceVersion);
-
-    /**
      * Loads messages for all entities with the timestamp equal or after the passed value.
      *
      * @param from  timestamp to read messages from
