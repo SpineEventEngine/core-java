@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides common file system access for {@link FileSystemStorage} and {@link FileSystemSnapshotStorage}.
+ * Provides common file system access for {@link FileSystemMessageJournal} and {@link FileSystemSnapshotStorage}.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov

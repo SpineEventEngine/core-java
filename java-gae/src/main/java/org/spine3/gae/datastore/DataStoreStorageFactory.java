@@ -43,7 +43,7 @@ public class DataStoreStorageFactory {
      * @return Storage with Timeline and Version
      */
     public static MessageJournal<String, EventRecord> createEventStoreStorage() {
-        return DataStoreStorage.newInstance(EventRecord.class);
+        return DataStoreMessageJournal.newInstance(EventRecord.class);
     }
 
     /**
@@ -62,6 +62,6 @@ public class DataStoreStorageFactory {
      * @return Storage with Timeline
      */
     public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
-        return DataStoreStorage.newInstance(CommandRequest.class);
+        return DataStoreMessageJournal.newInstance(CommandRequest.class);
     }
 }

@@ -36,20 +36,24 @@ import static org.spine3.gae.datastore.DataStoreHelper.PARENT_ID_KEY;
 import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
 
 /**
- * @param <M> Message type to store
+ * {@code MessageJournal} based on App Engine Datastore.
+ *
+ * {@inheritDoc}
+ *
+ * @author Mikhail Mikhaylov
  */
-public class DataStoreStorage<I, M extends Message> implements MessageJournal<I, M> {
+public class DataStoreMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
     private final DataStoreHelper dataStoreHelper;
 
     private final TypeName type;
 
-    public static <I, M extends Message> DataStoreStorage<I, M> newInstance(Class<M> messageClass) {
+    public static <I, M extends Message> DataStoreMessageJournal<I, M> newInstance(Class<M> messageClass) {
         final Descriptors.Descriptor classDescriptor = Messages.getClassDescriptor(messageClass);
-        return new DataStoreStorage<>(TypeName.of(classDescriptor));
+        return new DataStoreMessageJournal<>(TypeName.of(classDescriptor));
     }
 
-    private DataStoreStorage(TypeName type) {
+    private DataStoreMessageJournal(TypeName type) {
         this.type = type;
         dataStoreHelper = new DataStoreHelper();
     }

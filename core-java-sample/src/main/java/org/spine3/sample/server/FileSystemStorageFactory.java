@@ -42,7 +42,7 @@ public class FileSystemStorageFactory {
      * @return new storage instance
      */
     public static MessageJournal<String, EventRecord> createEventStoreStorage() {
-        return FileSystemStorage.newInstance(EventRecord.class);
+        return FileSystemMessageJournal.newInstance(EventRecord.class);
     }
 
     /**
@@ -60,6 +60,6 @@ public class FileSystemStorageFactory {
      * @return new storage instance
      */
     public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
-        return FileSystemStorage.newInstance(CommandRequest.class);
+        return FileSystemMessageJournal.newInstance(CommandRequest.class);
     }
 }

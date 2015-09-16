@@ -39,11 +39,13 @@ import static org.spine3.util.Lists.filter;
 /**
  * {@code MessageJournal} based on file system.
  *
+ * {@inheritDoc}
+ *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage<I, M extends Message> implements MessageJournal<I, M> {
+public class FileSystemMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())
@@ -52,11 +54,11 @@ public class FileSystemStorage<I, M extends Message> implements MessageJournal<I
 
     private final Class<M> clazz;
 
-    public static <I, M extends Message> FileSystemStorage<I, M> newInstance(Class<M> messageClass) {
-        return new FileSystemStorage<>(messageClass);
+    public static <I, M extends Message> FileSystemMessageJournal<I, M> newInstance(Class<M> messageClass) {
+        return new FileSystemMessageJournal<>(messageClass);
     }
 
-    private FileSystemStorage(Class<M> clazz) {
+    private FileSystemMessageJournal(Class<M> clazz) {
         this.clazz = clazz;
     }
 
