@@ -18,35 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
-
-import org.spine3.server.Snapshot;
-
-import javax.annotation.Nullable;
+package org.spine3.server;
 
 /**
- * The storage for aggregate root snapshots.
+ * A storage can store and load entities.
  *
- * @param <I> the type of the aggregate root ID
- * @author Mikhail Mikhaylov
+ * @param <I> the type of entity ID
+ * @param <E> the type of entity
+ *
+ * @author Alexander Yevsyukov
  */
-public interface SnapshotStorage<I> {
-
-    /**
-     * Stores Snapshot with desired Parent Id.
-     *
-     * @param aggregateId the ID of the aggregate root
-     * @param snapshot    snapshot to be stored
-     */
-    void store(I aggregateId, Snapshot snapshot);
-
-    /**
-     * Reads snapshot from storage by appropriate parent id.
-     *
-     * @param aggregateId the ID of the aggregate root
-     * @return snapshot instance or {@code null} if no snapshot with the passed ID was found
-     */
-    @Nullable
-    Snapshot load(I aggregateId);
+public interface Storage<I, E extends Entity<I, ?>> {
 
 }

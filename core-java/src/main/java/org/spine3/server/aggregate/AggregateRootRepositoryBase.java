@@ -78,7 +78,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      *
      * @see #countSinceLastSnapshot
      */
-    private final SnapshotStorage snapshotStorage;
+    private final SnapshotStorage<I> snapshotStorage;
 
     /**
      * The number of events to store between snapshots.
@@ -90,7 +90,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage snapshotStorage) {
+    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
         super();
         this.eventStorage = eventStorage;
         this.snapshotStorage = snapshotStorage;

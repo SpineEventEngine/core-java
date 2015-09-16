@@ -34,16 +34,16 @@ import java.io.InputStream;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemSnapshotStorage implements SnapshotStorage {
+public class FileSystemSnapshotStorage<I> implements SnapshotStorage<I> {
 
     /**
      * Writes the snapshot of the given aggregate root to storage.
-     *  @param parentId parent id for snapshot
+     * @param aggregateId parent id for snapshot
      * @param snapshot the snapshot to store
      */
     @Override
-    public void store(Message parentId, Snapshot snapshot) {
-        File file = FileSystemHelper.getSnapshotsFile(parentId);
+    public void store(I aggregateId, Snapshot snapshot) {
+        File file = FileSystemHelper.getSnapshotsFile(aggregateId);
 
         FileSystemHelper.writeMessage(file, snapshot);
     }
@@ -51,12 +51,12 @@ public class FileSystemSnapshotStorage implements SnapshotStorage {
     /**
      * Returns the last snapshot for the given aggregate root.
      *
-     * @param parentId parent id for snapshot
+     * @param aggregateId parent id for snapshot
      * @return the {@link Snapshot} object
      */
     @Override
-    public Snapshot load(Message parentId) {
-        File file = FileSystemHelper.getSnapshotsFile(parentId);
+    public Snapshot load(I aggregateId) {
+        File file = FileSystemHelper.getSnapshotsFile(aggregateId);
 
         Snapshot snapshot = readLastSnapshotFromFile(file);
         return snapshot;

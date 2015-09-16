@@ -72,7 +72,7 @@ public class FileSystemHelper {
         fileStoragePath = storagePath;
     }
 
-    protected static File getSnapshotsFile(Message aggregateId) {
+    protected static <I> File getSnapshotsFile(I aggregateId) {
         String snapshots = "snapshots";
         return getFile(aggregateId, snapshots);
     }
