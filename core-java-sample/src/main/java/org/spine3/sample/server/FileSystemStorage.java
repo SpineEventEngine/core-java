@@ -43,7 +43,7 @@ import static org.spine3.util.Lists.filter;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
+public class FileSystemStorage<I, M extends Message> implements MessageJournal<I, M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())
@@ -52,7 +52,7 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
 
     private final Class<M> clazz;
 
-    public static <M extends Message> FileSystemStorage<M> newInstance(Class<M> messageClass) {
+    public static <I, M extends Message> FileSystemStorage<I, M> newInstance(Class<M> messageClass) {
         return new FileSystemStorage<>(messageClass);
     }
 
@@ -74,7 +74,7 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
     }
 
     @Override
-    public List<M> loadSince(Message entityId, Timestamp from) {
+    public List<M> loadSince(I entityId, Timestamp from) {
         checkNotNull(from);
         checkNotNull(entityId);
 
@@ -88,7 +88,7 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
     }
 
     @Override
-    public List<M> load(Message entityId) {
+    public List<M> load(I entityId) {
         checkNotNull(entityId);
 
         final List<M> messages = FileSystemHelper.read(clazz, entityId);
@@ -111,11 +111,6 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
         }
 
         @Override
-        public Predicate<CommandRequest> getSinceVersionPredicate(int sinceVersion) {
-            throw new IllegalStateException(COMMANDS_DO_NOT_SUPPORT_VERSIONS);
-        }
-
-        @Override
         public void sort(List<CommandRequest> messages) {
             Commands.sort(messages);
         }
@@ -129,11 +124,6 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
         }
 
         @Override
-        public Predicate<EventRecord> getSinceVersionPredicate(int sinceVersion) {
-            return Events.getEventPredicate(sinceVersion);
-        }
-
-        @Override
         public void sort(List<EventRecord> messages) {
             Events.sort(messages);
         }
@@ -142,8 +132,6 @@ public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
     private interface FilteringHelper<M extends Message> {
 
         Predicate<M> getWereAfterPredicate(Timestamp from);
-
-        Predicate<M> getSinceVersionPredicate(int sinceVersion);
 
         void sort(List<M> messages);
     }

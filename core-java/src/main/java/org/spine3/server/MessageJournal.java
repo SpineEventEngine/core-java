@@ -37,7 +37,7 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public interface MessageJournal<M extends Message> {
+public interface MessageJournal<I, M extends Message> {
 
     //TODO:2015-09-06:alexander.yevsyukov: Have Id as another generic type.
 
@@ -47,7 +47,7 @@ public interface MessageJournal<M extends Message> {
      * @param entityId the id of the entity to load messages for
      * @return read message
      */
-    List<M> load(Message entityId);
+    List<M> load(I entityId);
 
     //TODO:2015-09-16:alexander.yevsyukov: Pass ID as a parameter to this method. Don't force implementations to figure it out.
     /**
@@ -64,7 +64,7 @@ public interface MessageJournal<M extends Message> {
      * @param from     the timestamp from which load messages
      * @return list of messages or an empty list if no messages were found
      */
-    List<M> loadSince(Message entityId, Timestamp from);
+    List<M> loadSince(I entityId, Timestamp from);
 
     /**
      * Loads messages for all entities with the timestamp equal or after the passed value.

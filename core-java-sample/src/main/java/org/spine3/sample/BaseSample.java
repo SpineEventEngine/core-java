@@ -91,15 +91,15 @@ public abstract class BaseSample {
 
     protected abstract Logger getLog();
 
-    protected abstract MessageJournal<EventRecord> provideEventStoreStorage();
+    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
 
-    protected abstract MessageJournal<CommandRequest> provideCommandStoreStorage();
+    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 
     private OrderRootRepository getOrderRootRepository() {
-
-        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage(
+        //TODO:2015-09-16:alexander.yevsyukov: The storage for events of the AggregateRoot should be parameterized with OrderId, not String.
+        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage<>(
                 provideEventStoreStorage()
         );
 

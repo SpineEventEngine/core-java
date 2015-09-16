@@ -36,7 +36,6 @@ import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_THAN_OR_EQUAL;
-import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * Provides the access to common part of working with DataStore.
@@ -89,20 +88,20 @@ class DataStoreHelper {
         return messages;
     }
 
-    protected static Query.Filter prepareFilter(Message aggregateRootId, TimestampOrBuilder from) {
+    protected static <I> Query.Filter prepareFilter(I aggregateRootId, TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         final Date timestampDate = Timestamps.convertToDate(from);
         filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, timestampDate));
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, toJson(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected static Query.Filter prepareFilter(Message aggregateRootId, int sinceVersion) {
+    protected static <I> Query.Filter prepareFilter(I aggregateRootId, int sinceVersion) {
 
         final List<Query.Filter> filters = new ArrayList<>();
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, toJson(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
         filters.add(new Query.FilterPredicate(VERSION_KEY, GREATER_THAN_OR_EQUAL, sinceVersion));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);

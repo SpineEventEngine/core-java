@@ -74,12 +74,12 @@ public class FileSystemSample extends BaseSample {
     }
 
     @Override
-    protected MessageJournal<EventRecord> provideEventStoreStorage() {
+    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
         return FileSystemStorageFactory.createEventStoreStorage();
     }
 
     @Override
-    protected MessageJournal<CommandRequest> provideCommandStoreStorage() {
+    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
         return FileSystemStorageFactory.createCommandStoreStorage();
     }
 

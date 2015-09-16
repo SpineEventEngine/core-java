@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 
@@ -33,9 +32,9 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private final MessageJournal<CommandRequest> storage;
+    private final MessageJournal<String, CommandRequest> storage;
 
-    public CommandStore(MessageJournal<CommandRequest> storage) {
+    public CommandStore(MessageJournal<String, CommandRequest> storage) {
         this.storage = storage;
     }
 
@@ -54,7 +53,7 @@ public class CommandStore {
      * @param aggregateRootId the id of the aggregate root
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> loadCommands(Message aggregateRootId) {
+    public List<CommandRequest> loadCommands(String aggregateRootId) {
         return storage.load(aggregateRootId);
     }
 
@@ -65,7 +64,7 @@ public class CommandStore {
      * @param timestamp            the timestamp to load commands from
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> loadCommandsSince(Message aggregateRootId, Timestamp timestamp) {
+    public List<CommandRequest> loadCommandsSince(String aggregateRootId, Timestamp timestamp) {
         return storage.loadSince(aggregateRootId, timestamp);
     }
 }

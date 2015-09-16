@@ -122,9 +122,9 @@ public abstract class BaseSampleServer {
 
     protected abstract Logger getLog();
 
-    protected abstract MessageJournal<EventRecord> provideEventStoreStorage();
+    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
 
-    protected abstract MessageJournal<CommandRequest> provideCommandStoreStorage();
+    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 }

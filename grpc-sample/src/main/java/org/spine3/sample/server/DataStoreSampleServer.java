@@ -61,12 +61,12 @@ public class DataStoreSampleServer extends BaseSampleServer {
     }
 
     @Override
-    protected MessageJournal<EventRecord> provideEventStoreStorage() {
+    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
         return DataStoreStorageFactory.createEventStoreStorage();
     }
 
     @Override
-    protected MessageJournal<CommandRequest> provideCommandStoreStorage() {
+    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
         return DataStoreStorageFactory.createCommandStoreStorage();
     }
 

@@ -19,24 +19,22 @@
  */
 package org.spine3.server.aggregate;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.server.MessageJournal;
 
 import java.util.List;
 
-//TODO:2015-09-16:alexander.yevsyukov: Have generic parameter for aggregate root ID type.
 /**
  * Stores and loads the events for a class of aggregate roots.
  *
  * @author Mikhail Mikhaylov
  */
-public class AggregateRootEventStorage {
+public class AggregateRootEventStorage<I> {
 
-    private final MessageJournal<EventRecord> storage;
+    private final MessageJournal<I, EventRecord> storage;
 
-    public AggregateRootEventStorage(MessageJournal<EventRecord> storage) {
+    public AggregateRootEventStorage(MessageJournal<I, EventRecord> storage) {
         this.storage = storage;
     }
 
@@ -55,7 +53,7 @@ public class AggregateRootEventStorage {
      * @param aggregateRootId the id of aggregateRoot
      * @return list of events
      */
-    public List<EventRecord> loadAll(Message aggregateRootId) {
+    public List<EventRecord> loadAll(I aggregateRootId) {
         List<EventRecord> result = storage.load(aggregateRootId);
         return result;
     }
@@ -67,7 +65,7 @@ public class AggregateRootEventStorage {
      * @param from            timestamp to load events from
      * @return list of events
      */
-    public List<EventRecord> loadSince(Message aggregateRootId, Timestamp from) {
+    public List<EventRecord> loadSince(I aggregateRootId, Timestamp from) {
         List<EventRecord> result = storage.loadSince(aggregateRootId, from);
         return result;
     }
