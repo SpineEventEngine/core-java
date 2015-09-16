@@ -61,28 +61,28 @@ public class FileSystemStorage<I, M extends Message> implements MessageJournal<I
     }
 
     @Override
-    public List<M> loadAllSince(Timestamp from) {
-        checkNotNull(from);
+    public List<M> loadAllSince(Timestamp timestamp) {
+        checkNotNull(timestamp);
 
         final List<M> messages = FileSystemHelper.readAll(clazz);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
         final ImmutableList<M> result = filter(messages, predicate);
         return result;
     }
 
     @Override
-    public List<M> loadSince(I entityId, Timestamp from) {
-        checkNotNull(from);
+    public List<M> loadSince(I entityId, Timestamp timestamp) {
+        checkNotNull(timestamp);
         checkNotNull(entityId);
 
         final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
         final ImmutableList<M> result = filter(messages, predicate);
         return result;
     }

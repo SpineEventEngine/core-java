@@ -62,15 +62,15 @@ public class DataStoreStorage<I, M extends Message> implements MessageJournal<I,
     }
 
     @Override
-    public List<M> loadAllSince(Timestamp from) {
-        final Query.Filter filter = prepareFilter(from);
+    public List<M> loadAllSince(Timestamp timestamp) {
+        final Query.Filter filter = prepareFilter(timestamp);
         final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);
         return result;
     }
 
     @Override
-    public List<M> loadSince(I entityId, Timestamp from) {
-        final Query.Filter filter = prepareFilter(entityId, from);
+    public List<M> loadSince(I entityId, Timestamp timestamp) {
+        final Query.Filter filter = prepareFilter(entityId, timestamp);
         final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);
         return result;
     }

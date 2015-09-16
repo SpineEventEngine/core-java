@@ -58,16 +58,16 @@ public interface MessageJournal<I, M extends Message> {
      * Loads messages for the entity recorded on or after specified time.
      *
      * @param entityId the id of the entity to load messages for
-     * @param from     the timestamp from which load messages
+     * @param timestamp the timestamp from which load messages
      * @return list of messages or an empty list if no matching messages were found
      */
-    List<M> loadSince(I entityId, Timestamp from);
+    List<M> loadSince(I entityId, Timestamp timestamp);
 
     /**
      * Loads messages for all entities with the timestamp equal or after the passed value.
      *
-     * @param from  timestamp to read messages from
+     * @param timestamp the timestamp from which load messages
      * @return the list of messages with the matching timestamp or an empty list if no messages were found
      */
-    List<M> loadAllSince(Timestamp from);
+    List<M> loadAllSince(Timestamp timestamp);
 }
