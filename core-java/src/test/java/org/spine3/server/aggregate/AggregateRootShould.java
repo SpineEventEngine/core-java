@@ -64,8 +64,8 @@ import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testutil.ContextFactory.getEventContext;
 import static org.spine3.util.Commands.createCommandContext;
 
-@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "StaticNonFinalField",
-"ResultOfObjectAllocationIgnored", "MagicNumber", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
+"ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
 public class AggregateRootShould {
 
     private ProjectId projectId;
