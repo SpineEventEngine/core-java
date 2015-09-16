@@ -24,7 +24,8 @@ project.ext {
 
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
     GENERATED_RESOURCES = "/generated/main/resources/"
-    PROPERTIES_PATH = "${project.GENERATED_RESOURCES}protos/properties/"
+    PROPERTIES_FILE_PATH = "${project.GENERATED_RESOURCES}protos/properties/"
+    PROPERTIES_FILE_NAME = "proto_to_java_class.properties"
 }
 
 def repositoryUserName = null
@@ -48,7 +49,7 @@ task removeSavedProtoNames << {
 build.dependsOn removeSavedProtoNames
 
 String protoPropertiesFilePath() {
-    return "${project(":core-java").projectDir}" + project.PROPERTIES_PATH + "proto.properties";
+    return "${project(":core-java").projectDir}" + project.PROPERTIES_FILE_PATH + project.PROPERTIES_FILE_NAME;
 }
 
 String replaceFileSeparatorWithDot(String filePath) {
@@ -126,7 +127,7 @@ subprojects {
             }
 
             //TODO: avoid duplication of constant of the path to generated resources.
-            File propsFileFolder = file("${project(":core-java").projectDir}${PROPERTIES_PATH}")
+            File propsFileFolder = file("${project(":core-java").projectDir}${PROPERTIES_FILE_PATH}")
             if (!propsFileFolder.exists()) {
                 propsFileFolder.mkdirs();
             }

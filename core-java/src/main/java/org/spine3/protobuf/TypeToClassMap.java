@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.ClassName;
@@ -46,16 +47,16 @@ public class TypeToClassMap {
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PROPERTIES_FILES_PATH = "protos/properties/";
+    private static final String PROPERTIES_FILES_PATH = "protos/properties/proto_to_java_class.properties";
 
-    private static final Map<TypeName, ClassName> namesMap = new HashMap<>();
+    private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
     static {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         Enumeration<URL> resources = null;
         try {
-            resources = classLoader.getResources(PROPERTIES_FILES_PATH + "proto.properties");
+            resources = classLoader.getResources(PROPERTIES_FILES_PATH);
         } catch (IOException ignored) {
         }
 
