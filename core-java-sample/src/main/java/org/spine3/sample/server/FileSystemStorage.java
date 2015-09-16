@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Lists.filter;
 
 /**
- * Test file system based implementation of the {@link Message} repository.
+ * {@code MessageJournal} based on file system.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
@@ -102,8 +102,6 @@ public class FileSystemStorage<I, M extends Message> implements MessageJournal<I
     }
 
     private static class CommandFilteringHelper implements FilteringHelper<CommandRequest> {
-
-        private static final String COMMANDS_DO_NOT_SUPPORT_VERSIONS = "Commands don\'t support versions";
 
         @Override
         public Predicate<CommandRequest> getWereAfterPredicate(Timestamp from) {
