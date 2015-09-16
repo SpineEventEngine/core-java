@@ -29,8 +29,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.gae.datastore.DataStoreStorageFactory;
 import org.spine3.sample.order.Order;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageOfEntityMessages;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
@@ -59,12 +58,12 @@ public class DataStoreSample extends BaseSample {
     }
 
     @Override
-    protected StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
+    protected StorageOfEntityMessages<EventRecord> provideEventStoreStorage() {
         return DataStoreStorageFactory.createEventStoreStorage();
     }
 
     @Override
-    protected StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
+    protected StorageOfEntityMessages<CommandRequest> provideCommandStoreStorage() {
         return DataStoreStorageFactory.createCommandStoreStorage();
     }
 

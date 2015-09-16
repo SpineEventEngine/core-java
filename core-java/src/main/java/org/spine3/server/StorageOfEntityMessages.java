@@ -21,8 +21,11 @@
 package org.spine3.server;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 
 import java.util.List;
+
+//TODO:2015-09-16:alexander.yevsyukov: Review documentation of methods.
 
 /**
  * A storage for messages associated with entity objects.
@@ -34,17 +37,17 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public interface EntityMessagesStorage<M extends Message> {
+public interface StorageOfEntityMessages<M extends Message> {
 
     //TODO:2015-09-06:alexander.yevsyukov: Have Id as another generic type.
 
     /**
      * Reads Messages of type {@link M} with appropriate Parent Id from storage.
      *
-     * @param parentId parent id of message
+     * @param entityId the id of the entity to load messages for
      * @return read message
      */
-    List<M> load(Message parentId);
+    List<M> load(Message entityId);
 
     //TODO:2015-09-16:alexander.yevsyukov: Pass ID as a parameter to this method. Don't force implementations to figure it out.
     /**
@@ -54,4 +57,29 @@ public interface EntityMessagesStorage<M extends Message> {
      */
     void store(M message);
 
+    /**
+     * Loads messages for the object with the passed ID that have timestamp equal or after the passed value.
+     *
+     * @param entityId the id of the entity to load messages for
+     * @param from     the timestamp from which load messages
+     * @return list of messages or an empty list if no messages were found
+     */
+    List<M> loadSince(Message entityId, Timestamp from);
+
+    /**
+     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
+     *
+     * @param entityId the ID of the entity to load messages for
+     * @param sinceVersion  sinceVersion to read messages from
+     * @return read message
+     */
+    List<M> loadSince(Message entityId, int sinceVersion);
+
+    /**
+     * Loads messages for all entities with the timestamp equal or after the passed value.
+     *
+     * @param from  timestamp to read messages from
+     * @return the list of messages with the matching timestamp or an empty list if no messages were found
+     */
+    List<M> loadAllSince(Timestamp from);
 }

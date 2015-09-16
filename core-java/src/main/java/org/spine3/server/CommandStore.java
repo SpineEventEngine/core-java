@@ -33,9 +33,9 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private final StorageWithTimeline<CommandRequest> storage;
+    private final StorageOfEntityMessages<CommandRequest> storage;
 
-    public CommandStore(StorageWithTimeline<CommandRequest> storage) {
+    public CommandStore(StorageOfEntityMessages<CommandRequest> storage) {
         this.storage = storage;
     }
 
@@ -66,6 +66,6 @@ public class CommandStore {
      * @return list of commands for the aggregate root
      */
     public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
-        return storage.load(aggregateRootId, from);
+        return storage.loadSince(aggregateRootId, from);
     }
 }

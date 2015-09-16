@@ -22,8 +22,7 @@ package org.spine3.sample.server;
 
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageOfEntityMessages;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
@@ -42,7 +41,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
+    public static StorageOfEntityMessages<EventRecord> createEventStoreStorage() {
         return FileSystemStorage.newInstance(EventRecord.class);
     }
 
@@ -60,7 +59,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
+    public static StorageOfEntityMessages<CommandRequest> createCommandStoreStorage() {
         return FileSystemStorage.newInstance(CommandRequest.class);
     }
 }

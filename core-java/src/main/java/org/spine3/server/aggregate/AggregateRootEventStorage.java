@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageOfEntityMessages;
 
 import java.util.List;
 
@@ -34,9 +34,9 @@ import java.util.List;
  */
 public class AggregateRootEventStorage {
 
-    private final StorageWithTimelineAndVersion<EventRecord> storage;
+    private final StorageOfEntityMessages<EventRecord> storage;
 
-    public AggregateRootEventStorage(StorageWithTimelineAndVersion<EventRecord> storage) {
+    public AggregateRootEventStorage(StorageOfEntityMessages<EventRecord> storage) {
         this.storage = storage;
     }
 
@@ -68,7 +68,7 @@ public class AggregateRootEventStorage {
      * @return list of events
      */
     public List<EventRecord> getEvents(Message aggregateRootId, Timestamp from) {
-        List<EventRecord> result = storage.load(aggregateRootId, from);
+        List<EventRecord> result = storage.loadSince(aggregateRootId, from);
         return result;
     }
 
@@ -80,7 +80,7 @@ public class AggregateRootEventStorage {
      * @return list of the event records
      */
     public List<EventRecord> getEvents(Message aggregateRootId, int sinceVersion) {
-        List<EventRecord> result = storage.load(aggregateRootId, sinceVersion);
+        List<EventRecord> result = storage.loadSince(aggregateRootId, sinceVersion);
         return result;
     }
 

@@ -28,7 +28,10 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.server.*;
+import org.spine3.server.CommandStore;
+import org.spine3.server.Engine;
+import org.spine3.server.EventStore;
+import org.spine3.server.StorageOfEntityMessages;
 import org.spine3.server.aggregate.AggregateRootEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.util.UserIds;
@@ -88,9 +91,9 @@ public abstract class BaseSample {
 
     protected abstract Logger getLog();
 
-    protected abstract StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage();
+    protected abstract StorageOfEntityMessages<EventRecord> provideEventStoreStorage();
 
-    protected abstract StorageWithTimeline<CommandRequest> provideCommandStoreStorage();
+    protected abstract StorageOfEntityMessages<CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 

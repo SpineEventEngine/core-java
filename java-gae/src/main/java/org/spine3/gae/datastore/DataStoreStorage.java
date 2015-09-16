@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageOfEntityMessages;
 
 import java.util.List;
 
@@ -37,11 +37,9 @@ import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
 import static org.spine3.protobuf.Messages.toJson;
 
 /**
- * DataStore-based {@link StorageWithTimelineAndVersion} implementation.
- *
  * @param <M> Message type to store
  */
-public class DataStoreStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
+public class DataStoreStorage<M extends Message> implements StorageOfEntityMessages<M> {
 
     private final DataStoreHelper dataStoreHelper;
 
@@ -65,26 +63,26 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
     }
 
     @Override
-    public List<M> load(Message parentId, int sinceVersion) {
+    public List<M> loadSince(Message entityId, int sinceVersion) {
         return dataStoreHelper.loadByFilter(type.toString(),
-                prepareFilter(parentId, sinceVersion));
+                prepareFilter(entityId, sinceVersion));
     }
 
     @Override
-    public List<M> load(Timestamp from) {
+    public List<M> loadAllSince(Timestamp from) {
         return dataStoreHelper.loadByFilter(type.toString(), prepareFilter(from));
     }
 
     @Override
-    public List<M> load(Message parentId, Timestamp from) {
+    public List<M> loadSince(Message entityId, Timestamp from) {
         return dataStoreHelper.loadByFilter(type.toString(),
-                prepareFilter(parentId, from));
+                prepareFilter(entityId, from));
     }
 
     @Override
-    public List<M> load(Message id) {
+    public List<M> load(Message entityId) {
         return dataStoreHelper.loadByFilter(type.toString(), new Query.FilterPredicate(
-                PARENT_ID_KEY, EQUAL, toJson(id)));
+                PARENT_ID_KEY, EQUAL, toJson(entityId)));
     }
 
 }

@@ -31,9 +31,9 @@ import java.util.List;
  */
 public class EventStore {
 
-    private final StorageWithTimelineAndVersion<EventRecord> storage;
+    private final StorageOfEntityMessages<EventRecord> storage;
 
-    public EventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
+    public EventStore(StorageOfEntityMessages<EventRecord> storage) {
         this.storage = storage;
     }
 
@@ -53,7 +53,7 @@ public class EventStore {
      * @return list of events
      */
     public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.load(from);
+        List<EventRecord> result = storage.loadAllSince(from);
         return result;
     }
 

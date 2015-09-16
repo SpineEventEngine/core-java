@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.StorageOfEntityMessages;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
@@ -43,7 +43,7 @@ import static org.spine3.util.Lists.filter;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
+public class FileSystemStorage<M extends Message> implements StorageOfEntityMessages<M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())
@@ -61,10 +61,10 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> load(Message parentId, int sinceVersion) {
-        checkNotNull(parentId);
+    public List<M> loadSince(Message entityId, int sinceVersion) {
+        checkNotNull(entityId);
 
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
+        final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
@@ -74,7 +74,7 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> load(Timestamp from) {
+    public List<M> loadAllSince(Timestamp from) {
         checkNotNull(from);
 
         final List<M> messages = FileSystemHelper.readAll(clazz);
@@ -87,11 +87,11 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> load(Message parentId, Timestamp from) {
+    public List<M> loadSince(Message entityId, Timestamp from) {
         checkNotNull(from);
-        checkNotNull(parentId);
+        checkNotNull(entityId);
 
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
+        final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
@@ -101,10 +101,10 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> load(Message id) {
-        checkNotNull(id);
+    public List<M> load(Message entityId) {
+        checkNotNull(entityId);
 
-        final List<M> messages = FileSystemHelper.read(clazz, id);
+        final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         return messages;
     }
