@@ -160,13 +160,13 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         try {
             Snapshot snapshot = snapshotStorage.load(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStorage.getEvents(id, snapshot.getVersion());
+                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenLastModified());
                 R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = eventStorage.getAllEvents(id);
+                List<EventRecord> events = eventStorage.loadAll(id);
                 R result = create(id);
                 result.play(events);
                 return result;

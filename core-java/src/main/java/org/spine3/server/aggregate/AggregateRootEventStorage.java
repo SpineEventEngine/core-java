@@ -55,7 +55,7 @@ public class AggregateRootEventStorage {
      * @param aggregateRootId the id of aggregateRoot
      * @return list of events
      */
-    public List<EventRecord> getAllEvents(Message aggregateRootId) {
+    public List<EventRecord> loadAll(Message aggregateRootId) {
         List<EventRecord> result = storage.load(aggregateRootId);
         return result;
     }
@@ -67,20 +67,8 @@ public class AggregateRootEventStorage {
      * @param from            timestamp to load events from
      * @return list of events
      */
-    public List<EventRecord> getEvents(Message aggregateRootId, Timestamp from) {
+    public List<EventRecord> loadSince(Message aggregateRootId, Timestamp from) {
         List<EventRecord> result = storage.loadSince(aggregateRootId, from);
-        return result;
-    }
-
-    /**
-     * Returns the event records for the given aggregate root
-     * that has version greater than passed.
-     *
-     * @param sinceVersion the version of the aggregate root used as lower threshold for the result list
-     * @return list of the event records
-     */
-    public List<EventRecord> getEvents(Message aggregateRootId, int sinceVersion) {
-        List<EventRecord> result = storage.loadSince(aggregateRootId, sinceVersion);
         return result;
     }
 

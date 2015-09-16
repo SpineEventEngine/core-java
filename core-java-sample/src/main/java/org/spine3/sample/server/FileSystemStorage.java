@@ -61,19 +61,6 @@ public class FileSystemStorage<M extends Message> implements StorageOfEntityMess
     }
 
     @Override
-    public List<M> loadSince(Message entityId, int sinceVersion) {
-        checkNotNull(entityId);
-
-        final List<M> messages = FileSystemHelper.read(clazz, entityId);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getSinceVersionPredicate(sinceVersion);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
     public List<M> loadAllSince(Timestamp from) {
         checkNotNull(from);
 

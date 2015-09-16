@@ -63,12 +63,6 @@ public class DataStoreStorage<M extends Message> implements StorageOfEntityMessa
     }
 
     @Override
-    public List<M> loadSince(Message entityId, int sinceVersion) {
-        return dataStoreHelper.loadByFilter(type.toString(),
-                prepareFilter(entityId, sinceVersion));
-    }
-
-    @Override
     public List<M> loadAllSince(Timestamp from) {
         return dataStoreHelper.loadByFilter(type.toString(), prepareFilter(from));
     }
