@@ -97,7 +97,7 @@ public class FileSystemStorage<I, M extends Message> implements MessageJournal<I
     }
 
     @Override
-    public void store(I id, M message) {
+    public void store(I entityId, M message) {
         FileSystemHelper.write(message);
     }
 

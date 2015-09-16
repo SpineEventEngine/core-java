@@ -25,14 +25,13 @@ import com.google.protobuf.Timestamp;
 
 import java.util.List;
 
-//TODO:2015-09-16:alexander.yevsyukov: Review documentation of methods.
-
 /**
  * A storage for messages associated with entity objects.
  *
  * <p>An entity can have more than one associated message.
  *
- * @param <M> the type of messages to store
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages associated with entities
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
@@ -40,27 +39,27 @@ import java.util.List;
 public interface MessageJournal<I, M extends Message> {
 
     /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage.
+     * Loads all messages for the entity with the passed ID.
      *
-     * @param entityId the id of the entity to load messages for
-     * @return read message
+     * @param entityId the ID of the entity to load messages for
+     * @return list of messages or empty list if no messages were found
      */
     List<M> load(I entityId);
 
     /**
-     * Stores message to storage. Storage should determine parent id by itself.
+     * Store a message for the entity with the passed ID.
      *
-     * @param id the ID of the entity
-     * @param message message to store in storage
+     * @param entityId the ID of the entity
+     * @param message a message to store
      */
-    void store(I id, M message);
+    void store(I entityId, M message);
 
     /**
-     * Loads messages for the object with the passed ID that have timestamp equal or after the passed value.
+     * Loads messages for the entity recorded on or after specified time.
      *
      * @param entityId the id of the entity to load messages for
      * @param from     the timestamp from which load messages
-     * @return list of messages or an empty list if no messages were found
+     * @return list of messages or an empty list if no matching messages were found
      */
     List<M> loadSince(I entityId, Timestamp from);
 
