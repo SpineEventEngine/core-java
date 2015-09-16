@@ -25,16 +25,17 @@ import org.spine3.base.EventRecord;
 
 import java.util.List;
 
+//TODO:2015-09-16:alexander.yevsyukov: Have generic parameter for aggregate root ID type.
 /**
  * Stores and loads the events for a class of aggregate roots.
  *
  * @author Mikhail Mikhaylov
  */
-public class RepositoryEventStore {
+public class AggregateRootEventStorage {
 
     private final StorageWithTimelineAndVersion<EventRecord> storage;
 
-    public RepositoryEventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
+    public AggregateRootEventStorage(StorageWithTimelineAndVersion<EventRecord> storage) {
         this.storage = storage;
     }
 

@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.AggregateRootEventStorage;
 import org.spine3.server.RepositoryBase;
-import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotStorage;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -70,7 +70,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * The store for events and snapshots.
      */
-    private final RepositoryEventStore eventStorage;
+    private final AggregateRootEventStorage eventStorage;
 
     /**
      * The storage for snapshots.
@@ -92,7 +92,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase(RepositoryEventStore eventStorage, SnapshotStorage snapshotStorage) {
+    protected AggregateRootRepositoryBase(AggregateRootEventStorage eventStorage, SnapshotStorage snapshotStorage) {
         super();
         this.eventStorage = eventStorage;
         this.snapshotStorage = snapshotStorage;

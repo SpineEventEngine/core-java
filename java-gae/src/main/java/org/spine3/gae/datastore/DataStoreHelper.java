@@ -126,9 +126,11 @@ class DataStoreHelper {
         final ByteString messageByteString = ByteString.copyFrom(messageBlob.getBytes());
         final String typeUrl = (String) entity.getProperty(TYPE_KEY);
 
+        //TODO:2015-09-16:alexander.yevsyukov: Use Any.unpack() instead. We know type here.
         final Any messageAny = Any.newBuilder().setValue(messageByteString).setTypeUrl(typeUrl).build();
 
-        return Messages.fromAny(messageAny);
+        final T result = Messages.fromAny(messageAny);
+        return result;
     }
 
     private static <T extends Message> List<T> readAll(PreparedQuery query) {

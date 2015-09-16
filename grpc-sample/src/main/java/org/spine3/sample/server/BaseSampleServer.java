@@ -56,7 +56,7 @@ public abstract class BaseSampleServer {
 
     private OrderRootRepository getOrderRootRepository() {
 
-        final RepositoryEventStore eventStore = new RepositoryEventStore(
+        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage(
                 provideEventStoreStorage()
         );
 
