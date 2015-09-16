@@ -41,14 +41,14 @@ public interface Storage<M extends Message> {
      * @param parentId parent id of message
      * @return read message
      */
-    List<M> read(Message parentId);
+    List<M> load(Message parentId);
 
     /**
      * Reads all Messages of type {@link M} from storage.
      *
      * @return read messages
      */
-    List<M> readAll();
+    List<M> loadAll();
 
     //TODO:2015-09-06:alexander.yevsyukov: We need to define a method, which gets ID by the message.
     // Otherwise it would be hard to create storage implementations.

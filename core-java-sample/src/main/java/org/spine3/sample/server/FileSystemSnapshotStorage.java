@@ -38,12 +38,11 @@ public class FileSystemSnapshotStorage implements SnapshotStorage {
 
     /**
      * Writes the snapshot of the given aggregate root to storage.
-     *
-     * @param parentId parent id for snapshot
+     *  @param parentId parent id for snapshot
      * @param snapshot the snapshot to store
      */
     @Override
-    public void store(Snapshot snapshot, Message parentId) {
+    public void store(Message parentId, Snapshot snapshot) {
         File file = FileSystemHelper.getSnapshotsFile(parentId);
 
         FileSystemHelper.writeMessage(file, snapshot);
@@ -56,7 +55,7 @@ public class FileSystemSnapshotStorage implements SnapshotStorage {
      * @return the {@link Snapshot} object
      */
     @Override
-    public Snapshot read(Message parentId) {
+    public Snapshot load(Message parentId) {
         File file = FileSystemHelper.getSnapshotsFile(parentId);
 
         Snapshot snapshot = readLastSnapshotFromFile(file);

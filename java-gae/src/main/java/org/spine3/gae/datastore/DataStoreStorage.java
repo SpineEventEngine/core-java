@@ -82,13 +82,13 @@ public class DataStoreStorage<M extends Message> implements StorageWithTimelineA
     }
 
     @Override
-    public List<M> read(Message parentId) {
+    public List<M> load(Message parentId) {
         return dataStoreHelper.readByFilter(type.toString(), new Query.FilterPredicate(
                 PARENT_ID_KEY, EQUAL, toJson(parentId)));
     }
 
     @Override
-    public List<M> readAll() {
+    public List<M> loadAll() {
         return dataStoreHelper.read(type.toString());
     }
 }

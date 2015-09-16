@@ -22,6 +22,8 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 
+//TODO:2015-09-16:alexander.yevsyukov: Have generic parameter for type of IDs.
+
 /**
  * Defines the low level data interface of the storage
  * that is used to read and write Snapshots as Protobuf messages.
@@ -33,10 +35,10 @@ public interface SnapshotStorage {
     /**
      * Stores Snapshot with desired Parent Id.
      *
-     * @param snapshot snapshot to be stored
      * @param parentId parent id to identify snapshots of different Aggregate Root instances
+     * @param snapshot snapshot to be stored
      */
-    void store(Snapshot snapshot, Message parentId);
+    void store(Message parentId, Snapshot snapshot);
 
     /**
      * Reads snapshot from storage by appropriate parent id.
@@ -44,6 +46,6 @@ public interface SnapshotStorage {
      * @param parentId parent id to identify snapshots of different Aggregate Root instances
      * @return read snapshot
      */
-    Snapshot read(Message parentId);
+    Snapshot load(Message parentId);
 
 }

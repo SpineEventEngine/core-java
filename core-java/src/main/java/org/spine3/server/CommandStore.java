@@ -23,7 +23,6 @@ package org.spine3.server;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.server.StorageWithTimeline;
 
 import java.util.List;
 
@@ -56,7 +55,7 @@ public class CommandStore {
      * @return list of commands for the aggregate root
      */
     public List<CommandRequest> getCommands(Message aggregateRootId) {
-        return storage.read(aggregateRootId);
+        return storage.load(aggregateRootId);
     }
 
     /**

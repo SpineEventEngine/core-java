@@ -32,15 +32,10 @@ import java.util.List;
  */
 public class RepositoryEventStore {
 
-    private long eventCount;
     private final StorageWithTimelineAndVersion<EventRecord> storage;
 
-    private long snapshotCount;
-    private final SnapshotStorage snapshotStorage;
-
-    public RepositoryEventStore(StorageWithTimelineAndVersion<EventRecord> storage, SnapshotStorage snapshotStorage) {
+    public RepositoryEventStore(StorageWithTimelineAndVersion<EventRecord> storage) {
         this.storage = storage;
-        this.snapshotStorage = snapshotStorage;
     }
 
     /**
@@ -50,51 +45,6 @@ public class RepositoryEventStore {
      */
     public void store(EventRecord record) {
         storage.store(record);
-        ++eventCount;
-    }
-
-    /**
-     * Obtains the number of events stored.
-     * <p>
-     * The number of snapshots is not included into this value.
-     *
-     * @return the number of stored events
-     * @see #getSnapshotCount()
-     */
-    public long getEventCount() {
-        return eventCount;
-    }
-
-    /**
-     * Stores the aggregate root's snapshot.
-     *
-     * @param aggregateId the id of aggregate root
-     * @param snapshot    the snapshot of aggregate root
-     */
-    public void storeSnapshot(Message aggregateId, Snapshot snapshot) {
-        snapshotStorage.store(snapshot, aggregateId);
-        ++snapshotCount;
-    }
-
-    /**
-     * @return the number of snapshots stored
-     */
-    public long getSnapshotCount() {
-        return snapshotCount;
-    }
-
-    public void setSnapshotCount(long snapshotCount) {
-        this.snapshotCount = snapshotCount;
-    }
-
-    /**
-     * Loads aggregateRoot's snapshot by given aggregateRootId.
-     *
-     * @param aggregateRootId the id of aggregate root
-     * @return the snapshot of aggregate root
-     */
-    public Snapshot getLastSnapshot(Message aggregateRootId) {
-        return snapshotStorage.read(aggregateRootId);
     }
 
     /**
@@ -104,7 +54,7 @@ public class RepositoryEventStore {
      * @return list of events
      */
     public List<EventRecord> getAllEvents(Message aggregateRootId) {
-        List<EventRecord> result = storage.read(aggregateRootId);
+        List<EventRecord> result = storage.load(aggregateRootId);
         return result;
     }
 

@@ -53,7 +53,7 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
     }
 
     @Override
-    public void store(Snapshot snapshot, Message parentId) {
+    public void store(Message parentId, Snapshot snapshot) {
         final Entity dataStoreEntity = new Entity(entityKind.toString(), toJson(parentId));
 
         final Any any = Messages.toAny(snapshot);
@@ -65,7 +65,7 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
     }
 
     @Override
-    public Snapshot read(Message parentId) {
+    public Snapshot load(Message parentId) {
         return dataStoreHelper.read(entityKind, toJson(parentId));
     }
 }

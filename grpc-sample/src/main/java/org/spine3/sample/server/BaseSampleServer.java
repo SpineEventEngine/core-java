@@ -57,11 +57,10 @@ public abstract class BaseSampleServer {
     private OrderRootRepository getOrderRootRepository() {
 
         final RepositoryEventStore eventStore = new RepositoryEventStore(
-                provideEventStoreStorage(),
-                provideSnapshotStorage());
+                provideEventStoreStorage()
+        );
 
-        final OrderRootRepository repository = new OrderRootRepository();
-        repository.configure(eventStore);
+        final OrderRootRepository repository = new OrderRootRepository(eventStore, provideSnapshotStorage());
         return repository;
     }
 
