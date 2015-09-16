@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.AggregateRootEventStorage;
 import org.spine3.server.RepositoryBase;
 import org.spine3.server.Snapshot;
 import org.spine3.server.SnapshotStorage;

@@ -29,6 +29,7 @@ import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.server.*;
+import org.spine3.server.aggregate.AggregateRootEventStorage;
 import org.spine3.util.UserIds;
 
 import java.util.List;
