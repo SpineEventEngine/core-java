@@ -39,8 +39,6 @@ import java.util.List;
  */
 public interface MessageJournal<I, M extends Message> {
 
-    //TODO:2015-09-06:alexander.yevsyukov: Have Id as another generic type.
-
     /**
      * Reads Messages of type {@link M} with appropriate Parent Id from storage.
      *
@@ -49,13 +47,13 @@ public interface MessageJournal<I, M extends Message> {
      */
     List<M> load(I entityId);
 
-    //TODO:2015-09-16:alexander.yevsyukov: Pass ID as a parameter to this method. Don't force implementations to figure it out.
     /**
      * Stores message to storage. Storage should determine parent id by itself.
      *
+     * @param id the ID of the entity
      * @param message message to store in storage
      */
-    void store(M message);
+    void store(I id, M message);
 
     /**
      * Loads messages for the object with the passed ID that have timestamp equal or after the passed value.

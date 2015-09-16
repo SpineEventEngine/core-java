@@ -43,7 +43,8 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        storage.store(record);
+        String id = Entity.idToString(record.getContext().getAggregateId());
+        storage.store(id, record);
     }
 
     /**

@@ -68,7 +68,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * The store for events and snapshots.
      */
-    private final AggregateRootEventStorage eventStorage;
+    private final AggregateRootEventStorage<I> eventStorage;
 
     /**
      * The storage for snapshots.
@@ -90,7 +90,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase(AggregateRootEventStorage eventStorage, SnapshotStorage snapshotStorage) {
+    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage snapshotStorage) {
         super();
         this.eventStorage = eventStorage;
         this.snapshotStorage = snapshotStorage;

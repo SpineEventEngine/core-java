@@ -55,7 +55,7 @@ public class DataStoreStorage<I, M extends Message> implements MessageJournal<I,
     }
 
     @Override
-    public void store(Message message) {
+    public void store(I id, M message) {
         final Entity dataStoreEntity = Converters.convert(message);
 
         dataStoreHelper.put(dataStoreEntity);

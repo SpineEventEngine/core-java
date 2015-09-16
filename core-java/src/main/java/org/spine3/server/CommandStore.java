@@ -22,6 +22,8 @@ package org.spine3.server;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
+import org.spine3.server.aggregate.AggregateCommand;
+import org.spine3.server.aggregate.AggregateId;
 
 import java.util.List;
 
@@ -44,7 +46,9 @@ public class CommandStore {
      * @param request command request to store
      */
     public void store(CommandRequest request) {
-        storage.store(request);
+        final AggregateId aggregateId = AggregateCommand.getAggregateId(request.getCommand());
+        String id = Entity.idToString(aggregateId.value());
+        storage.store(id, request);
     }
 
     /**

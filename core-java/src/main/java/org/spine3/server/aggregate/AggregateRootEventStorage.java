@@ -19,8 +19,11 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandId;
 import org.spine3.base.EventRecord;
+import org.spine3.server.Entity;
 import org.spine3.server.MessageJournal;
 
 import java.util.List;
@@ -44,7 +47,15 @@ public class AggregateRootEventStorage<I> {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        storage.store(record);
+        /**
+         * The type is ensured by binding the same type in AggregateRootRepositoryBase to ID type
+         * of AggregateRoot and AggregateRootEventStorage.
+         *
+         * @see AggregateRoot#createEventContext(CommandId, Message, Message, int)
+         */
+        @SuppressWarnings("unchecked")
+        I id = (I)Entity.idFromAny(record.getContext().getAggregateId());
+        storage.store(id, record);
     }
 
     /**
