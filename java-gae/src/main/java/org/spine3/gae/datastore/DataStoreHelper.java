@@ -76,11 +76,7 @@ class DataStoreHelper {
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected <T extends Message> List<T> read(String kind) {
-        return readByFilter(kind, null);
-    }
-
-    protected <T extends Message> List<T> readByFilter(String kind, @Nullable Query.Filter filter) {
+    protected <T extends Message> List<T> loadByFilter(String kind, @Nullable Query.Filter filter) {
         final Query query = new Query(kind);
         if (filter != null) {
             query.setFilter(filter);
