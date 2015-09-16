@@ -34,7 +34,7 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public interface EntityMessageStorage<M extends Message> {
+public interface EntityMessagesStorage<M extends Message> {
 
     //TODO:2015-09-06:alexander.yevsyukov: Have Id as another parameterizing type.
 

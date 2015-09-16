@@ -26,12 +26,12 @@ import com.google.protobuf.Timestamp;
 import java.util.List;
 
 /**
- * Extends {@link EntityMessageStorage} and provides an ability to work with Timestamp.
+ * Extends {@link EntityMessagesStorage} and provides an ability to work with Timestamp.
  *
  * @param <M> Message type to store
  * @author Mikhail Mikhaylov
  */
-public interface StorageWithTimeline<M extends Message> extends EntityMessageStorage<M> {
+public interface StorageWithTimeline<M extends Message> extends EntityMessagesStorage<M> {
 
     /**
      * Loads messages with the timestamp equal or after the passed value.
