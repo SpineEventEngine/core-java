@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
 import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotStorage;
 import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nonnull;

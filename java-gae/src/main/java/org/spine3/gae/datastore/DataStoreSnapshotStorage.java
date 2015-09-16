@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 import static org.spine3.gae.datastore.DataStoreHelper.TYPE_KEY;
 import static org.spine3.gae.datastore.DataStoreHelper.VALUE_KEY;

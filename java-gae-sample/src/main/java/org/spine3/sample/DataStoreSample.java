@@ -29,9 +29,9 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.gae.datastore.DataStoreStorageFactory;
 import org.spine3.sample.order.Order;
-import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * Entry point for core-java sample without gRPC. Works with DataStore.

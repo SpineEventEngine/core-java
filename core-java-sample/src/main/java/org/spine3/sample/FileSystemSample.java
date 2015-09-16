@@ -26,9 +26,9 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.sample.server.FileSystemStorageFactory;
-import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 import java.io.File;
 import java.io.IOException;

@@ -19,9 +19,9 @@
  */
 package org.spine3.sample.order;
 
-import org.spine3.server.SnapshotStorage;
 import org.spine3.server.aggregate.AggregateRootEventStorage;
 import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * @author Mikhail Melnik

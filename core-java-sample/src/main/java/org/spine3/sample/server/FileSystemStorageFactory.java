@@ -22,9 +22,9 @@ package org.spine3.sample.server;
 
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.SnapshotStorage;
 import org.spine3.server.StorageWithTimeline;
 import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * This class provides factory methods for creating storages based on file system.

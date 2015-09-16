@@ -18,9 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.server.Snapshot;
 
 //TODO:2015-09-16:alexander.yevsyukov: Have generic parameter for type of IDs.
 

@@ -32,6 +32,7 @@ import org.spine3.sample.EventLogger;
 import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.server.*;
 import org.spine3.server.aggregate.AggregateRootEventStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * Sample gRPC server implementation.

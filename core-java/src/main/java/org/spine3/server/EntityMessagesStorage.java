@@ -29,14 +29,14 @@ import java.util.List;
  *
  * <p>An entity can have more than one associated message.
  *
- * @param <M> Message type to store
+ * @param <M> the type of messages to store
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
 public interface EntityMessagesStorage<M extends Message> {
 
-    //TODO:2015-09-06:alexander.yevsyukov: Have Id as another parameterizing type.
+    //TODO:2015-09-06:alexander.yevsyukov: Have Id as another generic type.
 
     /**
      * Reads Messages of type {@link M} with appropriate Parent Id from storage.
@@ -46,6 +46,7 @@ public interface EntityMessagesStorage<M extends Message> {
      */
     List<M> load(Message parentId);
 
+    //TODO:2015-09-16:alexander.yevsyukov: Pass ID as a parameter to this method. Don't force implementations to figure it out.
     /**
      * Stores message to storage. Storage should determine parent id by itself.
      *
