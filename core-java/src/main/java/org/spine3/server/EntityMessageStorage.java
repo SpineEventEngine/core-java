@@ -25,15 +25,16 @@ import com.google.protobuf.Message;
 import java.util.List;
 
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Protobuf messages.
+ * A storage for messages associated with entity objects.
+ *
+ * <p>An entity can have more than one associated message.
  *
  * @param <M> Message type to store
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public interface Storage<M extends Message> {
+public interface EntityMessageStorage<M extends Message> {
 
     //TODO:2015-09-06:alexander.yevsyukov: Have Id as another parameterizing type.
 
