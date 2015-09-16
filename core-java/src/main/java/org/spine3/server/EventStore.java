@@ -53,7 +53,7 @@ public class EventStore {
      * @return list of events
      */
     public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.read(from);
+        List<EventRecord> result = storage.load(from);
         return result;
     }
 

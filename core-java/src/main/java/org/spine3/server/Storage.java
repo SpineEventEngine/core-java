@@ -29,7 +29,9 @@ import java.util.List;
  * that is used to read and write Protobuf messages.
  *
  * @param <M> Message type to store
+ *
  * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
 public interface Storage<M extends Message> {
 
@@ -42,16 +44,6 @@ public interface Storage<M extends Message> {
      * @return read message
      */
     List<M> load(Message parentId);
-
-    /**
-     * Reads all Messages of type {@link M} from storage.
-     *
-     * @return read messages
-     */
-    List<M> loadAll();
-
-    //TODO:2015-09-06:alexander.yevsyukov: We need to define a method, which gets ID by the message.
-    // Otherwise it would be hard to create storage implementations.
 
     /**
      * Stores message to storage. Storage should determine parent id by itself.

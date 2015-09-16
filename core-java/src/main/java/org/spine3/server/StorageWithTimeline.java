@@ -34,19 +34,19 @@ import java.util.List;
 public interface StorageWithTimeline<M extends Message> extends Storage<M> {
 
     /**
-     * Reads Messages of type {@link M} from storage from chosen timestamp.
+     * Loads messages with the timestamp equal or after the passed value.
      *
-     * @param from     timestamp to read messages from
-     * @return read message
+     * @param from  timestamp to read messages from
+     * @return the list of messages with the matching timestamp or an empty list if no messages were found
      */
-    List<M> read(Timestamp from);
+    List<M> load(Timestamp from);
 
     /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage from chosen timestamp.
+     * Loads messages for the object with the passed ID that have timestamp equal or after the passed value.
      *
-     * @param parentId parent id of message
+     * @param id the id of the object to load messages for
      * @param from     timestamp to read messages from
-     * @return read message
+     * @return list of messages or an empty list if no messages were found
      */
-    List<M> read(Message parentId, Timestamp from);
+    List<M> load(Message id, Timestamp from);
 }

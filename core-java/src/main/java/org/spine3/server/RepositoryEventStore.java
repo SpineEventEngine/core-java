@@ -26,7 +26,7 @@ import org.spine3.base.EventRecord;
 import java.util.List;
 
 /**
- * Stores and loads the events for desired Aggregate Root and it's snapshots.
+ * Stores and loads the events for a class of aggregate roots.
  *
  * @author Mikhail Mikhaylov
  */
@@ -66,7 +66,7 @@ public class RepositoryEventStore {
      * @return list of events
      */
     public List<EventRecord> getEvents(Message aggregateRootId, Timestamp from) {
-        List<EventRecord> result = storage.read(aggregateRootId, from);
+        List<EventRecord> result = storage.load(aggregateRootId, from);
         return result;
     }
 
@@ -78,7 +78,7 @@ public class RepositoryEventStore {
      * @return list of the event records
      */
     public List<EventRecord> getEvents(Message aggregateRootId, int sinceVersion) {
-        List<EventRecord> result = storage.read(aggregateRootId, sinceVersion);
+        List<EventRecord> result = storage.load(aggregateRootId, sinceVersion);
         return result;
     }
 

@@ -30,8 +30,7 @@ import java.util.List;
  * @param <M> Message type to store
  * @author Mikhail Mikhaylov
  */
-public interface StorageWithTimelineAndVersion<M extends Message>
-        extends StorageWithTimeline<M> {
+public interface StorageWithTimelineAndVersion<M extends Message> extends StorageWithTimeline<M> {
 
     /**
      * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
@@ -40,5 +39,5 @@ public interface StorageWithTimelineAndVersion<M extends Message>
      * @param sinceVersion  sinceVersion to read messages from
      * @return read message
      */
-    List<M> read(Message parentId, int sinceVersion);
+    List<M> load(Message parentId, int sinceVersion);
 }

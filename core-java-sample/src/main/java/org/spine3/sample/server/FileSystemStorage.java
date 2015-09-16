@@ -61,7 +61,7 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> read(Message parentId, int sinceVersion) {
+    public List<M> load(Message parentId, int sinceVersion) {
         checkNotNull(parentId);
 
         final List<M> messages = FileSystemHelper.read(clazz, parentId);
@@ -74,7 +74,7 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> read(Timestamp from) {
+    public List<M> load(Timestamp from) {
         checkNotNull(from);
 
         final List<M> messages = FileSystemHelper.readAll(clazz);
@@ -87,7 +87,7 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> read(Message parentId, Timestamp from) {
+    public List<M> load(Message parentId, Timestamp from) {
         checkNotNull(from);
         checkNotNull(parentId);
 
@@ -101,20 +101,11 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     }
 
     @Override
-    public List<M> load(Message parentId) {
-        checkNotNull(parentId);
+    public List<M> load(Message id) {
+        checkNotNull(id);
 
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
+        final List<M> messages = FileSystemHelper.read(clazz, id);
 
-        return messages;
-    }
-
-    @Override
-    public List<M> loadAll() {
-        final List<M> messages = FileSystemHelper.readAll(clazz);
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        helper.sort(messages);
         return messages;
     }
 
