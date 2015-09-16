@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ import static org.spine3.protobuf.Messages.toJson;
 /**
  * @param <M> Message type to store
  */
-public class DataStoreStorage<M extends Message> implements StorageOfEntityMessages<M> {
+public class DataStoreStorage<M extends Message> implements MessageJournal<M> {
 
     private final DataStoreHelper dataStoreHelper;
 

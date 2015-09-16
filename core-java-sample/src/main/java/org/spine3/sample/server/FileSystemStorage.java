@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
@@ -43,7 +43,7 @@ import static org.spine3.util.Lists.filter;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage<M extends Message> implements StorageOfEntityMessages<M> {
+public class FileSystemStorage<M extends Message> implements MessageJournal<M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())

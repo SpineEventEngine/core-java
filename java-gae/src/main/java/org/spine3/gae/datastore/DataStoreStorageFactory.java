@@ -23,7 +23,7 @@ package org.spine3.gae.datastore;
 import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
@@ -42,7 +42,7 @@ public class DataStoreStorageFactory {
      *
      * @return Storage with Timeline and Version
      */
-    public static StorageOfEntityMessages<EventRecord> createEventStoreStorage() {
+    public static MessageJournal<EventRecord> createEventStoreStorage() {
         return DataStoreStorage.newInstance(EventRecord.class);
     }
 
@@ -61,7 +61,7 @@ public class DataStoreStorageFactory {
      *
      * @return Storage with Timeline
      */
-    public static StorageOfEntityMessages<CommandRequest> createCommandStoreStorage() {
+    public static MessageJournal<CommandRequest> createCommandStoreStorage() {
         return DataStoreStorage.newInstance(CommandRequest.class);
     }
 }

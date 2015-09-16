@@ -22,7 +22,7 @@ package org.spine3.sample.server;
 
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
@@ -41,7 +41,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageOfEntityMessages<EventRecord> createEventStoreStorage() {
+    public static MessageJournal<EventRecord> createEventStoreStorage() {
         return FileSystemStorage.newInstance(EventRecord.class);
     }
 
@@ -59,7 +59,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageOfEntityMessages<CommandRequest> createCommandStoreStorage() {
+    public static MessageJournal<CommandRequest> createCommandStoreStorage() {
         return FileSystemStorage.newInstance(CommandRequest.class);
     }
 }

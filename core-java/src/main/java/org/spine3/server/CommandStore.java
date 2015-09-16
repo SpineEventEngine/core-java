@@ -33,9 +33,9 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private final StorageOfEntityMessages<CommandRequest> storage;
+    private final MessageJournal<CommandRequest> storage;
 
-    public CommandStore(StorageOfEntityMessages<CommandRequest> storage) {
+    public CommandStore(MessageJournal<CommandRequest> storage) {
         this.storage = storage;
     }
 
@@ -54,7 +54,7 @@ public class CommandStore {
      * @param aggregateRootId the id of the aggregate root
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> getCommands(Message aggregateRootId) {
+    public List<CommandRequest> loadCommands(Message aggregateRootId) {
         return storage.load(aggregateRootId);
     }
 
@@ -62,10 +62,10 @@ public class CommandStore {
      * Loads all commands for the given aggregate root id from given timestamp.
      *
      * @param aggregateRootId the id of the aggregate root
-     * @param from            the timestamp to load commands from
+     * @param timestamp            the timestamp to load commands from
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
-        return storage.loadSince(aggregateRootId, from);
+    public List<CommandRequest> loadCommandsSince(Message aggregateRootId, Timestamp timestamp) {
+        return storage.loadSince(aggregateRootId, timestamp);
     }
 }

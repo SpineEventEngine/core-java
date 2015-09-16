@@ -26,7 +26,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.sample.server.FileSystemStorageFactory;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 import java.io.File;
@@ -74,12 +74,12 @@ public class FileSystemSample extends BaseSample {
     }
 
     @Override
-    protected StorageOfEntityMessages<EventRecord> provideEventStoreStorage() {
+    protected MessageJournal<EventRecord> provideEventStoreStorage() {
         return FileSystemStorageFactory.createEventStoreStorage();
     }
 
     @Override
-    protected StorageOfEntityMessages<CommandRequest> provideCommandStoreStorage() {
+    protected MessageJournal<CommandRequest> provideCommandStoreStorage() {
         return FileSystemStorageFactory.createCommandStoreStorage();
     }
 

@@ -31,9 +31,9 @@ import java.util.List;
  */
 public class EventStore {
 
-    private final StorageOfEntityMessages<EventRecord> storage;
+    private final MessageJournal<EventRecord> storage;
 
-    public EventStore(StorageOfEntityMessages<EventRecord> storage) {
+    public EventStore(MessageJournal<EventRecord> storage) {
         this.storage = storage;
     }
 

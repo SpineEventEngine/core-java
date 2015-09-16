@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 
 import java.util.List;
 
@@ -34,9 +34,9 @@ import java.util.List;
  */
 public class AggregateRootEventStorage {
 
-    private final StorageOfEntityMessages<EventRecord> storage;
+    private final MessageJournal<EventRecord> storage;
 
-    public AggregateRootEventStorage(StorageOfEntityMessages<EventRecord> storage) {
+    public AggregateRootEventStorage(MessageJournal<EventRecord> storage) {
         this.storage = storage;
     }
 

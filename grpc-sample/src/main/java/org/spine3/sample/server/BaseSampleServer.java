@@ -33,7 +33,7 @@ import org.spine3.sample.order.OrderRootRepository;
 import org.spine3.server.CommandStore;
 import org.spine3.server.Engine;
 import org.spine3.server.EventStore;
-import org.spine3.server.StorageOfEntityMessages;
+import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.AggregateRootEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
 
@@ -122,9 +122,9 @@ public abstract class BaseSampleServer {
 
     protected abstract Logger getLog();
 
-    protected abstract StorageOfEntityMessages<EventRecord> provideEventStoreStorage();
+    protected abstract MessageJournal<EventRecord> provideEventStoreStorage();
 
-    protected abstract StorageOfEntityMessages<CommandRequest> provideCommandStoreStorage();
+    protected abstract MessageJournal<CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 }
