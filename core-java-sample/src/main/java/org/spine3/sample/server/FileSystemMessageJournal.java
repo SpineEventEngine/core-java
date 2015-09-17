@@ -43,19 +43,20 @@ public class FileSystemMessageJournal<I, M extends Message> extends BaseMessageJ
     }
 
     @Override
-    protected List<M> getById(Class<M> messageClass, I parentId) {
-        final List<M> messages = FileSystemHelper.read(messageClass, parentId);
+    protected List<M> getById(I parentId) {
+        final List<M> messages = FileSystemHelper.read(getMessageClass(), parentId);
         return messages;
     }
 
     @Override
-    protected List<M> getAll(Class<M> messageClass) {
-        final List<M> messages = FileSystemHelper.readAll(messageClass);
+    protected List<M> getAll() {
+        final List<M> messages = FileSystemHelper.readAll(getMessageClass());
         return messages;
     }
 
+    // TODO[alexander.litus]: entityId is not used
     @Override
     protected void save(I entityId, M message) {
-        FileSystemHelper.write(message); // TODO[alexander.litus]: entityId is not used!
+        FileSystemHelper.write(message);
     }
 }

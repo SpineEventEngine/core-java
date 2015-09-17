@@ -57,15 +57,15 @@ public abstract class BaseMessageJournal<I, M extends Message> implements Messag
     }
 
     protected abstract void save(I entityId, M message);
-    protected abstract List<M> getById(Class<M> messageClass, I parentId);
-    protected abstract List<M> getAll(Class<M> messageClass);
+    protected abstract List<M> getById(I parentId);
+    protected abstract List<M> getAll();
 
 
     @Override
     public List<M> load(I entityId) {
         checkNotNull(entityId);
 
-        final List<M> messages = getById(messageClass, entityId);
+        final List<M> messages = getById(entityId);
 
         return messages;
     }
@@ -81,7 +81,7 @@ public abstract class BaseMessageJournal<I, M extends Message> implements Messag
         checkNotNull(timestamp);
         checkNotNull(entityId);
 
-        final List<M> messages = getById(messageClass, entityId);
+        final List<M> messages = getById(entityId);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
@@ -94,7 +94,7 @@ public abstract class BaseMessageJournal<I, M extends Message> implements Messag
     public List<M> loadAllSince(Timestamp timestamp) {
         checkNotNull(timestamp);
 
-        final List<M> messages = getAll(messageClass);
+        final List<M> messages = getAll();
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
@@ -103,10 +103,7 @@ public abstract class BaseMessageJournal<I, M extends Message> implements Messag
         return result;
     }
 
-
     private static class CommandFilteringHelper implements FilteringHelper<CommandRequest> {
-
-        private static final String COMMANDS_DO_NOT_SUPPORT_VERSIONS = "Commands don\'t support versions";
 
         @Override
         public Predicate<CommandRequest> getWereAfterPredicate(Timestamp from) {
@@ -117,6 +114,10 @@ public abstract class BaseMessageJournal<I, M extends Message> implements Messag
         public void sort(List<CommandRequest> messages) {
             Commands.sort(messages);
         }
+    }
+
+    protected Class<M> getMessageClass() {
+        return messageClass;
     }
 
     private static class EventFilteringHelper implements FilteringHelper<EventRecord> {
