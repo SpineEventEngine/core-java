@@ -20,44 +20,14 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-
-import java.util.List;
-
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Protobuf messages.
+ * A storage can store and load entities.
  *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
+ * @param <I> the type of entity ID
+ * @param <E> the type of entity
+ *
+ * @author Alexander Yevsyukov
  */
-public interface Storage<M extends Message> {
-
-    //TODO:2015-09-06:alexander.yevsyukov: Have Id as another parameterizing type.
-
-    /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage.
-     *
-     * @param parentId parent id of message
-     * @return read message
-     */
-    List<M> read(Message parentId);
-
-    /**
-     * Reads all Messages of type {@link M} from storage.
-     *
-     * @return read messages
-     */
-    List<M> readAll();
-
-    //TODO:2015-09-06:alexander.yevsyukov: We need to define a method, which gets ID by the message.
-    // Otherwise it would be hard to create storage implementations.
-
-    /**
-     * Stores message to storage. Storage should determine parent id by itself.
-     *
-     * @param message message to store in storage
-     */
-    void store(M message);
+public interface Storage<I, E extends Entity<I, ?>> {
 
 }

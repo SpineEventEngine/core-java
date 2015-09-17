@@ -24,10 +24,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.Messages;
+import org.spine3.server.Entity;
+import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
 
 import javax.annotation.Nullable;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides common file system access for {@link FileSystemStorage} and {@link FileSystemSnapshotStorage}.
+ * Provides common file system access for {@link FileSystemMessageJournal} and {@link FileSystemSnapshotStorage}.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
@@ -55,7 +55,7 @@ public class FileSystemHelper {
     @SuppressWarnings("StaticNonFinalField") //To divide initialization from class loading
     private static String fileStoragePath = null;
 
-    private static final Map<Class<?>, Helper<?>> helpers = ImmutableMap.<Class<?>, Helper<?>>builder()
+    private static final Map<Class<?>, Helper<?, ?>> helpers = ImmutableMap.<Class<?>, Helper<?, ?>>builder()
             .put(CommandRequest.class, new CommandHelper())
             .put(EventRecord.class, new EventHelper())
             .build();
@@ -72,18 +72,18 @@ public class FileSystemHelper {
         fileStoragePath = storagePath;
     }
 
-    protected static File getSnapshotsFile(Message aggregateId) {
+    protected static <I> File getSnapshotsFile(I aggregateId) {
         String snapshots = "snapshots";
         return getFile(aggregateId, snapshots);
     }
 
-    private static File getFile(Message aggregateId, String fileName) {
+    private static <I> File getFile(I aggregateId, String fileName) {
         if (Strings.isNullOrEmpty(fileStoragePath)) {
-            throw new RuntimeException(STORAGE_PATH_IS_NOT_SET);
+            throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
         }
         File result = new File(fileStoragePath + '/'
                 + aggregateId.getClass().getSimpleName()
-                + '-' + Messages.toJson(aggregateId) + '/' + fileName);
+                + '-' + Entity.idToString(aggregateId) + '/' + fileName);
         return result;
     }
 
@@ -149,18 +149,18 @@ public class FileSystemHelper {
         return new BufferedInputStream(new FileInputStream(file));
     }
 
-    protected static <M extends Message> List<M> read(Class<M> messageClass, Message parentId) {
+    protected static <I, M extends Message> List<M> read(Class<M> messageClass, I parentId) {
         //noinspection unchecked
-        final Helper<M> helper = (Helper<M>) helpers.get(messageClass);
+        final Helper<I, M> helper = (Helper<I, M>) helpers.get(messageClass);
         final File file = helper.getFile(parentId);
         final List<M> fileMessages = helper.readFromFile(file);
         return fileMessages;
     }
 
-    protected static <M extends Message> void write(M message) {
+    protected static <I, M extends Message> void write(M message) {
         final Class<? extends Message> messageClass = message.getClass();
         //noinspection unchecked
-        final Helper<M> helper = (Helper<M>) helpers.get(messageClass);
+        final Helper<I, M> helper = (Helper<I, M>) helpers.get(messageClass);
 
         helper.write(message);
     }
@@ -182,7 +182,7 @@ public class FileSystemHelper {
         return allMessages;
     }
 
-    private static class CommandHelper extends Helper<CommandRequest> {
+    private static class CommandHelper extends Helper<String, CommandRequest> {
 
         @Override
         public List<CommandRequest> readFromFile(File file) {
@@ -222,7 +222,7 @@ public class FileSystemHelper {
         }
     }
 
-    private static class EventHelper extends Helper<EventRecord> {
+    private static class EventHelper<I> extends Helper<I, EventRecord> {
 
         @Override
         public List<EventRecord> readFromFile(File file) {
@@ -254,16 +254,16 @@ public class FileSystemHelper {
 
         @Override
         protected void write(EventRecord message) {
-            Message aggregateId = Messages.fromAny(message.getContext().getAggregateId());
+            Object aggregateId = Entity.idFromAny(message.getContext().getAggregateId());
             File file = FileSystemHelper.getFile(aggregateId, getFileNameSuffix());
 
             writeMessage(file, message);
         }
     }
 
-    private abstract static class Helper<M extends Message> {
+    private abstract static class Helper<I, M extends Message> {
 
-        protected File getFile(Message parentId) {
+        protected File getFile(I parentId) {
             return FileSystemHelper.getFile(parentId, getFileNameSuffix());
         }
 

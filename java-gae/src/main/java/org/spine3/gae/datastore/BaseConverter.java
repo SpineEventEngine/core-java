@@ -25,10 +25,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.aggregate.AggregateId;
 
 import static org.spine3.gae.datastore.DataStoreHelper.*;
 
@@ -40,7 +40,7 @@ import static org.spine3.gae.datastore.DataStoreHelper.*;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-abstract class BaseConverter<T extends Message, I extends Message> implements Converter<T> {
+abstract class BaseConverter<I extends Message, T extends Message> implements Converter<T> {
 
     private final TypeName typeName;
 

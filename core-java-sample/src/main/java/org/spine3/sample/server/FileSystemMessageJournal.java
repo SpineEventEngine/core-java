@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
@@ -37,13 +37,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Lists.filter;
 
 /**
- * Test file system based implementation of the {@link Message} repository.
+ * {@code MessageJournal} based on file system.
+ *
+ * {@inheritDoc}
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
+public class FileSystemMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())
@@ -52,89 +54,60 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
 
     private final Class<M> clazz;
 
-    public static <M extends Message> FileSystemStorage<M> newInstance(Class<M> messageClass) {
-        return new FileSystemStorage<>(messageClass);
+    public static <I, M extends Message> FileSystemMessageJournal<I, M> newInstance(Class<M> messageClass) {
+        return new FileSystemMessageJournal<>(messageClass);
     }
 
-    private FileSystemStorage(Class<M> clazz) {
+    private FileSystemMessageJournal(Class<M> clazz) {
         this.clazz = clazz;
     }
 
     @Override
-    public List<M> read(Message parentId, int sinceVersion) {
-        checkNotNull(parentId);
-
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getSinceVersionPredicate(sinceVersion);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> read(Timestamp from) {
-        checkNotNull(from);
+    public List<M> loadAllSince(Timestamp timestamp) {
+        checkNotNull(timestamp);
 
         final List<M> messages = FileSystemHelper.readAll(clazz);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
         final ImmutableList<M> result = filter(messages, predicate);
         return result;
     }
 
     @Override
-    public List<M> read(Message parentId, Timestamp from) {
-        checkNotNull(from);
-        checkNotNull(parentId);
+    public List<M> loadSince(I entityId, Timestamp timestamp) {
+        checkNotNull(timestamp);
+        checkNotNull(entityId);
 
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
+        final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         //noinspection unchecked
         final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
         final ImmutableList<M> result = filter(messages, predicate);
         return result;
     }
 
     @Override
-    public List<M> read(Message parentId) {
-        checkNotNull(parentId);
+    public List<M> load(I entityId) {
+        checkNotNull(entityId);
 
-        final List<M> messages = FileSystemHelper.read(clazz, parentId);
+        final List<M> messages = FileSystemHelper.read(clazz, entityId);
 
         return messages;
     }
 
     @Override
-    public List<M> readAll() {
-        final List<M> messages = FileSystemHelper.readAll(clazz);
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        helper.sort(messages);
-        return messages;
-    }
-
-    @Override
-    public void store(Message message) {
+    public void store(I entityId, M message) {
         FileSystemHelper.write(message);
     }
 
     private static class CommandFilteringHelper implements FilteringHelper<CommandRequest> {
 
-        private static final String COMMANDS_DO_NOT_SUPPORT_VERSIONS = "Commands don\'t support versions";
-
         @Override
         public Predicate<CommandRequest> getWereAfterPredicate(Timestamp from) {
             return Commands.wereAfter(from);
-        }
-
-        @Override
-        public Predicate<CommandRequest> getSinceVersionPredicate(int sinceVersion) {
-            throw new IllegalStateException(COMMANDS_DO_NOT_SUPPORT_VERSIONS);
         }
 
         @Override
@@ -151,11 +124,6 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
         }
 
         @Override
-        public Predicate<EventRecord> getSinceVersionPredicate(int sinceVersion) {
-            return Events.getEventPredicate(sinceVersion);
-        }
-
-        @Override
         public void sort(List<EventRecord> messages) {
             Events.sort(messages);
         }
@@ -164,8 +132,6 @@ public class FileSystemStorage<M extends Message> implements StorageWithTimeline
     private interface FilteringHelper<M extends Message> {
 
         Predicate<M> getWereAfterPredicate(Timestamp from);
-
-        Predicate<M> getSinceVersionPredicate(int sinceVersion);
 
         void sort(List<M> messages);
     }

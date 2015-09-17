@@ -112,7 +112,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      */
     protected AggregateRoot(I id) {
         super(id);
-        this.idAsAny = Messages.idToAny(id);
+        this.idAsAny = idToAny(id);
     }
 
     /**

@@ -157,45 +157,6 @@ public class Messages {
         return result;
     }
 
-    /**
-     * Wraps the passed value into an instance of {@link Any}.
-     *
-     * <p>The passed value must be of one of the supported types listed below.
-     * The type of the value wrapped into the returned instance is defined by the type
-     * of the passed value:
-     *   <ul>
-     *       <li>For classes implementing {@link Message} — the value of the message itself</li>
-     *       <li>For {@code String} — {@link StringValue}</li>
-     *       <li>For {@code Long} — {@link UInt64Value}</li>
-     *       <li>For {@code Integer} — {@link UInt32Value}</li>
-     *   </ul>
-     *
-     * @param id the value to wrap
-     * @param <I> the type of the value
-     * @return instance of {@link Any} with the passed value
-     * @throws IllegalArgumentException if the passed value is not of the supported type
-     */
-    public static <I> Any idToAny(I id) {
-        Any anyId;
-        //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
-        if (id instanceof Message) {
-            Message message = (Message) id;
-            anyId = toAny(message);
-        } else if (id instanceof String) {
-            String s = (String) id;
-            anyId = toAny(StringValue.newBuilder().setValue(s).build());
-        } else if (id instanceof Integer) {
-            Integer intValue = (Integer) id;
-            anyId = toAny(UInt32Value.newBuilder().setValue(intValue).build());
-        } else if (id instanceof Long) {
-            Long longValue = (Long) id;
-            anyId = toAny(UInt64Value.newBuilder().setValue(longValue).build());
-        } else {
-            throw new IllegalArgumentException("ID of unsupported type encountered: " + id);
-        }
-        return anyId;
-    }
-
     private enum JsonPrinter {
         INSTANCE;
 

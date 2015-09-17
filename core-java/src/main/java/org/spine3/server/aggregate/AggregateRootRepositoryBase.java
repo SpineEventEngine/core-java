@@ -26,7 +26,6 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
-import org.spine3.server.RepositoryEventStore;
 import org.spine3.server.Snapshot;
 import org.spine3.server.internal.CommandHandlerMethod;
 
@@ -57,12 +56,29 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
+    /**
+     * The name of the method used for dispatching commands to aggregate roots.
+     *
+     * <p>This constant is used for obtaining {@code Method} instance via reflection.
+     *
+     * @see #dispatch(Message, CommandContext)
+     */
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     /**
      * The store for events and snapshots.
      */
-    private RepositoryEventStore repositoryEventStore;
+    private final AggregateRootEventStorage<I> eventStorage;
+
+    /**
+     * The storage for snapshots.
+     *
+     * <p>Snapshots are created each time the number of events exceeds the number
+     * configured in {@link #snapshotTrigger}.
+     *
+     * @see #countSinceLastSnapshot
+     */
+    private final SnapshotStorage<I> snapshotStorage;
 
     /**
      * The number of events to store between snapshots.
@@ -74,19 +90,10 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase() {
+    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
         super();
-    }
-
-    /**
-     * Configures repository with passed implementation of the aggregate storage.
-     * It is used for storing and loading aggregated root during handling
-     * of the incoming commands.
-     *
-     * @param eventStore the event store implementation
-     */
-    public void configure(RepositoryEventStore eventStore) {
-        this.repositoryEventStore = eventStore;
+        this.eventStorage = eventStorage;
+        this.snapshotStorage = snapshotStorage;
     }
 
     public int getSnapshotTrigger() {
@@ -150,31 +157,22 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     @Nonnull
     @Override
     public R load(I id) throws IllegalStateException {
-        checkConfigured();
-
         try {
-            Snapshot snapshot = repositoryEventStore.getLastSnapshot(id);
+            Snapshot snapshot = snapshotStorage.load(id);
             if (snapshot != null) {
-                List<EventRecord> trail = repositoryEventStore.getEvents(id, snapshot.getVersion());
+                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenLastModified());
                 R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = repositoryEventStore.getAllEvents(id);
+                List<EventRecord> events = eventStorage.loadAll(id);
                 R result = create(id);
                 result.play(events);
                 return result;
             }
         } catch (InvocationTargetException e) {
             throw propagate(e);
-        }
-    }
-
-    private void checkConfigured() {
-        if (repositoryEventStore == null) {
-            throw new IllegalStateException("Repository instance is not configured."
-                    + "Call the configure() method before trying to load/save the aggregate root.");
         }
     }
 
@@ -185,8 +183,6 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     @Override
     public void store(R aggregateRoot) {
-        checkConfigured();
-
         final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
@@ -203,11 +199,11 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     private void createAndStoreSnapshot(R aggregateRoot) {
         Snapshot snapshot = aggregateRoot.toSnapshot();
         final I aggregateRootId = aggregateRoot.getId();
-        repositoryEventStore.storeSnapshot(aggregateRootId, snapshot);
+        snapshotStorage.store(aggregateRootId, snapshot);
     }
 
     private void storeEvent(EventRecord event) {
-        repositoryEventStore.store(event);
+        eventStorage.store(event);
         ++countSinceLastSnapshot;
     }
 

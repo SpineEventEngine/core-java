@@ -22,9 +22,8 @@ package org.spine3.sample.server;
 
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * This class provides factory methods for creating storages based on file system.
@@ -42,8 +41,8 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return FileSystemStorage.newInstance(EventRecord.class);
+    public static MessageJournal<String, EventRecord> createEventStoreStorage() {
+        return FileSystemMessageJournal.newInstance(EventRecord.class);
     }
 
     /**
@@ -60,7 +59,7 @@ public class FileSystemStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return FileSystemStorage.newInstance(CommandRequest.class);
+    public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
+        return FileSystemMessageJournal.newInstance(CommandRequest.class);
     }
 }

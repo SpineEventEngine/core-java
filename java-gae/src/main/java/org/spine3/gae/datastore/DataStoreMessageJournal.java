@@ -27,68 +27,65 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
 
 import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 import static org.spine3.gae.datastore.DataStoreHelper.PARENT_ID_KEY;
 import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
-import static org.spine3.protobuf.Messages.toJson;
 
 /**
- * DataStore-based {@link StorageWithTimelineAndVersion} implementation.
+ * {@code MessageJournal} based on App Engine Datastore.
  *
- * @param <M> Message type to store
+ * {@inheritDoc}
+ *
+ * @author Mikhail Mikhaylov
  */
-public class DataStoreStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
+public class DataStoreMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
     private final DataStoreHelper dataStoreHelper;
 
     private final TypeName type;
 
-    public static <M extends Message> DataStoreStorage<M> newInstance(Class<M> messageClass) {
+    public static <I, M extends Message> DataStoreMessageJournal<I, M> newInstance(Class<M> messageClass) {
         final Descriptors.Descriptor classDescriptor = Messages.getClassDescriptor(messageClass);
-        return new DataStoreStorage<>(TypeName.of(classDescriptor));
+        return new DataStoreMessageJournal<>(TypeName.of(classDescriptor));
     }
 
-    private DataStoreStorage(TypeName type) {
+    private DataStoreMessageJournal(TypeName type) {
         this.type = type;
         dataStoreHelper = new DataStoreHelper();
     }
 
     @Override
-    public void store(Message message) {
+    public void store(I entityId, M message) {
         final Entity dataStoreEntity = Converters.convert(message);
 
         dataStoreHelper.put(dataStoreEntity);
     }
 
     @Override
-    public List<M> read(Message parentId, int sinceVersion) {
-        return dataStoreHelper.readByFilter(type.toString(),
-                prepareFilter(parentId, sinceVersion));
+    public List<M> loadAllSince(Timestamp timestamp) {
+        final Query.Filter filter = prepareFilter(timestamp);
+        final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);
+        return result;
     }
 
     @Override
-    public List<M> read(Timestamp from) {
-        return dataStoreHelper.readByFilter(type.toString(), prepareFilter(from));
+    public List<M> loadSince(I entityId, Timestamp timestamp) {
+        final Query.Filter filter = prepareFilter(entityId, timestamp);
+        final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);
+        return result;
     }
 
     @Override
-    public List<M> read(Message parentId, Timestamp from) {
-        return dataStoreHelper.readByFilter(type.toString(),
-                prepareFilter(parentId, from));
+    public List<M> load(I entityId) {
+        final String id = org.spine3.server.Entity.idToString(entityId);
+        final Query.FilterPredicate filter = new Query.FilterPredicate(
+                PARENT_ID_KEY, EQUAL, id);
+        final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);
+        return result;
     }
 
-    @Override
-    public List<M> read(Message parentId) {
-        return dataStoreHelper.readByFilter(type.toString(), new Query.FilterPredicate(
-                PARENT_ID_KEY, EQUAL, toJson(parentId)));
-    }
-
-    @Override
-    public List<M> readAll() {
-        return dataStoreHelper.read(type.toString());
-    }
 }
