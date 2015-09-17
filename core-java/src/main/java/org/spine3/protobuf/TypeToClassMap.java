@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,7 +30,10 @@ import org.spine3.TypeName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Utility class for reading real proto class names from properties file.
@@ -42,6 +46,9 @@ public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
+    private TypeToClassMap() {
+    }
+
     //TODO:2015-09-09:mikhail.mikhaylov: Find a way to read it from gradle properties.
     /**
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
@@ -49,6 +56,9 @@ public class TypeToClassMap {
      */
     private static final String PROPERTIES_FILES_PATH = "protos/properties/proto_to_java_class.properties";
 
+    //TODO:2015-09-17:alexander.yevsyukov:  @mikhail.mikhaylov: Have immutable instance here.
+    // Transform static methods into inner Builder class
+    // that would populate its internal structure and then emits it to be stored in this field.
     private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
     static {
@@ -68,11 +78,15 @@ public class TypeToClassMap {
                 } catch (IOException ignored) {
                 }
             }
-
         }
     }
 
-    private TypeToClassMap() {
+    /**
+     * @return immutable set of Protobuf types known to the application
+     */
+    public static ImmutableSet<TypeName> knownTypes() {
+        final Set<TypeName> result = namesMap.keySet();
+        return ImmutableSet.copyOf(result);
     }
 
     /**
@@ -148,17 +162,4 @@ public class TypeToClassMap {
         return className;
     }
 
-    private static ClassName searchClassNameRecursively(String lookupType, StringBuilder currentSuffix) {
-        final int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
-        if (lastDotPosition == -1) {
-            return null;
-        }
-        String rootType = lookupType.substring(0, lastDotPosition);
-        currentSuffix.insert(0, lookupType.substring(lastDotPosition));
-        final TypeName rootTypeName = TypeName.of(rootType);
-        if (namesMap.get(rootTypeName) == null) {
-            return searchClassNameRecursively(lookupType, currentSuffix);
-        }
-        return ClassName.of(rootType + currentSuffix);
-    }
 }

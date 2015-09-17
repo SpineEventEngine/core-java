@@ -20,9 +20,9 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.*;
+import com.google.protobuf.util.JsonFormat;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
-import org.spine3.util.StringTypeValue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,11 +61,29 @@ public class Messages {
     public static Any toAny(Message message) {
         checkNotNull(message);
 
-        Any result = Any.newBuilder()
-                .setTypeUrl(message.getDescriptorForType().getFullName())
-                .setValue(message.toByteString())
-                .build();
+        Any result = Any.pack(message);
+//        Any result = Any.newBuilder()
+//                .setTypeUrl(message.getDescriptorForType().getFullName())
+//                .setValue(message.toByteString())
+//                .build();
 
+        return result;
+    }
+
+    /**
+     * Creates a new instance of {@link Any} with the message represented by its byte
+     * content and passed type.
+     *
+     * @param type the type of the message to be wrapped into {@code Any}
+     * @param value the byte content of the message
+     * @return new {@code Any} instance
+     */
+    public static Any ofType(TypeName type, ByteString value) {
+        String typeUrl = type.toTypeUrl();
+        final Any result = Any.newBuilder()
+                .setValue(value)
+                .setTypeUrl(typeUrl)
+                .build();
         return result;
     }
 
@@ -85,29 +103,36 @@ public class Messages {
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
 
-        final TypeName typeName = TypeName.of(any.getTypeUrl());
-        Class<T> messageClass;
-        String messageClassName = StringTypeValue.NULL;
-        try {
-            messageClass = toMessageClass(typeName);
-            messageClassName = messageClass.getName();
-            Method method = messageClass.getMethod(METHOD_PARSE_FROM, ByteString.class);
+        T result = null;
 
-            //noinspection unchecked
-            T result = (T) method.invoke(null, any.getValue());
-            return result;
+        TypeName typeName = TypeName.of("");
+//        String messageClassName = StringTypeValue.NULL;
+        try {
+            typeName = TypeName.ofEnclosed(any);
+            Class<T> messageClass = toMessageClass(typeName);
+
+            result = any.unpack(messageClass);
+
+//            messageClassName = messageClass.getName();
+//            Method method = messageClass.getMethod(METHOD_PARSE_FROM, ByteString.class);
+//
+//            //noinspection unchecked
+//            T result = (T) method.invoke(null, any.getValue());
         } catch (ClassNotFoundException ignored) {
             throw new UnknownTypeInAnyException(typeName.toString());
-        } catch (NoSuchMethodException e) {
-            String msg = String.format(MSG_NO_SUCH_METHOD, METHOD_PARSE_FROM, messageClassName);
-            throw new Error(msg, e);
-        } catch (IllegalAccessException e) {
-            String msg = String.format(MSG_UNABLE_TO_ACCESS, METHOD_PARSE_FROM, messageClassName);
-            throw new Error(msg, e);
-        } catch (InvocationTargetException e) {
-            String msg = String.format(MSG_ERROR_INVOKING, METHOD_PARSE_FROM, messageClassName, e.getCause());
-            throw new Error(msg, e);
+//        } catch (NoSuchMethodException e) {
+//            String msg = String.format(MSG_NO_SUCH_METHOD, METHOD_PARSE_FROM, messageClassName);
+//            throw new Error(msg, e);
+//        } catch (IllegalAccessException e) {
+//            String msg = String.format(MSG_UNABLE_TO_ACCESS, METHOD_PARSE_FROM, messageClassName);
+//            throw new Error(msg, e);
+//        } catch (InvocationTargetException e) {
+//            String msg = String.format(MSG_ERROR_INVOKING, METHOD_PARSE_FROM, messageClassName, e.getCause());
+//            throw new Error(msg, e);
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
         }
+        return result;
     }
 
     /**
@@ -161,19 +186,36 @@ public class Messages {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final com.google.protobuf.util.JsonFormat.Printer value = com.google.protobuf.util.JsonFormat.printer();
+        private final JsonFormat.Printer value = JsonFormat.printer().usingTypeRegistry(forKnownTypes());
+
+        private static JsonFormat.TypeRegistry forKnownTypes() {
+            final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
+            for (TypeName typeName : TypeToClassMap.knownTypes()) {
+                try {
+                    Class<? extends Message> clazz = toMessageClass(typeName);
+                    Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
+                    // Skip outer class descriptors.
+                    if (descriptor instanceof Descriptors.Descriptor) {
+                        Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
+                        builder.add(typeDescriptor);
+                    }
+
+                } catch (ClassNotFoundException e) {
+                    propagate(e);
+                }
+            }
+            return builder.build();
+        }
 
         private static com.google.protobuf.util.JsonFormat.Printer instance() {
             return INSTANCE.value;
         }
-
     }
 
-
-    public static Descriptors.Descriptor getClassDescriptor(Class<? extends Message> clazz) {
+    public static Descriptors.GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
-            final Descriptors.Descriptor result = (Descriptors.Descriptor) method.invoke(null);
+            final Descriptors.GenericDescriptor result = (Descriptors.GenericDescriptor) method.invoke(null);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException

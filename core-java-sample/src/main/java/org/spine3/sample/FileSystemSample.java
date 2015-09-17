@@ -42,7 +42,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class FileSystemSample extends BaseSample {
 
-    private static final String STORAGE_PATH = "/storage";
+    private static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
 
     public static File getTempDir() {
         try {
@@ -57,15 +57,6 @@ public class FileSystemSample extends BaseSample {
             propagate(e);
         }
         throw new IllegalStateException("Unable to get temporary directory for storage");
-    }
-
-    public static void main(String[] args) {
-        final String tempDir = getTempDir().getAbsolutePath();
-        FileSystemHelper.configure(tempDir + STORAGE_PATH);
-
-        BaseSample sample = new FileSystemSample();
-
-        sample.execute();
     }
 
     @Override
@@ -96,6 +87,16 @@ public class FileSystemSample extends BaseSample {
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(FileSystemSample.class);
+
+    }
+
+    public static void main(String[] args) {
+        final String tempDir = getTempDir().getAbsolutePath();
+        FileSystemHelper.configure(tempDir + STORAGE_PATH);
+
+        BaseSample sample = new FileSystemSample();
+
+        sample.execute();
     }
 
 }

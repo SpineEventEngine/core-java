@@ -39,10 +39,8 @@ public class MessagesShould {
     @Before
     public void setUp() {
         id = UserIds.create("messages_test");
-        any = Any.newBuilder()
-                .setTypeUrl(id.getDescriptorForType().getFullName())
-                .setValue(id.toByteString())
-                .build();
+
+        any = Any.pack(id);
     }
 
     @Test
