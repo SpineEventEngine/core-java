@@ -47,7 +47,11 @@ public class InMemoryMessageJournal<I, M extends Message> extends BaseMessageJou
     private final Map<I, List<EventRecord>> eventRecordsMap = newHashMap();
 
 
-    public InMemoryMessageJournal(Class<M> messageClass) {
+    public static <I, M extends Message> InMemoryMessageJournal<I, M> newInstance(Class<M> messageClass) {
+        return new InMemoryMessageJournal<>(messageClass);
+    }
+
+    private InMemoryMessageJournal(Class<M> messageClass) {
         super(messageClass);
     }
 

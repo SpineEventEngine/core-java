@@ -39,7 +39,7 @@ public class InMemoryStorageFactory {
      * @return new storage instance
      */
     public static MessageJournal<String, EventRecord> createEventStoreStorage() {
-        return new InMemoryMessageJournal<>(EventRecord.class);
+        return InMemoryMessageJournal.newInstance(EventRecord.class);
     }
 
     /**
@@ -48,7 +48,7 @@ public class InMemoryStorageFactory {
      * @return new storage instance
      */
     public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
-        return new InMemoryMessageJournal<>(CommandRequest.class);
+        return InMemoryMessageJournal.newInstance(CommandRequest.class);
     }
 
     /**
