@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public interface Repository<I, E extends Entity<I, ?>> {
+public interface Repository<I, E extends Entity<I, ?>> extends Storage<I, E> {
 
     /**
      * Create a new entity instance with its default state.

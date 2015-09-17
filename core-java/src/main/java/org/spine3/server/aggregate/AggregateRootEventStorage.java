@@ -17,23 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandId;
 import org.spine3.base.EventRecord;
+import org.spine3.server.Entity;
+import org.spine3.server.MessageJournal;
 
 import java.util.List;
 
 /**
- * Stores and loads the events.
+ * Stores and loads the events for a class of aggregate roots.
  *
  * @author Mikhail Mikhaylov
  */
-public class EventStore {
+public class AggregateRootEventStorage<I> {
 
-    private final MessageJournal<String, EventRecord> storage;
+    private final MessageJournal<I, EventRecord> storage;
 
-    public EventStore(MessageJournal<String, EventRecord> storage) {
+    public AggregateRootEventStorage(MessageJournal<I, EventRecord> storage) {
         this.storage = storage;
     }
 
@@ -43,18 +47,37 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        String id = Entity.idToString(record.getContext().getAggregateId());
+        /**
+         * The type is ensured by binding the same type in AggregateRootRepositoryBase to ID type
+         * of AggregateRoot and AggregateRootEventStorage.
+         *
+         * @see AggregateRoot#createEventContext(CommandId, Message, Message, int)
+         */
+        @SuppressWarnings("unchecked")
+        I id = (I)Entity.idFromAny(record.getContext().getAggregateId());
         storage.store(id, record);
     }
 
     /**
-     * Loads all events from given timestamp.
+     * Loads all events by AggregateRoot Id.
      *
-     * @param from timestamp to load events from
+     * @param aggregateRootId the id of aggregateRoot
      * @return list of events
      */
-    public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.loadAllSince(from);
+    public List<EventRecord> loadAll(I aggregateRootId) {
+        List<EventRecord> result = storage.load(aggregateRootId);
+        return result;
+    }
+
+    /**
+     * Loads all events by AggregateRoot Id from given timestamp.
+     *
+     * @param aggregateRootId the id of aggregateRoot
+     * @param from            timestamp to load events from
+     * @return list of events
+     */
+    public List<EventRecord> loadSince(I aggregateRootId, Timestamp from) {
+        List<EventRecord> result = storage.loadSince(aggregateRootId, from);
         return result;
     }
 

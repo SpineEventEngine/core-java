@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.aggregate.AggregateCommand;
 
 import java.util.List;
 import java.util.Map;
@@ -32,38 +31,37 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.protobuf.Messages.fromAny;
 
 /**
  * In-memory-based implementation of the {@link com.google.protobuf.Message} repository.
  */
-public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
+public class InMemoryMessageJournal<I, M extends Message> extends BaseMessageJournal<I, M> {
 
     private final Map<Class, StorageHelper> storageHelpers = ImmutableMap.<Class, StorageHelper>builder()
             .put(CommandRequest.class, new CommandStorageHelper())
             .put(EventRecord.class, new EventStorageHelper())
             .build();
 
-    private final Map<Message, List<CommandRequest>> commandRequestsMap = newHashMap();
+    private final Map<I, List<CommandRequest>> commandRequestsMap = newHashMap();
 
-    private final Map<Message, List<EventRecord>> eventRecordsMap = newHashMap();
+    private final Map<I, List<EventRecord>> eventRecordsMap = newHashMap();
 
 
-    public InMemoryStorage(Class<M> messageClass) {
+    public InMemoryMessageJournal(Class<M> messageClass) {
         super(messageClass);
     }
 
     @Override
-    protected List<M> read(Class<M> messageClass, Message parentId) {
+    protected List<M> getById(Class<M> messageClass, I parentId) {
 
         final StorageHelper helper = storageHelpers.get(messageClass);
         //noinspection unchecked
-        final List<M> result = helper.get(parentId);
+        final List<M> result = helper.getById(parentId);
         return result;
     }
 
     @Override
-    protected List<M> readAll(Class<M> messageClass) {
+    protected List<M> getAll(Class<M> messageClass) {
 
         final StorageHelper helper = storageHelpers.get(messageClass);
         //noinspection unchecked
@@ -72,72 +70,57 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
     }
 
     @Override
-    protected void save(M message) {
+    protected void save(I entityId, M message) {
 
         final StorageHelper helper = storageHelpers.get(message.getClass());
         //noinspection unchecked
-        helper.save(message);
+        helper.save(entityId, message);
     }
 
 
-    private class CommandStorageHelper extends StorageHelper<CommandRequest> {
-
-        @Override
-        protected Message getAggregateId(CommandRequest message) {
-            Message command = AggregateCommand.getCommandValue(message);
-            final Message aggregateId = AggregateCommand.getAggregateId(command).value();
-            return aggregateId;
-        }
+    private class CommandStorageHelper extends StorageHelper<I, CommandRequest> {
 
         @Override
         @SuppressWarnings("ReturnOfCollectionOrArrayField")
-        protected Map<Message, List<CommandRequest>> getStorage() {
+        protected Map<I, List<CommandRequest>> getStorage() {
             return commandRequestsMap;
         }
     }
 
-    private class EventStorageHelper extends StorageHelper<EventRecord> {
-
-        @Override
-        protected Message getAggregateId(EventRecord record) {
-            final Message aggregateId = fromAny(record.getContext().getAggregateId());
-            return aggregateId;
-        }
+    private class EventStorageHelper extends StorageHelper<I, EventRecord> {
 
         @Override
         @SuppressWarnings("ReturnOfCollectionOrArrayField")
-        protected Map<Message, List<EventRecord>> getStorage() {
+        protected Map<I, List<EventRecord>> getStorage() {
             return eventRecordsMap;
         }
     }
 
-    private abstract static class StorageHelper<M extends Message> {
+    private abstract static class StorageHelper<I, M extends Message> {
 
-        protected abstract Message getAggregateId(M message);
-        protected abstract Map<Message, List<M>> getStorage();
+        protected abstract Map<I, List<M>> getStorage();
 
-        private void save(M message) {
+        private void save(I entityId, M message) {
 
-            Message aggregateId = getAggregateId(message);
-            final Map<Message, List<M>> storage = getStorage();
+            final Map<I, List<M>> storage = getStorage();
 
             List<M> messagesById = newArrayList();
 
-            if (storage.containsKey(aggregateId)) {
-                messagesById = storage.get(aggregateId);
+            if (storage.containsKey(entityId)) {
+                messagesById = storage.get(entityId);
             }
 
             messagesById.add(message);
-            storage.put(aggregateId, messagesById);
+            storage.put(entityId, messagesById);
         }
 
-        private List<M> get(Message aggregateId) {
+        private List<M> getById(I id) {
 
             List<M> result = newArrayList();
-            final Map<Message, List<M>> storage = getStorage();
+            final Map<I, List<M>> storage = getStorage();
 
-            if (storage.containsKey(aggregateId)) {
-                result = storage.get(aggregateId);
+            if (storage.containsKey(id)) {
+                result = storage.get(id);
             }
 
             return result;
@@ -146,9 +129,9 @@ public class InMemoryStorage<M extends Message> extends BaseStorage<M> {
         private List<M> getAll() {
 
             final List<M> result = newLinkedList();
-            final Map<Message, List<M>> storage = getStorage();
+            final Map<I, List<M>> storage = getStorage();
 
-            for (Message key : storage.keySet()){
+            for (I key : storage.keySet()){
                 final List<M> messages = storage.get(key);
                 result.addAll(messages);
             }

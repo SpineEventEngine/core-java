@@ -24,28 +24,38 @@ import com.google.protobuf.Message;
 import java.util.List;
 
 /**
- * Test file system based implementation of the {@link Message} repository.
+ * {@code MessageJournal} based on file system.
+ *
+ * {@inheritDoc}
+ *
+ * @author Mikhail Melnik
+ * @author Mikhail Mikhaylov
  */
-public class FileSystemStorage<M extends Message> extends BaseStorage<M> {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+public class FileSystemMessageJournal<I, M extends Message> extends BaseMessageJournal<I, M> {
 
-    public FileSystemStorage(Class<M> messageClass) {
+    public static <I, M extends Message> FileSystemMessageJournal<I, M> newInstance(Class<M> messageClass) {
+        return new FileSystemMessageJournal<>(messageClass);
+    }
+
+    private FileSystemMessageJournal(Class<M> messageClass) {
         super(messageClass);
     }
 
     @Override
-    protected List<M> read(Class<M> messageClass, Message parentId) {
-        final List<M> result = FileSystemHelper.read(messageClass, parentId);
-        return result;
+    protected List<M> getById(Class<M> messageClass, I parentId) {
+        final List<M> messages = FileSystemHelper.read(messageClass, parentId);
+        return messages;
     }
 
     @Override
-    protected List<M> readAll(Class<M> messageClass) {
-        final List<M> result = FileSystemHelper.readAll(messageClass);
-        return result;
+    protected List<M> getAll(Class<M> messageClass) {
+        final List<M> messages = FileSystemHelper.readAll(messageClass);
+        return messages;
     }
 
     @Override
-    protected void save(M message) {
-        FileSystemHelper.write(message);
+    protected void save(I entityId, M message) {
+        FileSystemHelper.write(message); // TODO[alexander.litus]: entityId is not used!
     }
 }

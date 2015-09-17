@@ -20,10 +20,10 @@
 
 package org.spine3.sample.server;
 
-import com.google.protobuf.Message;
 import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -32,21 +32,23 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * In-memory-based implementation of the {@link Snapshot} repository.
  */
-public class InMemorySnapshotStorage implements SnapshotStorage {
+public class InMemorySnapshotStorage<I> implements SnapshotStorage<I> {
 
-    private static final Map<Message, Snapshot> SNAPSHOTS_MAP = newHashMap();
+    private final Map<I, Snapshot> snapshots = newHashMap();
+
 
     @Override
-    public void store(Snapshot snapshot, Message parentId) {
-        checkNotNull(parentId);
+    public void store(I aggregateId, Snapshot snapshot) {
+        checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        SNAPSHOTS_MAP.put(parentId, snapshot);
+        snapshots.put(aggregateId, snapshot);
     }
 
+    @Nullable
     @Override
-    public Snapshot read(Message parentId) {
-        checkNotNull(parentId);
-        final Snapshot snapshot = SNAPSHOTS_MAP.get(parentId);
+    public Snapshot load(I aggregateId) {
+        checkNotNull(aggregateId);
+        final Snapshot snapshot = snapshots.get(aggregateId);
         return snapshot;
     }
 }

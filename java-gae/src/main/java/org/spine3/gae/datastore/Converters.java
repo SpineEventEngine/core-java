@@ -26,12 +26,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.TypeName;
+import org.spine3.base.*;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.base.*;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
-import org.spine3.TypeName;
 
 import java.util.Map;
 
@@ -78,7 +78,7 @@ class Converters {
     /**
      * Converts Protobuf messages to DataStore {@code CommandRequest} entities.
      */
-    static class CommandRequestConverter extends BaseConverter<CommandRequest, CommandId> {
+    static class CommandRequestConverter extends BaseConverter<CommandId, CommandRequest> {
 
         CommandRequestConverter() {
             super(TypeName.of(CommandRequest.getDescriptor()));
@@ -112,7 +112,7 @@ class Converters {
      *
      * @author Mikhail Mikhaylov
      */
-    static class EventRecordConverter extends BaseConverter<EventRecord, EventId> {
+    static class EventRecordConverter extends BaseConverter<EventId, EventRecord> {
 
         EventRecordConverter() {
             super(TypeName.of(EventRecord.getDescriptor()));

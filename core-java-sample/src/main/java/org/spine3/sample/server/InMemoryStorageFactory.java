@@ -22,9 +22,8 @@ package org.spine3.sample.server;
 
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * This class provides factory methods for creating in-memory-storages.
@@ -39,8 +38,8 @@ public class InMemoryStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return new InMemoryStorage<>(EventRecord.class);
+    public static MessageJournal<String, EventRecord> createEventStoreStorage() {
+        return new InMemoryMessageJournal<>(EventRecord.class);
     }
 
     /**
@@ -48,8 +47,8 @@ public class InMemoryStorageFactory {
      *
      * @return new storage instance
      */
-    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return new InMemoryStorage<>(CommandRequest.class);
+    public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
+        return new InMemoryMessageJournal<>(CommandRequest.class);
     }
 
     /**

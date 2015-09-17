@@ -49,8 +49,8 @@ public class EngineShould {
     @Test
     public void return_instance_if_configured_correctly() {
 
-        final EventStore eventStore = new EventStore(new MockStorage<EventRecord>());
-        final CommandStore commandStore = new CommandStore(new MockStorage<CommandRequest>());
+        final EventStore eventStore = new EventStore(new MockStorage<String, EventRecord>());
+        final CommandStore commandStore = new CommandStore(new MockStorage<String, CommandRequest>());
 
         Engine.configure(commandStore, eventStore);
 
@@ -62,12 +62,25 @@ public class EngineShould {
     }
 
 
-    public static class MockStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
-        @Override public List<M> read(Message parentId, int sinceVersion) { return null; }
-        @Override public List<M> read(Timestamp from) { return null; }
-        @Override public List<M> read(Message parentId, Timestamp from) { return null; }
-        @Override public List<M> read(Message parentId) { return null; }
-        @Override public List<M> readAll() { return null; }
-        @Override public void store(Message message) {}
+    private static class MockStorage<I, M extends Message> implements MessageJournal<I, M> {
+        @Override
+        public List<M> load(I entityId) {
+            return null;
+        }
+
+        @Override
+        public void store(I entityId, M message) {
+
+        }
+
+        @Override
+        public List<M> loadSince(I entityId, Timestamp timestamp) {
+            return null;
+        }
+
+        @Override
+        public List<M> loadAllSince(Timestamp timestamp) {
+            return null;
+        }
     }
 }

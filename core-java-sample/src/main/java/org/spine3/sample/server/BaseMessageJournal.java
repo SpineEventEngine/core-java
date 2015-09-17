@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
@@ -43,7 +43,7 @@ import static org.spine3.util.Lists.filter;
  * Base implementation of the {@link com.google.protobuf.Message} repository.
  * Filters and sorts data sets.
  */
-public abstract class BaseStorage<M extends Message> implements StorageWithTimelineAndVersion<M> {
+public abstract class BaseMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
     private static final Map<Class<?>, FilteringHelper<?>> HELPERS = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
             .put(CommandRequest.class, new CommandFilteringHelper())
@@ -52,79 +52,55 @@ public abstract class BaseStorage<M extends Message> implements StorageWithTimel
 
     private final Class<M> messageClass;
 
-    protected BaseStorage(Class<M> messageClass) {
+    protected BaseMessageJournal(Class<M> messageClass) {
         this.messageClass = messageClass;
     }
 
-    protected abstract List<M> read(Class<M> messageClass, Message parentId);
-    protected abstract List<M> readAll(Class<M> messageClass);
-    protected abstract void save(M message);
+    protected abstract void save(I entityId, M message);
+    protected abstract List<M> getById(Class<M> messageClass, I parentId);
+    protected abstract List<M> getAll(Class<M> messageClass);
 
 
     @Override
-    public List<M> read(Message parentId, int sinceVersion) {
+    public List<M> load(I entityId) {
+        checkNotNull(entityId);
 
-        checkNotNull(parentId);
+        final List<M> messages = getById(messageClass, entityId);
 
-        final List<M> messages = read(messageClass, parentId);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
-        final Predicate<M> predicate = helper.getSinceVersionPredicate(sinceVersion);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> read(Timestamp from) {
-
-        checkNotNull(from);
-
-        final List<M> messages = readAll(messageClass);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> read(Message parentId, Timestamp from) {
-
-        checkNotNull(from);
-        checkNotNull(parentId);
-
-        final List<M> messages = read(messageClass, parentId);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(from);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> read(Message parentId) {
-
-        checkNotNull(parentId);
-        final List<M> messages = read(messageClass, parentId);
         return messages;
     }
 
-    @Override
-    public List<M> readAll() {
 
-        final List<M> messages = readAll(messageClass);
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
-        helper.sort(messages);
-        return messages;
+    @Override
+    public void store(I entityId, M message) {
+        save(entityId, message);
     }
 
     @Override
-    public void store(M message) {
-        save(message);
+    public List<M> loadSince(I entityId, Timestamp timestamp) {
+        checkNotNull(timestamp);
+        checkNotNull(entityId);
+
+        final List<M> messages = getById(messageClass, entityId);
+
+        //noinspection unchecked
+        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
+        final ImmutableList<M> result = filter(messages, predicate);
+        return result;
+    }
+
+    @Override
+    public List<M> loadAllSince(Timestamp timestamp) {
+        checkNotNull(timestamp);
+
+        final List<M> messages = getAll(messageClass);
+
+        //noinspection unchecked
+        final FilteringHelper<M> helper = (FilteringHelper<M>) HELPERS.get(messageClass);
+        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
+        final ImmutableList<M> result = filter(messages, predicate);
+        return result;
     }
 
 
@@ -135,11 +111,6 @@ public abstract class BaseStorage<M extends Message> implements StorageWithTimel
         @Override
         public Predicate<CommandRequest> getWereAfterPredicate(Timestamp from) {
             return wereAfter(from);
-        }
-
-        @Override
-        public Predicate<CommandRequest> getSinceVersionPredicate(int sinceVersion) {
-            throw new IllegalStateException(COMMANDS_DO_NOT_SUPPORT_VERSIONS);
         }
 
         @Override
@@ -156,11 +127,6 @@ public abstract class BaseStorage<M extends Message> implements StorageWithTimel
         }
 
         @Override
-        public Predicate<EventRecord> getSinceVersionPredicate(int sinceVersion) {
-            return getEventPredicate(sinceVersion);
-        }
-
-        @Override
         public void sort(List<EventRecord> messages) {
             Events.sort(messages);
         }
@@ -169,8 +135,6 @@ public abstract class BaseStorage<M extends Message> implements StorageWithTimel
     private interface FilteringHelper<M extends Message> {
 
         Predicate<M> getWereAfterPredicate(Timestamp from);
-
-        Predicate<M> getSinceVersionPredicate(int sinceVersion);
 
         void sort(List<M> messages);
     }
