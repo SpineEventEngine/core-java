@@ -41,33 +41,18 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
-    private static final String METHOD_PARSE_FROM = "parseFrom";
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
-
-    private static final String MSG_NO_SUCH_METHOD = "Method %s() is not defined in the class %s.";
-    private static final String MSG_UNABLE_TO_ACCESS = "Method %s() is not accessible in the class %s.";
-    private static final String MSG_ERROR_INVOKING = "Error invoking %s() of the class %s: %s";
 
     private Messages() {}
 
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
-     * The protobuf fully qualified name is used as typeUrl param,
-     * {@link Message#toByteString()} is used to get the {@link ByteString} message representation.
      *
      * @param message message that should be put inside the {@link Any} instance.
      * @return the instance of {@link Any} object that wraps given message.
      */
     public static Any toAny(Message message) {
-        checkNotNull(message);
-
-        Any result = Any.pack(message);
-//        Any result = Any.newBuilder()
-//                .setTypeUrl(message.getDescriptorForType().getFullName())
-//                .setValue(message.toByteString())
-//                .build();
-
-        return result;
+        return Any.pack(message);
     }
 
     /**
@@ -88,51 +73,34 @@ public class Messages {
     }
 
     /**
-     * Unwraps {@link Any} instance object to {@link Message}
-     * that was put inside it and returns as the instance of object
-     * with described by {@link Any#getTypeUrl()}.
-     * <p>
-     * NOTE: This is temporary solution and should be reworked in the future
-     * when Protobuf provides means for working with {@link Any}.
+     * Unwraps {@link Any} value into an instance of type specified by value
+     * returned by {@link Any#getTypeUrl()}.
+     *
+     * <p>If there is not Java class for the type, {@link UnknownTypeInAnyException}
+     * will be thrown.
      *
      * @param any instance of {@link Any} that should be unwrapped
-     * @param <T> descendant of {@link Message} class that is used as the return type for this method
-     * @return unwrapped instance of {@link Message} descendant that were put inside of given {@link Any} object
+     * @param <T> the type enclosed into {@code Any}
+     * @return unwrapped message instance
+     * @throws UnknownTypeInAnyException if there is no Java class in the classpath for the enclosed type
      */
-    @SuppressWarnings("ProhibitedExceptionThrown")
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
-
-        T result = null;
-
-        TypeName typeName = TypeName.of("");
-//        String messageClassName = StringTypeValue.NULL;
+        String typeStr = "";
         try {
-            typeName = TypeName.ofEnclosed(any);
-            Class<T> messageClass = toMessageClass(typeName);
+            final TypeName typeName = TypeName.ofEnclosed(any);
+            typeStr = typeName.value();
 
-            result = any.unpack(messageClass);
+            final Class<T> messageClass = toMessageClass(typeName);
+            T result = any.unpack(messageClass);
+            return result;
 
-//            messageClassName = messageClass.getName();
-//            Method method = messageClass.getMethod(METHOD_PARSE_FROM, ByteString.class);
-//
-//            //noinspection unchecked
-//            T result = (T) method.invoke(null, any.getValue());
         } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeInAnyException(typeName.toString());
-//        } catch (NoSuchMethodException e) {
-//            String msg = String.format(MSG_NO_SUCH_METHOD, METHOD_PARSE_FROM, messageClassName);
-//            throw new Error(msg, e);
-//        } catch (IllegalAccessException e) {
-//            String msg = String.format(MSG_UNABLE_TO_ACCESS, METHOD_PARSE_FROM, messageClassName);
-//            throw new Error(msg, e);
-//        } catch (InvocationTargetException e) {
-//            String msg = String.format(MSG_ERROR_INVOKING, METHOD_PARSE_FROM, messageClassName, e.getCause());
-//            throw new Error(msg, e);
+            throw new UnknownTypeInAnyException(typeStr);
         } catch (InvalidProtocolBufferException e) {
             propagate(e);
         }
-        return result;
+        return null; // cannot get here
     }
 
     /**
@@ -182,30 +150,36 @@ public class Messages {
         return result;
     }
 
+    /**
+     * Builds and returns the registry of types known in the application.
+     *
+     * @return {@code JsonFormat.TypeRegistry} instance
+     * @see TypeToClassMap#knownTypes()
+     */
+    public static JsonFormat.TypeRegistry forKnownTypes() {
+        final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
+        for (TypeName typeName : TypeToClassMap.knownTypes()) {
+            try {
+                Class<? extends Message> clazz = toMessageClass(typeName);
+                Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
+                // Skip outer class descriptors.
+                if (descriptor instanceof Descriptors.Descriptor) {
+                    Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
+                    builder.add(typeDescriptor);
+                }
+
+            } catch (ClassNotFoundException e) {
+                propagate(e);
+            }
+        }
+        return builder.build();
+    }
+
     private enum JsonPrinter {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final JsonFormat.Printer value = JsonFormat.printer().usingTypeRegistry(forKnownTypes());
-
-        private static JsonFormat.TypeRegistry forKnownTypes() {
-            final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-            for (TypeName typeName : TypeToClassMap.knownTypes()) {
-                try {
-                    Class<? extends Message> clazz = toMessageClass(typeName);
-                    Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
-                    // Skip outer class descriptors.
-                    if (descriptor instanceof Descriptors.Descriptor) {
-                        Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
-                        builder.add(typeDescriptor);
-                    }
-
-                } catch (ClassNotFoundException e) {
-                    propagate(e);
-                }
-            }
-            return builder.build();
-        }
 
         private static com.google.protobuf.util.JsonFormat.Printer instance() {
             return INSTANCE.value;
