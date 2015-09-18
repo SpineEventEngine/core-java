@@ -39,10 +39,20 @@ public class MessagesShould {
     @Before
     public void setUp() {
         id = UserIds.create("messages_test");
-        any = Any.newBuilder()
-                .setTypeUrl(id.getDescriptorForType().getFullName())
-                .setValue(id.toByteString())
-                .build();
+
+        any = Any.pack(id);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void toText_fail_on_null() {
+        //noinspection ConstantConditions
+        Messages.toText(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void toJson_fail_on_null() {
+        //noinspection ConstantConditions
+        Messages.toJson(null);
     }
 
     @Test

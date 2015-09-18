@@ -24,39 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.sample.server.FileSystemHelper;
-import org.spine3.sample.server.FileSystemStorageFactory;
+import org.spine3.sample.server.InMemoryStorageFactory;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 
-import java.io.File;
-import java.io.IOException;
-
-import static com.google.common.base.Throwables.propagate;
-
 /**
- * Entry point for core-java sample without gRPC. Works with FileSystem.
- *
- * @author Mikhail Mikhaylov
+ * Entry point for core-java sample without gRPC. Works with in-memory-storage.
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemSample extends BaseSample {
+public class InMemorySample extends BaseSample {
 
-    private static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
+    public static void main(String[] args) {
 
-    public static File getTempDir() {
-        try {
-            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
-            File result = new File(tmpFile.getParent());
-            if (tmpFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                tmpFile.delete();
-            }
-            return result;
-        } catch (IOException e) {
-            propagate(e);
-        }
-        throw new IllegalStateException("Unable to get temporary directory for storage");
+        BaseSample sample = new InMemorySample();
+        sample.execute();
     }
 
     @Override
@@ -66,37 +47,28 @@ public class FileSystemSample extends BaseSample {
 
     @Override
     protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return FileSystemStorageFactory.createEventStoreStorage();
+        return InMemoryStorageFactory.createEventStoreStorage();
     }
 
     @Override
     protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return FileSystemStorageFactory.createCommandStoreStorage();
+        return InMemoryStorageFactory.createCommandStoreStorage();
     }
 
     @Override
     protected SnapshotStorage provideSnapshotStorage() {
-        return FileSystemStorageFactory.createSnapshotStorage();
+        return InMemoryStorageFactory.createSnapshotStorage();
     }
 
-    private FileSystemSample() {
+    private InMemorySample() {
     }
 
     private enum LogSingleton {
+
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FileSystemSample.class);
-
-    }
-
-    public static void main(String[] args) {
-        final String tempDir = getTempDir().getAbsolutePath();
-        FileSystemHelper.configure(tempDir + STORAGE_PATH);
-
-        BaseSample sample = new FileSystemSample();
-
-        sample.execute();
+        private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
     }
 
 }

@@ -49,7 +49,8 @@ public class DataStoreMessageJournal<I, M extends Message> implements MessageJou
     private final TypeName type;
 
     public static <I, M extends Message> DataStoreMessageJournal<I, M> newInstance(Class<M> messageClass) {
-        final Descriptors.Descriptor classDescriptor = Messages.getClassDescriptor(messageClass);
+        // Cast the class as the descriptor returned for a message class cannot be of outer class (which has type FileDescriptor).
+        final Descriptors.Descriptor classDescriptor = (Descriptors.Descriptor)Messages.getClassDescriptor(messageClass);
         return new DataStoreMessageJournal<>(TypeName.of(classDescriptor));
     }
 

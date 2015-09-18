@@ -26,7 +26,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ChannelServiceProto";
 option java_package = "org.spine3.base";
 
-import "channel.proto";
+import "spine/base/channel.proto";
 
 service ChannelService {
     rpc Connect (ChannelRequest) returns (ChannelResponse);

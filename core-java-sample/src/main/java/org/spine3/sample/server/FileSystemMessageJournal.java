@@ -19,22 +19,9 @@
  */
 package org.spine3.sample.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.server.MessageJournal;
-import org.spine3.util.Commands;
-import org.spine3.util.Events;
 
 import java.util.List;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Lists.filter;
 
 /**
  * {@code MessageJournal} based on file system.
@@ -45,94 +32,31 @@ import static org.spine3.util.Lists.filter;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public class FileSystemMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
-
-    private static final Map<Class<?>, FilteringHelper<?>> helpers = ImmutableMap.<Class<?>, FilteringHelper<?>>builder()
-            .put(CommandRequest.class, new CommandFilteringHelper())
-            .put(EventRecord.class, new EventFilteringHelper())
-            .build();
-
-    private final Class<M> clazz;
+public class FileSystemMessageJournal<I, M extends Message> extends BaseMessageJournal<I, M> {
 
     public static <I, M extends Message> FileSystemMessageJournal<I, M> newInstance(Class<M> messageClass) {
         return new FileSystemMessageJournal<>(messageClass);
     }
 
-    private FileSystemMessageJournal(Class<M> clazz) {
-        this.clazz = clazz;
+    private FileSystemMessageJournal(Class<M> messageClass) {
+        super(messageClass);
     }
 
     @Override
-    public List<M> loadAllSince(Timestamp timestamp) {
-        checkNotNull(timestamp);
-
-        final List<M> messages = FileSystemHelper.readAll(clazz);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> loadSince(I entityId, Timestamp timestamp) {
-        checkNotNull(timestamp);
-        checkNotNull(entityId);
-
-        final List<M> messages = FileSystemHelper.read(clazz, entityId);
-
-        //noinspection unchecked
-        final FilteringHelper<M> helper = (FilteringHelper<M>) helpers.get(clazz);
-        final Predicate<M> predicate = helper.getWereAfterPredicate(timestamp);
-        final ImmutableList<M> result = filter(messages, predicate);
-        return result;
-    }
-
-    @Override
-    public List<M> load(I entityId) {
-        checkNotNull(entityId);
-
-        final List<M> messages = FileSystemHelper.read(clazz, entityId);
-
+    protected List<M> getById(I parentId) {
+        final List<M> messages = FileSystemHelper.read(getMessageClass(), parentId);
         return messages;
     }
 
     @Override
-    public void store(I entityId, M message) {
+    protected List<M> getAll() {
+        final List<M> messages = FileSystemHelper.readAll(getMessageClass());
+        return messages;
+    }
+
+    // TODO[alexander.litus]: entityId is not used
+    @Override
+    protected void save(I entityId, M message) {
         FileSystemHelper.write(message);
-    }
-
-    private static class CommandFilteringHelper implements FilteringHelper<CommandRequest> {
-
-        @Override
-        public Predicate<CommandRequest> getWereAfterPredicate(Timestamp from) {
-            return Commands.wereAfter(from);
-        }
-
-        @Override
-        public void sort(List<CommandRequest> messages) {
-            Commands.sort(messages);
-        }
-    }
-
-    private static class EventFilteringHelper implements FilteringHelper<EventRecord> {
-
-        @Override
-        public Predicate<EventRecord> getWereAfterPredicate(Timestamp from) {
-            return Events.getEventPredicate(from);
-        }
-
-        @Override
-        public void sort(List<EventRecord> messages) {
-            Events.sort(messages);
-        }
-    }
-
-    private interface FilteringHelper<M extends Message> {
-
-        Predicate<M> getWereAfterPredicate(Timestamp from);
-
-        void sort(List<M> messages);
     }
 }

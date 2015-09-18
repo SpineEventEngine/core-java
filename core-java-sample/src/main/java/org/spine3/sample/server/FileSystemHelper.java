@@ -174,8 +174,8 @@ public class FileSystemHelper {
             final Helper helper = helpers.get(messageClass);
             final File file = new File(fileStoragePath + '/' + fileName + '/' + helper.getFileNameSuffix());
             if (file.exists()) {
-                //noinspection unchecked //we assume that helper produces messages of type M
-                List<M> fileMessages = helper.readFromFile(file);
+                //noinspection unchecked
+                List<M> fileMessages = helper.readFromFile(file); //we assume that helper produces messages of type M
                 allMessages.addAll(fileMessages);
             }
         }

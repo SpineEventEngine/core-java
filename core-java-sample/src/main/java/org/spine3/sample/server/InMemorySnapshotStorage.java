@@ -17,24 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
 
-import org.junit.Test;
-import org.spine3.protobuf.Messages;
+package org.spine3.sample.server;
+
+import org.spine3.server.Snapshot;
+import org.spine3.server.aggregate.SnapshotStorage;
+
+import javax.annotation.Nullable;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * @author Mikhail Melnik
+ * In-memory-based implementation of the {@link Snapshot} repository.
  */
-public class IdsTest {
+public class InMemorySnapshotStorage<I> implements SnapshotStorage<I> {
 
-    @Test(expected = NullPointerException.class)
-    public void toStringRepresentationFailsOnNull() {
-        Messages.toText(null);
+    private final Map<I, Snapshot> snapshots = newHashMap();
+
+
+    @Override
+    public void store(I aggregateId, Snapshot snapshot) {
+        checkNotNull(aggregateId);
+        checkNotNull(snapshot);
+        snapshots.put(aggregateId, snapshot);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void toJsonFailsOnNull() {
-        Messages.toJson(null);
+    @Nullable
+    @Override
+    public Snapshot load(I aggregateId) {
+        checkNotNull(aggregateId);
+        final Snapshot snapshot = snapshots.get(aggregateId);
+        return snapshot;
     }
-
 }
