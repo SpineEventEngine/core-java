@@ -86,21 +86,21 @@ public class Messages {
      */
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
+        T result = null;
         String typeStr = "";
         try {
             final TypeName typeName = TypeName.ofEnclosed(any);
             typeStr = typeName.value();
 
             final Class<T> messageClass = toMessageClass(typeName);
-            T result = any.unpack(messageClass);
-            return result;
+            result = any.unpack(messageClass);
 
         } catch (ClassNotFoundException ignored) {
             throw new UnknownTypeInAnyException(typeStr);
         } catch (InvalidProtocolBufferException e) {
             propagate(e);
         }
-        return null; // cannot get here
+        return result;
     }
 
     /**

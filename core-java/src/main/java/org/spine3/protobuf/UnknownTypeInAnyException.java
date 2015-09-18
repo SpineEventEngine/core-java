@@ -28,7 +28,7 @@ package org.spine3.protobuf;
 public class UnknownTypeInAnyException extends RuntimeException {
 
     public UnknownTypeInAnyException(String typeUrl) {
-        super("There is no appropriate Java class for the Protobuf message: " + typeUrl);
+        super("No Java class found for message type: " + typeUrl);
     }
 
     private static final long serialVersionUID = 0L;

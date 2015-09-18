@@ -43,6 +43,18 @@ public class MessagesShould {
         any = Any.pack(id);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void toText_fail_on_null() {
+        //noinspection ConstantConditions
+        Messages.toText(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void toJson_fail_on_null() {
+        //noinspection ConstantConditions
+        Messages.toJson(null);
+    }
+
     @Test
     public void convert_id_to_Any() {
         Any test = Messages.toAny(id);

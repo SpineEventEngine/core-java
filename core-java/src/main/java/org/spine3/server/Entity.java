@@ -178,11 +178,23 @@ public abstract class Entity<I, S extends Message> {
         }
 
         if (id instanceof Message) {
-            Message message = (Message) id;
-            String json = toJson(message);
-            return json;
+            final String result = idMessageToString((Message) id);
+            return result;
         }
         throw unsupportedIdType(id);
+    }
+
+    private static String idMessageToString(Message message) {
+        //TODO:2015-09-18:alexander.yevsyukov: Extract value from the message and use it for output
+        // See TextFormat.printFieldValue() and JsonFormat.PrinterImpl for idea on how we can do it.
+        //
+        // The guidelines:
+        // If it's one field inside — use it for string output.
+        // If more than one field, use TextFormat output and compact the form. See TextFormat.shortDebugString()
+        // Add our types as well known with good output.
+
+        String json = toJson(message);
+        return json;
     }
 
     /**
