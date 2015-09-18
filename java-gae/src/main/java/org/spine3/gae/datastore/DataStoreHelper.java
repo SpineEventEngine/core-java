@@ -123,11 +123,12 @@ class DataStoreHelper {
     private static <T extends Message> T readMessageFromEntity(Entity entity) {
         final Blob messageBlob = (Blob) entity.getProperty(VALUE_KEY);
         final ByteString messageByteString = ByteString.copyFrom(messageBlob.getBytes());
-        final String typeUrl = (String) entity.getProperty(TYPE_KEY);
+        final String typeName = (String) entity.getProperty(TYPE_KEY);
 
-        //TODO:2015-09-16:alexander.yevsyukov: Use Any.unpack() instead. We know type here.
-        final Any messageAny = Any.newBuilder().setValue(messageByteString).setTypeUrl(typeUrl).build();
+        //TODO:2015-09-17:alexander.yevsyukov: Is there any faster way of decoding the message knowing its type?
+        // We here wrap and un-wrap just to restore the instance of known type.
 
+        final Any messageAny = Messages.ofType(TypeName.of(typeName), messageByteString);
         final T result = Messages.fromAny(messageAny);
         return result;
     }

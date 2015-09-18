@@ -20,9 +20,7 @@
 
 package org.spine3;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
-import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.*;
 import org.spine3.util.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,6 +68,51 @@ public final class TypeName extends StringTypeValue {
      */
     public static TypeName of(String typeName) {
         return new TypeName(typeName);
+    }
+
+    /**
+     * Obtains the type name of the message enclosed into passed instance of {@link Any}.
+     *
+     * <p>The type name is the string coming after "type.googleapis.com/" in the URL
+     * returned by {@link Any#getTypeUrl()}.
+     *
+     * @param any the instance of {@code Any} containing {@code Message} instance of interest
+     * @return new instance of {@code TypeName}
+     * @throws InvalidProtocolBufferException if:
+     *  <ul>
+     *      <li>the type URL returned by {@code any} does not have "type.googleapis.com/" prefix</li>
+     *      <li>there's nothing after the prefix</li>
+     *      <li>the type URL has more than one '/' separator</li>
+     *  </ul>
+     */
+    public static TypeName ofEnclosed(AnyOrBuilder any) throws InvalidProtocolBufferException {
+        String typeName = getTypeName(any.getTypeUrl());
+        return of(typeName);
+    }
+
+    private static final String TYPE_URL_PREFIX = "type.googleapis.com";
+    private static final String TYPE_URL_SEPARATOR = "/";
+
+    private static String getTypeName(String typeUrl)
+            throws InvalidProtocolBufferException {
+        String[] parts = typeUrl.split(TYPE_URL_SEPARATOR);
+        if (parts.length != 2 || !parts[0].equals(TYPE_URL_PREFIX)) {
+            throw new InvalidProtocolBufferException(
+                    "Invalid type url encountered: " + typeUrl);
+        }
+        return parts[1];
+    }
+
+    /**
+     * Returns string to be used as a type URL in {@code Any}.
+     *
+     * @return string with "type.googleapis.com/" prefix followed by the full type name
+     * @see Any#getTypeUrl()
+     * @see #ofEnclosed(AnyOrBuilder)
+     */
+    public String toTypeUrl() {
+        String result = TYPE_URL_PREFIX + TYPE_URL_SEPARATOR + value();
+        return result;
     }
 
     /**

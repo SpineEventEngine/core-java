@@ -32,6 +32,8 @@ import java.util.List;
 /**
  * The common interface for aggregate root repositories.
  *
+ * @param <I> the type of IDs of aggregate roots
+ * @param <R> aggregate root type
  * @author Alexander Yevsyukov
  */
 public interface AggregateRootRepository<I extends Message, R extends AggregateRoot<I, ?>>
@@ -44,13 +46,13 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
      * @return loaded or newly created instance of the aggregate root
      */
     @SuppressWarnings({"AbstractMethodOverridesAbstractMethod",
-                       "NullableProblems" /* We override the default behavior of loading. */})
+            "NullableProblems" /* We override the default behavior of loading. */})
     @Nonnull
     R load(I id);
 
     /**
      * Processes the command by dispatching it to a method of an aggregate root.
-     * <p>
+     * <p/>
      * For more details on writing aggregate commands read
      * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
      *
@@ -58,7 +60,6 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
      * @param context context info of the command
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     *
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
