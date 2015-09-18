@@ -25,7 +25,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -55,8 +55,8 @@ public class CommandDispatcher {
         checkNotNull(object);
 
         Map<CommandClass, CommandHandlerMethod> handlers;
-        if (object instanceof AggregateRootRepositoryBase) {
-            AggregateRootRepositoryBase<?, ?> repository = (AggregateRootRepositoryBase) object;
+        if (object instanceof AggregateRepositoryBase) {
+            AggregateRepositoryBase<?, ?> repository = (AggregateRepositoryBase) object;
             handlers = repository.getCommandHandlers();
         } else {
             handlers = CommandHandlerMethod.scan(object);

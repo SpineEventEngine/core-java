@@ -27,7 +27,7 @@ import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
 import org.spine3.server.Assign;
-import org.spine3.server.aggregate.AggregateRoot;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 
 /**
@@ -36,7 +36,7 @@ import org.spine3.server.aggregate.Apply;
  */
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic"})
 // Use command and event classes passed as parameters instead of SomethingOrBuilder
-public class OrderRoot extends AggregateRoot<OrderId, Order> {
+public class OrderRoot extends Aggregate<OrderId, Order> {
 
     public OrderRoot(OrderId id) {
         super(id);

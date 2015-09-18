@@ -29,12 +29,12 @@ import org.spine3.base.CommandServiceGrpc;
 import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.EventLogger;
-import org.spine3.sample.order.OrderRootRepository;
+import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.CommandStore;
 import org.spine3.server.Engine;
 import org.spine3.server.EventStore;
 import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.AggregateRootEventStorage;
+import org.spine3.server.aggregate.AggregateEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
@@ -52,20 +52,20 @@ public abstract class BaseSampleServer {
         final EventStore eventStore = new EventStore(provideEventStoreStorage());
         final CommandStore commandStore = new CommandStore(provideCommandStoreStorage());
 
-        final OrderRootRepository orderRootRepository = getOrderRootRepository();
+        final OrderRepository orderRootRepository = getOrderRootRepository();
 
         Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
         engine.getCommandDispatcher().register(orderRootRepository);
     }
 
-    private OrderRootRepository getOrderRootRepository() {
+    private OrderRepository getOrderRootRepository() {
 
-        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage(
+        final AggregateEventStorage eventStore = new AggregateEventStorage(
                 provideEventStoreStorage()
         );
 
-        final OrderRootRepository repository = new OrderRootRepository(eventStore, provideSnapshotStorage());
+        final OrderRepository repository = new OrderRepository(eventStore, provideSnapshotStorage());
         return repository;
     }
 

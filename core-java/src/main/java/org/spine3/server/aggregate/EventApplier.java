@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
+class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
 
     private static final int EVENT_PARAM_INDEX = 0;
 
@@ -59,7 +59,7 @@ class EventApplier extends MessageHandlerMethod<AggregateRoot, Void> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventApplier(AggregateRoot target, Method method) {
+    protected EventApplier(Aggregate target, Method method) {
         super(target, method);
     }
 

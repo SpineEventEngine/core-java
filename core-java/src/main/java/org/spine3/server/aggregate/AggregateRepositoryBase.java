@@ -47,9 +47,9 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
-public abstract class AggregateRootRepositoryBase<I extends Message,
-                                                  R extends AggregateRoot<I, ?>>
-        extends RepositoryBase<I, R> implements AggregateRootRepository<I, R> {
+public abstract class AggregateRepositoryBase<I extends Message,
+                                                  R extends Aggregate<I, ?>>
+        extends RepositoryBase<I, R> implements AggregateRepository<I, R> {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
@@ -68,7 +68,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * The store for events and snapshots.
      */
-    private final AggregateRootEventStorage<I> eventStorage;
+    private final AggregateEventStorage<I> eventStorage;
 
     /**
      * The storage for snapshots.
@@ -90,7 +90,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
+    protected AggregateRepositoryBase(AggregateEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
         super();
         this.eventStorage = eventStorage;
         this.snapshotStorage = snapshotStorage;
@@ -124,8 +124,8 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     private Map<CommandClass, CommandHandlerMethod> getDispatchingHandlers() {
         Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
 
-        Class<? extends AggregateRoot> aggregateRootClass = TypeInfo.getEntityClass(getClass());
-        Set<CommandClass> aggregateCommands = AggregateRoot.getCommandClasses(aggregateRootClass);
+        Class<? extends Aggregate> aggregateRootClass = TypeInfo.getEntityClass(getClass());
+        Set<CommandClass> aggregateCommands = Aggregate.getCommandClasses(aggregateRootClass);
 
         CommandHandlerMethod handler = dispatchAsHandler();
         for (CommandClass commandClass : aggregateCommands) {

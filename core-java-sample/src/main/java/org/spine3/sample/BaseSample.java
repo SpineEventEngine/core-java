@@ -27,12 +27,12 @@ import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
-import org.spine3.sample.order.OrderRootRepository;
+import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.CommandStore;
 import org.spine3.server.Engine;
 import org.spine3.server.EventStore;
 import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.AggregateRootEventStorage;
+import org.spine3.server.aggregate.AggregateEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.util.UserIds;
 
@@ -82,7 +82,7 @@ public abstract class BaseSample {
         final EventStore eventStore = new EventStore(provideEventStoreStorage());
         final CommandStore commandStore = new CommandStore(provideCommandStoreStorage());
 
-        final OrderRootRepository orderRootRepository = getOrderRootRepository();
+        final OrderRepository orderRootRepository = getOrderRootRepository();
 
         Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
@@ -97,13 +97,13 @@ public abstract class BaseSample {
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 
-    private OrderRootRepository getOrderRootRepository() {
+    private OrderRepository getOrderRootRepository() {
         //TODO:2015-09-16:alexander.yevsyukov: The storage for events of the AggregateRoot should be parameterized with OrderId, not String.
-        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage<>(
+        final AggregateEventStorage eventStore = new AggregateEventStorage<>(
                 provideEventStoreStorage()
         );
 
-        final OrderRootRepository repository = new OrderRootRepository(eventStore, provideSnapshotStorage());
+        final OrderRepository repository = new OrderRepository(eventStore, provideSnapshotStorage());
         return repository;
     }
 }

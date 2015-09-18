@@ -19,16 +19,16 @@
  */
 package org.spine3.sample.order;
 
-import org.spine3.server.aggregate.AggregateRootEventStorage;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+import org.spine3.server.aggregate.AggregateEventStorage;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * @author Mikhail Melnik
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot> {
+public class OrderRepository extends AggregateRepositoryBase<OrderId, OrderRoot> {
 
-    public OrderRootRepository(AggregateRootEventStorage eventStorage, SnapshotStorage snapshotStorage) {
+    public OrderRepository(AggregateEventStorage eventStorage, SnapshotStorage snapshotStorage) {
         super(eventStorage, snapshotStorage);
     }
 }

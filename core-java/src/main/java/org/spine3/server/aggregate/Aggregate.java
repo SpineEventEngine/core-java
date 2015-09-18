@@ -66,12 +66,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *            <li>Phone number</li>
  *            <li>email address as a couple of local-part and domain</li>
  *            </ul>
- * @param <S> the type of the state held by the root
+ * @param <S> the type of the state held by the aggregate
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "AbstractClassNeverImplemented"})
-public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
+@SuppressWarnings("ClassWithTooManyMethods")
+public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -79,7 +79,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     private final Any idAsAny;
 
     /**
-     * Keeps initialization state of the aggregate root.
+     * Keeps initialization state of the aggregate.
      */
     private volatile boolean initialized = false;
 
@@ -110,19 +110,19 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
-    protected AggregateRoot(I id) {
+    protected Aggregate(I id) {
         super(id);
         this.idAsAny = idToAny(id);
     }
 
     /**
-     * Returns set of the command types handled by a given aggregate root.
+     * Returns set of the command types handled by a given aggregate.
      *
-     * @param clazz {@link Class} of the aggregate root
-     * @return command types handled by aggregate root
+     * @param clazz {@link Class} of the aggregate
+     * @return command types handled by aggregate
      */
     @CheckReturnValue
-    public static Set<CommandClass> getCommandClasses(Class<? extends AggregateRoot> clazz) {
+    public static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> clazz) {
         Set<Class<? extends Message>> messageClasses = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
         Iterable<CommandClass> transformed = Iterables.transform(messageClasses, new Function<Class<? extends Message>, CommandClass>() {
             @SuppressWarnings("NullableProblems") // The set we transform cannot have null entries.
@@ -135,11 +135,12 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     }
 
     /**
-     * Returns event/command types handled by given AggregateRoot class.
+     * Returns event/command types handled by given {@code Aggregate} class.
+     *
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    static Set<Class<? extends Message>> getHandledMessageClasses(Class<? extends AggregateRoot> clazz, Predicate<Method> methodPredicate) {
+    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<? extends Aggregate> clazz, Predicate<Method> methodPredicate) {
 
         Set<Class<? extends Message>> result = Sets.newHashSet();
 
@@ -161,7 +162,7 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     private void init() {
         if (!this.initialized) {
             final Registry registry = Registry.instance();
-            final Class<? extends AggregateRoot> thisClass = getClass();
+            final Class<? extends Aggregate> thisClass = getClass();
 
             // Register this aggregate root class if it wasn't.
             if (!registry.contains(thisClass)) {
@@ -435,15 +436,15 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
     /**
      * The registry of method maps for all aggregate root classes.
      *
-     * <p>The instances of {@code AggregateRoot} class register their classes in {@link AggregateRoot#init()} method.
+     * <p>The instances of {@code AggregateRoot} class register their classes in {@link Aggregate#init()} method.
      */
     private static class Registry {
 
-        private final MethodMap.Registry<AggregateRoot> commandHandlers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<Aggregate> commandHandlers = new MethodMap.Registry<>();
 
-        private final MethodMap.Registry<AggregateRoot> eventAppliers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
-        void register(Class<? extends AggregateRoot> clazz) {
+        void register(Class<? extends Aggregate> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz));
 
@@ -451,17 +452,17 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
             EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 
-        boolean contains(Class<? extends AggregateRoot> clazz) {
+        boolean contains(Class<? extends Aggregate> clazz) {
             boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
-        MethodMap getCommandHandlers(Class<? extends AggregateRoot> clazz) {
+        MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
             MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
-        MethodMap getEventAppliers(Class<? extends AggregateRoot> clazz) {
+        MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
             MethodMap result = eventAppliers.get(clazz);
             return result;
         }

@@ -56,8 +56,8 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.AggregateRoot.getCommandClasses;
-import static org.spine3.server.aggregate.AggregateRoot.getHandledMessageClasses;
+import static org.spine3.server.aggregate.Aggregate.getCommandClasses;
+import static org.spine3.server.aggregate.Aggregate.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
@@ -66,7 +66,7 @@ import static org.spine3.util.Commands.createCommandContext;
 
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
 "ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
-public class AggregateRootShould {
+public class AggregateShould {
 
     private ProjectId projectId;
     private CommandContext commandContext;
@@ -348,7 +348,7 @@ public class AggregateRootShould {
     }
 
 
-    private void dispatchAllProjectCommands(AggregateRoot r) throws InvocationTargetException {
+    private void dispatchAllProjectCommands(Aggregate r) throws InvocationTargetException {
         r.dispatch(createProject, commandContext);
         r.dispatch(addTask, commandContext);
         r.dispatch(startProject, commandContext);
@@ -404,7 +404,7 @@ public class AggregateRootShould {
         return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
-    public static class ProjectRoot extends AggregateRoot<ProjectId, Project> {
+    public static class ProjectRoot extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
         private static final String STATUS_STARTED = "STARTED";
@@ -480,7 +480,7 @@ public class AggregateRootShould {
     /*
      * Class only for test cases: missing command handler; missing event applier
      */
-    public static class TestRootForCaseMissingHandlerOrApplier extends AggregateRoot<ProjectId, Project> {
+    public static class TestRootForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -500,7 +500,7 @@ public class AggregateRootShould {
         }
     }
 
-    public static class TestRootWithIdString extends AggregateRoot<String, Project> {
+    public static class TestRootWithIdString extends Aggregate<String, Project> {
         protected TestRootWithIdString(String id) {
             super(id);
         }
@@ -509,7 +509,7 @@ public class AggregateRootShould {
         }
     }
 
-    public static class TestRootWithIdInteger extends AggregateRoot<Integer, Project> {
+    public static class TestRootWithIdInteger extends Aggregate<Integer, Project> {
         protected TestRootWithIdInteger(Integer id) {
             super(id);
         }
@@ -518,7 +518,7 @@ public class AggregateRootShould {
         }
     }
 
-    public static class TestRootWithIdLong extends AggregateRoot<Long, Project> {
+    public static class TestRootWithIdLong extends Aggregate<Long, Project> {
         protected TestRootWithIdLong(Long id) {
             super(id);
         }
@@ -527,7 +527,7 @@ public class AggregateRootShould {
         }
     }
 
-    public static class TestRootWithIdUnsupported extends AggregateRoot<UnsupportedClassVersionError, Project> {
+    public static class TestRootWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project> {
         protected TestRootWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
