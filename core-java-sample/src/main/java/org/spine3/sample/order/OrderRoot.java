@@ -38,6 +38,8 @@ import org.spine3.server.aggregate.Apply;
 // Use command and event classes passed as parameters instead of SomethingOrBuilder
 public class OrderRoot extends Aggregate<OrderId, Order> {
 
+    //TODO:2015-09-18:alexander.yevsyukov: Rename protobuf type to OrderState and this class to Order
+
     public OrderRoot(OrderId id) {
         super(id);
     }

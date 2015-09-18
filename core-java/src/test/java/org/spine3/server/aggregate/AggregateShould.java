@@ -404,6 +404,7 @@ public class AggregateShould {
         return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
+    //TODO:2015-09-18:alexander.yevsyukov: Rename protobuf-generated class to ProjectState and this class to Project.
     public static class ProjectRoot extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
