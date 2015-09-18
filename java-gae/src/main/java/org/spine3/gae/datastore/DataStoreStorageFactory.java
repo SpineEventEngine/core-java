@@ -23,9 +23,8 @@ package org.spine3.gae.datastore;
 import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * This class provides factory method for DataStore-based storages.
@@ -43,8 +42,8 @@ public class DataStoreStorageFactory {
      *
      * @return Storage with Timeline and Version
      */
-    public static StorageWithTimelineAndVersion<EventRecord> createEventStoreStorage() {
-        return DataStoreStorage.newInstance(EventRecord.class);
+    public static MessageJournal<String, EventRecord> createEventStoreStorage() {
+        return DataStoreMessageJournal.newInstance(EventRecord.class);
     }
 
     /**
@@ -62,7 +61,7 @@ public class DataStoreStorageFactory {
      *
      * @return Storage with Timeline
      */
-    public static StorageWithTimeline<CommandRequest> createCommandStoreStorage() {
-        return DataStoreStorage.newInstance(CommandRequest.class);
+    public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
+        return DataStoreMessageJournal.newInstance(CommandRequest.class);
     }
 }

@@ -17,24 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
 
-import org.junit.Test;
-import org.spine3.protobuf.Messages;
+package org.spine3.server.aggregate;
+
+import org.spine3.server.Snapshot;
+
+import javax.annotation.Nullable;
 
 /**
- * @author Mikhail Melnik
+ * The storage for aggregate root snapshots.
+ *
+ * @param <I> the type of the aggregate root ID
+ * @author Mikhail Mikhaylov
  */
-public class IdsTest {
+public interface SnapshotStorage<I> {
 
-    @Test(expected = NullPointerException.class)
-    public void toStringRepresentationFailsOnNull() {
-        Messages.toText(null);
-    }
+    /**
+     * Stores Snapshot with desired Parent Id.
+     *
+     * @param aggregateId the ID of the aggregate root
+     * @param snapshot    snapshot to be stored
+     */
+    void store(I aggregateId, Snapshot snapshot);
 
-    @Test(expected = NullPointerException.class)
-    public void toJsonFailsOnNull() {
-        Messages.toJson(null);
-    }
+    /**
+     * Reads snapshot from storage by appropriate parent id.
+     *
+     * @param aggregateId the ID of the aggregate root
+     * @return snapshot instance or {@code null} if no snapshot with the passed ID was found
+     */
+    @Nullable
+    Snapshot load(I aggregateId);
 
 }

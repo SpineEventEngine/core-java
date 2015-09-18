@@ -17,33 +17,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.server;
+package org.spine3.sample.server;
 
 import com.google.protobuf.Message;
 
+import java.util.List;
+
 /**
- * Defines the low level data interface of the storage
- * that is used to read and write Snapshots as Protobuf messages.
+ * {@code MessageJournal} based on file system.
  *
+ * {@inheritDoc}
+ *
+ * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
  */
-public interface SnapshotStorage {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+public class FileSystemMessageJournal<I, M extends Message> extends BaseMessageJournal<I, M> {
 
-    /**
-     * Stores Snapshot with desired Parent Id.
-     *
-     * @param snapshot snapshot to be stored
-     * @param parentId parent id to identify snapshots of different Aggregate Root instances
-     */
-    void store(Snapshot snapshot, Message parentId);
+    public static <I, M extends Message> FileSystemMessageJournal<I, M> newInstance(Class<M> messageClass) {
+        return new FileSystemMessageJournal<>(messageClass);
+    }
 
-    /**
-     * Reads snapshot from storage by appropriate parent id.
-     *
-     * @param parentId parent id to identify snapshots of different Aggregate Root instances
-     * @return read snapshot
-     */
-    Snapshot read(Message parentId);
+    private FileSystemMessageJournal(Class<M> messageClass) {
+        super(messageClass);
+    }
 
+    @Override
+    protected List<M> getById(I parentId) {
+        final List<M> messages = FileSystemHelper.read(getMessageClass(), parentId);
+        return messages;
+    }
+
+    @Override
+    protected List<M> getAll() {
+        final List<M> messages = FileSystemHelper.readAll(getMessageClass());
+        return messages;
+    }
+
+    // TODO[alexander.litus]: entityId is not used
+    @Override
+    protected void save(I entityId, M message) {
+        FileSystemHelper.write(message);
+    }
 }

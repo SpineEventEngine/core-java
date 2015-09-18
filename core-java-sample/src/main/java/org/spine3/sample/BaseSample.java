@@ -28,7 +28,12 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.server.*;
+import org.spine3.server.CommandStore;
+import org.spine3.server.Engine;
+import org.spine3.server.EventStore;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.AggregateRootEventStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.util.UserIds;
 
 import java.util.List;
@@ -86,20 +91,19 @@ public abstract class BaseSample {
 
     protected abstract Logger getLog();
 
-    protected abstract StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage();
+    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
 
-    protected abstract StorageWithTimeline<CommandRequest> provideCommandStoreStorage();
+    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 
     private OrderRootRepository getOrderRootRepository() {
+        //TODO:2015-09-16:alexander.yevsyukov: The storage for events of the AggregateRoot should be parameterized with OrderId, not String.
+        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage<>(
+                provideEventStoreStorage()
+        );
 
-        final RepositoryEventStore eventStore = new RepositoryEventStore(
-                provideEventStoreStorage(),
-                provideSnapshotStorage());
-
-        final OrderRootRepository repository = new OrderRootRepository();
-        repository.configure(eventStore);
+        final OrderRootRepository repository = new OrderRootRepository(eventStore, provideSnapshotStorage());
         return repository;
     }
 }

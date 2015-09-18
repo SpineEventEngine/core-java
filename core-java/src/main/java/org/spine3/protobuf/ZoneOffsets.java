@@ -18,27 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.protobuf;
 
-import com.google.protobuf.Message;
+import org.spine3.time.ZoneOffset;
 
-import java.util.List;
+public class ZoneOffsets {
 
-/**
- * Extends {@link StorageWithTimeline} and provides an ability to work with Version.
- *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
- */
-public interface StorageWithTimelineAndVersion<M extends Message>
-        extends StorageWithTimeline<M> {
+    private ZoneOffsets() {}
 
-    /**
-     * Reads Messages of type {@link M} with appropriate Parent Id and chosen from chosen sinceVersion from storage.
-     *
-     * @param parentId parent id of message
-     * @param sinceVersion  sinceVersion to read messages from
-     * @return read message
-     */
-    List<M> read(Message parentId, int sinceVersion);
+    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
 }

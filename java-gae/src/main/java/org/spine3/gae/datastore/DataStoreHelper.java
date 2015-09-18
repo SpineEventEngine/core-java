@@ -36,7 +36,6 @@ import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
 import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_THAN_OR_EQUAL;
-import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * Provides the access to common part of working with DataStore.
@@ -76,11 +75,7 @@ class DataStoreHelper {
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected <T extends Message> List<T> read(String kind) {
-        return readByFilter(kind, null);
-    }
-
-    protected <T extends Message> List<T> readByFilter(String kind, @Nullable Query.Filter filter) {
+    protected <T extends Message> List<T> loadByFilter(String kind, @Nullable Query.Filter filter) {
         final Query query = new Query(kind);
         if (filter != null) {
             query.setFilter(filter);
@@ -93,20 +88,20 @@ class DataStoreHelper {
         return messages;
     }
 
-    protected static Query.Filter prepareFilter(Message aggregateRootId, TimestampOrBuilder from) {
+    protected static <I> Query.Filter prepareFilter(I aggregateRootId, TimestampOrBuilder from) {
 
         final List<Query.Filter> filters = new ArrayList<>();
         final Date timestampDate = Timestamps.convertToDate(from);
         filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, timestampDate));
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, toJson(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
 
-    protected static Query.Filter prepareFilter(Message aggregateRootId, int sinceVersion) {
+    protected static <I> Query.Filter prepareFilter(I aggregateRootId, int sinceVersion) {
 
         final List<Query.Filter> filters = new ArrayList<>();
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, toJson(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
         filters.add(new Query.FilterPredicate(VERSION_KEY, GREATER_THAN_OR_EQUAL, sinceVersion));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
@@ -128,11 +123,14 @@ class DataStoreHelper {
     private static <T extends Message> T readMessageFromEntity(Entity entity) {
         final Blob messageBlob = (Blob) entity.getProperty(VALUE_KEY);
         final ByteString messageByteString = ByteString.copyFrom(messageBlob.getBytes());
-        final String typeUrl = (String) entity.getProperty(TYPE_KEY);
+        final String typeName = (String) entity.getProperty(TYPE_KEY);
 
-        final Any messageAny = Any.newBuilder().setValue(messageByteString).setTypeUrl(typeUrl).build();
+        //TODO:2015-09-17:alexander.yevsyukov: Is there any faster way of decoding the message knowing its type?
+        // We here wrap and un-wrap just to restore the instance of known type.
 
-        return Messages.fromAny(messageAny);
+        final Any messageAny = Messages.ofType(TypeName.of(typeName), messageByteString);
+        final T result = Messages.fromAny(messageAny);
+        return result;
     }
 
     private static <T extends Message> List<T> readAll(PreparedQuery query) {

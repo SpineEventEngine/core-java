@@ -26,9 +26,8 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
 import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.sample.server.FileSystemStorageFactory;
-import org.spine3.server.SnapshotStorage;
-import org.spine3.server.StorageWithTimeline;
-import org.spine3.server.StorageWithTimelineAndVersion;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +42,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class FileSystemSample extends BaseSample {
 
-    private static final String STORAGE_PATH = "/storage";
+    private static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
 
     public static File getTempDir() {
         try {
@@ -60,27 +59,18 @@ public class FileSystemSample extends BaseSample {
         throw new IllegalStateException("Unable to get temporary directory for storage");
     }
 
-    public static void main(String[] args) {
-        final String tempDir = getTempDir().getAbsolutePath();
-        FileSystemHelper.configure(tempDir + STORAGE_PATH);
-
-        BaseSample sample = new FileSystemSample();
-
-        sample.execute();
-    }
-
     @Override
     protected Logger getLog() {
         return LogSingleton.INSTANCE.value;
     }
 
     @Override
-    protected StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage() {
+    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
         return FileSystemStorageFactory.createEventStoreStorage();
     }
 
     @Override
-    protected StorageWithTimeline<CommandRequest> provideCommandStoreStorage() {
+    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
         return FileSystemStorageFactory.createCommandStoreStorage();
     }
 
@@ -97,6 +87,16 @@ public class FileSystemSample extends BaseSample {
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(FileSystemSample.class);
+
+    }
+
+    public static void main(String[] args) {
+        final String tempDir = getTempDir().getAbsolutePath();
+        FileSystemHelper.configure(tempDir + STORAGE_PATH);
+
+        BaseSample sample = new FileSystemSample();
+
+        sample.execute();
     }
 
 }

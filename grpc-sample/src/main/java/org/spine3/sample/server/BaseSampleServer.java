@@ -30,7 +30,12 @@ import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.EventLogger;
 import org.spine3.sample.order.OrderRootRepository;
-import org.spine3.server.*;
+import org.spine3.server.CommandStore;
+import org.spine3.server.Engine;
+import org.spine3.server.EventStore;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.AggregateRootEventStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
  * Sample gRPC server implementation.
@@ -56,12 +61,11 @@ public abstract class BaseSampleServer {
 
     private OrderRootRepository getOrderRootRepository() {
 
-        final RepositoryEventStore eventStore = new RepositoryEventStore(
-                provideEventStoreStorage(),
-                provideSnapshotStorage());
+        final AggregateRootEventStorage eventStore = new AggregateRootEventStorage(
+                provideEventStoreStorage()
+        );
 
-        final OrderRootRepository repository = new OrderRootRepository();
-        repository.configure(eventStore);
+        final OrderRootRepository repository = new OrderRootRepository(eventStore, provideSnapshotStorage());
         return repository;
     }
 
@@ -118,9 +122,9 @@ public abstract class BaseSampleServer {
 
     protected abstract Logger getLog();
 
-    protected abstract StorageWithTimelineAndVersion<EventRecord> provideEventStoreStorage();
+    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
 
-    protected abstract StorageWithTimeline<CommandRequest> provideCommandStoreStorage();
+    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
 
     protected abstract SnapshotStorage provideSnapshotStorage();
 }

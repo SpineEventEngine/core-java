@@ -20,10 +20,13 @@
 
 package org.spine3.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
-import org.spine3.server.StorageWithTimeline;
+import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.AggregateCommand;
+import org.spine3.server.aggregate.AggregateId;
 
 import java.util.List;
 
@@ -34,9 +37,9 @@ import java.util.List;
  */
 public class CommandStore {
 
-    private final StorageWithTimeline<CommandRequest> storage;
+    private final MessageJournal<String, CommandRequest> storage;
 
-    public CommandStore(StorageWithTimeline<CommandRequest> storage) {
+    public CommandStore(MessageJournal<String, CommandRequest> storage) {
         this.storage = storage;
     }
 
@@ -46,7 +49,11 @@ public class CommandStore {
      * @param request command request to store
      */
     public void store(CommandRequest request) {
-        storage.store(request);
+        final Any any = request.getCommand();
+        final Message command = Messages.fromAny(any);
+        final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
+        String id = Entity.idToString(aggregateId.value());
+        storage.store(id, request);
     }
 
     /**
@@ -55,18 +62,18 @@ public class CommandStore {
      * @param aggregateRootId the id of the aggregate root
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> getCommands(Message aggregateRootId) {
-        return storage.read(aggregateRootId);
+    public List<CommandRequest> loadCommands(String aggregateRootId) {
+        return storage.load(aggregateRootId);
     }
 
     /**
      * Loads all commands for the given aggregate root id from given timestamp.
      *
      * @param aggregateRootId the id of the aggregate root
-     * @param from            the timestamp to load commands from
+     * @param timestamp            the timestamp to load commands from
      * @return list of commands for the aggregate root
      */
-    public List<CommandRequest> getCommands(Message aggregateRootId, Timestamp from) {
-        return storage.read(aggregateRootId, from);
+    public List<CommandRequest> loadCommandsSince(String aggregateRootId, Timestamp timestamp) {
+        return storage.loadSince(aggregateRootId, timestamp);
     }
 }

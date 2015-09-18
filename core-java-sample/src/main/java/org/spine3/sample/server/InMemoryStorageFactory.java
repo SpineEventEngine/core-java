@@ -18,35 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.sample.server;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-
-import java.util.List;
+import org.spine3.base.CommandRequest;
+import org.spine3.base.EventRecord;
+import org.spine3.server.MessageJournal;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
- * Extends {@link Storage} and provides an ability to work with Timestamp.
- *
- * @param <M> Message type to store
- * @author Mikhail Mikhaylov
+ * This class provides factory methods for creating in-memory-storages.
  */
-public interface StorageWithTimeline<M extends Message> extends Storage<M> {
+@SuppressWarnings("UtilityClass")
+public class InMemoryStorageFactory {
+
+    private InMemoryStorageFactory() {}
 
     /**
-     * Reads Messages of type {@link M} from storage from chosen timestamp.
+     * Creates new instance of the event store.
      *
-     * @param from     timestamp to read messages from
-     * @return read message
+     * @return new storage instance
      */
-    List<M> read(Timestamp from);
+    public static MessageJournal<String, EventRecord> createEventStoreStorage() {
+        return InMemoryMessageJournal.newInstance(EventRecord.class);
+    }
 
     /**
-     * Reads Messages of type {@link M} with appropriate Parent Id from storage from chosen timestamp.
+     * Creates new command store.
      *
-     * @param parentId parent id of message
-     * @param from     timestamp to read messages from
-     * @return read message
+     * @return new storage instance
      */
-    List<M> read(Message parentId, Timestamp from);
+    public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
+        return InMemoryMessageJournal.newInstance(CommandRequest.class);
+    }
+
+    /**
+     * Creates new snapshot storage.
+     *
+     * @return new storage instance
+     */
+    public static SnapshotStorage createSnapshotStorage() {
+        return new InMemorySnapshotStorage();
+    }
 }

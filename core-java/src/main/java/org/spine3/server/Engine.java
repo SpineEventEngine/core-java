@@ -54,7 +54,7 @@ public final class Engine {
      *
      * @return Engine instance
      * @throws IllegalStateException if the engine was not configured
-     *                               with {@link CommandStore} and {@link RepositoryEventStore} instances
+     *                               with {@link CommandStore} and {@link EventStore} instances
      * @see #configure(CommandStore, EventStore)
      */
     public static Engine getInstance() {

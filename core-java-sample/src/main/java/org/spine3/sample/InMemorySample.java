@@ -18,41 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.server;
+package org.spine3.sample;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.TypeName;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.gae.datastore.DataStoreStorageFactory;
-import org.spine3.sample.order.Order;
+import org.spine3.sample.server.InMemoryStorageFactory;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
- * File system Server implementation.
- * No main method provided because of requirement to initialize
- * helper for each working with data store thread.
- *
- * @author Mikhail Mikhaylov
+ * Entry point for core-java sample without gRPC. Works with in-memory-storage.
  */
-public class DataStoreSampleServer extends BaseSampleServer {
+@SuppressWarnings("UtilityClass")
+public class InMemorySample extends BaseSample {
 
-    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    public static void main(String[] args) {
 
-    @Override
-    protected void start() throws Exception {
-        helper.setUp();
-        super.start();
-    }
-
-    @Override
-    protected void stop() {
-        super.stop();
-        helper.tearDown();
+        BaseSample sample = new InMemorySample();
+        sample.execute();
     }
 
     @Override
@@ -62,23 +47,28 @@ public class DataStoreSampleServer extends BaseSampleServer {
 
     @Override
     protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return DataStoreStorageFactory.createEventStoreStorage();
+        return InMemoryStorageFactory.createEventStoreStorage();
     }
 
     @Override
     protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return DataStoreStorageFactory.createCommandStoreStorage();
+        return InMemoryStorageFactory.createCommandStoreStorage();
     }
 
     @Override
     protected SnapshotStorage provideSnapshotStorage() {
-        return DataStoreStorageFactory.createSnapshotStorage(TypeName.of(Order.getDescriptor()));
+        return InMemoryStorageFactory.createSnapshotStorage();
+    }
+
+    private InMemorySample() {
     }
 
     private enum LogSingleton {
+
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DataStoreSampleServer.class);
+        private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
     }
+
 }

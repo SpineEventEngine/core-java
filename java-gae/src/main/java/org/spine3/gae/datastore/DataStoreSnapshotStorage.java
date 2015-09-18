@@ -23,20 +23,18 @@ package org.spine3.gae.datastore;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotStorage;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 import static org.spine3.gae.datastore.DataStoreHelper.TYPE_KEY;
 import static org.spine3.gae.datastore.DataStoreHelper.VALUE_KEY;
-import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * DataStore-based {@link SnapshotStorage} implementation.
  */
-public class DataStoreSnapshotStorage implements SnapshotStorage {
+public class DataStoreSnapshotStorage<I> implements SnapshotStorage<I> {
 
     private final DataStoreHelper dataStoreHelper;
 
@@ -53,8 +51,8 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
     }
 
     @Override
-    public void store(Snapshot snapshot, Message parentId) {
-        final Entity dataStoreEntity = new Entity(entityKind.toString(), toJson(parentId));
+    public void store(I aggregateId, Snapshot snapshot) {
+        final Entity dataStoreEntity = new Entity(entityKind.toString(), idToString(aggregateId));
 
         final Any any = Messages.toAny(snapshot);
 
@@ -64,8 +62,12 @@ public class DataStoreSnapshotStorage implements SnapshotStorage {
         dataStoreHelper.put(dataStoreEntity);
     }
 
+    private static <I> String idToString(I aggregateId) {
+        return org.spine3.server.Entity.idToString(aggregateId);
+    }
+
     @Override
-    public Snapshot read(Message parentId) {
-        return dataStoreHelper.read(entityKind, toJson(parentId));
+    public Snapshot load(I aggregateId) {
+        return dataStoreHelper.read(entityKind, idToString(aggregateId));
     }
 }
