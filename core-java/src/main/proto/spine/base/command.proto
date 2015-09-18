@@ -77,18 +77,9 @@ message EventContext {
     // The version of the aggregate after the event was applied.
     int32 version = 3;
 
-    // The aggregate result state after the event was applied.
-    //
-    // This field may store the state of an aggregate root after the event was applied.
-    // The availability of this field is defined by the aggregated root configuration.
-    // For example, it may not be present if the state of the root is big enough for being
-    // transmitted to other parts of the system.
-    // NOTE: This field is CLEARED for event contexts instances stored in a persistent media.
-    google.protobuf.Any aggregate_state = 4;
-
     // This field may be used for additional attributes that were not known at the time of
     // defining the corresponding event type.
-    repeated google.protobuf.Any attributes = 5;
+    repeated google.protobuf.Any attributes = 4;
 }
 
 message EventRecord {

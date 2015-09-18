@@ -30,35 +30,98 @@ import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "spine/base/command.proto";
 
-// Built-in event type for storing aggregate root snapshots.
+// Built-in event type for storing aggregate snapshots.
 message Snapshot {
-    // The version of the aggregate root at which the snapshot was made.
+    // The version of the aggregate at which the snapshot was made.
     int32 version = 1;
 
-    // The state of the aggregate root.
+    // The state of the aggregate.
     google.protobuf.Any state = 2;
 
-    // Time when the stored state of the aggregate root was modified.
-    // This value is copied to the aggregated root when the snapshot is restored.
+    //TODO:2015-09-18:alexander.yevsyukov: Assuming we have Timestamp in AggregateRootStorageRecord, we may not need this field.
+
+    // Time when the stored state of the aggregate was modified.
+    // This value is copied to the aggregated when the snapshot is restored.
     google.protobuf.Timestamp whenLastModified = 3;
 }
 
-// This type defines the way events are stored in an external media.
+// A record in the storage of events and snapshots of an aggregate type.
+// Different types of aggregates are managed by different storages.
+message AggregateStorageRecord {
+    // A moment of time when the event occurred.
+    google.protobuf.Timestamp timestamp = 1;
+
+     // string representation of an aggregate id.
+    string aggregate_id = 2;
+
+    // The type of the event as a fully-qualified Protobuf type name.
+    string event_type = 3;
+
+    // String representation of EventId.
+    string event_id = 4;
+
+    // The version of the aggregate after the event was applied.
+    int32 version = 5;
+
+    oneof kind {
+        // Event data and context.
+        spine.base.EventRecord eventRecord = 6;
+
+        // Snapshot of the aggregate root.
+        Snapshot snapshot = 7;
+    }
+}
+
+// Event data for an aggregate.
+message AggregateEvents {
+    // If present, Snapshot will be used for restoring aggregate state before playing other events.
+     Snapshot snapshot = 1;
+
+     // Event records for the aggregate.
+     // If `snapshot` field is present, event records represent a 'tail' of event history of the aggregate.
+     // Otherwise, records are full history of the aggregate root.
+     repeated spine.base.EventRecord eventRecord = 2;
+}
+
+// This type defines the way events are stored in EventStore.
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message EventStoreRecord {
-     // Json representation of an aggregate id.
-    string aggregate_id = 1;
+    // A moment of time when the event occurred.
+    google.protobuf.Timestamp timestamp = 1;
 
     // The type of the event as a fully-qualified Protobuf type name.
     string event_type = 2;
 
-    // Json representation of EventId.
-    string event_id = 3;
+     // string representation of an aggregate id.
+    string aggregate_id = 3;
 
-    // The version of the aggregate root after the event was applied.
-    int32 version = 5;
+    // String representation of EventId.
+    string event_id = 4;
 
-    // Event data and context.
-    spine.base.EventRecord eventRecord = 6;
+    // Event instance.
+    google.protobuf.Any event = 5;
+
+    // Event context.
+    spine.base.EventContext context = 6;
+}
+
+// This type defines the way commands are stored in CommandStore.
+// Some of the fields are defined as string representation of corresponding message types
+// so that these fields are available for querying.
+message CommandStoreRecord {
+    // A moment of time when the command was received.
+    google.protobuf.Timestamp whenReceived = 1;
+
+    // The type of the command as a fully-qualified Protobuf type name.
+    string command_type = 2;
+
+    // String representation of CommandId.
+    string command_id = 3;
+
+    // The command instance.
+    google.protobuf.Any command = 4;
+
+    // The context of the command.
+    spine.base.CommandContext context = 5;
 }

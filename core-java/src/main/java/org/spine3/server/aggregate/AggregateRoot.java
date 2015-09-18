@@ -272,16 +272,19 @@ public abstract class AggregateRoot<I, S extends Message> extends Entity<I, S> {
         checkNotNull(command);
         checkNotNull(context);
 
-        Object handlingResult = invokeHandler(command, context);
+        final Object handlingResult = invokeHandler(command, context);
+        final Class<?> resultClass = handlingResult.getClass();
 
         //noinspection IfMayBeConditional
-        if (List.class.isAssignableFrom(handlingResult.getClass())) {
+        if (List.class.isAssignableFrom(resultClass)) {
             // Cast to list of messages as it is one of the return types we expect by methods we can call.
-            //noinspection unchecked
-            return (List<? extends Message>) handlingResult;
+            @SuppressWarnings("unchecked")
+            final List<? extends Message> result = (List<? extends Message>) handlingResult;
+            return result;
         } else {
             // Another type of result is single event (as Message).
-            return Collections.singletonList((Message) handlingResult);
+            final List<Message> result = Collections.singletonList((Message) handlingResult);
+            return result;
         }
     }
 
