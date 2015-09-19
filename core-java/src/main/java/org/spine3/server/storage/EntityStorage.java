@@ -25,6 +25,6 @@ package org.spine3.server.storage;
  *
  * @author Alexander Yevsyukov
  */
-public interface EntityStorage {
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
+public abstract class EntityStorage {
+    //TODO:2015-09-19:alexander.yevsyukov: Implement
 }

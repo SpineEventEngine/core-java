@@ -34,6 +34,7 @@ import org.spine3.server.aggregate.AggregateId;
  */
 public class CommandStore {
 
+    //TODO:2015-09-19:alexander.yevsyukov: Migrate to use CommandStorage created by StorageFactory of Engine.
     private final MessageJournal<String, CommandRequest> storage;
 
     public CommandStore(MessageJournal<String, CommandRequest> storage) {

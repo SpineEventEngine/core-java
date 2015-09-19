@@ -40,7 +40,7 @@ message AggregateStorageRecord {
      // string representation of an aggregate id.
     string aggregate_id = 2;
 
-    // The type of the event as a fully-qualified Protobuf type name.
+    // A short Protobuf type name of the event.
     string event_type = 3;
 
     // String representation of EventId.
@@ -79,7 +79,7 @@ message EventStoreRecord {
     // A moment of time when the event occurred.
     google.protobuf.Timestamp timestamp = 1;
 
-    // The type of the event as a fully-qualified Protobuf type name.
+    // A short name of Protobuf type of the event.
     string event_type = 2;
 
     // String representation of ID of the aggregate, which generated the event.
@@ -106,13 +106,13 @@ message CommandStoreRecord {
     // A moment of time when the command was created.
     google.protobuf.Timestamp timestamp = 1;
 
-    // The type of the command as a fully-qualified Protobuf type name.
+    // A short name of Protobuf command type.
     string command_type = 2;
 
     // String representation of CommandId.
     string command_id = 3;
 
-    // Fully-qualified Protobuf type name of the aggregate the command is for.
+    // A short Protobuf type name of the aggregate the command is for.
     //
     // If the command is not for an aggregate, this field is empty.
     // We store the type of aggregate ID, not the type of the aggregate itself,

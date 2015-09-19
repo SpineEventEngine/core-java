@@ -70,11 +70,13 @@ public abstract class AggregateStorage<I> {
         return builder.build();
     }
 
+    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
+
     public void store(I aggregateId, Snapshot snapshot) {
         AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
                 .setAggregateId(Entity.idToString(aggregateId))
-                .setEventType(Snapshot.getDescriptor().getFullName())
+                .setEventType(SNAPSHOT_TYPE_NAME)
                 .setEventId("") // No event ID for snapshots
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot);
@@ -87,7 +89,7 @@ public abstract class AggregateStorage<I> {
         final String aggregateId = Entity.idToString(context.getAggregateId());
         final EventId eventId = context.getEventId();
         final String eventIdStr = Entity.idToString(eventId);
-        final String typeName = TypeName.ofEnclosed(event).value();
+        final String typeName = TypeName.ofEnclosed(event).nameOnly();
         AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(eventId.getTimestamp())
                 .setAggregateId(aggregateId)

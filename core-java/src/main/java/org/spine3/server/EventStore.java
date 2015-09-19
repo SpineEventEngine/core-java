@@ -19,10 +19,7 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-
-import java.util.List;
 
 /**
  * Stores and loads the events.
@@ -45,17 +42,6 @@ public class EventStore {
     public void store(EventRecord record) {
         String id = Entity.idToString(record.getContext().getAggregateId());
         storage.store(id, record);
-    }
-
-    /**
-     * Loads all events from given timestamp.
-     *
-     * @param from timestamp to load events from
-     * @return list of events
-     */
-    public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.loadAllSince(from);
-        return result;
     }
 
 }

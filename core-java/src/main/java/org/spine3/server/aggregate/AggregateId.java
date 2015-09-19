@@ -21,6 +21,7 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
@@ -58,6 +59,14 @@ public final class AggregateId extends MessageValue {
     @SuppressWarnings("TypeMayBeWeakened") // We want already built instances on this level of API.
     public static AggregateId of(EventContext value) {
         return new AggregateId(Messages.fromAny(value.getAggregateId()));
+    }
+
+    /**
+     * Returns the type name of the value of aggregate ID.
+     */
+    public TypeName getTypeName() {
+        TypeName result = TypeName.of(value().getDescriptorForType());
+        return result;
     }
 
     @Override

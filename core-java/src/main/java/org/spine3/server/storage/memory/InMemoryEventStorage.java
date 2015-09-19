@@ -21,7 +21,12 @@
 package org.spine3.server.storage.memory;
 
 import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventStoreRecord;
 
 public class InMemoryEventStorage extends EventStorage {
 
+    @Override
+    protected void write(EventStoreRecord r) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    }
 }

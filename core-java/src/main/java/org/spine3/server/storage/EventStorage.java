@@ -20,11 +20,43 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
+import org.spine3.TypeName;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.EventRecord;
+import org.spine3.server.Entity;
+
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
  *
  * @author Alexander Yevsyukov
  */
 public abstract class EventStorage {
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    public void store(EventRecord record) {
+        final Any event = record.getEvent();
+        final EventContext context = record.getContext();
+        final TypeName typeName = TypeName.ofEnclosed(event);
+        final EventId eventId = context.getEventId();
+        final String eventIdStr = Entity.idToString(eventId);
+        EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
+                .setTimestamp(eventId.getTimestamp())
+                .setEventType(typeName.nameOnly())
+                .setAggregateId(context.getAggregateId().toString())
+                .setEventId(eventIdStr)
+                .setEvent(event)
+                .setContext(context);
+
+        write(builder.build());
+    }
+
+    /**
+     * Writes record into the storage.
+     *
+     * @param r the record to write
+     */
+    protected abstract void write(EventStoreRecord r);
+
 }
