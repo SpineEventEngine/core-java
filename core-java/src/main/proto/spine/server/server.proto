@@ -69,12 +69,14 @@ message AggregateStorageRecord {
     // The version of the aggregate after the event was applied.
     int32 version = 5;
 
+    reserved 6 to 19;
+
     oneof kind {
         // Event data and context.
-        spine.base.EventRecord event_record = 6;
+        spine.base.EventRecord event_record = 20;
 
         // Snapshot of the aggregate.
-        Snapshot snapshot = 7;
+        Snapshot snapshot = 21;
     }
 }
 
@@ -100,25 +102,29 @@ message EventStoreRecord {
     // The type of the event as a fully-qualified Protobuf type name.
     string event_type = 2;
 
-     // string representation of an aggregate id.
+    // String representation of ID of the aggregate, which generated the event.
+    //
+    // This field is empty, if the event is not from an aggregate.
     string aggregate_id = 3;
 
     // String representation of EventId.
     string event_id = 4;
 
+    reserved 5 to 19;
+
     // Event instance.
-    google.protobuf.Any event = 5;
+    google.protobuf.Any event = 20;
 
     // Event context.
-    spine.base.EventContext context = 6;
+    spine.base.EventContext context = 21;
 }
 
 // This type defines the way commands are stored in CommandStore.
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message CommandStoreRecord {
-    // A moment of time when the command was received.
-    google.protobuf.Timestamp when_received = 1;
+    // A moment of time when the command was created.
+    google.protobuf.Timestamp timestamp = 1;
 
     // The type of the command as a fully-qualified Protobuf type name.
     string command_type = 2;
@@ -126,9 +132,21 @@ message CommandStoreRecord {
     // String representation of CommandId.
     string command_id = 3;
 
+    // Fully-qualified Protobuf type name of the aggregate the command is for.
+    //
+    // If the command is not for an aggregate, this field is empty.
+    string aggregate_type = 4;
+
+    // String representation of the ID of the aggregate for which the command is for.
+    //
+    // This field is empty if the command is not for an aggregate.
+    string aggregate_id = 5;
+
+    reserved 6 to 19;
+
     // The command instance.
-    google.protobuf.Any command = 4;
+    google.protobuf.Any command = 20;
 
     // The context of the command.
-    spine.base.CommandContext context = 5;
+    spine.base.CommandContext context = 21;
 }

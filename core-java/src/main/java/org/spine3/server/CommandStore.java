@@ -22,13 +22,10 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
-
-import java.util.List;
 
 /**
  * Stores and loads commands.
@@ -56,24 +53,4 @@ public class CommandStore {
         storage.store(id, request);
     }
 
-    /**
-     * Loads all commands for the given aggregate root id.
-     *
-     * @param aggregateRootId the id of the aggregate root
-     * @return list of commands for the aggregate root
-     */
-    public List<CommandRequest> loadCommands(String aggregateRootId) {
-        return storage.load(aggregateRootId);
-    }
-
-    /**
-     * Loads all commands for the given aggregate root id from given timestamp.
-     *
-     * @param aggregateRootId the id of the aggregate root
-     * @param timestamp            the timestamp to load commands from
-     * @return list of commands for the aggregate root
-     */
-    public List<CommandRequest> loadCommandsSince(String aggregateRootId, Timestamp timestamp) {
-        return storage.loadSince(aggregateRootId, timestamp);
-    }
 }
