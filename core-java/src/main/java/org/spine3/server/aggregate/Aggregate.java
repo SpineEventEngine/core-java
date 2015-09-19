@@ -231,7 +231,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     public Timestamp whenLastModified() {
         init();
         final Timestamp lastModified = super.whenLastModified();
-        // An aggregate root when initialized may not have a null modification timestamp because:
+        // An aggregate when initialized may not have a null modification timestamp because:
         // 1. Its initialization sets the timestamp.
         // 2. Modifications are performed via command handlers or event appliers,
         //     which involves prior initialization.
@@ -244,9 +244,9 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     }
 
     /**
-     * Dispatches commands, generates events and applies them to the aggregate root.
+     * Dispatches commands, generates events and applies them to the aggregate.
      *
-     * @param command the command to be executed on aggregate root
+     * @param command the command to be executed on aggregate
      * @param context of the command
      * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
      */
@@ -318,7 +318,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     }
 
     /**
-     * Applies an event to the aggregate root.
+     * Applies an event to the aggregate.
      *
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
@@ -379,8 +379,8 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      *
      * @param commandId      the ID of the command, which caused the event
      * @param event          the event for which to create the context
-     * @param currentState   the state of the aggregated root after the event was applied
-     * @param currentVersion the version of the aggregate root after the event was applied
+     * @param currentState   the state of the aggregated after the event was applied
+     * @param currentVersion the version of the aggregate after the event was applied
      * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
@@ -406,8 +406,8 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param builder        a builder for the event context
      * @param commandId      the id of the command, which cased the event
      * @param event          the event message
-     * @param currentState   the current state of the aggregate root after the event was applied
-     * @param currentVersion the version of the aggregate root after the event was applied
+     * @param currentState   the current state of the aggregate after the event was applied
+     * @param currentVersion the version of the aggregate after the event was applied
      * @see #createEventContext(CommandId, Message, Message, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
@@ -417,7 +417,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     }
 
     /**
-     * Transforms the current state of the aggregate root into the snapshot event.
+     * Transforms the current state of the aggregate into the snapshot event.
      *
      * @return new snapshot
      */
@@ -434,7 +434,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     }
 
     /**
-     * The registry of method maps for all aggregate root classes.
+     * The registry of method maps for all aggregate classes.
      *
      * <p>The instances of {@code AggregateRoot} class register their classes in {@link Aggregate#init()} method.
      */
@@ -486,13 +486,13 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
         return new IllegalStateException(
-                String.format("Missing handler for command class %s in aggregate root class %s.",
+                String.format("Missing handler for command class %s in aggregate class %s.",
                         commandClass.getName(), getClass().getName()));
     }
 
     private IllegalStateException missingEventApplier(Class<? extends Message> eventClass) {
         return new IllegalStateException(
-                String.format("Missing event applier for event class %s in aggregate root class %s.",
+                String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
     }
 
