@@ -26,6 +26,7 @@ import com.google.common.collect.*;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
@@ -434,7 +435,8 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
         Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setWhenModified(whenModified)
-                .setVersion(version);
+                .setVersion(version)
+                .setTimestamp(TimeUtil.getCurrentTime());
 
         return builder.build();
     }

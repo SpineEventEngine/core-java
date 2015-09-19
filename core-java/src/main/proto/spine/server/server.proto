@@ -42,14 +42,19 @@ message Snapshot {
 
     // The version of the aggregate at which the snapshot was made.
     int32 version = 3;
+
+    // The moment the snapshot was created.
+    //
+    // This value should normally be after the time the aggregate was modified (and timestamp of the
+    // corresponding event), and before the time of the next event in the aggregate history.
+    google.protobuf.Timestamp timestamp = 4;
 }
 
 // A record in the storage of events and snapshots of an aggregate type.
 //
 // Different types of aggregates are managed by different storages.
 message AggregateStorageRecord {
-    // A moment of time when the record was created.
-    //
+    // A timestamp of an event or a snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
      // string representation of an aggregate id.

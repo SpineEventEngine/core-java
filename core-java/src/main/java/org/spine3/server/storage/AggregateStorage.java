@@ -21,15 +21,22 @@
 package org.spine3.server.storage;
 
 import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
+import org.spine3.TypeName;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.AggregateEvents;
 import org.spine3.server.AggregateStorageRecord;
+import org.spine3.server.Entity;
 import org.spine3.server.Snapshot;
 
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * An event-sourced storage of aggregate root events and snapshots.
@@ -41,19 +48,18 @@ public abstract class AggregateStorage<I> {
     public AggregateEvents load(I aggregateId) {
         Deque<EventRecord> history = Lists.newLinkedList();
         Snapshot snapshot = null;
-        final Iterator<AggregateStorageRecord> iterator = historyBackward(aggregateId);
-        while (iterator.hasNext() && snapshot == null) {
-            AggregateStorageRecord record = iterator.next();
 
+        final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
+        while (historyBackward.hasNext()
+                && snapshot == null) {
+            AggregateStorageRecord record = historyBackward.next();
             switch (record.getKindCase()) {
                 case EVENT_RECORD:
                     history.addFirst(record.getEventRecord());
                     break;
-
                 case SNAPSHOT:
                     snapshot = record.getSnapshot();
                     break;
-
                 case KIND_NOT_SET:
                     throw new IllegalStateException("Event record or snapshot missing in " + TextFormat.shortDebugString(record));
             }
@@ -68,21 +74,53 @@ public abstract class AggregateStorage<I> {
         return builder.build();
     }
 
-    //TODO:2015-09-18:alexander.yevsyukov: The problem is snapshot creation and event time are not sequential.
-    // event happened before we create a snapshot because we make a snapshot when we realize we have far too many events.
+    public void store(I aggregateId, Snapshot snapshot) {
+        AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+                .setTimestamp(snapshot.getTimestamp())
+                .setAggregateId(Entity.idToString(aggregateId))
+                .setEventType(Snapshot.getDescriptor().getFullName())
+                .setEventId("") // No event ID for snapshots
+                .setVersion(snapshot.getVersion())
+                .setSnapshot(snapshot);
+        write(builder.build());
+    }
 
-    public abstract void store(Snapshot snapshot);
+    public void store(EventRecord record) {
+        final EventContext context = record.getContext();
+        final Any event = record.getEvent();
+        final String aggregateId = Entity.idToString(context.getAggregateId());
+        final EventId eventId = context.getEventId();
+        final String eventIdStr = Entity.idToString(eventId);
+        try {
+            final String typeName = TypeName.ofEnclosed(event).value();
+            AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+                    .setTimestamp(eventId.getTimestamp())
+                    .setAggregateId(aggregateId)
+                    .setEventType(typeName)
+                    .setEventId(eventIdStr)
+                    .setVersion(context.getVersion())
+                    .setEventRecord(record);
+            write(builder.build());
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
+        }
+    }
 
-    public abstract void store(EventRecord record);
+    // Storage implementation API.
 
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
-
-    // Internal implementation API.
-
+    /**
+     * Writes the passed record into the storage.
+     *
+     * @param r the record to write
+     */
     protected abstract void write(AggregateStorageRecord r);
 
-    protected abstract List<AggregateStorageRecord> read(I id);
-
+    /**
+     * Creates iterator of aggregate event history with the reverse traversal.
+     *
+     * @param id aggregate ID
+     * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
+     */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
 }
