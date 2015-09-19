@@ -346,9 +346,9 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param snapshot the snapshot with the state to restore
      */
     public void restore(SnapshotOrBuilder snapshot) {
-        S stateToRestore = Messages.fromAny(snapshot.getState());
+        S stateToRestore = Messages.fromAny(snapshot.getAggregateState());
 
-        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenLastModified());
+        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
 
     /**
@@ -422,13 +422,13 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @return new snapshot
      */
     public Snapshot toSnapshot() {
-        final Any state = Messages.toAny(getState());
+        final Any state = Any.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenLastModified();
         Snapshot.Builder builder = Snapshot.newBuilder()
-                .setState(state)
+                .setAggregateState(state)
                 .setVersion(version)
-                .setWhenLastModified(whenModified);
+                .setWhenModified(whenModified);
 
         return builder.build();
     }

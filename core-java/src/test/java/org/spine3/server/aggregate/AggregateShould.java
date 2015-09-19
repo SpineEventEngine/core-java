@@ -327,7 +327,7 @@ public class AggregateShould {
         root.dispatch(createProject, commandContext);
 
         final Snapshot snapshot = root.toSnapshot();
-        final Project state = fromAny(snapshot.getState());
+        final Project state = fromAny(snapshot.getAggregateState());
 
         assertEquals(projectId, state.getProjectId());
         assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());

@@ -32,23 +32,25 @@ import "spine/base/command.proto";
 
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {
-    // The version of the aggregate at which the snapshot was made.
-    int32 version = 1;
-
     // The state of the aggregate.
-    google.protobuf.Any state = 2;
-
-    //TODO:2015-09-18:alexander.yevsyukov: Assuming we have Timestamp in AggregateRootStorageRecord, we may not need this field.
+    google.protobuf.Any aggregate_state = 1;
 
     // Time when the stored state of the aggregate was modified.
+    //
+    // This value should be taken from the last event applied to the aggregate.
     // This value is copied to the aggregated when the snapshot is restored.
-    google.protobuf.Timestamp whenLastModified = 3;
+    google.protobuf.Timestamp when_modified = 2;
+
+    // The version of the aggregate at which the snapshot was made.
+    int32 version = 3;
 }
 
 // A record in the storage of events and snapshots of an aggregate type.
+//
 // Different types of aggregates are managed by different storages.
 message AggregateStorageRecord {
-    // A moment of time when the event occurred.
+    // A moment of time when the record was created.
+    //
     google.protobuf.Timestamp timestamp = 1;
 
      // string representation of an aggregate id.
@@ -65,22 +67,23 @@ message AggregateStorageRecord {
 
     oneof kind {
         // Event data and context.
-        spine.base.EventRecord eventRecord = 6;
+        spine.base.EventRecord event_record = 6;
 
-        // Snapshot of the aggregate root.
+        // Snapshot of the aggregate.
         Snapshot snapshot = 7;
     }
 }
 
-// Event data for an aggregate.
+// Event data for an aggregate returned by a storage managing the aggregate.
 message AggregateEvents {
     // If present, Snapshot will be used for restoring aggregate state before playing other events.
      Snapshot snapshot = 1;
 
      // Event records for the aggregate.
+     //
      // If `snapshot` field is present, event records represent a 'tail' of event history of the aggregate.
-     // Otherwise, records are full history of the aggregate root.
-     repeated spine.base.EventRecord eventRecord = 2;
+     // Otherwise, records are full history of the aggregate.
+     repeated spine.base.EventRecord event_record = 2;
 }
 
 // This type defines the way events are stored in EventStore.
@@ -111,7 +114,7 @@ message EventStoreRecord {
 // so that these fields are available for querying.
 message CommandStoreRecord {
     // A moment of time when the command was received.
-    google.protobuf.Timestamp whenReceived = 1;
+    google.protobuf.Timestamp when_received = 1;
 
     // The type of the command as a fully-qualified Protobuf type name.
     string command_type = 2;

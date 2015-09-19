@@ -160,7 +160,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
         try {
             Snapshot snapshot = snapshotStorage.load(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenLastModified());
+                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenModified());
                 R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
