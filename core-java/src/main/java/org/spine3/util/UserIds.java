@@ -19,7 +19,6 @@
  */
 package org.spine3.util;
 
-
 import org.spine3.base.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;

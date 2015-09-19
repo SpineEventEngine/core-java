@@ -31,8 +31,6 @@ import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
-import org.spine3.server.Snapshot;
-import org.spine3.server.SnapshotOrBuilder;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Events;

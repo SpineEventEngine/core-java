@@ -33,7 +33,6 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.ZoneOffsets;
 import org.spine3.server.Assign;
-import org.spine3.server.Snapshot;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -74,7 +73,7 @@ public class AggregateShould {
     private CreateProject createProject;
     private AddTask addTask;
     private StartProject startProject;
-    private ProjectRoot root;
+    private ProjectAggregate root;
 
     @Before
     public void setUp() {
@@ -84,13 +83,13 @@ public class AggregateShould {
         createProject = CreateProject.newBuilder().setProjectId(projectId).build();
         addTask = AddTask.newBuilder().setProjectId(projectId).build();
         startProject = StartProject.newBuilder().setProjectId(projectId).build();
-        root = new ProjectRoot(projectId);
+        root = new ProjectAggregate(projectId);
     }
 
     @Test
     public void accept_Message_id_to_constructor() {
         try {
-            final ProjectRoot r = new ProjectRoot(projectId);
+            final ProjectAggregate r = new ProjectAggregate(projectId);
             assertEquals(projectId, r.getId());
         } catch (Throwable e) {
             fail();
@@ -195,7 +194,7 @@ public class AggregateShould {
     @Test
     public void return_command_classes_which_are_handled_by_root() {
 
-        final Set<CommandClass> classes = getCommandClasses(ProjectRoot.class);
+        final Set<CommandClass> classes = getCommandClasses(ProjectAggregate.class);
 
         assertTrue(classes.size() == 3);
         assertTrue(classes.contains(CommandClass.of(CreateProject.class)));
@@ -206,7 +205,7 @@ public class AggregateShould {
     @Test
     public void return_message_classes_which_are_handled_by_root_case_event_classes() {
 
-        final Set<Class<? extends Message>> classes = getHandledMessageClasses(ProjectRoot.class, isEventApplierPredicate);
+        final Set<Class<? extends Message>> classes = getHandledMessageClasses(ProjectAggregate.class, isEventApplierPredicate);
         assertContainsAllProjectEvents(classes);
     }
 
@@ -225,23 +224,23 @@ public class AggregateShould {
         final Project state = root.getState();
 
         assertEquals(projectId, state.getProjectId());
-        assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());
+        assertEquals(ProjectAggregate.STATUS_NEW, state.getStatus());
     }
 
     @Test
     public void return_current_state_after_several_dispatches() throws InvocationTargetException {
 
         root.dispatch(createProject, commandContext);
-        assertEquals(ProjectRoot.STATUS_NEW, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_NEW, root.getState().getStatus());
 
         root.dispatch(startProject, commandContext);
-        assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_STARTED, root.getState().getStatus());
     }
 
     @Test
     public void return_non_null_time_when_was_last_modified() {
 
-        final Timestamp creationTime = new ProjectRoot(projectId).whenModified();
+        final Timestamp creationTime = new ProjectAggregate(projectId).whenModified();
         assertNotNull(creationTime);
     }
 
@@ -272,11 +271,11 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = root.toSnapshot();
 
         root.dispatch(startProject, commandContext);
-        assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_STARTED, root.getState().getStatus());
 
         final List<EventRecord> eventRecords = newArrayList(snapshotToEventRecord(snapshotNewProject));
         root.play(eventRecords);
-        assertEquals(ProjectRoot.STATUS_NEW, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_NEW, root.getState().getStatus());
     }
 
     @Test
@@ -330,7 +329,7 @@ public class AggregateShould {
         final Project state = fromAny(snapshot.getState());
 
         assertEquals(projectId, state.getProjectId());
-        assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());
+        assertEquals(ProjectAggregate.STATUS_NEW, state.getStatus());
     }
 
     @Test
@@ -341,10 +340,10 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = root.toSnapshot();
 
         root.dispatch(startProject, commandContext);
-        assertEquals(ProjectRoot.STATUS_STARTED, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_STARTED, root.getState().getStatus());
 
         root.restore(snapshotNewProject);
-        assertEquals(ProjectRoot.STATUS_NEW, root.getState().getStatus());
+        assertEquals(ProjectAggregate.STATUS_NEW, root.getState().getStatus());
     }
 
 
@@ -379,7 +378,7 @@ public class AggregateShould {
         return events;
     }
 
-    private void assertProjectEventsApplied(ProjectRoot r) {
+    private void assertProjectEventsApplied(ProjectAggregate r) {
         assertTrue(r.isProjectCreatedEventApplied);
         assertTrue(r.isTaskAddedEventApplied);
         assertTrue(r.isProjectStartedEventApplied);
@@ -404,8 +403,7 @@ public class AggregateShould {
         return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
-    //TODO:2015-09-18:alexander.yevsyukov: Rename protobuf-generated class to ProjectState and this class to Project.
-    public static class ProjectRoot extends Aggregate<ProjectId, Project> {
+    public static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
         private static final String STATUS_STARTED = "STARTED";
@@ -418,7 +416,7 @@ public class AggregateShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        public ProjectRoot(ProjectId id) {
+        public ProjectAggregate(ProjectId id) {
             super(id);
         }
 

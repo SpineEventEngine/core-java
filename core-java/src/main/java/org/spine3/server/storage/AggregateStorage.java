@@ -28,10 +28,8 @@ import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.server.AggregateEvents;
-import org.spine3.server.AggregateStorageRecord;
 import org.spine3.server.Entity;
-import org.spine3.server.Snapshot;
+import org.spine3.server.aggregate.Snapshot;
 
 import java.util.Deque;
 import java.util.Iterator;
