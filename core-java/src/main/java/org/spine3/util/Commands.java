@@ -22,8 +22,8 @@ package org.spine3.util;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
-import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.Entity;
 import org.spine3.time.ZoneOffset;
 
 import javax.annotation.Nullable;
@@ -62,6 +62,18 @@ public class Commands {
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .build();
+    }
+
+    /**
+     * Creates string representation of the passed command ID.
+     *
+     * @param commandId the ID to convert
+     * @return string value, with the format defined by {@link Entity#idToString(Object)}
+     * @see Entity#idToString(Object)
+     */
+    public static String idToString(CommandId commandId) {
+        String result = Entity.idToString(commandId);
+        return result;
     }
 
     public static Predicate<CommandRequest> wereAfter(final Timestamp from) {
@@ -106,17 +118,6 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Converts {@code CommandId} into Json string.
-     *
-     * @param id the id to convert
-     * @return Json representation of the id
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types converted in this way.
-    public static String idToString(CommandId id) {
-        return Messages.toJson(id);
     }
 
     /**

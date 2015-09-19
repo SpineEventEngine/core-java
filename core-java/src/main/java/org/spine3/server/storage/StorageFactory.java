@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.server.aggregate.Aggregate;
+
 /**
  * A factory for creating storages used by repositories, {@link org.spine3.server.CommandStore}, and
  * {@link org.spine3.server.EventStore}.
@@ -32,5 +34,5 @@ public interface StorageFactory {
 
     EventStorage createEventStorage();
 
-    AggregateStorage createAggregateRootStorage();
+    <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass);
 }

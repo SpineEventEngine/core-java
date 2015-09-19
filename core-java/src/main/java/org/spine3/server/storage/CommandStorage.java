@@ -20,11 +20,40 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
+import org.spine3.TypeName;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.CommandRequest;
+import org.spine3.server.Entity;
+import org.spine3.server.aggregate.AggregateId;
+
 /**
  * A storage used by {@link org.spine3.server.CommandStore} for keeping command data.
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandStorage {
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
+public abstract class CommandStorage {
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    public void store(AggregateId aggregateId, CommandRequest request) {
+        final Any command = request.getCommand();
+        final CommandContext context = request.getContext();
+        final TypeName commandType = TypeName.ofEnclosed(command);
+        final CommandId commandId = context.getCommandId();
+        final String commandIdStr = Entity.idToString(commandId);
+        CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
+                .setTimestamp(commandId.getTimestamp())
+                .setCommandType(commandType.value())
+                .setCommandId(commandIdStr)
+                .setAggregateIdType(aggregateId.value().getDescriptorForType().getFullName())
+                .setAggregateId(aggregateId.toString())
+                .setCommand(command)
+                .setContext(context);
+
+        write(builder.build());
+    }
+
+    protected abstract void write(CommandStoreRecord record);
+
 }

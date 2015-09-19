@@ -22,7 +22,6 @@ package org.spine3.server.storage;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
 import org.spine3.TypeName;
 import org.spine3.base.EventContext;
@@ -34,11 +33,10 @@ import org.spine3.server.aggregate.Snapshot;
 import java.util.Deque;
 import java.util.Iterator;
 
-import static com.google.common.base.Throwables.propagate;
-
 /**
  * An event-sourced storage of aggregate root events and snapshots.
  *
+ * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateStorage<I> {
@@ -89,19 +87,15 @@ public abstract class AggregateStorage<I> {
         final String aggregateId = Entity.idToString(context.getAggregateId());
         final EventId eventId = context.getEventId();
         final String eventIdStr = Entity.idToString(eventId);
-        try {
-            final String typeName = TypeName.ofEnclosed(event).value();
-            AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                    .setTimestamp(eventId.getTimestamp())
-                    .setAggregateId(aggregateId)
-                    .setEventType(typeName)
-                    .setEventId(eventIdStr)
-                    .setVersion(context.getVersion())
-                    .setEventRecord(record);
-            write(builder.build());
-        } catch (InvalidProtocolBufferException e) {
-            propagate(e);
-        }
+        final String typeName = TypeName.ofEnclosed(event).value();
+        AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+                .setTimestamp(eventId.getTimestamp())
+                .setAggregateId(aggregateId)
+                .setEventType(typeName)
+                .setEventId(eventIdStr)
+                .setVersion(context.getVersion())
+                .setEventRecord(record);
+        write(builder.build());
     }
 
     // Storage implementation API.

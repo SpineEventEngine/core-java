@@ -18,13 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.storage.memory;
 
-/**
- * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
- *
- * @author Alexander Yevsyukov
- */
-public abstract class EventStorage {
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStoreRecord;
+
+public class InMemoryCommandStorage extends CommandStorage {
+
+    //TODO:2015-09-19:alexander.yevsyukov: Implement
+
+    @Override
+    protected void write(CommandStoreRecord record) {
+
+    }
 }

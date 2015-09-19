@@ -115,7 +115,9 @@ message CommandStoreRecord {
     // Fully-qualified Protobuf type name of the aggregate the command is for.
     //
     // If the command is not for an aggregate, this field is empty.
-    string aggregate_type = 4;
+    // We store the type of aggregate ID, not the type of the aggregate itself,
+    // because it is not available at the level of commands.
+    string aggregate_id_type = 4;
 
     // String representation of the ID of the aggregate for which the command is for.
     //

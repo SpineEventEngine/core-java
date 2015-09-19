@@ -24,6 +24,7 @@ import com.google.protobuf.*;
 import org.spine3.util.StringTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * A value object for fully-qualified Protobuf type name.
@@ -78,15 +79,15 @@ public final class TypeName extends StringTypeValue {
      *
      * @param any the instance of {@code Any} containing {@code Message} instance of interest
      * @return new instance of {@code TypeName}
-     * @throws InvalidProtocolBufferException if:
-     *  <ul>
-     *      <li>the type URL returned by {@code any} does not have "type.googleapis.com/" prefix</li>
-     *      <li>there's nothing after the prefix</li>
-     *      <li>the type URL has more than one '/' separator</li>
-     *  </ul>
      */
-    public static TypeName ofEnclosed(AnyOrBuilder any) throws InvalidProtocolBufferException {
-        String typeName = getTypeName(any.getTypeUrl());
+    public static TypeName ofEnclosed(AnyOrBuilder any) {
+        String typeName = null;
+        try {
+            typeName = getTypeName(any.getTypeUrl());
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
+        }
+        assert typeName != null;
         return of(typeName);
     }
 

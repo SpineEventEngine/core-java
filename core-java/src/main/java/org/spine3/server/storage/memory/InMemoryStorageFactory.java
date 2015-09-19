@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.EventStorage;
@@ -34,19 +35,17 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        //TODO:2015-09-18:alexander.yevsyukov: Implement
-        return null;
+        return new InMemoryCommandStorage();
     }
 
     @Override
     public EventStorage createEventStorage() {
-        //TODO:2015-09-18:alexander.yevsyukov: Implement
-        return null;
+        return new InMemoryEventStorage();
     }
 
     @Override
-    public AggregateStorage createAggregateRootStorage() {
-        //TODO:2015-09-18:alexander.yevsyukov: Implement
-        return null;
+    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+        return new InMemoryAggregateStorage<>();
     }
+
 }

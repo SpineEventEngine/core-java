@@ -18,13 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.storage.memory;
 
-/**
- * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
- *
- * @author Alexander Yevsyukov
- */
-public abstract class EventStorage {
-    //TODO:2015-09-18:alexander.yevsyukov: Implement
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.AggregateStorageRecord;
+
+import java.util.Iterator;
+
+public class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+
+    //TODO:2015-09-19:alexander.yevsyukov: Consider having Multimap backed with TreeMap for storing data.
+
+    @Override
+    protected void write(AggregateStorageRecord r) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    }
+
+    @Override
+    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
+        return null;
+    }
 }
