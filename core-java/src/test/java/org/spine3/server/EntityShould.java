@@ -27,9 +27,7 @@ import org.spine3.test.project.Project;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.lang.System.currentTimeMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
@@ -49,7 +47,7 @@ public class EntityShould {
     public void have_null_fields_by_default() {
 
         assertNull(entity.getState());
-        assertNull(entity.whenLastModified());
+        assertNull(entity.whenModified());
         assertEquals(0, entity.getVersion());
     }
 
@@ -68,7 +66,7 @@ public class EntityShould {
         entity.setState(state, version, whenLastModified);
 
         assertEquals(state, entity.getState());
-        assertEquals(whenLastModified, entity.whenLastModified());
+        assertEquals(whenLastModified, entity.whenModified());
         assertEquals(version, entity.getVersion());
     }
 
@@ -86,7 +84,7 @@ public class EntityShould {
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
         assertEquals(entity.getDefaultState(), entity.getState());
-        assertEquals(expectedTimeSec, entity.whenLastModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
         assertEquals(0, entity.getVersion());
     }
 
@@ -104,7 +102,7 @@ public class EntityShould {
         entity.incrementVersion();
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
-        assertEquals(expectedTimeSec, entity.whenLastModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
 
     @Test
@@ -128,7 +126,7 @@ public class EntityShould {
         entity.incrementState(stubState);
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
-        assertEquals(expectedTimeSec, entity.whenLastModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
 
 

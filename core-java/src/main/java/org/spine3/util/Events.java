@@ -44,25 +44,31 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 @SuppressWarnings("UtilityClass")
 public class Events {
 
+    private Events() {
+    }
+
     /**
      * Generates new {@link EventId} by the passed {@link CommandId} and current system time.
-     * <p>
-     * It is assumed tha the passed command ID is of the command that originates the event
-     * for which we generate the ID.
      *
      * @param commandId ID of the command, which originated the event
      * @return new event ID
      */
     public static EventId generateId(CommandId commandId) {
-        checkNotNull(commandId);
-
-        return EventId.newBuilder()
-                .setCommandId(commandId)
-                .setTimestamp(getCurrentTime())
-                .build();
+        return createId(commandId, getCurrentTime());
     }
 
-    private Events() {
+    /**
+     * Creates new {@link EventId} by the passed {@link CommandId} and passed timestamp.
+     *
+     * @param commandId ID of the command, which originated the event
+     * @param timestamp the moment of time the event happened
+     * @return new event ID
+     */
+    public static EventId createId(CommandId commandId, Timestamp timestamp) {
+        final EventId.Builder builder = EventId.newBuilder()
+                .setCommandId(checkNotNull(commandId))
+                .setTimestamp(checkNotNull(timestamp));
+        return builder.build();
     }
 
     public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {

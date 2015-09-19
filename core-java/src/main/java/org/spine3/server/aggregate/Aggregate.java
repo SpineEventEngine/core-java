@@ -49,9 +49,9 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Abstract base for aggregate roots.
+ * Abstract base for aggregates.
  *
- * @param <I> the type for ID of the aggregate root. Supported types are:
+ * @param <I> the type for IDs of this class of aggregates. Supported types are:
  *            <ul>
  *            <li>Classes implementing {@link Message}</li>
  *            <li>String</li>
@@ -224,13 +224,13 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * Returns a non-null timestamp of the last modification.
      *
      * @return a non-null instance, which is the timestamp of the last modification or
-     *         the timestamp of setting the default state of the aggregate
+     * the timestamp of setting the default state of the aggregate
      */
     @Nonnull
     @Override
-    public Timestamp whenLastModified() {
+    public Timestamp whenModified() {
         init();
-        final Timestamp lastModified = super.whenLastModified();
+        final Timestamp lastModified = super.whenModified();
         // An aggregate when initialized may not have a null modification timestamp because:
         // 1. Its initialization sets the timestamp.
         // 2. Modifications are performed via command handlers or event appliers,
@@ -257,7 +257,6 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
         CommandId commandId = context.getCommandId();
         apply(events, commandId);
     }
-
 
     /**
      * Directs the passed command to the corresponding command handler method of the aggregate.
@@ -306,11 +305,18 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     private void apply(Iterable<? extends Message> events, CommandId commandId) throws InvocationTargetException {
         for (Message event : events) {
+            /**
+             * Event applier should call {@link #incrementState(Message)}.
+             * It will advance version and record time of the modification.
+             *
+             * <p>It may turn that the event does not modify the state of the aggregate.
+             */
             apply(event);
 
-            int currentVersion = incrementVersion();
+            int currentVersion = getVersion();
             final S state = getState();
-            EventContext eventContext = createEventContext(commandId, event, state, currentVersion);
+            EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
+
             EventRecord eventRecord = Events.createEventRecord(event, eventContext);
 
             putUncommitted(eventRecord);
@@ -319,7 +325,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Applies an event to the aggregate.
-     *
+     * <p/>
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
@@ -346,7 +352,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param snapshot the snapshot with the state to restore
      */
     public void restore(SnapshotOrBuilder snapshot) {
-        S stateToRestore = Messages.fromAny(snapshot.getAggregateState());
+        S stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
@@ -373,20 +379,20 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Creates a context for an event.
-     *
+     * <p/>
      * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
      * @param event          the event for which to create the context
      * @param currentState   the state of the aggregated after the event was applied
-     * @param currentVersion the version of the aggregate after the event was applied
-     * @return new instance of the {@code EventContext}
+     * @param whenModified   the moment of the aggregate modification for this event
+     * @param currentVersion the version of the aggregate after the event was applied  @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
-    protected EventContext createEventContext(CommandId commandId, Message event, S currentState, int currentVersion) {
+    protected EventContext createEventContext(CommandId commandId, Message event, S currentState, Timestamp whenModified, int currentVersion) {
 
-        EventId eventId = Events.generateId(commandId);
+        EventId eventId = Events.createId(commandId, whenModified);
 
         EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
@@ -400,7 +406,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     *
+     * <p/>
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
@@ -408,7 +414,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param event          the event message
      * @param currentState   the current state of the aggregate after the event was applied
      * @param currentVersion the version of the aggregate after the event was applied
-     * @see #createEventContext(CommandId, Message, Message, int)
+     * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
@@ -424,19 +430,20 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
     public Snapshot toSnapshot() {
         final Any state = Any.pack(getState());
         final int version = getVersion();
-        final Timestamp whenModified = whenLastModified();
+        final Timestamp whenModified = whenModified();
         Snapshot.Builder builder = Snapshot.newBuilder()
-                .setAggregateState(state)
-                .setVersion(version)
-                .setWhenModified(whenModified);
+                .setState(state)
+                .setWhenModified(whenModified)
+                .setVersion(version);
 
         return builder.build();
     }
 
     /**
      * The registry of method maps for all aggregate classes.
-     *
-     * <p>The instances of {@code AggregateRoot} class register their classes in {@link Aggregate#init()} method.
+     * <p/>
+     * <p>This registry is used for caching command handlers and event appliers.
+     * Aggregates register their classes in {@link Aggregate#init()} method.
      */
     private static class Registry {
 
@@ -468,16 +475,11 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
         }
 
         static Registry instance() {
-            return RegistrySingleton.INSTANCE.value;
+            return Singleton.value;
         }
 
-        @SuppressWarnings("InnerClassTooDeeplyNested")
-        private enum RegistrySingleton {
-            INSTANCE;
-
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-
+        private static class Singleton {
+            private static final Registry value = new Registry();
         }
     }
 

@@ -51,7 +51,7 @@ public class AggregateEventStorage<I> {
          * The type is ensured by binding the same type in AggregateRootRepositoryBase to ID type
          * of AggregateRoot and AggregateRootEventStorage.
          *
-         * @see Aggregate#createEventContext(CommandId, Message, Message, int)
+         * @see Aggregate#createEventContext(CommandId, Message, Message, Timestamp, int)
          */
         @SuppressWarnings("unchecked")
         I id = (I)Entity.idFromAny(record.getContext().getAggregateId());

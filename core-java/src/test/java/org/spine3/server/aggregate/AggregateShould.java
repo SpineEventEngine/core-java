@@ -241,7 +241,7 @@ public class AggregateShould {
     @Test
     public void return_non_null_time_when_was_last_modified() {
 
-        final Timestamp creationTime = new ProjectRoot(projectId).whenLastModified();
+        final Timestamp creationTime = new ProjectRoot(projectId).whenModified();
         assertNotNull(creationTime);
     }
 
@@ -251,7 +251,7 @@ public class AggregateShould {
         root.dispatch(createProject, commandContext);
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
-        final Timestamp whenLastModified = root.whenLastModified();
+        final Timestamp whenLastModified = root.whenModified();
 
         assertEquals(expectedTimeSec, whenLastModified.getSeconds());
     }
@@ -327,7 +327,7 @@ public class AggregateShould {
         root.dispatch(createProject, commandContext);
 
         final Snapshot snapshot = root.toSnapshot();
-        final Project state = fromAny(snapshot.getAggregateState());
+        final Project state = fromAny(snapshot.getState());
 
         assertEquals(projectId, state.getProjectId());
         assertEquals(ProjectRoot.STATUS_NEW, state.getStatus());

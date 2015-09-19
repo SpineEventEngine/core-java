@@ -33,11 +33,10 @@ import "spine/base/command.proto";
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {
     // The state of the aggregate.
-    google.protobuf.Any aggregate_state = 1;
+    google.protobuf.Any state = 1;
 
     // Time when the stored state of the aggregate was modified.
     //
-    // This value should be taken from the last event applied to the aggregate.
     // This value is copied to the aggregated when the snapshot is restored.
     google.protobuf.Timestamp when_modified = 2;
 
