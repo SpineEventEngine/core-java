@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 
 /**
@@ -48,7 +49,7 @@ import static com.google.common.base.Throwables.propagate;
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRepositoryBase<I extends Message,
-                                                  R extends Aggregate<I, ?>>
+                                              R extends Aggregate<I, ?>>
         extends RepositoryBase<I, R> implements AggregateRepository<I, R> {
 
     /**
@@ -97,10 +98,11 @@ public abstract class AggregateRepositoryBase<I extends Message,
     }
 
     public int getSnapshotTrigger() {
-        return snapshotTrigger;
+        return this.snapshotTrigger;
     }
 
     public void setSnapshotTrigger(int snapshotTrigger) {
+        checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }
 
@@ -184,6 +186,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
     @Override
     public void store(R aggregateRoot) {
         final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
+        final int snapshotTrigger = getSnapshotTrigger();
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
 

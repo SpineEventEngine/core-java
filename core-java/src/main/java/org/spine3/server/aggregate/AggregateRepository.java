@@ -64,4 +64,11 @@ public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
+
+    /**
+     * Returns the number of events between a next snapshot is made.
+     *
+     * @return a positive integer value
+     */
+    int getSnapshotTrigger();
 }
