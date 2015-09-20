@@ -25,7 +25,7 @@ import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.util.Iterator;
 
-public class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     //TODO:2015-09-19:alexander.yevsyukov: Consider having Multimap backed with TreeMap for storing data.
 

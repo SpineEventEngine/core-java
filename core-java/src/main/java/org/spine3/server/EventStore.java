@@ -41,6 +41,7 @@ public class EventStore {
      */
     public void store(EventRecord record) {
         String id = Entity.idToString(record.getContext().getAggregateId());
+        //TODO:2015-09-19:alexander.yevsyukov: Migrate to using EventStorage.
         storage.store(id, record);
     }
 

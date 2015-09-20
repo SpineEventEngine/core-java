@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
-public class InMemoryCommandStorage extends CommandStorage {
+class InMemoryCommandStorage extends CommandStorage {
 
     //TODO:2015-09-19:alexander.yevsyukov: Implement
 
