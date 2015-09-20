@@ -21,6 +21,8 @@ package org.spine3.server;
 
 import org.spine3.base.EventRecord;
 
+import java.util.Iterator;
+
 /**
  * Stores and loads the events.
  *
@@ -45,4 +47,13 @@ public class EventStore {
         storage.store(id, record);
     }
 
+    /**
+     * Returns iterator through all the events in the history sorted by timestamp.
+     *
+     * @return iterator instance
+     */
+    public Iterator<EventRecord> allEvents() {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
 }

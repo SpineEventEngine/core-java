@@ -20,10 +20,28 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.base.EventId;
+import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
+
 class InMemoryEventStorage extends EventStorage {
+
+    @Override
+    protected Iterator<EventRecord> allEvents() {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Nullable
+    @Override
+    protected EventStoreRecord read(EventId eventId) {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
 
     @Override
     protected void write(EventStoreRecord r) {

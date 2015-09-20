@@ -27,6 +27,9 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.Entity;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
+
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
  *
@@ -51,6 +54,22 @@ public abstract class EventStorage {
 
         write(builder.build());
     }
+
+    /**
+     * Returns iterator through all the event records in the storage sorted by timestamp.
+     *
+     * @return iterator instance
+     */
+    protected abstract Iterator<EventRecord> allEvents();
+
+    /**
+     * Reads event record from the storage by event id.
+     *
+     * @param eventId ID of the event to load
+     * @return a record instance or {@code null} if there is no record with such event ID
+     */
+    @Nullable
+    protected abstract EventStoreRecord read(EventId eventId);
 
     /**
      * Writes record into the storage.
