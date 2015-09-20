@@ -20,11 +20,10 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.protobuf.Message;
+import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.*;
 
 /**
  * A factory for in-memory storages.
@@ -46,6 +45,11 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         return new InMemoryAggregateStorage<>();
+    }
+
+    @Override
+    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
+        return new InMemoryEntityStorage<>();
     }
 
 }

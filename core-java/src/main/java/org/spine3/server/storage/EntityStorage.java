@@ -20,11 +20,18 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Message;
+
 /**
- * An entity storage keeps entities.
+ * An entity storage keeps messages with identity.
  *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of entity state messages written in the storage
  * @author Alexander Yevsyukov
  */
-public abstract class EntityStorage {
-    //TODO:2015-09-19:alexander.yevsyukov: Implement
+public abstract class EntityStorage<I, M extends Message> {
+
+    public abstract M read(I id);
+
+    public abstract void write(I id, M message);
 }

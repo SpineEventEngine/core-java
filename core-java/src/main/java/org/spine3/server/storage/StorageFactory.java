@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Message;
+import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 
 /**
@@ -35,4 +37,6 @@ public interface StorageFactory {
     EventStorage createEventStorage();
 
     <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass);
+
+    <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass);
 }

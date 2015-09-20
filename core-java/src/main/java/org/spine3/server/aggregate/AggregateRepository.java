@@ -36,8 +36,7 @@ import java.util.List;
  * @param <R> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?>>
-        extends Repository<I, R> {
+public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?>> extends Repository<I, R> {
 
     /**
      * Loads or creates an aggregate with the passed ID.
@@ -64,9 +63,8 @@ public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
-
     /**
-     * Returns the number of events between a next snapshot is made.
+     * Returns the number of events until a next snapshot is made.
      *
      * @return a positive integer value
      */

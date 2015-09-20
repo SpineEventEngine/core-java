@@ -18,16 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.storage.memory;
 
-/**
- * A storage can store and load entities.
- *
- * @param <I> the type of entity ID
- * @param <E> the type of entity
- *
- * @author Alexander Yevsyukov
- */
-public interface Storage<I, E extends Entity<I, ?>> {
+import com.google.protobuf.Message;
+import org.spine3.server.storage.EntityStorage;
 
+
+class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+
+    @Override
+    public M read(I id) {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Override
+    public void write(I id, M message) {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+    }
 }
