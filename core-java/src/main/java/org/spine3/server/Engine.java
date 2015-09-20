@@ -27,6 +27,7 @@ import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
@@ -49,6 +50,11 @@ public final class Engine {
     private CommandStore commandStore;
     private EventStore eventStore;
 
+    private Engine() {
+        // Disallow creation of instances from outside.
+    }
+
+    //TODO:2015-09-20:alexander.yevsyukov: Adjust this documentation after start() / stop() are implemented.
     /**
      * Returns a singleton instance of the engine.
      *
@@ -67,13 +73,29 @@ public final class Engine {
         return engine;
     }
 
-    public CommandDispatcher getCommandDispatcher() {
-        return this.dispatcher;
+    /**
+     * Starts the engine with the passed storage factory instance.
+     *
+     * <p>There can be only one started instance of {@code Engine} per application. Calling this method
+     * without invoking {@link #stop()} will cause {@code IllegalStateException}
+     *
+     * @param storageFactory the factory to be used for creating application data storages
+     * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
+     */
+    public static void start(StorageFactory storageFactory) {
+        //TODO:2015-09-20:alexander.yevsyukov: Create a new instance of the Engine associated
+        // with the passed factory, and store it.
+        // There can be only one instance of Engine per application. So the next call of the start() should
+        // fire an exception.
     }
 
-    public EventBus getEventBus() {
-        return EventBus.getInstance();
+    public static void stop() {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
     }
+
+    //TODO:2015-09-20:alexander.yevsyukov: Replace usages of this call with start(StorageFactory)
+    // The engine will then create CommandStore and EventStore instances with appropriate storage implementations
+    // passed to them.
 
     /**
      * Configures the engine with the passed implementations of command and event stores.
@@ -84,6 +106,14 @@ public final class Engine {
         final Engine engine = instance();
         engine.commandStore = commandStore;
         engine.eventStore = eventStore;
+    }
+
+    public CommandDispatcher getCommandDispatcher() {
+        return this.dispatcher;
+    }
+
+    public EventBus getEventBus() {
+        return EventBus.getInstance();
     }
 
     /**
@@ -146,9 +176,4 @@ public final class Engine {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Engine value = new Engine();
     }
-
-    private Engine() {
-        // Disallow creation of instances from outside.
-    }
-
 }

@@ -475,11 +475,13 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
         }
 
         static Registry instance() {
-            return Singleton.value;
+            return Singleton.INSTANCE.value;
         }
 
-        private static class Singleton {
-            private static final Registry value = new Registry();
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Registry value = new Registry();
         }
     }
 
