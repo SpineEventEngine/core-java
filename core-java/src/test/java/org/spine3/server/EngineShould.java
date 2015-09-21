@@ -43,7 +43,7 @@ public class EngineShould {
 
     @Test
     public void return_instance_if_configured_correctly() {
-        Engine.start(new InMemoryStorageFactory());
+        Engine.start(InMemoryStorageFactory.instance());
 
         final Engine engine = Engine.getInstance();
 
