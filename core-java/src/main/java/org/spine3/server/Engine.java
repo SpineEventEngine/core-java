@@ -21,6 +21,8 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
@@ -45,6 +47,8 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
+    private StorageFactory storageFactory;
+
     private CommandStore commandStore;
     private EventStore eventStore;
 
@@ -52,58 +56,67 @@ public final class Engine {
         // Disallow creation of instances from outside.
     }
 
-    //TODO:2015-09-20:alexander.yevsyukov: Adjust this documentation after start() / stop() are implemented.
     /**
-     * Returns a singleton instance of the engine.
+     * Obtains instance of the engine.
      *
-     * @return Engine instance
-     * @throws IllegalStateException if the engine was not configured
-     *                               with {@link CommandStore} and {@link EventStore} instances
-     * @see #configure(CommandStore, EventStore)
+     * @return {@code Engine} instance
+     * @throws IllegalStateException if the engine wasn't started before callling this method
+     * @see #start(StorageFactory)
      */
     public static Engine getInstance() {
         final Engine engine = instance();
-
-        if (engine.commandStore == null || engine.eventStore == null) {
-            throw new IllegalStateException(
-                    "Engine is not configured. Call Engine.configure() before obtaining the instance.");
-        }
+        engine.checkStarted();
         return engine;
+    }
+
+    private void doStart(StorageFactory storageFactory) {
+        this.storageFactory = storageFactory;
+        this.commandStore = new CommandStore(storageFactory.createCommandStorage());
+        this.eventStore = new EventStore(storageFactory.createEventStorage());
+    }
+
+    private void doStop() {
+        this.storageFactory = null;
+        this.commandStore = null;
+        this.eventStore = null;
+
+    }
+
+    private void checkNotStarted() {
+        if (isStarted()) {
+            throw new IllegalStateException("Engine already started. Call stop() before re-start.");
+        }
+    }
+
+    private void checkStarted() {
+        if (!isStarted()) {
+            throw new IllegalStateException("Engine is not started. Call Engine.start(StorageFactory).");
+        }
     }
 
     /**
      * Starts the engine with the passed storage factory instance.
      *
      * <p>There can be only one started instance of {@code Engine} per application. Calling this method
-     * without invoking {@link #stop()} will cause {@code IllegalStateException}
+     * without invoking {@link #doStop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
-     * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
+     * @throws IllegalStateException if the method is called more than once without calling {@link #doStop()} in between
      */
     public static void start(StorageFactory storageFactory) {
-        //TODO:2015-09-20:alexander.yevsyukov: Create a new instance of the Engine associated
-        // with the passed factory, and store it.
-        // There can be only one instance of Engine per application. So the next call of the start() should
-        // fire an exception.
+        log().info("Starting on storage: " + storageFactory.getClass());
+        final Engine engine = instance();
+        engine.checkNotStarted();
+        engine.doStart(storageFactory);
+    }
+
+    private boolean isStarted() {
+        return storageFactory != null;
     }
 
     public static void stop() {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-    }
-
-    //TODO:2015-09-20:alexander.yevsyukov: Replace usages of this call with start(StorageFactory)
-    // The engine will then create CommandStore and EventStore instances with appropriate storage implementations
-    // passed to them.
-
-    /**
-     * Configures the engine with the passed implementations of command and event stores.
-     *
-     * @param commandStore storage for the commands
-     */
-    public static void configure(CommandStore commandStore, EventStore eventStore) {
-        final Engine engine = instance();
-        engine.commandStore = commandStore;
-        engine.eventStore = eventStore;
+        instance().doStop();
+        log().info("Engine stopped.");
     }
 
     /**
@@ -136,6 +149,7 @@ public final class Engine {
      */
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
+        checkStarted();
 
         store(request);
 
@@ -150,7 +164,7 @@ public final class Engine {
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private CommandResult dispatch(CommandRequest request) {
+    private static CommandResult dispatch(CommandRequest request) {
         CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
             Message command = Messages.fromAny(request.getCommand());
@@ -187,4 +201,16 @@ public final class Engine {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Engine value = new Engine();
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(Engine.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }

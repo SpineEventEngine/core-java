@@ -26,6 +26,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.storage.CommandStorage;
 
 /**
  * Stores and loads commands.
@@ -34,10 +35,9 @@ import org.spine3.server.aggregate.AggregateId;
  */
 public class CommandStore {
 
-    //TODO:2015-09-19:alexander.yevsyukov: Migrate to use CommandStorage created by StorageFactory of Engine.
-    private final MessageJournal<String, CommandRequest> storage;
+    private final CommandStorage storage;
 
-    public CommandStore(MessageJournal<String, CommandRequest> storage) {
+    public CommandStore(CommandStorage storage) {
         this.storage = storage;
     }
 
@@ -50,8 +50,7 @@ public class CommandStore {
         final Any any = request.getCommand();
         final Message command = Messages.fromAny(any);
         final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
-        String id = Entity.idToString(aggregateId.value());
-        storage.store(id, request);
+        storage.store(aggregateId, request);
     }
 
 }

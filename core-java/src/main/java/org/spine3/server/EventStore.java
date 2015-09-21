@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import org.spine3.base.EventRecord;
+import org.spine3.server.storage.EventStorage;
 
 import java.util.Iterator;
 
@@ -30,9 +31,9 @@ import java.util.Iterator;
  */
 public class EventStore {
 
-    private final MessageJournal<String, EventRecord> storage;
+    private final EventStorage storage;
 
-    public EventStore(MessageJournal<String, EventRecord> storage) {
+    public EventStore(EventStorage storage) {
         this.storage = storage;
     }
 
@@ -42,9 +43,7 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        String id = Entity.idToString(record.getContext().getAggregateId());
-        //TODO:2015-09-19:alexander.yevsyukov: Migrate to using EventStorage.
-        storage.store(id, record);
+        storage.store(record);
     }
 
     /**
@@ -53,7 +52,6 @@ public class EventStore {
      * @return iterator instance
      */
     public Iterator<EventRecord> allEvents() {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
+        return storage.allEvents();
     }
 }

@@ -31,6 +31,8 @@ import org.spine3.gae.datastore.DataStoreStorageFactory;
 import org.spine3.sample.order.Order;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 /**
  * Entry point for core-java sample without gRPC. Works with DataStore.
@@ -50,6 +52,11 @@ public class DataStoreSample extends BaseSample {
         sample.execute();
 
         sample.helper.tearDown();
+    }
+
+    @Override
+    protected StorageFactory getStorageFactory() {
+        return new DatastoreStorageFactory();
     }
 
     @Override

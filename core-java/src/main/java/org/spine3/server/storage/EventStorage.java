@@ -60,7 +60,7 @@ public abstract class EventStorage {
      *
      * @return iterator instance
      */
-    protected abstract Iterator<EventRecord> allEvents();
+    public abstract Iterator<EventRecord> allEvents();
 
     /**
      * Reads event record from the storage by event id.

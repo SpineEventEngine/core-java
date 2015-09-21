@@ -18,33 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+/**
+ * This package provides storages based on Google Datastore.
+ */
+@ParametersAreNonnullByDefault
+package org.spine3.server.storage.datastore;
 
-import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
-
-import javax.annotation.Nullable;
-import java.util.Iterator;
-
-class InMemoryEventStorage extends EventStorage {
-
-    @Override
-    public Iterator<EventRecord> allEvents() {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Nullable
-    @Override
-    protected EventStoreRecord read(EventId eventId) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Override
-    protected void write(EventStoreRecord r) {
-        //TODO:2015-09-19:alexander.yevsyukov: Implement
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

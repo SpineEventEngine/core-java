@@ -18,33 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage.filesystem;
 
-import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
 
-import javax.annotation.Nullable;
-import java.util.Iterator;
+import com.google.protobuf.Message;
+import org.spine3.server.Entity;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.storage.*;
 
-class InMemoryEventStorage extends EventStorage {
-
+public class FileSystemStorageFactory implements StorageFactory {
     @Override
-    public Iterator<EventRecord> allEvents() {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Nullable
-    @Override
-    protected EventStoreRecord read(EventId eventId) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
+    public CommandStorage createCommandStorage() {
         return null;
     }
 
     @Override
-    protected void write(EventStoreRecord r) {
-        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    public EventStorage createEventStorage() {
+        return null;
+    }
+
+    @Override
+    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+        return null;
+    }
+
+    @Override
+    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
+        return null;
     }
 }

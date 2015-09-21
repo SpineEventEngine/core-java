@@ -28,12 +28,11 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
-import org.spine3.server.CommandStore;
 import org.spine3.server.Engine;
-import org.spine3.server.EventStore;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.AggregateEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.UserIds;
 
 import java.util.List;
@@ -79,15 +78,15 @@ public abstract class BaseSample {
     }
 
     protected void prepareEngine() {
-        final EventStore eventStore = new EventStore(provideEventStoreStorage());
-        final CommandStore commandStore = new CommandStore(provideCommandStoreStorage());
+        Engine.start(getStorageFactory());
 
         final OrderRepository orderRootRepository = getOrderRootRepository();
 
-        Engine.configure(commandStore, eventStore);
         final Engine engine = Engine.getInstance();
         engine.getCommandDispatcher().register(orderRootRepository);
     }
+
+    protected abstract StorageFactory getStorageFactory();
 
     protected abstract Logger getLog();
 
