@@ -21,15 +21,20 @@
 package org.spine3.server;
 
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventId;
+import org.spine3.test.*;
 import org.spine3.test.project.Project;
+import org.spine3.test.project.ProjectId;
+import org.spine3.util.UserIds;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.lang.System.currentTimeMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.spine3.server.Entity.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
@@ -131,6 +136,122 @@ public class EntityShould {
         assertEquals(expectedTimeSec, entity.whenLastModified().getSeconds());
     }
 
+    @Test
+    public void convert_to_string_command_id_message() {
+
+        final String userIdString = "user123123";
+        final Timestamp currentTime = getCurrentTime();
+        CommandId id = CommandId.newBuilder().setActor(UserIds.create(userIdString)).setTimestamp(currentTime).build();
+
+        final String expected = userIdString + ID_DELIMITER +  TimeUtil.toString(currentTime);
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_event_id_message() {
+
+        final String userIdString = "user123123";
+        final Timestamp commandTime = getCurrentTime();
+        final Timestamp eventTime = getCurrentTime().toBuilder().setSeconds(commandTime.getSeconds() + 5).build();
+
+        CommandId commandId = CommandId.newBuilder().setActor(UserIds.create(userIdString)).setTimestamp(commandTime).build();
+        EventId id = EventId.newBuilder().setCommandId(commandId).setTimestamp(eventTime).build();
+
+        final String expected = userIdString + ID_DELIMITER + TimeUtil.toString(commandTime) + ID_DELIMITER + TimeUtil.toString(eventTime);
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_project_id_message() {
+
+        final String expected = "project123";
+        ProjectId id = ProjectId.newBuilder().setId(expected).build();
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_string_field() {
+
+        final String expected = "user123123";
+        final TestIdWithStringField id = TestIdWithStringField.newBuilder().setId(expected).build();
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_integer_field() {
+
+        final Integer value = 256;
+        final String expected = value.toString();
+        final TestIdWithIntField id = TestIdWithIntField.newBuilder().setId(value).build();
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_long_field() {
+
+        final Long value = 256L;
+        final String expected = value.toString();
+        final TestIdWithLongField id = TestIdWithLongField.newBuilder().setId(value).build();
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_timestamp_field() {
+
+        final Timestamp currentTime = getCurrentTime();
+        final String expected = TimeUtil.toString(currentTime);
+        final TestIdWithTimestampField id = TestIdWithTimestampField.newBuilder().setId(currentTime).build();
+
+        final String actual = idToString(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_message_field() {
+
+        final String expected = "user123123";
+        final TestIdWithStringField value = TestIdWithStringField.newBuilder().setId(expected).build();
+        final TestIdWithMessageField idToConvert = TestIdWithMessageField.newBuilder().setId(value).build();
+
+        final String actual = idToString(idToConvert);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_several_fields() {
+
+        final String nestedString = "inner_string";
+        final String outerString = "outer_string";
+        final Integer number = 256;
+
+        final TestIdWithStringField message = TestIdWithStringField.newBuilder().setId(nestedString).build();
+        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder().setString(outerString).setInt(number).setMessage(message).build();
+
+        final String actual = idToString(idToConvert);
+
+        assertTrue(actual.contains(outerString));
+        assertTrue(actual.contains(nestedString));
+        assertTrue(actual.contains(number.toString()));
+    }
 
     public static class TestEntity extends Entity<String, Project> {
 

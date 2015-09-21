@@ -21,16 +21,21 @@
 package org.spine3.server;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Maps;
 import com.google.protobuf.*;
+import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
+import org.spine3.test.project.ProjectId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.protobuf.Messages.toJson;
 
 /**
  * A server-side wrapper for message objects with identity stored by a repository.
@@ -39,6 +44,8 @@ import static org.spine3.protobuf.Messages.toJson;
  * @param <S> the type of object states.
  */
 public abstract class Entity<I, S extends Message> {
+
+    public static final char ID_DELIMITER = '@';
 
     private final I id;
 
@@ -186,31 +193,51 @@ public abstract class Entity<I, S extends Message> {
         throw unsupportedIdType(id);
     }
 
+    @SuppressWarnings({"IfMayBeConditional", "UnusedAssignment"})
     private static String idMessageToString(Message message) {
 
-        //TODO:2015-09-18:alexander.yevsyukov: Extract value from the message and use it for output
-        /**
-         *
-         * @see TextFormat#printFieldValue(Descriptors.FieldDescriptor, Object, Appendable)
-         *      and
-         * @see com.google.protobuf.util.JsonFormat.ParserImpl
-         *
-         * for ideas on how we can do it.
-         *
-         * The guidelines:
-         *   -  If it's one field inside — use it for string output.
-         *   -  If more than one field, use TextFormat output and compact the form. See TextFormat.shortDebugString()
-         *   -  Add our types as well known with good output.
-         *
-         * Also
-         *
-         * @see org.spine3.server.Entity.IdConverterRegistry below.
-         *
-         * We may add our types right into it during the initialization.
-         */
+        final Map<Descriptors.FieldDescriptor, Object> fieldsMap = message.getAllFields();
 
-        String json = toJson(message);
-        return json;
+        if (fieldsMap.isEmpty()) {
+            return "";
+        }
+
+        String result = "";
+
+        final IdConverterRegistry registry = IdConverterRegistry.instance();
+
+        if (registry.containsConverter(message)) {
+            final Function<Message, String> converter = registry.getConverter(message);
+            result = converter.apply(message);
+        } else {
+            result = idMessageToStringManually(message, fieldsMap);
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
+    private static String idMessageToStringManually(Message message, Map<Descriptors.FieldDescriptor, Object> fieldsMap) {
+
+        String result;
+
+        final Collection<Object> values = fieldsMap.values();
+
+        if (values.size() == 1) {
+
+            final Object object = values.iterator().next();
+
+            if (object instanceof Message) {
+                result = idMessageToString((Message) object);
+            } else {
+                result = object.toString();
+            }
+
+        } else {
+            result = TextFormat.shortDebugString(message);
+        }
+
+        return result;
     }
 
     /**
@@ -291,18 +318,26 @@ public abstract class Entity<I, S extends Message> {
     /**
      * The registry of converters of ID types to string representations.
      */
+    @SuppressWarnings({"serial", "ClassExtendsConcreteCollection", "InnerClassTooDeeplyNested", "ConstantConditions",
+            "StringBufferWithoutInitialCapacity"})
     public static class IdConverterRegistry {
 
-        private final Map<Class<?>, Function<?, String>> entries = Maps.newHashMap();
+        private final Map<Class<?>, Function<?, String>> entries = new HashMap<Class<?>, Function<?, String>>() {{
+            put(CommandId.class, new CommandIdToStringConverter());
+            put(EventId.class, new EventIdToStringConverter());
+            put(ProjectId.class, new ProjectIdToStringConverter());
+            put(Timestamp.class, new TimestampToStringConverter());
+        }};
 
         private IdConverterRegistry() {
         }
 
         public <I extends Message> void register(Class<I> idClass, Function<I, String> converter) {
+            checkNotNull(idClass);
+            checkNotNull(converter);
             entries.put(idClass, converter);
         }
 
-        @Nullable
         public <I> Function<I, String> getConverter(I id) {
             final Function<?, String> func = entries.get(id.getClass());
 
@@ -310,6 +345,11 @@ public abstract class Entity<I, S extends Message> {
                 @see #register(Class, Function) */
             final Function<I, String> result = (Function<I, String>) func;
             return result;
+        }
+
+        public <I> boolean containsConverter(I id) {
+            final boolean contains = entries.containsKey(id.getClass()) && (entries.get(id.getClass()) != null);
+            return contains;
         }
 
         private enum Singleton {
@@ -320,6 +360,91 @@ public abstract class Entity<I, S extends Message> {
 
         public static IdConverterRegistry instance() {
             return Singleton.INSTANCE.value;
+        }
+
+        private static class CommandIdToStringConverter implements Function<CommandId, String> {
+            @Nullable
+            @Override
+            public String apply(@Nullable CommandId commandId) {
+
+                if (commandId == null) {
+                    return "";
+                }
+
+                final StringBuilder builder = new StringBuilder();
+
+                final String userId = userIdToString(commandId);
+                final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+
+                builder.append(userId)
+                        .append(ID_DELIMITER)
+                        .append(commandTime);
+
+                return builder.toString();
+            }
+        }
+
+        private static class EventIdToStringConverter implements Function<EventId, String> {
+            @Nullable
+            @Override
+            public String apply(@Nullable EventId eventId) {
+
+                if (eventId == null) {
+                    return "";
+                }
+
+                final StringBuilder builder = new StringBuilder();
+
+                final CommandId commandId = eventId.getCommandId();
+
+                final String userId = userIdToString(commandId);
+                final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+                final String eventTime = (eventId != null) ? TimeUtil.toString(eventId.getTimestamp()) : "";
+
+                builder.append(userId)
+                        .append(ID_DELIMITER)
+                        .append(commandTime)
+                        .append(ID_DELIMITER)
+                        .append(eventTime);
+
+                return builder.toString();
+            }
+        }
+
+        private static class ProjectIdToStringConverter implements Function<ProjectId, String> {
+            @SuppressWarnings("IfMayBeConditional")
+            @Nullable
+            @Override
+            public String apply(@Nullable ProjectId projectId) {
+                if (projectId != null) {
+                    return projectId.getId();
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        private static class TimestampToStringConverter implements Function<Timestamp, String> {
+            @SuppressWarnings("IfMayBeConditional")
+            @Nullable
+            @Override
+            public String apply(@Nullable Timestamp timestamp) {
+                if (timestamp != null) {
+                    return TimeUtil.toString(timestamp);
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        @SuppressWarnings("TypeMayBeWeakened")
+        private static String userIdToString(CommandId commandId) {
+
+            if (commandId == null || commandId.getActor() == null) {
+                return "unknown";
+            }
+            final String userId = commandId.getActor().getValue();
+            return userId;
         }
     }
 }
