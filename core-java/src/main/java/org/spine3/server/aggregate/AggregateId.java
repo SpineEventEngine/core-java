@@ -20,30 +20,42 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.Identifiers;
-import org.spine3.util.MessageValue;
-
-import javax.annotation.Nonnull;
+import org.spine3.server.Entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Value object for aggregate root IDs.
- * <p>
- * An aggregate root ID can be defined as any valid Protobuf message, which content fits the business
- * logic of an application. The purpose of this class is to provide type safety for these messages.
+ * Value object for aggregate IDs.
+ *
+ * <p>An aggregate ID value can be of one of the following types:
+ *   <ul>
+ *      <li>String</li>
+ *      <li>Long</li>
+ *      <li>Integer</li>
+ *      <li>A class implementing {@link Message}</li>
+ *   </ul>
+ *
+ * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ * if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *   <ul>
+ *      <li>EAN value used in bar codes</li>
+ *      <li>ISBN</li>
+ *      <li>Phone number</li>
+ *      <li>email address as a couple of local-part and domain</li>
+ *   </ul>
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
-public final class AggregateId extends MessageValue {
+public final class AggregateId<I> {
 
-    private AggregateId(Message value) {
-        super(checkNotNull(value));
+    private final I value;
+
+    private AggregateId(I value) {
+        this.value = checkNotNull(value);
     }
 
     /**
@@ -52,35 +64,46 @@ public final class AggregateId extends MessageValue {
      * @param value id value
      * @return new instance
      */
-    public static AggregateId of(Message value) {
-        return new AggregateId(value);
+    public static <I> AggregateId<I> of(I value) {
+        return new AggregateId<>(value);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We want already built instances on this level of API.
-    public static AggregateId of(EventContext value) {
-        return new AggregateId(Messages.fromAny(value.getAggregateId()));
+    @SuppressWarnings("TypeMayBeWeakened") // We want already built instances at this level of API.
+    public static AggregateId<? extends Message> of(EventContext value) {
+        final Message message = Messages.fromAny(value.getAggregateId());
+        final AggregateId<Message> result = new AggregateId<>(message);
+        return result;
     }
 
     /**
-     * Returns the type name of the value of aggregate ID.
+     * Returns the short name of the type of underlying value.
+     *
+     * @return
+     *  <ul>
+     *      <li>Short Protobuf type name if the value is {@link Message}</li>
+     *      <li>Simple class name of the value, otherwise</li>
+     *  </ul>
      */
-    public TypeName getTypeName() {
-        TypeName result = TypeName.of(value().getDescriptorForType());
-        return result;
+    public String getShortTypeName() {
+        if (this.value instanceof Message) {
+            //noinspection TypeMayBeWeakened
+            Message message = (Message)this.value;
+            Descriptors.Descriptor descriptor = message.getDescriptorForType();
+            final String result = descriptor.getName();
+            return result;
+        } else {
+            String result = value.getClass().getSimpleName();
+            return result;
+        }
     }
 
     @Override
     public String toString() {
-        final String result = Identifiers.idToString(value());
+        final String result = Entity.idToString(value());
         return result;
     }
 
-    @Nonnull
-    @Override
-    public Message value() {
-        final Message result = super.value();
-        // We check this in constructor.
-        assert result != null;
-        return result;
+    public I value() {
+        return this.value;
     }
 }
