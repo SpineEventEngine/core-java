@@ -45,7 +45,7 @@ public abstract class EventStorage {
         final EventId eventId = context.getEventId();
         final String eventIdStr = Events.idToString(eventId);
         EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
-                .setTimestamp(eventId.getTimestamp())
+                .setTimestamp(Events.getTimestamp(eventId))
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
                 .setEventId(eventIdStr)

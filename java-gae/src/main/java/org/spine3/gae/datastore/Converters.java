@@ -127,7 +127,7 @@ class Converters {
             final EventContext eventContext = eventRecord.getContext();
             final EventId eventId = eventContext.getEventId();
             final AggregateId aggregateId = AggregateId.of(eventContext);
-            final Timestamp timestamp = eventId.getTimestamp();
+            final Timestamp timestamp = Events.getTimestamp(eventId);
             final int version = eventContext.getVersion();
 
             final Entity entity = newEntity(eventId);

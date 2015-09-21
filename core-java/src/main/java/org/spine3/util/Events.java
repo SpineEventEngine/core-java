@@ -72,6 +72,11 @@ public class Events {
         return builder.build();
     }
 
+    public static Timestamp getTimestamp(EventId eventId) {
+        //TODO:2015-09-21:alexander.yevsyukov: Have time range math here.
+        return eventId.getTimestamp();
+    }
+
     public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
         return CommandResult.newBuilder()
                 .addAllEventRecord(eventRecords)
@@ -95,7 +100,7 @@ public class Events {
             @Override
             public boolean apply(@Nullable EventRecord record) {
                 checkNotNull(record);
-                Timestamp timestamp = record.getContext().getEventId().getTimestamp();
+                Timestamp timestamp = getTimestamp(record.getContext().getEventId());
                 return Timestamps.isAfter(timestamp, from);
             }
         };
@@ -106,7 +111,7 @@ public class Events {
             @Override
             public boolean apply(@Nullable EventRecord record) {
                 checkNotNull(record);
-                Timestamp timestamp = record.getContext().getEventId().getTimestamp();
+                Timestamp timestamp = getTimestamp(record.getContext().getEventId());
                 return Timestamps.isBetween(timestamp, from, to);
             }
         };
@@ -121,8 +126,8 @@ public class Events {
         Collections.sort(eventRecords, new Comparator<EventRecord>() {
             @Override
             public int compare(EventRecord o1, EventRecord o2) {
-                Timestamp timestamp1 = o1.getContext().getEventId().getTimestamp();
-                Timestamp timestamp2 = o2.getContext().getEventId().getTimestamp();
+                Timestamp timestamp1 = getTimestamp(o1.getContext().getEventId());
+                Timestamp timestamp2 = getTimestamp(o2.getContext().getEventId());
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
