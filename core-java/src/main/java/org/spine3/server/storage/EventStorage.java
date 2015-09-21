@@ -25,7 +25,7 @@ import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Entity;
+import org.spine3.util.Events;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ public abstract class EventStorage {
         final EventContext context = record.getContext();
         final TypeName typeName = TypeName.ofEnclosed(event);
         final EventId eventId = context.getEventId();
-        final String eventIdStr = Entity.idToString(eventId);
+        final String eventIdStr = Events.idToString(eventId);
         EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
                 .setTimestamp(eventId.getTimestamp())
                 .setEventType(typeName.nameOnly())

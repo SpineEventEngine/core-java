@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.Entity;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -135,7 +136,7 @@ public class Events {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
-        return Messages.toJson(id);
+        return Entity.idToString(id);
     }
 
     /**
