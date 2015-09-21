@@ -33,8 +33,10 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
+/*
+ * Utility class for Entity ids conversation.
+ */
 public class Identifiers {
-
 
     /*
      * Delimiter between user id and time in string representation
@@ -49,8 +51,7 @@ public class Identifiers {
      */
     public static final String NULL_ID_OR_FIELD = "NULL";
 
-    private Identifiers() {
-    }
+    private Identifiers() {}
 
     /**
      * Converts the passed ID value into the string representation.
