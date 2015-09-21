@@ -138,7 +138,7 @@ public class CommandsShould {
     @Test
     public void convert_to_string_command_id_message() {
 
-        final String userIdString = "user123123";
+        final String userIdString = "user123";
         final Timestamp currentTime = getCurrentTime();
         CommandId id = generateId(userIdString, currentTime);
 
