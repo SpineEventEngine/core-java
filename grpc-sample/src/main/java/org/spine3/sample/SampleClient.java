@@ -31,7 +31,7 @@ import org.spine3.base.CommandServiceGrpc;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.OrderId;
-import org.spine3.util.UserIds;
+import org.spine3.util.Users;
 
 import java.util.concurrent.TimeUnit;
 
@@ -116,7 +116,7 @@ public class SampleClient {
 
             for (int i = 0; i < 10; i++) {
                 OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-                UserId userId = UserIds.create("user" + i);
+                UserId userId = Users.createId("user" + i);
 
                 client.createOrder(userId, orderId);
                 client.addOrderLine(userId, orderId);

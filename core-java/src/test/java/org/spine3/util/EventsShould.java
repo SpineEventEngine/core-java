@@ -35,7 +35,7 @@ public class EventsShould {
 
     @Test
     public void generate_event_id() {
-        UserId userId = UserIds.create("events_test");
+        UserId userId = Users.createId("events_test");
         CommandId commandId = Commands.generateId(userId);
 
         EventId result = Events.generateId(commandId);
@@ -43,7 +43,7 @@ public class EventsShould {
         //noinspection DuplicateStringLiteralInspection
         assertThat(result, allOf(
                 hasProperty("commandId", equalTo(commandId)),
-                hasProperty("timestamp")));
+                hasProperty("deltaNanos")));
     }
 
     @Test(expected = NullPointerException.class)

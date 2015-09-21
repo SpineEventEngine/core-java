@@ -38,7 +38,7 @@ public class MessagesShould {
 
     @Before
     public void setUp() {
-        id = UserIds.create("messages_test");
+        id = Users.createId("messages_test");
 
         any = Any.pack(id);
     }

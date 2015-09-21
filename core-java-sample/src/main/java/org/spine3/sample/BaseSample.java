@@ -33,7 +33,7 @@ import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.AggregateEventStorage;
 import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.util.UserIds;
+import org.spine3.util.Users;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ public abstract class BaseSample {
 
         for (int i = 0; i < 10; i++) {
             OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            UserId userId = UserIds.create("user" + i);
+            UserId userId = Users.createId("user" + i);
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);

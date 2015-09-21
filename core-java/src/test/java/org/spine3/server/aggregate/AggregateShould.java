@@ -41,7 +41,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.util.UserIds;
+import org.spine3.util.Users;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -61,7 +61,7 @@ import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testutil.ContextFactory.getEventContext;
-import static org.spine3.util.Commands.createCommandContext;
+import static org.spine3.util.Commands.createContext;
 
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
 "ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
@@ -78,7 +78,7 @@ public class AggregateShould {
     @Before
     public void setUp() {
         projectId = ProjectId.newBuilder().setId("project_id").build();
-        commandContext = createCommandContext(UserIds.create("user_id"), ZoneOffsets.UTC);
+        commandContext = createContext(Users.createId("user_id"), ZoneOffsets.UTC);
         eventContext = getEventContext(0);
         createProject = CreateProject.newBuilder().setProjectId(projectId).build();
         addTask = AddTask.newBuilder().setProjectId(projectId).build();

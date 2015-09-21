@@ -41,7 +41,7 @@ public class CommandRequestFactory {
     private CommandRequestFactory() {
     }
 
-    public static CommandRequest create(Timestamp when) {
+    private static CommandRequest create(Timestamp when) {
         final UserId userId = UserId.getDefaultInstance();
         final Any command = Messages.toAny(CreateProject.newBuilder().setProjectId(
                 AggregateIdFactory.createCommon()).build());

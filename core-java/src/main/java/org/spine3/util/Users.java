@@ -19,39 +19,32 @@
  */
 package org.spine3.util;
 
-import org.junit.Test;
 import org.spine3.base.UserId;
 
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.Assert.assertEquals;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * The {@link UserId} utility class.
+ *
  * @author Mikhail Melnik
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class UserIdsShould {
+@SuppressWarnings("UtilityClass")
+public class Users {
 
-    @Test
-    public void create_id_by_string() {
-        final String testIdString = "12345";
+    /**
+     * Creates a new user ID instance by passed string value.
+     *
+     * @param value new user ID value
+     * @return new instance
+     */
+    public static UserId createId(String value) {
+        checkNotNull(value);
 
-        UserId userId = UserIds.create(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-        assertEquals(expected, userId);
+        return UserId.newBuilder()
+                .setValue(value)
+                .build();
     }
 
-    @Test(expected = NullPointerException.class)
-    public void fail_on_null_argument_passed_to_create() {
-        //noinspection ConstantConditions
-        UserIds.create(null);
-    }
-
-    @Test
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
-    public void have_private_constructor()
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
-        Tests.callPrivateUtilityConstructor(UserIds.class);
+    private Users() {
     }
 }

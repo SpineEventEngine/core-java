@@ -47,7 +47,7 @@ public class CommandsShould {
 
     @Test
     public void generate() {
-        UserId userId = UserIds.create("commands-should-test");
+        UserId userId = Users.createId("commands-should-test");
 
         CommandId result = Commands.generateId(userId);
 
@@ -73,7 +73,7 @@ public class CommandsShould {
     @Test
     public void return_correct_were_after_predicate() throws InterruptedException {
         final Timestamp timestamp = TimeUtil.getCurrentTime();
-        final CommandRequest commandRequest = CommandRequestFactory.create(timestamp);
+        final CommandRequest commandRequest = CommandRequestFactory.create();
         Thread.sleep(100);
         final CommandRequest commandRequestAfter = CommandRequestFactory.create();
 
