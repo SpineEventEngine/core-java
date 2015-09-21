@@ -18,16 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.storage.memory;
 
-/**
- * A storage can store and load entities.
- *
- * @param <I> the type of entity ID
- * @param <E> the type of entity
- *
- * @author Alexander Yevsyukov
- */
-public interface Storage<I, E extends Entity<I, ?>> {
+import org.spine3.base.EventId;
+import org.spine3.base.EventRecord;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventStoreRecord;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
+
+class InMemoryEventStorage extends EventStorage {
+
+    @Override
+    public Iterator<EventRecord> allEvents() {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Nullable
+    @Override
+    protected EventStoreRecord read(EventId eventId) {
+        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Override
+    protected void write(EventStoreRecord r) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    }
 }

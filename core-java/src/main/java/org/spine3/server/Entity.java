@@ -53,7 +53,7 @@ public abstract class Entity<I, S extends Message> {
     private S state;
 
     @Nullable
-    private Timestamp whenLastModified;
+    private Timestamp whenModified;
 
     private int version;
 
@@ -98,11 +98,11 @@ public abstract class Entity<I, S extends Message> {
         validate(state);
         this.state = state;
         this.version = version;
-        this.whenLastModified = whenLastModified;
+        this.whenModified = whenLastModified;
     }
 
     /**
-     * Updates the state incrementing the version number and recording time of the modification
+     * Updates the state incrementing the version number and recording time of the modification.
      *
      * @param newState a new state to set
      */
@@ -115,9 +115,9 @@ public abstract class Entity<I, S extends Message> {
      * <p/>
      * Results of this method call are:
      * <ul>
-     * <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
-     * <li>The version number is set to zero.</li>
-     * <li>The timestamp is set to the system time of the call.</li>
+     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
+     *   <li>The version number is set to zero.</li>
+     *   <li>The {@link #whenModified} field is set to the system time of the call.</li>
      * </ul>
      * <p/>
      * The timestamp is set to current system time.
@@ -141,8 +141,7 @@ public abstract class Entity<I, S extends Message> {
      */
     protected int incrementVersion() {
         ++version;
-        whenLastModified = getCurrentTime();
-
+        whenModified = getCurrentTime();
         return version;
     }
 
@@ -159,8 +158,8 @@ public abstract class Entity<I, S extends Message> {
      */
     @CheckReturnValue
     @Nullable
-    public Timestamp whenLastModified() {
-        return this.whenLastModified;
+    public Timestamp whenModified() {
+        return this.whenModified;
     }
 
     // Utilities for ID conversion
@@ -399,13 +398,13 @@ public abstract class Entity<I, S extends Message> {
 
                 final String userId = userIdToString(commandId);
                 final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
-                final String eventTime = (eventId != null) ? TimeUtil.toString(eventId.getTimestamp()) : "";
+                final String delta = (eventId != null) ? String.valueOf(eventId.getDeltaNanos()) : "";
 
                 builder.append(userId)
                         .append(ID_DELIMITER)
                         .append(commandTime)
-                        .append(ID_DELIMITER)
-                        .append(eventTime);
+                        .append("+")
+                        .append(delta);
 
                 return builder.toString();
             }

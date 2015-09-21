@@ -17,18 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
-
-import org.spine3.server.aggregate.AggregateRootEventStorage;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
-import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
- * @author Mikhail Melnik
+ * This package provides sample implementation of storages based on file system.
  */
-public class OrderRootRepository extends AggregateRootRepositoryBase<OrderId, OrderRoot> {
+@ParametersAreNonnullByDefault
+package org.spine3.server.storage.filesystem;
 
-    public OrderRootRepository(AggregateRootEventStorage eventStorage, SnapshotStorage snapshotStorage) {
-        super(eventStorage, snapshotStorage);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

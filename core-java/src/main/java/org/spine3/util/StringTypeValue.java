@@ -32,8 +32,6 @@ import java.util.Objects;
 public abstract class StringTypeValue {
     // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
 
-    public static final String NULL = String.valueOf((Object)null);
-
     private final String value;
 
     protected StringTypeValue(String value) {

@@ -41,6 +41,7 @@ public abstract class RepositoryBase<I extends Message, E extends Entity<I, ?>> 
 
     protected RepositoryBase() {
         this.entityConstructor = getEntityConstructor();
+        this.entityConstructor.setAccessible(true);
     }
 
     private Constructor<E> getEntityConstructor() {

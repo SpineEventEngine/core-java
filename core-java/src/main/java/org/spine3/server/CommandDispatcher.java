@@ -25,7 +25,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.server.aggregate.AggregateRootRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -47,6 +47,13 @@ public class CommandDispatcher {
     private final Map<CommandClass, CommandHandlerMethod> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
+     * @return singleton instance of {@code CommandDispatcher}
+     */
+    public static CommandDispatcher getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    /**
      * Registers the passed object of many commands in the dispatcher.
      *
      * @param object a {@code non-null} object
@@ -55,8 +62,8 @@ public class CommandDispatcher {
         checkNotNull(object);
 
         Map<CommandClass, CommandHandlerMethod> handlers;
-        if (object instanceof AggregateRootRepositoryBase) {
-            AggregateRootRepositoryBase<?, ?> repository = (AggregateRootRepositoryBase) object;
+        if (object instanceof AggregateRepositoryBase) {
+            AggregateRepositoryBase<?, ?> repository = (AggregateRepositoryBase) object;
             handlers = repository.getCommandHandlers();
         } else {
             handlers = CommandHandlerMethod.scan(object);
@@ -146,6 +153,14 @@ public class CommandDispatcher {
 
     public boolean handlerRegistered(CommandClass cls) {
         return handlersByCommandClass.containsKey(cls);
+    }
+
+
+    private enum Singleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final CommandDispatcher value = new CommandDispatcher();
     }
 
 }

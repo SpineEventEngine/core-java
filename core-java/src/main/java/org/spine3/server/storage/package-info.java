@@ -18,39 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateCommand;
-import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.storage.CommandStorage;
-
 /**
- * Stores and loads commands.
- *
- * @author Mikhail Mikhaylov
+ * This package provides interfaces and base classes for storages.
  */
-public class CommandStore {
+@ParametersAreNonnullByDefault
+package org.spine3.server.storage;
 
-    private final CommandStorage storage;
-
-    public CommandStore(CommandStorage storage) {
-        this.storage = storage;
-    }
-
-    /**
-     * Stores the command request.
-     *
-     * @param request command request to store
-     */
-    public void store(CommandRequest request) {
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
-        storage.store(aggregateId, request);
-    }
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,39 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.storage;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateCommand;
-import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.storage.CommandStorage;
 
 /**
- * Stores and loads commands.
+ * An entity storage keeps messages with identity.
  *
- * @author Mikhail Mikhaylov
+ * @param <I> the type of entity IDs
+ * @param <M> the type of entity state messages written in the storage
+ * @author Alexander Yevsyukov
  */
-public class CommandStore {
+public abstract class EntityStorage<I, M extends Message> {
 
-    private final CommandStorage storage;
+    public abstract M read(I id);
 
-    public CommandStore(CommandStorage storage) {
-        this.storage = storage;
-    }
-
-    /**
-     * Stores the command request.
-     *
-     * @param request command request to store
-     */
-    public void store(CommandRequest request) {
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
-        storage.store(aggregateId, request);
-    }
-
+    public abstract void write(I id, M message);
 }

@@ -22,7 +22,6 @@ package org.spine3.sample.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
@@ -32,17 +31,20 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
+import org.spine3.util.Commands;
+import org.spine3.util.Events;
+import org.spine3.util.Users;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.protobuf.Messages.toAny;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "DuplicateStringLiteralInspection"})
 public class InMemoryMessageJournalShould {
 
+    private UserId userId;
     private ProjectId projectId;
 
     private List<CommandRequest> commandRequests;
@@ -53,7 +55,7 @@ public class InMemoryMessageJournalShould {
 
     @Before
     public void setUp() {
-
+        userId = Users.createId("user@testing-in-memory-storage.org");
         projectId = ProjectId.newBuilder().setId("project_id").build();
 
         commandRequests = newArrayList(createProject(), startProject());
@@ -144,17 +146,8 @@ public class InMemoryMessageJournalShould {
     }
 
     private EventContext getEventContext() {
-
-        final Timestamp now = getCurrentTime();
-
-        final CommandId commandId = CommandId.newBuilder()
-                .setTimestamp(now)
-                .build();
-
-        final EventId eventId = EventId.newBuilder()
-                .setCommandId(commandId)
-                .setTimestamp(now)
-                .build();
+        final CommandId commandId = Commands.generateId(userId);
+        final EventId eventId = Events.generateId(commandId);
 
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)

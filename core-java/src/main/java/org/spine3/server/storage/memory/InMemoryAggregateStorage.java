@@ -18,39 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateCommand;
-import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.AggregateStorageRecord;
 
-/**
- * Stores and loads commands.
- *
- * @author Mikhail Mikhaylov
- */
-public class CommandStore {
+import java.util.Iterator;
 
-    private final CommandStorage storage;
+class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    public CommandStore(CommandStorage storage) {
-        this.storage = storage;
+    //TODO:2015-09-19:alexander.yevsyukov: Consider having Multimap backed with TreeMap for storing data.
+
+    @Override
+    protected void write(AggregateStorageRecord r) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
     }
 
-    /**
-     * Stores the command request.
-     *
-     * @param request command request to store
-     */
-    public void store(CommandRequest request) {
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
-        storage.store(aggregateId, request);
+    @Override
+    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+        //TODO:2015-09-19:alexander.yevsyukov: Implement
+        return null;
     }
-
 }

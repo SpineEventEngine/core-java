@@ -17,40 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.sample.order;
 
-package org.spine3.server;
-
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateCommand;
-import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.aggregate.AggregateEventStorage;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
+import org.spine3.server.aggregate.SnapshotStorage;
 
 /**
- * Stores and loads commands.
- *
- * @author Mikhail Mikhaylov
+ * @author Mikhail Melnik
  */
-public class CommandStore {
+public class OrderRepository extends AggregateRepositoryBase<OrderId, OrderAggregate> {
 
-    private final CommandStorage storage;
-
-    public CommandStore(CommandStorage storage) {
-        this.storage = storage;
+    public OrderRepository(AggregateEventStorage eventStorage, SnapshotStorage snapshotStorage) {
+        super(eventStorage, snapshotStorage);
     }
-
-    /**
-     * Stores the command request.
-     *
-     * @param request command request to store
-     */
-    public void store(CommandRequest request) {
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        final AggregateId aggregateId = AggregateCommand.getAggregateId(command);
-        storage.store(aggregateId, request);
-    }
-
 }

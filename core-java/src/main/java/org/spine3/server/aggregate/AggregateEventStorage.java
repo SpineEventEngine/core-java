@@ -33,11 +33,11 @@ import java.util.List;
  *
  * @author Mikhail Mikhaylov
  */
-public class AggregateRootEventStorage<I> {
+public class AggregateEventStorage<I> {
 
     private final MessageJournal<I, EventRecord> storage;
 
-    public AggregateRootEventStorage(MessageJournal<I, EventRecord> storage) {
+    public AggregateEventStorage(MessageJournal<I, EventRecord> storage) {
         this.storage = storage;
     }
 
@@ -51,7 +51,7 @@ public class AggregateRootEventStorage<I> {
          * The type is ensured by binding the same type in AggregateRootRepositoryBase to ID type
          * of AggregateRoot and AggregateRootEventStorage.
          *
-         * @see AggregateRoot#createEventContext(CommandId, Message, Message, int)
+         * @see Aggregate#createEventContext(CommandId, Message, Message, Timestamp, int)
          */
         @SuppressWarnings("unchecked")
         I id = (I)Entity.idFromAny(record.getContext().getAggregateId());

@@ -30,7 +30,6 @@ import org.spine3.TypeName;
 import org.spine3.base.*;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
 import java.util.Map;
@@ -85,7 +84,7 @@ class Converters {
         }
 
         protected Entity newEntity(CommandId commandId) {
-            final String id = Commands.idToString(commandId);
+            final String id = org.spine3.server.Entity.idToString(commandId);
             return new Entity(getEntityKind(), id);
         }
 
@@ -128,7 +127,7 @@ class Converters {
             final EventContext eventContext = eventRecord.getContext();
             final EventId eventId = eventContext.getEventId();
             final AggregateId aggregateId = AggregateId.of(eventContext);
-            final Timestamp timestamp = eventId.getTimestamp();
+            final Timestamp timestamp = Events.getTimestamp(eventId);
             final int version = eventContext.getVersion();
 
             final Entity entity = newEntity(eventId);
