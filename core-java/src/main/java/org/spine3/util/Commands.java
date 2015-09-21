@@ -19,9 +19,11 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Function;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.Entity;
@@ -34,6 +36,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.server.Entity.NULL_ID_OR_FIELD;
+import static org.spine3.server.Entity.USER_ID_AND_TIME_DELIMITER;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
@@ -45,6 +49,10 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Commands {
 
     public static final String ID_PROPERTY_SUFFIX = "id";
+
+    static {
+        Entity.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
+    }
 
     private Commands() {
         // Prevent instantiation.
@@ -95,6 +103,34 @@ public class Commands {
         return result.build();
     }
 
+    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    public static class CommandIdToStringConverter implements Function<CommandId, String> {
+        @Nullable
+        @Override
+        public String apply(@Nullable CommandId commandId) {
+
+            if (commandId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            final StringBuilder builder = new StringBuilder();
+
+            String userId = NULL_ID_OR_FIELD;
+
+            if (commandId != null && commandId.getActor() != null) {
+                userId = commandId.getActor().getValue();
+            }
+
+            final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+
+            builder.append(userId)
+                    .append(USER_ID_AND_TIME_DELIMITER)
+                    .append(commandTime);
+
+            return builder.toString();
+        }
+    }
+
     /**
      * Creates string representation of the passed command ID.
      *
@@ -105,6 +141,14 @@ public class Commands {
     public static String idToString(CommandId commandId) {
         String result = Entity.idToString(commandId);
         return result;
+    }
+
+    public static CommandId generateId(String userIdString, Timestamp currentTime) {
+        final UserId userId = Users.createId(userIdString);
+        final CommandId.Builder builder = CommandId.newBuilder()
+                .setActor(userId)
+                .setTimestamp(currentTime);
+        return builder.build();
     }
 
     public static Predicate<CommandRequest> wereAfter(final Timestamp from) {

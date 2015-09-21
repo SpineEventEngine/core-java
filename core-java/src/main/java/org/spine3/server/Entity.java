@@ -21,20 +21,18 @@
 package org.spine3.server;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.*;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
-import org.spine3.test.project.ProjectId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -45,7 +43,20 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  */
 public abstract class Entity<I, S extends Message> {
 
-    public static final char ID_DELIMITER = '@';
+    /*
+     * Delimiter between user id and time in string representation
+     */
+    public static final char USER_ID_AND_TIME_DELIMITER = '@';
+
+    /*
+     * Delimiter between command time and event time delta in string representation
+     */
+    public static final char TIME_DELIMITER = '+';
+
+    /*
+     * Null message or field string representation
+     */
+    public static final String NULL_ID_OR_FIELD = "NULL";
 
     private final I id;
 
@@ -174,14 +185,19 @@ public abstract class Entity<I, S extends Message> {
      * <li>For classes implementing {@link Message} — Json form</li>
      * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}</li>
      * </ul>
-     * @throws IllegalArgumentException if the passed type isn't one of the above
+     * @throws IllegalArgumentException if the passed type isn't one of the above or {@link Message} id has no fields
      */
     public static <I> String idToString(I id) {
+
         //noinspection ChainOfInstanceofChecks
         if (id instanceof String
                 || id instanceof Integer
                 || id instanceof Long) {
+
             String toString = id.toString();
+            if (toString.isEmpty()) {
+                toString = NULL_ID_OR_FIELD;
+            }
             return toString;
         }
 
@@ -189,19 +205,14 @@ public abstract class Entity<I, S extends Message> {
             final String result = idMessageToString((Message) id);
             return result;
         }
+
         throw unsupportedIdType(id);
     }
 
-    @SuppressWarnings({"IfMayBeConditional", "UnusedAssignment"})
+    @SuppressWarnings("IfMayBeConditional")
     private static String idMessageToString(Message message) {
 
-        final Map<Descriptors.FieldDescriptor, Object> fieldsMap = message.getAllFields();
-
-        if (fieldsMap.isEmpty()) {
-            return "";
-        }
-
-        String result = "";
+        String result;
 
         final IdConverterRegistry registry = IdConverterRegistry.instance();
 
@@ -209,18 +220,22 @@ public abstract class Entity<I, S extends Message> {
             final Function<Message, String> converter = registry.getConverter(message);
             result = converter.apply(message);
         } else {
-            result = idMessageToStringManually(message, fieldsMap);
+            result = performConversion(message);
         }
 
         return result;
     }
 
     @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
-    private static String idMessageToStringManually(Message message, Map<Descriptors.FieldDescriptor, Object> fieldsMap) {
+    private static String performConversion(Message message) {
 
-        String result;
+        String result = "";
 
-        final Collection<Object> values = fieldsMap.values();
+        final Collection<Object> values = message.getAllFields().values();
+
+        if (values.isEmpty()) {
+            throw new IllegalArgumentException("Message id should contain at least one field.");
+        }
 
         if (values.size() == 1) {
 
@@ -228,10 +243,9 @@ public abstract class Entity<I, S extends Message> {
 
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);
-            } else {
+            } else if (values.size() == 1) {
                 result = object.toString();
             }
-
         } else {
             result = TextFormat.shortDebugString(message);
         }
@@ -321,12 +335,10 @@ public abstract class Entity<I, S extends Message> {
             "StringBufferWithoutInitialCapacity"})
     public static class IdConverterRegistry {
 
-        private final Map<Class<?>, Function<?, String>> entries = new HashMap<Class<?>, Function<?, String>>() {{
-            put(CommandId.class, new CommandIdToStringConverter());
-            put(EventId.class, new EventIdToStringConverter());
-            put(ProjectId.class, new ProjectIdToStringConverter());
-            put(Timestamp.class, new TimestampToStringConverter());
-        }};
+        private final Map<Class<?>, Function<?, String>> entries = newHashMap(
+                ImmutableMap.<Class<?>, Function<?, String>>builder()
+                        .put(Timestamp.class, new TimestampToStringConverter()).build()
+        );
 
         private IdConverterRegistry() {
         }
@@ -347,7 +359,8 @@ public abstract class Entity<I, S extends Message> {
         }
 
         public <I> boolean containsConverter(I id) {
-            final boolean contains = entries.containsKey(id.getClass()) && (entries.get(id.getClass()) != null);
+            final Class<?> idClass = id.getClass();
+            final boolean contains = entries.containsKey(idClass) && (entries.get(idClass) != null);
             return contains;
         }
 
@@ -361,68 +374,6 @@ public abstract class Entity<I, S extends Message> {
             return Singleton.INSTANCE.value;
         }
 
-        private static class CommandIdToStringConverter implements Function<CommandId, String> {
-            @Nullable
-            @Override
-            public String apply(@Nullable CommandId commandId) {
-
-                if (commandId == null) {
-                    return "";
-                }
-
-                final StringBuilder builder = new StringBuilder();
-
-                final String userId = userIdToString(commandId);
-                final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
-
-                builder.append(userId)
-                        .append(ID_DELIMITER)
-                        .append(commandTime);
-
-                return builder.toString();
-            }
-        }
-
-        private static class EventIdToStringConverter implements Function<EventId, String> {
-            @Nullable
-            @Override
-            public String apply(@Nullable EventId eventId) {
-
-                if (eventId == null) {
-                    return "";
-                }
-
-                final StringBuilder builder = new StringBuilder();
-
-                final CommandId commandId = eventId.getCommandId();
-
-                final String userId = userIdToString(commandId);
-                final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
-                final String delta = (eventId != null) ? String.valueOf(eventId.getDeltaNanos()) : "";
-
-                builder.append(userId)
-                        .append(ID_DELIMITER)
-                        .append(commandTime)
-                        .append("+")
-                        .append(delta);
-
-                return builder.toString();
-            }
-        }
-
-        private static class ProjectIdToStringConverter implements Function<ProjectId, String> {
-            @SuppressWarnings("IfMayBeConditional")
-            @Nullable
-            @Override
-            public String apply(@Nullable ProjectId projectId) {
-                if (projectId != null) {
-                    return projectId.getId();
-                } else {
-                    return "";
-                }
-            }
-        }
-
         private static class TimestampToStringConverter implements Function<Timestamp, String> {
             @SuppressWarnings("IfMayBeConditional")
             @Nullable
@@ -434,16 +385,6 @@ public abstract class Entity<I, S extends Message> {
                     return "";
                 }
             }
-        }
-
-        @SuppressWarnings("TypeMayBeWeakened")
-        private static String userIdToString(CommandId commandId) {
-
-            if (commandId == null || commandId.getActor() == null) {
-                return "unknown";
-            }
-            final String userId = commandId.getActor().getValue();
-            return userId;
         }
     }
 }
