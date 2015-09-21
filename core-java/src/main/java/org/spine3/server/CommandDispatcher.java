@@ -47,6 +47,13 @@ public class CommandDispatcher {
     private final Map<CommandClass, CommandHandlerMethod> handlersByCommandClass = Maps.newConcurrentMap();
 
     /**
+     * @return singleton instance of {@code CommandDispatcher}
+     */
+    public static CommandDispatcher getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    /**
      * Registers the passed object of many commands in the dispatcher.
      *
      * @param object a {@code non-null} object
@@ -146,6 +153,14 @@ public class CommandDispatcher {
 
     public boolean handlerRegistered(CommandClass cls) {
         return handlersByCommandClass.containsKey(cls);
+    }
+
+
+    private enum Singleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final CommandDispatcher value = new CommandDispatcher();
     }
 
 }

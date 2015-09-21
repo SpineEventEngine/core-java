@@ -45,8 +45,6 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
-    private final CommandDispatcher dispatcher = new CommandDispatcher();
-
     private CommandStore commandStore;
     private EventStore eventStore;
 
@@ -108,10 +106,22 @@ public final class Engine {
         engine.eventStore = eventStore;
     }
 
+    /**
+     * Convenience method for obtaining instance of {@link CommandDispatcher}.
+     *
+     * @return instance of {@code CommandDispatcher} used in the application
+     * @see CommandDispatcher#getInstance()
+     */
     public CommandDispatcher getCommandDispatcher() {
-        return this.dispatcher;
+        return CommandDispatcher.getInstance();
     }
 
+    /**
+     * Convenience method for obtaining instance of {@link EventBus}.
+     *
+     * @return instance of {@code EventBus} used in the application
+     * @see EventBus#getInstance()
+     */
     public EventBus getEventBus() {
         return EventBus.getInstance();
     }
@@ -141,6 +151,7 @@ public final class Engine {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
+        CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
             Message command = Messages.fromAny(request.getCommand());
             CommandContext context = request.getContext();
