@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -31,6 +30,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.base.UserId;
 import org.spine3.protobuf.ZoneOffsets;
 import org.spine3.server.Assign;
 import org.spine3.test.project.Project;
@@ -61,6 +61,7 @@ import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testutil.ContextFactory.getEventContext;
+import static org.spine3.testutil.EventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
@@ -78,8 +79,9 @@ public class AggregateShould {
     @Before
     public void setUp() {
         projectId = ProjectId.newBuilder().setId("project_id").build();
-        commandContext = createContext(Users.createId("user_id"), ZoneOffsets.UTC);
-        eventContext = getEventContext(0);
+        final UserId userId = Users.createId("user_id");
+        commandContext = createContext(userId, ZoneOffsets.UTC);
+        eventContext = getEventContext(userId, projectId);
         createProject = CreateProject.newBuilder().setProjectId(projectId).build();
         addTask = AddTask.newBuilder().setProjectId(projectId).build();
         startProject = StartProject.newBuilder().setProjectId(projectId).build();
@@ -372,9 +374,9 @@ public class AggregateShould {
 
     private List<EventRecord> getProjectEventRecords() {
         List<EventRecord> events = newLinkedList();
-        events.add(getProjectCreatedEventRecord());
-        events.add(getTaskAddedEventRecord());
-        events.add(getProjectStartedEventRecord());
+        events.add(projectCreated(projectId, eventContext));
+        events.add(taskAdded(projectId, eventContext));
+        events.add(projectStarted(projectId, eventContext));
         return events;
     }
 
@@ -382,21 +384,6 @@ public class AggregateShould {
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
-    }
-
-    private EventRecord getProjectCreatedEventRecord() {
-        final Any event = toAny(ProjectCreated.newBuilder().setProjectId(projectId).build());
-        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
-    }
-
-    private EventRecord getTaskAddedEventRecord() {
-        final Any event = toAny(TaskAdded.newBuilder().setProjectId(projectId).build());
-        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
-    }
-
-    private EventRecord getProjectStartedEventRecord() {
-        final Any event = toAny(ProjectStarted.newBuilder().setProjectId(projectId).build());
-        return EventRecord.newBuilder().setContext(eventContext).setEvent(event).build();
     }
 
     private EventRecord snapshotToEventRecord(Snapshot snapshot) {
