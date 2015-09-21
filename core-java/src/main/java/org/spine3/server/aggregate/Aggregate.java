@@ -50,21 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for aggregates.
  *
- * @param <I> the type for IDs of this class of aggregates. Supported types are:
- *            <ul>
- *            <li>Classes implementing {@link Message}</li>
- *            <li>String</li>
- *            <li>Long</li>
- *            <li>Integer</li>
- *            </ul>
- *            Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- *            if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *            <ul>
- *            <li>EAN value used in bar codes</li>
- *            <li>ISBN</li>
- *            <li>Phone number</li>
- *            <li>email address as a couple of local-part and domain</li>
- *            </ul>
+ * @param <I> the type for IDs of this class of aggregates. For supported types see {@link AggregateId}
  * @param <S> the type of the state held by the aggregate
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov

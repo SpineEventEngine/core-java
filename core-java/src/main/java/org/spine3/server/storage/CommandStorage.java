@@ -42,12 +42,11 @@ public abstract class CommandStorage {
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
         final String commandIdStr = Entity.idToString(commandId);
-        final TypeName aggregateIdType = aggregateId.getTypeName();
         CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
                 .setTimestamp(commandId.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)
-                .setAggregateIdType(aggregateIdType.nameOnly())
+                .setAggregateIdType(aggregateId.getShortTypeName())
                 .setAggregateId(aggregateId.toString())
                 .setCommand(command)
                 .setContext(context);
