@@ -29,7 +29,6 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.Entity;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -38,7 +37,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.Entity.*;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -53,7 +51,7 @@ public class Events {
     }
 
     static {
-        IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
+        Identifiers.IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
     }
 
     /**
@@ -163,7 +161,7 @@ public class Events {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
-        return Entity.idToString(id);
+        return Identifiers.idToString(id);
     }
 
     /**
@@ -193,14 +191,14 @@ public class Events {
         public String apply(@Nullable EventId eventId) {
 
             if (eventId == null) {
-                return NULL_ID_OR_FIELD;
+                return Identifiers.NULL_ID_OR_FIELD;
             }
 
             final StringBuilder builder = new StringBuilder();
 
             final CommandId commandId = eventId.getCommandId();
 
-            String userId = NULL_ID_OR_FIELD;
+            String userId = Identifiers.NULL_ID_OR_FIELD;
 
             if (commandId != null && commandId.getActor() != null) {
                 userId = commandId.getActor().getValue();
@@ -209,9 +207,9 @@ public class Events {
             final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
 
             builder.append(userId)
-                    .append(USER_ID_AND_TIME_DELIMITER)
+                    .append(Identifiers.USER_ID_AND_TIME_DELIMITER)
                     .append(commandTime)
-                    .append(TIME_DELIMITER)
+                    .append(Identifiers.TIME_DELIMITER)
                     .append(eventId.getDeltaNanos());
 
             return builder.toString();

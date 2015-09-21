@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.Entity;
 import org.spine3.time.ZoneOffset;
 
 import javax.annotation.Nullable;
@@ -36,8 +35,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.Entity.NULL_ID_OR_FIELD;
-import static org.spine3.server.Entity.USER_ID_AND_TIME_DELIMITER;
+import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
@@ -51,7 +50,7 @@ public class Commands {
     public static final String ID_PROPERTY_SUFFIX = "id";
 
     static {
-        Entity.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
+        Identifiers.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
     }
 
     private Commands() {
@@ -135,11 +134,11 @@ public class Commands {
      * Creates string representation of the passed command ID.
      *
      * @param commandId the ID to convert
-     * @return string value, with the format defined by {@link Entity#idToString(Object)}
-     * @see Entity#idToString(Object)
+     * @return string value, with the format defined by {@link Identifiers#idToString(Object)}
+     * @see Identifiers#idToString(Object)
      */
     public static String idToString(CommandId commandId) {
-        String result = Entity.idToString(commandId);
+        String result = Identifiers.idToString(commandId);
         return result;
     }
 

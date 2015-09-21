@@ -30,8 +30,8 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.server.Entity.TIME_DELIMITER;
-import static org.spine3.server.Entity.USER_ID_AND_TIME_DELIMITER;
+import static org.spine3.util.Identifiers.TIME_DELIMITER;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Commands.generateId;
 
 /**

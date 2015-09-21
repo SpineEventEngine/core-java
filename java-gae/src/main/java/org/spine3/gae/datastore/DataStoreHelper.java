@@ -28,6 +28,7 @@ import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.util.Identifiers;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ class DataStoreHelper {
         final List<Query.Filter> filters = new ArrayList<>();
         final Date timestampDate = Timestamps.convertToDate(from);
         filters.add(new Query.FilterPredicate(TIMESTAMP_KEY, GREATER_THAN_OR_EQUAL, timestampDate));
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, Identifiers.idToString(aggregateRootId)));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);
     }
@@ -101,7 +102,7 @@ class DataStoreHelper {
     protected static <I> Query.Filter prepareFilter(I aggregateRootId, int sinceVersion) {
 
         final List<Query.Filter> filters = new ArrayList<>();
-        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, org.spine3.server.Entity.idToString(aggregateRootId)));
+        filters.add(new Query.FilterPredicate(PARENT_ID_KEY, EQUAL, Identifiers.idToString(aggregateRootId)));
         filters.add(new Query.FilterPredicate(VERSION_KEY, GREATER_THAN_OR_EQUAL, sinceVersion));
 
         return new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filters);

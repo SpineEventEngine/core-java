@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Identifiers.idToAny;
 
 /**
  * Abstract base for aggregates.

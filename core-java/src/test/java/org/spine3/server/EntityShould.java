@@ -28,14 +28,14 @@ import org.junit.Test;
 import org.spine3.test.*;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.util.Identifiers;
 
 import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
-import static org.spine3.server.Entity.*;
-import static org.spine3.server.Entity.idToString;
+import static org.spine3.util.Identifiers.idToString;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
@@ -140,10 +140,10 @@ public class EntityShould {
     @Test
     public void convert_to_string_registered_project_id_message() {
 
-        IdConverterRegistry.instance().register(ProjectId.class, new Function<ProjectId, String>() {
+        Identifiers.IdConverterRegistry.instance().register(ProjectId.class, new Function<ProjectId, String>() {
             @Override
             public String apply(@Nullable ProjectId projectId) {
-                return projectId != null ? projectId.getId() : NULL_ID_OR_FIELD;
+                return projectId != null ? projectId.getId() : Identifiers.NULL_ID_OR_FIELD;
             }
         });
 
