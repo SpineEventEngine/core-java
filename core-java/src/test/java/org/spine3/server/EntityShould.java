@@ -37,6 +37,9 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.util.Identifiers.idToString;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class EntityShould {

@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * In-memory implementation of {@link org.spine3.server.storage.EntityStorage}.
+ * In-memory-based implementation of {@link org.spine3.server.storage.EntityStorage}.
  *
  * @author Alexander Litus
  */

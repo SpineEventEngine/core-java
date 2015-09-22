@@ -26,6 +26,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "ConstantConditions"})
 public class EngineShould {

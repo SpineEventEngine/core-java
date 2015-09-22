@@ -64,6 +64,9 @@ import static org.spine3.testutil.ContextFactory.getEventContext;
 import static org.spine3.testutil.EventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
 "ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
 public class AggregateShould {

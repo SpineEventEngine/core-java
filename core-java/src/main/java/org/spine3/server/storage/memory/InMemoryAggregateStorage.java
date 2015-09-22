@@ -33,6 +33,9 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Identifiers.idToString;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings("ComparatorNotSerializable")
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
