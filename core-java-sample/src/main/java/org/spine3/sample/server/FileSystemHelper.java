@@ -47,7 +47,7 @@ import java.util.Map;
 @SuppressWarnings("UtilityClass")
 public class FileSystemHelper {
 
-    private static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
+    public static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
 
     @SuppressWarnings("StaticNonFinalField") //Is being rewritten
     private static File backup = null;
