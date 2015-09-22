@@ -45,12 +45,12 @@ import static org.spine3.util.Events.idToString;
  */
 class InMemoryEventStorage extends EventStorage {
 
-    private final Map<String, EventStoreRecord> eventsMap = newHashMap();
+    private final Map<String, EventStoreRecord> storage = newHashMap();
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final Collection<EventRecord> result = transform(eventsMap.values(), TO_EVENT_RECORD);
+        final Collection<EventRecord> result = transform(storage.values(), TO_EVENT_RECORD);
         Events.sort(newArrayList(result));
         final Iterator<EventRecord> iterator = result.iterator();
         return iterator;
@@ -63,7 +63,7 @@ class InMemoryEventStorage extends EventStorage {
         checkNotNull(eventId);
 
         final String id = idToString(eventId);
-        final EventStoreRecord record = eventsMap.get(id);
+        final EventStoreRecord record = storage.get(id);
         return record;
     }
 
@@ -71,17 +71,13 @@ class InMemoryEventStorage extends EventStorage {
     protected void write(EventStoreRecord record) {
         checkNotNull(record);
         checkNotNull(record.getEventId());
-        eventsMap.put(record.getEventId(), record);
+        storage.put(record.getEventId(), record);
     }
 
     private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
-        @Nullable
+        @SuppressWarnings("NullableProblems") // record cannot be null because it is checked when saving to storage
         @Override
-        public EventRecord apply(@Nullable EventStoreRecord record) {
-
-            if (record == null) {
-                return EventRecord.getDefaultInstance();
-            }
+        public EventRecord apply(EventStoreRecord record) {
 
             EventRecord.Builder builder = EventRecord.newBuilder()
                     .setEvent(record.getEvent())
