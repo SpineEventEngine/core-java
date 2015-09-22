@@ -20,7 +20,7 @@
 package org.spine3.sample.server;
 
 import com.google.protobuf.Message;
-import org.spine3.server.Snapshot;
+import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.aggregate.SnapshotStorage;
 
 import java.io.File;

@@ -20,8 +20,6 @@
 
 package org.spine3.server.aggregate;
 
-import org.spine3.server.Snapshot;
-
 import javax.annotation.Nullable;
 
 /**

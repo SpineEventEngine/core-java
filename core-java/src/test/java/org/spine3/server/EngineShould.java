@@ -20,14 +20,9 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-
-import java.util.List;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -37,7 +32,7 @@ public class EngineShould {
 
     @Before
     public void setUp() {
-        Engine.configure(null, null);
+        Engine.stop();
     }
 
 
@@ -48,39 +43,11 @@ public class EngineShould {
 
     @Test
     public void return_instance_if_configured_correctly() {
-
-        final EventStore eventStore = new EventStore(new MockStorage<String, EventRecord>());
-        final CommandStore commandStore = new CommandStore(new MockStorage<String, CommandRequest>());
-
-        Engine.configure(commandStore, eventStore);
+        Engine.start(new InMemoryStorageFactory());
 
         final Engine engine = Engine.getInstance();
 
         assertNotNull(engine);
-        assertNotNull(engine.getCommandDispatcher());
-        assertNotNull(engine.getEventBus());
     }
 
-
-    private static class MockStorage<I, M extends Message> implements MessageJournal<I, M> {
-        @Override
-        public List<M> load(I entityId) {
-            return null;
-        }
-
-        @Override
-        public void store(I entityId, M message) {
-
-        }
-
-        @Override
-        public List<M> loadSince(I entityId, Timestamp timestamp) {
-            return null;
-        }
-
-        @Override
-        public List<M> loadAllSince(Timestamp timestamp) {
-            return null;
-        }
-    }
 }

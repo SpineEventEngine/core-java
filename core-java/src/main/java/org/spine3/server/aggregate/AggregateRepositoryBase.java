@@ -26,7 +26,6 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
-import org.spine3.server.Snapshot;
 import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nonnull;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 
 /**
@@ -47,9 +47,9 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
-public abstract class AggregateRootRepositoryBase<I extends Message,
-                                                  R extends AggregateRoot<I, ?>>
-        extends RepositoryBase<I, R> implements AggregateRootRepository<I, R> {
+public abstract class AggregateRepositoryBase<I extends Message,
+                                              R extends Aggregate<I, ?>>
+        extends RepositoryBase<I, R> implements AggregateRepository<I, R> {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
@@ -68,7 +68,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     /**
      * The store for events and snapshots.
      */
-    private final AggregateRootEventStorage<I> eventStorage;
+    private final AggregateEventStorage<I> eventStorage;
 
     /**
      * The storage for snapshots.
@@ -90,17 +90,18 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRootRepositoryBase(AggregateRootEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
+    protected AggregateRepositoryBase(AggregateEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
         super();
         this.eventStorage = eventStorage;
         this.snapshotStorage = snapshotStorage;
     }
 
     public int getSnapshotTrigger() {
-        return snapshotTrigger;
+        return this.snapshotTrigger;
     }
 
     public void setSnapshotTrigger(int snapshotTrigger) {
+        checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }
 
@@ -124,8 +125,8 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     private Map<CommandClass, CommandHandlerMethod> getDispatchingHandlers() {
         Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
 
-        Class<? extends AggregateRoot> aggregateRootClass = TypeInfo.getEntityClass(getClass());
-        Set<CommandClass> aggregateCommands = AggregateRoot.getCommandClasses(aggregateRootClass);
+        Class<? extends Aggregate> aggregateRootClass = TypeInfo.getEntityClass(getClass());
+        Set<CommandClass> aggregateCommands = Aggregate.getCommandClasses(aggregateRootClass);
 
         CommandHandlerMethod handler = dispatchAsHandler();
         for (CommandClass commandClass : aggregateCommands) {
@@ -160,7 +161,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
         try {
             Snapshot snapshot = snapshotStorage.load(id);
             if (snapshot != null) {
-                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenLastModified());
+                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenModified());
                 R result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
@@ -184,6 +185,7 @@ public abstract class AggregateRootRepositoryBase<I extends Message,
     @Override
     public void store(R aggregateRoot) {
         final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
+        final int snapshotTrigger = getSnapshotTrigger();
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
 

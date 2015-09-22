@@ -28,6 +28,7 @@ import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.sample.server.FileSystemStorageFactory;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class FileSystemSample extends BaseSample {
 
-    private static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
+    public static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
 
     public static File getTempDir() {
         try {
@@ -57,6 +58,11 @@ public class FileSystemSample extends BaseSample {
             propagate(e);
         }
         throw new IllegalStateException("Unable to get temporary directory for storage");
+    }
+
+    @Override
+    protected StorageFactory getStorageFactory() {
+        return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
     }
 
     @Override

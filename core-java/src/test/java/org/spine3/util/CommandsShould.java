@@ -33,10 +33,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
+import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Lists.filter;
 
 /**
@@ -47,9 +50,9 @@ public class CommandsShould {
 
     @Test
     public void generate() {
-        UserId userId = UserIds.create("commands-should-test");
+        UserId userId = Users.createId("commands-should-test");
 
-        CommandId result = Commands.generateId(userId);
+        CommandId result = generateId(userId);
 
         //noinspection DuplicateStringLiteralInspection
         assertThat(result, allOf(
@@ -60,7 +63,7 @@ public class CommandsShould {
     @Test(expected = NullPointerException.class)
     public void fail_on_null_parameter() {
         //noinspection ConstantConditions
-        Commands.generateId(null);
+        generateId(null);
     }
 
     @Test
@@ -73,7 +76,7 @@ public class CommandsShould {
     @Test
     public void return_correct_were_after_predicate() throws InterruptedException {
         final Timestamp timestamp = TimeUtil.getCurrentTime();
-        final CommandRequest commandRequest = CommandRequestFactory.create(timestamp);
+        final CommandRequest commandRequest = CommandRequestFactory.create();
         Thread.sleep(100);
         final CommandRequest commandRequestAfter = CommandRequestFactory.create();
 
@@ -130,5 +133,21 @@ public class CommandsShould {
 
         assertEquals(1, filteredList.size());
         assertEquals(req2, filteredList.get(0));
+    }
+
+    @Test
+    public void convert_to_string_command_id_message() {
+
+        final String userIdString = "user123";
+        final Timestamp currentTime = getCurrentTime();
+        CommandId id = generateId(userIdString, currentTime);
+
+        /* TODO[alexander.litus]: create parse() method that would restore an object from its String representation.
+            Use the restored object for equality check with the original object.*/
+        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER +  TimeUtil.toString(currentTime);
+
+        final String actual = Commands.idToString(id);
+
+        assertEquals(expected, actual);
     }
 }

@@ -19,13 +19,20 @@
  */
 package org.spine3.util;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 import org.spine3.base.UserId;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.spine3.util.Identifiers.TIME_DELIMITER;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
+import static org.spine3.util.Commands.generateId;
 
 /**
  * @author Mikhail Melnik
@@ -35,7 +42,7 @@ public class EventsShould {
 
     @Test
     public void generate_event_id() {
-        UserId userId = UserIds.create("events_test");
+        UserId userId = Users.createId("events_test");
         CommandId commandId = Commands.generateId(userId);
 
         EventId result = Events.generateId(commandId);
@@ -43,12 +50,32 @@ public class EventsShould {
         //noinspection DuplicateStringLiteralInspection
         assertThat(result, allOf(
                 hasProperty("commandId", equalTo(commandId)),
-                hasProperty("timestamp")));
+                hasProperty("deltaNanos")));
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_generate_null_event_id() {
         //noinspection ConstantConditions
         Events.generateId(null);
+    }
+
+    @Test
+    public void convert_to_string_event_id_message() {
+
+        final String userIdString = "user123123";
+        final Timestamp commandTime = getCurrentTime();
+        final long deltaNanos = 256000;
+
+        CommandId commandId = generateId(userIdString, commandTime);
+        EventId id = EventId.newBuilder().setCommandId(commandId).setDeltaNanos(deltaNanos).build();
+
+        /* TODO[alexander.litus]: create parse() method that would restore an object from its String representation.
+            Use the restored object for equality check with the original object.*/
+        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER + TimeUtil.toString(commandTime) +
+                TIME_DELIMITER + String.valueOf(deltaNanos);
+
+        final String actual = Events.idToString(id);
+
+        assertEquals(expected, actual);
     }
 }

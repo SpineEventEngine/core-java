@@ -21,8 +21,10 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
+import org.spine3.util.Identifiers;
 import org.spine3.util.MessageValue;
 
 import javax.annotation.Nonnull;
@@ -59,14 +61,18 @@ public final class AggregateId extends MessageValue {
         return new AggregateId(Messages.fromAny(value.getAggregateId()));
     }
 
-    public static String idToString(Message aggregateRootId) {
-        return Messages.toJson(aggregateRootId);
+    /**
+     * Returns the type name of the value of aggregate ID.
+     */
+    public TypeName getTypeName() {
+        TypeName result = TypeName.of(value().getDescriptorForType());
+        return result;
     }
 
     @Override
     public String toString() {
-        final Message value = value();
-        return (idToString(value));
+        final String result = Identifiers.idToString(value());
+        return result;
     }
 
     @Nonnull

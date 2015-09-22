@@ -23,7 +23,10 @@ package org.spine3;
 import com.google.protobuf.*;
 import org.spine3.util.StringTypeValue;
 
+import java.util.regex.Pattern;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * A value object for fully-qualified Protobuf type name.
@@ -78,24 +81,27 @@ public final class TypeName extends StringTypeValue {
      *
      * @param any the instance of {@code Any} containing {@code Message} instance of interest
      * @return new instance of {@code TypeName}
-     * @throws InvalidProtocolBufferException if:
-     *  <ul>
-     *      <li>the type URL returned by {@code any} does not have "type.googleapis.com/" prefix</li>
-     *      <li>there's nothing after the prefix</li>
-     *      <li>the type URL has more than one '/' separator</li>
-     *  </ul>
      */
-    public static TypeName ofEnclosed(AnyOrBuilder any) throws InvalidProtocolBufferException {
-        String typeName = getTypeName(any.getTypeUrl());
+    public static TypeName ofEnclosed(AnyOrBuilder any) {
+        String typeName = null;
+        try {
+            typeName = getTypeName(any.getTypeUrl());
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
+        }
+        assert typeName != null;
         return of(typeName);
     }
 
     private static final String TYPE_URL_PREFIX = "type.googleapis.com";
+
     private static final String TYPE_URL_SEPARATOR = "/";
+    private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(TYPE_URL_SEPARATOR);
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR = Pattern.compile(".");
 
     private static String getTypeName(String typeUrl)
             throws InvalidProtocolBufferException {
-        String[] parts = typeUrl.split(TYPE_URL_SEPARATOR);
+        String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
         if (parts.length != 2 || !parts[0].equals(TYPE_URL_PREFIX)) {
             throw new InvalidProtocolBufferException(
                     "Invalid type url encountered: " + typeUrl);
@@ -122,5 +128,22 @@ public final class TypeName extends StringTypeValue {
     public String value() {
         // Expose method to other packages.
         return super.value();
+    }
+
+    /**
+     * Returns the name part of the fully qualified name.
+     *
+     * <p>If there's no package part in the type name, its value is returned.
+     *
+     * @return string with the type name
+     */
+    public String nameOnly() {
+        String value = value();
+        String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
+        if (parts.length == 0) {
+            return value;
+        }
+        String result = parts[parts.length - 1];
+        return result;
     }
 }

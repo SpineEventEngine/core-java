@@ -24,8 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
+import org.spine3.sample.FileSystemSample;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
 
 /**
  * File system Server implementation.
@@ -33,7 +35,8 @@ import org.spine3.server.aggregate.SnapshotStorage;
  * @author Mikhail Mikhaylov
  */
 public class FileSystemSampleServer extends BaseSampleServer {
-    private static final String STORAGE_PATH = "./storage";
+
+    private static final String STORAGE_PATH = FileSystemSample.STORAGE_PATH;
 
     /**
      * Main launches the server from the command line.
@@ -43,6 +46,11 @@ public class FileSystemSampleServer extends BaseSampleServer {
         final BaseSampleServer server = new FileSystemSampleServer();
         server.registerEventSubscribers();
         server.start();
+    }
+
+    @Override
+    protected StorageFactory getStorageFactory() {
+        return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
     }
 
     @Override

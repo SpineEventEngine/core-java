@@ -27,6 +27,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.sample.server.InMemoryStorageFactory;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
 
 /**
  * Entry point for core-java sample without gRPC. Works with in-memory-storage.
@@ -38,6 +39,11 @@ public class InMemorySample extends BaseSample {
 
         BaseSample sample = new InMemorySample();
         sample.execute();
+    }
+
+    @Override
+    protected StorageFactory getStorageFactory() {
+        return new org.spine3.server.storage.memory.InMemoryStorageFactory();
     }
 
     @Override

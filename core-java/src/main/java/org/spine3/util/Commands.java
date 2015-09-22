@@ -19,10 +19,12 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Function;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
-import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
@@ -33,6 +35,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
@@ -44,6 +48,10 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Commands {
 
     public static final String ID_PROPERTY_SUFFIX = "id";
+
+    static {
+        Identifiers.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
+    }
 
     private Commands() {
         // Prevent instantiation.
@@ -58,10 +66,88 @@ public class Commands {
     public static CommandId generateId(UserId userId) {
         checkNotNull(userId);
 
+        final Timestamp currentTime = getCurrentTime();
+        return create(userId, currentTime);
+    }
+
+    /**
+     * Creates a command ID instance by user ID and timestamp.
+     *
+     * <p>To create new instances of {@link CommandId} use {@link Commands#generateId(UserId)}.
+     * This method should be used for testing purposes or for creating command IDs for working with
+     * historical data.
+     *
+     * @param userId the user to whom generate command ID
+     * @param timestamp known timestamp for previously generated command ID
+     * @return command ID instance
+     */
+    @VisibleForTesting
+    public static CommandId create(UserId userId, Timestamp timestamp) {
         return CommandId.newBuilder()
                 .setActor(userId)
-                .setTimestamp(getCurrentTime())
+                .setTimestamp(timestamp)
                 .build();
+    }
+
+    /**
+     * Creates new Command context with current time
+     * @param userId the actor id
+     * @param offset the timezone offset
+     */
+    public static CommandContext createContext(UserId userId, ZoneOffset offset) {
+        CommandId commandId = create(userId, getCurrentTime());
+        final CommandContext.Builder result = CommandContext.newBuilder()
+                .setCommandId(commandId)
+                .setZoneOffset(offset);
+        return result.build();
+    }
+
+    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    public static class CommandIdToStringConverter implements Function<CommandId, String> {
+        @Nullable
+        @Override
+        public String apply(@Nullable CommandId commandId) {
+
+            if (commandId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            final StringBuilder builder = new StringBuilder();
+
+            String userId = NULL_ID_OR_FIELD;
+
+            if (commandId != null && commandId.getActor() != null) {
+                userId = commandId.getActor().getValue();
+            }
+
+            final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+
+            builder.append(userId)
+                    .append(USER_ID_AND_TIME_DELIMITER)
+                    .append(commandTime);
+
+            return builder.toString();
+        }
+    }
+
+    /**
+     * Creates string representation of the passed command ID.
+     *
+     * @param commandId the ID to convert
+     * @return string value, with the format defined by {@link Identifiers#idToString(Object)}
+     * @see Identifiers#idToString(Object)
+     */
+    public static String idToString(CommandId commandId) {
+        String result = Identifiers.idToString(commandId);
+        return result;
+    }
+
+    public static CommandId generateId(String userIdString, Timestamp currentTime) {
+        final UserId userId = Users.createId(userIdString);
+        final CommandId.Builder builder = CommandId.newBuilder()
+                .setActor(userId)
+                .setTimestamp(currentTime);
+        return builder.build();
     }
 
     public static Predicate<CommandRequest> wereAfter(final Timestamp from) {
@@ -106,33 +192,5 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Converts {@code CommandId} into Json string.
-     *
-     * @param id the id to convert
-     * @return Json representation of the id
-     */
-    @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types converted in this way.
-    public static String idToString(CommandId id) {
-        return Messages.toJson(id);
-    }
-
-    /**
-     * Creates new Command context with current time
-     * @param userId the actor id
-     * @param offset the timezone offset
-     */
-    public static CommandContext createCommandContext(UserId userId, ZoneOffset offset) {
-
-        CommandId commandId = CommandId.newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .build();
-        final CommandContext.Builder result = CommandContext.newBuilder()
-                .setCommandId(commandId)
-                .setZoneOffset(offset);
-        return result.build();
     }
 }

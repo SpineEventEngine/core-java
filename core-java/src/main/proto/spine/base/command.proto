@@ -62,8 +62,8 @@ message EventId {
     // The command originated the event.
     CommandId command_id = 1;
 
-    // The time event was created.
-    google.protobuf.Timestamp timestamp = 2;
+    // The duration between the moment of generation of CommandId and creation of this EventId.
+    int64 delta_nanos = 2;
 }
 
 // Meta-information for an event.
@@ -77,18 +77,9 @@ message EventContext {
     // The version of the aggregate after the event was applied.
     int32 version = 3;
 
-    // The aggregate result state after the event was applied.
-    //
-    // This field may store the state of an aggregate root after the event was applied.
-    // The availability of this field is defined by the aggregated root configuration.
-    // For example, it may not be present if the state of the root is big enough for being
-    // transmitted to other parts of the system.
-    // NOTE: This field is CLEARED for event contexts instances stored in a persistent media.
-    google.protobuf.Any aggregate_state = 4;
-
     // This field may be used for additional attributes that were not known at the time of
     // defining the corresponding event type.
-    repeated google.protobuf.Any attributes = 5;
+    repeated google.protobuf.Any attributes = 4;
 }
 
 message EventRecord {

@@ -22,27 +22,36 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.base.UserId;
 
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Melnik
  */
-public class UserIdsTest {
-
-    private static final String testIdString = "12345";
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class UsersShould {
 
     @Test
-    public void create() {
-        UserId userId = UserIds.create(testIdString);
+    public void create_id_by_string() {
+        final String testIdString = "12345";
+
+        UserId userId = Users.createId(testIdString);
 
         final UserId expected = UserId.newBuilder().setValue(testIdString).build();
         assertEquals(expected, userId);
     }
 
     @Test(expected = NullPointerException.class)
-    public void createFailsOnNull() {
+    public void fail_on_null_argument_passed_to_create() {
         //noinspection ConstantConditions
-        UserIds.create(null);
+        Users.createId(null);
     }
 
+    @Test
+    @SuppressWarnings("MethodWithTooExceptionsDeclared")
+    public void have_private_constructor()
+            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
+        Tests.callPrivateUtilityConstructor(Users.class);
+    }
 }

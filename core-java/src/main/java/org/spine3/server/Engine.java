@@ -21,12 +21,15 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
@@ -44,46 +47,96 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
-    private final CommandDispatcher dispatcher = new CommandDispatcher();
+    private StorageFactory storageFactory;
 
     private CommandStore commandStore;
     private EventStore eventStore;
 
+    private Engine() {
+        // Disallow creation of instances from outside.
+    }
+
     /**
-     * Returns a singleton instance of the engine.
+     * Obtains instance of the engine.
      *
-     * @return Engine instance
-     * @throws IllegalStateException if the engine was not configured
-     *                               with {@link CommandStore} and {@link EventStore} instances
-     * @see #configure(CommandStore, EventStore)
+     * @return {@code Engine} instance
+     * @throws IllegalStateException if the engine wasn't started before callling this method
+     * @see #start(StorageFactory)
      */
     public static Engine getInstance() {
         final Engine engine = instance();
-
-        if (engine.commandStore == null || engine.eventStore == null) {
-            throw new IllegalStateException(
-                    "Engine is not configured. Call Engine.configure() before obtaining the instance.");
-        }
+        engine.checkStarted();
         return engine;
     }
 
-    public CommandDispatcher getCommandDispatcher() {
-        return this.dispatcher;
+    private void doStart(StorageFactory storageFactory) {
+        this.storageFactory = storageFactory;
+        this.commandStore = new CommandStore(storageFactory.createCommandStorage());
+        this.eventStore = new EventStore(storageFactory.createEventStorage());
     }
 
-    public EventBus getEventBus() {
-        return EventBus.getInstance();
+    private void doStop() {
+        this.storageFactory = null;
+        this.commandStore = null;
+        this.eventStore = null;
+
+    }
+
+    private void checkNotStarted() {
+        if (isStarted()) {
+            throw new IllegalStateException("Engine already started. Call stop() before re-start.");
+        }
+    }
+
+    private void checkStarted() {
+        if (!isStarted()) {
+            throw new IllegalStateException("Engine is not started. Call Engine.start(StorageFactory).");
+        }
     }
 
     /**
-     * Configures the engine with the passed implementations of command and event stores.
+     * Starts the engine with the passed storage factory instance.
      *
-     * @param commandStore storage for the commands
+     * <p>There can be only one started instance of {@code Engine} per application. Calling this method
+     * without invoking {@link #doStop()} will cause {@code IllegalStateException}
+     *
+     * @param storageFactory the factory to be used for creating application data storages
+     * @throws IllegalStateException if the method is called more than once without calling {@link #doStop()} in between
      */
-    public static void configure(CommandStore commandStore, EventStore eventStore) {
+    public static void start(StorageFactory storageFactory) {
+        log().info("Starting on storage: " + storageFactory.getClass());
         final Engine engine = instance();
-        engine.commandStore = commandStore;
-        engine.eventStore = eventStore;
+        engine.checkNotStarted();
+        engine.doStart(storageFactory);
+    }
+
+    private boolean isStarted() {
+        return storageFactory != null;
+    }
+
+    public static void stop() {
+        instance().doStop();
+        log().info("Engine stopped.");
+    }
+
+    /**
+     * Convenience method for obtaining instance of {@link CommandDispatcher}.
+     *
+     * @return instance of {@code CommandDispatcher} used in the application
+     * @see CommandDispatcher#getInstance()
+     */
+    public CommandDispatcher getCommandDispatcher() {
+        return CommandDispatcher.getInstance();
+    }
+
+    /**
+     * Convenience method for obtaining instance of {@link EventBus}.
+     *
+     * @return instance of {@code EventBus} used in the application
+     * @see EventBus#getInstance()
+     */
+    public EventBus getEventBus() {
+        return EventBus.getInstance();
     }
 
     /**
@@ -96,6 +149,7 @@ public final class Engine {
      */
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
+        checkStarted();
 
         store(request);
 
@@ -110,7 +164,8 @@ public final class Engine {
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private CommandResult dispatch(CommandRequest request) {
+    private static CommandResult dispatch(CommandRequest request) {
+        CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
             Message command = Messages.fromAny(request.getCommand());
             CommandContext context = request.getContext();
@@ -147,8 +202,15 @@ public final class Engine {
         private final Engine value = new Engine();
     }
 
-    private Engine() {
-        // Disallow creation of instances from outside.
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(Engine.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

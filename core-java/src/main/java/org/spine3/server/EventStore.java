@@ -19,10 +19,10 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.server.storage.EventStorage;
 
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * Stores and loads the events.
@@ -31,9 +31,9 @@ import java.util.List;
  */
 public class EventStore {
 
-    private final MessageJournal<String, EventRecord> storage;
+    private final EventStorage storage;
 
-    public EventStore(MessageJournal<String, EventRecord> storage) {
+    public EventStore(EventStorage storage) {
         this.storage = storage;
     }
 
@@ -43,19 +43,15 @@ public class EventStore {
      * @param record event record to store
      */
     public void store(EventRecord record) {
-        String id = Entity.idToString(record.getContext().getAggregateId());
-        storage.store(id, record);
+        storage.store(record);
     }
 
     /**
-     * Loads all events from given timestamp.
+     * Returns iterator through all the events in the history sorted by timestamp.
      *
-     * @param from timestamp to load events from
-     * @return list of events
+     * @return iterator instance
      */
-    public List<EventRecord> getEvents(Timestamp from) {
-        List<EventRecord> result = storage.loadAllSince(from);
-        return result;
+    public Iterator<EventRecord> allEvents() {
+        return storage.allEvents();
     }
-
 }

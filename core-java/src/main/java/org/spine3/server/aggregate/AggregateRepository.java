@@ -30,28 +30,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
- * The common interface for aggregate root repositories.
+ * The common interface for aggregate repositories.
  *
- * @param <I> the type of IDs of aggregate roots
- * @param <R> aggregate root type
+ * @param <I> the type of IDs of aggregates
+ * @param <R> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRootRepository<I extends Message, R extends AggregateRoot<I, ?>>
-        extends Repository<I, R> {
+public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?>> extends Repository<I, R> {
 
     /**
-     * Loads or creates a root with the passed ID.
+     * Loads or creates an aggregate with the passed ID.
      *
      * @param id the id of the aggregate
-     * @return loaded or newly created instance of the aggregate root
+     * @return loaded or newly created instance of the aggregate
      */
-    @SuppressWarnings({"AbstractMethodOverridesAbstractMethod",
-            "NullableProblems" /* We override the default behavior of loading. */})
+    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") /* We override the default behavior of loading. */
     @Nonnull
+    @Override
     R load(I id);
 
     /**
-     * Processes the command by dispatching it to a method of an aggregate root.
+     * Processes the command by dispatching it to a method of an aggregate.
      * <p/>
      * For more details on writing aggregate commands read
      * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
@@ -64,4 +63,10 @@ public interface AggregateRootRepository<I extends Message, R extends AggregateR
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
+    /**
+     * Returns the number of events until a next snapshot is made.
+     *
+     * @return a positive integer value
+     */
+    int getSnapshotTrigger();
 }

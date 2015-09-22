@@ -17,35 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
 
+package org.spine3.server.storage.datastore;
 
-import org.spine3.base.UserId;
+import com.google.protobuf.Message;
+import org.spine3.server.Entity;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.storage.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * The {@link UserId} utility class.
- *
- * @author Mikhail Melnik
- */
-@SuppressWarnings("UtilityClass")
-public class UserIds {
-
-    /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId create(String value) {
-        checkNotNull(value);
-
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
+public class DatastoreStorageFactory implements StorageFactory {
+    @Override
+    public CommandStorage createCommandStorage() {
+        //TODO:2015-09-21:alexander.yevsyukov: Implement
+        return null;
     }
 
-    private UserIds() {
+    @Override
+    public EventStorage createEventStorage() {
+        //TODO:2015-09-21:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Override
+    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+        //TODO:2015-09-21:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Override
+    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
+        //TODO:2015-09-21:alexander.yevsyukov: Implement
+        return null;
     }
 }

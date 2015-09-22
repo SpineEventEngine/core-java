@@ -31,6 +31,8 @@ import org.spine3.gae.datastore.DataStoreStorageFactory;
 import org.spine3.sample.order.Order;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 /**
  * File system Server implementation.
@@ -53,6 +55,11 @@ public class DataStoreSampleServer extends BaseSampleServer {
     protected void stop() {
         super.stop();
         helper.tearDown();
+    }
+
+    @Override
+    protected StorageFactory getStorageFactory() {
+        return new DatastoreStorageFactory();
     }
 
     @Override

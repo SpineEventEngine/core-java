@@ -20,12 +20,12 @@
 
 package org.spine3.testutil;
 
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.time.ZoneOffset;
-
-import com.google.protobuf.Timestamp;
+import org.spine3.util.Events;
 
 
 /**
@@ -60,10 +60,8 @@ public class ContextFactory {
                 .setActor(UserId.getDefaultInstance())
                 .setTimestamp(now)
                 .build();
-        final EventId eventId = EventId.newBuilder()
-                .setCommandId(commandId)
-                .setTimestamp(now)
-                .build();
+        final EventId eventId = Events.generateId(commandId);
+
         return EventContext.newBuilder()
                 .setEventId(eventId)
                 .setAggregateId(Messages.toAny(AggregateIdFactory.createCommon()))
