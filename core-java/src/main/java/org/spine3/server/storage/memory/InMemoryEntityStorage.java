@@ -23,17 +23,31 @@ package org.spine3.server.storage.memory;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
+import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
+
+/**
+ * In-memory implementation of {@link org.spine3.server.storage.EntityStorage}.
+ *
+ * @author Alexander Litus
+ */
 class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+
+    private final Map<I, M> storage = newHashMap();
 
     @Override
     public M read(I id) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
+        checkNotNull(id);
+        final M message = storage.get(id);
+        return message;
     }
 
     @Override
     public void write(I id, M message) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
+        checkNotNull(id);
+        checkNotNull(message);
+        storage.put(id, message);
     }
 }
