@@ -32,14 +32,14 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  * A server-side wrapper for message objects with identity stored by a repository.
  *
  * @param <I> the type of object IDs
- * @param <S> the type of object states.
+ * @param <M> the type of object states.
  */
-public abstract class Entity<I, S extends Message> {
+public abstract class Entity<I, M extends Message> {
 
     private final I id;
 
     @Nullable
-    private S state;
+    private M state;
 
     @Nullable
     private Timestamp whenModified;
@@ -51,14 +51,14 @@ public abstract class Entity<I, S extends Message> {
     }
 
     @CheckReturnValue
-    protected abstract S getDefaultState();
+    protected abstract M getDefaultState();
 
     /**
      * @return the current state object or {@code null} if the state wasn't set
      */
     @CheckReturnValue
     @Nullable
-    public S getState() {
+    public M getState() {
         return state;
     }
 
@@ -73,7 +73,7 @@ public abstract class Entity<I, S extends Message> {
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
     // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
+    protected void validate(M state) throws IllegalStateException {
         // Do nothing by default.
     }
 
@@ -81,9 +81,9 @@ public abstract class Entity<I, S extends Message> {
      * Validates and sets the state.
      *
      * @param state the state object to set
-     * @see #validate(S)
+     * @see #validate(M)
      */
-    protected void setState(S state, int version, Timestamp whenLastModified) {
+    protected void setState(M state, int version, Timestamp whenLastModified) {
         validate(state);
         this.state = state;
         this.version = version;
@@ -95,7 +95,7 @@ public abstract class Entity<I, S extends Message> {
      *
      * @param newState a new state to set
      */
-    protected void incrementState(S newState) {
+    protected void incrementState(M newState) {
         setState(newState, incrementVersion(), getCurrentTime());
     }
 

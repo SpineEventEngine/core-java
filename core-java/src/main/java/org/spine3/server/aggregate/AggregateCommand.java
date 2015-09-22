@@ -29,7 +29,7 @@ import org.spine3.util.Commands;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A command issued for an aggregate root.
+ * A command issued for an aggregate.
  *
  * @author Alexander Yevsyukov
  */
@@ -73,7 +73,6 @@ public class AggregateCommand extends AbstractCommand {
         }
 
         try {
-
             Message value = (Message) MessageFields.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX);
             return AggregateId.of(value);
         } catch (RuntimeException e) {

@@ -52,12 +52,12 @@ import static org.spine3.util.Identifiers.idToAny;
  * Abstract base for aggregates.
  *
  * @param <I> the type for IDs of this class of aggregates. For supported types see {@link AggregateId}
- * @param <S> the type of the state held by the aggregate
+ * @param <M> the type of the state held by the aggregate
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
+public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -195,9 +195,9 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      */
     @Nonnull
     @Override
-    public S getState() {
+    public M getState() {
         init();
-        final S state = super.getState();
+        final M state = super.getState();
         // An aggregate root when initialized may not have a null state because:
         // 1. Its initialization sets the state to default.
         // 2. Modifications are performed via command handlers or event appliers,
@@ -300,7 +300,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
             apply(event);
 
             int currentVersion = getVersion();
-            final S state = getState();
+            final M state = getState();
             EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
 
             EventRecord eventRecord = Events.createEventRecord(event, eventContext);
@@ -338,7 +338,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param snapshot the snapshot with the state to restore
      */
     public void restore(SnapshotOrBuilder snapshot) {
-        S stateToRestore = Messages.fromAny(snapshot.getState());
+        M stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
@@ -376,7 +376,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      * @param currentVersion the version of the aggregate after the event was applied  @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
-    protected EventContext createEventContext(CommandId commandId, Message event, S currentState, Timestamp whenModified, int currentVersion) {
+    protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
 
         EventId eventId = Events.createId(commandId, whenModified);
 
@@ -404,7 +404,7 @@ public abstract class Aggregate<I, S extends Message> extends Entity<I, S> {
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId, Message event, S currentState, int currentVersion) {
+                                             CommandId commandId, Message event, M currentState, int currentVersion) {
         // Do nothing.
     }
 

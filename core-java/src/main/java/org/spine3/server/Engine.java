@@ -19,6 +19,7 @@
  */
 package org.spine3.server;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
@@ -29,6 +30,10 @@ import org.spine3.base.CommandResult;
 import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
@@ -51,6 +56,8 @@ public final class Engine {
 
     private CommandStore commandStore;
     private EventStore eventStore;
+
+    private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private Engine() {
         // Disallow creation of instances from outside.
@@ -75,13 +82,6 @@ public final class Engine {
         this.eventStore = new EventStore(storageFactory.createEventStorage());
     }
 
-    private void doStop() {
-        this.storageFactory = null;
-        this.commandStore = null;
-        this.eventStore = null;
-
-    }
-
     private void checkNotStarted() {
         if (isStarted()) {
             throw new IllegalStateException("Engine already started. Call stop() before re-start.");
@@ -96,59 +96,106 @@ public final class Engine {
 
     /**
      * Starts the engine with the passed storage factory instance.
-     *
+     * <p/>
      * <p>There can be only one started instance of {@code Engine} per application. Calling this method
-     * without invoking {@link #doStop()} will cause {@code IllegalStateException}
+     * without invoking {@link #stop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
-     * @throws IllegalStateException if the method is called more than once without calling {@link #doStop()} in between
+     * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
      */
     public static void start(StorageFactory storageFactory) {
-        log().info("Starting on storage: " + storageFactory.getClass());
+        log().info("Starting on storage factory: " + storageFactory.getClass());
         final Engine engine = instance();
         engine.checkNotStarted();
         engine.doStart(storageFactory);
     }
 
-    private boolean isStarted() {
+    /**
+     * @return {@code true} if the engine is started, {@code false} otherwise
+     */
+    public boolean isStarted() {
         return storageFactory != null;
     }
 
     /**
+     * Registers the passed repository with the Engine.
+     *
+     * <p>The Engine creates and assigns a storage depending on the type of the passed repository.
+     *
+     * <p>For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * created and assigned.
+     *
+     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
+     * and assigned.
+     *
+     * @param repository the repository to register
+     * @param <I>        the type of IDs used in the repository
+     * @param <E>        the type of entities or aggregates
+     */
+    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
+        if (repository instanceof AggregateRepository) {
+            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
+
+            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateRootStorage(aggregateClass);
+            repository.assignStorage(aggregateStorage);
+        } else {
+            Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
+
+            EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
+            repository.assignStorage(entityStorage);
+        }
+
+        repositories.add(repository);
+
+        getCommandDispatcher().register(repository);
+        getEventBus().register(repository);
+    }
+
+    /**
      * Stops the engine.
+     *
+     * <p>This method shuts down all registered repositories. Each registered repository is:
+     *  <ul>
+     *      <li>un-registered from {@link CommandDispatcher}</li>
+     *      <li>un-registered from {@link EventBus}</li>
+     *      <li>detached from storage</li>
+     * </ul>
      */
     public static void stop() {
-        instance().doStop();
+        Engine engine = instance();
+
+        engine.doStop();
+
         log().info("Engine stopped.");
     }
 
-    /**
-     * Convenience method for obtaining instance of {@link CommandDispatcher}.
-     *
-     * @return instance of {@code CommandDispatcher} used in the application
-     * @see CommandDispatcher#getInstance()
-     */
-    public CommandDispatcher getCommandDispatcher() {
-        return CommandDispatcher.getInstance();
+    private void shutDownRepositories() {
+        CommandDispatcher dispatcher = getCommandDispatcher();
+        EventBus eventBus = getEventBus();
+        for (Repository<?, ?> repository : repositories) {
+            dispatcher.unregister(repository);
+            eventBus.unregister(repository);
+            repository.assignStorage(null);
+        }
     }
 
-    /**
-     * Convenience method for obtaining instance of {@link EventBus}.
-     *
-     * @return instance of {@code EventBus} used in the application
-     * @see EventBus#getInstance()
-     */
-    public EventBus getEventBus() {
-        return EventBus.getInstance();
+    private  void doStop() {
+        shutDownRepositories();
+        storageFactory = null;
+        commandStore = null;
+        eventStore = null;
     }
 
     /**
      * Processed the incoming command requests.
-     *
+     * <p/>
      * <p>This method is the entry point of a command in to a backend of an application.
+     * <p/>
+     * <p>The engine must be started.
      *
      * @param request incoming command request to handle
      * @return the result of command handling
+     * @see #start(StorageFactory)
      */
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
@@ -193,6 +240,26 @@ public final class Engine {
             eventStore.store(record);
             eventBus.post(record);
         }
+    }
+
+    /**
+     * Convenience method for obtaining instance of {@link CommandDispatcher}.
+     *
+     * @return instance of {@code CommandDispatcher} used in the application
+     * @see CommandDispatcher#getInstance()
+     */
+    public CommandDispatcher getCommandDispatcher() {
+        return CommandDispatcher.getInstance();
+    }
+
+    /**
+     * Convenience method for obtaining instance of {@link EventBus}.
+     *
+     * @return instance of {@code EventBus} used in the application
+     * @see EventBus#getInstance()
+     */
+    public EventBus getEventBus() {
+        return EventBus.getInstance();
     }
 
     private static Engine instance() {

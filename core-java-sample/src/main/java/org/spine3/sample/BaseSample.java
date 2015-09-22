@@ -23,15 +23,11 @@ package org.spine3.sample;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.AggregateEventStorage;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Users;
 
@@ -51,7 +47,7 @@ public abstract class BaseSample {
             Engine.getInstance().process(request);
         }
 
-        getLog().info("All the requests were handled.");
+        log().info("All the requests were handled.");
     }
 
     protected List<CommandRequest> prepareRequests() {
@@ -79,30 +75,12 @@ public abstract class BaseSample {
 
     protected void prepareEngine() {
         Engine.start(getStorageFactory());
-
-        final OrderRepository orderRootRepository = getOrderRootRepository();
-
         final Engine engine = Engine.getInstance();
-        engine.getCommandDispatcher().register(orderRootRepository);
+        engine.getCommandDispatcher().register(new OrderRepository());
     }
 
     protected abstract StorageFactory getStorageFactory();
 
-    protected abstract Logger getLog();
+    protected abstract Logger log();
 
-    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
-
-    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
-
-    protected abstract SnapshotStorage provideSnapshotStorage();
-
-    private OrderRepository getOrderRootRepository() {
-        //TODO:2015-09-16:alexander.yevsyukov: The storage for events of the AggregateRoot should be parameterized with OrderId, not String.
-        final AggregateEventStorage eventStore = new AggregateEventStorage<>(
-                provideEventStoreStorage()
-        );
-
-        final OrderRepository repository = new OrderRepository(eventStore, provideSnapshotStorage());
-        return repository;
-    }
 }

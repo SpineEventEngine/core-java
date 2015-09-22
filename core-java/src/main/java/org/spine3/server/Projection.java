@@ -32,9 +32,9 @@ import java.lang.reflect.Method;
  * Creates data projection from incoming events.
  *
  * @param <I> the type of the IDs of the stateful handlers
- * @param <S> the type of the state objects
+ * @param <M> the type of the state objects
  */
-public abstract class Projection<I, S extends Message> extends Entity<I, S> {
+public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
     private MethodMap handlers;
 
