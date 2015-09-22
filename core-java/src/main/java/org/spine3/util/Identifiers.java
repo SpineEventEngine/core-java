@@ -33,8 +33,10 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
+/*
+ * Utility class for Entity ids conversation.
+ */
 public class Identifiers {
-
 
     /*
      * Delimiter between user id and time in string representation
@@ -49,8 +51,7 @@ public class Identifiers {
      */
     public static final String NULL_ID_OR_FIELD = "NULL";
 
-    private Identifiers() {
-    }
+    private Identifiers() {}
 
     /**
      * Converts the passed ID value into the string representation.
@@ -63,26 +64,32 @@ public class Identifiers {
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or {@link com.google.protobuf.Message} id has no fields
      */
+    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
     public static <I> String idToString(I id) {
 
-        //noinspection ChainOfInstanceofChecks
-        if (id instanceof String
+        if (id == null) {
+            return NULL_ID_OR_FIELD;
+        }
+
+        String result = "";
+
+        final boolean isSupportedCommonType = id instanceof String
                 || id instanceof Integer
-                || id instanceof Long) {
+                || id instanceof Long;
 
-            String toString = id.toString();
-            if (toString.isEmpty()) {
-                toString = NULL_ID_OR_FIELD;
-            }
-            return toString;
+        if (isSupportedCommonType) {
+            result = id.toString();
+        } else if (id instanceof Message) {
+            result = idMessageToString((Message) id);
+        } else {
+            throw unsupportedIdType(id);
         }
 
-        if (id instanceof Message) {
-            final String result = idMessageToString((Message) id);
-            return result;
+        if (result.isEmpty()) {
+            result = NULL_ID_OR_FIELD;
         }
 
-        throw unsupportedIdType(id);
+        return result;
     }
 
     @SuppressWarnings("IfMayBeConditional")

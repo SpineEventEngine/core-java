@@ -26,7 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.util.Identifiers;
+import org.spine3.util.Commands;
 
 /**
  * A storage used by {@link org.spine3.server.CommandStore} for keeping command data.
@@ -41,13 +41,12 @@ public abstract class CommandStorage {
         final CommandContext context = request.getContext();
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = Identifiers.idToString(commandId);
-        final TypeName aggregateIdType = aggregateId.getTypeName();
+        final String commandIdStr = Commands.idToString(commandId);
         CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
                 .setTimestamp(commandId.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)
-                .setAggregateIdType(aggregateIdType.nameOnly())
+                .setAggregateIdType(aggregateId.getShortTypeName())
                 .setAggregateId(aggregateId.toString())
                 .setCommand(command)
                 .setContext(context);
@@ -55,6 +54,9 @@ public abstract class CommandStorage {
         write(builder.build());
     }
 
+    /*
+     * Writes record by its aggregateId
+     */
     protected abstract void write(CommandStoreRecord record);
 
 }

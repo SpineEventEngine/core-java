@@ -20,31 +20,68 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Function;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.util.Events;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Events.idToString;
+
+/**
+ * In-memory implementation of {@link org.spine3.server.storage.EventStorage}.
+ *
+ * @author Alexander Litus
+ */
 class InMemoryEventStorage extends EventStorage {
+
+    private final Map<String, EventStoreRecord> storage = newHashMap();
 
     @Override
     public Iterator<EventRecord> allEvents() {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
+
+        final Collection<EventRecord> result = transform(storage.values(), TO_EVENT_RECORD);
+        Events.sort(newArrayList(result));
+        final Iterator<EventRecord> iterator = result.iterator();
+        return iterator;
     }
 
     @Nullable
     @Override
     protected EventStoreRecord read(EventId eventId) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
+
+        final String id = idToString(eventId);
+        final EventStoreRecord record = storage.get(id);
+        return record;
     }
 
     @Override
-    protected void write(EventStoreRecord r) {
-        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    protected void write(EventStoreRecord record) {
+        checkNotNull(record);
+        checkNotNull(record.getEventId());
+        storage.put(record.getEventId(), record);
     }
+
+    private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
+        @SuppressWarnings("NullableProblems") // record cannot be null because it is checked when saving to storage
+        @Override
+        public EventRecord apply(EventStoreRecord record) {
+
+            EventRecord.Builder builder = EventRecord.newBuilder()
+                    .setEvent(record.getEvent())
+                    .setContext(record.getContext());
+
+            return builder.build();
+        }
+    };
 }
