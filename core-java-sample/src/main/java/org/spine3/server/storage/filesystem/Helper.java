@@ -21,10 +21,13 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.common.base.Strings;
-import org.spine3.sample.server.FileSystemHelper;
-import org.spine3.server.aggregate.AggregateId;
+import com.google.protobuf.Message;
+import org.spine3.server.storage.CommandStoreRecord;
+import org.spine3.server.storage.EventStoreRecord;
 
-import java.io.File;
+import javax.annotation.Nullable;
+import java.io.*;
+import java.nio.file.Files;
 
 /**
  * @author Mikhail Mikhaylov
@@ -33,9 +36,17 @@ public class Helper {
 
     @SuppressWarnings("StaticNonFinalField")
     private static String fileStoragePath = null;
+
     private static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    private static final String EVENT_STORE_FILE_NAME = "/event-store";
+
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
     private static final String PATH_DELIMITER = "/";
+
+    public static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
+
+    @SuppressWarnings("StaticNonFinalField")
+    private static File backup = null;
 
     private Helper() {
     }
@@ -49,18 +60,83 @@ public class Helper {
         fileStoragePath = storagePath;
     }
 
-    public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
+    public static void write(CommandStoreRecord record) {
         checkConfigured();
 
-        final String filePath = fileStoragePath + AGGREGATE_FILE_NAME_PREFIX +
-                aggregateType + PATH_DELIMITER + aggregateIdString;
-        return filePath;
+        final String filePath = fileStoragePath + COMMAND_STORE_FILE_NAME;
+        File file = new File(filePath);
+        writeMessage(file, record);
+    }
+
+    public static void write(EventStoreRecord record) {
+        checkConfigured();
+
+        final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
+        File file = new File(filePath);
+        writeMessage(file, record);
+    }
+
+    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
+    protected static void writeMessage(File file, Message message) {
+
+        OutputStream outputStream = null;
+
+        try {
+            if (file.exists()) {
+                backup = makeBackupCopy(file);
+            } else {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            outputStream = getObjectOutputStream(file);
+
+            message.writeDelimitedTo(outputStream);
+
+            if (backup != null) {
+                backup.delete();
+            }
+        } catch (IOException ignored) {
+            restoreFromBackup(file);
+        } finally {
+            closeSilently(outputStream);
+        }
+    }
+
+    private static void restoreFromBackup(File file) {
+        boolean isDeleted = file.delete();
+        if (isDeleted && backup != null) {
+            //noinspection ResultOfMethodCallIgnored
+            backup.renameTo(file);
+        }
+    }
+
+    private static File makeBackupCopy(File sourceFile) throws IOException {
+        File backupFile = new File(sourceFile.toPath() + "_backup");
+
+        Files.copy(sourceFile.toPath(), backupFile.toPath());
+
+        return backupFile;
+    }
+
+    private static void closeSilently(@Nullable Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException e) {
+            //NOP
+        }
+    }
+
+    private static OutputStream getObjectOutputStream(File file) throws IOException {
+        return new BufferedOutputStream(new FileOutputStream(file, true));
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
     private static void checkConfigured() {
         if (Strings.isNullOrEmpty(fileStoragePath)) {
-            throw new IllegalStateException(FileSystemHelper.STORAGE_PATH_IS_NOT_SET);
+            throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
         }
     }
 }
