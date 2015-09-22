@@ -55,17 +55,17 @@ public class InMemoryEntityStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_by_null_id() {
+    public void throw_exception_if_write_by_null_id() {
         storage.write(null, message);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null_message() {
+    public void throw_exception_if_write_null_message() {
         storage.write("testId", null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_read_by_null_id() {
+    public void throw_exception_if_read_by_null_id() {
         storage.read(null);
     }
 
