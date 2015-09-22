@@ -63,15 +63,6 @@ public abstract class EventStorage {
     public abstract Iterator<EventRecord> allEvents();
 
     /**
-     * Reads event record from the storage by event id.
-     *
-     * @param eventId ID of the event to load
-     * @return a record instance or {@code null} if there is no record with such event ID
-     */
-    @Nullable
-    protected abstract EventStoreRecord read(EventId eventId);
-
-    /**
      * Writes record into the storage.
      *
      * @param record the record to write
