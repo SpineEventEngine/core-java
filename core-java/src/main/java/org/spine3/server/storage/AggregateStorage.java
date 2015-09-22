@@ -106,9 +106,10 @@ public abstract class AggregateStorage<I> {
     /**
      * Writes the passed record into the storage.
      *
-     * @param r the record to write
+     * @param record the record to write
+     * @throws java.lang.NullPointerException if record or its aggregateId is null
      */
-    protected abstract void write(AggregateStorageRecord r);
+    protected abstract void write(AggregateStorageRecord record);
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
