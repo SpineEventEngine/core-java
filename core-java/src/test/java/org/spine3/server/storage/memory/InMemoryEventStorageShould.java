@@ -31,11 +31,15 @@ import org.spine3.util.Users;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.spine3.testutil.ContextFactory.getEventContext;
 import static org.spine3.testutil.EventRecordFactory.projectCreated;
 
+/**
+ * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ *
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
         "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class InMemoryEventStorageShould {
@@ -51,6 +55,30 @@ public class InMemoryEventStorageShould {
         UserId userId = Users.createId("user@testing-in-memory-storage.org");
         projectId = ProjectId.newBuilder().setId("project_id").build();
         eventContext = getEventContext(userId, projectId);
+    }
+
+    @Test
+    public void return_null_if_read_one_record_from_empty_storage() {
+
+        final EventStoreRecord record = storage.read(eventContext.getEventId());
+        assertNull(record);
+    }
+
+    @Test
+    public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
+
+        final Iterator<EventRecord> iterator = storage.allEvents();
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_write_null() {
+        storage.write(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_read_by_null_id() {
+        storage.read(null);
     }
 
     @Test
