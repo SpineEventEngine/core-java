@@ -20,11 +20,11 @@
 
 package org.spine3.testutil;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
-import org.spine3.test.project.ProjectId;
 import org.spine3.time.ZoneOffset;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
@@ -71,14 +71,14 @@ public class ContextFactory {
                 .build();
     }
 
-    public static EventContext getEventContext(UserId userId, ProjectId projectId) {
+    public static EventContext getEventContext(UserId userId, Message aggregateId) {
 
         final CommandId commandId = Commands.generateId(userId);
         final EventId eventId = Events.generateId(commandId);
 
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(projectId));
+                .setAggregateId(Messages.toAny(aggregateId));
 
         return builder.build();
     }
