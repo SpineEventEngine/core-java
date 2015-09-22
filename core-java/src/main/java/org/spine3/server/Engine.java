@@ -114,6 +114,9 @@ public final class Engine {
         return storageFactory != null;
     }
 
+    /**
+     * Stops the engine.
+     */
     public static void stop() {
         instance().doStop();
         log().info("Engine stopped.");
