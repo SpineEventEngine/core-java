@@ -36,13 +36,6 @@ class InMemoryEventStorage extends EventStorage {
         return null;
     }
 
-    @Nullable
-    @Override
-    protected EventStoreRecord read(EventId eventId) {
-        //TODO:2015-09-20:alexander.yevsyukov: Implement
-        return null;
-    }
-
     @Override
     protected void write(EventStoreRecord r) {
         //TODO:2015-09-19:alexander.yevsyukov: Implement
