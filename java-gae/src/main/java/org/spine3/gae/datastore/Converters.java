@@ -31,6 +31,7 @@ import org.spine3.base.*;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.util.Events;
+import org.spine3.util.Identifiers;
 
 import java.util.Map;
 
@@ -84,7 +85,7 @@ class Converters {
         }
 
         protected Entity newEntity(CommandId commandId) {
-            final String id = org.spine3.server.Entity.idToString(commandId);
+            final String id = Identifiers.idToString(commandId);
             return new Entity(getEntityKind(), id);
         }
 

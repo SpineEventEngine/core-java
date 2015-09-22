@@ -31,7 +31,20 @@ import com.google.protobuf.Message;
  */
 public abstract class EntityStorage<I, M extends Message> {
 
+    /**
+     * Reads message from the storage by id.
+     *
+     * @param id ID of the message to load
+     * @return a message instance or {@code null} if there is no message with such ID
+     */
     public abstract M read(I id);
 
+    /**
+     * Writes message into the storage.
+     *
+     * @param id ID of the message
+     * @param message the message to save
+     * @throws java.lang.NullPointerException if id or message is null
+     */
     public abstract void write(I id, M message);
 }

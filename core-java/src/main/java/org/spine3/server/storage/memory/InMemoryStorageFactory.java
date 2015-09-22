@@ -52,4 +52,15 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryEntityStorage<>();
     }
 
+    public static InMemoryStorageFactory instance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final InMemoryStorageFactory value = new InMemoryStorageFactory();
+    }
+
+    private InMemoryStorageFactory() {}
 }

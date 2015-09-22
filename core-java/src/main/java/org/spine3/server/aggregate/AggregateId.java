@@ -24,7 +24,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.Entity;
+import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -99,7 +99,7 @@ public final class AggregateId<I> {
 
     @Override
     public String toString() {
-        final String result = Entity.idToString(value());
+        final String result = Identifiers.idToString(value());
         return result;
     }
 

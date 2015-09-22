@@ -74,8 +74,9 @@ public abstract class EventStorage {
     /**
      * Writes record into the storage.
      *
-     * @param r the record to write
+     * @param record the record to write
+     * @throws java.lang.NullPointerException if record is null
      */
-    protected abstract void write(EventStoreRecord r);
+    protected abstract void write(EventStoreRecord record);
 
 }

@@ -27,6 +27,7 @@ import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.util.Identifiers;
 
 import static org.spine3.gae.datastore.DataStoreHelper.TYPE_KEY;
 import static org.spine3.gae.datastore.DataStoreHelper.VALUE_KEY;
@@ -63,7 +64,7 @@ public class DataStoreSnapshotStorage<I> implements SnapshotStorage<I> {
     }
 
     private static <I> String idToString(I aggregateId) {
-        return org.spine3.server.Entity.idToString(aggregateId);
+        return Identifiers.idToString(aggregateId);
     }
 
     @Override

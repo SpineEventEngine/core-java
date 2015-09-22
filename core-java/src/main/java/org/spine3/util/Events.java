@@ -19,6 +19,7 @@
  */
 package org.spine3.util;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -28,7 +29,6 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.Entity;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -48,6 +48,10 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Events {
 
     private Events() {
+    }
+
+    static {
+        Identifiers.IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
     }
 
     /**
@@ -157,7 +161,7 @@ public class Events {
      */
     @SuppressWarnings("TypeMayBeWeakened") // We want to limit the number of types that can be converted to Json.
     public static String idToString(EventId id) {
-        return Entity.idToString(id);
+        return Identifiers.idToString(id);
     }
 
     /**
@@ -178,5 +182,37 @@ public class Events {
         final Any any = eventRecord.getEvent();
         final Message result = Messages.fromAny(any);
         return result;
+    }
+
+    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    public static class EventIdToStringConverter implements Function<EventId, String> {
+        @Nullable
+        @Override
+        public String apply(@Nullable EventId eventId) {
+
+            if (eventId == null) {
+                return Identifiers.NULL_ID_OR_FIELD;
+            }
+
+            final StringBuilder builder = new StringBuilder();
+
+            final CommandId commandId = eventId.getCommandId();
+
+            String userId = Identifiers.NULL_ID_OR_FIELD;
+
+            if (commandId != null && commandId.getActor() != null) {
+                userId = commandId.getActor().getValue();
+            }
+
+            final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+
+            builder.append(userId)
+                    .append(Identifiers.USER_ID_AND_TIME_DELIMITER)
+                    .append(commandTime)
+                    .append(Identifiers.TIME_DELIMITER)
+                    .append(eventId.getDeltaNanos());
+
+            return builder.toString();
+        }
     }
 }

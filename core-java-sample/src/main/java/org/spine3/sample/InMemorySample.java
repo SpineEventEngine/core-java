@@ -24,10 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.sample.server.InMemoryStorageFactory;
 import org.spine3.server.MessageJournal;
 import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
  * Entry point for core-java sample without gRPC. Works with in-memory-storage.
@@ -43,7 +43,7 @@ public class InMemorySample extends BaseSample {
 
     @Override
     protected StorageFactory getStorageFactory() {
-        return new org.spine3.server.storage.memory.InMemoryStorageFactory();
+        return InMemoryStorageFactory.instance();
     }
 
     @Override
@@ -53,17 +53,17 @@ public class InMemorySample extends BaseSample {
 
     @Override
     protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return InMemoryStorageFactory.createEventStoreStorage();
+        return null;
     }
 
     @Override
     protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return InMemoryStorageFactory.createCommandStoreStorage();
+        return null;
     }
 
     @Override
     protected SnapshotStorage provideSnapshotStorage() {
-        return InMemoryStorageFactory.createSnapshotStorage();
+        return null;
     }
 
     private InMemorySample() {

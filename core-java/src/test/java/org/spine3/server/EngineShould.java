@@ -26,6 +26,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.assertNotNull;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
 "ClassWithTooManyMethods", "ReturnOfNull", "ConstantConditions"})
 public class EngineShould {
@@ -43,7 +46,7 @@ public class EngineShould {
 
     @Test
     public void return_instance_if_configured_correctly() {
-        Engine.start(new InMemoryStorageFactory());
+        Engine.start(InMemoryStorageFactory.instance());
 
         final Engine engine = Engine.getInstance();
 

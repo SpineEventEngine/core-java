@@ -20,23 +20,60 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Identifiers.idToString;
+
+/**
+ * @author Alexander Litus
+ */
+@SuppressWarnings("ComparatorNotSerializable")
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    //TODO:2015-09-19:alexander.yevsyukov: Consider having Multimap backed with TreeMap for storing data.
+    private final Multimap<String, AggregateStorageRecord> storage = TreeMultimap.create(
+            new StringComparator(),
+            new AggregateStorageRecordReverseComparator()
+    );
 
     @Override
-    protected void write(AggregateStorageRecord r) {
-        //TODO:2015-09-19:alexander.yevsyukov: Implement
+    protected void write(AggregateStorageRecord record) {
+        checkNotNull(record);
+        checkNotNull(record.getAggregateId());
+        storage.put(record.getAggregateId(), record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-        //TODO:2015-09-19:alexander.yevsyukov: Implement
-        return null;
+
+        final String idString = idToString(id);
+        final Collection<AggregateStorageRecord> records = storage.get(idString);
+        return records.iterator();
+    }
+
+
+    /*
+     * Used for sorting by timestamp descending (from newer to older)
+     */
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord> {
+        @Override
+        public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
+            return Timestamps.compare(second.getTimestamp(), first.getTimestamp());
+        }
+    }
+
+    private static class StringComparator implements Comparator<String> {
+        @Override
+        public int compare(String first, String second) {
+            return first.compareTo(second);
+        }
     }
 }
