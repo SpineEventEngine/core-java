@@ -27,6 +27,7 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
+import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Users;
@@ -39,10 +40,19 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
-        registerEventHandlers();
-        prepareEngine();
+        // Register event handlers
+        EventBus.getInstance().register(new EventLogger());
 
-        List<CommandRequest> requests = prepareRequests();
+        // Register command handlers
+        CommandDispatcher.getInstance().register(new OrderRepository());
+
+        // Start the engine
+        Engine.start(createStorageFactory());
+
+        // Generate test requests
+        List<CommandRequest> requests = generateRequests();
+
+        // Process requests
         for (CommandRequest request : requests) {
             Engine.getInstance().process(request);
         }
@@ -50,7 +60,7 @@ public abstract class BaseSample {
         log().info("All the requests were handled.");
     }
 
-    protected List<CommandRequest> prepareRequests() {
+    protected List<CommandRequest> generateRequests() {
         List<CommandRequest> result = Lists.newArrayList();
 
         for (int i = 0; i < 10; i++) {
@@ -69,17 +79,7 @@ public abstract class BaseSample {
         return result;
     }
 
-    protected static void registerEventHandlers() {
-        EventBus.getInstance().register(new EventLogger());
-    }
-
-    protected void prepareEngine() {
-        Engine.start(getStorageFactory());
-        final Engine engine = Engine.getInstance();
-        engine.getCommandDispatcher().register(new OrderRepository());
-    }
-
-    protected abstract StorageFactory getStorageFactory();
+    protected abstract StorageFactory createStorageFactory();
 
     protected abstract Logger log();
 

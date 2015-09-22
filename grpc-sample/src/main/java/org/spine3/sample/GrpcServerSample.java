@@ -62,6 +62,7 @@ public class GrpcServerSample {
         helper.tearDown();
     }
 
+    //TODO:2015-09-23:alexander.yevsyukov: Don't we have similar code in BaseSample?
     private static List<CommandRequest> prepareRequests() {
         List<CommandRequest> result = Lists.newArrayList();
 

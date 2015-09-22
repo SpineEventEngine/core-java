@@ -38,7 +38,7 @@ public class InMemorySample extends BaseSample {
     }
 
     @Override
-    protected StorageFactory getStorageFactory() {
+    protected StorageFactory createStorageFactory() {
         return InMemoryStorageFactory.instance();
     }
 

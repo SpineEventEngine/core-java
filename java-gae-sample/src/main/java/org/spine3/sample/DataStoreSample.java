@@ -48,7 +48,7 @@ public class DataStoreSample extends BaseSample {
     }
 
     @Override
-    protected StorageFactory getStorageFactory() {
+    protected StorageFactory createStorageFactory() {
         return new DatastoreStorageFactory();
     }
 

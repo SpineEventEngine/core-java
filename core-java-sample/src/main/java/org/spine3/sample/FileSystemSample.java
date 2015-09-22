@@ -56,7 +56,7 @@ public class FileSystemSample extends BaseSample {
     }
 
     @Override
-    protected StorageFactory getStorageFactory() {
+    protected StorageFactory createStorageFactory() {
         return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
     }
 
