@@ -60,8 +60,6 @@ class InMemoryEventStorage extends EventStorage {
     @Override
     protected EventStoreRecord read(EventId eventId) {
 
-        checkNotNull(eventId);
-
         final String id = idToString(eventId);
         final EventStoreRecord record = storage.get(id);
         return record;

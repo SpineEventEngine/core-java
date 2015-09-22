@@ -65,6 +65,13 @@ public class InMemoryEventStorageShould {
     }
 
     @Test
+    public void return_null_if_read_one_record_by_null_id() {
+
+        final EventStoreRecord record = storage.read(null);
+        assertNull(record);
+    }
+
+    @Test
     public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
 
         final Iterator<EventRecord> iterator = storage.allEvents();
@@ -74,11 +81,6 @@ public class InMemoryEventStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
         storage.write(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_read_by_null_id() {
-        storage.read(null);
     }
 
     @Test

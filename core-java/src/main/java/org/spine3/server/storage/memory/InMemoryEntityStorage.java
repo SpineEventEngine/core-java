@@ -39,7 +39,6 @@ class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     @Override
     public M read(I id) {
-        checkNotNull(id);
         final M message = storage.get(id);
         return message;
     }

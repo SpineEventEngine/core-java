@@ -43,6 +43,7 @@ public class InMemoryEntityStorageShould {
 
     @Before
     public void setUp() {
+
         storage = InMemoryStorageFactory.instance().createEntityStorage(null);
         message = Any.newBuilder().setTypeUrl("typeUrl").build();
     }
@@ -54,6 +55,13 @@ public class InMemoryEntityStorageShould {
         assertNull(message);
     }
 
+    @Test
+    public void return_null_if_read_one_record_by_null_id() {
+
+        final Message message = storage.read(null);
+        assertNull(message);
+    }
+
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
         storage.write(null, message);
@@ -62,11 +70,6 @@ public class InMemoryEntityStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_message() {
         storage.write("testId", null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_by_null_id() {
-        storage.read(null);
     }
 
     @Test
