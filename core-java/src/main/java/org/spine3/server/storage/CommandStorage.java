@@ -54,6 +54,9 @@ public abstract class CommandStorage {
         write(builder.build());
     }
 
+    /*
+     * Writes record by its aggregateId
+     */
     protected abstract void write(CommandStoreRecord record);
 
 }

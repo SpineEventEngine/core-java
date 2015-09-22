@@ -20,22 +20,29 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.CommandStorage;
+import org.junit.Before;
+import org.junit.Test;
 import org.spine3.server.storage.CommandStoreRecord;
 
-import java.util.Map;
+@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
+        "DuplicateStringLiteralInspection", "ConstantConditions"})
+public class InMemoryCommandStorageShould {
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
+    private InMemoryCommandStorage storage;
 
-class InMemoryCommandStorage extends CommandStorage {
+    @Before
+    public void setUp() {
+        storage = (InMemoryCommandStorage) InMemoryStorageFactory.instance().createCommandStorage();
+    }
 
-    private final Map<String, CommandStoreRecord> storage = newHashMap();
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_write_null_record() {
+        storage.write(null);
+    }
 
-    @Override
-    protected void write(CommandStoreRecord record) {
-        checkNotNull(record);
-        checkNotNull(record.getAggregateId());
-        storage.put(record.getAggregateId(), record);
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_write_record_with_null_aggregate_id() {
+        final CommandStoreRecord record = CommandStoreRecord.newBuilder().setAggregateId(null).build();
+        storage.write(record);
     }
 }
