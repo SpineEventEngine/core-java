@@ -112,7 +112,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
         //TODO:2015-09-22:mikhail.mikhaylov: Note: each of these objects instantly allocates 100K memory.
-        public static final int PAGE_SIZE = 102400;
+//        public static final int PAGE_SIZE = 102400;
+        public static final int PAGE_SIZE = 40;
         public static final int LONG_SIZE_IN_BYTES = 8;
 
         private final File file;
@@ -158,8 +159,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
         private void allocatePage() throws IOException {
             if (fileOffset > PAGE_SIZE + pageOffset) {
-                pageOffset = PAGE_SIZE;
                 fileOffset -= PAGE_SIZE - pageOffset;
+                pageOffset = PAGE_SIZE;
             } else {
                 //noinspection NumericCastThatLosesPrecision
                 pageOffset += (int) fileOffset;
