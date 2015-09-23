@@ -30,9 +30,15 @@ import java.io.*;
 import java.nio.file.Files;
 
 /**
+ * TODO:2015-09-22:mikhail.mikhaylov:
+ * This class should replace {@code org.spine3.sample.server.FileSystemHelper}.
+ * Also, the old mechanism of working
+ * with files should also be removed as soon as this is ready.
+ *
  * @author Mikhail Mikhaylov
+ * @author Alexander Litus
  */
-public class Helper {
+class Helper {
 
     @SuppressWarnings("StaticNonFinalField")
     private static String fileStoragePath = null;
@@ -60,6 +66,15 @@ public class Helper {
         fileStoragePath = storagePath;
     }
 
+    public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
+        checkConfigured();
+
+        final String filePath = fileStoragePath + AGGREGATE_FILE_NAME_PREFIX +
+                aggregateType + PATH_DELIMITER + aggregateIdString;
+        return filePath;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
     public static void write(CommandStoreRecord record) {
         checkConfigured();
 
@@ -68,6 +83,7 @@ public class Helper {
         writeMessage(file, record);
     }
 
+    @SuppressWarnings("TypeMayBeWeakened")
     public static void write(EventStoreRecord record) {
         checkConfigured();
 
@@ -76,8 +92,18 @@ public class Helper {
         writeMessage(file, record);
     }
 
+    public static void closeSilently(@Nullable Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException e) {
+            //NOP
+        }
+    }
+
     @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
-    protected static void writeMessage(File file, Message message) {
+    private static void writeMessage(File file, Message message) {
 
         OutputStream outputStream = null;
 
@@ -117,16 +143,6 @@ public class Helper {
         Files.copy(sourceFile.toPath(), backupFile.toPath());
 
         return backupFile;
-    }
-
-    private static void closeSilently(@Nullable Closeable closeable) {
-        try {
-            if (closeable != null) {
-                closeable.close();
-            }
-        } catch (IOException e) {
-            //NOP
-        }
     }
 
     private static OutputStream getObjectOutputStream(File file) throws IOException {
