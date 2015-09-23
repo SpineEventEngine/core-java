@@ -94,6 +94,8 @@ public class InMemoryAggregateStorageShould {
         final AggregateStorageRecord actual = iterator.next();
 
         assertEquals(expected, actual);
+
+        assertFalse(iterator.hasNext());
     }
 
     @Test
