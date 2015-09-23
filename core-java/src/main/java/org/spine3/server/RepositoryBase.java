@@ -50,15 +50,28 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     private Constructor<E> getEntityConstructor() {
         Constructor<E> result;
         try {
-            final Class<? extends RepositoryBase> thisClass = getClass();
-            Class<E> entityClass = Repository.TypeInfo.getEntityClass(thisClass);
-            Class<I> idClass = Repository.TypeInfo.getIdClass(thisClass);
+            Class<E> entityClass = getEntityClass();
+            Class<I> idClass = getIdClass();
 
             result = entityClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
         return result;
+    }
+
+    /**
+     * @return the class of IDs used by this repository
+     */
+    protected Class<I> getIdClass() {
+        return TypeInfo.getIdClass(getClass());
+    }
+
+    /**
+     * @return the class of entities managed by this repository
+     */
+    protected Class<E> getEntityClass() {
+        return TypeInfo.getEntityClass(getClass());
     }
 
     /**

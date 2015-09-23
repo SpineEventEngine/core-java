@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
@@ -55,7 +54,6 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.Aggregate.getCommandClasses;
 import static org.spine3.server.aggregate.Aggregate.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
@@ -199,12 +197,12 @@ public class AggregateShould {
     @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
 
-        final Set<CommandClass> classes = getCommandClasses(ProjectAggregate.class);
+        final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(ProjectAggregate.class);
 
         assertTrue(classes.size() == 3);
-        assertTrue(classes.contains(CommandClass.of(CreateProject.class)));
-        assertTrue(classes.contains(CommandClass.of(AddTask.class)));
-        assertTrue(classes.contains(CommandClass.of(StartProject.class)));
+        assertTrue(classes.contains(CreateProject.class));
+        assertTrue(classes.contains(AddTask.class));
+        assertTrue(classes.contains(StartProject.class));
     }
 
     @Test

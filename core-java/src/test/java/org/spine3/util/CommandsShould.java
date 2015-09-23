@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
+import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.MessageFields;
 import org.spine3.testutil.CommandRequestFactory;
 
@@ -38,8 +39,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Commands.generateId;
+import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Lists.filter;
 
 /**
@@ -77,8 +78,7 @@ public class CommandsShould {
     public void return_correct_were_after_predicate() throws InterruptedException {
         final Timestamp timestamp = TimeUtil.getCurrentTime();
         final CommandRequest commandRequest = CommandRequestFactory.create();
-        Thread.sleep(100);
-        final CommandRequest commandRequestAfter = CommandRequestFactory.create();
+        final CommandRequest commandRequestAfter = CommandRequestFactory.createAt(TimeUtil.add(timestamp, Durations.minutes(3)));
 
         final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
                 .add(commandRequest)
@@ -119,10 +119,9 @@ public class CommandsShould {
     public void return_correct_were_within_period_predicate() throws InterruptedException {
         final CommandRequest req1 = CommandRequestFactory.create();
         final Timestamp from = TimeUtil.getCurrentTime();
-        Thread.sleep(100);
-        final CommandRequest req2 = CommandRequestFactory.create();
-        Thread.sleep(100);
-        final Timestamp to = TimeUtil.getCurrentTime();
+        final Timestamp ofSecondRequest = TimeUtil.add(from, Durations.ofSeconds(1));
+        final CommandRequest req2 = CommandRequestFactory.createAt(ofSecondRequest);
+        final Timestamp to = TimeUtil.add(ofSecondRequest, Durations.ofSeconds(1));
 
         final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
                 .add(req1)

@@ -19,16 +19,12 @@
  */
 package org.spine3.server.aggregate;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 
@@ -36,7 +32,6 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -107,42 +102,12 @@ public abstract class AggregateRepositoryBase<I extends Message,
 
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
-        Class<? extends Aggregate> aggregateClass = TypeInfo.getEntityClass(getClass());
-        Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandMessageClasses(aggregateClass);
+        Class<? extends Aggregate> aggregateClass = getEntityClass();
+        Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
         Method dispatch = dispatchAsMethod();
-        final ImmutableMultimap.Builder<Method, Class<? extends Message>> builder = ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(dispatch, aggregateCommands);
-        return builder.build();
-    }
-
-    /**
-     * Creates a map which contains command handlers of the repository itself and
-     * handlers dispatching commands to aggregates handled by this repository.
-     *
-     * @return immutable map of command handler methods
-     */
-    public Map<CommandClass, CommandHandlerMethod> getCommandHandlers() {
-        ImmutableMap.Builder<CommandClass, CommandHandlerMethod> handlers = ImmutableMap.builder();
-        handlers.putAll(getDispatchingHandlers());
-        handlers.putAll(CommandHandlerMethod.scan(this));
-        return handlers.build();
-    }
-
-    /**
-     * Creates a map of handlers that call {@link #dispatch(Message, CommandContext)}
-     * method for all commands of the aggregate root class.
-     */
-    private Map<CommandClass, CommandHandlerMethod> getDispatchingHandlers() {
-        Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
-
-        Class<? extends Aggregate> aggregateClass = TypeInfo.getEntityClass(getClass());
-        Set<CommandClass> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
-
-        CommandHandlerMethod handler = dispatchAsHandler();
-        for (CommandClass commandClass : aggregateCommands) {
-            result.put(commandClass, handler);
-        }
-        return result;
+        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
+                .putAll(dispatch, aggregateCommands)
+                .build();
     }
 
     /**
@@ -155,16 +120,6 @@ public abstract class AggregateRepositoryBase<I extends Message,
             throw propagate(e);
         }
     }
-
-    /**
-     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
-     */
-    private CommandHandlerMethod dispatchAsHandler() {
-        Method method = dispatchAsMethod();
-        final CommandHandlerMethod result = new CommandHandlerMethod(this, method);
-        return result;
-    }
-
 
     /**
      * Loads the an aggregate by given id.
@@ -182,18 +137,16 @@ public abstract class AggregateRepositoryBase<I extends Message,
             Snapshot snapshot = aggregateEvents.hasSnapshot()
                         ? aggregateEvents.getSnapshot()
                         : null;
+            A result = create(id);
+            List<EventRecord> events = aggregateEvents.getEventRecordList();
+
             if (snapshot != null) {
-                List<EventRecord> trail = aggregateEvents.getEventRecordList();
-                A result = create(id);
                 result.restore(snapshot);
-                result.play(trail);
-                return result;
-            } else {
-                List<EventRecord> events = aggregateEvents.getEventRecordList();
-                A result = create(id);
-                result.play(events);
-                return result;
             }
+
+            result.play(events);
+
+            return result;
         } catch (InvocationTargetException e) {
             throw propagate(e);
         }
