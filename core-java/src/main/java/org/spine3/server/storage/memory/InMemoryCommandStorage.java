@@ -23,12 +23,19 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
+
 class InMemoryCommandStorage extends CommandStorage {
 
-    //TODO:2015-09-19:alexander.yevsyukov: Implement
+    private final Map<String, CommandStoreRecord> storage = newHashMap();
 
     @Override
     protected void write(CommandStoreRecord record) {
-
+        checkNotNull(record);
+        checkNotNull(record.getAggregateId());
+        storage.put(record.getAggregateId(), record);
     }
 }

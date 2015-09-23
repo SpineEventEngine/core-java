@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.TypeName;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.MessageJournal;
+import org.spine3.util.Identifiers;
 
 import java.util.List;
 
@@ -82,7 +83,7 @@ public class DataStoreMessageJournal<I, M extends Message> implements MessageJou
 
     @Override
     public List<M> load(I entityId) {
-        final String id = org.spine3.server.Entity.idToString(entityId);
+        final String id = Identifiers.idToString(entityId);
         final Query.FilterPredicate filter = new Query.FilterPredicate(
                 PARENT_ID_KEY, EQUAL, id);
         final List<M> result = dataStoreHelper.loadByFilter(type.toString(), filter);

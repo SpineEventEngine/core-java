@@ -25,7 +25,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.Repository;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -33,10 +32,10 @@ import java.util.List;
  * The common interface for aggregate repositories.
  *
  * @param <I> the type of IDs of aggregates
- * @param <R> aggregate type
+ * @param <A> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?>> extends Repository<I, R> {
+public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A> {
 
     /**
      * Loads or creates an aggregate with the passed ID.
@@ -44,10 +43,10 @@ public interface AggregateRepository<I extends Message, R extends Aggregate<I, ?
      * @param id the id of the aggregate
      * @return loaded or newly created instance of the aggregate
      */
-    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") /* We override the default behavior of loading. */
-    @Nonnull
-    @Override
-    R load(I id);
+//    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") /* We override the default behavior of loading. */
+//    @Nonnull
+//    @Override
+//    A load(I id);
 
     /**
      * Processes the command by dispatching it to a method of an aggregate.

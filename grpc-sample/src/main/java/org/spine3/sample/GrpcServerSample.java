@@ -62,6 +62,7 @@ public class GrpcServerSample {
         helper.tearDown();
     }
 
+    //TODO:2015-09-23:alexander.yevsyukov: Don't we have similar code in BaseSample?
     private static List<CommandRequest> prepareRequests() {
         List<CommandRequest> result = Lists.newArrayList();
 
@@ -71,7 +72,7 @@ public class GrpcServerSample {
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payOrder = Requests.payOrder(userId, orderId);
+            CommandRequest payOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);

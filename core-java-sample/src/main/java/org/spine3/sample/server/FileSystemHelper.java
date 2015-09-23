@@ -26,9 +26,9 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.EventRecord;
-import org.spine3.server.Entity;
 import org.spine3.server.aggregate.AggregateCommand;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.util.Identifiers;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -83,7 +83,7 @@ public class FileSystemHelper {
         }
         File result = new File(fileStoragePath + '/'
                 + aggregateId.getClass().getSimpleName()
-                + '-' + Entity.idToString(aggregateId) + '/' + fileName);
+                + '-' + Identifiers.idToString(aggregateId) + '/' + fileName);
         return result;
     }
 
@@ -254,7 +254,7 @@ public class FileSystemHelper {
 
         @Override
         protected void write(EventRecord message) {
-            Object aggregateId = Entity.idFromAny(message.getContext().getAggregateId());
+            Object aggregateId = Identifiers.idFromAny(message.getContext().getAggregateId());
             File file = FileSystemHelper.getFile(aggregateId, getFileNameSuffix());
 
             writeMessage(file, message);

@@ -20,34 +20,49 @@
 
 package org.spine3.server;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.assertNotNull;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
-"ClassWithTooManyMethods", "ReturnOfNull", "ConstantConditions"})
+/**
+ * @author Alexander Litus
+ */
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class EngineShould {
 
     @Before
     public void setUp() {
+        Engine.start(InMemoryStorageFactory.getInstance());
+    }
+
+    @After
+    public void tearDown() {
         Engine.stop();
     }
 
-
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_not_configured_and_try_to_get_instance() {
+        Engine.stop();
+
         Engine.getInstance();
     }
 
     @Test
     public void return_instance_if_configured_correctly() {
-        Engine.start(new InMemoryStorageFactory());
-
         final Engine engine = Engine.getInstance();
-
         assertNotNull(engine);
     }
 
+    @Test
+    public void return_EventBus() {
+        assertNotNull(Engine.getInstance().getEventBus());
+    }
+
+    @Test
+    public void return_CommandDispatcher() {
+        assertNotNull(Engine.getInstance().getCommandDispatcher());
+    }
 }

@@ -20,33 +20,29 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Message;
-import org.spine3.server.storage.EntityStorage;
+import org.junit.Before;
+import org.junit.Test;
+import org.spine3.server.storage.CommandStoreRecord;
 
-import java.util.Map;
+@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
+        "DuplicateStringLiteralInspection", "ConstantConditions"})
+public class InMemoryCommandStorageShould {
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
+    private InMemoryCommandStorage storage;
 
-/**
- * Memory-based implementation of {@link org.spine3.server.storage.EntityStorage}.
- *
- * @author Alexander Litus
- */
-class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
-
-    private final Map<I, M> storage = newHashMap();
-
-    @Override
-    public M read(I id) {
-        final M message = storage.get(id);
-        return message;
+    @Before
+    public void setUp() {
+        storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
     }
 
-    @Override
-    public void write(I id, M message) {
-        checkNotNull(id);
-        checkNotNull(message);
-        storage.put(id, message);
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_write_null_record() {
+        storage.write(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_write_record_with_null_aggregate_id() {
+        final CommandStoreRecord record = CommandStoreRecord.newBuilder().setAggregateId(null).build();
+        storage.write(record);
     }
 }

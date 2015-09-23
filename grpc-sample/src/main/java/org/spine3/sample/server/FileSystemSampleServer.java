@@ -22,11 +22,7 @@ package org.spine3.sample.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
 import org.spine3.sample.FileSystemSample;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 
 /**
@@ -54,23 +50,8 @@ public class FileSystemSampleServer extends BaseSampleServer {
     }
 
     @Override
-    protected Logger getLog() {
+    protected Logger log() {
         return LogSingleton.INSTANCE.value;
-    }
-
-    @Override
-    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return FileSystemStorageFactory.createEventStoreStorage();
-    }
-
-    @Override
-    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return FileSystemStorageFactory.createCommandStoreStorage();
-    }
-
-    @Override
-    protected SnapshotStorage provideSnapshotStorage() {
-        return FileSystemStorageFactory.createSnapshotStorage();
     }
 
     private enum LogSingleton {

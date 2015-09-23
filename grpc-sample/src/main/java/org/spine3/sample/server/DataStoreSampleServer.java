@@ -24,13 +24,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.TypeName;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.gae.datastore.DataStoreStorageFactory;
-import org.spine3.sample.order.Order;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
@@ -63,23 +56,8 @@ public class DataStoreSampleServer extends BaseSampleServer {
     }
 
     @Override
-    protected Logger getLog() {
+    protected Logger log() {
         return LogSingleton.INSTANCE.value;
-    }
-
-    @Override
-    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return DataStoreStorageFactory.createEventStoreStorage();
-    }
-
-    @Override
-    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return DataStoreStorageFactory.createCommandStoreStorage();
-    }
-
-    @Override
-    protected SnapshotStorage provideSnapshotStorage() {
-        return DataStoreStorageFactory.createSnapshotStorage(TypeName.of(Order.getDescriptor()));
     }
 
     private enum LogSingleton {
