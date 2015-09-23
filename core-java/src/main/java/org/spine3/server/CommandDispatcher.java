@@ -25,7 +25,6 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -62,9 +61,10 @@ public class CommandDispatcher {
         checkNotNull(object);
 
         Map<CommandClass, CommandHandlerMethod> handlers;
-        if (object instanceof AggregateRepositoryBase) {
-            AggregateRepositoryBase<?, ?> repository = (AggregateRepositoryBase) object;
-            handlers = repository.getCommandHandlers();
+
+        if (object instanceof MultiHandler) {
+            MultiHandler multihandler = (MultiHandler) object;
+            handlers = CommandHandlerMethod.createMap(multihandler);
         } else {
             handlers = CommandHandlerMethod.scan(object);
         }
@@ -112,8 +112,8 @@ public class CommandDispatcher {
             if (handlerRegistered(commandClass)) {
                 final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
-                                                                   alreadyRegistered.getFullName(),
-                                                                   entry.getValue().getFullName());
+                        alreadyRegistered.getFullName(),
+                        entry.getValue().getFullName());
             }
         }
     }
@@ -124,7 +124,7 @@ public class CommandDispatcher {
      * @param command the command to be processed
      * @param context the context of the command
      * @return a list of the event records as the result of handling the command
-     * @throws InvocationTargetException if an exception occurs during command handling
+     * @throws InvocationTargetException   if an exception occurs during command handling
      * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
      */
     List<EventRecord> dispatch(Message command, CommandContext context)

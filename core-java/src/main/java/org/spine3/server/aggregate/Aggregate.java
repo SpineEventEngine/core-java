@@ -107,9 +107,19 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @param clazz {@link Class} of the aggregate
      * @return command types handled by aggregate
      */
+    public static Set<Class<? extends Message>> getCommandMessageClasses(Class<? extends Aggregate> clazz) {
+        return getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+    }
+
+    /**
+     * Returns set of the command types handled by a given aggregate.
+     *
+     * @param clazz {@link Class} of the aggregate
+     * @return command types handled by aggregate
+     */
     @CheckReturnValue
     public static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> clazz) {
-        Set<Class<? extends Message>> messageClasses = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+        Set<Class<? extends Message>> messageClasses = getCommandMessageClasses(clazz);
         Iterable<CommandClass> transformed = Iterables.transform(messageClasses, new Function<Class<? extends Message>, CommandClass>() {
             @SuppressWarnings("NullableProblems") // The set we transform cannot have null entries.
             @Override

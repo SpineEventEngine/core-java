@@ -22,6 +22,7 @@ package org.spine3.server.internal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
+import org.spine3.server.MultiHandler;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -36,6 +38,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +98,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         final Class<?> returnType = method.getReturnType();
         final boolean returnsMessageOrList =
                 Message.class.isAssignableFrom(returnType)
-                || List.class.equals(returnType);
+                        || List.class.equals(returnType);
 
         return acceptsMessageAndCommandContext && returnsMessageOrList;
     }
@@ -127,6 +130,48 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
+     * Creates a command handler map from the passed instance of {@link MultiHandler}.
+     */
+    public static ImmutableMap<CommandClass, CommandHandlerMethod> createMap(MultiHandler obj) {
+        Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+
+        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
+
+        // Add entries exposed by the object as MultiHandler.
+        // One of the possible cases is AggregateRepository proxying its handling for its aggregates.
+        for (Method method : methodsToClasses.keySet()) {
+            final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
+            builder.putAll(createMap(obj, method, classes));
+        }
+
+        // Add entries for exposed command handling methods.
+        builder.putAll(scan(obj));
+
+        return builder.build();
+    }
+
+    /**
+     * Creates a command handler map for a single method of an object that handles multiple
+     * message classes.
+     *
+     * @param target  the object on which execute the method
+     * @param method  the method to call
+     * @param classes the classes of messages handled by the method
+     * @return immutable map of command handlers
+     */
+    public static ImmutableMap<CommandClass, CommandHandlerMethod> createMap(Object target,
+                                                                             Method method,
+                                                                             Iterable<Class<? extends Message>> classes) {
+        ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
+        for (Class<? extends Message> messageClass : classes) {
+            CommandClass key = CommandClass.of(messageClass);
+            CommandHandlerMethod value = new CommandHandlerMethod(target, method);
+            builder.put(key, value);
+        }
+        return builder.build();
+    }
+
+    /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
      *
      * <p>Logs warning for the methods with a non-public modifier.
@@ -139,7 +184,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
             boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
                 log().warn(String.format("Command handler %s must be declared 'public'.",
-                                         Methods.getFullMethodName(method)));
+                        Methods.getFullMethodName(method)));
             }
         }
     }

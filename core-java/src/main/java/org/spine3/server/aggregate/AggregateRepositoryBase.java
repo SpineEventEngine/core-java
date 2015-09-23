@@ -20,7 +20,9 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
@@ -103,6 +105,16 @@ public abstract class AggregateRepositoryBase<I extends Message,
         return result;
     }
 
+    @Override
+    public Multimap<Method, Class<? extends Message>> getHandlers() {
+        Class<? extends Aggregate> aggregateClass = TypeInfo.getEntityClass(getClass());
+        Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandMessageClasses(aggregateClass);
+        Method dispatch = dispatchAsMethod();
+        final ImmutableMultimap.Builder<Method, Class<? extends Message>> builder = ImmutableMultimap.<Method, Class<? extends Message>>builder()
+                .putAll(dispatch, aggregateCommands);
+        return builder.build();
+    }
+
     /**
      * Creates a map which contains command handlers of the repository itself and
      * handlers dispatching commands to aggregates handled by this repository.
@@ -123,8 +135,8 @@ public abstract class AggregateRepositoryBase<I extends Message,
     private Map<CommandClass, CommandHandlerMethod> getDispatchingHandlers() {
         Map<CommandClass, CommandHandlerMethod> result = Maps.newHashMap();
 
-        Class<? extends Aggregate> aggregateRootClass = TypeInfo.getEntityClass(getClass());
-        Set<CommandClass> aggregateCommands = Aggregate.getCommandClasses(aggregateRootClass);
+        Class<? extends Aggregate> aggregateClass = TypeInfo.getEntityClass(getClass());
+        Set<CommandClass> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
 
         CommandHandlerMethod handler = dispatchAsHandler();
         for (CommandClass commandClass : aggregateCommands) {
@@ -136,15 +148,23 @@ public abstract class AggregateRepositoryBase<I extends Message,
     /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
-    private CommandHandlerMethod dispatchAsHandler() {
+    private Method dispatchAsMethod() {
         try {
-            Method method = getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            final CommandHandlerMethod result = new CommandHandlerMethod(this, method);
-            return result;
+            return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
     }
+
+    /**
+     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
+     */
+    private CommandHandlerMethod dispatchAsHandler() {
+        Method method = dispatchAsMethod();
+        final CommandHandlerMethod result = new CommandHandlerMethod(this, method);
+        return result;
+    }
+
 
     /**
      * Loads the an aggregate by given id.
