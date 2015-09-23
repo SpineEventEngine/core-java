@@ -21,17 +21,16 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.*;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.util.Users;
 
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
-import static org.spine3.testutil.ContextFactory.getEventContext;
-import static org.spine3.testutil.EventRecordFactory.projectCreated;
+import static org.spine3.protobuf.Messages.toAny;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
@@ -41,7 +40,6 @@ public class FileSystemEventStorageShould {
     private static final FileSystemEventStorage STORAGE = new FileSystemEventStorage();
 
     private ProjectId projectId;
-    private EventContext eventContext;
 
     @BeforeClass
     public static void setUpClass() {
@@ -57,7 +55,6 @@ public class FileSystemEventStorageShould {
 
         UserId userId = Users.createId("user@testing-in-memory-storage.org");
         projectId = ProjectId.newBuilder().setId("project_id").build();
-        eventContext = getEventContext(userId, projectId);
     }
 
     @After
@@ -83,7 +80,7 @@ public class FileSystemEventStorageShould {
     @Test
     public void save_and_read_event() {
 
-        final EventRecord expected = projectCreated(projectId, eventContext);
+        final EventRecord expected = projectCreated(projectId);
         STORAGE.store(expected);
 
         final Iterator<EventRecord> iterator = STORAGE.allEvents();
@@ -96,5 +93,12 @@ public class FileSystemEventStorageShould {
         assertEquals(expected.getContext(), actual.getContext());
 
         assertFalse(iterator.hasNext());
+    }
+
+    public static EventRecord projectCreated(ProjectId projectId) {
+
+        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
+        final EventRecord.Builder builder = EventRecord.newBuilder().setEvent(toAny(event));
+        return builder.build();
     }
 }
