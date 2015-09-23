@@ -109,5 +109,7 @@ public class InMemoryEventStorageShould {
 
         assertEquals(expected.getEvent(), actual.getEvent());
         assertEquals(expected.getContext(), actual.getContext());
+
+        assertFalse(iterator.hasNext());
     }
 }
