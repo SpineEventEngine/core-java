@@ -24,8 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.spine3.sample.FileSystemSample;
 import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.util.Collections;
@@ -46,59 +46,57 @@ import org.spine3.test.project.ProjectId;
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemAggregateStorageShould {
 
-    private FileSystemAggregateStorage<ProjectId> storage;
-    private ProjectId projectId;
-    private ProjectId projectIdReadOnly;
-
     private static final String AGGREGATE_ID = "aggregateId";
-    private static final String AGGREGATE_ID_READ_ONLY = "aggregateIdReadOnly";
+
+    private static final ProjectId PROJECT_ID = ProjectId.newBuilder().setId(AGGREGATE_ID).build();
+
+    @SuppressWarnings("unchecked")
+    private static final FileSystemAggregateStorage<ProjectId> STORAGE =
+            new FileSystemAggregateStorage(ProjectId.getDescriptor().getName());
+
+    @BeforeClass
+    public static void setUpClass() {
+        Helper.configure(FileSystemAggregateStorageShould.class);
+    }
 
     @Before
-    public void setUp() {
-
-        final String tempDir = FileSystemSample.getTempDir().getAbsolutePath();
-        Helper.configure(tempDir + FileSystemSample.STORAGE_PATH);
-
-        //noinspection unchecked
-        storage = new FileSystemAggregateStorage(ProjectId.getDescriptor().getName());
-
-        projectId = ProjectId.newBuilder().setId(AGGREGATE_ID).build();
-        projectIdReadOnly = ProjectId.newBuilder().setId(AGGREGATE_ID_READ_ONLY).build();
+    public void setUpTest() {
+        Helper.cleanData();
     }
 
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(projectIdReadOnly);
+        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
         assertFalse(iterator.hasNext());
     }
 
     @Test
     public void return_iterator_over_empty_collection_if_read_by_null_id() {
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(null);
+        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(null);
         assertFalse(iterator.hasNext());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_record() {
-        storage.write(null);
+        STORAGE.write(null);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_record_with_null_aggregate_id() {
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder().setAggregateId(null).build();
-        storage.write(record);
+        STORAGE.write(record);
     }
 
     @Test
     public void save_and_read_one_record() {
 
-        final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), projectId.getId());
-        storage.write(expected);
+        final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), PROJECT_ID.getId());
+        STORAGE.write(expected);
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(projectId);
+        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
 
         assertTrue(iterator.hasNext());
 
@@ -110,13 +108,13 @@ public class FileSystemAggregateStorageShould {
     @Test
     public void save_records_and_return_sorted_by_timestamp_descending() {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(projectId.getId());
+        final List<AggregateStorageRecord> records = getSequentialRecords(PROJECT_ID.getId());
 
         for (AggregateStorageRecord record : records) {
-            storage.write(record);
+            STORAGE.write(record);
         }
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(projectId);
+        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
 
         Collections.reverse(records); // expected records should be in reverse order

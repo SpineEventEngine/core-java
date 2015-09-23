@@ -3,4 +3,6 @@ dependencies {
 
     compile project(':core-java')
     compile project(':test-common')
+
+    compile 'commons-io:commons-io:2.4'
 }
