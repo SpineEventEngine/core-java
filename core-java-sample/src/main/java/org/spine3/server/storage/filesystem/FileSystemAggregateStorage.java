@@ -147,6 +147,11 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             return record;
         }
 
+        @Override
+        public void remove() {
+
+        }
+
         private void allocatePage() throws IOException {
             if (fileOffset > PAGE_SIZE + pageOffset) {
                 pageOffset = PAGE_SIZE;
