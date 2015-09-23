@@ -43,6 +43,7 @@ public class FileSystemEventStorage extends EventStorage {
 
     @Override
     protected void write(EventStoreRecord record) {
+        checkNotNull(record, "Record shouldn't be null.");
         Helper.write(record);
     }
 
@@ -58,6 +59,10 @@ public class FileSystemEventStorage extends EventStorage {
 
         @Override
         public boolean hasNext() {
+
+            if (!file.exists()) {
+                return false;
+            }
 
             boolean hasNext;
             try {

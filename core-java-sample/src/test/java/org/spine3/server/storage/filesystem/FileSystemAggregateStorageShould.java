@@ -23,10 +23,12 @@ package org.spine3.server.storage.filesystem;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.test.project.ProjectId;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -34,11 +36,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.spine3.test.project.ProjectId;
+import static org.junit.Assert.*;
 
 /**
  * @author Mikhail Mikhaylov
@@ -61,6 +59,11 @@ public class FileSystemAggregateStorageShould {
 
     @Before
     public void setUpTest() {
+        Helper.cleanData();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
         Helper.cleanData();
     }
 
