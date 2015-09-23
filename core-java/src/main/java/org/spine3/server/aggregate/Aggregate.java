@@ -366,7 +366,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @param event          the event for which to create the context
      * @param currentState   the state of the aggregated after the event was applied
      * @param whenModified   the moment of the aggregate modification for this event
-     * @param currentVersion the version of the aggregate after the event was applied  @return new instance of the {@code EventContext}
+     * @param currentVersion the version of the aggregate after the event was applied
+     * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {

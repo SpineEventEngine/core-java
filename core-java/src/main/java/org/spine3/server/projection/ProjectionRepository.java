@@ -28,5 +28,5 @@ import org.spine3.server.RepositoryBase;
  * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, ?>> extends RepositoryBase<I, P> {
-
+    //TODO:2015-09-23:alexander.yevsyukov: Implement
 }
