@@ -21,13 +21,18 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
+import org.apache.commons.io.FileUtils;
+import org.spine3.sample.FileSystemSample;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * TODO:2015-09-22:mikhail.mikhaylov:
@@ -60,10 +65,12 @@ class Helper {
     /**
      * Configures helper with file storage path.
      *
-     * @param storagePath file storage path
+     * @param executorClass execution context class. Is used to choose target directory.
      */
-    public static void configure(String storagePath) {
-        fileStoragePath = storagePath;
+    public static void configure(Class executorClass) {
+        final String tempDir = getTempDir().getAbsolutePath();
+
+        fileStoragePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
     }
 
     public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
@@ -96,6 +103,23 @@ class Helper {
         final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
         File file = new File(filePath);
         writeMessage(file, record);
+    }
+
+    /**
+     * Removes all previous existing data from file system storage.
+     */
+    public static void cleanData() {
+        checkConfigured();
+
+        final File dataFolder = new File(fileStoragePath);
+        if (!dataFolder.exists() || !dataFolder.isDirectory()) {
+            return;
+        }
+        try {
+            FileUtils.deleteDirectory(dataFolder);
+        } catch (IOException e) {
+            Throwables.propagate(e);
+        }
     }
 
     public static void closeSilently(@Nullable Closeable closeable) {
@@ -164,5 +188,20 @@ class Helper {
         if (Strings.isNullOrEmpty(fileStoragePath)) {
             throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
         }
+    }
+
+    private static File getTempDir() {
+        try {
+            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
+            File result = new File(tmpFile.getParent());
+            if (tmpFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                tmpFile.delete();
+            }
+            return result;
+        } catch (IOException e) {
+            propagate(e);
+        }
+        throw new IllegalStateException("Unable to get temporary directory for storage");
     }
 }
