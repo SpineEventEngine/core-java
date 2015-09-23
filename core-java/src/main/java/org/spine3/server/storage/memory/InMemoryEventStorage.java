@@ -57,7 +57,7 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Nullable
-    @Override
+//    @Override
     protected EventStoreRecord read(EventId eventId) {
 
         final String id = idToString(eventId);

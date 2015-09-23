@@ -21,8 +21,6 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.common.base.Throwables;
-import com.google.protobuf.Any;
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -30,6 +28,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import static org.spine3.util.Identifiers.idToString;
 
 class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
@@ -46,31 +46,34 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     protected void write(AggregateStorageRecord r) {
 
         if (r.getAggregateId() == null) {
-            //TODO:2015-09-23: Check if it's correct.
+            //TODO:2015-09-23:mikhail.mikhaylov: Check if it's correct.
             throw new NullPointerException(INVALID_AGGREGATE_ID);
         }
 
-        final String aggregateFile = Helper.getAggregateFilePath(shortTypeName, r.getAggregateId());
+        final String aggregateFilePath = Helper.getAggregateFilePath(shortTypeName, r.getAggregateId());
+        final File aggregateFile = new File(aggregateFilePath);
 
-        writeToFile(aggregateFile, r);
+        //TODO:2015-09-23:mikhail.mikhaylov: check
+        if (!aggregateFile.exists()) {
+            aggregateFile.getParentFile().mkdirs();
+            try {
+                aggregateFile.createNewFile();
+            } catch (IOException e) {
+                //NOP
+            }
+        }
+
+        writeToFile(aggregateFilePath, r);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+        final String stringId = idToString(id);
         return new FileIterator(new File(
-                Helper.getAggregateFilePath(shortTypeName, AggregateId.of(id).toString())));
+                Helper.getAggregateFilePath(shortTypeName, stringId)));
     }
 
     private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
-        final Any packedAny = Any.pack(r);
-        final String eventType = r.getEventType();
-        final FileSystemEventRecord fileSystemRecord = FileSystemEventRecord.newBuilder()
-                .setMessage(packedAny)
-                .setMessageSize(packedAny.getSerializedSize())
-                .setMessageType(eventType)
-                .setMessageTypeSize(eventType.getBytes().length)
-                .build();
-
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(aggregateFilePath);
@@ -80,7 +83,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         DataOutputStream dos = new DataOutputStream(fos);
 
         try {
-            writeRecord(dos, fileSystemRecord);
+            writeRecord(dos, r);
         } catch (IOException e) {
             Throwables.propagate(e);
         }
@@ -89,7 +92,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private static void writeRecord(DataOutputStream stream, FileSystemEventRecord r) throws IOException {
+    private static void writeRecord(DataOutputStream stream, AggregateStorageRecord r) throws IOException {
         byte[] bytes = r.toByteArray();
         stream.write(bytes);
         stream.writeLong(bytes.length);
@@ -103,7 +106,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
         //TODO:2015-09-22:mikhail.mikhaylov: Note: each of these objects instantly allocates 100K memory.
-        public static final int PAGE_SIZE = 102400;
+        public static final int PAGE_SIZE = 106;
+        //        public static final int PAGE_SIZE = 102400;
         public static final int LONG_SIZE_IN_BYTES = 8;
 
         private final File file;
@@ -175,7 +179,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             }
 
             pageOffset -= LONG_SIZE_IN_BYTES;
-            longBuffer.put(page, pageOffset - 1, LONG_SIZE_IN_BYTES);
+            longBuffer.put(page, pageOffset, LONG_SIZE_IN_BYTES);
 
             longBuffer.flip();
             long messageSize = longBuffer.getLong();
@@ -192,7 +196,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             pageOffset -= (int) messageSize;
             //noinspection NumericCastThatLosesPrecision
             final ByteBuffer messageBuffer = ByteBuffer.allocate((int) messageSize);
-            messageBuffer.put(page, pageOffset - 1, (int) messageSize);
+            messageBuffer.put(page, pageOffset, (int) messageSize);
 
             final AggregateStorageRecord record =
                     AggregateStorageRecord.parseFrom(messageBuffer.array());
