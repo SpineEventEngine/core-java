@@ -74,6 +74,12 @@ class Helper {
         return filePath;
     }
 
+    public static String getEventFilePath() {
+        checkConfigured();
+        final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
+        return filePath;
+    }
+
     @SuppressWarnings("TypeMayBeWeakened")
     public static void write(CommandStoreRecord record) {
         checkConfigured();
@@ -147,6 +153,10 @@ class Helper {
 
     private static OutputStream getObjectOutputStream(File file) throws IOException {
         return new BufferedOutputStream(new FileOutputStream(file, true));
+    }
+
+    protected static InputStream getObjectInputStream(File file) throws IOException {
+        return new BufferedInputStream(new FileInputStream(file));
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
