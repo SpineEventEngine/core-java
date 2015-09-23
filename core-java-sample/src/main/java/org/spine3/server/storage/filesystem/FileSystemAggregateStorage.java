@@ -76,7 +76,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(aggregateFilePath);
+            fos = new FileOutputStream(aggregateFilePath, true);
         } catch (FileNotFoundException e) {
             Throwables.propagate(e);
         }
@@ -87,6 +87,12 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         } catch (IOException e) {
             Throwables.propagate(e);
         }
+        try {
+            dos.flush();
+        } catch (IOException e) {
+            Throwables.propagate(e);
+        }
+
         Helper.closeSilently(dos);
         Helper.closeSilently(fos);
     }
@@ -106,8 +112,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
         //TODO:2015-09-22:mikhail.mikhaylov: Note: each of these objects instantly allocates 100K memory.
-        public static final int PAGE_SIZE = 106;
-        //        public static final int PAGE_SIZE = 102400;
+//        public static final int PAGE_SIZE = 102400;
+        public static final int PAGE_SIZE = 40;
         public static final int LONG_SIZE_IN_BYTES = 8;
 
         private final File file;
@@ -116,7 +122,6 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         private final byte[] page = new byte[PAGE_SIZE];
 
         private long fileOffset; //the whole file offset
-        private final ByteBuffer longBuffer = ByteBuffer.allocate(LONG_SIZE_IN_BYTES);
         private int pageOffset; // page offset
 
         private FileIterator(File file) {
@@ -149,13 +154,13 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
         @Override
         public void remove() {
-
+            throw new UnsupportedOperationException("remove");
         }
 
         private void allocatePage() throws IOException {
             if (fileOffset > PAGE_SIZE + pageOffset) {
-                pageOffset = PAGE_SIZE;
                 fileOffset -= PAGE_SIZE - pageOffset;
+                pageOffset = PAGE_SIZE;
             } else {
                 //noinspection NumericCastThatLosesPrecision
                 pageOffset += (int) fileOffset;
@@ -182,6 +187,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
                 }
             }
+
+            final ByteBuffer longBuffer = ByteBuffer.allocate(LONG_SIZE_IN_BYTES);
 
             pageOffset -= LONG_SIZE_IN_BYTES;
             longBuffer.put(page, pageOffset, LONG_SIZE_IN_BYTES);
