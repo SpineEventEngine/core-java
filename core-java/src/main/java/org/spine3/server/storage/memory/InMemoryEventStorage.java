@@ -57,7 +57,8 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Nullable
-//    @Override
+    // TODO[alexander.litus]: this method may be needed later in API
+    // @Override
     protected EventStoreRecord read(EventId eventId) {
 
         final String id = idToString(eventId);
