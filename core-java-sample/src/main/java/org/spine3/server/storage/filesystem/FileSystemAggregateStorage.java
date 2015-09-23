@@ -153,7 +153,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
         @Override
         public void remove() {
-
+            throw new UnsupportedOperationException("remove");
         }
 
         private void allocatePage() throws IOException {
