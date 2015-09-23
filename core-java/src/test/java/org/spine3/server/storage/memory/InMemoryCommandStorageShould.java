@@ -32,7 +32,7 @@ public class InMemoryCommandStorageShould {
 
     @Before
     public void setUp() {
-        storage = (InMemoryCommandStorage) InMemoryStorageFactory.instance().createCommandStorage();
+        storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
     }
 
     @Test(expected = NullPointerException.class)

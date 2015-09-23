@@ -22,10 +22,6 @@ package org.spine3.sample;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -35,46 +31,28 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class InMemorySample extends BaseSample {
 
-    public static void main(String[] args) {
-
-        BaseSample sample = new InMemorySample();
-        sample.execute();
-    }
-
-    @Override
-    protected StorageFactory getStorageFactory() {
-        return InMemoryStorageFactory.instance();
-    }
-
-    @Override
-    protected Logger getLog() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    @Override
-    protected MessageJournal<String, EventRecord> provideEventStoreStorage() {
-        return null;
-    }
-
-    @Override
-    protected MessageJournal<String, CommandRequest> provideCommandStoreStorage() {
-        return null;
-    }
-
-    @Override
-    protected SnapshotStorage provideSnapshotStorage() {
-        return null;
-    }
-
     private InMemorySample() {
     }
 
+    @Override
+    protected StorageFactory storageFactory() {
+        return InMemoryStorageFactory.getInstance();
+    }
+
+    @Override
+    protected Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
     private enum LogSingleton {
-
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
+    }
+
+    public static void main(String[] args) {
+        BaseSample sample = new InMemorySample();
+        sample.execute();
     }
 
 }

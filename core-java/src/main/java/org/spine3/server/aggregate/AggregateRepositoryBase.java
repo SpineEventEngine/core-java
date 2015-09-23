@@ -27,6 +27,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.storage.AggregateEvents;
+import org.spine3.server.storage.AggregateStorage;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -41,15 +43,15 @@ import static com.google.common.base.Throwables.propagate;
 /**
  * Abstract base for aggregate root repositories.
  *
- * @param <R> the type of the aggregated root
+ * @param <A> the type of the aggregated root
  * @param <I> the type of the aggregated root id
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
 public abstract class AggregateRepositoryBase<I extends Message,
-                                              R extends Aggregate<I, ?>>
-        extends RepositoryBase<I, R> implements AggregateRepository<I, R> {
+                                              A extends Aggregate<I, ?>>
+        extends RepositoryBase<I, A> implements AggregateRepository<I, A> {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
@@ -66,21 +68,6 @@ public abstract class AggregateRepositoryBase<I extends Message,
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     /**
-     * The store for events and snapshots.
-     */
-    private final AggregateEventStorage<I> eventStorage;
-
-    /**
-     * The storage for snapshots.
-     *
-     * <p>Snapshots are created each time the number of events exceeds the number
-     * configured in {@link #snapshotTrigger}.
-     *
-     * @see #countSinceLastSnapshot
-     */
-    private final SnapshotStorage<I> snapshotStorage;
-
-    /**
      * The number of events to store between snapshots.
      */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -90,19 +77,30 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     private int countSinceLastSnapshot;
 
-    protected AggregateRepositoryBase(AggregateEventStorage<I> eventStorage, SnapshotStorage<I> snapshotStorage) {
+    protected AggregateRepositoryBase() {
         super();
-        this.eventStorage = eventStorage;
-        this.snapshotStorage = snapshotStorage;
+    }
+
+    @SuppressWarnings("RefusedBequest") // We override to check our type of storage.
+    protected void checkStorageClass(Object storage) {
+        @SuppressWarnings({"unused", "unchecked"})
+        AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
     }
 
     public int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
 
+    @SuppressWarnings("unused")
     public void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
+    }
+
+    private AggregateStorage<I> aggregateStorage() {
+        @SuppressWarnings("unchecked") // We check the type on initialization.
+        final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
+        return result;
     }
 
     /**
@@ -157,18 +155,22 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     @Nonnull
     @Override
-    public R load(I id) throws IllegalStateException {
+    public A load(I id) throws IllegalStateException {
+        final AggregateEvents aggregateEvents = aggregateStorage().load(id);
+
         try {
-            Snapshot snapshot = snapshotStorage.load(id);
+            Snapshot snapshot = aggregateEvents.hasSnapshot()
+                        ? aggregateEvents.getSnapshot()
+                        : null;
             if (snapshot != null) {
-                List<EventRecord> trail = eventStorage.loadSince(id, snapshot.getWhenModified());
-                R result = create(id);
+                List<EventRecord> trail = aggregateEvents.getEventRecordList();
+                A result = create(id);
                 result.restore(snapshot);
                 result.play(trail);
                 return result;
             } else {
-                List<EventRecord> events = eventStorage.loadAll(id);
-                R result = create(id);
+                List<EventRecord> events = aggregateEvents.getEventRecordList();
+                A result = create(id);
                 result.play(events);
                 return result;
             }
@@ -183,7 +185,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      * @param aggregateRoot an instance to store
      */
     @Override
-    public void store(R aggregateRoot) {
+    public void store(A aggregateRoot) {
         final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
         final int snapshotTrigger = getSnapshotTrigger();
         for (EventRecord event : uncommittedEvents) {
@@ -198,21 +200,21 @@ public abstract class AggregateRepositoryBase<I extends Message,
         aggregateRoot.commitEvents();
     }
 
-    private void createAndStoreSnapshot(R aggregateRoot) {
+    private void createAndStoreSnapshot(A aggregateRoot) {
         Snapshot snapshot = aggregateRoot.toSnapshot();
         final I aggregateRootId = aggregateRoot.getId();
-        snapshotStorage.store(aggregateRootId, snapshot);
+        aggregateStorage().store(aggregateRootId, snapshot);
     }
 
     private void storeEvent(EventRecord event) {
-        eventStorage.store(event);
+        aggregateStorage().store(event);
         ++countSinceLastSnapshot;
     }
 
     @Override
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         I aggregateId = getAggregateId(command);
-        R aggregateRoot = load(aggregateId);
+        A aggregateRoot = load(aggregateId);
 
         aggregateRoot.dispatch(command, context);
 
@@ -230,5 +232,4 @@ public abstract class AggregateRepositoryBase<I extends Message,
     private I getAggregateId(Message command) {
         return (I) AggregateCommand.getAggregateId(command).value();
     }
-
 }

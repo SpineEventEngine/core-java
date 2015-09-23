@@ -23,15 +23,11 @@ package org.spine3.sample;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.AggregateEventStorage;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Users;
 
@@ -43,18 +39,30 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
-        registerEventHandlers();
-        prepareEngine();
+        // Start the engine
+        Engine.start(storageFactory());
 
-        List<CommandRequest> requests = prepareRequests();
+        // Register repository with the engine. This will register it in the CommandDispatcher too.
+        Engine.getInstance().register(new OrderRepository());
+
+        // Register event handlers
+        EventBus.getInstance().register(new EventLogger());
+
+        // Generate test requests
+        List<CommandRequest> requests = generateRequests();
+
+        // Process requests
         for (CommandRequest request : requests) {
             Engine.getInstance().process(request);
         }
 
-        getLog().info("All the requests were handled.");
+        log().info("All the requests were handled.");
     }
 
-    protected List<CommandRequest> prepareRequests() {
+    //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
+    // See Amazon screens for correct naming of domain things.
+
+    protected List<CommandRequest> generateRequests() {
         List<CommandRequest> result = Lists.newArrayList();
 
         for (int i = 0; i < 10; i++) {
@@ -63,46 +71,18 @@ public abstract class BaseSample {
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payOrder = Requests.payOrder(userId, orderId);
+            CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);
-            result.add(payOrder);
+            result.add(payForOrder);
         }
 
         return result;
     }
 
-    protected static void registerEventHandlers() {
-        EventBus.getInstance().register(new EventLogger());
-    }
+    protected abstract StorageFactory storageFactory();
 
-    protected void prepareEngine() {
-        Engine.start(getStorageFactory());
+    protected abstract Logger log();
 
-        final OrderRepository orderRootRepository = getOrderRootRepository();
-
-        final Engine engine = Engine.getInstance();
-        engine.getCommandDispatcher().register(orderRootRepository);
-    }
-
-    protected abstract StorageFactory getStorageFactory();
-
-    protected abstract Logger getLog();
-
-    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
-
-    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
-
-    protected abstract SnapshotStorage provideSnapshotStorage();
-
-    private OrderRepository getOrderRootRepository() {
-        //TODO:2015-09-16:alexander.yevsyukov: The storage for events of the AggregateRoot should be parameterized with OrderId, not String.
-        final AggregateEventStorage eventStore = new AggregateEventStorage<>(
-                provideEventStoreStorage()
-        );
-
-        final OrderRepository repository = new OrderRepository(eventStore, provideSnapshotStorage());
-        return repository;
-    }
 }

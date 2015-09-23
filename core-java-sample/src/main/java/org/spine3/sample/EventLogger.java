@@ -19,6 +19,7 @@
  */
 package org.spine3.sample;
 
+import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
@@ -27,34 +28,39 @@ import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
+import org.spine3.util.Identifiers;
 
 /**
  * Sample Spine event subscriber implementation.
  *
  * @author Mikhail Melnik
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened", "UnusedParameters"})
 public class EventLogger {
 
-    public static final String NEW_LINE = System.lineSeparator();
+    private static final String NEW_LINE = System.lineSeparator();
+
+    private static String orderIdLine(Message id) {
+        return "Order ID: " + Identifiers.idToString(id) + NEW_LINE;
+    }
 
     @Subscribe
     public void on(OrderCreated event, EventContext context) {
         log().info("Order has been created. " + NEW_LINE
-                + Messages.toText(event.getOrderId()));
+                + orderIdLine(event.getOrderId()));
     }
 
     @Subscribe
     public void on(OrderLineAdded event, EventContext context) {
         log().info("Order line was added. " + NEW_LINE
-                + Messages.toText(event.getOrderId())
+                + orderIdLine(event.getOrderId())
                 + Messages.toText(event.getOrderLine()));
     }
 
     @Subscribe
     public void on(OrderPaid event, EventContext context) {
-        log().info("Order was paid. It is waiting to be shipped now. " + NEW_LINE
-                + Messages.toText(event.getOrderId())
+        log().info("Order was paid." + NEW_LINE
+                + orderIdLine(event.getOrderId())
                 + Messages.toText(event.getBillingInfo()));
     }
 

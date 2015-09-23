@@ -87,7 +87,7 @@ public class Requests {
         return result;
     }
 
-    public static CommandRequest payOrder(UserId userId, OrderId orderId) {
+    public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
         BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
 
         PayForOrder cmd = PayForOrder.newBuilder()

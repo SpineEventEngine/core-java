@@ -20,8 +20,9 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
+import org.spine3.server.storage.EntityStorage;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -32,12 +33,14 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class RepositoryBase<I extends Message, E extends Entity<I, ?>> implements Repository<I, E> {
+public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repository<I, E> {
 
     /**
      * The constructor for creating new entity instances.
      */
     private final Constructor<E> entityConstructor;
+
+    private Object storage;
 
     protected RepositoryBase() {
         this.entityConstructor = getEntityConstructor();
@@ -48,14 +51,31 @@ public abstract class RepositoryBase<I extends Message, E extends Entity<I, ?>> 
         Constructor<E> result;
         try {
             final Class<? extends RepositoryBase> thisClass = getClass();
-            Class<E> entityClass = TypeInfo.getEntityClass(thisClass);
-            Class<I> idClass = TypeInfo.getIdClass(thisClass);
+            Class<E> entityClass = Repository.TypeInfo.getEntityClass(thisClass);
+            Class<I> idClass = Repository.TypeInfo.getIdClass(thisClass);
 
             result = entityClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
         return result;
+    }
+
+    /**
+     * Implementation should throw {@link ClassCastException} if the class of the passed
+     * object does not match that required by the repository.
+     *
+     * <p>Default implementation attempts to cast to {@link EntityStorage}.
+     *
+     * @param storage the instance of storage to check
+     * @throws ClassCastException if the object is not of the required class
+     */
+    protected void checkStorageClass(Object storage) {
+        @SuppressWarnings("unused") EntityStorage ignored = (EntityStorage)storage;
+    }
+
+    protected Object getStorage() {
+        return this.storage;
     }
 
     /**
@@ -72,4 +92,31 @@ public abstract class RepositoryBase<I extends Message, E extends Entity<I, ?>> 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void assignStorage(@Nullable Object storage) {
+        if (storage == null) {
+            shutDown();
+            this.storage = null;
+            return;
+        }
+
+        // Ignore if the same instance of the storage is passed more than one time.
+        //noinspection ObjectEquality
+        if (storage == this.storage) {
+            return;
+        }
+
+        checkStorageClass(storage);
+        this.storage = storage;
+    }
+
+    /**
+     * Override this method to perform repository clean-up before the storage is detached.
+     */
+    @SuppressWarnings("NoopMethodInAbstractClass") // Do nothing by default.
+    protected void shutDown() {
+    }
 }

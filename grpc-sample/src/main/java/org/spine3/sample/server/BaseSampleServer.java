@@ -26,15 +26,10 @@ import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.base.EventRecord;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.EventLogger;
 import org.spine3.sample.order.OrderRepository;
-import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Engine;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.AggregateEventStorage;
-import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.server.storage.StorageFactory;
 
 /**
@@ -49,21 +44,8 @@ public abstract class BaseSampleServer {
     }
 
     public void prepareEngine() {
-
-        final OrderRepository orderRootRepository = getOrderRootRepository();
-
         Engine.start(getStorageFactory());
-        CommandDispatcher.getInstance().register(orderRootRepository);
-    }
-
-    private OrderRepository getOrderRootRepository() {
-
-        final AggregateEventStorage eventStore = new AggregateEventStorage(
-                provideEventStoreStorage()
-        );
-
-        final OrderRepository repository = new OrderRepository(eventStore, provideSnapshotStorage());
-        return repository;
+        Engine.getInstance().getCommandDispatcher().register(new OrderRepository());
     }
 
     /* The port on which the server should run */
@@ -80,7 +62,7 @@ public abstract class BaseSampleServer {
                 .build()
                 .start();
 
-        getLog().info("Server started, listening on " + port);
+        log().info("Server started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -121,11 +103,6 @@ public abstract class BaseSampleServer {
 
     protected abstract StorageFactory getStorageFactory();
 
-    protected abstract Logger getLog();
+    protected abstract Logger log();
 
-    protected abstract MessageJournal<String, EventRecord> provideEventStoreStorage();
-
-    protected abstract MessageJournal<String, CommandRequest> provideCommandStoreStorage();
-
-    protected abstract SnapshotStorage provideSnapshotStorage();
 }

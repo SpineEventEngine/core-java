@@ -51,7 +51,7 @@ public class InMemoryEventStorageShould {
     @Before
     public void setUp() {
 
-        storage = (InMemoryEventStorage) InMemoryStorageFactory.instance().createEventStorage();
+        storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
         UserId userId = Users.createId("user@testing-in-memory-storage.org");
         projectId = ProjectId.newBuilder().setId("project_id").build();
         eventContext = getEventContext(userId, projectId);

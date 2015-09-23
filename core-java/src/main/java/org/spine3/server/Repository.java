@@ -34,6 +34,26 @@ import javax.annotation.Nullable;
 public interface Repository<I, E extends Entity<I, ?>> {
 
     /**
+     * Assigns the storage to the repository.
+     *
+     * <p>The type of the storage depends on and should be checked by the implementations.
+     *
+     * <p>This method should be normally called once during registration of the repository with {@link Engine}.
+     * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
+     *
+     * <p>{@link Engine} will call this method with {@code null} argument to request performing all necessary
+     * clean-up operations before the the engine stops.
+     *
+     * <p>Another storage can be assigned after this method is called with {@code null} parameter.
+     *
+     * @param storage a storage instance or {@code null} if the current storage should be dismissed.
+     *                If there is no storage assigned, passing {@code null} does not have effect
+     * @throws ClassCastException    if the passed storage is not of the required type
+     * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
+     */
+    void assignStorage(@Nullable Object storage);
+
+    /**
      * Create a new entity instance with its default state.
      *
      * @param id the id of the entity
@@ -81,7 +101,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
         }
 
         /**
-         * Returns {@link Class} object representing the aggregate root type of the given repository.
+         * Returns {@link Class} object representing entity type of the given repository.
          *
          * @return the aggregate root {@link Class}
          */
