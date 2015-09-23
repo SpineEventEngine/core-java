@@ -20,11 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.protobuf.Message;
-import org.apache.commons.io.FileUtils;
-import org.spine3.sample.FileSystemSample;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
@@ -32,6 +28,7 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 
 /**
@@ -109,17 +106,18 @@ class Helper {
      * Removes all previous existing data from file system storage.
      */
     public static void cleanData() {
-        checkConfigured();
+
+        if (isNullOrEmpty(fileStoragePath)) {
+            return;
+        }
 
         final File dataFolder = new File(fileStoragePath);
         if (!dataFolder.exists() || !dataFolder.isDirectory()) {
             return;
         }
-        try {
-            FileUtils.deleteDirectory(dataFolder);
-        } catch (IOException e) {
-            Throwables.propagate(e);
-        }
+
+        // TODO[alexander.litus]: delete properly
+        final boolean deleted = dataFolder.delete();
     }
 
     public static void closeSilently(@Nullable Closeable closeable) {
@@ -185,7 +183,7 @@ class Helper {
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
     private static void checkConfigured() {
-        if (Strings.isNullOrEmpty(fileStoragePath)) {
+        if (isNullOrEmpty(fileStoragePath)) {
             throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
         }
     }
