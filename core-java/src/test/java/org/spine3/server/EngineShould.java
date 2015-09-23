@@ -35,7 +35,7 @@ public class EngineShould {
 
     @Before
     public void setUp() {
-        Engine.start(InMemoryStorageFactory.instance());
+        Engine.start(InMemoryStorageFactory.getInstance());
     }
 
     @After

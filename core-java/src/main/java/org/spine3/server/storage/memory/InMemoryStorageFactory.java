@@ -52,7 +52,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryEntityStorage<>();
     }
 
-    public static InMemoryStorageFactory instance() {
+    public static InMemoryStorageFactory getInstance() {
         return Singleton.INSTANCE.value;
     }
 

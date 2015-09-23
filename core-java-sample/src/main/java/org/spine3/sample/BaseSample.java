@@ -27,7 +27,6 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
-import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Users;
@@ -40,14 +39,14 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
+        // Start the engine
+        Engine.start(storageFactory());
+
+        // Register repository with the engine. This will register it in the CommandDispatcher too.
+        Engine.getInstance().register(new OrderRepository());
+
         // Register event handlers
         EventBus.getInstance().register(new EventLogger());
-
-        // Register command handlers
-        CommandDispatcher.getInstance().register(new OrderRepository());
-
-        // Start the engine
-        Engine.start(createStorageFactory());
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -60,6 +59,9 @@ public abstract class BaseSample {
         log().info("All the requests were handled.");
     }
 
+    //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
+    // See Amazon screens for correct naming of domain things.
+
     protected List<CommandRequest> generateRequests() {
         List<CommandRequest> result = Lists.newArrayList();
 
@@ -69,17 +71,17 @@ public abstract class BaseSample {
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payOrder = Requests.payOrder(userId, orderId);
+            CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);
-            result.add(payOrder);
+            result.add(payForOrder);
         }
 
         return result;
     }
 
-    protected abstract StorageFactory createStorageFactory();
+    protected abstract StorageFactory storageFactory();
 
     protected abstract Logger log();
 

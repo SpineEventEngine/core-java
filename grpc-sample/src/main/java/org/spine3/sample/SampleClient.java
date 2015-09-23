@@ -35,6 +35,8 @@ import org.spine3.util.Users;
 
 import java.util.concurrent.TimeUnit;
 
+//TODO:2015-09-23:alexander.yevsyukov: Eliminate code duplication with BaseSample.
+
 /**
  * Sample gRPC client implementation. Can be used with {@link org.spine3.sample.server.DataStoreSampleServer} and
  * {@link org.spine3.sample.server.FileSystemSampleServer}.
@@ -53,7 +55,7 @@ public class SampleClient {
     private static final String RESULT = "Result: ";
 
     /**
-     * Construct client connecting to HelloWorld server at {@code host:port}.
+     * Construct the client connecting to server at {@code host:port}.
      */
     public SampleClient(String host, int port) {
         channel = NettyChannelBuilder
@@ -94,7 +96,7 @@ public class SampleClient {
     private void payOrder(UserId userId, OrderId orderId) {
         try {
             log().info(USER + userId + " tries to pay money for order " + orderId + " ...");
-            CommandRequest request = Requests.payOrder(userId, orderId);
+            CommandRequest request = Requests.payForOrder(userId, orderId);
 
             CommandResult result = blockingStub.handle(request);
             log().info(RESULT + Messages.toText(result));

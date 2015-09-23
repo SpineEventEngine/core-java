@@ -72,7 +72,7 @@ public class GrpcServerSample {
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payOrder = Requests.payOrder(userId, orderId);
+            CommandRequest payOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);

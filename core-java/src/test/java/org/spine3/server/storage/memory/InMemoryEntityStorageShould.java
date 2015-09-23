@@ -44,7 +44,7 @@ public class InMemoryEntityStorageShould {
     @Before
     public void setUp() {
 
-        storage = InMemoryStorageFactory.instance().createEntityStorage(null);
+        storage = InMemoryStorageFactory.getInstance().createEntityStorage(null);
         message = Any.newBuilder().setTypeUrl("typeUrl").build();
     }
 

@@ -31,15 +31,12 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class InMemorySample extends BaseSample {
 
-    public static void main(String[] args) {
-
-        BaseSample sample = new InMemorySample();
-        sample.execute();
+    private InMemorySample() {
     }
 
     @Override
-    protected StorageFactory createStorageFactory() {
-        return InMemoryStorageFactory.instance();
+    protected StorageFactory storageFactory() {
+        return InMemoryStorageFactory.getInstance();
     }
 
     @Override
@@ -47,15 +44,15 @@ public class InMemorySample extends BaseSample {
         return LogSingleton.INSTANCE.value;
     }
 
-    private InMemorySample() {
-    }
-
     private enum LogSingleton {
-
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
+    }
+
+    public static void main(String[] args) {
+        BaseSample sample = new InMemorySample();
+        sample.execute();
     }
 
 }

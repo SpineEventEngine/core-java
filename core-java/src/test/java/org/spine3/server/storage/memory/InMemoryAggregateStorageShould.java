@@ -51,7 +51,7 @@ public class InMemoryAggregateStorageShould {
     public void setUp() {
 
         //noinspection unchecked
-        storage = (InMemoryAggregateStorage) InMemoryStorageFactory.instance().createAggregateRootStorage(null);
+        storage = (InMemoryAggregateStorage) InMemoryStorageFactory.getInstance().createAggregateRootStorage(null);
         projectId = ProjectId.newBuilder().setId("aggregateId").build();
     }
 
