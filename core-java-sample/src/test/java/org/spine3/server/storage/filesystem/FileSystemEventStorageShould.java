@@ -106,12 +106,12 @@ public class FileSystemEventStorageShould {
         assertEventRecordListsAreEqual(expectedRecords, actualRecordsSecond);
     }
 
-    private static void assertEventRecordListsAreEqual(List<EventRecord> expectedRecords, List<EventRecord> actualRecords) {
-        if (expectedRecords.size() != actualRecords.size()) {
-            fail("Expected records are not equal to actual");
+    private static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
+        if (expected.size() != actual.size()) {
+            fail("Expected records count: " + expected.size() + " is not equal to actual records count: " + actual.size());
         }
-        for (int i = 0; i < expectedRecords.size(); i++) {
-            assertEventRecordsAreEqual(expectedRecords.get(i), actualRecords.get(i));
+        for (int i = 0; i < expected.size(); i++) {
+            assertEventRecordsAreEqual(expected.get(i), actual.get(i));
         }
     }
 
