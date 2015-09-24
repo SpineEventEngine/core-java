@@ -76,6 +76,23 @@ class Helper {
         fileStoragePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
     }
 
+    /**
+     * Removes all previous existing data from file system storage.
+     */
+    public static void cleanTestData() {
+
+        final File folder = new File(fileStoragePath);
+        if (!folder.exists() || !folder.isDirectory()) {
+            return;
+        }
+
+        try {
+            deleteDirectory(folder);
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
     public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
 
@@ -103,26 +120,9 @@ class Helper {
     public static void write(EventStoreRecord record) {
         checkConfigured();
 
-        final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
+        final String filePath = getEventStoreFilePath();
         File file = new File(filePath);
         writeMessage(file, record);
-    }
-
-    /**
-     * Removes all previous existing data from file system storage.
-     */
-    public static void cleanTestData() {
-
-        final File folder = new File(fileStoragePath);
-        if (!folder.exists() || !folder.isDirectory()) {
-            return;
-        }
-
-        try {
-            deleteDirectory(folder);
-        } catch (IOException e) {
-            propagate(e);
-        }
     }
 
     /*
