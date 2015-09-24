@@ -34,20 +34,17 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
 import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
 import static org.spine3.server.storage.filesystem.Helper.configure;
-import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
-import static org.spine3.util.testutil.EventRecordFactory.projectStarted;
-import static org.spine3.util.testutil.EventRecordFactory.taskAdded;
+import static org.spine3.util.testutil.EventRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
 
-    private static final FileSystemEventStorage STORAGE = new FileSystemEventStorage();
+    private static final FileSystemEventStorage STORAGE = (FileSystemEventStorage) FileSystemEventStorage.newInstance();
 
     private ProjectId id;
 
     @Before
     public void setUpTest() {
-
         STORAGE.releaseResources();
         configure(FileSystemEventStorageShould.class);
         cleanTestData();

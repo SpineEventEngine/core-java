@@ -23,6 +23,7 @@ package org.spine3.server.storage.filesystem;
 import com.google.protobuf.Any;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.storage.EntityStorage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -38,7 +39,7 @@ import static org.spine3.server.storage.filesystem.Helper.configure;
         "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEntityStorageShould {
 
-    private static final FileSystemEntityStorage<String, Any> STORAGE = new FileSystemEntityStorage<>();
+    private static final EntityStorage<String, Any> STORAGE = FileSystemEntityStorage.newInstance();
 
     private Any message;
 

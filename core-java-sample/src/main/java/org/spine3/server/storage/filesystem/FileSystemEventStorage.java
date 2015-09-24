@@ -40,6 +40,13 @@ public class FileSystemEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
+
+    protected static EventStorage newInstance() {
+        return new FileSystemEventStorage();
+    }
+
+    private FileSystemEventStorage() {}
+
     @Override
     public Iterator<EventRecord> allEvents() {
 

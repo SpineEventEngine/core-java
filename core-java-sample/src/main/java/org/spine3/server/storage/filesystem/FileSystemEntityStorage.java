@@ -29,6 +29,12 @@ import static org.spine3.util.Identifiers.idToString;
 
 public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
+    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
+        return new FileSystemEntityStorage<>();
+    }
+
+    private FileSystemEntityStorage() {}
+
     @Override
     @SuppressWarnings({"ConstantConditions", "ReturnOfNull"})
     public M read(I id) {

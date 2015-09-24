@@ -27,14 +27,15 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
 public class FileSystemStorageFactory implements StorageFactory {
+
     @Override
     public CommandStorage createCommandStorage() {
-        return null;
+        return FileSystemCommandStorage.newInstance();
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return null;
+        return FileSystemEventStorage.newInstance();
     }
 
     @Override
@@ -44,6 +45,6 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return null;
+        return FileSystemEntityStorage.newInstance();
     }
 }
