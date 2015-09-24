@@ -60,8 +60,8 @@ import static org.spine3.server.aggregate.Aggregate.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testutil.ContextFactory.getEventContext;
-import static org.spine3.testutil.EventRecordFactory.*;
+import static org.spine3.util.testutil.ContextFactory.getEventContext;
+import static org.spine3.util.testutil.EventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 
 /**
