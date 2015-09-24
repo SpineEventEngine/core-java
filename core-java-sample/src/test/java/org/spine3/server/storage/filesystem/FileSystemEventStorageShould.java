@@ -28,6 +28,7 @@ import org.spine3.test.project.ProjectId;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
@@ -71,6 +72,13 @@ public class FileSystemEventStorageShould {
         STORAGE.write(null);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void throw_exception_if_try_to_remove_element_via_iterator() {
+
+        final Iterator<EventRecord> iterator = STORAGE.allEvents();
+        iterator.remove();
+    }
+
     @Test
     public void save_and_read_events() {
 
@@ -84,8 +92,25 @@ public class FileSystemEventStorageShould {
         final EventRecord actual = iterator.next();
 
         assertEventRecordsAreEqual(expected, actual);
-
         assertFalse(iterator.hasNext());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void throw_exception_if_iteration_has_no_more_elements() {
+
+        final EventRecord expected = projectCreated(id);
+        STORAGE.store(expected);
+
+        final Iterator<EventRecord> iterator = STORAGE.allEvents();
+
+        assertTrue(iterator.hasNext());
+
+        final EventRecord actual = iterator.next();
+
+        assertEventRecordsAreEqual(expected, actual);
+        assertFalse(iterator.hasNext());
+
+        iterator.next();
     }
 
     @Test

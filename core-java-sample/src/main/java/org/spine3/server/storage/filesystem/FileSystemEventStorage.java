@@ -27,6 +27,7 @@ import org.spine3.server.storage.EventStoreRecord;
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -141,13 +142,13 @@ public class FileSystemEventStorage extends EventStorage {
 
         private void checkHasNextBytes() {
             if (!hasNext()) {
-                throw new IllegalStateException("No more records to read from file.");
+                throw new NoSuchElementException("No more records to read from file.");
             }
         }
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Not implemented");
+            throw new UnsupportedOperationException("This operation is not supported for FileSystemStorage");
         }
     }
 }
