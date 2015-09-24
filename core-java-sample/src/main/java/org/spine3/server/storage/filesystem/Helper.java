@@ -98,7 +98,7 @@ class Helper {
      *
      * @param aggregateType     the type of an aggregate
      * @param aggregateIdString String representation of aggregate id
-     * @return absolute path
+     * @return absolute path string
      */
     public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
@@ -108,13 +108,22 @@ class Helper {
         return filePath;
     }
 
-
+    /**
+     * Returns common event store file path.
+     *
+     * @return absolute path string
+     */
     public static String getEventStoreFilePath() {
         checkConfigured();
         final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
         return filePath;
     }
 
+    /**
+     * Writes the {@code CommandStoreRecord} to common command store.
+     *
+     * @param record {@code CommandStoreRecord} instance
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void write(CommandStoreRecord record) {
         checkConfigured();
@@ -124,6 +133,11 @@ class Helper {
         writeMessage(file, record);
     }
 
+    /**
+     * Writes the {@code EventStoreRecord} to common event store.
+     *
+     * @param record {@code EventStoreRecord} instance
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void write(EventStoreRecord record) {
         checkConfigured();
@@ -134,7 +148,7 @@ class Helper {
     }
 
     /*
-     * Closes streams in turn
+     * Closes streams in turn.
      */
     @SuppressWarnings("ConstantConditions")
     public static void closeSilently(@Nullable Closeable... closeables) {
@@ -155,7 +169,7 @@ class Helper {
     }
 
     /*
-     * Flushes streams in turn
+     * Flushes streams in turn.
      */
     @SuppressWarnings("ConstantConditions")
     public static void flushSilently(@Nullable Flushable... flushables) {
@@ -176,7 +190,7 @@ class Helper {
     }
 
     /*
-     * Flushes and closes output streams in turn
+     * Flushes and closes output streams in turn.
      */
     @SuppressWarnings("ConstantConditions")
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
@@ -187,6 +201,12 @@ class Helper {
         closeSilently(streams);
     }
 
+    /**
+     * Writes {@code Message} into {@code File} using {@code Message.writeDelimitedTo}.
+     *
+     * @param file    a {@code File} to write data in
+     * @param message data to extract
+     */
     @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
     private static void writeMessage(File file, Message message) {
 
