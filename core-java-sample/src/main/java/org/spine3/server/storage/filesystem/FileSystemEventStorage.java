@@ -31,6 +31,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.server.storage.filesystem.Helper.closeSilently;
+import static org.spine3.util.Events.toEventRecord;
 
 public class FileSystemEventStorage extends EventStorage {
 
@@ -100,11 +101,11 @@ public class FileSystemEventStorage extends EventStorage {
             EventStoreRecord storeRecord = parseEventRecord();
             EventRecord result = toEventRecord(storeRecord);
 
-            checkNotNull(result, "Event record from file shouldn't be null.");
-
             if (!hasNext()) {
                 releaseResources();
             }
+
+            checkNotNull(result, "Event record from file shouldn't be null.");
 
             return result;
         }
@@ -139,14 +140,6 @@ public class FileSystemEventStorage extends EventStorage {
                 closeSilently(fileInputStream, bufferedInputStream);
                 areResourcesReleased = true;
             }
-        }
-
-        @SuppressWarnings("TypeMayBeWeakened")
-        private static EventRecord toEventRecord(EventStoreRecord storeRecord) {// TODO[alexander.litus]: extract
-            final EventRecord.Builder builder = EventRecord.newBuilder()
-                    .setEvent(storeRecord.getEvent())
-                    .setContext(storeRecord.getContext());
-            return builder.build();
         }
 
         private void checkFileExists() {
