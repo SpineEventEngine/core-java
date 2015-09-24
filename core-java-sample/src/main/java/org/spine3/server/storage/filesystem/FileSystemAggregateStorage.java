@@ -31,6 +31,9 @@ import java.util.NoSuchElementException;
 
 import static org.spine3.util.Identifiers.idToString;
 
+/**
+ * Max available message size is about 2GB.
+ */
 class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
@@ -108,14 +111,14 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static void writeRecord(DataOutputStream stream, AggregateStorageRecord r) throws IOException {
         byte[] bytes = r.toByteArray();
         stream.write(bytes);
-        stream.writeLong(bytes.length);
+        stream.writeInt(bytes.length);
     }
 
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
         //Note: each of these objects instantly allocates 100K memory.
         public static final int DEFAULT_PAGE_SIZE = 102400;
-        public static final int LONG_SIZE_IN_BYTES = 8;
+        public static final int INT_SIZE_IN_BYTES = 4;
 
         private final File file;
         private final long fileLength;
@@ -135,7 +138,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
         @Override
         public boolean hasNext() {
-            return pageOffset + fileOffset > LONG_SIZE_IN_BYTES;
+            return pageOffset + fileOffset > INT_SIZE_IN_BYTES;
         }
 
         @Override
@@ -191,28 +194,27 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         }
 
         private AggregateStorageRecord readEntry() throws IOException {
-            if (pageOffset < LONG_SIZE_IN_BYTES) {
+            if (pageOffset < INT_SIZE_IN_BYTES) {
                 allocatePage();
                 if (pageOffset == 0) {
                     return null;
                 }
-                if (pageOffset < LONG_SIZE_IN_BYTES) {
+                if (pageOffset < INT_SIZE_IN_BYTES) {
                     //TODO:2015-09-23:mikhail.mikhaylov: Have a proper exception here.
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
                 }
             }
 
-            final ByteBuffer longBuffer = ByteBuffer.allocate(LONG_SIZE_IN_BYTES);
+            final ByteBuffer longBuffer = ByteBuffer.allocate(INT_SIZE_IN_BYTES);
 
-            pageOffset -= LONG_SIZE_IN_BYTES;
-            longBuffer.put(page, pageOffset, LONG_SIZE_IN_BYTES);
+            pageOffset -= INT_SIZE_IN_BYTES;
+            longBuffer.put(page, pageOffset, INT_SIZE_IN_BYTES);
 
             longBuffer.flip();
-            long messageSize = longBuffer.getLong();
+            int messageSize = longBuffer.getInt();
 
             if (pageOffset < messageSize) {
-                ////todo:2015-09-24:mikhail.mikhaylov: migrate to int
-                allocatePage((int) messageSize + LONG_SIZE_IN_BYTES);
+                allocatePage(messageSize + INT_SIZE_IN_BYTES);
                 if (pageOffset < messageSize) {
                     //TODO:2015-09-23:mikhail.mikhaylov: Have a proper exception here.
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
