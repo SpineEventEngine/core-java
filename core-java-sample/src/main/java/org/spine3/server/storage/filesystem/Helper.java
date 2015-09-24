@@ -124,7 +124,7 @@ class Helper {
         try {
             deleteDirectory(folder);
         } catch (IOException e) {
-            LOG.warn("Exception while deleting folder: " + folder.getPath(), e);
+            propagate(e);
         }
     }
 
@@ -134,7 +134,9 @@ class Helper {
                 closeable.close();
             }
         } catch (IOException e) {
-            LOG.warn("Exception while closing stream", e);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Exception while closing stream", e);
+            }
         }
     }
 
