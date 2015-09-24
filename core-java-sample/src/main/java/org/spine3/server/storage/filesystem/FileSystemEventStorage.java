@@ -36,7 +36,6 @@ public class FileSystemEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
-    // TODO:alexander.litus: release res on end
     @Override
     public Iterator<EventRecord> allEvents() {
 
