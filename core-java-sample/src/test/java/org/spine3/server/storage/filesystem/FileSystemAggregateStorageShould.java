@@ -40,7 +40,6 @@ import static org.spine3.server.storage.filesystem.Helper.configure;
 /**
  * @author Mikhail Mikhaylov
  */
-// TODO[alexander.litus]: impl storage.releaseResources method to fix tests
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemAggregateStorageShould {
 
