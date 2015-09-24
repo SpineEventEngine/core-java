@@ -124,10 +124,19 @@ class Helper {
         }
     }
 
-    public static void closeSilently(@Nullable Closeable closeable) {
+    /*
+     * Closes streams in turn
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static void closeSilently(@Nullable Closeable... closeables) {
+        if (closeables == null) {
+            return;
+        }
         try {
-            if (closeable != null) {
-                closeable.close();
+            for (Closeable c : closeables) {
+                if (c != null) {
+                    c.close();
+                }
             }
         } catch (IOException e) {
             if (LOG.isWarnEnabled()) {
@@ -136,10 +145,44 @@ class Helper {
         }
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored"})
+    /*
+     * Flushes streams in turn
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static void flushSilently(@Nullable Flushable... flushables) {
+        if (flushables == null) {
+            return;
+        }
+        try {
+            for (Flushable f : flushables) {
+                if (f != null) {
+                    f.flush();
+                }
+            }
+        } catch (IOException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Exception while flushing stream", e);
+            }
+        }
+    }
+
+    /*
+     * Flushes and closes streams in turn
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
+        if (streams == null) {
+            return;
+        }
+        flushSilently(streams);
+        closeSilently(streams);
+    }
+
+    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
     private static void writeMessage(File file, Message message) {
 
-        OutputStream outputStream = null;
+        FileOutputStream fileOutputStream = null;
+        OutputStream bufferedOutputStream = null;
 
         try {
             if (file.exists()) {
@@ -149,9 +192,10 @@ class Helper {
                 file.createNewFile();
             }
 
-            outputStream = getObjectOutputStream(file);
+            fileOutputStream = new FileOutputStream(file, true);
+            bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 
-            message.writeDelimitedTo(outputStream);
+            message.writeDelimitedTo(bufferedOutputStream);
 
             if (backup != null) {
                 backup.delete();
@@ -159,7 +203,7 @@ class Helper {
         } catch (IOException ignored) {
             restoreFromBackup(file);
         } finally {
-            closeSilently(outputStream);
+            flushAndCloseSilently(fileOutputStream, bufferedOutputStream);
         }
     }
 
