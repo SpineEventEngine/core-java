@@ -41,7 +41,6 @@ import static org.spine3.server.storage.filesystem.Helper.configure;
  * @author Mikhail Mikhaylov
  */
 // TODO[alexander.litus]: impl storage.releaseResources method to fix tests
-@Ignore
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemAggregateStorageShould {
 
@@ -56,8 +55,8 @@ public class FileSystemAggregateStorageShould {
     @Before
     public void setUpTest() {
         STORAGE.releaseResources();
-        cleanTestData();
         configure(FileSystemAggregateStorageShould.class);
+        cleanTestData();
     }
 
     @After
