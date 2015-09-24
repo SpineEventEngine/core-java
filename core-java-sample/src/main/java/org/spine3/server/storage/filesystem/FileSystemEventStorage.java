@@ -26,22 +26,25 @@ import org.spine3.server.storage.EventStoreRecord;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.server.storage.filesystem.Helper.closeSilently;
 
 public class FileSystemEventStorage extends EventStorage {
 
-    private EventRecordFileIterator iterator;
+    private final List<EventRecordFileIterator> iterators = newLinkedList();
 
+    // TODO:alexander.litus: release res on end
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        releaseResources();
-
         final File file = new File(Helper.getEventFilePath());
 
-        iterator = new EventRecordFileIterator(file);
+        final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
+
+        iterators.add(iterator);
 
         return iterator;
     }
@@ -54,8 +57,8 @@ public class FileSystemEventStorage extends EventStorage {
 
     @Override
     protected void releaseResources() {
-        if (iterator != null) {
-            iterator.releaseResources();
+        for (EventRecordFileIterator i : iterators) {
+            i.releaseResources();
         }
     }
 
@@ -65,6 +68,7 @@ public class FileSystemEventStorage extends EventStorage {
         private final File file;
         private FileInputStream fileInputStream;
         private BufferedInputStream bufferedInputStream;
+        private boolean areResourcesReleased;
 
         private EventRecordFileIterator(File file) {
             this.file = file;
@@ -73,7 +77,7 @@ public class FileSystemEventStorage extends EventStorage {
         @Override
         public boolean hasNext() {
 
-            if (!file.exists()) {
+            if (!file.exists() || areResourcesReleased) {
                 return false;
             }
 
@@ -98,6 +102,10 @@ public class FileSystemEventStorage extends EventStorage {
             EventRecord result = toEventRecord(storeRecord);
 
             checkNotNull(result, "Event record from file shouldn't be null.");
+
+            if (!hasNext()) {
+                releaseResources();
+            }
 
             return result;
         }
@@ -128,7 +136,10 @@ public class FileSystemEventStorage extends EventStorage {
         }
 
         private void releaseResources() {
-            closeSilently(fileInputStream, bufferedInputStream);
+            if (!areResourcesReleased) {
+                closeSilently(fileInputStream, bufferedInputStream);
+                areResourcesReleased = true;
+            }
         }
 
         @SuppressWarnings("TypeMayBeWeakened")
