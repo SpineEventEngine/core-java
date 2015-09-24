@@ -21,6 +21,8 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
@@ -30,6 +32,7 @@ import java.io.*;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static java.nio.file.Files.copy;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 /**
  * TODO:2015-09-22:mikhail.mikhaylov:
@@ -41,6 +44,8 @@ import static java.nio.file.Files.copy;
  * @author Alexander Litus
  */
 class Helper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Helper.class);
 
     @SuppressWarnings("StaticNonFinalField")
     private static String fileStoragePath = null;
@@ -111,17 +116,16 @@ class Helper {
             return;
         }
 
-        final File dataFolder = new File(fileStoragePath);
-        if (!dataFolder.exists() || !dataFolder.isDirectory()) {
+        final File folder = new File(fileStoragePath);
+        if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
 
-        // TODO[alexander.litus]: this is tmp solution, replace with nio.deleteFile()
-        final File[] files = dataFolder.listFiles();
-        for (File f : files) {
-            f.delete();
+        try {
+            deleteDirectory(folder);
+        } catch (IOException e) {
+            LOG.warn("Exception while deleting folder: " + folder.getPath(), e);
         }
-        dataFolder.delete();
     }
 
     public static void closeSilently(@Nullable Closeable closeable) {
@@ -130,7 +134,7 @@ class Helper {
                 closeable.close();
             }
         } catch (IOException e) {
-            //NOP
+            LOG.warn("Exception while closing stream", e);
         }
     }
 
