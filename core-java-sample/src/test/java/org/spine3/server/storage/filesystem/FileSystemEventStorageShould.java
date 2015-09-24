@@ -84,7 +84,7 @@ public class FileSystemEventStorageShould {
         assertFalse(iterator.hasNext());
     }
 
-    public static EventRecord projectCreated(ProjectId projectId) {
+    public static EventRecord projectCreated(ProjectId projectId) { // TODO[alexander.litus]: use method from testutils
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
         final EventRecord.Builder builder = EventRecord.newBuilder().setEvent(toAny(event));
