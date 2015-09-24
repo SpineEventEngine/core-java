@@ -34,10 +34,17 @@ import static org.spine3.server.storage.filesystem.Helper.getObjectInputStream;
 
 public class FileSystemEventStorage extends EventStorage {
 
+    private EventRecordFileIterator iterator;
+
     @Override
     public Iterator<EventRecord> allEvents() {
+
+        releaseResources();
+
         final File file = new File(Helper.getEventFilePath());
-        final Iterator iterator = new EventRecordFileIterator(file);
+
+        iterator = new EventRecordFileIterator(file);
+
         return iterator;
     }
 
@@ -45,6 +52,13 @@ public class FileSystemEventStorage extends EventStorage {
     protected void write(EventStoreRecord record) {
         checkNotNull(record, "Record shouldn't be null.");
         Helper.write(record);
+    }
+
+    @Override
+    protected void releaseResources() {
+        if (iterator != null) {
+            iterator.releaseResources();
+        }
     }
 
 
@@ -112,8 +126,18 @@ public class FileSystemEventStorage extends EventStorage {
             return inputStream;
         }
 
+        private void releaseResources() {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    // NOP
+                }
+            }
+        }
+
         @SuppressWarnings("TypeMayBeWeakened")
-        private static EventRecord toEventRecord(EventStoreRecord storeRecord) {
+        private static EventRecord toEventRecord(EventStoreRecord storeRecord) {// TODO[alexander.litus]: extract
             final EventRecord.Builder builder = EventRecord.newBuilder()
                     .setEvent(storeRecord.getEvent())
                     .setContext(storeRecord.getContext());

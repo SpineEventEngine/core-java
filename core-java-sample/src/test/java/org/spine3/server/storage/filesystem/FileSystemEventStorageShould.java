@@ -22,47 +22,38 @@ package org.spine3.server.storage.filesystem;
 
 import org.junit.*;
 import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.util.Users;
 
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.storage.filesystem.Helper.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
-
-    // TODO[alexander.litus]: clear data properly
 
     private static final FileSystemEventStorage STORAGE = new FileSystemEventStorage();
 
     private ProjectId projectId;
 
-    @BeforeClass
-    public static void setUpClass() {
-        Helper.cleanData();
-        Helper.configure(FileSystemEventStorageShould.class);
-    }
-
     @Before
     public void setUpTest() {
 
-        Helper.cleanData();
-        Helper.configure(FileSystemEventStorageShould.class);
+        STORAGE.releaseResources();
+        cleanTestData();
+        configure(FileSystemEventStorageShould.class);
 
-        UserId userId = Users.createId("user@testing-in-memory-storage.org");
         projectId = ProjectId.newBuilder().setId("project_id").build();
     }
 
     @After
     public void tearDownTest() {
-        Helper.cleanData();
+        STORAGE.releaseResources();
+        cleanTestData();
     }
 
-    @Ignore
     @Test
     public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
 
@@ -70,13 +61,11 @@ public class FileSystemEventStorageShould {
         assertFalse(iterator.hasNext());
     }
 
-    @Ignore
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
         STORAGE.write(null);
     }
 
-    @Ignore
     @Test
     public void save_and_read_event() {
 

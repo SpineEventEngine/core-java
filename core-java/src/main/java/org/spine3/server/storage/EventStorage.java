@@ -27,7 +27,6 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.util.Events;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 /**
@@ -70,4 +69,8 @@ public abstract class EventStorage {
      */
     protected abstract void write(EventStoreRecord record);
 
+    /**
+     * Releases storage resources (closes I/O streams etc)
+     */
+    protected abstract void releaseResources();
 }
