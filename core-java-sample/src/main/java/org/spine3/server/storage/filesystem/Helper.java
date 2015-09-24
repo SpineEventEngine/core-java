@@ -112,10 +112,6 @@ class Helper {
      */
     public static void cleanTestData() {
 
-        if (isNullOrEmpty(fileStoragePath)) {
-            return;
-        }
-
         final File folder = new File(fileStoragePath);
         if (!folder.exists() || !folder.isDirectory()) {
             return;
