@@ -27,6 +27,8 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.spine3.util.Identifiers.idToString;
@@ -46,20 +48,20 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     protected void write(AggregateStorageRecord r) {
 
         if (r.getAggregateId() == null) {
-            //TODO:2015-09-23:mikhail.mikhaylov: Check if it's correct.
-            throw new NullPointerException(INVALID_AGGREGATE_ID);
+            Throwables.propagate(new NullPointerException(INVALID_AGGREGATE_ID));
         }
 
         final String aggregateFilePath = Helper.getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
-        //TODO:2015-09-23:mikhail.mikhaylov: check
         if (!aggregateFile.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             aggregateFile.getParentFile().mkdirs();
             try {
+                //noinspection ResultOfMethodCallIgnored
                 aggregateFile.createNewFile();
             } catch (IOException e) {
-                //NOP
+                Throwables.propagate(e);
             }
         }
 
@@ -69,14 +71,15 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToString(id);
-        return new FileIterator(new File(
+        final Iterator<AggregateStorageRecord> iterator = new FileIterator(new File(
                 Helper.getAggregateFilePath(shortTypeName, stringId)));
+        return iterator;
     }
 
     @Override
     protected void releaseResources() {
-        // TODO[alexander.litus]: impl
-        throw new UnsupportedOperationException("not implemented yet");
+        //NOP
+        //reading mechanism closes streams as soon as the page is read.
     }
 
     private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
@@ -108,16 +111,11 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         byte[] bytes = r.toByteArray();
         stream.write(bytes);
         stream.writeLong(bytes.length);
-
-//        stream.writeUTF(r.getMessage().getValue().toStringUtf8());
-//        stream.writeLong(r.getMessageSize());
-//        stream.writeUTF(r.getMessageType());
-//        stream.writeLong(r.getMessageTypeSize());
     }
 
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
-        //TODO:2015-09-22:mikhail.mikhaylov: Note: each of these objects instantly allocates 100K memory.
+        //Note: each of these objects instantly allocates 100K memory.
         public static final int PAGE_SIZE = 102400;
         public static final int LONG_SIZE_IN_BYTES = 8;
 
@@ -179,6 +177,9 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
             //noinspection ResultOfMethodCallIgnored
             bis.read(page, 0, page.length);
+
+            bis.close();
+            fis.close();
         }
 
         private AggregateStorageRecord readEntry() throws IOException {
