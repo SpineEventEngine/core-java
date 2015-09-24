@@ -37,10 +37,10 @@ import static org.spine3.util.Identifiers.idToString;
 class FileSystemStoragePathHelper {
 
     protected static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
-    static final String COMMAND_STORE_FILE_NAME = "/command-store";
-    static final String EVENT_STORE_FILE_NAME = "/event-store";
+    protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    protected static final String EVENT_STORE_FILE_NAME = "/event-store";
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
-    static final String PATH_DELIMITER = "/";
+    protected static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
     @SuppressWarnings("StaticNonFinalField")
     private static String fileStoragePath = null;
