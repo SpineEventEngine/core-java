@@ -73,6 +73,11 @@ class InMemoryEventStorage extends EventStorage {
         storage.put(record.getEventId(), record);
     }
 
+    @Override
+    protected void releaseResources() {
+        // NOP
+    }
+
     private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
         @SuppressWarnings("NullableProblems") // record cannot be null because it is checked when saving to storage
         @Override

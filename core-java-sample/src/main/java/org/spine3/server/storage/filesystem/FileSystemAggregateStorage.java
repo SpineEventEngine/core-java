@@ -73,6 +73,12 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
                 Helper.getAggregateFilePath(shortTypeName, stringId)));
     }
 
+    @Override
+    protected void releaseResources() {
+        // TODO[alexander.litus]: impl
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
     private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
         FileOutputStream fos = null;
         try {

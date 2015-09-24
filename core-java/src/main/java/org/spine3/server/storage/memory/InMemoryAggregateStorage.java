@@ -59,6 +59,11 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         return records.iterator();
     }
 
+    @Override
+    protected void releaseResources() {
+        // NOP
+    }
+
 
     /*
      * Used for sorting by timestamp descending (from newer to older)

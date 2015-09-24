@@ -26,10 +26,10 @@ import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.nio.file.Files;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
+import static java.nio.file.Files.copy;
 
 /**
  * TODO:2015-09-22:mikhail.mikhaylov:
@@ -105,7 +105,7 @@ class Helper {
     /**
      * Removes all previous existing data from file system storage.
      */
-    public static void cleanData() {
+    public static void cleanTestData() {
 
         if (isNullOrEmpty(fileStoragePath)) {
             return;
@@ -116,8 +116,12 @@ class Helper {
             return;
         }
 
-        // TODO[alexander.litus]: delete properly
-        final boolean deleted = dataFolder.delete();
+        // TODO[alexander.litus]: this is tmp solution, replace with nio.deleteFile()
+        final File[] files = dataFolder.listFiles();
+        for (File f : files) {
+            f.delete();
+        }
+        dataFolder.delete();
     }
 
     public static void closeSilently(@Nullable Closeable closeable) {
@@ -168,7 +172,7 @@ class Helper {
     private static File makeBackupCopy(File sourceFile) throws IOException {
         File backupFile = new File(sourceFile.toPath() + "_backup");
 
-        Files.copy(sourceFile.toPath(), backupFile.toPath());
+        copy(sourceFile.toPath(), backupFile.toPath());
 
         return backupFile;
     }
