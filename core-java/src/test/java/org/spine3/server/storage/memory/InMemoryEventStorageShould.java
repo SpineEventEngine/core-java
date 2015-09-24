@@ -32,8 +32,8 @@ import org.spine3.util.Users;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
-import static org.spine3.testutil.ContextFactory.getEventContext;
-import static org.spine3.testutil.EventRecordFactory.projectCreated;
+import static org.spine3.util.testutil.ContextFactory.getEventContext;
+import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
 
 /**
  * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.

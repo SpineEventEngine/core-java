@@ -28,7 +28,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.MessageFields;
-import org.spine3.testutil.CommandRequestFactory;
+import org.spine3.util.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;

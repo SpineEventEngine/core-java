@@ -18,14 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.util.testutil;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.Messages;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
@@ -41,22 +38,18 @@ import static org.spine3.protobuf.Messages.toAny;
 @SuppressWarnings("UtilityClass")
 public class EventRecordFactory {
 
-    public static EventRecord create(Timestamp when) {
+    private EventRecordFactory() {}
 
-        //todo:2015-08-10:mikhail.mikhaylov: check it.
-        final Any event = Messages.toAny(
-                ProjectCreated.newBuilder().setProjectId(AggregateIdFactory.createCommon()).build()
-        );
-
-        final EventRecord eventRecord = EventRecord.newBuilder()
-                .setContext(ContextFactory.getEventContext(0))
-                .setEvent(event)
-                .build();
-        return eventRecord;
+    public static EventRecord projectCreated(ProjectId projectId) {
+        return projectCreated(projectId, EventContext.getDefaultInstance());
     }
 
-    public static EventRecord create() {
-        return create(TimeUtil.getCurrentTime());
+    public static EventRecord taskAdded(ProjectId projectId) {
+        return taskAdded(projectId, EventContext.getDefaultInstance());
+    }
+
+    public static EventRecord projectStarted(ProjectId projectId) {
+        return projectStarted(projectId, EventContext.getDefaultInstance());
     }
 
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
