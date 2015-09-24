@@ -43,6 +43,7 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
+@SuppressWarnings("UtilityClass")
 class Helper {
 
     private static final Logger LOG = LoggerFactory.getLogger(Helper.class);

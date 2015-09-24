@@ -63,7 +63,6 @@ public class FileSystemAggregateStorageShould {
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-        cleanTestData();
     }
 
     @AfterClass
