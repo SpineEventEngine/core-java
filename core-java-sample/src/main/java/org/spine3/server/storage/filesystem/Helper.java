@@ -84,7 +84,7 @@ class Helper {
         return filePath;
     }
 
-    public static String getEventFilePath() {
+    public static String getEventStoreFilePath() {
         checkConfigured();
         final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
         return filePath;

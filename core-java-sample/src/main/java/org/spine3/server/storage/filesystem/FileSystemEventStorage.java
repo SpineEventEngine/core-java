@@ -40,7 +40,7 @@ public class FileSystemEventStorage extends EventStorage {
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = new File(Helper.getEventFilePath());
+        final File file = new File(Helper.getEventStoreFilePath());
 
         final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
 
