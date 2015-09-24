@@ -93,6 +93,13 @@ class Helper {
         }
     }
 
+    /**
+     * Returns path for aggregate storage file.
+     *
+     * @param aggregateType     the type of an aggregate
+     * @param aggregateIdString String representation of aggregate id
+     * @return absolute path
+     */
     public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
 
@@ -100,6 +107,7 @@ class Helper {
                 aggregateType + PATH_DELIMITER + aggregateIdString;
         return filePath;
     }
+
 
     public static String getEventStoreFilePath() {
         checkConfigured();
