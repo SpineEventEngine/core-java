@@ -167,7 +167,7 @@ class Helper {
     }
 
     /*
-     * Flushes and closes streams in turn
+     * Flushes and closes output streams in turn
      */
     @SuppressWarnings("ConstantConditions")
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
@@ -221,14 +221,6 @@ class Helper {
         copy(sourceFile.toPath(), backupFile.toPath());
 
         return backupFile;
-    }
-
-    private static OutputStream getObjectOutputStream(File file) throws IOException {
-        return new BufferedOutputStream(new FileOutputStream(file, true));
-    }
-
-    protected static InputStream getObjectInputStream(File file) throws IOException {
-        return new BufferedInputStream(new FileInputStream(file));
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
