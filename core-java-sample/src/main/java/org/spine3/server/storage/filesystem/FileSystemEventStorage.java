@@ -24,13 +24,11 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.Helper.getObjectInputStream;
+import static org.spine3.server.storage.filesystem.Helper.closeSilently;
 
 public class FileSystemEventStorage extends EventStorage {
 
@@ -65,7 +63,8 @@ public class FileSystemEventStorage extends EventStorage {
     private static class EventRecordFileIterator implements Iterator<EventRecord> {
 
         private final File file;
-        private InputStream inputStream;
+        private FileInputStream fileInputStream;
+        private BufferedInputStream bufferedInputStream;
 
         private EventRecordFileIterator(File file) {
             this.file = file;
@@ -113,27 +112,23 @@ public class FileSystemEventStorage extends EventStorage {
             return event;
         }
 
+        @SuppressWarnings("OverlyBroadCatchBlock")
         private InputStream getInputStream() {
 
-            if (inputStream == null) {
+            if (bufferedInputStream == null || fileInputStream == null) {
                 try {
-                    inputStream = getObjectInputStream(file);
+                    fileInputStream = new FileInputStream(file);
+                    bufferedInputStream = new BufferedInputStream(fileInputStream);
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to get input stream from file: " + file.getAbsolutePath(), e);
                 }
             }
 
-            return inputStream;
+            return bufferedInputStream;
         }
 
         private void releaseResources() {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    // NOP
-                }
-            }
+            closeSilently(fileInputStream, bufferedInputStream);
         }
 
         @SuppressWarnings("TypeMayBeWeakened")
