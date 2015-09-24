@@ -57,6 +57,13 @@ class FileSystemStoragePathHelper {
         fileStoragePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
     }
 
+    /**
+     * Returns path for aggregate storage file.
+     *
+     * @param aggregateType     the type of an aggregate
+     * @param aggregateIdString String representation of aggregate id
+     * @return absolute path string
+     */
     protected static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
 
@@ -70,6 +77,11 @@ class FileSystemStoragePathHelper {
         return fileStoragePath + COMMAND_STORE_FILE_NAME;
     }
 
+    /**
+     * Returns common event store file path.
+     *
+     * @return absolute path string
+     */
     protected static String getEventStoreFilePath() {
         checkConfigured();
         return fileStoragePath + EVENT_STORE_FILE_NAME;

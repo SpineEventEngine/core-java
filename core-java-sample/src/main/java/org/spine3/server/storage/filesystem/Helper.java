@@ -65,6 +65,11 @@ class Helper {
         FileSystemStoragePathHelper.configure(executorClass);
     }
 
+    /**
+     * Writes the {@code CommandStoreRecord} to common command store.
+     *
+     * @param record {@code CommandStoreRecord} instance
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void write(CommandStoreRecord record) {
 
@@ -73,6 +78,11 @@ class Helper {
         writeMessage(file, record);
     }
 
+    /**
+     * Writes the {@code EventStoreRecord} to common event store.
+     *
+     * @param record {@code EventStoreRecord} instance
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void write(EventStoreRecord record) {
 
@@ -96,67 +106,6 @@ class Helper {
         } catch (IOException e) {
             propagate(e);
         }
-    }
-
-    /**
-     * Returns path for aggregate storage file.
-     *
-     * @param aggregateType     the type of an aggregate
-     * @param aggregateIdString String representation of aggregate id
-     * @return absolute path string
-     */
-    /**
-     * Returns path for aggregate storage file.
-     *
-     * @param aggregateType     the type of an aggregate
-     * @param aggregateIdString String representation of aggregate id
-     * @return absolute path string
-     */
-    public static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
-        checkConfigured();
-
-        final String filePath = fileStoragePath + AGGREGATE_FILE_NAME_PREFIX +
-                aggregateType + PATH_DELIMITER + aggregateIdString;
-        return filePath;
-    }
-
-    /**
-     * Returns common event store file path.
-     *
-     * @return absolute path string
-     */
-    public static String getEventStoreFilePath() {
-        checkConfigured();
-        final String filePath = fileStoragePath + EVENT_STORE_FILE_NAME;
-        return filePath;
-    }
-
-    /**
-     * Writes the {@code CommandStoreRecord} to common command store.
-     *
-     * @param record {@code CommandStoreRecord} instance
-     */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public static void write(CommandStoreRecord record) {
-        checkConfigured();
-
-        final String filePath = fileStoragePath + COMMAND_STORE_FILE_NAME;
-        File file = new File(filePath);
-        writeMessage(file, record);
-    }
-
-    /**
-     * Writes the {@code EventStoreRecord} to common event store.
-     *
-     * @param record {@code EventStoreRecord} instance
-     */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public static void write(EventStoreRecord record) {
-        checkConfigured();
-
-        final String filePath = getEventStoreFilePath();
-        File file = new File(filePath);
-        writeMessage(file, record);
     }
 
     /*
