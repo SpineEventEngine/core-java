@@ -200,7 +200,6 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
                     return null;
                 }
                 if (pageOffset < INT_SIZE_IN_BYTES) {
-                    //TODO:2015-09-23:mikhail.mikhaylov: Have a proper exception here.
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
                 }
             }
@@ -216,16 +215,15 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             if (pageOffset < messageSize) {
                 allocatePage(messageSize + INT_SIZE_IN_BYTES);
                 if (pageOffset < messageSize) {
-                    //TODO:2015-09-23:mikhail.mikhaylov: Have a proper exception here.
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
                 }
             }
 
             //noinspection NumericCastThatLosesPrecision
-            pageOffset -= (int) messageSize;
+            pageOffset -= messageSize;
             //noinspection NumericCastThatLosesPrecision
-            final ByteBuffer messageBuffer = ByteBuffer.allocate((int) messageSize);
-            messageBuffer.put(page, pageOffset, (int) messageSize);
+            final ByteBuffer messageBuffer = ByteBuffer.allocate(messageSize);
+            messageBuffer.put(page, pageOffset, messageSize);
 
             final AggregateStorageRecord record =
                     AggregateStorageRecord.parseFrom(messageBuffer.array());
