@@ -30,7 +30,9 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.spine3.server.storage.filesystem.Helper.checkFileExists;
 import static org.spine3.server.storage.filesystem.Helper.closeSilently;
+import static org.spine3.server.storage.filesystem.Helper.tryOpenFileInputStream;
 import static org.spine3.util.Events.toEventRecord;
 
 public class FileSystemEventStorage extends EventStorage {
@@ -95,7 +97,7 @@ public class FileSystemEventStorage extends EventStorage {
         @Override
         public EventRecord next() {
 
-            checkFileExists();
+            checkFileExists(file);
             checkHasNextBytes();
 
             EventStoreRecord storeRecord = parseEventRecord();
@@ -115,21 +117,16 @@ public class FileSystemEventStorage extends EventStorage {
             try {
                 event = EventStoreRecord.parseDelimitedFrom(getInputStream());
             } catch (IOException e) {
-                throw new RuntimeException("Failed read event record from file: " + file.getAbsolutePath(), e);
+                throw new RuntimeException("Failed to read event record from file: " + file.getAbsolutePath(), e);
             }
             return event;
         }
 
-        @SuppressWarnings("OverlyBroadCatchBlock")
         private InputStream getInputStream() {
 
             if (bufferedInputStream == null || fileInputStream == null) {
-                try {
-                    fileInputStream = new FileInputStream(file);
-                    bufferedInputStream = new BufferedInputStream(fileInputStream);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to get input stream from file: " + file.getAbsolutePath(), e);
-                }
+                fileInputStream = tryOpenFileInputStream(file);
+                bufferedInputStream = new BufferedInputStream(fileInputStream);
             }
 
             return bufferedInputStream;
@@ -139,12 +136,6 @@ public class FileSystemEventStorage extends EventStorage {
             if (!areResourcesReleased) {
                 closeSilently(fileInputStream, bufferedInputStream);
                 areResourcesReleased = true;
-            }
-        }
-
-        private void checkFileExists() {
-            if (!file.exists()) {
-                throw new IllegalStateException("No such file: " + file.getAbsolutePath());
             }
         }
 

@@ -20,15 +20,11 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.spine3.server.Entity;
-
 import java.io.File;
 import java.io.IOException;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.util.Identifiers.idToString;
 
 /*
  * Provides with file system storage paths
@@ -87,11 +83,9 @@ class FileSystemStoragePathHelper {
         return fileStoragePath + EVENT_STORE_FILE_NAME;
     }
 
-    protected static String getEntityFilePath(Entity entity) {
+    protected static String getEntityStoreFilePath(String entityId) {
         checkConfigured();
-        checkNotNull(entity.getId(), "Entity id shouldn't be null");
-        final String idString = idToString(entity.getId());
-        final String filePath = fileStoragePath + ENTITY_STORE_DIR + idString;
+        final String filePath = fileStoragePath + ENTITY_STORE_DIR + entityId;
         return filePath;
     }
 
