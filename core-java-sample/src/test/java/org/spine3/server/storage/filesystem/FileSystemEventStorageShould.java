@@ -20,16 +20,22 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.test.project.event.ProjectStarted;
 
 import java.util.Iterator;
+import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.Helper.*;
+import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
+import static org.spine3.server.storage.filesystem.Helper.configure;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
@@ -51,7 +57,6 @@ public class FileSystemEventStorageShould {
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-        cleanTestData();
     }
 
     @Test
@@ -67,7 +72,7 @@ public class FileSystemEventStorageShould {
     }
 
     @Test
-    public void save_and_read_event() {
+    public void save_and_read_events() {
 
         final EventRecord expected = projectCreated(projectId);
         STORAGE.store(expected);
@@ -78,15 +83,55 @@ public class FileSystemEventStorageShould {
 
         final EventRecord actual = iterator.next();
 
-        assertEquals(expected.getEvent(), actual.getEvent());
-        assertEquals(expected.getContext(), actual.getContext());
+        assertEventRecordsAreEqual(expected, actual);
 
         assertFalse(iterator.hasNext());
     }
 
+    @Test
+    public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
+
+        final List<EventRecord> expectedRecords = newArrayList(projectCreated(projectId), projectStarted(projectId));
+
+        for (EventRecord r : expectedRecords) {
+            STORAGE.store(r);
+        }
+
+        final Iterator<EventRecord> iteratorFirst = STORAGE.allEvents();
+        final List<EventRecord> actualRecordsFirst = newArrayList(iteratorFirst);
+        assertEventRecordListsAreEqual(expectedRecords, actualRecordsFirst);
+
+        final Iterator<EventRecord> iteratorSecond = STORAGE.allEvents();
+        final List<EventRecord> actualRecordsSecond = newArrayList(iteratorSecond);
+        assertEventRecordListsAreEqual(expectedRecords, actualRecordsSecond);
+    }
+
+    private static void assertEventRecordListsAreEqual(List<EventRecord> expectedRecords, List<EventRecord> actualRecords) {
+        if (expectedRecords.size() != actualRecords.size()) {
+            fail("Expected records are not equal to actual");
+        }
+        for (int i = 0; i < expectedRecords.size(); i++) {
+            assertEventRecordsAreEqual(expectedRecords.get(i), actualRecords.get(i));
+        }
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static void assertEventRecordsAreEqual(EventRecord expected, EventRecord actual) {
+        assertEquals(expected.getEvent(), actual.getEvent());
+        assertEquals(expected.getContext(), actual.getContext());
+    }
+
+
     public static EventRecord projectCreated(ProjectId projectId) { // TODO[alexander.litus]: use method from testutils
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
+        final EventRecord.Builder builder = EventRecord.newBuilder().setEvent(toAny(event));
+        return builder.build();
+    }
+
+    public static EventRecord projectStarted(ProjectId projectId) { // TODO[alexander.litus]: use method from testutils
+
+        final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();
         final EventRecord.Builder builder = EventRecord.newBuilder().setEvent(toAny(event));
         return builder.build();
     }
