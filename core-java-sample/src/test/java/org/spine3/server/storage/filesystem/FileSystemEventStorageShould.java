@@ -42,8 +42,8 @@ public class FileSystemEventStorageShould {
     public void setUpTest() {
 
         STORAGE.releaseResources();
-        cleanTestData();
         configure(FileSystemEventStorageShould.class);
+        cleanTestData();
 
         projectId = ProjectId.newBuilder().setId("project_id").build();
     }
