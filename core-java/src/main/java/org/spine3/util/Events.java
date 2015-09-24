@@ -29,6 +29,7 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -182,6 +183,17 @@ public class Events {
         final Any any = eventRecord.getEvent();
         final Message result = Messages.fromAny(any);
         return result;
+    }
+
+    /**
+     * Converts EventStoreRecord to EventRecord.
+     */
+    @SuppressWarnings("TypeMayBeWeakened")
+    public static EventRecord toEventRecord(EventStoreRecord storeRecord) {
+        final EventRecord.Builder builder = EventRecord.newBuilder()
+                .setEvent(storeRecord.getEvent())
+                .setContext(storeRecord.getContext());
+        return builder.build();
     }
 
     @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
