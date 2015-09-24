@@ -57,7 +57,7 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Nullable
-    // TODO[alexander.litus]: this method may be needed later in API
+    // TODO:2015.09.24:alexander.litus: this method may be needed later in API
     // @Override
     protected EventStoreRecord read(EventId eventId) {
 
