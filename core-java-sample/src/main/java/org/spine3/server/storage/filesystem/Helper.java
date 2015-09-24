@@ -29,12 +29,15 @@ import org.spine3.server.storage.EventStoreRecord;
 import javax.annotation.Nullable;
 import java.io.*;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getCommandStoreFilePath;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEventStoreFilePath;
 
 /**
+ * Util class for working with file system
  * TODO:2015-09-22:mikhail.mikhaylov:
  * This class should replace {@code org.spine3.sample.server.FileSystemHelper}.
  * Also, the old mechanism of working
@@ -49,21 +52,9 @@ class Helper {
     private static final Logger LOG = LoggerFactory.getLogger(Helper.class);
 
     @SuppressWarnings("StaticNonFinalField")
-    private static String fileStoragePath = null;
-
-    private static final String COMMAND_STORE_FILE_NAME = "/command-store";
-    private static final String EVENT_STORE_FILE_NAME = "/event-store";
-
-    private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
-    private static final String PATH_DELIMITER = "/";
-
-    public static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
-
-    @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;
 
-    private Helper() {
-    }
+    private Helper() {}
 
     /**
      * Configures helper with file storage path.
@@ -71,9 +62,23 @@ class Helper {
      * @param executorClass execution context class. Is used to choose target directory.
      */
     public static void configure(Class executorClass) {
-        final String tempDir = getTempDir().getAbsolutePath();
+        FileSystemStoragePathHelper.configure(executorClass);
+    }
 
-        fileStoragePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
+    @SuppressWarnings("TypeMayBeWeakened")
+    public static void write(CommandStoreRecord record) {
+
+        final String filePath = getCommandStoreFilePath();
+        File file = new File(filePath);
+        writeMessage(file, record);
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    public static void write(EventStoreRecord record) {
+
+        final String filePath = getEventStoreFilePath();
+        File file = new File(filePath);
+        writeMessage(file, record);
     }
 
     /**
@@ -81,7 +86,7 @@ class Helper {
      */
     public static void cleanTestData() {
 
-        final File folder = new File(fileStoragePath);
+        final File folder = new File(getFileStoragePath());
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
@@ -93,6 +98,13 @@ class Helper {
         }
     }
 
+    /**
+     * Returns path for aggregate storage file.
+     *
+     * @param aggregateType     the type of an aggregate
+     * @param aggregateIdString String representation of aggregate id
+     * @return absolute path string
+     */
     /**
      * Returns path for aggregate storage file.
      *
@@ -245,32 +257,11 @@ class Helper {
     }
 
     private static File makeBackupCopy(File sourceFile) throws IOException {
-        File backupFile = new File(sourceFile.toPath() + "_backup");
+        final String backupFilePath = getBackupFilePath(sourceFile);
+        File backupFile = new File(backupFilePath);
 
         copy(sourceFile.toPath(), backupFile.toPath());
 
         return backupFile;
-    }
-
-    @SuppressWarnings("StaticVariableUsedBeforeInitialization")
-    private static void checkConfigured() {
-        if (isNullOrEmpty(fileStoragePath)) {
-            throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
-        }
-    }
-
-    private static File getTempDir() {
-        try {
-            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
-            File result = new File(tmpFile.getParent());
-            if (tmpFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                tmpFile.delete();
-            }
-            return result;
-        } catch (IOException e) {
-            propagate(e);
-        }
-        throw new IllegalStateException("Unable to get temporary directory for storage");
     }
 }

@@ -52,7 +52,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             Throwables.propagate(new NullPointerException(INVALID_AGGREGATE_ID));
         }
 
-        final String aggregateFilePath = Helper.getAggregateFilePath(shortTypeName, r.getAggregateId());
+        final String aggregateFilePath = FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
         if (!aggregateFile.exists()) {
@@ -73,7 +73,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToString(id);
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(new File(
-                Helper.getAggregateFilePath(shortTypeName, stringId)));
+                FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, stringId)));
         return iterator;
     }
 
