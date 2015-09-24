@@ -70,7 +70,7 @@ public abstract class EventStorage {
     protected abstract void write(EventStoreRecord record);
 
     /**
-     * Releases storage resources (closes I/O streams etc)
+     * Releases storage resources (closes I/O streams etc) if needed.
      */
     protected abstract void releaseResources();
 }
