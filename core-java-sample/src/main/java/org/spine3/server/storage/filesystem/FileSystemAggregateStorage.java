@@ -27,8 +27,6 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.spine3.util.Identifiers.idToString;
@@ -116,13 +114,14 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     private static class FileIterator implements Iterator<AggregateStorageRecord> {
 
         //Note: each of these objects instantly allocates 100K memory.
-        public static final int PAGE_SIZE = 102400;
+        public static final int DEFAULT_PAGE_SIZE = 102400;
         public static final int LONG_SIZE_IN_BYTES = 8;
 
         private final File file;
         private final long fileLength;
 
-        private final byte[] page = new byte[PAGE_SIZE];
+        private int pageSize = DEFAULT_PAGE_SIZE;
+        private byte[] page = new byte[DEFAULT_PAGE_SIZE];
 
         private long fileOffset; //the whole file offset
         private int pageOffset; // page offset
@@ -161,9 +160,18 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
         }
 
         private void allocatePage() throws IOException {
-            if (fileOffset > PAGE_SIZE + pageOffset) {
-                fileOffset -= PAGE_SIZE - pageOffset;
-                pageOffset = PAGE_SIZE;
+            allocatePage(pageSize);
+        }
+
+        private void allocatePage(int minimumPageSize) throws IOException {
+            if (minimumPageSize > pageSize) {
+                pageSize = minimumPageSize;
+                page = new byte[pageSize];
+            }
+
+            if (fileOffset > pageSize + pageOffset) {
+                fileOffset -= pageSize - pageOffset;
+                pageOffset = pageSize;
             } else {
                 //noinspection NumericCastThatLosesPrecision
                 pageOffset += (int) fileOffset;
@@ -203,7 +211,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             long messageSize = longBuffer.getLong();
 
             if (pageOffset < messageSize) {
-                allocatePage();
+                ////todo:2015-09-24:mikhail.mikhaylov: migrate to int
+                allocatePage((int) messageSize + LONG_SIZE_IN_BYTES);
                 if (pageOffset < messageSize) {
                     //TODO:2015-09-23:mikhail.mikhaylov: Have a proper exception here.
                     throw new InvalidObjectException(INVALID_OBJECT_EXCEPTION);
