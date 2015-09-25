@@ -20,14 +20,15 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.CommandClass;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
@@ -108,16 +109,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @return command types handled by aggregate
      */
     @CheckReturnValue
-    public static Set<CommandClass> getCommandClasses(Class<? extends Aggregate> clazz) {
-        Set<Class<? extends Message>> messageClasses = getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
-        Iterable<CommandClass> transformed = Iterables.transform(messageClasses, new Function<Class<? extends Message>, CommandClass>() {
-            @SuppressWarnings("NullableProblems") // The set we transform cannot have null entries.
-            @Override
-            public CommandClass apply(Class<? extends Message> input) {
-                return CommandClass.of(input);
-            }
-        });
-        return ImmutableSet.copyOf(transformed);
+    public static Set<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
+        return getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
     }
 
     /**
@@ -373,7 +366,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @param event          the event for which to create the context
      * @param currentState   the state of the aggregated after the event was applied
      * @param whenModified   the moment of the aggregate modification for this event
-     * @param currentVersion the version of the aggregate after the event was applied  @return new instance of the {@code EventContext}
+     * @param currentVersion the version of the aggregate after the event was applied
+     * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {

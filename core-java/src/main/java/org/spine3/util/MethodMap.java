@@ -42,9 +42,33 @@ public class MethodMap {
     private final ImmutableMap<Class<? extends Message>, Method> map;
 
     public MethodMap(Class<?> clazz, Predicate<Method> filter) {
-        this.map = ImmutableMap.<Class<? extends Message>, Method>builder().putAll(
-                Methods.scan(clazz, filter))
+        this(Methods.scan(clazz, filter));
+    }
+
+    private MethodMap(Map<Class<? extends Message>, Method> map) {
+        this.map = ImmutableMap.<Class<? extends Message>, Method>builder()
+                .putAll(map)
                 .build();
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final Map<Class<? extends Message>, Method> map = Maps.newHashMap();
+
+        public Builder addMany(Iterable<Class<? extends Message>> keys, Method value) {
+            for (Class<? extends Message> key : keys) {
+                map.put(key, value);
+            }
+            return this;
+        }
+
+        public MethodMap build() {
+            MethodMap result = new MethodMap(map);
+            return result;
+        }
     }
 
     /**

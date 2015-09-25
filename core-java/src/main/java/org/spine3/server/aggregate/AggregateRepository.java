@@ -23,8 +23,10 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.MultiHandler;
 import org.spine3.server.Repository;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -35,7 +37,7 @@ import java.util.List;
  * @param <A> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A> {
+public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>, MultiHandler {
 
     /**
      * Loads or creates an aggregate with the passed ID.
@@ -43,10 +45,10 @@ public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repos
      * @param id the id of the aggregate
      * @return loaded or newly created instance of the aggregate
      */
-//    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") /* We override the default behavior of loading. */
-//    @Nonnull
-//    @Override
-//    A load(I id);
+    @SuppressWarnings("AbstractMethodOverridesAbstractMethod") /* We override the default behavior of loading. */
+    @Nonnull
+    @Override
+    A load(I id);
 
     /**
      * Processes the command by dispatching it to a method of an aggregate.
