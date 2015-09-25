@@ -42,7 +42,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     private final String shortTypeName;
 
-    FileSystemAggregateStorage(String shortTypeName) {
+    /*package*/ FileSystemAggregateStorage(String shortTypeName) {
         this.shortTypeName = shortTypeName;
     }
 
