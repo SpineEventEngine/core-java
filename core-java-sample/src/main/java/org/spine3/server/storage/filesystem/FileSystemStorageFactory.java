@@ -28,7 +28,6 @@ import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 import org.spine3.util.Classes;
-import org.spine3.util.Identifiers;
 
 public class FileSystemStorageFactory implements StorageFactory {
 
