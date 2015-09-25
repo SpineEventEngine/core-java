@@ -21,6 +21,7 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
@@ -55,6 +56,11 @@ public class FileSystemEventStorageShould {
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        cleanTestData();
     }
 
     @Test

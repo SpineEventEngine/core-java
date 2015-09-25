@@ -21,6 +21,7 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.EntityStorage;
@@ -49,6 +50,11 @@ public class FileSystemEntityStorageShould {
         configure(FileSystemEntityStorageShould.class);
         cleanTestData();
         message = createMessage("testTypeUrl");
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        cleanTestData();
     }
 
     @Test
