@@ -22,7 +22,7 @@ package org.spine3.sample.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.sample.FileSystemSample;
+import org.spine3.sample.FileSystemBasedSample;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemHelper;
 
@@ -33,13 +33,13 @@ import org.spine3.server.storage.filesystem.FileSystemHelper;
  */
 public class FileSystemSampleServer extends BaseSampleServer {
 
-    private static final String STORAGE_PATH = FileSystemSample.STORAGE_PATH;
+    private static final String STORAGE_PATH = FileSystemBasedSample.STORAGE_PATH;
 
     /**
      * Main launches the server from the command line.
      */
     public static void main(String[] args) throws Exception {
-        FileSystemHelper.configure(FileSystemSample.class);
+        FileSystemHelper.configure(FileSystemBasedSample.class);
         final BaseSampleServer server = new FileSystemSampleServer();
         server.registerEventSubscribers();
         server.start();
