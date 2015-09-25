@@ -37,6 +37,11 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestDat
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 import static org.spine3.util.testutil.EventRecordFactory.*;
 
+/**
+ * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ *
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
 
