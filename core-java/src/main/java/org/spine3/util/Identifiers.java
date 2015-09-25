@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static org.spine3.protobuf.Messages.fromAny;
 
 /*
  * Utility class for Entity ids conversation.
@@ -71,7 +72,7 @@ public class Identifiers {
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or {@link com.google.protobuf.Message} id has no fields
      */
-    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
+    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention", "IfStatementWithTooManyBranches"})
     public static <I> String idToString(I id) {
 
         if (id == null) {
@@ -86,6 +87,9 @@ public class Identifiers {
 
         if (isSupportedCommonType) {
             result = id.toString();
+        } else if (id instanceof Any) {
+            final Message messageFromAny = fromAny((Any) id);
+            result = idMessageToString(messageFromAny);
         } else if (id instanceof Message) {
             result = idMessageToString((Message) id);
         } else {
@@ -222,7 +226,7 @@ public class Identifiers {
      * </ul>
      */
     public static Object idFromAny(Any idInAny) {
-        Message extracted = Messages.fromAny(idInAny);
+        Message extracted = fromAny(idInAny);
 
         //noinspection ChainOfInstanceofChecks
         if (extracted instanceof StringValue) {
