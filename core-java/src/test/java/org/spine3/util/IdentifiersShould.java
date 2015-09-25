@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import javax.annotation.Nullable;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -166,6 +168,17 @@ public class IdentifiersShould {
     }
 
     @Test
+    public void convert_to_string_message_id_wrapped_in_Any() {
+
+        final TestIdWithStringField messageToWrap = TestIdWithStringField.newBuilder().setId(TEST_ID).build();
+        final Any any = toAny(messageToWrap);
+
+        final String result = idToString(any);
+
+        assertEquals(TEST_ID, result);
+    }
+
+    @Test
     @SuppressWarnings("LocalVariableNamingConvention")
     public void remove_chars_not_allowed_in_windows_file_name_from_string_when_convert_id_to_string() {
 
@@ -174,7 +187,6 @@ public class IdentifiersShould {
 
         assertTrue(result.isEmpty());
     }
-
 
 
     private static final Function<ProjectId, String> ID_TO_STRING_CONVERTER = new Function<ProjectId, String>() {

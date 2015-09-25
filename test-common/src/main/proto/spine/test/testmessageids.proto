@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.project;
+package spine.test;
 
 option java_package="org.spine3.test";
 option java_multiple_files = true;
