@@ -194,6 +194,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             fis.close();
         }
 
+        @SuppressWarnings("ReturnOfNull")
         private AggregateStorageRecord readEntry() throws IOException {
             if (pageOffset < INT_SIZE_IN_BYTES) {
                 allocatePage();
