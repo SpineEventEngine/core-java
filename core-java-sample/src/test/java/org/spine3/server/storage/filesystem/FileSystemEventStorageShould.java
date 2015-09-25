@@ -32,8 +32,8 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
-import static org.spine3.server.storage.filesystem.Helper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 import static org.spine3.util.testutil.EventRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})

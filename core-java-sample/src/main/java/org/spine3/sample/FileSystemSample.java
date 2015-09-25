@@ -22,8 +22,9 @@ package org.spine3.sample;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
+import org.spine3.server.storage.filesystem.FileSystemHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,15 @@ import static com.google.common.base.Throwables.propagate;
 public class FileSystemSample extends BaseSample {
 
     public static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
+
+    public static void main(String[] args) {
+
+        FileSystemHelper.configure(FileSystemSample.class);
+
+        BaseSample sample = new FileSystemSample();
+
+        sample.execute();
+    }
 
     public static File getTempDir() {
         try {
@@ -57,15 +67,12 @@ public class FileSystemSample extends BaseSample {
 
     @Override
     protected StorageFactory storageFactory() {
-        return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
+        return new FileSystemStorageFactory();
     }
 
     @Override
     protected Logger log() {
         return LogSingleton.INSTANCE.value;
-    }
-
-    private FileSystemSample() {
     }
 
     private enum LogSingleton {
@@ -76,13 +83,5 @@ public class FileSystemSample extends BaseSample {
 
     }
 
-    public static void main(String[] args) {
-        final String tempDir = getTempDir().getAbsolutePath();
-        FileSystemHelper.configure(tempDir + STORAGE_PATH);
-
-        BaseSample sample = new FileSystemSample();
-
-        sample.execute();
-    }
-
+    private FileSystemSample() {}
 }

@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.sample.FileSystemSample;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.filesystem.FileSystemHelper;
 
 /**
  * File system Server implementation.
@@ -38,7 +39,7 @@ public class FileSystemSampleServer extends BaseSampleServer {
      * Main launches the server from the command line.
      */
     public static void main(String[] args) throws Exception {
-        FileSystemHelper.configure(STORAGE_PATH);
+        FileSystemHelper.configure(FileSystemSample.class);
         final BaseSampleServer server = new FileSystemSampleServer();
         server.registerEventSubscribers();
         server.start();

@@ -42,14 +42,14 @@ import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*
  * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
-class Helper {
+public class FileSystemHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Helper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FileSystemHelper.class);
 
     @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;
 
-    private Helper() {}
+    private FileSystemHelper() {}
 
     /**
      * Configures helper with file storage path.

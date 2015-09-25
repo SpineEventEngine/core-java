@@ -31,9 +31,10 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.server.storage.filesystem.Helper.checkFileExists;
-import static org.spine3.server.storage.filesystem.Helper.closeSilently;
-import static org.spine3.server.storage.filesystem.Helper.tryOpenFileInputStream;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.checkFileExists;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.tryOpenFileInputStream;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
 import static org.spine3.util.Events.toEventRecord;
 
 public class FileSystemEventStorage extends EventStorage {
@@ -50,7 +51,7 @@ public class FileSystemEventStorage extends EventStorage {
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = new File(FileSystemStoragePathHelper.getEventStoreFilePath());
+        final File file = new File(getEventStoreFilePath());
 
         final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
 
@@ -62,7 +63,7 @@ public class FileSystemEventStorage extends EventStorage {
     @Override
     protected void write(EventStoreRecord record) {
         checkNotNull(record, "Record shouldn't be null.");
-        Helper.write(record);
+        FileSystemHelper.write(record);
     }
 
     @Override

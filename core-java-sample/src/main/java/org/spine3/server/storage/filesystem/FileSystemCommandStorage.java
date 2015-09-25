@@ -36,6 +36,6 @@ public class FileSystemCommandStorage extends CommandStorage {
     @Override
     protected void write(CommandStoreRecord record) {
         checkNotNull(record, "CommandRecord shouldn't be null.");
-        Helper.write(record);
+        FileSystemHelper.write(record);
     }
 }

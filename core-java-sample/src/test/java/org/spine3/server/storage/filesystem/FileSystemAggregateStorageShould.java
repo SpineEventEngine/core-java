@@ -27,15 +27,15 @@ import org.junit.Test;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.project.ProjectId;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
-import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
-import static org.spine3.server.storage.filesystem.Helper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequentialRecords;
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
 
@@ -67,7 +67,7 @@ public class FileSystemAggregateStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        Helper.cleanTestData();
+        cleanTestData();
     }
 
     @Test
@@ -123,7 +123,7 @@ public class FileSystemAggregateStorageShould {
         final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
 
-        Collections.reverse(records); // expected records should be in reverse order
+        reverse(records); // expected records should be in reverse order
 
         assertEquals(records, actual);
     }

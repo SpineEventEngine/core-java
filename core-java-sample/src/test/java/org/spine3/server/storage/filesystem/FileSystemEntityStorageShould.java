@@ -27,8 +27,8 @@ import org.spine3.server.storage.EntityStorage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
-import static org.spine3.server.storage.filesystem.Helper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
