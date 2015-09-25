@@ -40,27 +40,61 @@ import static org.spine3.util.Identifiers.idToString;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
+    private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
+
     @Test
-    public void convert_to_string_registered_project_id_message() {
+    public void return_same_string_when_convert_string() {
 
-        Identifiers.IdConverterRegistry.instance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
+        final TestIdWithStringField id = TestIdWithStringField.newBuilder().setId(TEST_ID).build();
 
-        final String expected = "project123";
-        ProjectId id = ProjectId.newBuilder().setId(expected).build();
+        final String result = idToString(id);
+
+        assertEquals(TEST_ID, result);
+    }
+
+    @Test
+    public void convert_to_string_integer_id() {
+
+        final Integer value = 256;
+        final String expected = value.toString();
+        final TestIdWithIntField id = TestIdWithIntField.newBuilder().setId(value).build();
+
         final String actual = idToString(id);
 
         assertEquals(expected, actual);
     }
 
     @Test
-    public void convert_to_string_message_id_with_string_field() {
+    public void convert_to_string_long_id() {
 
-        final String expected = "user1234";
-        final TestIdWithStringField id = TestIdWithStringField.newBuilder().setId(expected).build();
+        final Long value = 256L;
+        final String expected = value.toString();
+        final TestIdWithLongField id = TestIdWithLongField.newBuilder().setId(value).build();
 
         final String actual = idToString(id);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void convert_to_string_registered_project_id_message() {
+
+        Identifiers.IdConverterRegistry.instance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
+
+        ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
+        final String result = idToString(id);
+
+        assertEquals(TEST_ID, result);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_string_field() {
+
+        final TestIdWithStringField id = TestIdWithStringField.newBuilder().setId(TEST_ID).build();
+
+        final String result = idToString(id);
+
+        assertEquals(TEST_ID, result);
     }
 
     @Test
@@ -102,13 +136,12 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_message_id_with_message_field() {
 
-        final String expected = "user123123";
-        final TestIdWithStringField value = TestIdWithStringField.newBuilder().setId(expected).build();
+        final TestIdWithStringField value = TestIdWithStringField.newBuilder().setId(TEST_ID).build();
         final TestIdWithMessageField idToConvert = TestIdWithMessageField.newBuilder().setId(value).build();
 
-        final String actual = idToString(idToConvert);
+        final String result = idToString(idToConvert);
 
-        assertEquals(expected, actual);
+        assertEquals(TEST_ID, result);
     }
 
     @Test
@@ -119,7 +152,11 @@ public class IdentifiersShould {
         final Integer number = 256;
 
         final TestIdWithStringField message = TestIdWithStringField.newBuilder().setId(nestedString).build();
-        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder().setString(outerString).setInt(number).setMessage(message).build();
+        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder()
+                .setString(outerString)
+                .setInt(number)
+                .setMessage(message)
+                .build();
 
         final String actual = idToString(idToConvert);
 
@@ -127,6 +164,18 @@ public class IdentifiersShould {
         assertTrue(actual.contains(nestedString));
         assertTrue(actual.contains(number.toString()));
     }
+
+    @Test
+    @SuppressWarnings("LocalVariableNamingConvention")
+    public void remove_chars_not_allowed_in_windows_file_name_from_string_when_convert_id_to_string() {
+
+        final String charsNotAllowedInWindowsFileName = "\\/*?\"<>|";
+        final String result = idToString(charsNotAllowedInWindowsFileName);
+
+        assertTrue(result.isEmpty());
+    }
+
+
 
     private static final Function<ProjectId, String> ID_TO_STRING_CONVERTER = new Function<ProjectId, String>() {
         @Override

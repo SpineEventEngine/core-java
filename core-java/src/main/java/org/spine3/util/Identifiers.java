@@ -31,7 +31,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.protobuf.TextFormat.shortDebugString;
 
 /*
  * Utility class for Entity ids conversation.
@@ -42,14 +44,19 @@ public class Identifiers {
      * Delimiter between user id and time in string representation
      */
     public static final char USER_ID_AND_TIME_DELIMITER = '@';
+
     /*
      * Delimiter between command time and event time delta in string representation
      */
     public static final char TIME_DELIMITER = '+';
+
     /*
      * Null message or field string representation
      */
     public static final String NULL_ID_OR_FIELD = "NULL";
+
+    private static final String EMPTY_STRING = "";
+
 
     private Identifiers() {}
 
@@ -85,9 +92,12 @@ public class Identifiers {
             throw unsupportedIdType(id);
         }
 
-        if (result.isEmpty()) {
+        if (isNullOrEmpty(result) || result.trim().isEmpty()) {
             result = NULL_ID_OR_FIELD;
         }
+
+        result = result.trim();
+        result = eliminateCharsNotAllowedInWindowsFileName(result);
 
         return result;
     }
@@ -126,13 +136,36 @@ public class Identifiers {
 
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);
-            } else if (values.size() == 1) {
+            } else {
                 result = object.toString();
             }
         } else {
-            result = TextFormat.shortDebugString(message);
+            result = messageWithMultipleFieldsToString(message);
         }
 
+        return result;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static String messageWithMultipleFieldsToString(Message message) {
+        String result;
+        result = shortDebugString(message)
+                .replace(": ", "=")
+                .replace(" ", "; ");
+        return result;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static String eliminateCharsNotAllowedInWindowsFileName(String input) {
+        String result = input
+                .replace("\\", EMPTY_STRING)
+                .replace("/", EMPTY_STRING)
+                .replace("*", EMPTY_STRING)
+                .replace("?", EMPTY_STRING)
+                .replace("\"", EMPTY_STRING)
+                .replace("<", EMPTY_STRING)
+                .replace(">", EMPTY_STRING)
+                .replace("|", EMPTY_STRING);
         return result;
     }
 
