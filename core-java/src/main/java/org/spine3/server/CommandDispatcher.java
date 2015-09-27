@@ -29,6 +29,7 @@ import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 
+import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class CommandDispatcher {
     /**
      * @return singleton instance of {@code CommandDispatcher}
      */
+    @CheckReturnValue
     public static CommandDispatcher getInstance() {
         return Singleton.INSTANCE.value;
     }
@@ -127,6 +129,7 @@ public class CommandDispatcher {
      * @throws InvocationTargetException   if an exception occurs during command handling
      * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
      */
+    @CheckReturnValue
     List<EventRecord> dispatch(Message command, CommandContext context)
             throws InvocationTargetException {
 
@@ -147,10 +150,12 @@ public class CommandDispatcher {
         handlersByCommandClass.putAll(subscribers);
     }
 
+    @CheckReturnValue
     public CommandHandlerMethod getHandler(CommandClass cls) {
         return handlersByCommandClass.get(cls);
     }
 
+    @CheckReturnValue
     public boolean handlerRegistered(CommandClass cls) {
         return handlersByCommandClass.containsKey(cls);
     }

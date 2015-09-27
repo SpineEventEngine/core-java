@@ -26,6 +26,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.Repository;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -62,6 +63,7 @@ public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repos
      * @throws InvocationTargetException if an exception occurs during command dispatching
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
+    @CheckReturnValue
     List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException;
 
     /**
@@ -69,5 +71,6 @@ public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repos
      *
      * @return a positive integer value
      */
+    @CheckReturnValue
     int getSnapshotTrigger();
 }

@@ -370,6 +370,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
+    @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
 
         EventId eventId = Events.createId(commandId, whenModified);
@@ -407,6 +408,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      *
      * @return new snapshot
      */
+    @CheckReturnValue
     public Snapshot toSnapshot() {
         final Any state = Any.pack(getState());
         final int version = getVersion();
@@ -440,21 +442,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
             EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 
+        @CheckReturnValue
         boolean contains(Class<? extends Aggregate> clazz) {
             boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
+        @CheckReturnValue
         MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
             MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
+        @CheckReturnValue
         MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
             MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
+        @CheckReturnValue
         static Registry instance() {
             return Singleton.INSTANCE.value;
         }

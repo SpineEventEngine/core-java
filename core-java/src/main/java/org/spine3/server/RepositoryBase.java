@@ -22,6 +22,7 @@ package org.spine3.server;
 
 import org.spine3.server.storage.EntityStorage;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -63,6 +64,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     /**
      * @return the class of IDs used by this repository
      */
+    @CheckReturnValue
     protected Class<I> getIdClass() {
         return TypeInfo.getIdClass(getClass());
     }
@@ -70,6 +72,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     /**
      * @return the class of entities managed by this repository
      */
+    @CheckReturnValue
     protected Class<E> getEntityClass() {
         return TypeInfo.getEntityClass(getClass());
     }
@@ -87,6 +90,13 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
         @SuppressWarnings("unused") EntityStorage ignored = (EntityStorage)storage;
     }
 
+
+    /**
+     * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
+     * @see #assignStorage(Object)
+     */
+    @CheckReturnValue
+    @Nullable
     protected Object getStorage() {
         return this.storage;
     }
