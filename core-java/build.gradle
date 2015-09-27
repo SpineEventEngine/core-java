@@ -1,3 +1,11 @@
+buildscript {
+    dependencies {
+        classpath "org.spine3.tools:proto-lookup-plugin:1.0"
+    }
+}
+
 dependencies {
     compile project(':test-common')
 }
+
+apply plugin: 'org.spine3.tools.protolookup'
