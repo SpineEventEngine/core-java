@@ -57,7 +57,8 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Nullable
-    @Override
+    // TODO:2015.09.24:alexander.litus: this method may be needed later in API
+    // @Override
     protected EventStoreRecord read(EventId eventId) {
 
         final String id = idToString(eventId);
@@ -70,6 +71,11 @@ class InMemoryEventStorage extends EventStorage {
         checkNotNull(record);
         checkNotNull(record.getEventId());
         storage.put(record.getEventId(), record);
+    }
+
+    @Override
+    protected void releaseResources() {
+        // NOP
     }
 
     private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {

@@ -18,29 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.server.storage.filesystem;
 
-import org.spine3.test.project.ProjectId;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStoreRecord;
 
-/**
- * The utility class which is used for creating Aggregate Root Ids for tests.
- *
- * @author Mikhail Mikhaylov
- */
-@SuppressWarnings("UtilityClass")
-public class AggregateIdFactory {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    public static final String DUMMY_PROJECT_ID = "dummy_project_id";
+public class FileSystemCommandStorage extends CommandStorage {
 
-    private AggregateIdFactory() {
+    protected static CommandStorage newInstance() {
+        return new FileSystemCommandStorage();
     }
 
-    /**
-     * Generates the same ProjectId for each request.
-     *
-     * @return ProjectId instance
-     */
-    public static ProjectId createCommon() {
-        return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
+    private FileSystemCommandStorage() {}
+
+    @Override
+    protected void write(CommandStoreRecord record) {
+        checkNotNull(record, "CommandRecord shouldn't be null.");
+        FileSystemHelper.write(record);
     }
 }

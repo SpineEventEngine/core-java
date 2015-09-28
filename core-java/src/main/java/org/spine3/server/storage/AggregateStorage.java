@@ -119,4 +119,8 @@ public abstract class AggregateStorage<I> {
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
+    /**
+     * Releases storage resources (closes I/O streams etc) if needed.
+     */
+    protected abstract void releaseResources();
 }

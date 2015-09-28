@@ -31,7 +31,11 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
+import static com.google.protobuf.TextFormat.shortDebugString;
+import static org.spine3.protobuf.Messages.fromAny;
 
 /*
  * Utility class for Entity ids conversation.
@@ -98,15 +102,21 @@ public class Identifiers {
 
         if (isSupportedCommonType) {
             result = id.toString();
+        } else if (id instanceof Any) {
+            final Message messageFromAny = fromAny((Any) id);
+            result = idMessageToString(messageFromAny);
         } else if (id instanceof Message) {
             result = idMessageToString((Message) id);
         } else {
             throw unsupportedIdType(id);
         }
 
-        if (result.isEmpty()) {
+        if (isNullOrEmpty(result) || result.trim().isEmpty()) {
             result = NULL_ID_OR_FIELD;
         }
+
+        result = result.trim();
+        result = escapeCharsNotAllowedInWindowsFileName(result);
 
         return result;
     }
@@ -146,9 +156,56 @@ public class Identifiers {
                 result = object.toString();
             }
         } else {
-            result = TextFormat.shortDebugString(message);
+            result = messageWithMultipleFieldsToString(message);
         }
 
+        return result;
+    }
+
+    @SuppressWarnings({"TypeMayBeWeakened", "LocalVariableNamingConvention"})
+    private static String messageWithMultipleFieldsToString(Message message) {
+
+        final Message messageWithEscapedFields = escapeStringFields(message);
+
+        String result = shortDebugString(messageWithEscapedFields);
+
+        result = result.replace(": ", "=");
+        return result;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static Message escapeStringFields(Message message) {
+
+        final Message.Builder result = message.toBuilder();
+        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
+
+        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
+
+            Object value = fields.get(descriptor);
+
+            if (descriptor.getJavaType() == STRING) {
+                Object stringValue = escapeCharsNotAllowedInWindowsFileName(value.toString());
+                result.setField(descriptor, stringValue);
+            } else {
+                result.setField(descriptor, value);
+            }
+        }
+
+        return result.build();
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static String escapeCharsNotAllowedInWindowsFileName(String input) {
+        String result = input
+                .replace("\\", "&#92;")
+                .replace("/", "&#47;")
+                .replace(":", "&#58;")
+                .replace("*", "&#42;")
+                .replace("?", "&#63;")
+                .replace("\"", "&#34;")
+                .replace("<", "&#60;")
+                .replace(">", "&#62;")
+                .replace("|", "&#124;");
         return result;
     }
 
@@ -205,7 +262,7 @@ public class Identifiers {
      * </ul>
      */
     public static Object idFromAny(Any idInAny) {
-        Message extracted = Messages.fromAny(idInAny);
+        Message extracted = fromAny(idInAny);
 
         //noinspection ChainOfInstanceofChecks
         if (extracted instanceof StringValue) {
@@ -221,6 +278,25 @@ public class Identifiers {
             return uInt64Value.getValue();
         }
         return extracted;
+    }
+
+    /**
+     * Converts the passed timestamp to human-readable string representation.
+     *
+     * @param timestamp  the value to convert
+     * @return string representation or {@code NULL_ID_OR_FIELD} if input is null
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static String timestampToString(Timestamp timestamp) {
+
+        if (timestamp == null) {
+            return NULL_ID_OR_FIELD;
+        }
+
+        String result = TimeUtil.toString(timestamp)
+                .replace(":", "-")
+                .replace("T", "_T");
+        return result;
     }
 
     private static <I> IllegalArgumentException unsupportedIdType(I id) {
@@ -274,15 +350,9 @@ public class Identifiers {
         }
 
         private static class TimestampToStringConverter implements Function<Timestamp, String> {
-            @SuppressWarnings("IfMayBeConditional")
-            @Nullable
             @Override
             public String apply(@Nullable Timestamp timestamp) {
-                if (timestamp != null) {
-                    return TimeUtil.toString(timestamp);
-                } else {
-                    return "";
-                }
+                return timestampToString(timestamp);
             }
         }
     }

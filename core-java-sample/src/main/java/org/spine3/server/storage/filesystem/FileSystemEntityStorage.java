@@ -18,37 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.server;
+package org.spine3.server.storage.filesystem;
 
-import org.spine3.server.aggregate.Snapshot;
-import org.spine3.server.aggregate.SnapshotStorage;
-
-import javax.annotation.Nullable;
-import java.util.Map;
+import com.google.protobuf.Message;
+import org.spine3.server.storage.EntityStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.writeEntity;
+import static org.spine3.util.Identifiers.idToString;
 
-/**
- * In-memory-based implementation of the {@link Snapshot} repository.
- */
-public class InMemorySnapshotStorage<I> implements SnapshotStorage<I> {
+public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final Map<I, Snapshot> snapshots = newHashMap();
-
-
-    @Override
-    public void store(I aggregateId, Snapshot snapshot) {
-        checkNotNull(aggregateId);
-        checkNotNull(snapshot);
-        snapshots.put(aggregateId, snapshot);
+    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
+        return new FileSystemEntityStorage<>();
     }
 
-    @Nullable
+    private FileSystemEntityStorage() {}
+
     @Override
-    public Snapshot load(I aggregateId) {
-        checkNotNull(aggregateId);
-        final Snapshot snapshot = snapshots.get(aggregateId);
-        return snapshot;
+    @SuppressWarnings({"ConstantConditions", "ReturnOfNull"})
+    public M read(I id) {
+
+        if (id == null) {
+            return null;
+        }
+
+        final String idString = idToString(id);
+
+        Message message = readEntity(idString);
+
+        //noinspection unchecked
+        return (M) message;
+    }
+
+    @Override
+    public void write(I id, M message) {
+
+        checkNotNull(id);
+        checkNotNull(message);
+
+        final String idString = idToString(id);
+
+        writeEntity(idString, message);
     }
 }

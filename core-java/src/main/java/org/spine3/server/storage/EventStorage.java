@@ -27,7 +27,6 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.util.Events;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 /**
@@ -63,15 +62,6 @@ public abstract class EventStorage {
     public abstract Iterator<EventRecord> allEvents();
 
     /**
-     * Reads event record from the storage by event id.
-     *
-     * @param eventId ID of the event to load
-     * @return a record instance or {@code null} if there is no record with such event ID
-     */
-    @Nullable
-    protected abstract EventStoreRecord read(EventId eventId);
-
-    /**
      * Writes record into the storage.
      *
      * @param record the record to write
@@ -79,4 +69,8 @@ public abstract class EventStorage {
      */
     protected abstract void write(EventStoreRecord record);
 
+    /**
+     * Releases storage resources (closes I/O streams etc) if needed.
+     */
+    protected abstract void releaseResources();
 }

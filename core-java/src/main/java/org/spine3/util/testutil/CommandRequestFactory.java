@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.util.testutil;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -28,7 +28,7 @@ import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 import org.spine3.test.project.command.CreateProject;
 
-import static org.spine3.testutil.ContextFactory.getCommandContext;
+import static org.spine3.util.testutil.ContextFactory.getCommandContext;
 
 /**
  * The utility class which is used for creating CommandRequests for tests.
@@ -47,7 +47,7 @@ public class CommandRequestFactory {
                 AggregateIdFactory.createCommon()).build());
 
         final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
-                .setContext(getCommandContext(userId, when))
+                .setContext(ContextFactory.getCommandContext(userId, when))
                 .setCommand(command)
                 .build();
         return dummyCommandRequest;

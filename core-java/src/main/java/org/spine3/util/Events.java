@@ -29,6 +29,7 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.util.Identifiers.*;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -51,7 +53,7 @@ public class Events {
     }
 
     static {
-        Identifiers.IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
+        IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
     }
 
     /**
@@ -184,6 +186,17 @@ public class Events {
         return result;
     }
 
+    /**
+     * Converts EventStoreRecord to EventRecord.
+     */
+    @SuppressWarnings("TypeMayBeWeakened")
+    public static EventRecord toEventRecord(EventStoreRecord storeRecord) {
+        final EventRecord.Builder builder = EventRecord.newBuilder()
+                .setEvent(storeRecord.getEvent())
+                .setContext(storeRecord.getContext());
+        return builder.build();
+    }
+
     @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Nullable
@@ -191,25 +204,25 @@ public class Events {
         public String apply(@Nullable EventId eventId) {
 
             if (eventId == null) {
-                return Identifiers.NULL_ID_OR_FIELD;
+                return NULL_ID_OR_FIELD;
             }
 
             final StringBuilder builder = new StringBuilder();
 
             final CommandId commandId = eventId.getCommandId();
 
-            String userId = Identifiers.NULL_ID_OR_FIELD;
+            String userId = NULL_ID_OR_FIELD;
 
             if (commandId != null && commandId.getActor() != null) {
                 userId = commandId.getActor().getValue();
             }
 
-            final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+            final String commandTime = (commandId != null) ? timestampToString(commandId.getTimestamp()) : "";
 
             builder.append(userId)
-                    .append(Identifiers.USER_ID_AND_TIME_DELIMITER)
+                    .append(USER_ID_AND_TIME_DELIMITER)
                     .append(commandTime)
-                    .append(Identifiers.TIME_DELIMITER)
+                    .append(TIME_DELIMITER)
                     .append(eventId.getDeltaNanos());
 
             return builder.toString();

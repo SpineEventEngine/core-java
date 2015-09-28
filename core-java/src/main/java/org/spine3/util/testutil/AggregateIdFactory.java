@@ -18,48 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.server;
+package org.spine3.util.testutil;
 
-import org.spine3.base.CommandRequest;
-import org.spine3.base.EventRecord;
-import org.spine3.server.MessageJournal;
-import org.spine3.server.aggregate.SnapshotStorage;
+import org.spine3.test.project.ProjectId;
 
 /**
- * This class provides factory methods for creating storages based on file system.
+ * The utility class which is used for creating Aggregate Root Ids for tests.
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemStorageFactory {
+public class AggregateIdFactory {
 
-    private FileSystemStorageFactory() {
+    public static final String DUMMY_PROJECT_ID = "dummy_project_id";
+
+    private AggregateIdFactory() {
     }
 
     /**
-     * Creates new instance of the event store.
+     * Generates the same ProjectId for each request.
      *
-     * @return new storage instance
+     * @return ProjectId instance
      */
-    public static MessageJournal<String, EventRecord> createEventStoreStorage() {
-        return FileSystemMessageJournal.newInstance(EventRecord.class);
-    }
-
-    /**
-     * Creates new snapshot storage.
-     *
-     * @return new storage instance
-     */
-    public static SnapshotStorage createSnapshotStorage() {
-        return new FileSystemSnapshotStorage();
-    }
-
-    /**
-     * Creates new command store.
-     *
-     * @return new storage instance
-     */
-    public static MessageJournal<String, CommandRequest> createCommandStoreStorage() {
-        return FileSystemMessageJournal.newInstance(CommandRequest.class);
+    public static ProjectId createCommon() {
+        return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
     }
 }

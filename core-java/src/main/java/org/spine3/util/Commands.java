@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
@@ -35,6 +34,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.util.Identifiers.*;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 
@@ -48,7 +48,7 @@ import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 public class Commands {
 
     static {
-        Identifiers.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
+        IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
     }
 
     private Commands() {
@@ -118,7 +118,7 @@ public class Commands {
                 userId = commandId.getActor().getValue();
             }
 
-            final String commandTime = (commandId != null) ? TimeUtil.toString(commandId.getTimestamp()) : "";
+            final String commandTime = (commandId != null) ? timestampToString(commandId.getTimestamp()) : "";
 
             builder.append(userId)
                     .append(USER_ID_AND_TIME_DELIMITER)
