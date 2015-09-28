@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.readEntity;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.writeEntity;
 import static org.spine3.util.Identifiers.idToString;
 
@@ -37,19 +37,14 @@ public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage
     private FileSystemEntityStorage() {}
 
     @Override
-    @SuppressWarnings({"ConstantConditions", "ReturnOfNull"})
     public M read(I id) {
-
-        if (id == null) {
-            return null;
-        }
-
         final String idString = idToString(id);
 
         Message message = readEntity(idString);
 
-        //noinspection unchecked
-        return (M) message;
+        @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
+        final M result = (M) message;
+        return result;
     }
 
     @Override

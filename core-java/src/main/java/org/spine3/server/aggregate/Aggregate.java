@@ -20,11 +20,9 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -34,9 +32,9 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.util.Classes;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
-import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -44,7 +42,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Identifiers.idToAny;
@@ -106,37 +103,16 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * Returns set of the command types handled by a given aggregate.
      *
      * @param clazz {@link Class} of the aggregate
-     * @return command types handled by aggregate
+     * @return immutable set of classes of commands
      */
     @CheckReturnValue
-    public static Set<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+    public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
+        return Classes.getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
     }
 
     /**
-     * Returns event/command types handled by given {@code Aggregate} class.
-     *
-     * @return immutable set of message classes or an empty set
-     */
-    @CheckReturnValue
-    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<? extends Aggregate> clazz, Predicate<Method> methodPredicate) {
-
-        Set<Class<? extends Message>> result = Sets.newHashSet();
-
-        for (Method method : clazz.getDeclaredMethods()) {
-
-            boolean methodMatches = methodPredicate.apply(method);
-
-            if (methodMatches) {
-                Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
-                result.add(firstParamType);
-            }
-        }
-        return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
-    }
-
-    /**
-     * Performs initialization of the instance.
+     * Performs initialization of the instance and registers this class of aggregates
+     * in the {@link Registry} if it is not registered yet.
      */
     private void init() {
         if (!this.initialized) {
@@ -349,7 +325,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      *
      * @return the list of event records
      */
-    @CheckReturnValue
     public List<EventRecord> commitEvents() {
         List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
@@ -370,6 +345,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
+    @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
 
         EventId eventId = Events.createId(commandId, whenModified);
@@ -407,6 +383,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      *
      * @return new snapshot
      */
+    @CheckReturnValue
     public Snapshot toSnapshot() {
         final Any state = Any.pack(getState());
         final int version = getVersion();
@@ -434,27 +411,31 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
         void register(Class<? extends Aggregate> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
-            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz));
+            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
             EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 
+        @CheckReturnValue
         boolean contains(Class<? extends Aggregate> clazz) {
             boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
+        @CheckReturnValue
         MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
             MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
+        @CheckReturnValue
         MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
             MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
+        @CheckReturnValue
         static Registry instance() {
             return Singleton.INSTANCE.value;
         }

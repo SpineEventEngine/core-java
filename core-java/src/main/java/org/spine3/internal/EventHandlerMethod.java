@@ -20,21 +20,27 @@
 
 package org.spine3.internal;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
+import org.spine3.server.MultiHandler;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -71,6 +77,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @param method a method to check
      * @return {@code true} if the method matches event handler conventions, {@code false} otherwise
      */
+    @CheckReturnValue
     public static boolean isEventHandler(Method method) {
 
         boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
@@ -96,13 +103,68 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @param target the target to scan
      * @return immutable map of event handling methods
      */
+    @CheckReturnValue
     public static Map<EventClass, EventHandlerMethod> scan(Object target) {
+        final ImmutableMap.Builder<EventClass, EventHandlerMethod> result = ImmutableMap.builder();
+
+        // Scan for declared event handler methods.
         MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
-        checkModifiers(handlers);
-        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
+
+        checkModifiers(handlers.values());
+
         for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
+            final EventClass eventClass = EventClass.of(entry.getKey());
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
-            builder.put(EventClass.of(entry.getKey()), handler);
+            result.put(eventClass, handler);
+        }
+
+        // If the passed object is MultiHandler add its methods too.
+        if (target instanceof MultiHandler) {
+            MultiHandler multiHandler = (MultiHandler) target;
+            Map<EventClass, EventHandlerMethod> map = createMap(multiHandler);
+
+            checkModifiers(toMethods(map.values()));
+
+            result.putAll(map);
+        }
+
+        return result.build();
+    }
+
+    private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
+        Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+
+        // Add entries exposed by the object as MultiHandler.
+        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
+        for (Method method : methodsToClasses.keySet()) {
+            final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
+            builder.putAll(createMap(obj, method, classes));
+        }
+
+        return builder.build();
+    }
+
+    private static Iterable<Method> toMethods(Iterable<EventHandlerMethod> handlerMethods) {
+        return Iterables.transform(handlerMethods, new Function<EventHandlerMethod, Method>() {
+            @Nullable
+            @Override
+            public Method apply(@Nullable EventHandlerMethod eventHandlerMethod) {
+                if (eventHandlerMethod == null) {
+                    return null;
+                }
+                return eventHandlerMethod.getMethod();
+            }
+        });
+    }
+
+    private static Map<EventClass, EventHandlerMethod> createMap(Object target,
+                                                                 Method method,
+                                                                 Iterable<Class<? extends Message>> classes) {
+        ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
+        for (Class<? extends Message> messageClass : classes) {
+            EventClass key = EventClass.of(messageClass);
+            EventHandlerMethod value = new EventHandlerMethod(target, method);
+            builder.put(key, value);
         }
         return builder.build();
     }
@@ -119,9 +181,8 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      *
      * @param methods the map of methods to check
      */
-    public static void checkModifiers(MethodMap methods) {
-        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
-            Method method = entry.getValue();
+    public static void checkModifiers(Iterable<Method> methods) {
+        for (Method method : methods) {
             boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
                 log().warn(String.format("Event handler %s must be declared 'public'",
@@ -137,6 +198,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         private final Logger value = LoggerFactory.getLogger(EventHandlerMethod.class);
     }
 
+    @CheckReturnValue
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

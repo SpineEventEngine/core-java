@@ -20,14 +20,18 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
+import org.spine3.util.Classes;
 import org.spine3.util.MethodMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * Creates data projection from incoming events.
@@ -43,12 +47,12 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
         super(id);
     }
 
-    protected void handle(Message event, EventContext ctx) throws InvocationTargetException {
+    protected void handle(Message event, EventContext ctx) {
         init();
         dispatch(event, ctx);
     }
 
-    private void dispatch(Message event, EventContext ctx) throws InvocationTargetException {
+    private void dispatch(Message event, EventContext ctx) {
         final Class<? extends Message> eventClass = event.getClass();
         Method method = handlers.get(eventClass);
         if (method == null) {
@@ -56,13 +60,21 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
                     eventClass, this.getClass()));
         }
         EventHandlerMethod handler = new EventHandlerMethod(this, method);
-        handler.invoke(event, ctx);
+        try {
+            handler.invoke(event, ctx);
+        } catch (InvocationTargetException e) {
+            propagate(e);
+        }
     }
 
     protected boolean isInitialized() {
         return handlers != null;
     }
 
+    /**
+     * Performs initialization of the instance and registers this class of projections in {@link Registry}
+     * if it is not registered yet.
+     */
     protected void init() {
         if (!isInitialized()) {
             final Registry registry = Registry.instance();
@@ -74,6 +86,16 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
             handlers = registry.getEventHandlers(thisClass);
         }
+    }
+
+    /**
+     * Returns the set of event classes handled by the passed projection class.
+     *
+     * @param clazz the class to inspect
+     * @return immutable set of event classes or an empty set if no events are handled
+     */
+    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Projection> clazz) {
+        return Classes.getHandledMessageClasses(clazz, EventHandlerMethod.isEventHandlerPredicate);
     }
 
     private static class Registry {

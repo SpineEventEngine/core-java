@@ -20,8 +20,7 @@
 
 package org.spine3.server;
 
-import org.spine3.server.storage.EntityStorage;
-
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * The base abstract implementation for repositories.
+ * Abstract implementation of basic features of repositories.
  *
  * @author Alexander Yevsyukov
  */
@@ -63,6 +62,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     /**
      * @return the class of IDs used by this repository
      */
+    @CheckReturnValue
     protected Class<I> getIdClass() {
         return TypeInfo.getIdClass(getClass());
     }
@@ -70,23 +70,28 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     /**
      * @return the class of entities managed by this repository
      */
+    @CheckReturnValue
     protected Class<E> getEntityClass() {
         return TypeInfo.getEntityClass(getClass());
     }
 
     /**
-     * Implementation should throw {@link ClassCastException} if the class of the passed
-     * object does not match that required by the repository.
+     * Checks if the passed storage object is of required type.
      *
-     * <p>Default implementation attempts to cast to {@link EntityStorage}.
+     * <p>Implementation should throw {@link ClassCastException} if the class of the passed
+     * object does not match that required by the repository.
      *
      * @param storage the instance of storage to check
      * @throws ClassCastException if the object is not of the required class
      */
-    protected void checkStorageClass(Object storage) {
-        @SuppressWarnings("unused") EntityStorage ignored = (EntityStorage)storage;
-    }
+    protected abstract void checkStorageClass(Object storage);
 
+    /**
+     * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
+     * @see #assignStorage(Object)
+     */
+    @CheckReturnValue
+    @Nullable
     protected Object getStorage() {
         return this.storage;
     }

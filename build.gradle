@@ -39,15 +39,6 @@ if (credentialsFile.exists()) {
     repositoryUserPassword = properties.getProperty("user.password")
 }
 
-task removeSavedProtoNames << {
-    File propsFile = file(protoPropertiesFilePath())
-    if (propsFile.exists()) {
-        propsFile.delete()
-    }
-}
-
-build.dependsOn removeSavedProtoNames
-
 String protoPropertiesFilePath() {
     return "${project(":core-java").projectDir}" + project.PROPERTIES_FILE_PATH + project.PROPERTIES_FILE_NAME;
 }
@@ -58,6 +49,17 @@ String replaceFileSeparatorWithDot(String filePath) {
 
 //todo:2015-09-10:mikhail.mikhaylov: Take care of duplicated code: use plugin here.
 subprojects {
+
+    buildscript {
+        repositories {
+            mavenLocal()
+            maven {
+                url 'http://maven.teamdev.com/repository/spine'
+            }
+            mavenCentral()
+        }
+    }
+
     apply plugin: 'java'
     apply plugin: "idea"
     apply plugin: 'com.google.protobuf'
@@ -79,10 +81,10 @@ subprojects {
     }
 
     dependencies {
-        compile group: 'com.google.guava', name: 'guava', version: '18.0'
+        compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
-        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.10'
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.12'
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
         compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
@@ -115,66 +117,6 @@ subprojects {
         }
     }
 
-    task saveProtoNames << {
-        String javaSuffix = ".java"
-        String orBuilderSuffix = "OrBuilder" + javaSuffix
-
-        ["$projectDir/generated/main/java",
-         "$projectDir/generated/test/java"].each { String rootDirPath ->
-            File rootDir = file(rootDirPath)
-            if (!rootDir.exists()) {
-                return
-            }
-
-            //TODO: avoid duplication of constant of the path to generated resources.
-            File propsFileFolder = file("${project(":core-java").projectDir}${PROPERTIES_FILE_PATH}")
-            if (!propsFileFolder.exists()) {
-                propsFileFolder.mkdirs();
-            }
-            Properties props = new Properties() {
-                @Override
-                public synchronized Enumeration<Object> keys() {
-                    return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-                }
-            };
-            File propsFile = file(protoPropertiesFilePath())
-            if (propsFile.exists()) {
-                props.load(propsFile.newDataInputStream())
-                // as Properties API does not support saving default table values, we have to rewrite them all
-                // Probably we should use Apache property API
-                Set<String> names = props.stringPropertyNames();
-                for (Iterator<String> i = names.iterator(); i.hasNext();) {
-                    String propName = i.next();
-                    props.setProperty(propName, props.getProperty(propName));
-                }
-            }
-            rootDir.listFiles().each {
-                String prefixName = it.name
-                fileTree(it).each {
-                    if (it.name.endsWith(javaSuffix) && !it.name.endsWith(orBuilderSuffix)) {
-                        String protoPath = it.path.substring((rootDirPath + prefixName).length() + 2)
-                        protoPath = protoPath.substring(0, protoPath.length() - javaSuffix.length())
-                        protoPath = replaceFileSeparatorWithDot(protoPath)
-                        String className = replaceFileSeparatorWithDot(prefixName) + "." + protoPath
-
-                        // 'Spine3' is the abbreviation for Spine Event Engine.
-                        // We have 'org.spine3' package name for Java because other 'spine' in 'org' or 'io'
-                        // were occupied.
-                        // We have 'spine' package for Protobuf (without '3') because it reads better.
-                        String protoType = protoPath.replace("spine3", "spine")
-
-                        props.setProperty(protoType, className)
-                    }
-                }
-            }
-            BufferedWriter writer = propsFile.newWriter();
-            props.store(writer, null)
-            writer.close()
-        }
-    }
-
-    compileJava.dependsOn saveProtoNames
-
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -186,6 +128,7 @@ subprojects {
             }
         }
     }
+
     publishing {
         repositories {
             maven {
@@ -197,14 +140,6 @@ subprojects {
             }
         }
     }
-}
-
-task removeProtoNames << {
-    File propsFile = file(getProtoPropertiesFilePath())
-    if (propsFile.exists()) {
-        propsFile.delete();
-    }
-    println "Publishing build as ${repositoryUserName}"
 }
 
 task readPublishingCredentials << {
@@ -224,6 +159,4 @@ subprojects.each { project ->
     }
     publish.dependsOn project.getTasksByName("publish", false)
 }
-
-clean.dependsOn removeSavedProtoNames
 

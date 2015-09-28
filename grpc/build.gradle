@@ -1,10 +1,19 @@
 description = ''
+
+buildscript {
+    dependencies {
+        classpath "org.spine3.tools:proto-lookup-plugin:1.0"
+    }
+}
+
 dependencies {
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: "${project.PROTOBUF_VERSION}"
     compile group: 'io.grpc', name: 'grpc-all', version: '0.8.0'
 
     compile project(':core-java')
 }
+
+apply plugin: 'org.spine3.tools.protolookup'
 
 sourceSets {
     main {

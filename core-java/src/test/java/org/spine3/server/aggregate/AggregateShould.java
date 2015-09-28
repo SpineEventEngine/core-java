@@ -40,6 +40,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.util.Classes;
 import org.spine3.util.Users;
 
 import java.lang.reflect.InvocationTargetException;
@@ -54,13 +55,12 @@ import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.Aggregate.getHandledMessageClasses;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
+import static org.spine3.util.Commands.createContext;
 import static org.spine3.util.testutil.ContextFactory.getEventContext;
 import static org.spine3.util.testutil.EventRecordFactory.*;
-import static org.spine3.util.Commands.createContext;
 
 /**
  * @author Alexander Litus
@@ -208,7 +208,7 @@ public class AggregateShould {
     @Test
     public void return_message_classes_which_are_handled_by_aggregate_case_event_classes() {
 
-        final Set<Class<? extends Message>> classes = getHandledMessageClasses(ProjectAggregate.class, isEventApplierPredicate);
+        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(ProjectAggregate.class, isEventApplierPredicate);
         assertContainsAllProjectEvents(classes);
     }
 

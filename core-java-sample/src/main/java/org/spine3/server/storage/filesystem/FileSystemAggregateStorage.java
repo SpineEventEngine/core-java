@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 import static org.spine3.util.Identifiers.idToString;
 
 /**

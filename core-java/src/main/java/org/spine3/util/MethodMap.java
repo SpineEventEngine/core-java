@@ -21,11 +21,13 @@
 package org.spine3.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class MethodMap {
                 .build();
     }
 
+    @CheckReturnValue
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -74,22 +77,32 @@ public class MethodMap {
     /**
      * @return {@code true} if the map is empty, {@code false} otherwise
      */
+    @CheckReturnValue
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    @CheckReturnValue
     public ImmutableSet<Class<? extends Message>> keySet() {
         return map.keySet();
     }
 
+    @CheckReturnValue
     public ImmutableSet<Map.Entry<Class<? extends Message>, Method>> entrySet() {
         return map.entrySet();
     }
 
+    @CheckReturnValue
+    public ImmutableCollection<Method> values() {
+        return map.values();
+    }
+
+    @CheckReturnValue
     public boolean containsHandlerFor(Class<? extends Message> messageClass) {
         return map.containsKey(checkNotNull(messageClass));
     }
 
+    @CheckReturnValue
     @Nullable
     public Method get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
@@ -110,6 +123,7 @@ public class MethodMap {
          * @param clazz the class to check
          * @return {@code true} if there is a message map for the passed class, {@code false} otherwise
          */
+        @CheckReturnValue
         public boolean contains(Class<? extends T> clazz) {
             boolean result = entries.containsKey(clazz);
             return result;
@@ -135,6 +149,7 @@ public class MethodMap {
         /**
          * Obtains method map for the passed class.
          */
+        @CheckReturnValue
         public MethodMap get(Class<? extends T> clazz) {
             MethodMap result = entries.get(clazz);
             return result;
