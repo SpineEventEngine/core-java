@@ -100,6 +100,7 @@ public class Identifiers {
                 || id instanceof Integer
                 || id instanceof Long;
 
+        //noinspection IfStatementWithTooManyBranches
         if (isSupportedCommonType) {
             result = id.toString();
         } else if (id instanceof Any) {
@@ -169,6 +170,7 @@ public class Identifiers {
 
         String result = shortDebugString(messageWithEscapedFields);
 
+        //TODO:2015-09-28:alexander.yevsyukov: @AlexanderLitus: Use RegExp instead. Pay attention to warnings.
         result = result.replace(": ", "=");
         return result;
     }
@@ -194,6 +196,7 @@ public class Identifiers {
         return result.build();
     }
 
+    //TODO:2015-09-28:alexander.yevsyukov: What about other types of OS?
     @SuppressWarnings("TypeMayBeWeakened")
     private static String escapeCharsNotAllowedInWindowsFileName(String input) {
         String result = input
