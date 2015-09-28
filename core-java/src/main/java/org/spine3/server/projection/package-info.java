@@ -18,35 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore;
+/**
+ * This package provides classes for managing projections.
+ */
 
-import com.google.protobuf.Message;
-import org.spine3.server.Entity;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.*;
+@ParametersAreNonnullByDefault
+package org.spine3.server.projection;
 
-public class DatastoreStorageFactory implements StorageFactory {
-    @Override
-    public CommandStorage createCommandStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Override
-    public EventStorage createEventStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
-    }
-
-    @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

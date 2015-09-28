@@ -37,6 +37,7 @@ import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
+import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
@@ -70,6 +71,7 @@ public final class Engine {
      * @throws IllegalStateException if the engine wasn't started before callling this method
      * @see #start(StorageFactory)
      */
+    @CheckReturnValue
     public static Engine getInstance() {
         final Engine engine = instance();
         engine.checkStarted();
@@ -113,6 +115,7 @@ public final class Engine {
     /**
      * @return {@code true} if the engine is started, {@code false} otherwise
      */
+    @CheckReturnValue
     public boolean isStarted() {
         return storageFactory != null;
     }
@@ -136,7 +139,7 @@ public final class Engine {
         if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateRootStorage(aggregateClass);
+            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
             repository.assignStorage(aggregateStorage);
         } else {
             Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
@@ -197,6 +200,7 @@ public final class Engine {
      * @return the result of command handling
      * @see #start(StorageFactory)
      */
+    @CheckReturnValue
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
         checkStarted();
@@ -248,6 +252,7 @@ public final class Engine {
      * @return instance of {@code CommandDispatcher} used in the application
      * @see CommandDispatcher#getInstance()
      */
+    @CheckReturnValue
     public CommandDispatcher getCommandDispatcher() {
         return CommandDispatcher.getInstance();
     }
@@ -258,6 +263,7 @@ public final class Engine {
      * @return instance of {@code EventBus} used in the application
      * @see EventBus#getInstance()
      */
+    @CheckReturnValue
     public EventBus getEventBus() {
         return EventBus.getInstance();
     }

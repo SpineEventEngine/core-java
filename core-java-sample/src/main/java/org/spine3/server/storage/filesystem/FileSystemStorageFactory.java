@@ -44,7 +44,7 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         final Class<Message> messageClazz =
                 Classes.getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
         final Descriptors.GenericDescriptor msgClassDescriptor = Messages.getClassDescriptor(messageClazz);

@@ -20,13 +20,101 @@
 
 package org.spine3.server.projection;
 
-import org.spine3.server.RepositoryBase;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
+import org.spine3.server.EntityRepository;
+import org.spine3.server.MultiHandler;
+import org.spine3.util.Identifiers;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, ?>> extends RepositoryBase<I, P> {
-    //TODO:2015-09-23:alexander.yevsyukov: Implement
+@SuppressWarnings("unused")
+public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
+        extends EntityRepository<I, P, M> implements MultiHandler {
+
+    @Override
+    public Multimap<Method, Class<? extends Message>> getHandlers() {
+        Class<? extends Projection> projectionClass = getEntityClass();
+        Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
+        Method forward = dispatchAsMethod();
+        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
+                .putAll(forward, events)
+                .build();
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    protected I getEntityId(Message event, EventContext context) {
+        final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
+        @SuppressWarnings("unchecked") I id = (I)aggregateId;
+
+        return id;
+    }
+
+    /**
+     * Loads or creates a projection by the passed ID.
+     *
+     * <p>The projection is created if there was no projection with such ID stored before.
+     *
+     * @param id the ID of the projection to load
+     * @return loaded or created projection instance
+     */
+    @Nonnull
+    @Override
+    public P load(I id) {
+        P result = super.load(id);
+
+        if (result == null) {
+            result = create(id);
+        }
+        return result;
+    }
+
+    /**
+     * Dispatches the passed event to a corresponding projection.
+     *
+     * <p>The ID of the projection must be specified as the first property of the passed event.
+     *
+     * <p>If there is no stored projection with the ID from the event, a new projection is created
+     * and stored after it handles the passed event.
+     *
+     * @param event the event to dispatch
+     * @param context the context of the event
+     * @see Projection#handle(Message, EventContext)
+     */
+    @SuppressWarnings("unused") // This method is used by reflection
+    protected void dispatch(Message event, EventContext context) {
+        I id = getEntityId(event, context);
+        P p = load(id);
+        p.handle(event, context);
+        store(p);
+    }
+
+    /**
+     * The name of the method used for dispatching events to projections.
+     *
+     * <p>This constant is used for obtaining {@code Method} instance via reflection.
+     *
+     * @see #dispatch(Message, EventContext)
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String DISPATCH_METHOD_NAME = "dispatch";
+
+    private Method dispatchAsMethod() {
+        try {
+            return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, EventContext.class);
+        } catch (NoSuchMethodException e) {
+            throw propagate(e);
+        }
+    }
 }

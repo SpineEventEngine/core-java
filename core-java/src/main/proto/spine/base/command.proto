@@ -71,7 +71,7 @@ message EventContext {
     // The id of the event.
     EventId event_id = 1;
 
-    // The id of the aggregate event was applied to.
+    // The id of the aggregate the event was applied to.
     google.protobuf.Any aggregate_id = 2;
 
     // The version of the aggregate after the event was applied.

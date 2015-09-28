@@ -62,6 +62,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      *
      * @see #dispatch(Message, CommandContext)
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     /**
@@ -200,8 +201,8 @@ public abstract class AggregateRepositoryBase<I extends Message,
     @SuppressWarnings("unchecked")
     // We cast to this type because assume that all commands for our aggregate refer to ID of the same type <I>.
     // If this assumption fails, we would get ClassCastException.
-    // A better way would be to check all the aggregate commands for the presence of the ID field and
-    // correctness of the type on compile-time.
+    // To double check this we need to check all the aggregate commands for the presence of the ID field and
+    // correctness of the type on compile time.
     private I getAggregateId(Message command) {
         return (I) AggregateCommand.getAggregateId(command).value();
     }

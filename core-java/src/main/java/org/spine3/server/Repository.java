@@ -21,6 +21,7 @@ package org.spine3.server;
 
 import org.spine3.util.Classes;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 
 /**
@@ -59,6 +60,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
      * @param id the id of the entity
      * @return new entity instance
      */
+    @CheckReturnValue
     E create(I id);
 
     /**
@@ -74,6 +76,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
      * @param id the id of the entity to load
      * @return the entity or {@code null} if there's no entity with such id
      */
+    @CheckReturnValue
     @Nullable
     E load(I id);
 
@@ -96,6 +99,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
          *
          * @return the aggregate id {@link Class}
          */
+        @CheckReturnValue
         public static <I> Class<I> getIdClass(Class<? extends Repository> clazz) {
             return Classes.getGenericParameterType(clazz, ID_CLASS_GENERIC_INDEX);
         }
@@ -105,6 +109,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
          *
          * @return the aggregate root {@link Class}
          */
+        @CheckReturnValue
         public static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
             return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
         }

@@ -33,7 +33,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.util.Identifiers.*;
-import static org.spine3.util.Identifiers.idToString;
 
 /**
  * @author Alexander Litus

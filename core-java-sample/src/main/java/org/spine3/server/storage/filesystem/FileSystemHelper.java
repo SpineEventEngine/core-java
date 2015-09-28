@@ -44,8 +44,6 @@ import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*
 @SuppressWarnings("UtilityClass")
 public class FileSystemHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileSystemHelper.class);
-
     @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;
 
@@ -148,8 +146,7 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Exception while closing stream", e);
+            if (log().isWarnEnabled()) {log().warn("Exception while closing stream", e);
             }
         }
     }
@@ -169,8 +166,7 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Exception while flushing stream", e);
+            if (log().isWarnEnabled()) {log().warn("Exception while flushing stream", e);
             }
         }
     }
@@ -285,4 +281,16 @@ public class FileSystemHelper {
 
         return backupFile;
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(FileSystemHelper.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }

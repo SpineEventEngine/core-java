@@ -24,16 +24,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
+
+import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Utility class for reading real proto class names from properties file.
@@ -45,6 +46,9 @@ import java.util.Set;
 public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
+    private static final Logger LOG = LoggerFactory.getLogger(TypeToClassMap.class);
+
+    private static final List<URL> readResourcesUrls = newLinkedList();
 
     private TypeToClassMap() {
     }
@@ -62,23 +66,7 @@ public class TypeToClassMap {
     private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
     static {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-        Enumeration<URL> resources = null;
-        try {
-            resources = classLoader.getResources(PROPERTIES_FILES_PATH);
-        } catch (IOException ignored) {
-        }
-
-        if (resources != null) {
-            while (resources.hasMoreElements()) {
-                final URL resourceUrl = resources.nextElement();
-                try {
-                    readPropertiesFromStream(resourceUrl.openStream());
-                } catch (IOException ignored) {
-                }
-            }
-        }
+        loadClasses();
     }
 
     /**
@@ -97,6 +85,9 @@ public class TypeToClassMap {
      * @return Java class name
      */
     public static ClassName get(TypeName protoType) {
+        if (!namesMap.containsKey(protoType)) {
+            loadClasses();
+        }
         if (!namesMap.containsKey(protoType)) {
             final ClassName className = searchAsSubclass(protoType);
             namesMap.put(protoType, className);
@@ -160,6 +151,33 @@ public class TypeToClassMap {
             throw new UnknownTypeInAnyException(lookupTypeName.value());
         }
         return className;
+    }
+
+    private static void loadClasses() {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        Enumeration<URL> resources = null;
+        try {
+            resources = classLoader.getResources(PROPERTIES_FILES_PATH);
+        } catch (IOException ignored) {
+        }
+
+        if (resources != null) {
+            while (resources.hasMoreElements()) {
+                final URL resourceUrl = resources.nextElement();
+                if (!readResourcesUrls.contains(resourceUrl)) {
+                    try {
+                        readPropertiesFromStream(resourceUrl.openStream());
+                        readResourcesUrls.add(resourceUrl);
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+        }
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Total classes in TypeToClassMap: " + namesMap.size());
+        }
     }
 
 }

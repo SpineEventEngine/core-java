@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.MessageFields;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
-import org.spine3.util.Commands;
+import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,8 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters") // is OK as we want many factory methods.
 public class AggregateCommand extends AbstractCommand {
-
-    public static final int AGGREGATE_ID_FIELD_INDEX = 0;
 
     private final AggregateId aggregateId;
 
@@ -67,13 +65,13 @@ public class AggregateCommand extends AbstractCommand {
      * @return value of the id
      */
     public static AggregateId getAggregateId(Message command) {
-        String fieldName = MessageFields.getFieldName(command, AGGREGATE_ID_FIELD_INDEX);
-        if (!fieldName.endsWith(Commands.ID_PROPERTY_SUFFIX)) {
+        String fieldName = MessageFields.getFieldName(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+        if (!fieldName.endsWith(Identifiers.ID_PROPERTY_SUFFIX)) {
             throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
         }
 
         try {
-            Message value = (Message) MessageFields.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX);
+            Message value = (Message) MessageFields.getFieldValue(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
             return AggregateId.of(value);
         } catch (RuntimeException e) {
             throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);

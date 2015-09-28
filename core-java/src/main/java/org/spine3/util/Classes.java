@@ -20,8 +20,16 @@
 
 package org.spine3.util;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
+
+import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -36,6 +44,15 @@ public class Classes {
 
     private Classes() {}
 
+    /**
+     * Returns the class of the generic type of the passed class.
+     *
+     * @param clazz the class to check
+     * @param paramNumber the number of the generic parameter
+     * @param <T> the generic type
+     * @return the class reference for the generic type
+     */
+    @CheckReturnValue
     public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
         try {
             Type genericSuperclass = clazz.getGenericSuperclass();
@@ -50,5 +67,27 @@ public class Classes {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw propagate(e);
         }
+    }
+
+    /**
+     * Returns event/command types handled by given {@code Aggregate} class.
+     *
+     * @return immutable set of message classes or an empty set
+     */
+    @CheckReturnValue
+    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<?> clazz, Predicate<Method> methodPredicate) {
+
+        Set<Class<? extends Message>> result = Sets.newHashSet();
+
+        for (Method method : clazz.getDeclaredMethods()) {
+
+            boolean methodMatches = methodPredicate.apply(method);
+
+            if (methodMatches) {
+                Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
+                result.add(firstParamType);
+            }
+        }
+        return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
     }
 }
