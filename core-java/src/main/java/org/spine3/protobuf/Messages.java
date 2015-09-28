@@ -76,7 +76,7 @@ public class Messages {
      * Unwraps {@link Any} value into an instance of type specified by value
      * returned by {@link Any#getTypeUrl()}.
      *
-     * <p>If there is not Java class for the type, {@link UnknownTypeInAnyException}
+     * <p>If there is no Java class for the type, {@link UnknownTypeInAnyException}
      * will be thrown.
      *
      * @param any instance of {@link Any} that should be unwrapped

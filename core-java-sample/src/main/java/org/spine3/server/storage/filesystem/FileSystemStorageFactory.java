@@ -21,29 +21,39 @@
 package org.spine3.server.storage.filesystem;
 
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
+import org.spine3.util.Classes;
 
 public class FileSystemStorageFactory implements StorageFactory {
+
+    private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
+
     @Override
     public CommandStorage createCommandStorage() {
-        return null;
+        return FileSystemCommandStorage.newInstance();
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return null;
+        return FileSystemEventStorage.newInstance();
     }
 
     @Override
     public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
-        return null;
+        final Class<Message> messageClazz =
+                Classes.getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
+        final Descriptors.GenericDescriptor msgClassDescriptor = Messages.getClassDescriptor(messageClazz);
+        final String msgDescriptorName = msgClassDescriptor.getName();
+        return new FileSystemAggregateStorage<>(msgDescriptorName);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return null;
+        return FileSystemEntityStorage.newInstance();
     }
 }
