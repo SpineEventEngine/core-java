@@ -35,8 +35,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.util.Identifiers.*;
-import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
-import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.

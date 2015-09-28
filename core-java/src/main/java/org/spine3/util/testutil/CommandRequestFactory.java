@@ -28,8 +28,6 @@ import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 import org.spine3.test.project.command.CreateProject;
 
-import static org.spine3.util.testutil.ContextFactory.getCommandContext;
-
 /**
  * The utility class which is used for creating CommandRequests for tests.
  *
