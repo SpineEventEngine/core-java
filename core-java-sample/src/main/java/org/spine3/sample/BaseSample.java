@@ -20,6 +20,7 @@
 
 package org.spine3.sample;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
@@ -31,7 +32,12 @@ import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Users;
 
+import javax.annotation.Nullable;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.spine3.util.Identifiers.IdConverterRegistry;
+import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * @author Mikhail Mikhaylov
@@ -39,6 +45,7 @@ import java.util.List;
 public abstract class BaseSample {
 
     protected void execute() {
+
         // Start the engine
         Engine.start(storageFactory());
 
@@ -47,6 +54,9 @@ public abstract class BaseSample {
 
         // Register event handlers
         EventBus.getInstance().register(new EventLogger());
+
+        // Register id converters
+        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -63,11 +73,13 @@ public abstract class BaseSample {
     // See Amazon screens for correct naming of domain things.
 
     protected List<CommandRequest> generateRequests() {
+
         List<CommandRequest> result = Lists.newArrayList();
 
         for (int i = 0; i < 10; i++) {
+
             OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            UserId userId = Users.createId("user" + i);
+            UserId userId = Users.createId("user_" + i);
 
             CommandRequest createOrder = Requests.createOrder(userId, orderId);
             CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
@@ -85,4 +97,22 @@ public abstract class BaseSample {
 
     protected abstract Logger log();
 
+    private static class OrderIdToStringConverter implements Function<OrderId, String> {
+
+        @Override
+        public String apply(@Nullable OrderId orderId) {
+
+            if (orderId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            final String value = orderId.getValue();
+
+            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            return value;
+        }
+    }
 }

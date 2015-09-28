@@ -22,13 +22,9 @@ package org.spine3.sample;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.sample.server.FileSystemHelper;
 import org.spine3.server.storage.StorageFactory;
-
-import java.io.File;
-import java.io.IOException;
-
-import static com.google.common.base.Throwables.propagate;
+import org.spine3.server.storage.filesystem.FileSystemHelper;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 
 /**
  * Entry point for core-java sample without gRPC. Works with FileSystem.
@@ -36,28 +32,22 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class FileSystemSample extends BaseSample {
+public class FileSystemBasedSample extends BaseSample {
 
-    public static final String STORAGE_PATH = '/' + FileSystemSample.class.getClass().getName();
+    public static final String STORAGE_PATH = '/' + FileSystemBasedSample.class.getClass().getName();
 
-    public static File getTempDir() {
-        try {
-            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
-            File result = new File(tmpFile.getParent());
-            if (tmpFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                tmpFile.delete();
-            }
-            return result;
-        } catch (IOException e) {
-            propagate(e);
-        }
-        throw new IllegalStateException("Unable to get temporary directory for storage");
+    public static void main(String[] args) {
+
+        FileSystemHelper.configure(FileSystemBasedSample.class);
+
+        BaseSample sample = new FileSystemBasedSample();
+
+        sample.execute();
     }
 
     @Override
     protected StorageFactory storageFactory() {
-        return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
+        return new FileSystemStorageFactory();
     }
 
     @Override
@@ -65,24 +55,13 @@ public class FileSystemSample extends BaseSample {
         return LogSingleton.INSTANCE.value;
     }
 
-    private FileSystemSample() {
-    }
-
     private enum LogSingleton {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FileSystemSample.class);
+        private final Logger value = LoggerFactory.getLogger(FileSystemBasedSample.class);
 
     }
 
-    public static void main(String[] args) {
-        final String tempDir = getTempDir().getAbsolutePath();
-        FileSystemHelper.configure(tempDir + STORAGE_PATH);
-
-        BaseSample sample = new FileSystemSample();
-
-        sample.execute();
-    }
-
+    private FileSystemBasedSample() {}
 }

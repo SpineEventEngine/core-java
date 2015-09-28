@@ -27,20 +27,31 @@ import org.spine3.server.storage.EventStoreRecord;
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.server.storage.filesystem.Helper.closeSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.checkFileExists;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.tryOpenFileInputStream;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
 import static org.spine3.util.Events.toEventRecord;
 
 public class FileSystemEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
+
+    protected static EventStorage newInstance() {
+        return new FileSystemEventStorage();
+    }
+
+    private FileSystemEventStorage() {}
+
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = new File(FileSystemStoragePathHelper.getEventStoreFilePath());
+        final File file = new File(getEventStoreFilePath());
 
         final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
 
@@ -52,7 +63,7 @@ public class FileSystemEventStorage extends EventStorage {
     @Override
     protected void write(EventStoreRecord record) {
         checkNotNull(record, "Record shouldn't be null.");
-        Helper.write(record);
+        FileSystemHelper.write(record);
     }
 
     @Override
@@ -95,7 +106,7 @@ public class FileSystemEventStorage extends EventStorage {
         @Override
         public EventRecord next() {
 
-            checkFileExists();
+            checkFileExists(file);
             checkHasNextBytes();
 
             EventStoreRecord storeRecord = parseEventRecord();
@@ -115,21 +126,16 @@ public class FileSystemEventStorage extends EventStorage {
             try {
                 event = EventStoreRecord.parseDelimitedFrom(getInputStream());
             } catch (IOException e) {
-                throw new RuntimeException("Failed read event record from file: " + file.getAbsolutePath(), e);
+                throw new RuntimeException("Failed to read event record from file: " + file.getAbsolutePath(), e);
             }
             return event;
         }
 
-        @SuppressWarnings("OverlyBroadCatchBlock")
         private InputStream getInputStream() {
 
             if (bufferedInputStream == null || fileInputStream == null) {
-                try {
-                    fileInputStream = new FileInputStream(file);
-                    bufferedInputStream = new BufferedInputStream(fileInputStream);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to get input stream from file: " + file.getAbsolutePath(), e);
-                }
+                fileInputStream = tryOpenFileInputStream(file);
+                bufferedInputStream = new BufferedInputStream(fileInputStream);
             }
 
             return bufferedInputStream;
@@ -142,21 +148,15 @@ public class FileSystemEventStorage extends EventStorage {
             }
         }
 
-        private void checkFileExists() {
-            if (!file.exists()) {
-                throw new IllegalStateException("No such file: " + file.getAbsolutePath());
-            }
-        }
-
         private void checkHasNextBytes() {
             if (!hasNext()) {
-                throw new IllegalStateException("No more records to read from file.");
+                throw new NoSuchElementException("No more records to read from file.");
             }
         }
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Not implemented");
+            throw new UnsupportedOperationException("This operation is not supported for FileSystemStorage");
         }
     }
 }

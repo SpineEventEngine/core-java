@@ -27,11 +27,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FileSystemCommandStorage extends CommandStorage {
 
+    protected static CommandStorage newInstance() {
+        return new FileSystemCommandStorage();
+    }
+
+    private FileSystemCommandStorage() {}
+
     @Override
     protected void write(CommandStoreRecord record) {
         checkNotNull(record, "CommandRecord shouldn't be null.");
-        Helper.write(record);
+        FileSystemHelper.write(record);
     }
-
-
 }

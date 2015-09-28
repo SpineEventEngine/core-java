@@ -39,8 +39,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.spine3.util.Identifiers.*;
 import static org.spine3.util.Commands.generateId;
-import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Lists.filter;
 
 /**
@@ -141,9 +141,11 @@ public class CommandsShould {
         final Timestamp currentTime = getCurrentTime();
         CommandId id = generateId(userIdString, currentTime);
 
-        /* TODO[alexander.litus]: create parse() method that would restore an object from its String representation.
-            Use the restored object for equality check with the original object.*/
-        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER +  TimeUtil.toString(currentTime);
+        /* TODO:2015-09-21:alexander.litus:
+           create parse() method that would restore an object from its String representation.
+           Use the restored object for equality check with the original object.
+         */
+        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER +  timestampToString(currentTime);
 
         final String actual = Commands.idToString(id);
 

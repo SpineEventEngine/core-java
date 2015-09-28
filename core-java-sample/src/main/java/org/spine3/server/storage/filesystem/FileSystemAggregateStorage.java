@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -41,7 +42,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     private final String shortTypeName;
 
-    FileSystemAggregateStorage(String shortTypeName) {
+    /*package*/ FileSystemAggregateStorage(String shortTypeName) {
         this.shortTypeName = shortTypeName;
     }
 
@@ -72,8 +73,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToString(id);
-        final Iterator<AggregateStorageRecord> iterator = new FileIterator(new File(
-                FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, stringId)));
+        final File file = new File(getAggregateFilePath(shortTypeName, stringId));
+        final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
     }
 
@@ -103,8 +104,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             Throwables.propagate(e);
         }
 
-        Helper.closeSilently(dos);
-        Helper.closeSilently(fos);
+        FileSystemHelper.closeSilently(dos);
+        FileSystemHelper.closeSilently(fos);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
@@ -193,6 +194,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             fis.close();
         }
 
+        @SuppressWarnings("ReturnOfNull")
         private AggregateStorageRecord readEntry() throws IOException {
             if (pageOffset < INT_SIZE_IN_BYTES) {
                 allocatePage();

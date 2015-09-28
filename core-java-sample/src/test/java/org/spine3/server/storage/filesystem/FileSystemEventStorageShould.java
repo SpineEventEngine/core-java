@@ -21,6 +21,7 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
@@ -28,25 +29,28 @@ import org.spine3.test.project.ProjectId;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
-import static org.spine3.server.storage.filesystem.Helper.configure;
-import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
-import static org.spine3.util.testutil.EventRecordFactory.projectStarted;
-import static org.spine3.util.testutil.EventRecordFactory.taskAdded;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
+import static org.spine3.util.testutil.EventRecordFactory.*;
 
+/**
+ * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ *
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemEventStorageShould {
 
-    private static final FileSystemEventStorage STORAGE = new FileSystemEventStorage();
+    private static final FileSystemEventStorage STORAGE = (FileSystemEventStorage) FileSystemEventStorage.newInstance();
 
     private ProjectId id;
 
     @Before
     public void setUpTest() {
-
         STORAGE.releaseResources();
         configure(FileSystemEventStorageShould.class);
         cleanTestData();
@@ -59,6 +63,11 @@ public class FileSystemEventStorageShould {
         STORAGE.releaseResources();
     }
 
+    @AfterClass
+    public static void tearDownClass() {
+        cleanTestData();
+    }
+
     @Test
     public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
 
@@ -69,6 +78,13 @@ public class FileSystemEventStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
         STORAGE.write(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void throw_exception_if_try_to_remove_element_via_iterator() {
+
+        final Iterator<EventRecord> iterator = STORAGE.allEvents();
+        iterator.remove();
     }
 
     @Test
@@ -84,8 +100,25 @@ public class FileSystemEventStorageShould {
         final EventRecord actual = iterator.next();
 
         assertEventRecordsAreEqual(expected, actual);
-
         assertFalse(iterator.hasNext());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void throw_exception_if_iteration_has_no_more_elements() {
+
+        final EventRecord expected = projectCreated(id);
+        STORAGE.store(expected);
+
+        final Iterator<EventRecord> iterator = STORAGE.allEvents();
+
+        assertTrue(iterator.hasNext());
+
+        final EventRecord actual = iterator.next();
+
+        assertEventRecordsAreEqual(expected, actual);
+        assertFalse(iterator.hasNext());
+
+        iterator.next();
     }
 
     @Test
