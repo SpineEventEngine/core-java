@@ -34,8 +34,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
-import static org.spine3.server.storage.filesystem.Helper.cleanTestData;
-import static org.spine3.server.storage.filesystem.Helper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 
 /**
  * @author Mikhail Mikhaylov
@@ -65,7 +65,7 @@ public class FileSystemAggregateStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        Helper.cleanTestData();
+        FileSystemHelper.cleanTestData();
     }
 
     @Test

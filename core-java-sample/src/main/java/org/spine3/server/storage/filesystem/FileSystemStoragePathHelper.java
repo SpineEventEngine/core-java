@@ -29,7 +29,7 @@ import static com.google.common.base.Throwables.propagate;
 /*
  * Provides with file system storage paths
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
+@SuppressWarnings({"DuplicateStringLiteralInspection", "UtilityClass"})
 class FileSystemStoragePathHelper {
 
     protected static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
