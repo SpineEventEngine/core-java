@@ -39,7 +39,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         //TODO:2015-09-21:alexander.yevsyukov: Implement
         return null;
     }

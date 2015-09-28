@@ -139,7 +139,7 @@ public final class Engine {
         if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateRootStorage(aggregateClass);
+            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
             repository.assignStorage(aggregateStorage);
         } else {
             Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());

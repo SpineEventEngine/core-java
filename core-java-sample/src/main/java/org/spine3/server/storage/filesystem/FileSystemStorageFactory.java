@@ -38,7 +38,7 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateRootStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         return null;
     }
 

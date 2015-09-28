@@ -21,10 +21,12 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.project.ProjectId;
 
@@ -49,9 +51,8 @@ public class InMemoryAggregateStorageShould {
 
     @Before
     public void setUp() {
-
-        //noinspection unchecked
-        storage = (InMemoryAggregateStorage) InMemoryStorageFactory.getInstance().createAggregateRootStorage(null);
+        storage = (InMemoryAggregateStorage<ProjectId>) InMemoryStorageFactory.getInstance().createAggregateStorage(
+                (Class<? extends Aggregate<ProjectId, Message>>) null);
         projectId = ProjectId.newBuilder().setId("aggregateId").build();
     }
 
