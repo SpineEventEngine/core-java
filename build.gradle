@@ -83,8 +83,8 @@ subprojects {
     dependencies {
         compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
         compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
-        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
-        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.10'
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+        compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.12'
 
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
         compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
