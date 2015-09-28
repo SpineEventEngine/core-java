@@ -19,8 +19,8 @@
  */
 package org.spine3.util;
 
-import com.google.common.base.Function;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
@@ -46,8 +46,6 @@ import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
  */
 @SuppressWarnings("UtilityClass")
 public class Commands {
-
-    public static final String ID_PROPERTY_SUFFIX = "id";
 
     static {
         Identifiers.IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());

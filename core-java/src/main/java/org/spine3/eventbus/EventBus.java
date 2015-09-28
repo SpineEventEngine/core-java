@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Manages incoming events to the appropriate registered handler
  * according to the type of incoming event.
@@ -60,8 +62,8 @@ public class EventBus {
      * @param object the event applier object whose subscriber methods should be registered
      */
     public void register(Object object) {
+        checkNotNull(object);
         Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-
         putHandlersToBus(handlers);
     }
 
@@ -83,8 +85,8 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object object) {
+        checkNotNull(object);
         Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-
         unsubscribe(handlers);
     }
 

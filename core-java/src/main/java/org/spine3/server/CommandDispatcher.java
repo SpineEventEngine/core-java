@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    private final Map<CommandClass, CommandHandlerMethod> handlersByCommandClass = Maps.newConcurrentMap();
+    private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
 
     /**
      * @return singleton instance of {@code CommandDispatcher}
@@ -61,16 +61,7 @@ public class CommandDispatcher {
      */
     public void register(Object object) {
         checkNotNull(object);
-
-        Map<CommandClass, CommandHandlerMethod> handlers;
-
-        if (object instanceof MultiHandler) {
-            MultiHandler multihandler = (MultiHandler) object;
-            handlers = CommandHandlerMethod.createMap(multihandler);
-        } else {
-            handlers = CommandHandlerMethod.scan(object);
-        }
-
+        Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
         registerMap(handlers);
     }
 
@@ -104,7 +95,7 @@ public class CommandDispatcher {
     }
 
     private void removeFor(CommandClass commandClass) {
-        handlersByCommandClass.remove(commandClass);
+        handlersByClass.remove(commandClass);
     }
 
     private void checkDuplicates(Map<CommandClass, CommandHandlerMethod> handlers) {
@@ -147,17 +138,17 @@ public class CommandDispatcher {
     }
 
     private void putAll(Map<CommandClass, CommandHandlerMethod> subscribers) {
-        handlersByCommandClass.putAll(subscribers);
+        handlersByClass.putAll(subscribers);
     }
 
     @CheckReturnValue
     public CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlersByCommandClass.get(cls);
+        return handlersByClass.get(cls);
     }
 
     @CheckReturnValue
     public boolean handlerRegistered(CommandClass cls) {
-        return handlersByCommandClass.containsKey(cls);
+        return handlersByClass.containsKey(cls);
     }
 
 

@@ -36,20 +36,38 @@ import static com.google.common.collect.Maps.newHashMap;
 /*
  * Utility class for Entity ids conversation.
  */
+@SuppressWarnings("UtilityClass")
 public class Identifiers {
 
     /*
      * Delimiter between user id and time in string representation
      */
     public static final char USER_ID_AND_TIME_DELIMITER = '@';
+
     /*
      * Delimiter between command time and event time delta in string representation
      */
     public static final char TIME_DELIMITER = '+';
+
     /*
      * Null message or field string representation
      */
     public static final String NULL_ID_OR_FIELD = "NULL";
+
+    /**
+     * The suffix of ID fields.
+     */
+    public static final String ID_PROPERTY_SUFFIX = "id";
+
+    /**
+     * Aggregate ID must be the first field of aggregate commands.
+     */
+    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
+
+    /**
+     * Event ID must be the first field of entity events.
+     */
+    public static final int ENTITY_ID_FIELD_INDEX_IN_EVENTS = 0;
 
     private Identifiers() {}
 
@@ -59,19 +77,20 @@ public class Identifiers {
      * @param id  the value to convert
      * @param <I> the type of the ID
      * @return <ul>
-     * <li>For classes implementing {@link com.google.protobuf.Message} — Json form</li>
+     * <li>For classes implementing {@link Message} — Json form</li>
      * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}</li>
      * </ul>
-     * @throws IllegalArgumentException if the passed type isn't one of the above or {@link com.google.protobuf.Message} id has no fields
+     * @throws IllegalArgumentException if the passed type isn't one of the above or
+     *         the passed {@link Message} instance has no fields
      */
     @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
-    public static <I> String idToString(I id) {
+    public static <I> String idToString(@Nullable I id) {
 
         if (id == null) {
             return NULL_ID_OR_FIELD;
         }
 
-        String result = "";
+        String result;
 
         final boolean isSupportedCommonType = id instanceof String
                 || id instanceof Integer
@@ -103,30 +122,27 @@ public class Identifiers {
             final Function<Message, String> converter = registry.getConverter(message);
             result = converter.apply(message);
         } else {
-            result = performConversion(message);
+            result = convert(message);
         }
 
         return result;
     }
 
     @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
-    private static String performConversion(Message message) {
-
-        String result = "";
-
+    private static String convert(Message message) {
+        String result;
         final Collection<Object> values = message.getAllFields().values();
 
         if (values.isEmpty()) {
-            throw new IllegalArgumentException("Message id should contain at least one field.");
+            throw new IllegalArgumentException("ID must have at least one field. Encountered: " + message);
         }
 
         if (values.size() == 1) {
-
             final Object object = values.iterator().next();
 
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);
-            } else if (values.size() == 1) {
+            } else {
                 result = object.toString();
             }
         } else {

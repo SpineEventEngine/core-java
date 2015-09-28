@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -89,6 +90,11 @@ public class MethodMap {
     @CheckReturnValue
     public ImmutableSet<Map.Entry<Class<? extends Message>, Method>> entrySet() {
         return map.entrySet();
+    }
+
+    @CheckReturnValue
+    public ImmutableCollection<Method> values() {
+        return map.values();
     }
 
     @CheckReturnValue

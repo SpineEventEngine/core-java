@@ -20,7 +20,7 @@
 package org.spine3.server.aggregate.error;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Commands;
+import org.spine3.util.Identifiers;
 
 /**
  * Exception is thrown if a command, which is intended to be used for an aggregate
@@ -45,7 +45,7 @@ public class MissingAggregateIdException extends RuntimeException {
 
     public MissingAggregateIdException(String commandClassName, String propertyName) {
         super("The first property of the aggregate command " + commandClassName +
-                " must define aggregate ID with a name ending with '" + Commands.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
+                " must define aggregate ID with a name ending with '" + Identifiers.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
     }
 
     private static final long serialVersionUID = 0L;
