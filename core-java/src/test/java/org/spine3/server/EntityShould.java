@@ -132,7 +132,6 @@ public class EntityShould {
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
 
-
     public static class TestEntity extends Entity<String, Project> {
 
         private static final Project DEFAULT_STATE = Project.newBuilder().setStatus("default state").build();
