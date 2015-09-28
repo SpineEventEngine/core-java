@@ -90,13 +90,6 @@ public class FileSystemAggregateStorageShould {
         STORAGE.write(null);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_record_with_null_aggregate_id() {
-
-        final AggregateStorageRecord record = AggregateStorageRecord.newBuilder().setAggregateId(null).build();
-        STORAGE.write(record);
-    }
-
     @Test
     public void save_and_read_one_record() {
 

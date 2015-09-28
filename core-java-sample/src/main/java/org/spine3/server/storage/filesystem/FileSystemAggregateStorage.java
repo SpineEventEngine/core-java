@@ -49,10 +49,6 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void write(AggregateStorageRecord r) {
 
-        if (r.getAggregateId() == null) {
-            Throwables.propagate(new NullPointerException(INVALID_AGGREGATE_ID));
-        }
-
         final String aggregateFilePath = FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
