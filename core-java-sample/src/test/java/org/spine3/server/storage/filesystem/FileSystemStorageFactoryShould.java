@@ -22,8 +22,8 @@ package org.spine3.server.storage.filesystem;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.EntityShould;
-import org.spine3.server.aggregate.AggregateShould;
+import org.spine3.server.Entity;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 import org.spine3.test.project.Project;
 
@@ -48,13 +48,45 @@ public class FileSystemStorageFactoryShould {
         final EventStorage eventStorage = factory.createEventStorage();
         final CommandStorage commandStorage = factory.createCommandStorage();
         final EntityStorage<String, Project> entityStorage =
-                factory.createEntityStorage(EntityShould.TestEntity.class);
+                factory.createEntityStorage(TestEntity.class);
         final AggregateStorage<String> aggregateRootStorage =
-                factory.createAggregateRootStorage(AggregateShould.TestAggregateWithIdString.class);
+                factory.createAggregateStorage(TestAggregateWithIdString.class);
 
         assertNotNull(eventStorage);
         assertNotNull(commandStorage);
         assertNotNull(entityStorage);
         assertNotNull(aggregateRootStorage);
+    }
+
+    public static class TestAggregateWithIdString extends Aggregate<String, Project> {
+        protected TestAggregateWithIdString(String id) {
+            super(id);
+        }
+
+        @SuppressWarnings("ReturnOfNull")
+        @Override
+        protected Project getDefaultState() {
+            return null;
+        }
+    }
+
+    public static class TestEntity extends Entity<String, Project> {
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        private static final Project DEFAULT_STATE = Project.newBuilder().setStatus("default state").build();
+
+        protected TestEntity(String id) {
+            super(id);
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return DEFAULT_STATE;
+        }
+
+        @Override
+        protected void validate(Project state) throws IllegalStateException {
+            super.validate(state);
+        }
     }
 }
