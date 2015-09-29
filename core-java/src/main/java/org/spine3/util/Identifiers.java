@@ -68,11 +68,6 @@ public class Identifiers {
      */
     public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
 
-    /**
-     * Event ID must be the first field of entity events.
-     */
-    public static final int ENTITY_ID_FIELD_INDEX_IN_EVENTS = 0;
-
     private Identifiers() {}
 
     /**
