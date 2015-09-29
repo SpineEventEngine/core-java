@@ -43,7 +43,7 @@ import static com.google.appengine.api.datastore.Query.FilterOperator.GREATER_TH
  *
  * @author Mikhail Mikhaylov
  */
-class DataStoreHelper {
+class DataStoreHelperOldImpl {
 
     public static final String VALUE_KEY = "value";
     public static final String TYPE_KEY = "type";
@@ -54,7 +54,7 @@ class DataStoreHelper {
 
     private final DatastoreService dataStore;
 
-    protected DataStoreHelper() {
+    protected DataStoreHelperOldImpl() {
         dataStore = DatastoreServiceFactory.getDatastoreService();
     }
 

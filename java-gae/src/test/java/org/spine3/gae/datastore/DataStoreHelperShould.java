@@ -36,7 +36,7 @@ public class DataStoreHelperShould {
 
     private static final LocalServiceTestHelper testHelper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-    private static final DataStoreHelper dataStoreHelper = new DataStoreHelper();
+    private static final DataStoreHelperOldImpl dataStoreHelper = new DataStoreHelperOldImpl();
 
     private final TypeName commandTypeName = TypeName.of(CommandRequest.getDescriptor());
 

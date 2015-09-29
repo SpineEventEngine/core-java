@@ -32,9 +32,9 @@ import org.spine3.server.aggregate.SnapshotStorage;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class DataStoreStorageFactory {
+public class DataStoreStorageFactoryOldImpl {
 
-    private DataStoreStorageFactory() {
+    private DataStoreStorageFactoryOldImpl() {
     }
 
     /**

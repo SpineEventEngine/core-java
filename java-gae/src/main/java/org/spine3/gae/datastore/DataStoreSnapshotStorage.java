@@ -29,15 +29,15 @@ import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.aggregate.SnapshotStorage;
 import org.spine3.util.Identifiers;
 
-import static org.spine3.gae.datastore.DataStoreHelper.TYPE_KEY;
-import static org.spine3.gae.datastore.DataStoreHelper.VALUE_KEY;
+import static org.spine3.gae.datastore.DataStoreHelperOldImpl.TYPE_KEY;
+import static org.spine3.gae.datastore.DataStoreHelperOldImpl.VALUE_KEY;
 
 /**
  * DataStore-based {@link SnapshotStorage} implementation.
  */
 public class DataStoreSnapshotStorage<I> implements SnapshotStorage<I> {
 
-    private final DataStoreHelper dataStoreHelper;
+    private final DataStoreHelperOldImpl dataStoreHelper;
 
     private final TypeName entityKind;
 
@@ -48,7 +48,7 @@ public class DataStoreSnapshotStorage<I> implements SnapshotStorage<I> {
      */
     public DataStoreSnapshotStorage(TypeName entityKind) {
         this.entityKind = entityKind;
-        dataStoreHelper = new DataStoreHelper();
+        dataStoreHelper = new DataStoreHelperOldImpl();
     }
 
     @Override

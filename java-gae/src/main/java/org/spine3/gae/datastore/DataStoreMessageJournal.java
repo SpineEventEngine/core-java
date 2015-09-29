@@ -33,8 +33,8 @@ import org.spine3.util.Identifiers;
 import java.util.List;
 
 import static com.google.appengine.api.datastore.Query.FilterOperator.EQUAL;
-import static org.spine3.gae.datastore.DataStoreHelper.PARENT_ID_KEY;
-import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
+import static org.spine3.gae.datastore.DataStoreHelperOldImpl.PARENT_ID_KEY;
+import static org.spine3.gae.datastore.DataStoreHelperOldImpl.prepareFilter;
 
 /**
  * {@code MessageJournal} based on App Engine Datastore.
@@ -45,7 +45,7 @@ import static org.spine3.gae.datastore.DataStoreHelper.prepareFilter;
  */
 public class DataStoreMessageJournal<I, M extends Message> implements MessageJournal<I, M> {
 
-    private final DataStoreHelper dataStoreHelper;
+    private final DataStoreHelperOldImpl dataStoreHelper;
 
     private final TypeName type;
 
@@ -57,7 +57,7 @@ public class DataStoreMessageJournal<I, M extends Message> implements MessageJou
 
     private DataStoreMessageJournal(TypeName type) {
         this.type = type;
-        dataStoreHelper = new DataStoreHelper();
+        dataStoreHelper = new DataStoreHelperOldImpl();
     }
 
     @Override

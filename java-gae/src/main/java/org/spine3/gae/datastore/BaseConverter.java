@@ -30,7 +30,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.aggregate.AggregateId;
 
-import static org.spine3.gae.datastore.DataStoreHelper.*;
+import static org.spine3.gae.datastore.DataStoreHelperOldImpl.*;
 
 /**
  * Abstract implementation base for entity converters.
