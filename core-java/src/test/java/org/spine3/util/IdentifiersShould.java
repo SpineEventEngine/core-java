@@ -180,10 +180,10 @@ public class IdentifiersShould {
 
     @Test
     @SuppressWarnings("LocalVariableNamingConvention")
-    public void escape_chars_not_allowed_in_windows_file_name_when_convert_id_to_string() {
+    public void escape_chars_not_allowed_in_file_name_when_convert_id_to_string() {
 
-        final String charsNotAllowedInWindowsFileName = "\\/:*?\"<>|";
-        final String result = idToString(charsNotAllowedInWindowsFileName);
+        final String charsNotAllowedInFileName = "\\/:*?\"<>|";
+        final String result = idToString(charsNotAllowedInFileName);
 
         assertEquals("&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;", result);
     }

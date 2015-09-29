@@ -29,6 +29,7 @@ import org.spine3.protobuf.Messages;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -68,10 +69,11 @@ public class Identifiers {
      */
     public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
 
-    /**
-     * Event ID must be the first field of entity events.
-     */
-    public static final int ENTITY_ID_FIELD_INDEX_IN_EVENTS = 0;
+    private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
+    private static final Pattern PATTERN_COLON = Pattern.compile(":");
+    private static final Pattern PATTERN_T = Pattern.compile("T");
+    private static final String EQUAL_SIGN = "=";
+
 
     private Identifiers() {}
 
@@ -100,6 +102,7 @@ public class Identifiers {
                 || id instanceof Integer
                 || id instanceof Long;
 
+        //noinspection IfStatementWithTooManyBranches
         if (isSupportedCommonType) {
             result = id.toString();
         } else if (id instanceof Any) {
@@ -116,7 +119,7 @@ public class Identifiers {
         }
 
         result = result.trim();
-        result = escapeCharsNotAllowedInWindowsFileName(result);
+        result = FileNameEscaper.getInstance().escape(result);
 
         return result;
     }
@@ -169,7 +172,8 @@ public class Identifiers {
 
         String result = shortDebugString(messageWithEscapedFields);
 
-        result = result.replace(": ", "=");
+        result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
+
         return result;
     }
 
@@ -184,7 +188,7 @@ public class Identifiers {
             Object value = fields.get(descriptor);
 
             if (descriptor.getJavaType() == STRING) {
-                Object stringValue = escapeCharsNotAllowedInWindowsFileName(value.toString());
+                Object stringValue = FileNameEscaper.getInstance().escape(value.toString());
                 result.setField(descriptor, stringValue);
             } else {
                 result.setField(descriptor, value);
@@ -192,21 +196,6 @@ public class Identifiers {
         }
 
         return result.build();
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static String escapeCharsNotAllowedInWindowsFileName(String input) {
-        String result = input
-                .replace("\\", "&#92;")
-                .replace("/", "&#47;")
-                .replace(":", "&#58;")
-                .replace("*", "&#42;")
-                .replace("?", "&#63;")
-                .replace("\"", "&#34;")
-                .replace("<", "&#60;")
-                .replace(">", "&#62;")
-                .replace("|", "&#124;");
-        return result;
     }
 
     /**
@@ -293,9 +282,10 @@ public class Identifiers {
             return NULL_ID_OR_FIELD;
         }
 
-        String result = TimeUtil.toString(timestamp)
-                .replace(":", "-")
-                .replace("T", "_T");
+        String result = TimeUtil.toString(timestamp);
+        result = PATTERN_COLON.matcher(result).replaceAll("-");
+        result = PATTERN_T.matcher(result).replaceAll("_T");
+
         return result;
     }
 
