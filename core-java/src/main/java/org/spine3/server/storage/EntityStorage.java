@@ -29,8 +29,10 @@ import com.google.protobuf.Message;
  * @param <M> the type of entity state messages written in the storage
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassMayBeInterface")
 public abstract class EntityStorage<I, M extends Message> {
 
+    // TODO:2015.09.30:alexander.litus: change docs and impl to return default instances but not null
     /**
      * Reads message from the storage by id.
      *
