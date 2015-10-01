@@ -89,7 +89,7 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
      */
-    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
+    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks"})
     public static <I> String idToString(@Nullable I id) {
 
         if (id == null) {
@@ -98,6 +98,7 @@ public class Identifiers {
 
         String result;
 
+        //noinspection LocalVariableNamingConvention
         final boolean isSupportedCommonType = id instanceof String
                 || id instanceof Integer
                 || id instanceof Long;
@@ -165,9 +166,8 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "LocalVariableNamingConvention"})
     private static String messageWithMultipleFieldsToString(Message message) {
-
+        //noinspection LocalVariableNamingConvention
         final Message messageWithEscapedFields = escapeStringFields(message);
 
         String result = shortDebugString(messageWithEscapedFields);
@@ -177,22 +177,25 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private static Message escapeStringFields(Message message) {
 
         final Message.Builder result = message.toBuilder();
         final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
+
+        //TODO:2015-10-01:alexander.yevsyukov: @AlexanderLitus, we should not depend on file system at this level of the framework.
+        // Escaping is a property of the file system storage implementation.
+
+        final FileNameEscaper escaper = FileNameEscaper.getInstance();
 
         for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
 
             Object value = fields.get(descriptor);
 
             if (descriptor.getJavaType() == STRING) {
-                Object stringValue = FileNameEscaper.getInstance().escape(value.toString());
-                result.setField(descriptor, stringValue);
-            } else {
-                result.setField(descriptor, value);
+                value = escaper.escape(value.toString());
             }
+
+            result.setField(descriptor, value);
         }
 
         return result.build();
@@ -275,13 +278,7 @@ public class Identifiers {
      * @param timestamp  the value to convert
      * @return string representation or {@code NULL_ID_OR_FIELD} if input is null
      */
-    @SuppressWarnings("ConstantConditions")
     public static String timestampToString(Timestamp timestamp) {
-
-        if (timestamp == null) {
-            return NULL_ID_OR_FIELD;
-        }
-
         String result = TimeUtil.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
@@ -296,13 +293,12 @@ public class Identifiers {
     /**
      * The registry of converters of ID types to string representations.
      */
-    @SuppressWarnings({"serial", "ClassExtendsConcreteCollection", "InnerClassTooDeeplyNested", "ConstantConditions",
-            "StringBufferWithoutInitialCapacity"})
     public static class IdConverterRegistry {
 
         private final Map<Class<?>, Function<?, String>> entries = newHashMap(
                 ImmutableMap.<Class<?>, Function<?, String>>builder()
-                        .put(Timestamp.class, new TimestampToStringConverter()).build()
+                        .put(Timestamp.class, new TimestampToStringConverter())
+                        .build()
         );
 
         private IdConverterRegistry() {
@@ -339,11 +335,16 @@ public class Identifiers {
             return Singleton.INSTANCE.value;
         }
 
-        private static class TimestampToStringConverter implements Function<Timestamp, String> {
-            @Override
-            public String apply(@Nullable Timestamp timestamp) {
-                return timestampToString(timestamp);
+    }
+
+    private static class TimestampToStringConverter implements Function<Timestamp, String> {
+        @Override
+        public String apply(@Nullable Timestamp timestamp) {
+            if (timestamp == null) {
+                return NULL_ID_OR_FIELD;
             }
+            final String result = timestampToString(timestamp);
+            return result;
         }
     }
 }
