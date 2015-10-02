@@ -36,9 +36,9 @@ import static org.junit.Assert.assertEquals;
         "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class DatastoreEntityStorageShould {
 
-    /* TODO:2015.09.30:alexander.litus: start Local Datastore Server automatically and not ignore tests
-     * Asked question about this on StackOverflow:
-     * http://stackoverflow.com/questions/32868749/gae-datastore-cannot-start-localdevelopmentdatastore-programmatically-on-windo
+    /* TODO:2015.09.30:alexander.litus: start Local Datastore Server automatically and not ignore tests.
+     * Reported an issue here:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
 
     private DatastoreEntityStorage<String, TestIdWithStringField> storage;
