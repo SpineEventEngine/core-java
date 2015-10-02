@@ -238,8 +238,9 @@ public class FileSystemHelper {
         I result = input;
         if (input instanceof Message) {
             final Message message = escapeStringFields((Message) input);
-            //noinspection unchecked
-            result = (I) message; // cast is safe because input is Message
+            @SuppressWarnings("unchecked")
+            I castedMessage = (I) message; // cast is safe because input is Message
+            result = castedMessage;
         }
         return result;
     }
