@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
 
@@ -120,7 +119,6 @@ public class Identifiers {
         }
 
         result = result.trim();
-        result = FileNameEscaper.getInstance().escape(result);
 
         return result;
     }
@@ -129,7 +127,6 @@ public class Identifiers {
     private static String idMessageToString(Message message) {
 
         String result;
-
         final IdConverterRegistry registry = IdConverterRegistry.instance();
 
         if (registry.containsConverter(message)) {
@@ -144,6 +141,7 @@ public class Identifiers {
 
     @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
     private static String convert(Message message) {
+
         String result;
         final Collection<Object> values = message.getAllFields().values();
 
@@ -166,39 +164,11 @@ public class Identifiers {
         return result;
     }
 
-    private static String messageWithMultipleFieldsToString(Message message) {
-        //noinspection LocalVariableNamingConvention
-        final Message messageWithEscapedFields = escapeStringFields(message);
+    private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
 
-        String result = shortDebugString(messageWithEscapedFields);
-
+        String result = shortDebugString(message);
         result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
-
         return result;
-    }
-
-    private static Message escapeStringFields(Message message) {
-
-        final Message.Builder result = message.toBuilder();
-        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
-
-        //TODO:2015-10-01:alexander.yevsyukov: @AlexanderLitus, we should not depend on file system at this level of the framework.
-        // Escaping is a property of the file system storage implementation.
-
-        final FileNameEscaper escaper = FileNameEscaper.getInstance();
-
-        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
-
-            Object value = fields.get(descriptor);
-
-            if (descriptor.getJavaType() == STRING) {
-                value = escaper.escape(value.toString());
-            }
-
-            result.setField(descriptor, value);
-        }
-
-        return result.build();
     }
 
     /**
