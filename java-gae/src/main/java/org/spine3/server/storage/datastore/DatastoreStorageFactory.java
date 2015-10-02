@@ -21,15 +21,18 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Message;
+import org.spine3.TypeName;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
 public class DatastoreStorageFactory implements StorageFactory {
+
     @Override
     public CommandStorage createCommandStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        final TypeName typeName = TypeName.of(CommandStoreRecord.getDescriptor());
+        DatastoreManager.instance().setTypeName(typeName);
+        return DatastoreCommandStorage.newInstance(DatastoreManager.instance());
     }
 
     @Override
@@ -47,6 +50,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
         //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        DatastoreManager.instance().setTypeName(null);
+        return DatastoreEntityStorage.newInstance(DatastoreManager.instance());
     }
 }

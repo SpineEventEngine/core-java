@@ -20,18 +20,23 @@
 
 package org.spine3.server.storage.datastore;
 
-/**
- * Provides the access to DataStore.
- *
- * @author Alexander Litus
- */
-public class Datastore {
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStoreRecord;
 
-    
+public class DatastoreCommandStorage extends CommandStorage {
 
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Datastore value = new Datastore();
+    private final DatastoreManager datastoreManager;
+
+    private DatastoreCommandStorage(DatastoreManager datastoreManager) {
+        this.datastoreManager = datastoreManager;
+    }
+
+    protected static CommandStorage newInstance(DatastoreManager datastoreManager) {
+        return new DatastoreCommandStorage(datastoreManager);
+    }
+
+    @Override
+    protected void write(CommandStoreRecord record) {
+        datastoreManager.store(record.getAggregateId(), record);
     }
 }

@@ -22,10 +22,7 @@ package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.spine3.TypeName;
 import org.spine3.test.TestIdWithStringField;
 
@@ -41,27 +38,32 @@ public class DatastoreEntityStorageShould {
      * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
 
-    private DatastoreEntityStorage<String, TestIdWithStringField> storage;
+    private static final DatastoreEntityStorage<String, TestIdWithStringField> STORAGE =
+            DatastoreEntityStorage.newInstance(LocalDatastoreManager.instance());
+
     private TestIdWithStringField message;
+
+    @BeforeClass
+    public static void setUpClass() {
+        final TypeName typeName = TypeName.of(TestIdWithStringField.getDescriptor());
+        LocalDatastoreManager.instance().setTypeName(typeName);
+    }
 
     @Before
     public void setUpTest() {
-
-        final TypeName typeName = TypeName.of(TestIdWithStringField.getDescriptor());
-        storage = new DatastoreEntityStorage<>(typeName);
         message = TestIdWithStringField.newBuilder().setId("testValue").build();
     }
 
     @After
     public void tearDownTest() {
-        storage.clear();
+        LocalDatastoreManager.instance().clear();
     }
 
     @Ignore
     @Test
     public void return_default_message_if_read_one_record_from_empty_storage() {
 
-        final Message actual = storage.read("testId");
+        final Message actual = STORAGE.read("testId");
         assertEquals(Any.getDefaultInstance(), actual);
     }
 
@@ -69,20 +71,20 @@ public class DatastoreEntityStorageShould {
     @Test
     public void return_default_message_if_read_one_record_by_null_id() {
 
-        final Message actual = storage.read(null);
+        final Message actual = STORAGE.read(null);
         assertEquals(Any.getDefaultInstance(), actual);
     }
 
     @Ignore
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
-        storage.write(null, message);
+        STORAGE.write(null, message);
     }
 
     @Ignore
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_message() {
-        storage.write("testId", null);
+        STORAGE.write("testId", null);
     }
 
     @Ignore
@@ -91,9 +93,9 @@ public class DatastoreEntityStorageShould {
 
         final String id = "testId";
 
-        storage.write(id, message);
+        STORAGE.write(id, message);
 
-        final TestIdWithStringField actual = storage.read(id);
+        final TestIdWithStringField actual = STORAGE.read(id);
 
         assertEquals(message, actual);
     }
