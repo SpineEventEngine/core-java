@@ -151,7 +151,8 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while closing stream", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while closing stream", e);
             }
         }
     }
@@ -171,7 +172,8 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while flushing stream", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while flushing stream", e);
             }
         }
     }
@@ -189,8 +191,8 @@ public class FileSystemHelper {
     }
 
     /**
-     * @throws IllegalStateException if there is no such file
      * @param file file to check
+     * @throws IllegalStateException if there is no such file
      */
     public static void checkFileExists(File file) {
         if (!file.exists()) {
@@ -200,6 +202,7 @@ public class FileSystemHelper {
 
     /**
      * Tries to open {@code FileInputStream} from file
+     *
      * @throws RuntimeException if there is no such file
      */
     public static FileInputStream tryOpenFileInputStream(File file) {
@@ -231,7 +234,7 @@ public class FileSystemHelper {
         return result;
     }
 
-    private static<I> I escapeStringFieldsIfIsMessage(I input) {
+    private static <I> I escapeStringFieldsIfIsMessage(I input) {
         I result = input;
         if (input instanceof Message) {
             final Message message = escapeStringFields((Message) input);
