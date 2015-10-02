@@ -276,7 +276,7 @@ public class Identifiers {
      * Converts the passed timestamp to human-readable string representation.
      *
      * @param timestamp  the value to convert
-     * @return string representation or {@code NULL_ID_OR_FIELD} if input is null
+     * @return string representation of timestamp
      */
     public static String timestampToString(Timestamp timestamp) {
         String result = TimeUtil.toString(timestamp);
