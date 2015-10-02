@@ -150,8 +150,9 @@ public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<
         }
 
         if (response == null || response.getFoundCount() == 0) {
-            //noinspection unchecked
-            return (M) Any.getDefaultInstance(); // cast is save because Any is Message
+            @SuppressWarnings("unchecked")
+            final M empty = (M) Any.getDefaultInstance();// cast is save because Any is Message
+            return empty;
         }
 
         Entity entity = response.getFound(0).getEntity();
