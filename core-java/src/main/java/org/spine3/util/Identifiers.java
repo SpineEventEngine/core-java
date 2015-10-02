@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
 
@@ -89,7 +88,7 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
      */
-    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
+    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks"})
     public static <I> String idToString(@Nullable I id) {
 
         if (id == null) {
@@ -98,6 +97,7 @@ public class Identifiers {
 
         String result;
 
+        //noinspection LocalVariableNamingConvention
         final boolean isSupportedCommonType = id instanceof String
                 || id instanceof Integer
                 || id instanceof Long;
@@ -119,7 +119,6 @@ public class Identifiers {
         }
 
         result = result.trim();
-        result = FileNameEscaper.getInstance().escape(result);
 
         return result;
     }
@@ -128,7 +127,6 @@ public class Identifiers {
     private static String idMessageToString(Message message) {
 
         String result;
-
         final IdConverterRegistry registry = IdConverterRegistry.instance();
 
         if (registry.containsConverter(message)) {
@@ -143,6 +141,7 @@ public class Identifiers {
 
     @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
     private static String convert(Message message) {
+
         String result;
         final Collection<Object> values = message.getAllFields().values();
 
@@ -165,37 +164,11 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "LocalVariableNamingConvention"})
-    private static String messageWithMultipleFieldsToString(Message message) {
+    private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
 
-        final Message messageWithEscapedFields = escapeStringFields(message);
-
-        String result = shortDebugString(messageWithEscapedFields);
-
+        String result = shortDebugString(message);
         result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
-
         return result;
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static Message escapeStringFields(Message message) {
-
-        final Message.Builder result = message.toBuilder();
-        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
-
-        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
-
-            Object value = fields.get(descriptor);
-
-            if (descriptor.getJavaType() == STRING) {
-                Object stringValue = FileNameEscaper.getInstance().escape(value.toString());
-                result.setField(descriptor, stringValue);
-            } else {
-                result.setField(descriptor, value);
-            }
-        }
-
-        return result.build();
     }
 
     /**
@@ -273,15 +246,9 @@ public class Identifiers {
      * Converts the passed timestamp to human-readable string representation.
      *
      * @param timestamp  the value to convert
-     * @return string representation or {@code NULL_ID_OR_FIELD} if input is null
+     * @return string representation of timestamp
      */
-    @SuppressWarnings("ConstantConditions")
     public static String timestampToString(Timestamp timestamp) {
-
-        if (timestamp == null) {
-            return NULL_ID_OR_FIELD;
-        }
-
         String result = TimeUtil.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
@@ -296,13 +263,12 @@ public class Identifiers {
     /**
      * The registry of converters of ID types to string representations.
      */
-    @SuppressWarnings({"serial", "ClassExtendsConcreteCollection", "InnerClassTooDeeplyNested", "ConstantConditions",
-            "StringBufferWithoutInitialCapacity"})
     public static class IdConverterRegistry {
 
         private final Map<Class<?>, Function<?, String>> entries = newHashMap(
                 ImmutableMap.<Class<?>, Function<?, String>>builder()
-                        .put(Timestamp.class, new TimestampToStringConverter()).build()
+                        .put(Timestamp.class, new TimestampToStringConverter())
+                        .build()
         );
 
         private IdConverterRegistry() {
@@ -339,11 +305,16 @@ public class Identifiers {
             return Singleton.INSTANCE.value;
         }
 
-        private static class TimestampToStringConverter implements Function<Timestamp, String> {
-            @Override
-            public String apply(@Nullable Timestamp timestamp) {
-                return timestampToString(timestamp);
+    }
+
+    private static class TimestampToStringConverter implements Function<Timestamp, String> {
+        @Override
+        public String apply(@Nullable Timestamp timestamp) {
+            if (timestamp == null) {
+                return NULL_ID_OR_FIELD;
             }
+            final String result = timestampToString(timestamp);
+            return result;
         }
     }
 }

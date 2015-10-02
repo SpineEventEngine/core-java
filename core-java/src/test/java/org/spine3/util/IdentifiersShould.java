@@ -37,7 +37,7 @@ import static org.spine3.util.Identifiers.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "DuplicateStringLiteralInspection"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
@@ -158,9 +158,9 @@ public class IdentifiersShould {
                 .build();
 
         final String expected =
-                "string=&#34;" + outerString + "&#34;" +
+                "string=\"" + outerString + '\"' +
                 " int=" + number +
-                " message { id=&#34;" + nestedString + "&#34; }";
+                " message { id=\"" + nestedString + "\" }";
 
         final String actual = idToString(idToConvert);
 
@@ -176,16 +176,6 @@ public class IdentifiersShould {
         final String result = idToString(any);
 
         assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    @SuppressWarnings("LocalVariableNamingConvention")
-    public void escape_chars_not_allowed_in_file_name_when_convert_id_to_string() {
-
-        final String charsNotAllowedInFileName = "\\/:*?\"<>|";
-        final String result = idToString(charsNotAllowedInFileName);
-
-        assertEquals("&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;", result);
     }
 
     private static TestIdWithStringField newTestIdWithStringField(String nestedString) {

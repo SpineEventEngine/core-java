@@ -24,9 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.readEntity;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.writeEntity;
-import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 
 public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
@@ -38,7 +36,8 @@ public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage
 
     @Override
     public M read(I id) {
-        final String idString = idToString(id);
+
+        final String idString = idToStringWithEscaping(id);
 
         Message message = readEntity(idString);
 
@@ -53,7 +52,7 @@ public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage
         checkNotNull(id);
         checkNotNull(message);
 
-        final String idString = idToString(id);
+        final String idString = idToStringWithEscaping(id);
 
         writeEntity(idString, message);
     }
