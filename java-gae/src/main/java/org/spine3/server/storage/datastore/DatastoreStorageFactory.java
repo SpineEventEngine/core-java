@@ -30,15 +30,18 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
+        final DatastoreManager manager = DatastoreManager.instance();
         final TypeName typeName = TypeName.of(CommandStoreRecord.getDescriptor());
-        DatastoreManager.instance().setTypeName(typeName);
-        return DatastoreCommandStorage.newInstance(DatastoreManager.instance());
+        manager.setTypeName(typeName);
+        return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        final DatastoreManager manager = DatastoreManager.instance();
+        final TypeName typeName = TypeName.of(EventStoreRecord.getDescriptor());
+        manager.setTypeName(typeName);
+        return DatastoreEventStorage.newInstance(manager);
     }
 
     @Override
@@ -50,7 +53,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
         //TODO:2015-09-21:alexander.yevsyukov: Implement
-        DatastoreManager.instance().setTypeName(null);
-        return DatastoreEntityStorage.newInstance(DatastoreManager.instance());
+        final DatastoreManager manager = DatastoreManager.instance();
+        manager.setTypeName(null);
+        return DatastoreEntityStorage.newInstance(manager);
     }
 }
