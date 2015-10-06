@@ -87,7 +87,7 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
      */
-    @SuppressWarnings({"ConstantConditions", "ChainOfInstanceofChecks", "LocalVariableNamingConvention"})
+    @SuppressWarnings({"ChainOfInstanceofChecks", "IfStatementWithTooManyBranches"})
     public static <I> String idToString(@Nullable I id) {
 
         if (id == null) {
@@ -96,11 +96,11 @@ public class Identifiers {
 
         String result;
 
-        final boolean isSupportedCommonType = id instanceof String
+        final boolean isStringOrNumber = id instanceof String
                 || id instanceof Integer
                 || id instanceof Long;
 
-        if (isSupportedCommonType) {
+        if (isStringOrNumber) {
             result = id.toString();
         } else if (id instanceof Any) {
             final Message messageFromAny = fromAny((Any) id);
