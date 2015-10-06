@@ -40,18 +40,6 @@ public class EventRecordFactory {
 
     private EventRecordFactory() {}
 
-    public static EventRecord projectCreated(ProjectId projectId) {
-        return projectCreated(projectId, EventContext.getDefaultInstance());
-    }
-
-    public static EventRecord taskAdded(ProjectId projectId) {
-        return taskAdded(projectId, EventContext.getDefaultInstance());
-    }
-
-    public static EventRecord projectStarted(ProjectId projectId) {
-        return projectStarted(projectId, EventContext.getDefaultInstance());
-    }
-
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
