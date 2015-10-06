@@ -53,9 +53,7 @@ public class FileSystemEventStorageShould extends EventStorageShould {
 
     @Before
     public void setUpTest() {
-        STORAGE.releaseResources();
         configure(FileSystemEventStorageShould.class);
-        cleanTestData();
     }
 
     @After
