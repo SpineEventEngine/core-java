@@ -38,16 +38,14 @@ public class DatastoreEntityStorageShould {
      * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
 
+    private static final TypeName TYPE_NAME = TypeName.of(TestIdWithStringField.getDescriptor());
+
+    private static final LocalDatastoreManager<TestIdWithStringField> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
+
     private static final DatastoreEntityStorage<String, TestIdWithStringField> STORAGE =
-            DatastoreEntityStorage.newInstance(LocalDatastoreManager.instance());
+            DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
 
     private TestIdWithStringField message;
-
-    @BeforeClass
-    public static void setUpClass() {
-        final TypeName typeName = TypeName.of(TestIdWithStringField.getDescriptor());
-        LocalDatastoreManager.instance().setTypeName(typeName);
-    }
 
     @Before
     public void setUpTest() {
@@ -56,7 +54,7 @@ public class DatastoreEntityStorageShould {
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.instance().clear();
+        DATASTORE_MANAGER.clear();
     }
 
     @Ignore

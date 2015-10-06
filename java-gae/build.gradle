@@ -1,6 +1,9 @@
 description = ''
 dependencies {
+
     compile project(':core-java')
+
+    testCompile project (path: ":core-java", configuration: 'testArtifacts')
 
     compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.24'
     compile 'com.google.appengine:appengine-api-labs:1.9.24'

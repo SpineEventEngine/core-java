@@ -21,30 +21,42 @@
 package org.spine3.server.storage.datastore;
 
 import com.google.api.services.datastore.DatastoreV1.*;
+import com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreException;
 import com.google.api.services.datastore.client.DatastoreFactory;
 import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import org.spine3.TypeName;
+import org.spine3.server.storage.EventStoreRecord;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Throwables.propagate;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
+import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Timestamps.convertToDate;
 
 /**
  * Provides the access to Google Cloud Datastore.
  *
  * @author Alexander Litus
  */
-public class DatastoreManager {
+public class DatastoreManager<M extends Message> {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // temporary
     private static final String VALUE_KEY = "value";
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String TIMESTAMP_KEY = "timestamp";
     private static final String LOCALHOST = "http://localhost:8080";
     protected static final String DATASET_NAME = "myapp";
 
@@ -53,22 +65,18 @@ public class DatastoreManager {
             .dataset(DATASET_NAME).build();
 
     private final Datastore datastore;
-    private TypeName typeName;
+    private final TypeName typeName;
 
-
-    private DatastoreManager() {
-        this(DatastoreFactory.get());
-    }
-
-    protected DatastoreManager(DatastoreFactory factory) {
+    protected DatastoreManager(DatastoreFactory factory, TypeName typeName) {
         this.datastore = factory.create(OPTIONS);
+        this.typeName = typeName;
     }
 
-    protected static DatastoreManager instance() {
-        return Singleton.INSTANCE.value;
+    protected static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
+        return new DatastoreManager<>(DatastoreFactory.get(), TypeName.of(descriptor));
     }
 
-    public <M extends Message> void store(String id, M message) {
+    public void store(String id, M message) {
 
         final ByteString serializedMessage = toAny(message).getValue();
         final Key.Builder key = makeKey(typeName.nameOnly(), id);
@@ -78,30 +86,27 @@ public class DatastoreManager {
                 .setKey(key)
                 .addProperty(property);
 
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        CommitRequest commitRequest = CommitRequest.newBuilder()
-                .setMode(NON_TRANSACTIONAL)
-                .setMutation(mutation)
-                .build();
-
-        try {
-            datastore.commit(commitRequest);
-        } catch (DatastoreException e) {
-            propagate(e);
-        }
+        tryToStore(entity);
     }
 
-    public <M extends Message> M read(String id) {
+    public void storeEvent(String id, EventStoreRecord record) {
+
+        final ByteString serializedMessage = toAny(record).getValue();
+        final Key.Builder key = makeKey(typeName.nameOnly(), id);
+        Entity.Builder entity = Entity.newBuilder()
+                .setKey(key)
+                .addProperty(makeProperty(VALUE_KEY, makeValue(serializedMessage)))
+                .addProperty(makeProperty(TIMESTAMP_KEY, makeValue(convertToDate(record.getTimestamp()))));
+
+        tryToStore(entity);
+    }
+
+    public M read(String id) {
 
         final Key.Builder key = makeKey(typeName.nameOnly(), id);
         LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
-        LookupResponse response = null;
-        try {
-            response = datastore.lookup(request);
-        } catch (DatastoreException e) {
-            propagate(e);
-        }
+        final LookupResponse response = tryToLookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
             @SuppressWarnings("unchecked")
@@ -109,37 +114,82 @@ public class DatastoreManager {
             return empty;
         }
 
-        Entity entity = response.getFound(0).getEntity();
-        final M message = entityToMessage(entity);
+        EntityResult entity = response.getFound(0);
+        final M message = entityToMessage.apply(entity);
 
         return message;
     }
 
-    private <M extends Message> M entityToMessage(EntityOrBuilder entity) {
+    public List<M> readAllSortedByTime(Direction sortDirection) {
 
-        final Any.Builder any = Any.newBuilder();
-        final Property property = entity.getProperty(0);
+        Query.Builder query = Query.newBuilder();
+        query.addKindBuilder().setName(typeName.nameOnly());
+        query.addOrder(makeOrder(TIMESTAMP_KEY, sortDirection));
+        RunQueryRequest.Builder queryRequest = RunQueryRequest.newBuilder().setQuery(query);
+        List<EntityResult> entityResults = null;
 
-        if (property.getName().equals(VALUE_KEY)) {
-            any.setValue(property.getValue().getBlobValue());
+        try {
+            entityResults = datastore.runQuery(queryRequest.build()).getBatch().getEntityResultList();
+        } catch (DatastoreException e) {
+            propagate(e);
         }
-        any.setTypeUrl(typeName.toTypeUrl());
 
-        final M result = fromAny(any.build());
+        if (entityResults == null || entityResults.isEmpty()) {
+            return newArrayList();
+        }
+
+        final List<M> result = transform(entityResults, entityToMessage);
         return result;
     }
 
+    private void tryToStore(Entity.Builder entity) {
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        CommitRequest commitRequest = CommitRequest.newBuilder()
+                .setMode(NON_TRANSACTIONAL)
+                .setMutation(mutation)
+                .build();
+        try {
+            datastore.commit(commitRequest);
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+    }
+
+    private LookupResponse tryToLookup(LookupRequest request) {
+        LookupResponse response = null;
+        try {
+            response = datastore.lookup(request);
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+        return response;
+    }
+
+    private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
+        @Override
+        public M apply(@Nullable EntityResult entity) {
+
+            if (entity == null) {
+                @SuppressWarnings("unchecked") // cast is safe because Any is Message
+                final M empty = (M) Any.getDefaultInstance();
+                return empty;
+            }
+
+            final Any.Builder any = Any.newBuilder();
+            final Property property = entity.getEntity().getProperty(0);
+
+            if (property.getName().equals(VALUE_KEY)) {
+                any.setValue(property.getValue().getBlobValue());
+            }
+            any.setTypeUrl(typeName.toTypeUrl());
+
+            final M result = fromAny(any.build());
+            return result;
+        }
+    };
+
     protected Datastore getDatastore() {
         return datastore;
-    }
-
-    protected void setTypeName(TypeName typeName) {
-        this.typeName = typeName;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final DatastoreManager value = new DatastoreManager();
     }
 }

@@ -25,18 +25,18 @@ import org.spine3.server.storage.CommandStoreRecord;
 
 public class DatastoreCommandStorage extends CommandStorage {
 
-    private final DatastoreManager datastoreManager;
+    private final DatastoreManager<CommandStoreRecord> datastoreManager;
 
-    private DatastoreCommandStorage(DatastoreManager datastoreManager) {
+    private DatastoreCommandStorage(DatastoreManager<CommandStoreRecord> datastoreManager) {
         this.datastoreManager = datastoreManager;
     }
 
-    protected static CommandStorage newInstance(DatastoreManager datastoreManager) {
+    protected static CommandStorage newInstance(DatastoreManager<CommandStoreRecord> datastoreManager) {
         return new DatastoreCommandStorage(datastoreManager);
     }
 
     @Override
     protected void write(CommandStoreRecord record) {
-        datastoreManager.store(record.getAggregateId(), record);
+        datastoreManager.store(record.getCommandId(), record);
     }
 }

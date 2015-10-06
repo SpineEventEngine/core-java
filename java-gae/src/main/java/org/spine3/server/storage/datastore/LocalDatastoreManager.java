@@ -23,19 +23,21 @@ package org.spine3.server.storage.datastore;
 import com.google.api.services.datastore.client.LocalDevelopmentDatastore;
 import com.google.api.services.datastore.client.LocalDevelopmentDatastoreException;
 import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
+import com.google.protobuf.Message;
+import org.spine3.TypeName;
 
 import static com.google.common.base.Throwables.propagate;
 
-public class LocalDatastoreManager extends DatastoreManager {
+public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
     private static final String PATH_TO_GCD = "C:\\gcd";
 
-    private LocalDatastoreManager() {
-        super(LocalDevelopmentDatastoreFactory.get());
+    private LocalDatastoreManager(TypeName typeName) {
+        super(LocalDevelopmentDatastoreFactory.get(), typeName);
     }
 
-    protected static LocalDatastoreManager instance() {
-        return Singleton.INSTANCE.value;
+    protected static <M extends Message> LocalDatastoreManager<M> newInstance(TypeName typeName) {
+        return new LocalDatastoreManager<>(typeName);
     }
 
     public void start() {
@@ -67,11 +69,5 @@ public class LocalDatastoreManager extends DatastoreManager {
 
     private LocalDevelopmentDatastore getLocalDatastore() {
         return (LocalDevelopmentDatastore) getDatastore();
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreManager value = new LocalDatastoreManager();
     }
 }

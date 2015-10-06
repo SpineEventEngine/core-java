@@ -20,27 +20,28 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.TypeName;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
+import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.util.Classes.getGenericParameterType;
+
 public class DatastoreStorageFactory implements StorageFactory {
+
+    private static final int ENTITY_MESSAGE_PARAMETER_INDEX = 1;
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreManager manager = DatastoreManager.instance();
-        final TypeName typeName = TypeName.of(CommandStoreRecord.getDescriptor());
-        manager.setTypeName(typeName);
+        final DatastoreManager<CommandStoreRecord> manager = DatastoreManager.newInstance(CommandStoreRecord.getDescriptor());
         return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreManager manager = DatastoreManager.instance();
-        final TypeName typeName = TypeName.of(EventStoreRecord.getDescriptor());
-        manager.setTypeName(typeName);
+        final DatastoreManager<EventStoreRecord> manager = DatastoreManager.newInstance(EventStoreRecord.getDescriptor());
         return DatastoreEventStorage.newInstance(manager);
     }
 
@@ -52,9 +53,12 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        final DatastoreManager manager = DatastoreManager.instance();
-        manager.setTypeName(null);
+
+        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_PARAMETER_INDEX);
+        // TODO:2015.10.05:alexander.litus: test this
+        final Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getClassDescriptor(messageClass);
+
+        final DatastoreManager<M> manager = DatastoreManager.newInstance(descriptor);
         return DatastoreEntityStorage.newInstance(manager);
     }
 }

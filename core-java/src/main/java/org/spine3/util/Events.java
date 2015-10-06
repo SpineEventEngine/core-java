@@ -217,10 +217,10 @@ public class Events {
         final EventContext context = record.getContext();
         final TypeName typeName = TypeName.ofEnclosed(event);
         final EventId eventId = context.getEventId();
-        final String eventIdStr = Events.idToString(eventId);
+        final String eventIdStr = idToString(eventId);
 
         final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
-                .setTimestamp(Events.getTimestamp(eventId))
+                .setTimestamp(getTimestamp(eventId))
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
                 .setEventId(eventIdStr)

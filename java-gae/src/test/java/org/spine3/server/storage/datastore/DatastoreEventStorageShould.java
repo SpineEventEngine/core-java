@@ -18,47 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage.datastore;
 
 import org.junit.After;
-import org.junit.Test;
-import org.spine3.base.EventId;
+import org.spine3.TypeName;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
 
-import static org.junit.Assert.assertNull;
+@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic"})
+public class DatastoreEventStorageShould extends EventStorageShould {
 
-/**
- * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
- *
- * @author Alexander Litus
- */
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
-        "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class InMemoryEventStorageShould extends EventStorageShould {
+    /* TODO:2015.09.30:alexander.litus: start Local Datastore Server automatically and not ignore tests.
+     * Reported an issue here:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+     */
 
-    private static final InMemoryEventStorage STORAGE = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
+    private static final TypeName TYPE_NAME = TypeName.of(EventStoreRecord.getDescriptor());
+    private static final LocalDatastoreManager<EventStoreRecord> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
+    private static final DatastoreEventStorage STORAGE = DatastoreEventStorage.newInstance(DATASTORE_MANAGER);
 
-    public InMemoryEventStorageShould() {
+    public DatastoreEventStorageShould() {
         super(STORAGE);
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.clear();
-    }
-
-    @Test
-    public void return_null_if_read_one_record_from_empty_storage() {
-
-        final EventStoreRecord record = STORAGE.read(EventId.getDefaultInstance());
-        assertNull(record);
-    }
-
-    @Test
-    public void return_null_if_read_one_record_by_null_id() {
-
-        final EventStoreRecord record = STORAGE.read(null);
-        assertNull(record);
+        DATASTORE_MANAGER.clear();
     }
 }

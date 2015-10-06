@@ -33,13 +33,13 @@ import static org.spine3.util.Identifiers.idToString;
  */
 public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DatastoreManager datastoreManager;
+    private final DatastoreManager<M> datastoreManager;
 
-    private DatastoreEntityStorage(DatastoreManager datastoreManager) {
+    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
         this.datastoreManager = datastoreManager;
     }
 
-    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager datastoreManager) {
+    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
         return new DatastoreEntityStorage<>(datastoreManager);
     }
 

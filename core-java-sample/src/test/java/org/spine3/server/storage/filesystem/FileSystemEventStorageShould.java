@@ -21,21 +21,21 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
-import org.spine3.test.project.ProjectId;
+import org.spine3.server.storage.EventStorageShould;
+import org.spine3.server.storage.EventStoreRecord;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
-import static org.spine3.util.testutil.EventRecordFactory.*;
+import static org.spine3.util.Events.toEventRecord;
+import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -43,41 +43,23 @@ import static org.spine3.util.testutil.EventRecordFactory.*;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class FileSystemEventStorageShould {
+public class FileSystemEventStorageShould extends EventStorageShould {
 
     private static final FileSystemEventStorage STORAGE = (FileSystemEventStorage) FileSystemEventStorage.newInstance();
 
-    private ProjectId id;
+    public FileSystemEventStorageShould() {
+        super(STORAGE);
+    }
 
     @Before
     public void setUpTest() {
-        STORAGE.releaseResources();
         configure(FileSystemEventStorageShould.class);
-        cleanTestData();
-
-        id = ProjectId.newBuilder().setId("project_id").build();
     }
 
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
         cleanTestData();
-    }
-
-    @Test
-    public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
-
-        final Iterator<EventRecord> iterator = STORAGE.allEvents();
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null() {
-        STORAGE.write(null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -87,27 +69,12 @@ public class FileSystemEventStorageShould {
         iterator.remove();
     }
 
-    @Test
-    public void save_and_read_events() {
-
-        final EventRecord expected = projectCreated(id);
-        STORAGE.store(expected);
-
-        final Iterator<EventRecord> iterator = STORAGE.allEvents();
-
-        assertTrue(iterator.hasNext());
-
-        final EventRecord actual = iterator.next();
-
-        assertEventRecordsAreEqual(expected, actual);
-        assertFalse(iterator.hasNext());
-    }
-
     @Test(expected = NoSuchElementException.class)
     public void throw_exception_if_iteration_has_no_more_elements() {
 
-        final EventRecord expected = projectCreated(id);
-        STORAGE.store(expected);
+        final EventStoreRecord recordToStore = projectCreated();
+        final EventRecord expected = toEventRecord(recordToStore);
+        STORAGE.write(recordToStore);
 
         final Iterator<EventRecord> iterator = STORAGE.allEvents();
 
@@ -119,38 +86,5 @@ public class FileSystemEventStorageShould {
         assertFalse(iterator.hasNext());
 
         iterator.next();
-    }
-
-    @Test
-    public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
-
-        final List<EventRecord> expectedRecords = newArrayList(projectCreated(id), projectStarted(id), taskAdded(id));
-
-        for (EventRecord r : expectedRecords) {
-            STORAGE.store(r);
-        }
-
-        final Iterator<EventRecord> iteratorFirst = STORAGE.allEvents();
-        final List<EventRecord> actualRecordsFirst = newArrayList(iteratorFirst);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecordsFirst);
-
-        final Iterator<EventRecord> iteratorSecond = STORAGE.allEvents();
-        final List<EventRecord> actualRecordsSecond = newArrayList(iteratorSecond);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecordsSecond);
-    }
-
-    private static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
-        if (expected.size() != actual.size()) {
-            fail("Expected records count: " + expected.size() + " is not equal to actual records count: " + actual.size());
-        }
-        for (int i = 0; i < expected.size(); i++) {
-            assertEventRecordsAreEqual(expected.get(i), actual.get(i));
-        }
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static void assertEventRecordsAreEqual(EventRecord expected, EventRecord actual) {
-        assertEquals(expected.getEvent(), actual.getEvent());
-        assertEquals(expected.getContext(), actual.getContext());
     }
 }

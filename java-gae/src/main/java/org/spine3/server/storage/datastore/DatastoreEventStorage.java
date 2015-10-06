@@ -25,31 +25,38 @@ import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 
 import java.util.Iterator;
+import java.util.List;
+
+import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
+import static org.spine3.util.Events.toEventRecordsIterator;
 
 public class DatastoreEventStorage extends EventStorage {
 
-    private final DatastoreManager datastoreManager;
+    private final DatastoreManager<EventStoreRecord> datastoreManager;
 
-    private DatastoreEventStorage(DatastoreManager manager) {
+    private DatastoreEventStorage(DatastoreManager<EventStoreRecord> manager) {
         this.datastoreManager = manager;
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreManager manager) {
+    protected static DatastoreEventStorage newInstance(DatastoreManager<EventStoreRecord> manager) {
         return new DatastoreEventStorage(manager);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
-        return null;
+
+        final List<EventStoreRecord> records = datastoreManager.readAllSortedByTime(ASCENDING);
+        final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
+        return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        datastoreManager.store(record.getAggregateId(), record);
+        datastoreManager.storeEvent(record.getEventId(), record);
     }
 
     @Override
     protected void releaseResources() {
-
+        // NOP
     }
 }
