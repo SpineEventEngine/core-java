@@ -20,18 +20,14 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.spine3.TypeName;
+import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
-import static org.junit.Assert.assertEquals;
-
-
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
-        "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class DatastoreEntityStorageShould {
+public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     /* TODO:2015.09.30:alexander.litus: start Local Datastore Server automatically and not ignore tests.
      * Reported an issue here:
@@ -45,11 +41,13 @@ public class DatastoreEntityStorageShould {
     private static final DatastoreEntityStorage<String, TestIdWithStringField> STORAGE =
             DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
 
-    private TestIdWithStringField message;
+    public DatastoreEntityStorageShould() {
+        super(STORAGE);
+    }
 
-    @Before
-    public void setUpTest() {
-        message = TestIdWithStringField.newBuilder().setId("testValue").build();
+    @BeforeClass
+    public static void setUpClass() {
+        //DATASTORE_MANAGER.start();
     }
 
     @After
@@ -57,44 +55,8 @@ public class DatastoreEntityStorageShould {
         DATASTORE_MANAGER.clear();
     }
 
-    @Ignore
-    @Test
-    public void return_default_message_if_read_one_record_from_empty_storage() {
-
-        final Message actual = STORAGE.read("testId");
-        assertEquals(Any.getDefaultInstance(), actual);
-    }
-
-    @Ignore
-    @Test
-    public void return_default_message_if_read_one_record_by_null_id() {
-
-        final Message actual = STORAGE.read(null);
-        assertEquals(Any.getDefaultInstance(), actual);
-    }
-
-    @Ignore
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        STORAGE.write(null, message);
-    }
-
-    @Ignore
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_message() {
-        STORAGE.write("testId", null);
-    }
-
-    @Ignore
-    @Test
-    public void save_and_read_message() {
-
-        final String id = "testId";
-
-        STORAGE.write(id, message);
-
-        final TestIdWithStringField actual = STORAGE.read(id);
-
-        assertEquals(message, actual);
+    @AfterClass
+    public static void tearDownClass() {
+        //DATASTORE_MANAGER.stop();
     }
 }

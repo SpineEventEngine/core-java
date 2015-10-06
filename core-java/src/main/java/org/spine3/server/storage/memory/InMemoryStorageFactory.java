@@ -49,7 +49,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return new InMemoryEntityStorage<>();
+        return InMemoryEntityStorage.newInstance();
     }
 
     public static InMemoryStorageFactory getInstance() {

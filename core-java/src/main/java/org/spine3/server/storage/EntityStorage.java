@@ -32,12 +32,11 @@ import com.google.protobuf.Message;
 @SuppressWarnings("ClassMayBeInterface")
 public abstract class EntityStorage<I, M extends Message> {
 
-    // TODO:2015.09.30:alexander.litus: change docs and impl to return default instances but not null
     /**
      * Reads message from the storage by id.
      *
      * @param id ID of the message to load
-     * @return a message instance or {@code null} if there is no message with such ID
+     * @return a message instance or empty message if there is no message with such ID
      */
     public abstract M read(I id);
 

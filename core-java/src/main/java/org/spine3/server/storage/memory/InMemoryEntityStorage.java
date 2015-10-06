@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
@@ -37,9 +38,21 @@ class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     private final Map<I, M> storage = newHashMap();
 
+    protected static <I, M extends Message> InMemoryEntityStorage<I, M> newInstance() {
+        return new InMemoryEntityStorage<>();
+    }
+
     @Override
     public M read(I id) {
+
         final M message = storage.get(id);
+
+        if (message == null) {
+            @SuppressWarnings("unchecked") // cast is safe because Any is Message
+            final M empty = (M) Any.getDefaultInstance();
+            return empty;
+        }
+
         return message;
     }
 
@@ -48,5 +61,9 @@ class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         checkNotNull(id);
         checkNotNull(message);
         storage.put(id, message);
+    }
+
+    protected void clear() {
+        storage.clear();
     }
 }

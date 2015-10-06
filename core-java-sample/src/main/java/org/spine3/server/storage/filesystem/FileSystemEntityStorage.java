@@ -38,6 +38,7 @@ public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage
 
     @Override
     public M read(I id) {
+
         final String idString = idToString(id);
 
         Message message = readEntity(idString);

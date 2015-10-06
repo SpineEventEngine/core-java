@@ -24,7 +24,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.AggregateStorageRecord;
@@ -56,19 +55,13 @@ public class FileSystemAggregateStorageShould {
 
     @Before
     public void setUpTest() {
-        STORAGE.releaseResources();
         configure(FileSystemAggregateStorageShould.class);
-        cleanTestData();
     }
 
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        FileSystemHelper.cleanTestData();
+        cleanTestData();
     }
 
     @Test

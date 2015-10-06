@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
@@ -94,18 +95,20 @@ public class FileSystemHelper {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
-        writeMessage(file, message);
+        final Any any = Messages.toAny(message);
+        writeMessage(file, any);
     }
 
     /**
      * Reads the {@code Message} from common event store by string id.
+     * @return a message instance or empty message if there is no message with such ID
      */
     public static Message readEntity(String idString) {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
 
-        Message message = null;
+        Message message = Any.getDefaultInstance();
 
         if (file.exists()) {
             message = readMessage(file);
@@ -244,25 +247,25 @@ public class FileSystemHelper {
         }
     }
 
-    @SuppressWarnings({"OverlyBroadCatchBlock", "TypeMayBeWeakened"})
-    private static Any readMessage(File file) {
+    private static Message readMessage(File file) {
 
         checkFileExists(file);
 
         InputStream fileInputStream = tryOpenFileInputStream(file);
         InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
-        Any message;
+        Any any;
 
         try {
-            message = Any.parseDelimitedFrom(bufferedInputStream);
+            any = Any.parseDelimitedFrom(bufferedInputStream);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
         } finally {
             closeSilently(fileInputStream, bufferedInputStream);
         }
 
-        return message;
+        final Message result = Messages.fromAny(any);
+        return result;
     }
 
     private static void restoreFromBackup(File file) {
