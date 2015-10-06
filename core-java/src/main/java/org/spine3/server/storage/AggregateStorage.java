@@ -113,6 +113,7 @@ public abstract class AggregateStorage<I> {
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
+     * Records are sorted by timestamp descending (from newer to older).
      *
      * @param id aggregate ID
      * @return new iterator instance, the iterator is empty if there's no history for the aggregate with passed ID
