@@ -109,8 +109,8 @@ public class DatastoreManager<M extends Message> {
         final LookupResponse response = tryToLookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
-            @SuppressWarnings("unchecked")
-            final M empty = (M) Any.getDefaultInstance();// cast is save because Any is Message
+            @SuppressWarnings("unchecked") // cast is save because Any is Message
+            final M empty = (M) Any.getDefaultInstance();
             return empty;
         }
 
