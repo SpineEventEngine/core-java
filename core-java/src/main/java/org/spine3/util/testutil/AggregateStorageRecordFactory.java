@@ -30,6 +30,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
+@SuppressWarnings("UtilityClass")
 public class AggregateStorageRecordFactory {
 
     private AggregateStorageRecordFactory() {}
