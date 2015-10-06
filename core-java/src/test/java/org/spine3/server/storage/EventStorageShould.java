@@ -42,7 +42,7 @@ import static org.spine3.util.testutil.EventStoreRecordFactory.*;
 public abstract class EventStorageShould {
 
     private final EventStorage storage;
-// TODO:date:alexander.litus: test store method
+
     public EventStorageShould(EventStorage storage) {
         this.storage = storage;
     }
