@@ -52,7 +52,7 @@ public class DatastoreEventStorage extends EventStorage {
 
     @Override
     protected void write(EventStoreRecord record) {
-        datastoreManager.storeEvent(record.getEventId(), record);
+        datastoreManager.storeEventRecord(record.getEventId(), record);
     }
 
     @Override

@@ -30,13 +30,17 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
+import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.TypeName;
+import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
+import java.util.Date;
 import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
+import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
@@ -55,14 +59,20 @@ public class DatastoreManager<M extends Message> {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // temporary
     private static final String VALUE_KEY = "value";
+
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String TIMESTAMP_KEY = "timestamp";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String AGGREGATE_ID_KEY = "aggregateId";
+
     private static final String LOCALHOST = "http://localhost:8080";
     protected static final String DATASET_NAME = "myapp";
 
     private static final DatastoreOptions OPTIONS = new DatastoreOptions.Builder()
             .host(LOCALHOST)
             .dataset(DATASET_NAME).build();
+
 
     private final Datastore datastore;
     private final TypeName typeName;
@@ -76,29 +86,31 @@ public class DatastoreManager<M extends Message> {
         return new DatastoreManager<>(DatastoreFactory.get(), TypeName.of(descriptor));
     }
 
-    public void store(String id, M message) {
+    public void storeMessage(String id, M message) {
 
-        final ByteString serializedMessage = toAny(message).getValue();
-        final Key.Builder key = makeKey(typeName.nameOnly(), id);
-        final Value.Builder value = makeValue(serializedMessage);
-        final Property.Builder property = makeProperty(VALUE_KEY, value);
-        Entity.Builder entity = Entity.newBuilder()
-                .setKey(key)
-                .addProperty(property);
+        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly(), id));
 
-        tryToStore(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        performMutation(mutation);
     }
 
-    public void storeEvent(String id, EventStoreRecord record) {
+    public void storeEventRecord(String id, EventStoreRecord record) {
 
-        final ByteString serializedMessage = toAny(record).getValue();
-        final Key.Builder key = makeKey(typeName.nameOnly(), id);
-        Entity.Builder entity = Entity.newBuilder()
-                .setKey(key)
-                .addProperty(makeProperty(VALUE_KEY, makeValue(serializedMessage)))
-                .addProperty(makeProperty(TIMESTAMP_KEY, makeValue(convertToDate(record.getTimestamp()))));
+        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly(), id));
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 
-        tryToStore(entity);
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        performMutation(mutation);
+    }
+
+    public void storeAggregateRecord(String id, AggregateStorageRecord record) {
+
+        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly()));
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+        entity.addProperty(makeProperty(AGGREGATE_ID_KEY, makeValue(id)));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
+        performMutation(mutation);
     }
 
     public M read(String id) {
@@ -106,7 +118,7 @@ public class DatastoreManager<M extends Message> {
         final Key.Builder key = makeKey(typeName.nameOnly(), id);
         LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
-        final LookupResponse response = tryToLookup(request);
+        final LookupResponse response = lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
             @SuppressWarnings("unchecked") // cast is save because Any is Message
@@ -122,14 +134,48 @@ public class DatastoreManager<M extends Message> {
 
     public List<M> readAllSortedByTime(Direction sortDirection) {
 
-        Query.Builder query = Query.newBuilder();
-        query.addKindBuilder().setName(typeName.nameOnly());
-        query.addOrder(makeOrder(TIMESTAMP_KEY, sortDirection));
-        RunQueryRequest.Builder queryRequest = RunQueryRequest.newBuilder().setQuery(query);
-        List<EntityResult> entityResults = null;
+        Query.Builder query = makeQuery(sortDirection);
+        return runQuery(query);
+    }
+
+    public List<M> readByAggregateIdSortedByTime(String aggregateId, Direction sortDirection) {
+
+        Query.Builder query = makeQuery(sortDirection);
+        query.setFilter(makeFilter(AGGREGATE_ID_KEY, EQUAL, makeValue(aggregateId))).build();
+
+        return runQuery(query);
+    }
+
+    private void performMutation(Mutation.Builder mutation) {
+
+        CommitRequest commitRequest = CommitRequest.newBuilder()
+                .setMode(NON_TRANSACTIONAL)
+                .setMutation(mutation)
+                .build();
+        try {
+            datastore.commit(commitRequest);
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+    }
+
+    private LookupResponse lookup(LookupRequest request) {
+        LookupResponse response = null;
+        try {
+            response = datastore.lookup(request);
+        } catch (DatastoreException e) {
+            propagate(e);
+        }
+        return response;
+    }
+
+    private List<M> runQuery(Query.Builder query) {
+
+        RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        List<EntityResult> entityResults = newArrayList();
 
         try {
-            entityResults = datastore.runQuery(queryRequest.build()).getBatch().getEntityResultList();
+            entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultList();
         } catch (DatastoreException e) {
             propagate(e);
         }
@@ -142,28 +188,23 @@ public class DatastoreManager<M extends Message> {
         return result;
     }
 
-    private void tryToStore(Entity.Builder entity) {
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        CommitRequest commitRequest = CommitRequest.newBuilder()
-                .setMode(NON_TRANSACTIONAL)
-                .setMutation(mutation)
-                .build();
-        try {
-            datastore.commit(commitRequest);
-        } catch (DatastoreException e) {
-            propagate(e);
-        }
+    private static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
+        final Date date = convertToDate(timestamp);
+        return makeProperty(TIMESTAMP_KEY, makeValue(date));
     }
 
-    private LookupResponse tryToLookup(LookupRequest request) {
-        LookupResponse response = null;
-        try {
-            response = datastore.lookup(request);
-        } catch (DatastoreException e) {
-            propagate(e);
-        }
-        return response;
+    private Query.Builder makeQuery(Direction sortDirection) {
+        Query.Builder query = Query.newBuilder();
+        query.addKindBuilder().setName(typeName.nameOnly());
+        query.addOrder(makeOrder(TIMESTAMP_KEY, sortDirection));
+        return query;
+    }
+
+    private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+        final ByteString serializedMessage = toAny(message).getValue();
+        return Entity.newBuilder()
+                .setKey(key)
+                .addProperty(makeProperty(VALUE_KEY, makeValue(serializedMessage)));
     }
 
     private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {

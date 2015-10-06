@@ -20,49 +20,42 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.protobuf.Message;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.AggregateStorageRecord;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static org.spine3.util.Identifiers.idToString;
 
-/**
- * {@link org.spine3.server.storage.EntityStorage} implementation based on Google App Engine Datastore.
- *
- * @author Alexander Litus
- */
-public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DatastoreManager<M> datastoreManager;
+    private final DatastoreManager<AggregateStorageRecord> datastoreManager;
 
-    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
-        this.datastoreManager = datastoreManager;
+    private DatastoreAggregateStorage(DatastoreManager<AggregateStorageRecord> manager) {
+        this.datastoreManager = manager;
     }
 
-    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
-        return new DatastoreEntityStorage<>(datastoreManager);
+    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreManager<AggregateStorageRecord> manager) {
+        return new DatastoreAggregateStorage<>(manager);
     }
 
     @Override
-    public M read(I id) {
-
-        final String idString = idToString(id);
-
-        final Message message = datastoreManager.read(idString);
-
-        @SuppressWarnings("unchecked") // save because messages of only this type are written
-        final M result = (M) message;
-        return result;
+    protected void write(AggregateStorageRecord record) {
+        datastoreManager.storeAggregateRecord(record.getAggregateId(), record);
     }
 
     @Override
-    public void write(I id, M message) {
-
-        checkNotNull(id);
-        checkNotNull(message);
+    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
+        final List<AggregateStorageRecord> records = datastoreManager.readByAggregateIdSortedByTime(idString, DESCENDING);
+        return records.iterator();
+    }
 
-        datastoreManager.storeMessage(idString, message);
+    @Override
+    protected void releaseResources() {
+        // NOP
     }
 }
