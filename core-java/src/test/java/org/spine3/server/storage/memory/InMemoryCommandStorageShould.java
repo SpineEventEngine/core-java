@@ -40,9 +40,8 @@ public class InMemoryCommandStorageShould {
         storage.write(null);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_record_with_null_aggregate_id() {
-        final CommandStoreRecord record = CommandStoreRecord.newBuilder().setAggregateId(null).build();
-        storage.write(record);
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_write_record_with_empty_command_id() {
+        storage.write(CommandStoreRecord.getDefaultInstance());
     }
 }
