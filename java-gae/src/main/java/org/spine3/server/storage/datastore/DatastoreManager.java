@@ -218,11 +218,15 @@ public class DatastoreManager<M extends Message> {
             }
 
             final Any.Builder any = Any.newBuilder();
-            final Property property = entity.getEntity().getProperty(0);
 
-            if (property.getName().equals(VALUE_KEY)) {
-                any.setValue(property.getValue().getBlobValue());
+            final List<Property> properties = entity.getEntity().getPropertyList();
+
+            for (Property property : properties) {
+                if (property.getName().equals(VALUE_KEY)) {
+                    any.setValue(property.getValue().getBlobValue());
+                }
             }
+
             any.setTypeUrl(typeName.toTypeUrl());
 
             final M result = fromAny(any.build());

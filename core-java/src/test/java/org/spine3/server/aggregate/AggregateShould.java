@@ -42,6 +42,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.util.Classes;
 import org.spine3.util.Users;
+import org.spine3.util.testutil.AggregateIdFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -79,7 +80,7 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
-        projectId = ProjectId.newBuilder().setId("project_id").build();
+        projectId = AggregateIdFactory.createCommon();
         final UserId userId = Users.createId("user_id");
         commandContext = createContext(userId, ZoneOffsets.UTC);
         eventContext = getEventContext(userId, projectId);
