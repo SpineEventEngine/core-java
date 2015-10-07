@@ -31,7 +31,7 @@ import static org.spine3.util.Classes.getGenericParameterType;
 
 public class DatastoreStorageFactory implements StorageFactory {
 
-    private static final int ENTITY_MESSAGE_PARAMETER_INDEX = 1;
+    private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
     @Override
     public CommandStorage createCommandStorage() {
@@ -47,14 +47,14 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        final DatastoreManager<AggregateStorageRecord> manager = DatastoreManager.newInstance(AggregateStorageRecord.getDescriptor());
+        return DatastoreAggregateStorage.newInstance(manager);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
 
-        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_PARAMETER_INDEX);
+        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
         // TODO:2015.10.05:alexander.litus: test this
         final Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getClassDescriptor(messageClass);
 
