@@ -89,9 +89,10 @@ public abstract class AggregateStorageShould {
 
         for (AggregateStorageRecord record : records) {
             storage.write(record);
+            waitIfNeeded(3);
         }
+        waitIfNeeded(2);
 
-        waitIfNeeded(8);
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
 

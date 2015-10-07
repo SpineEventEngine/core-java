@@ -76,7 +76,7 @@ public abstract class EventStorageShould {
         final EventRecord expected = toEventRecord(recordToStore);
 
         storage.write(recordToStore);
-        waitIfNeeded(3);
+        waitIfNeeded(4);
 
         assertStorageContains(expected);
     }
@@ -101,8 +101,9 @@ public abstract class EventStorageShould {
 
         for (EventStoreRecord r : recordsToStore) {
             storage.write(r);
+            waitIfNeeded(2);
         }
-        waitIfNeeded(7);
+        waitIfNeeded(2);
 
         assertStorageContains(expectedRecords);
     }

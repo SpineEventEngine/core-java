@@ -63,6 +63,6 @@ public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<
 
         final String idString = idToString(id);
 
-        datastoreManager.storeMessage(idString, message);
+        datastoreManager.storeEntity(idString, message);
     }
 }

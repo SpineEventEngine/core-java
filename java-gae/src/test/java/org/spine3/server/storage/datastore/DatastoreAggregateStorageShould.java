@@ -32,7 +32,7 @@ import org.spine3.test.project.ProjectId;
  * NOTE: to run these tests on Windows, start Local Development Datastore Server manually.
  * Reported an issue here:
  * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
- * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "RefusedBequest"})
 public class DatastoreAggregateStorageShould extends AggregateStorageShould {
@@ -60,9 +60,9 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @After
     public void tearDownTest() {
-        waitIfNeeded(1);
+        waitIfNeeded(2);
         DATASTORE_MANAGER.clear();
-        waitIfNeeded(1);
+        waitIfNeeded(2);
     }
 
     @AfterClass

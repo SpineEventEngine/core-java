@@ -31,7 +31,7 @@ import org.spine3.test.TestIdWithStringField;
  * NOTE: to run these tests on Windows, start Local Development Datastore Server manually.
  * Reported an issue here:
  * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
- * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  */
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
@@ -58,7 +58,9 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @After
     public void tearDownTest() {
+        waitIfNeeded(2);
         DATASTORE_MANAGER.clear();
+        waitIfNeeded(2);
     }
 
     @AfterClass
@@ -66,5 +68,13 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
         if (!IS_WINDOWS) { // Temporary solution
             DATASTORE_MANAGER.stop();
         }
+    }
+
+    @SuppressWarnings("RefusedBequest")
+    @Override
+    protected void waitIfNeeded(long seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException ignored) {}
     }
 }

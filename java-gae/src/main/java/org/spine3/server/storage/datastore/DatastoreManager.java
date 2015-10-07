@@ -27,10 +27,7 @@ import com.google.api.services.datastore.client.DatastoreException;
 import com.google.api.services.datastore.client.DatastoreFactory;
 import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.common.base.Function;
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Message;
-import com.google.protobuf.TimestampOrBuilder;
+import com.google.protobuf.*;
 import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.server.storage.CommandStoreRecord;
@@ -90,21 +87,11 @@ public class DatastoreManager<M extends Message> {
         return new DatastoreManager<>(DatastoreFactory.get(), TypeName.of(descriptor));
     }
 
-    public void storeMessage(String id, M message) {
+    public void storeEntity(String id, M message) {
 
         Entity.Builder entity = messageToEntity(message, makeCommonKey(id));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        performMutation(mutation);
-    }
-
-    public void storeCommandRecord(String id, CommandStoreRecord record) {
-
-        Entity.Builder entity = messageToEntity(record, makeCommonKey());
-        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(makeProperty(COMMAND_ID_KEY, makeValue(id)));
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
         performMutation(mutation);
     }
 
@@ -117,11 +104,19 @@ public class DatastoreManager<M extends Message> {
         performMutation(mutation);
     }
 
-    public void storeAggregateRecord(String id, AggregateStorageRecord record) {
+    public void storeCommandRecord(String id, CommandStoreRecord record) {
+        storeWithAutoId(makeProperty(COMMAND_ID_KEY, makeValue(id)), record, record.getTimestamp());
+    }
 
-        Entity.Builder entity = messageToEntity(record, makeCommonKey());
-        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
-        entity.addProperty(makeProperty(AGGREGATE_ID_KEY, makeValue(id)));
+    public void storeAggregateRecord(String id, AggregateStorageRecord record) {
+        storeWithAutoId(makeProperty(AGGREGATE_ID_KEY, makeValue(id)), record, record.getTimestamp());
+    }
+
+    private void storeWithAutoId(Property.Builder id, Message message, TimestampOrBuilder timestamp) {
+
+        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
+        entity.addProperty(makeTimestampProperty(timestamp));
+        entity.addProperty(id);
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
         performMutation(mutation);
@@ -216,10 +211,6 @@ public class DatastoreManager<M extends Message> {
 
     private Key.Builder makeCommonKey(String id) {
         return makeKey(typeName.nameOnly(), id);
-    }
-
-    private Key.Builder makeCommonKey() {
-        return makeKey(typeName.nameOnly());
     }
 
     private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
