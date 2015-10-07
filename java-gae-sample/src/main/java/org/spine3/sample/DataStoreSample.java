@@ -34,7 +34,7 @@ import org.spine3.server.storage.datastore.LocalDatastoreManager;
  * NOTE: to run this sample on Windows, start Local Development Datastore Server manually.
  * Reported an issue here:
  * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
- * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  *
  * @author Mikhail Mikhaylov
  */
