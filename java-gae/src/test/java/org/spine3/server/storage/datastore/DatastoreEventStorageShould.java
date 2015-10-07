@@ -28,9 +28,12 @@ import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
 
 /*
- * NOTE: to run these tests on Windows, start Local Development Datastore Server manually.
+ * NOTE: to run these tests on Windows, create the local Datastore directory and start local Datastore Server manually.
+ * https://cloud.google.com/datastore/docs/tools/
+ *
  * Reported an issue here:
  * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ *
  * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "RefusedBequest"})
