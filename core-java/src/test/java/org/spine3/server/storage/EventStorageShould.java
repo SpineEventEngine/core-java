@@ -21,21 +21,17 @@
 package org.spine3.server.storage;
 
 import org.junit.Test;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.EventRecordOrBuilder;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.util.testutil.ContextFactory;
+import org.spine3.util.testutil.EventRecordFactory;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.Events.toEventRecordsList;
-import static org.spine3.util.testutil.AggregateIdFactory.createCommon;
 import static org.spine3.util.testutil.EventStoreRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ConstantConditions",
@@ -63,7 +59,7 @@ public abstract class EventStorageShould {
     @Test
     public void store_and_read_one_event() {
 
-        final EventRecord expected = getProjectCreatedRecord();
+        final EventRecord expected = EventRecordFactory.projectCreated();
         storage.store(expected);
 
         assertStorageContains(expected);
@@ -147,13 +143,6 @@ public abstract class EventStorageShould {
 
     private static List<EventStoreRecord> createEventStoreRecords() {
         return newArrayList(projectCreated(), projectStarted(), taskAdded());
-    }
-
-    private static EventRecord getProjectCreatedRecord() {
-        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(createCommon()).build();
-        final EventContext context = ContextFactory.getEventContext();
-        final EventRecord.Builder builder = EventRecord.newBuilder().setContext(context).setEvent(toAny(event));
-        return builder.build();
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass")

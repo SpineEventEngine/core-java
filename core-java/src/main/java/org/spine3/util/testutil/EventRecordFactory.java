@@ -29,6 +29,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.util.testutil.AggregateIdFactory.createCommon;
 
 /**
  * The utility class which is used for creating EventRecords for tests.
@@ -58,6 +59,13 @@ public class EventRecordFactory {
 
         final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
+        return builder.build();
+    }
+
+    public static EventRecord projectCreated() {
+        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(createCommon()).build();
+        final EventContext context = ContextFactory.getEventContext();
+        final EventRecord.Builder builder = EventRecord.newBuilder().setContext(context).setEvent(toAny(event));
         return builder.build();
     }
 }
