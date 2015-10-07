@@ -92,7 +92,7 @@ public class DatastoreManager<M extends Message> {
 
     public void storeMessage(String id, M message) {
 
-        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly(), id));
+        Entity.Builder entity = messageToEntity(message, makeCommonKey(id));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         performMutation(mutation);
@@ -100,7 +100,7 @@ public class DatastoreManager<M extends Message> {
 
     public void storeCommandRecord(String id, CommandStoreRecord record) {
 
-        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly()));
+        Entity.Builder entity = messageToEntity(record, makeCommonKey());
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
         entity.addProperty(makeProperty(COMMAND_ID_KEY, makeValue(id)));
 
@@ -110,7 +110,7 @@ public class DatastoreManager<M extends Message> {
 
     public void storeEventRecord(String id, EventStoreRecord record) {
 
-        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly(), id));
+        Entity.Builder entity = messageToEntity(record, makeCommonKey(id));
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
@@ -119,7 +119,7 @@ public class DatastoreManager<M extends Message> {
 
     public void storeAggregateRecord(String id, AggregateStorageRecord record) {
 
-        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly()));
+        Entity.Builder entity = messageToEntity(record, makeCommonKey());
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
         entity.addProperty(makeProperty(AGGREGATE_ID_KEY, makeValue(id)));
 
@@ -129,7 +129,7 @@ public class DatastoreManager<M extends Message> {
 
     public M read(String id) {
 
-        final Key.Builder key = makeKey(typeName.nameOnly(), id);
+        final Key.Builder key = makeCommonKey(id);
         LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
         final LookupResponse response = lookup(request);
@@ -141,7 +141,7 @@ public class DatastoreManager<M extends Message> {
         }
 
         EntityResult entity = response.getFound(0);
-        final M message = entityToMessage.apply(entity);
+        final M message = entityToMessage(entity);
 
         return message;
     }
@@ -214,6 +214,14 @@ public class DatastoreManager<M extends Message> {
         return query;
     }
 
+    private Key.Builder makeCommonKey(String id) {
+        return makeKey(typeName.nameOnly(), id);
+    }
+
+    private Key.Builder makeCommonKey() {
+        return makeKey(typeName.nameOnly());
+    }
+
     private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         return Entity.newBuilder()
@@ -224,29 +232,33 @@ public class DatastoreManager<M extends Message> {
     private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
         @Override
         public M apply(@Nullable EntityResult entity) {
-
-            if (entity == null) {
-                @SuppressWarnings("unchecked") // cast is safe because Any is Message
-                final M empty = (M) Any.getDefaultInstance();
-                return empty;
-            }
-
-            final Any.Builder any = Any.newBuilder();
-
-            final List<Property> properties = entity.getEntity().getPropertyList();
-
-            for (Property property : properties) {
-                if (property.getName().equals(VALUE_KEY)) {
-                    any.setValue(property.getValue().getBlobValue());
-                }
-            }
-
-            any.setTypeUrl(typeName.toTypeUrl());
-
-            final M result = fromAny(any.build());
-            return result;
+            return entityToMessage(entity);
         }
     };
+
+    private M entityToMessage(@Nullable EntityResultOrBuilder entity) {
+
+        if (entity == null) {
+            @SuppressWarnings("unchecked") // cast is safe because Any is Message
+            final M empty = (M) Any.getDefaultInstance();
+            return empty;
+        }
+
+        final Any.Builder any = Any.newBuilder();
+
+        final List<Property> properties = entity.getEntity().getPropertyList();
+
+        for (Property property : properties) {
+            if (property.getName().equals(VALUE_KEY)) {
+                any.setValue(property.getValue().getBlobValue());
+            }
+        }
+
+        any.setTypeUrl(typeName.toTypeUrl());
+
+        final M result = fromAny(any.build());
+        return result;
+    }
 
     protected Datastore getDatastore() {
         return datastore;
