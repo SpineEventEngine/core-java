@@ -36,7 +36,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         super(LocalDevelopmentDatastoreFactory.get(), typeName);
     }
 
-    protected static <M extends Message> LocalDatastoreManager<M> newInstance(TypeName typeName) {
+    public static <M extends Message> LocalDatastoreManager<M> newInstance(TypeName typeName) {
         return new LocalDatastoreManager<>(typeName);
     }
 

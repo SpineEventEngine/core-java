@@ -37,6 +37,6 @@ public class DatastoreCommandStorage extends CommandStorage {
 
     @Override
     protected void write(CommandStoreRecord record) {
-        datastoreManager.storeMessage(record.getCommandId(), record);
+        datastoreManager.storeCommandRecord(record.getCommandId(), record);
     }
 }

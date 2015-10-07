@@ -33,6 +33,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
@@ -66,6 +67,9 @@ public class DatastoreManager<M extends Message> {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String AGGREGATE_ID_KEY = "aggregateId";
 
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String COMMAND_ID_KEY = "commandId";
+
     private static final String LOCALHOST = "http://localhost:8080";
     protected static final String DATASET_NAME = "myapp";
 
@@ -91,6 +95,16 @@ public class DatastoreManager<M extends Message> {
         Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly(), id));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        performMutation(mutation);
+    }
+
+    public void storeCommandRecord(String id, CommandStoreRecord record) {
+
+        Entity.Builder entity = messageToEntity(record, makeKey(typeName.nameOnly()));
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+        entity.addProperty(makeProperty(COMMAND_ID_KEY, makeValue(id)));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
         performMutation(mutation);
     }
 

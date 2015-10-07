@@ -20,31 +20,50 @@
 
 package org.spine3.sample;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.TypeName;
+import org.spine3.sample.order.Order;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
+import org.spine3.server.storage.datastore.LocalDatastoreManager;
 
 /**
  * Entry point for core-java sample without gRPC. Works with DataStore.
+ *
+ * NOTE: to run this sample on Windows, start Local Development Datastore Server manually.
+ * Reported an issue here:
+ * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
  *
  * @author Mikhail Mikhaylov
  */
 public class DataStoreSample extends BaseSample {
 
-    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    private static final TypeName TYPE_NAME = TypeName.of(Order.getDescriptor());
+    private static final LocalDatastoreManager<Order> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
+
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
     public static void main(String[] args) {
-        // we use it as DataStoreSample instead of BaseSample here to have an access to helper.
-        DataStoreSample sample = new DataStoreSample();
 
-        sample.helper.setUp();
+        if (!IS_WINDOWS) { // Temporary solution
+            DATASTORE_MANAGER.start();
+        }
 
-        sample.execute();
+        BaseSample sample = new DataStoreSample();
 
-        sample.helper.tearDown();
+        try {
+            sample.execute();
+        } finally {
+
+            DATASTORE_MANAGER.clear();
+
+            if (!IS_WINDOWS) { // Temporary solution
+                DATASTORE_MANAGER.stop();
+            }
+        }
     }
 
     @Override
