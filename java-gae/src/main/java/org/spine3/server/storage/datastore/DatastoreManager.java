@@ -55,7 +55,6 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  */
 public class DatastoreManager<M extends Message> {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // temporary
     private static final String VALUE_KEY = "value";
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
