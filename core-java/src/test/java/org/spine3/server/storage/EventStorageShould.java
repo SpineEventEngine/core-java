@@ -76,6 +76,7 @@ public abstract class EventStorageShould {
         final EventRecord expected = toEventRecord(recordToStore);
 
         storage.write(recordToStore);
+        waitIfNeeded(3);
 
         assertStorageContains(expected);
     }
@@ -101,11 +102,9 @@ public abstract class EventStorageShould {
         for (EventStoreRecord r : recordsToStore) {
             storage.write(r);
         }
+        waitIfNeeded(7);
 
-        final Iterator<EventRecord> iterator = storage.allEvents();
-        final List<EventRecord> actualRecords = newArrayList(iterator);
-
-        assertEventRecordListsAreEqual(expectedRecords, actualRecords);
+        assertStorageContains(expectedRecords);
     }
 
     @Test
@@ -117,14 +116,18 @@ public abstract class EventStorageShould {
         for (EventStoreRecord r : recordsToStore) {
             storage.write(r);
         }
+        waitIfNeeded(7);
 
-        final Iterator<EventRecord> iteratorFirst = storage.allEvents();
-        final List<EventRecord> actualRecordsFirst = newArrayList(iteratorFirst);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecordsFirst);
+        assertStorageContains(expectedRecords);
+        assertStorageContains(expectedRecords);
+        assertStorageContains(expectedRecords);
+    }
 
-        final Iterator<EventRecord> iteratorSecond = storage.allEvents();
-        final List<EventRecord> actualRecordsSecond = newArrayList(iteratorSecond);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecordsSecond);
+    private void assertStorageContains(List<EventRecord> expectedRecords) {
+
+        final Iterator<EventRecord> iterator = storage.allEvents();
+        final List<EventRecord> actualRecords = newArrayList(iterator);
+        assertEventRecordListsAreEqual(expectedRecords, actualRecords);
     }
 
     private static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
@@ -150,5 +153,10 @@ public abstract class EventStorageShould {
         final EventContext context = ContextFactory.getEventContext();
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(context).setEvent(toAny(event));
         return builder.build();
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass")
+    protected void waitIfNeeded(long seconds) {
+        // NOP
     }
 }

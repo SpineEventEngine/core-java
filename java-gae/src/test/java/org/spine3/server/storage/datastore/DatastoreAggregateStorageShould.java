@@ -60,7 +60,9 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @After
     public void tearDownTest() {
+        waitIfNeeded(1);
         DATASTORE_MANAGER.clear();
+        waitIfNeeded(1);
     }
 
     @AfterClass
@@ -70,16 +72,10 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
         }
     }
 
-    /*
-     * TODO:2015.10.06:alexander.litus: these tests sometimes fail if run all tests in this class (maybe because of timing).
-     * Investigate how to fix this.
-     */
-
     @Override
-    public void save_and_read_one_record() {
-    }
-
-    @Override
-    public void save_records_and_return_sorted_by_timestamp_descending() {
+    protected void waitIfNeeded(long seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException ignored) {}
     }
 }

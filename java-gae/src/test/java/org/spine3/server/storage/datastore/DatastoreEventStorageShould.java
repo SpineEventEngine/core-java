@@ -58,7 +58,9 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @After
     public void tearDownTest() {
+        waitIfNeeded(1);
         DATASTORE_MANAGER.clear();
+        waitIfNeeded(1);
     }
 
     @AfterClass
@@ -68,24 +70,10 @@ public class DatastoreEventStorageShould extends EventStorageShould {
         }
     }
 
-    /*
-     * TODO:2015.10.06:alexander.litus: these tests sometimes fail if run all tests in this class (maybe because of timing).
-     * Investigate how to fix this.
-     */
-
     @Override
-    public void store_and_read_one_event() {
-    }
-
-    @Override
-    public void write_and_read_one_event() {
-    }
-
-    @Override
-    public void write_and_read_several_events() {
-    }
-
-    @Override
-    public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
+    protected void waitIfNeeded(long seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException ignored) {}
     }
 }

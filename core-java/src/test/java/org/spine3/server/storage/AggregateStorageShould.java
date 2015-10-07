@@ -35,7 +35,7 @@ import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequenti
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
-        "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
+        "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber"})
 public abstract class AggregateStorageShould {
 
     private static final ProjectId ID = AggregateIdFactory.createCommon();
@@ -70,6 +70,7 @@ public abstract class AggregateStorageShould {
 
         final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), ID.getId());
         storage.write(expected);
+        waitIfNeeded(5);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
 
@@ -90,11 +91,17 @@ public abstract class AggregateStorageShould {
             storage.write(record);
         }
 
+        waitIfNeeded(8);
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
 
         Collections.reverse(records); // expected records should be in reverse order
 
         assertEquals(records, actual);
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass")
+    protected void waitIfNeeded(long seconds) {
+        // NOP
     }
 }
