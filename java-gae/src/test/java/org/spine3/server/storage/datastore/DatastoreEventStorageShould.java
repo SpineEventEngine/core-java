@@ -59,7 +59,8 @@ public class DatastoreEventStorageShould extends EventStorageShould {
     }
 
     /*
-     * TODO:2015.10.06:alexander.litus: these tests sometimes fail because of timing. Investigate how to fix this.
+     * TODO:2015.10.06:alexander.litus: these tests sometimes fail if run all tests in this class (maybe because of timing).
+     * Investigate how to fix this.
      */
 
     @Override
