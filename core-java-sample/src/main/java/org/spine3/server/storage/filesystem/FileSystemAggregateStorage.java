@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.flushAndCloseSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.tryToFlush;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 import static org.spine3.util.Identifiers.idToString;
 
@@ -101,7 +102,8 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             propagate(e);
         }
 
-        flushAndCloseSilently(fos, dos);
+        tryToFlush(dos);
+        closeSilently(fos, dos);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")

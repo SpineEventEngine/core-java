@@ -135,7 +135,7 @@ public class FileSystemHelper {
     }
 
     /*
-     * Closes streams in turn.
+     * Closes streams in turn silently. Logs IOException if occurs.
      */
     @SuppressWarnings("ConstantConditions")
     public static void closeSilently(@Nullable Closeable... closeables) {
@@ -149,35 +149,52 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while closing stream", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while closing stream", e);
             }
         }
     }
 
     /*
-     * Flushes streams in turn.
+     * Flushes streams in turn silently. Logs IOException if occurs.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void flushSilently(@Nullable Flushable... flushables) {
+        try {
+            flush(flushables);
+        } catch (IOException e) {
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while flushing stream", e);
+            }
+        }
+    }
+
+    /**
+     * Flushes streams in turn.
+     * @throws java.lang.RuntimeException if IOException occurs
+     */
+    public static void tryToFlush(@Nullable Flushable... flushables) {
+        try {
+            flush(flushables);
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void flush(@Nullable Flushable[] flushables) throws IOException {
         if (flushables == null) {
             return;
         }
-        try {
-            for (Flushable f : flushables) {
-                if (f != null) {
-                    f.flush();
-                }
-            }
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while flushing stream", e);
+        for (Flushable f : flushables) {
+            if (f != null) {
+                f.flush();
             }
         }
     }
 
     /*
-     * Flushes and closes output streams in turn.
+     * Flushes and closes output streams in turn silently. Logs IOException if occurs.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
         if (streams == null) {
             return;
