@@ -28,20 +28,23 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
+/*
+ * NOTE: to run these tests on Windows, start Local Development Datastore Server manually.
+ * Reported an issue here:
+ * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "RefusedBequest"})
 public class DatastoreAggregateStorageShould extends AggregateStorageShould {
-
-    /* TODO:2015.10.06:alexander.litus: start Local Datastore Server automatically and not ignore tests.
-     * Reported an issue here:
-     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
-     */
 
     private static final TypeName TYPE_NAME = TypeName.of(AggregateStorageRecord.getDescriptor());
 
     private static final LocalDatastoreManager<AggregateStorageRecord> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
 
-    private static final DatastoreAggregateStorage<ProjectId> STORAGE =
-            DatastoreAggregateStorage.newInstance(DATASTORE_MANAGER);
+    private static final DatastoreAggregateStorage<ProjectId> STORAGE = DatastoreAggregateStorage.newInstance(DATASTORE_MANAGER);
+
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
     public DatastoreAggregateStorageShould() {
         super(STORAGE);
@@ -50,7 +53,9 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        //DATASTORE_MANAGER.start();
+        if (!IS_WINDOWS) { // Temporary solution
+            DATASTORE_MANAGER.start();
+        }
     }
 
     @After
@@ -60,7 +65,9 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        //DATASTORE_MANAGER.stop();
+        if (!IS_WINDOWS) { // Temporary solution
+            DATASTORE_MANAGER.stop();
+        }
     }
 
     /*

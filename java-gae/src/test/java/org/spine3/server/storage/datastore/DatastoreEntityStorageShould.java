@@ -27,12 +27,13 @@ import org.spine3.TypeName;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
+/*
+ * NOTE: to run these tests on Windows, start Local Development Datastore Server manually.
+ * Reported an issue here:
+ * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ * TODO:2015.10.07:alexander.litus: remove OS checking when this issue will be fixed.
+ */
 public class DatastoreEntityStorageShould extends EntityStorageShould {
-
-    /* TODO:2015.09.30:alexander.litus: start Local Datastore Server automatically and not ignore tests.
-     * Reported an issue here:
-     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
-     */
 
     private static final TypeName TYPE_NAME = TypeName.of(TestIdWithStringField.getDescriptor());
 
@@ -41,13 +42,18 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
     private static final DatastoreEntityStorage<String, TestIdWithStringField> STORAGE =
             DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
 
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
     public DatastoreEntityStorageShould() {
         super(STORAGE);
     }
 
     @BeforeClass
     public static void setUpClass() {
-        //DATASTORE_MANAGER.start();
+        if (!IS_WINDOWS) { // Temporary solution
+            DATASTORE_MANAGER.start();
+        }
     }
 
     @After
@@ -57,6 +63,8 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        //DATASTORE_MANAGER.stop();
+        if (!IS_WINDOWS) { // Temporary solution
+            DATASTORE_MANAGER.stop();
+        }
     }
 }
