@@ -21,8 +21,10 @@
 package org.spine3.server.storage;
 
 import org.junit.Test;
+import org.spine3.base.EventRecord;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.AggregateIdFactory;
+import org.spine3.util.testutil.EventRecordFactory;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -35,7 +37,7 @@ import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequenti
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
-        "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber"})
+"ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber", "NoopMethodInAbstractClass"})
 public abstract class AggregateStorageShould {
 
     private static final ProjectId ID = AggregateIdFactory.createCommon();
@@ -66,7 +68,24 @@ public abstract class AggregateStorageShould {
     }
 
     @Test
-    public void save_and_read_one_record() {
+    public void store_and_read_one_record() {
+
+        final EventRecord expected = EventRecordFactory.projectCreated();
+        storage.store(expected);
+        waitIfNeeded(5);
+
+        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
+
+        assertTrue(iterator.hasNext());
+
+        final AggregateStorageRecord actual = iterator.next();
+
+        assertEquals(expected, actual.getEventRecord());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void write_and_read_one_record() {
 
         final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), ID.getId());
         storage.write(expected);
@@ -83,7 +102,7 @@ public abstract class AggregateStorageShould {
     }
 
     @Test
-    public void save_records_and_return_sorted_by_timestamp_descending() {
+    public void write_records_and_return_sorted_by_timestamp_descending() {
 
         final List<AggregateStorageRecord> records = getSequentialRecords(ID.getId());
 
@@ -101,7 +120,16 @@ public abstract class AggregateStorageShould {
         assertEquals(records, actual);
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass")
+    @Test
+    public void store_and_read_snapshot() {
+        // TODO:2015.10.07:alexander.litus: implement
+    }
+
+    @Test
+    public void write_records_and_load_history_till_snapshot() {
+        // TODO:2015.10.07:alexander.litus: implement
+    }
+
     protected void waitIfNeeded(long seconds) {
         // NOP
     }
