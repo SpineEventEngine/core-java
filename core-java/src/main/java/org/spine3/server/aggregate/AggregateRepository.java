@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.MultiHandlerRenamed;
+import org.spine3.server.MultiHandler;
 import org.spine3.server.Repository;
 
 import javax.annotation.CheckReturnValue;
@@ -38,7 +38,7 @@ import java.util.List;
  * @param <A> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>, MultiHandlerRenamed {
+public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>, MultiHandler {
 
     /**
      * Loads or creates an aggregate with the passed ID.

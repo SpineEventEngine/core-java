@@ -32,7 +32,7 @@ import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
-import org.spine3.server.MultiHandlerRenamed;
+import org.spine3.server.MultiHandler;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -127,8 +127,8 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
 
         // If the passed object is MultiHandler add its methods too.
-        if (object instanceof MultiHandlerRenamed) {
-            MultiHandlerRenamed multiHandler = (MultiHandlerRenamed) object;
+        if (object instanceof MultiHandler) {
+            MultiHandler multiHandler = (MultiHandler) object;
             Map<CommandClass, CommandHandlerMethod> map = createMap(multiHandler);
 
             checkModifiers(toMethods(map.values()));
@@ -159,10 +159,10 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
-     * Creates a command handler map from the passed instance of {@link MultiHandlerRenamed}.
+     * Creates a command handler map from the passed instance of {@link MultiHandler}.
      */
     @CheckReturnValue
-    private static Map<CommandClass, CommandHandlerMethod> createMap(MultiHandlerRenamed obj) {
+    private static Map<CommandClass, CommandHandlerMethod> createMap(MultiHandler obj) {
         Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
