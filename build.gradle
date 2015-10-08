@@ -15,7 +15,7 @@ allprojects {
     apply plugin: 'maven'
 
     group = 'org.spine3'
-    version = '0.1'
+    version = '0.1-SNAPSHOT'
 }
 
 project.ext {
@@ -38,6 +38,15 @@ if (credentialsFile.exists()) {
     repositoryUserName = properties.getProperty("user.name")
     repositoryUserPassword = properties.getProperty("user.password")
 }
+
+task removeSavedProtoNames << {
+    File propsFile = file(protoPropertiesFilePath())
+    if (propsFile.exists()) {
+        propsFile.delete()
+    }
+}
+
+clean.dependsOn removeSavedProtoNames
 
 String protoPropertiesFilePath() {
     return "${project(":core-java").projectDir}" + project.PROPERTIES_FILE_PATH + project.PROPERTIES_FILE_NAME;
@@ -117,6 +126,10 @@ subprojects {
         }
     }
 
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+    }
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -125,6 +138,9 @@ subprojects {
                 version "${project.version}"
 
                 from components.java
+                artifact sourceJar {
+                    classifier "sources"
+                }
             }
         }
     }
