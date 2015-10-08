@@ -20,9 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.LocalDevelopmentDatastore;
-import com.google.api.services.datastore.client.LocalDevelopmentDatastoreException;
-import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
+import com.google.api.services.datastore.client.*;
 import com.google.protobuf.Message;
 import org.spine3.TypeName;
 
@@ -31,9 +29,18 @@ import static com.google.common.base.Throwables.propagate;
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
     private static final String PATH_TO_GCD = "C:\\gcd";
+    private static final String LOCALHOST = "http://localhost:8080";
+    private static final String LOCAL_DATASET_NAME = "spine-local-dataset";
+
+    private static final DatastoreOptions DEFAULT_OPTIONS = new DatastoreOptions.Builder()
+            .host(LOCALHOST)
+            .dataset(LOCAL_DATASET_NAME)
+            .build();
+
+    private static final LocalDevelopmentDatastore LOCAL_DATASTORE = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_OPTIONS);
 
     private LocalDatastoreManager(TypeName typeName) {
-        super(LocalDevelopmentDatastoreFactory.get(), typeName);
+        super(LOCAL_DATASTORE, typeName);
     }
 
     public static <M extends Message> LocalDatastoreManager<M> newInstance(TypeName typeName) {
@@ -41,33 +48,26 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
     }
 
     public void start() {
-        final LocalDevelopmentDatastore datastore = getLocalDatastore();
         try {
-            datastore.start(PATH_TO_GCD, DATASET_NAME);
+            LOCAL_DATASTORE.start(PATH_TO_GCD, LOCAL_DATASET_NAME);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
     }
 
     public void clear() {
-        final LocalDevelopmentDatastore datastore = getLocalDatastore();
         try {
-            datastore.clear();
+            LOCAL_DATASTORE.clear();
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
     }
 
     public void stop() {
-        final LocalDevelopmentDatastore datastore = getLocalDatastore();
         try {
-            datastore.stop();
+            LOCAL_DATASTORE.stop();
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
-    }
-
-    private LocalDevelopmentDatastore getLocalDatastore() {
-        return (LocalDevelopmentDatastore) getDatastore();
     }
 }

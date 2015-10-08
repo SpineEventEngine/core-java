@@ -66,24 +66,28 @@ public class DatastoreManager<M extends Message> {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_KEY = "commandId";
 
-    private static final String LOCALHOST = "http://localhost:8080";
-    protected static final String DATASET_NAME = "myapp";
+    // TODO:2015.10.08:alexander.litus: change to real Datastore project ID
+    private static final String DATASET_NAME = "dummy-datastore-project-id";
 
-    private static final DatastoreOptions OPTIONS = new DatastoreOptions.Builder()
-            .host(LOCALHOST)
-            .dataset(DATASET_NAME).build();
-
+    // TODO:2015.10.08:alexander.litus: use credentials
+    private static final DatastoreOptions DEFAULT_OPTIONS = new DatastoreOptions.Builder()
+            .dataset(DATASET_NAME)
+            .build();
 
     private final Datastore datastore;
     private final TypeName typeName;
 
-    protected DatastoreManager(DatastoreFactory factory, TypeName typeName) {
-        this.datastore = factory.create(OPTIONS);
-        this.typeName = typeName;
+    protected static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
+        return new DatastoreManager<>(TypeName.of(descriptor));
     }
 
-    protected static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
-        return new DatastoreManager<>(DatastoreFactory.get(), TypeName.of(descriptor));
+    protected DatastoreManager(TypeName typeName) {
+        this(DatastoreFactory.get().create(DEFAULT_OPTIONS), typeName);
+    }
+
+    protected DatastoreManager(Datastore datastore, TypeName typeName) {
+        this.datastore = datastore;
+        this.typeName = typeName;
     }
 
     public void storeEntity(String id, M message) {
