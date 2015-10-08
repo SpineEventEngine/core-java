@@ -29,6 +29,11 @@ import java.util.List;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static org.spine3.util.Identifiers.idToString;
 
+/**
+ * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
+ *
+ * @author Alexander Litus
+ */
 public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
     private final DatastoreManager<AggregateStorageRecord> datastoreManager;

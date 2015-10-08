@@ -26,6 +26,11 @@ import org.spine3.TypeName;
 
 import static com.google.common.base.Throwables.propagate;
 
+/**
+ * Provides access to local Google Cloud Datastore.
+ *
+ * @author Alexander Litus
+ */
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
     private static final String PATH_TO_GCD = "C:\\gcd";
@@ -47,6 +52,9 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         return new LocalDatastoreManager<>(typeName);
     }
 
+    /*
+     * Starts the local Datastore server.
+     */
     public void start() {
         try {
             LOCAL_DATASTORE.start(PATH_TO_GCD, LOCAL_DATASET_NAME);
@@ -55,6 +63,9 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         }
     }
 
+    /*
+     * Clears all data in the local Datastore.
+     */
     public void clear() {
         try {
             LOCAL_DATASTORE.clear();
@@ -63,6 +74,9 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         }
     }
 
+    /*
+     * Stops the local Datastore server.
+     */
     public void stop() {
         try {
             LOCAL_DATASTORE.stop();
