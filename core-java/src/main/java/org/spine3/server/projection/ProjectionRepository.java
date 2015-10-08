@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.EntityRepository;
-import org.spine3.server.MultiHandler;
+import org.spine3.server.MultiHandlerRenamed;
 import org.spine3.util.Identifiers;
 
 import javax.annotation.Nonnull;
@@ -41,7 +41,7 @@ import static com.google.common.base.Throwables.propagate;
  */
 @SuppressWarnings("unused")
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
-        extends EntityRepository<I, P, M> implements MultiHandler {
+        extends EntityRepository<I, P, M> implements MultiHandlerRenamed {
 
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {

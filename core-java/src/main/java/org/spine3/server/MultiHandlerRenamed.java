@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
  *
  * @author Alexander Yevsyukov
  */
-public interface MultiHandler {
+public interface MultiHandlerRenamed {
 
     /**
      * Returns a map from methods to command classes they handle.

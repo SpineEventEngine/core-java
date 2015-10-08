@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
-import org.spine3.server.MultiHandler;
+import org.spine3.server.MultiHandlerRenamed;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -119,8 +119,8 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         }
 
         // If the passed object is MultiHandler add its methods too.
-        if (target instanceof MultiHandler) {
-            MultiHandler multiHandler = (MultiHandler) target;
+        if (target instanceof MultiHandlerRenamed) {
+            MultiHandlerRenamed multiHandler = (MultiHandlerRenamed) target;
             Map<EventClass, EventHandlerMethod> map = createMap(multiHandler);
 
             checkModifiers(toMethods(map.values()));
@@ -131,7 +131,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return result.build();
     }
 
-    private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
+    private static Map<EventClass, EventHandlerMethod> createMap(MultiHandlerRenamed obj) {
         Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
 
         // Add entries exposed by the object as MultiHandler.
