@@ -49,11 +49,11 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 
 /**
- * Provides the access to Google Cloud Datastore.
+ * Provides access to Google Cloud Datastore.
  *
  * @author Alexander Litus
  */
-public class DatastoreManager<M extends Message> {
+class DatastoreManager<M extends Message> {
 
     private static final String VALUE_KEY = "value";
 
