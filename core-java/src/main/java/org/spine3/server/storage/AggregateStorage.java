@@ -20,9 +20,7 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import com.google.protobuf.TextFormat;
 import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -34,6 +32,9 @@ import org.spine3.util.Identifiers;
 import java.util.Deque;
 import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.protobuf.TextFormat.shortDebugString;
+
 /**
  * An event-sourced storage of aggregate root events and snapshots.
  *
@@ -43,13 +44,17 @@ import java.util.Iterator;
 public abstract class AggregateStorage<I> {
 
     public AggregateEvents load(I aggregateId) {
-        Deque<EventRecord> history = Lists.newLinkedList();
+
+        Deque<EventRecord> history = newLinkedList();
         Snapshot snapshot = null;
 
         final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
+
         while (historyBackward.hasNext()
                 && snapshot == null) {
+
             AggregateStorageRecord record = historyBackward.next();
+
             switch (record.getKindCase()) {
                 case EVENT_RECORD:
                     history.addFirst(record.getEventRecord());
@@ -58,7 +63,8 @@ public abstract class AggregateStorage<I> {
                     snapshot = record.getSnapshot();
                     break;
                 case KIND_NOT_SET:
-                    throw new IllegalStateException("Event record or snapshot missing in " + TextFormat.shortDebugString(record));
+                    throw new IllegalStateException("Event record or snapshot missing in record: \"" +
+                            shortDebugString(record) + '\"');
             }
         }
 
@@ -74,6 +80,7 @@ public abstract class AggregateStorage<I> {
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
     public void store(I aggregateId, Snapshot snapshot) {
+
         AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
                 .setAggregateId(Identifiers.idToString(aggregateId))
@@ -81,16 +88,19 @@ public abstract class AggregateStorage<I> {
                 .setEventId("") // No event ID for snapshots
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot);
+
         write(builder.build());
     }
 
     public void store(EventRecord record) {
+
         final EventContext context = record.getContext();
         final Any event = record.getEvent();
         final String aggregateId = Identifiers.idToString(context.getAggregateId());
         final EventId eventId = context.getEventId();
         final String eventIdStr = Identifiers.idToString(eventId);
         final String typeName = TypeName.ofEnclosed(event).nameOnly();
+
         AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(Events.getTimestamp(eventId))
                 .setAggregateId(aggregateId)
@@ -98,6 +108,7 @@ public abstract class AggregateStorage<I> {
                 .setEventId(eventIdStr)
                 .setVersion(context.getVersion())
                 .setEventRecord(record);
+
         write(builder.build());
     }
 
