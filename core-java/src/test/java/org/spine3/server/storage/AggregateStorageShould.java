@@ -20,27 +20,36 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
+import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.AggregateIdFactory;
-import org.spine3.util.testutil.EventRecordFactory;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
+import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.server.storage.EventStorageShould.assertEventRecordListsAreEqual;
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequentialRecords;
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
+import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
 "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber", "NoopMethodInAbstractClass"})
 public abstract class AggregateStorageShould {
 
-    private static final ProjectId ID = AggregateIdFactory.createCommon();
+    private static final ProjectId ID = AggregateIdFactory.newProjectId();
 
     private final AggregateStorage<ProjectId> storage;
 
@@ -70,7 +79,7 @@ public abstract class AggregateStorageShould {
     @Test
     public void store_and_read_one_record() {
 
-        final EventRecord expected = EventRecordFactory.projectCreated();
+        final EventRecord expected = projectCreated();
         storage.store(expected);
         waitIfNeeded(5);
 
@@ -87,7 +96,7 @@ public abstract class AggregateStorageShould {
     @Test
     public void write_and_read_one_record() {
 
-        final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), ID.getId());
+        final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), ID);
         storage.write(expected);
         waitIfNeeded(5);
 
@@ -104,13 +113,11 @@ public abstract class AggregateStorageShould {
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(ID.getId());
+        final List<AggregateStorageRecord> records = getSequentialRecords(ID);
 
         for (AggregateStorageRecord record : records) {
             storage.write(record);
-            waitIfNeeded(3);
         }
-        waitIfNeeded(2);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
@@ -122,12 +129,76 @@ public abstract class AggregateStorageShould {
 
     @Test
     public void store_and_read_snapshot() {
-        // TODO:2015.10.07:alexander.litus: implement
+
+        final Snapshot expected = newSnapshot(getCurrentTime());
+        storage.store(ID, expected);
+
+        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
+
+        assertTrue(iterator.hasNext());
+
+        final AggregateStorageRecord actual = iterator.next();
+
+        assertEquals(expected, actual.getSnapshot());
+        assertFalse(iterator.hasNext());
     }
 
     @Test
-    public void write_records_and_load_history_till_snapshot() {
-        // TODO:2015.10.07:alexander.litus: implement
+    public void write_records_and_load_history_if_no_snapshots() {
+
+        testWriteRecordsAndLoadHistory(getCurrentTime());
+    }
+
+    @Test
+    public void write_records_and_load_history_till_last_snapshot() {
+
+        final Duration delta = seconds(10);
+        final Timestamp time1 = getCurrentTime();
+        final Timestamp time2 = add(time1, delta);
+        final Timestamp time3 = add(time2, delta);
+
+        storage.write(newAggregateStorageRecord(time1, ID));
+
+        storage.store(ID, newSnapshot(time2));
+
+        testWriteRecordsAndLoadHistory(time3);
+    }
+
+    private void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
+
+        final List<AggregateStorageRecord> records = getSequentialRecords(ID, firstRecordTime);
+
+        for (AggregateStorageRecord record : records) {
+            storage.write(record);
+        }
+
+        final AggregateEvents events = storage.load(ID);
+
+        final List<EventRecord> expectedEventRecords = transform(records, TO_EVENT_RECORD);
+
+        assertEventRecordListsAreEqual(expectedEventRecords, events.getEventRecordList());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_write_record_without_event_record_or_snapshot_and_load_it() {
+
+        final AggregateStorageRecord record = AggregateStorageRecord.newBuilder().setAggregateId(ID.getId()).build();
+
+        storage.write(record);
+
+        storage.load(ID);
+    }
+
+
+    private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
+        @Override
+        public EventRecord apply(@Nullable AggregateStorageRecord input) {
+            return input.getEventRecord();
+        }
+    };
+
+    private static Snapshot newSnapshot(Timestamp time) {
+        return Snapshot.newBuilder().setTimestamp(time).build();
     }
 
     protected void waitIfNeeded(long seconds) {

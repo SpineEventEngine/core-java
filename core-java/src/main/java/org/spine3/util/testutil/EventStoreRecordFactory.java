@@ -26,7 +26,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.testutil.AggregateIdFactory.createCommon;
+import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
 
 /**
  * The utility class for creating EventStoreRecords for tests.
@@ -39,7 +39,7 @@ public class EventStoreRecordFactory {
     private EventStoreRecordFactory() {}
 
     public static EventStoreRecord projectCreated() {
-        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(createCommon()).build();
+        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(newProjectId()).build();
         final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
                 .setEvent(toAny(event))
                 .setEventId("project_created");
@@ -47,7 +47,7 @@ public class EventStoreRecordFactory {
     }
 
     public static EventStoreRecord taskAdded() {
-        final TaskAdded taskAdded = TaskAdded.newBuilder().setProjectId(createCommon()).build();
+        final TaskAdded taskAdded = TaskAdded.newBuilder().setProjectId(newProjectId()).build();
         final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
                 .setEvent(toAny(taskAdded))
                 .setEventId("task_added");
@@ -55,7 +55,7 @@ public class EventStoreRecordFactory {
     }
 
     public static EventStoreRecord projectStarted() {
-        final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(createCommon()).build();
+        final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(newProjectId()).build();
         final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
                 .setEvent(toAny(event))
                 .setEventId("project_started");

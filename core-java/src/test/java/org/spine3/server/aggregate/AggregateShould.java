@@ -80,7 +80,7 @@ public class AggregateShould {
 
     @Before
     public void setUp() {
-        projectId = AggregateIdFactory.createCommon();
+        projectId = AggregateIdFactory.newProjectId();
         final UserId userId = Users.createId("user_id");
         commandContext = createContext(userId, ZoneOffsets.UTC);
         eventContext = getEventContext(userId, projectId);

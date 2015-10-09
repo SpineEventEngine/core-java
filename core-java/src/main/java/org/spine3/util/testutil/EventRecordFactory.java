@@ -20,7 +20,6 @@
 
 package org.spine3.util.testutil;
 
-import com.google.protobuf.Any;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.test.project.ProjectId;
@@ -29,7 +28,8 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.testutil.AggregateIdFactory.createCommon;
+import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
+import static org.spine3.util.testutil.ContextFactory.newEventContext;
 
 /**
  * The utility class which is used for creating EventRecords for tests.
@@ -41,6 +41,33 @@ public class EventRecordFactory {
 
     private EventRecordFactory() {}
 
+
+    public static EventRecord projectCreated() {
+        return projectCreated(newProjectId(), newEventContext());
+    }
+
+    public static EventRecord taskAdded() {
+        return taskAdded(newProjectId(), newEventContext());
+    }
+
+    public static EventRecord projectStarted() {
+        return projectStarted(newProjectId(), newEventContext());
+    }
+
+
+    public static EventRecord projectCreated(ProjectId projectId) {
+        return projectCreated(projectId, newEventContext());
+    }
+
+    public static EventRecord taskAdded(ProjectId projectId) {
+        return taskAdded(projectId, newEventContext());
+    }
+
+    public static EventRecord projectStarted(ProjectId projectId) {
+        return projectStarted(projectId, newEventContext());
+    }
+
+
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
@@ -49,9 +76,9 @@ public class EventRecordFactory {
     }
 
     public static EventRecord taskAdded(ProjectId projectId, EventContext eventContext) {
-        final TaskAdded taskAdded = TaskAdded.newBuilder().setProjectId(projectId).build();
-        final Any event = toAny(taskAdded);
-        final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(event);
+
+        final TaskAdded event = TaskAdded.newBuilder().setProjectId(projectId).build();
+        final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
         return builder.build();
     }
 
@@ -59,13 +86,6 @@ public class EventRecordFactory {
 
         final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
-        return builder.build();
-    }
-
-    public static EventRecord projectCreated() {
-        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(createCommon()).build();
-        final EventContext context = ContextFactory.getEventContext();
-        final EventRecord.Builder builder = EventRecord.newBuilder().setContext(context).setEvent(toAny(event));
         return builder.build();
     }
 }

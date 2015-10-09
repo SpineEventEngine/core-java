@@ -22,42 +22,61 @@ package org.spine3.util.testutil;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.EventRecord;
 import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.ProjectIdOrBuilder;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.util.testutil.EventRecordFactory.*;
 
 @SuppressWarnings("UtilityClass")
 public class AggregateStorageRecordFactory {
 
     private AggregateStorageRecordFactory() {}
 
-    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, String aggregateId) {
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId) {
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setAggregateId(aggregateId)
+                .setAggregateId(aggregateId.getId())
                 .setTimestamp(timestamp);
         return builder.build();
     }
 
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, EventRecord event) {
+        final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp, aggregateId)
+                .toBuilder()
+                .setEventRecord(event);
+        return builder.build();
+    }
+
     /*
-     * Returns several records sorted by timestamp ascending
+     * Returns several records sorted by timestamp ascending.
+     * First record's timestamp is current time.
      */
-    public static List<AggregateStorageRecord> getSequentialRecords(String aggregateId) {
+    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id) {
+        return getSequentialRecords(id, getCurrentTime());
+    }
 
-        final int secondsDelta = 10;
-        final Duration delta = Duration.newBuilder().setSeconds(secondsDelta).build();
+    /**
+     * Returns several records sorted by timestamp ascending.
+     * @param timestamp1 the timestamp of first record.
+     */
+    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id, Timestamp timestamp1) {
 
-        final Timestamp timestampFirst = getCurrentTime();
-        final Timestamp timestampSecond = TimeUtil.add(timestampFirst, delta);
-        final Timestamp timestampLast = TimeUtil.add(timestampSecond, delta);
+        final Duration delta = seconds(10);
 
-        final AggregateStorageRecord recordFirst = newAggregateStorageRecord(timestampFirst, aggregateId);
-        final AggregateStorageRecord recordSecond = newAggregateStorageRecord(timestampSecond, aggregateId);
-        final AggregateStorageRecord recordLast = newAggregateStorageRecord(timestampLast, aggregateId);
+        final Timestamp timestamp2 = add(timestamp1, delta);
+        final Timestamp timestamp3 = add(timestamp2, delta);
 
-        return newArrayList(recordFirst, recordSecond, recordLast);
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, projectCreated(id));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, taskAdded(id));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, projectStarted(id));
+
+        return newArrayList(record1, record2, record3);
     }
 }
