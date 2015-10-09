@@ -51,6 +51,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
 /**
  * Provides access to Google Cloud Datastore.
  *
+ * @param <M> the type of messages to save to the storage
  * @author Alexander Litus
  */
 class DatastoreManager<M extends Message> {
