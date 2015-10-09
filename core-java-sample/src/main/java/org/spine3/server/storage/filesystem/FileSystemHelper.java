@@ -122,7 +122,7 @@ public class FileSystemHelper {
      */
     public static void cleanTestData() {
 
-        final File folder = new File(getFileStoragePath());
+        final File folder = new File(getFileStorePath());
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
