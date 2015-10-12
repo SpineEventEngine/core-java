@@ -87,6 +87,9 @@ class DatastoreManager<M extends Message> {
         this.typeName = TypeName.of(descriptor);
     }
 
+    /**
+     * Stores the {@code message} by the {@code id}. Only one message could be stored by given id.
+     */
     public void storeEntity(String id, M message) {
 
         Entity.Builder entity = messageToEntity(message, makeCommonKey(id));
@@ -95,6 +98,9 @@ class DatastoreManager<M extends Message> {
         performMutation(mutation);
     }
 
+    /**
+     * Stores the {@code record} by the {@code id}. Only one record could be stored by given id.
+     */
     public void storeEventRecord(String id, EventStoreRecord record) {
 
         Entity.Builder entity = messageToEntity(record, makeCommonKey(id));
@@ -104,10 +110,16 @@ class DatastoreManager<M extends Message> {
         performMutation(mutation);
     }
 
+    /**
+     * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
+     */
     public void storeCommandRecord(String id, CommandStoreRecord record) {
         storeWithAutoId(makeProperty(COMMAND_ID_KEY, makeValue(id)), record, record.getTimestamp());
     }
 
+    /**
+     * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
+     */
     public void storeAggregateRecord(String id, AggregateStorageRecord record) {
         storeWithAutoId(makeProperty(AGGREGATE_ID_KEY, makeValue(id)), record, record.getTimestamp());
     }
@@ -122,6 +134,9 @@ class DatastoreManager<M extends Message> {
         performMutation(mutation);
     }
 
+    /**
+     * Reads the first element by the {@code id}.
+     */
     public M read(String id) {
 
         final Key.Builder key = makeCommonKey(id);
@@ -141,12 +156,20 @@ class DatastoreManager<M extends Message> {
         return message;
     }
 
+    /**
+     * Reads all the elements.
+     * @return the elements sorted by specified {@code sortDirection}.
+     */
     public List<M> readAllSortedByTime(Direction sortDirection) {
 
         Query.Builder query = makeQuery(sortDirection);
         return runQuery(query);
     }
 
+    /**
+     * Reads all the elements by the {@code aggregateId}.
+     * @return the elements sorted by specified {@code sortDirection}.
+     */
     public List<M> readByAggregateIdSortedByTime(String aggregateId, Direction sortDirection) {
 
         Query.Builder query = makeQuery(sortDirection);
@@ -249,9 +272,5 @@ class DatastoreManager<M extends Message> {
 
         final M result = fromAny(any.build());
         return result;
-    }
-
-    protected Datastore getDatastore() {
-        return datastore;
     }
 }
