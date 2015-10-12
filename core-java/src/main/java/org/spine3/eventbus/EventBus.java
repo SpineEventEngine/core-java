@@ -22,6 +22,8 @@ package org.spine3.eventbus;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
@@ -140,7 +142,7 @@ public class EventBus {
                 handler.invoke(event, context);
             } catch (InvocationTargetException e) {
                 //TODO:2015-09-09:alexander.yevsyukov: Don't we want to handle this somehow? At least log?
-                //NOP
+                log().warn("Exception invoking method: " + handler.getFullName(), e);
             }
         }
     }
@@ -165,4 +167,13 @@ public class EventBus {
         private final EventBus value = new EventBus();
     }
 
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventBus.class);
+    }
+    
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
 }
