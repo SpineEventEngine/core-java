@@ -55,7 +55,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
 
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-        // TODO:2015.10.05:alexander.litus: test this
+
         final Descriptors.Descriptor descriptor = (Descriptors.Descriptor) getClassDescriptor(messageClass);
 
         final DatastoreManager<M> manager = DatastoreManager.newInstance(descriptor);
