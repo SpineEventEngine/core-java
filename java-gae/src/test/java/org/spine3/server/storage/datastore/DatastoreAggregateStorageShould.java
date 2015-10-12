@@ -30,15 +30,14 @@ import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
 
-/*
- * NOTE: to run these tests on Windows, create the local Datastore directory and start local Datastore Server manually.
- * https://cloud.google.com/datastore/docs/tools/
+/**
+ * NOTE: to run these tests on Windows, create the local Datastore directory and start local Datastore Server manually.<br>
+ * See <a href="https://cloud.google.com/datastore/docs/tools/">docs</a> for details.<br>
  *
- * Reported an issue here:
- * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  *
  * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
- *
+ * <br>
  * Also:
  * supposed that waiting after saving records to Datastore will fix the problem with randomly failing tests during the build.
  * But it seems that this approach doesn't work.

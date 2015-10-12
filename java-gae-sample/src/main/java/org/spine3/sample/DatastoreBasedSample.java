@@ -28,11 +28,13 @@ import org.spine3.server.storage.datastore.LocalDatastoreManager;
 import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 
 /**
- * Entry point for core-java sample without gRPC. Works with local Google Cloud Datastore.
+ * Entry point for core-java sample without gRPC. Works with local Google Cloud Datastore.<br>
  *
- * NOTE: to run this sample on Windows, start local Google Cloud Datastore server manually.
- * Reported an issue here:
- * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+ * NOTE: to run this sample on Windows, create the local Datastore directory and start local Datastore Server manually.<br>
+ * See <a href="https://cloud.google.com/datastore/docs/tools/">docs</a> for details.<br>
+ *
+ * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
+ *
  * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  *
  * @author Mikhail Mikhaylov
