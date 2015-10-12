@@ -37,7 +37,7 @@ import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
  *
  * @author Mikhail Mikhaylov
  */
-public class DataStoreSample extends BaseSample {
+public class DatastoreBasedSample extends BaseSample {
 
     private static final LocalDatastoreManager<Order> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(Order.getDescriptor());
 
@@ -50,7 +50,7 @@ public class DataStoreSample extends BaseSample {
             DATASTORE_MANAGER.start();
         }
 
-        BaseSample sample = new DataStoreSample();
+        BaseSample sample = new DatastoreBasedSample();
 
         try {
             sample.execute();
@@ -74,14 +74,14 @@ public class DataStoreSample extends BaseSample {
         return LogSingleton.INSTANCE.value;
     }
 
-    private DataStoreSample() {
+    private DatastoreBasedSample() {
     }
 
     private enum LogSingleton {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DataStoreSample.class);
+        private final Logger value = LoggerFactory.getLogger(DatastoreBasedSample.class);
     }
 
 }

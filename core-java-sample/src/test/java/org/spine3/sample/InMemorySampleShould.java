@@ -20,16 +20,13 @@
 
 package org.spine3.sample;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class InMemorySampleShould {
 
-    //TODO:2015-09-23:alexander.yevsyukov: Find out why the test passes under IDEA and fails in Gradle build.
-//    @Ignore
     @Test
     public void execute() {
         //noinspection ZeroLengthArrayAllocation
-        InMemorySample.main(new String[0]);
+        InMemoryBasedSample.main(new String[0]);
     }
 }

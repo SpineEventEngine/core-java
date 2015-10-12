@@ -29,9 +29,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  * Entry point for core-java sample without gRPC. Works with in-memory-storage.
  */
 @SuppressWarnings("UtilityClass")
-public class InMemorySample extends BaseSample {
+public class InMemoryBasedSample extends BaseSample {
 
-    private InMemorySample() {
+    private InMemoryBasedSample() {
     }
 
     @Override
@@ -47,11 +47,11 @@ public class InMemorySample extends BaseSample {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
+        private final Logger value = LoggerFactory.getLogger(InMemoryBasedSample.class);
     }
 
     public static void main(String[] args) {
-        BaseSample sample = new InMemorySample();
+        BaseSample sample = new InMemoryBasedSample();
         sample.execute();
     }
 
