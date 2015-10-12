@@ -69,9 +69,7 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @After
     public void tearDownTest() {
-        waitIfNeeded(2);
         DATASTORE_MANAGER.clear();
-        waitIfNeeded(2);
     }
 
     @AfterClass
@@ -80,11 +78,4 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
             DATASTORE_MANAGER.stop();
         }
     }
-
-    /*@Override
-    protected void waitIfNeeded(long seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException ignored) {}
-    }*/
 }

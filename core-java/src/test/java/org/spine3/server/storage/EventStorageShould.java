@@ -72,7 +72,6 @@ public abstract class EventStorageShould {
         final EventRecord expected = toEventRecord(recordToStore);
 
         storage.write(recordToStore);
-        waitIfNeeded(4);
 
         assertStorageContains(expected);
     }
@@ -97,9 +96,7 @@ public abstract class EventStorageShould {
 
         for (EventStoreRecord r : recordsToStore) {
             storage.write(r);
-            waitIfNeeded(2);
         }
-        waitIfNeeded(2);
 
         assertStorageContains(expectedRecords);
     }
@@ -113,7 +110,6 @@ public abstract class EventStorageShould {
         for (EventStoreRecord r : recordsToStore) {
             storage.write(r);
         }
-        waitIfNeeded(7);
 
         assertStorageContains(expectedRecords);
         assertStorageContains(expectedRecords);
@@ -143,10 +139,5 @@ public abstract class EventStorageShould {
 
     private static List<EventStoreRecord> createEventStoreRecords() {
         return newArrayList(projectCreated(), projectStarted(), taskAdded());
-    }
-
-    @SuppressWarnings("NoopMethodInAbstractClass")
-    protected void waitIfNeeded(long seconds) {
-        // NOP
     }
 }

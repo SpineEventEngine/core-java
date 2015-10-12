@@ -81,7 +81,6 @@ public abstract class AggregateStorageShould {
 
         final EventRecord expected = projectCreated();
         storage.store(expected);
-        waitIfNeeded(5);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
 
@@ -98,7 +97,6 @@ public abstract class AggregateStorageShould {
 
         final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), ID);
         storage.write(expected);
-        waitIfNeeded(5);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
 
@@ -199,9 +197,5 @@ public abstract class AggregateStorageShould {
 
     private static Snapshot newSnapshot(Timestamp time) {
         return Snapshot.newBuilder().setTimestamp(time).build();
-    }
-
-    protected void waitIfNeeded(long seconds) {
-        // NOP
     }
 }

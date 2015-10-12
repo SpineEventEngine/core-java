@@ -82,7 +82,6 @@ public abstract class EntityStorageShould {
         final TestIdWithStringField expected = createMessage(messageId);
 
         storage.write(expected.getId(), expected);
-        waitIfNeeded(4);
 
         final TestIdWithStringField actual = storage.read(expected.getId());
 
@@ -91,10 +90,5 @@ public abstract class EntityStorageShould {
 
     private static TestIdWithStringField createMessage(String id) {
         return TestIdWithStringField.newBuilder().setId(id).build();
-    }
-
-    @SuppressWarnings("NoopMethodInAbstractClass")
-    protected void waitIfNeeded(long seconds) {
-        // NOP
     }
 }
