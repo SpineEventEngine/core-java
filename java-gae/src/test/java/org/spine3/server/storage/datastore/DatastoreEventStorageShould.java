@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.spine3.TypeName;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
 
@@ -46,11 +46,10 @@ import org.spine3.server.storage.EventStoreRecord;
 @Ignore
 public class DatastoreEventStorageShould extends EventStorageShould {
 
-    private static final TypeName TYPE_NAME = TypeName.of(EventStoreRecord.getDescriptor());
+    private static final LocalDatastoreManager<EventStoreRecord> DATASTORE_MANAGER =
+            LocalDatastoreManager.newInstance(EventStoreRecord.getDescriptor());
 
-    private static final LocalDatastoreManager<EventStoreRecord> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
-
-    private static final DatastoreEventStorage STORAGE = DatastoreEventStorage.newInstance(DATASTORE_MANAGER);
+    private static final EventStorage STORAGE = DatastoreEventStorage.newInstance(DATASTORE_MANAGER);
 
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");

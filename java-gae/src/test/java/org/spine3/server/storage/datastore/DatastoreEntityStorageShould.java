@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.spine3.TypeName;
+import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
@@ -47,11 +47,10 @@ import org.spine3.test.TestIdWithStringField;
 @Ignore
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
-    private static final TypeName TYPE_NAME = TypeName.of(TestIdWithStringField.getDescriptor());
+    private static final LocalDatastoreManager<TestIdWithStringField> DATASTORE_MANAGER =
+            LocalDatastoreManager.newInstance(TestIdWithStringField.getDescriptor());
 
-    private static final LocalDatastoreManager<TestIdWithStringField> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
-
-    private static final DatastoreEntityStorage<String, TestIdWithStringField> STORAGE =
+    private static final EntityStorage<String, TestIdWithStringField> STORAGE =
             DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
 
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})

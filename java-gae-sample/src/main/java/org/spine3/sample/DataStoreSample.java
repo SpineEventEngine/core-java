@@ -22,11 +22,10 @@ package org.spine3.sample;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.TypeName;
 import org.spine3.sample.order.Order;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 import org.spine3.server.storage.datastore.LocalDatastoreManager;
+import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 
 /**
  * Entry point for core-java sample without gRPC. Works with local Google Cloud Datastore.
@@ -40,8 +39,7 @@ import org.spine3.server.storage.datastore.LocalDatastoreManager;
  */
 public class DataStoreSample extends BaseSample {
 
-    private static final TypeName TYPE_NAME = TypeName.of(Order.getDescriptor());
-    private static final LocalDatastoreManager<Order> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(TYPE_NAME);
+    private static final LocalDatastoreManager<Order> DATASTORE_MANAGER = LocalDatastoreManager.newInstance(Order.getDescriptor());
 
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
@@ -68,7 +66,7 @@ public class DataStoreSample extends BaseSample {
 
     @Override
     protected StorageFactory storageFactory() {
-        return new DatastoreStorageFactory();
+        return new LocalDatastoreStorageFactory();
     }
 
     @Override

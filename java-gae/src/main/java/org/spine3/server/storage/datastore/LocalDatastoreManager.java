@@ -20,11 +20,14 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.*;
+import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastore;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastoreException;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
 import com.google.protobuf.Message;
-import org.spine3.TypeName;
 
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.Descriptor;
 
 /**
  * Provides access to local Google Cloud Datastore.
@@ -44,12 +47,12 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
 
     private static final LocalDevelopmentDatastore LOCAL_DATASTORE = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_OPTIONS);
 
-    private LocalDatastoreManager(TypeName typeName) {
-        super(LOCAL_DATASTORE, typeName);
+    private LocalDatastoreManager(Descriptor descriptor) {
+        super(descriptor, LOCAL_DATASTORE);
     }
 
-    public static <M extends Message> LocalDatastoreManager<M> newInstance(TypeName typeName) {
-        return new LocalDatastoreManager<>(typeName);
+    public static <M extends Message> LocalDatastoreManager<M> newInstance(Descriptor descriptor) {
+        return new LocalDatastoreManager<>(descriptor);
     }
 
     /*

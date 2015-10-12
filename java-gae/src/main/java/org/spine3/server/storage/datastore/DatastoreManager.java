@@ -79,16 +79,12 @@ class DatastoreManager<M extends Message> {
     private final TypeName typeName;
 
     protected static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
-        return new DatastoreManager<>(TypeName.of(descriptor));
+        return new DatastoreManager<>(descriptor, DatastoreFactory.get().create(DEFAULT_OPTIONS));
     }
 
-    protected DatastoreManager(TypeName typeName) {
-        this(DatastoreFactory.get().create(DEFAULT_OPTIONS), typeName);
-    }
-
-    protected DatastoreManager(Datastore datastore, TypeName typeName) {
+    protected DatastoreManager(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
-        this.typeName = typeName;
+        this.typeName = TypeName.of(descriptor);
     }
 
     public void storeEntity(String id, M message) {
