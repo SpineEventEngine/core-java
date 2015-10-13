@@ -39,6 +39,7 @@ import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
+import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.HAS_ANCESTOR;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
@@ -56,16 +57,18 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  */
 class DatastoreManager<M extends Message> {
 
-    private static final String VALUE_KEY = "value";
+    private static final String VALUE_PROPERTY_NAME = "value";
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String TIMESTAMP_KEY = "timestamp";
+    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String AGGREGATE_ID_KEY = "aggregateId";
+    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String COMMAND_ID_KEY = "commandId";
+    private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
+
+    private static final String KEY_PROPERTY_NAME = "__key__";
 
     // TODO:2015.10.08:alexander.litus: change to real Datastore project ID
     private static final String DATASET_NAME = "dummy-datastore-project-id";
@@ -75,8 +78,11 @@ class DatastoreManager<M extends Message> {
             .dataset(DATASET_NAME)
             .build();
 
+    private static final String COMMON_ENTITY_GROUP_NAME = "CommonGroupName";
+
     private final Datastore datastore;
     private final TypeName typeName;
+    private final Key commonAncestorKey;
 
     protected static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
         return new DatastoreManager<>(descriptor, DatastoreFactory.get().create(DEFAULT_OPTIONS));
@@ -85,6 +91,7 @@ class DatastoreManager<M extends Message> {
     protected DatastoreManager(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
         this.typeName = TypeName.of(descriptor);
+        this.commonAncestorKey = makeKey(COMMON_ENTITY_GROUP_NAME, typeName.nameOnly()).build();
     }
 
     /**
@@ -95,7 +102,7 @@ class DatastoreManager<M extends Message> {
         Entity.Builder entity = messageToEntity(message, makeCommonKey(id));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        performMutation(mutation);
+        commit(mutation);
     }
 
     /**
@@ -107,31 +114,31 @@ class DatastoreManager<M extends Message> {
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        performMutation(mutation);
+        commit(mutation);
     }
 
     /**
      * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
      */
     public void storeCommandRecord(String id, CommandStoreRecord record) {
-        storeWithAutoId(makeProperty(COMMAND_ID_KEY, makeValue(id)), record, record.getTimestamp());
+        storeWithAutoId(makeProperty(COMMAND_ID_PROPERTY_NAME, makeValue(id)), record, record.getTimestamp());
     }
 
     /**
      * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
      */
     public void storeAggregateRecord(String id, AggregateStorageRecord record) {
-        storeWithAutoId(makeProperty(AGGREGATE_ID_KEY, makeValue(id)), record, record.getTimestamp());
+        storeWithAutoId(makeProperty(AGGREGATE_ID_PROPERTY_NAME, makeValue(id)), record, record.getTimestamp());
     }
 
-    private void storeWithAutoId(Property.Builder id, Message message, TimestampOrBuilder timestamp) {
+    private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
 
-        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
+        Entity.Builder entity = messageToEntity(message, makeKey(commonAncestorKey, typeName.nameOnly()));
         entity.addProperty(makeTimestampProperty(timestamp));
-        entity.addProperty(id);
+        entity.addProperty(aggregateId);
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
-        performMutation(mutation);
+        commit(mutation);
     }
 
     /**
@@ -158,7 +165,7 @@ class DatastoreManager<M extends Message> {
 
     /**
      * Reads all the elements.
-     * @return the elements sorted by specified {@code sortDirection}.
+     * @return the elements sorted by {@code timestamp} in specified {@code sortDirection}.
      */
     public List<M> readAllSortedByTime(Direction sortDirection) {
 
@@ -168,17 +175,17 @@ class DatastoreManager<M extends Message> {
 
     /**
      * Reads all the elements by the {@code aggregateId}.
-     * @return the elements sorted by specified {@code sortDirection}.
+     * @return the elements sorted by {@code timestamp} in specified {@code sortDirection}.
      */
     public List<M> readByAggregateIdSortedByTime(String aggregateId, Direction sortDirection) {
 
         Query.Builder query = makeQuery(sortDirection);
-        query.setFilter(makeFilter(AGGREGATE_ID_KEY, EQUAL, makeValue(aggregateId))).build();
+        query.setFilter(makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(aggregateId))).build();
 
         return runQuery(query);
     }
 
-    private void performMutation(Mutation.Builder mutation) {
+    private void commit(Mutation.Builder mutation) {
 
         CommitRequest commitRequest = CommitRequest.newBuilder()
                 .setMode(NON_TRANSACTIONAL)
@@ -222,25 +229,26 @@ class DatastoreManager<M extends Message> {
 
     private static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
         final Date date = convertToDate(timestamp);
-        return makeProperty(TIMESTAMP_KEY, makeValue(date));
+        return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
     }
 
     private Query.Builder makeQuery(Direction sortDirection) {
         Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(typeName.nameOnly());
-        query.addOrder(makeOrder(TIMESTAMP_KEY, sortDirection));
+        query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
+        query.setFilter(makeFilter(KEY_PROPERTY_NAME, HAS_ANCESTOR, makeValue(commonAncestorKey)));
         return query;
     }
 
     private Key.Builder makeCommonKey(String id) {
-        return makeKey(typeName.nameOnly(), id);
+        return makeKey(commonAncestorKey, typeName.nameOnly(), id);
     }
 
     private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         return Entity.newBuilder()
                 .setKey(key)
-                .addProperty(makeProperty(VALUE_KEY, makeValue(serializedMessage)));
+                .addProperty(makeProperty(VALUE_PROPERTY_NAME, makeValue(serializedMessage)));
     }
 
     private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
@@ -263,7 +271,7 @@ class DatastoreManager<M extends Message> {
         final List<Property> properties = entity.getEntity().getPropertyList();
 
         for (Property property : properties) {
-            if (property.getName().equals(VALUE_KEY)) {
+            if (property.getName().equals(VALUE_PROPERTY_NAME)) {
                 any.setValue(property.getValue().getBlobValue());
             }
         }
