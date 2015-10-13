@@ -30,13 +30,14 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.Descriptor;
 
 /**
- * Provides access to local Google Cloud Datastore.
+ * Provides access to local Google Cloud Datastore. Used for testing.
  *
  * @author Alexander Litus
  */
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
-    private static final String PATH_TO_GCD = "C:\\gcd";
+    @SuppressWarnings("CallToSystemGetenv")
+    private static final String GCD_HOME = System.getenv("GCD_HOME");
     private static final String LOCALHOST = "http://localhost:8080";
     private static final String LOCAL_DATASET_NAME = "spine-local-dataset";
 
@@ -55,12 +56,14 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         return new LocalDatastoreManager<>(descriptor);
     }
 
-    /*
-     * Starts the local Datastore server.
+    /**
+     * Starts the local Datastore server in testing mode.
+     * @see <a href="https://cloud.google.com/datastore/docs/tools/devserver#local_development_server_command-line_arguments">
+     *      Documentation</a> ("testing" option)
      */
     public void start() {
         try {
-            LOCAL_DATASTORE.start(PATH_TO_GCD, LOCAL_DATASET_NAME);
+            LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, "testing");
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
