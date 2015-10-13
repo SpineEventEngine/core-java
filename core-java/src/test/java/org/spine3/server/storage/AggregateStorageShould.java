@@ -113,9 +113,7 @@ public abstract class AggregateStorageShould {
 
         final List<AggregateStorageRecord> records = getSequentialRecords(ID);
 
-        for (AggregateStorageRecord record : records) {
-            storage.write(record);
-        }
+        writeAll(records);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(ID);
         final List<AggregateStorageRecord> actual = newArrayList(iterator);
@@ -166,9 +164,7 @@ public abstract class AggregateStorageShould {
 
         final List<AggregateStorageRecord> records = getSequentialRecords(ID, firstRecordTime);
 
-        for (AggregateStorageRecord record : records) {
-            storage.write(record);
-        }
+        writeAll(records);
 
         final AggregateEvents events = storage.load(ID);
 
@@ -187,6 +183,11 @@ public abstract class AggregateStorageShould {
         storage.load(ID);
     }
 
+    private void writeAll(Iterable<AggregateStorageRecord> records) {
+        for (AggregateStorageRecord record : records) {
+            storage.write(record);
+        }
+    }
 
     private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
         @Override
