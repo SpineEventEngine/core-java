@@ -36,12 +36,6 @@ import org.spine3.test.TestIdWithStringField;
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  *
  * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
- * <br>
- * Also:
- * supposed that waiting after saving records to Datastore will fix the problem with randomly failing tests during the build.
- * But it seems that this approach doesn't work.
- * Tests fail if run one build after another at once and every fourth-fifth build even if wait after previous build for about a minute.
- * Ignoring this test class for now. Run these tests from IDE. If any test fails, just re-run it again separately (until it passes).
  */
 @Ignore
 public class DatastoreEntityStorageShould extends EntityStorageShould {
