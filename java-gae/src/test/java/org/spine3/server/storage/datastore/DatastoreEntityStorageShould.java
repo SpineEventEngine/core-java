@@ -23,21 +23,17 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
 
 /**
- * NOTE: to run these tests on Windows, create the local Datastore directory and start local Datastore Server manually.<br>
- * See <a href="https://cloud.google.com/datastore/docs/tools/">docs</a> for details.<br>
- *
+ * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
+ * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- *
  * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
  */
-@Ignore
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     private static final LocalDatastoreManager<TestIdWithStringField> DATASTORE_MANAGER =
