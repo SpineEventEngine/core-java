@@ -94,9 +94,7 @@ public abstract class EventStorageShould {
         final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
         final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
 
-        for (EventStoreRecord r : recordsToStore) {
-            storage.write(r);
-        }
+        writeAll(recordsToStore);
 
         assertStorageContains(expectedRecords);
     }
@@ -107,13 +105,17 @@ public abstract class EventStorageShould {
         final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
         final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
 
-        for (EventStoreRecord r : recordsToStore) {
-            storage.write(r);
-        }
+        writeAll(recordsToStore);
 
         assertStorageContains(expectedRecords);
         assertStorageContains(expectedRecords);
         assertStorageContains(expectedRecords);
+    }
+
+    private void writeAll(Iterable<EventStoreRecord> records) {
+        for (EventStoreRecord r : records) {
+            storage.write(r);
+        }
     }
 
     private void assertStorageContains(List<EventRecord> expectedRecords) {
