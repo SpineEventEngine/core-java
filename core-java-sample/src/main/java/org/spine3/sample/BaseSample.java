@@ -53,7 +53,8 @@ public abstract class BaseSample {
         Engine.getInstance().register(new OrderRepository());
 
         // Register event handlers
-        EventBus.getInstance().register(new EventLogger());
+        final EventLogger eventLogger = new EventLogger();
+        EventBus.getInstance().register(eventLogger);
 
         // Register id converters
         IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
@@ -67,6 +68,10 @@ public abstract class BaseSample {
         }
 
         log().info("All the requests were handled.");
+
+        EventBus.getInstance().unregister(eventLogger);
+
+        Engine.stop();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.

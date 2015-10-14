@@ -94,7 +94,9 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final CommandRequest commandRequest1 = CommandRequestFactory.create();
+        final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
+
+        final CommandRequest commandRequest1 = CommandRequestFactory.createAt(when);
         final CommandRequest commandRequest2 = CommandRequestFactory.create();
         final CommandRequest commandRequest3 = CommandRequestFactory.create();
 

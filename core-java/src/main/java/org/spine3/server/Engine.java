@@ -180,6 +180,7 @@ public final class Engine {
             eventBus.unregister(repository);
             repository.assignStorage(null);
         }
+        repositories.clear();
     }
 
     private  void doStop() {
