@@ -20,11 +20,13 @@
 
 package org.spine3.sample.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.sample.FileSystemBasedSample;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemHelper;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
+
+import java.io.IOException;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * File system Server implementation.
@@ -33,32 +35,19 @@ import org.spine3.server.storage.filesystem.FileSystemHelper;
  */
 public class FileSystemSampleServer extends BaseSampleServer {
 
-    private static final String STORAGE_PATH = FileSystemBasedSample.STORAGE_PATH;
+    protected FileSystemSampleServer() {
+        super(new FileSystemStorageFactory(), getLogger(FileSystemSampleServer.class));
+    }
 
     /**
      * Main launches the server from the command line.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
+
         FileSystemHelper.configure(FileSystemBasedSample.class);
+
         final BaseSampleServer server = new FileSystemSampleServer();
-        server.registerEventSubscribers();
+
         server.start();
-    }
-
-    @Override
-    protected StorageFactory getStorageFactory() {
-        return new org.spine3.server.storage.filesystem.FileSystemStorageFactory();
-    }
-
-    @Override
-    protected Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FileSystemSampleServer.class);
     }
 }

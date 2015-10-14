@@ -44,19 +44,11 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
  */
 public abstract class BaseSample {
 
+    public static final String SUCCESS_MESSAGE = "All the requests were handled.";
+
     protected void execute() {
 
-        // Start the engine
-        Engine.start(storageFactory());
-
-        // Register repository with the engine. This will register it in the CommandDispatcher too.
-        Engine.getInstance().register(new OrderRepository());
-
-        // Register event handlers
-        EventBus.getInstance().register(new EventLogger());
-
-        // Register id converters
-        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
+        setupEnvironment(storageFactory());
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -66,13 +58,28 @@ public abstract class BaseSample {
             Engine.getInstance().process(request);
         }
 
-        log().info("All the requests were handled.");
+        log().info(SUCCESS_MESSAGE);
+    }
+
+    public static void setupEnvironment(StorageFactory storageFactory) {
+
+        // Start the engine
+        Engine.start(storageFactory);
+
+        // Register repository with the engine. This will register it in the CommandDispatcher too.
+        Engine.getInstance().register(new OrderRepository());
+
+        // Register event handlers
+        EventBus.getInstance().register(new EventLogger());
+
+        // Register id converters
+        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
     // See Amazon screens for correct naming of domain things.
 
-    protected List<CommandRequest> generateRequests() {
+    public static List<CommandRequest> generateRequests() {
 
         List<CommandRequest> result = Lists.newArrayList();
 
