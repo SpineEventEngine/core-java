@@ -26,43 +26,46 @@ import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.eventbus.EventBus;
 import org.spine3.sample.EventLogger;
-import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+
+import java.io.IOException;
+
+import static org.spine3.sample.BaseSample.*;
 
 /**
  * Sample gRPC server implementation.
  *
  * @author Mikhail Melnik
  */
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 public abstract class BaseSampleServer {
 
-    public void registerEventSubscribers() {
-        EventBus.getInstance().register(new EventLogger());
-    }
+    public static final int SERVER_PORT = 50051;
 
-    public void prepareEngine() {
-        Engine.start(getStorageFactory());
-        Engine.getInstance().getCommandDispatcher().register(new OrderRepository());
-    }
-
-    /* The port on which the server should run */
-    private int port = 50051;
     private ServerImpl server;
+    private final StorageFactory storageFactory;
+    private final Logger logger;
 
-    protected void start() throws Exception {
+    private EventLogger eventLogger;
 
-        prepareEngine();
-        registerEventSubscribers();
+    protected BaseSampleServer(StorageFactory storageFactory, Logger logger) {
+        this.storageFactory = storageFactory;
+        this.logger = logger;
+    }
 
-        server = NettyServerBuilder.forPort(port)
+    protected void start() throws IOException {
+
+        setupEnvironment(storageFactory);
+        eventLogger = setupEventLogger();
+
+        server = NettyServerBuilder.forPort(SERVER_PORT)
                 .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
                 .build()
                 .start();
 
-        log().info("Server started, listening on " + port);
+        logger.info("Server started, listening on " + SERVER_PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -73,16 +76,18 @@ public abstract class BaseSampleServer {
                 System.err.println("*** server shut down");
             }
         });
-
     }
 
     protected void stop() {
         if (server != null) {
+            tearDownEventLogger(eventLogger);
+            tearDownEnvironment();
             server.shutdown();
         }
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
+
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
             CommandResult reply = Engine.getInstance().process(req);
@@ -93,16 +98,8 @@ public abstract class BaseSampleServer {
 
         @Override
         public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
-            StreamObserver<CommandRequest> o = null;
             //TODO:2015-06-25:mikhail.melnik: implement
-            return o;
+            return null;
         }
     }
-
-    //TODO:2015-09-21:alexander.yevsyukov: We have such factory methods already in BaseSample. Why duplicate?
-
-    protected abstract StorageFactory getStorageFactory();
-
-    protected abstract Logger log();
-
 }

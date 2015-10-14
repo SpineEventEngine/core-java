@@ -20,13 +20,10 @@
 
 package org.spine3.sample;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileSystemBasedSampleShould {
 
-    //TODO:2015-09-28:mikhail.mikhaylov: Enable it after pull request 28.
-    @Ignore
     @Test
     public void execute() {
         //noinspection ZeroLengthArrayAllocation

@@ -30,7 +30,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
 
 import javax.annotation.Nullable;
@@ -41,42 +40,21 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
+ * Base sample implementation. In order to use sample without calling an
+ * {@code execute()} method, you should first call {@code setupEnvironment()}
+ * and {@code setupEventLogger()} methods, and to stop -
+ * {@code tearDownEventLogger()} and {@code tearDownEnvironment()}.
+ *
  * @author Mikhail Mikhaylov
  */
 public abstract class BaseSample {
 
+    public static final String SUCCESS_MESSAGE = "All the requests were handled.";
+
     protected void execute() {
 
-        StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-
-        /**
-         * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
-         *
-         * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
-         *
-         */
-
-        /**
-         * To run the sample on a LocalDatastoreFactory, replace the above initialization with the following:
-         *
-         * StorageFactory storageFactory = LocalDatastoreFactory.newInstance();
-         *
-         */
-
-        //TODO:2015-10-14:alexander.yevsyukov: Refactor the sample, removing hierarchy for using different
-        // storagte factories with the above comment blocks.
-
-        // Start the engine
-        Engine.start(storageFactory());
-
-        // Register repository with the engine. This will register it in the CommandDispatcher too.
-        Engine.getInstance().register(new OrderRepository());
-
-        // Register event handlers
-        EventBus.getInstance().register(new EventLogger());
-
-        // Register id converters
-        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
+        setupEnvironment(storageFactory());
+        final EventLogger eventLogger = setupEventLogger();
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -86,13 +64,46 @@ public abstract class BaseSample {
             Engine.getInstance().process(request);
         }
 
-        log().info("All the requests were handled.");
+        log().info(SUCCESS_MESSAGE);
+
+        tearDownEventLogger(eventLogger);
+        tearDownEnvironment();
+    }
+
+    public static void setupEnvironment(StorageFactory storageFactory) {
+
+        // Start the engine
+        Engine.start(storageFactory);
+
+        // Register repository with the engine. This will register it in the CommandDispatcher too.
+        Engine.getInstance().register(new OrderRepository());
+
+        final EventLogger eventLogger = new EventLogger();
+        EventBus.getInstance().register(eventLogger);
+
+        // Register id converters
+        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
+    }
+
+    public static EventLogger setupEventLogger() {
+        // Register event handlers
+        final EventLogger eventLogger = new EventLogger();
+        EventBus.getInstance().register(eventLogger);
+        return eventLogger;
+    }
+
+    public static void tearDownEventLogger(EventLogger eventLogger) {
+        EventBus.getInstance().unregister(eventLogger);
+    }
+
+    public static void tearDownEnvironment() {
+        Engine.stop();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
     // See Amazon screens for correct naming of domain things.
 
-    protected List<CommandRequest> generateRequests() {
+    public static List<CommandRequest> generateRequests() {
 
         List<CommandRequest> result = Lists.newArrayList();
 
