@@ -22,10 +22,11 @@ package org.spine3.sample.server;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.datastore.DatastoreStorageFactory;
+
+import java.io.IOException;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * File system Server implementation.
@@ -38,8 +39,12 @@ public class DataStoreSampleServer extends BaseSampleServer {
 
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
+    public DataStoreSampleServer() {
+        super(new DatastoreStorageFactory(), getLogger(DataStoreSampleServer.class));
+    }
+
     @Override
-    protected void start() throws Exception {
+    protected void start() throws IOException {
         helper.setUp();
         super.start();
     }
@@ -48,22 +53,5 @@ public class DataStoreSampleServer extends BaseSampleServer {
     protected void stop() {
         super.stop();
         helper.tearDown();
-    }
-
-    @Override
-    protected StorageFactory getStorageFactory() {
-        return new DatastoreStorageFactory();
-    }
-
-    @Override
-    protected Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(DataStoreSampleServer.class);
     }
 }
