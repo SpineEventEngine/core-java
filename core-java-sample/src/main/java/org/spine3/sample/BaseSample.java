@@ -40,6 +40,11 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
+ * Base sample implementation. In order to use sample without calling an
+ * {@code execute()} method, you should first call {@code setupEnvironment()}
+ * and {@code setupEventLogger()} methods, and to stop -
+ * {@code tearDownEventLogger()} and {@code tearDownEnvironment()}.
+ *
  * @author Mikhail Mikhaylov
  */
 public abstract class BaseSample {
@@ -49,6 +54,7 @@ public abstract class BaseSample {
     protected void execute() {
 
         setupEnvironment(storageFactory());
+        final EventLogger eventLogger = setupEventLogger();
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -59,6 +65,9 @@ public abstract class BaseSample {
         }
 
         log().info(SUCCESS_MESSAGE);
+
+        tearDownEventLogger(eventLogger);
+        tearDownEnvironment();
     }
 
     public static void setupEnvironment(StorageFactory storageFactory) {
@@ -69,15 +78,25 @@ public abstract class BaseSample {
         // Register repository with the engine. This will register it in the CommandDispatcher too.
         Engine.getInstance().register(new OrderRepository());
 
-        // Register event handlers
         final EventLogger eventLogger = new EventLogger();
         EventBus.getInstance().register(eventLogger);
 
         // Register id converters
         IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
+    }
 
+    public static EventLogger setupEventLogger() {
+        // Register event handlers
+        final EventLogger eventLogger = new EventLogger();
+        EventBus.getInstance().register(eventLogger);
+        return eventLogger;
+    }
+
+    public static void tearDownEventLogger(EventLogger eventLogger) {
         EventBus.getInstance().unregister(eventLogger);
+    }
 
+    public static void tearDownEnvironment() {
         Engine.stop();
     }
 

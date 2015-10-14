@@ -49,6 +49,7 @@ public class GrpcServerSample {
         helper.setUp();
 
         setupEnvironment(new DatastoreStorageFactory());
+        final EventLogger eventLogger = setupEventLogger();
 
         List<CommandRequest> requests = generateRequests();
         for (CommandRequest request : requests) {
@@ -56,6 +57,9 @@ public class GrpcServerSample {
         }
 
         log().info(SUCCESS_MESSAGE);
+
+        tearDownEventLogger(eventLogger);
+        tearDownEnvironment();
 
         helper.tearDown();
     }
