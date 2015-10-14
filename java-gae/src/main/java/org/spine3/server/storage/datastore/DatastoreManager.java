@@ -55,7 +55,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * @param <M> the type of messages to save to the storage
  * @author Alexander Litus
  */
-class DatastoreManager<M extends Message> {
+public class DatastoreManager<M extends Message> {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
