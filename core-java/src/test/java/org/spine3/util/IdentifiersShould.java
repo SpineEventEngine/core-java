@@ -145,29 +145,6 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void convert_to_string_message_id_with_several_fields() {
-
-        final String nestedString = "nested_string";
-        final String outerString = "outer_string";
-        final Integer number = 256;
-
-        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder()
-                .setString(outerString)
-                .setInt(number)
-                .setMessage(newTestIdWithStringField(nestedString))
-                .build();
-
-        final String expected =
-                "string=&#34;" + outerString + "&#34;" +
-                " int=" + number +
-                " message { id=&#34;" + nestedString + "&#34; }";
-
-        final String actual = idToString(idToConvert);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
 
         final TestIdWithStringField messageToWrap = newTestIdWithStringField(TEST_ID);
@@ -176,16 +153,6 @@ public class IdentifiersShould {
         final String result = idToString(any);
 
         assertEquals(TEST_ID, result);
-    }
-
-    @Test
-    @SuppressWarnings("LocalVariableNamingConvention")
-    public void escape_chars_not_allowed_in_windows_file_name_when_convert_id_to_string() {
-
-        final String charsNotAllowedInWindowsFileName = "\\/:*?\"<>|";
-        final String result = idToString(charsNotAllowedInWindowsFileName);
-
-        assertEquals("&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;", result);
     }
 
     private static TestIdWithStringField newTestIdWithStringField(String nestedString) {

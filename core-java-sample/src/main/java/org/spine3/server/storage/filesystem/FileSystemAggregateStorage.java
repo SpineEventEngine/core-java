@@ -31,8 +31,8 @@ import java.util.NoSuchElementException;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.tryToFlush;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
-import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Max available message size is about 2GB.
@@ -74,7 +74,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-        final String stringId = idToString(id);
+        final String stringId = idToStringWithEscaping(id);
         final File file = new File(getAggregateFilePath(shortTypeName, stringId));
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;

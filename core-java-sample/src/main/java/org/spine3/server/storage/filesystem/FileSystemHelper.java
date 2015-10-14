@@ -21,20 +21,25 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.util.FileNameEscaper;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.util.Map;
 
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
+import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Util class for working with file system
@@ -204,8 +209,8 @@ public class FileSystemHelper {
     }
 
     /**
-     * @throws IllegalStateException if there is no such file
      * @param file file to check
+     * @throws IllegalStateException if there is no such file
      */
     public static void checkFileExists(File file) {
         if (!file.exists()) {
@@ -215,6 +220,7 @@ public class FileSystemHelper {
 
     /**
      * Tries to open {@code FileInputStream} from file
+     *
      * @throws RuntimeException if there is no such file
      */
     public static FileInputStream tryOpenFileInputStream(File file) {
@@ -227,6 +233,55 @@ public class FileSystemHelper {
         }
 
         return fileInputStream;
+    }
+
+    /**
+     * Creates string representation of the passed ID. Escapes characters which are not allowed in file names.
+     *
+     * @param id the ID to convert
+     * @return string representation of the ID
+     * @see org.spine3.util.Identifiers#idToString(Object)
+     * @see org.spine3.util.FileNameEscaper#escape(String)
+     */
+    public static <I> String idToStringWithEscaping(I id) {
+
+        final I idNormalized = escapeStringFieldsIfIsMessage(id);
+        String result = idToString(idNormalized);
+        result = FileNameEscaper.getInstance().escape(result);
+
+        return result;
+    }
+
+    private static <I> I escapeStringFieldsIfIsMessage(I input) {
+        I result = input;
+        if (input instanceof Message) {
+            final Message message = escapeStringFields((Message) input);
+            @SuppressWarnings("unchecked")
+            I castedMessage = (I) message; // cast is safe because input is Message
+            result = castedMessage;
+        }
+        return result;
+    }
+
+    private static Message escapeStringFields(Message message) {
+
+        final Message.Builder result = message.toBuilder();
+        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
+
+        final FileNameEscaper escaper = FileNameEscaper.getInstance();
+
+        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
+
+            Object value = fields.get(descriptor);
+
+            if (descriptor.getJavaType() == STRING) {
+                value = escaper.escape(value.toString());
+            }
+
+            result.setField(descriptor, value);
+        }
+
+        return result.build();
     }
 
     /**
