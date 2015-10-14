@@ -30,6 +30,7 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
 
 import javax.annotation.Nullable;
@@ -45,6 +46,25 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 public abstract class BaseSample {
 
     protected void execute() {
+
+        StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+
+        /**
+         * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
+         *
+         * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
+         *
+         */
+
+        /**
+         * To run the sample on a LocalDatastoreFactory, replace the above initialization with the following:
+         *
+         * StorageFactory storageFactory = LocalDatastoreFactory.newInstance();
+         *
+         */
+
+        //TODO:2015-10-14:alexander.yevsyukov: Refactor the sample, removing hierarchy for using different
+        // storagte factories with the above comment blocks.
 
         // Start the engine
         Engine.start(storageFactory());
