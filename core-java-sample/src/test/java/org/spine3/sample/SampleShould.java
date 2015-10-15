@@ -21,6 +21,7 @@
 package org.spine3.sample;
 
 import org.junit.Test;
+import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -36,15 +37,14 @@ public class SampleShould {
     }
 
     @Test
-    public void run_on_in_file_system_storage() {
+    public void run_on_file_system_storage() {
         Sample.setStorageFactory(FileSystemStorageFactory.newInstance());
         Sample.main(EMPTY_STRING_ARRAY);
     }
 
-    //@Test
+    @Test
     public void run_on_Datastore_storage() {
-        // TODO:2015-10-15:alexander.litus: set LocalDatastoreStorageFactory
-        //Sample.setStorageFactory(LocalDatastoreStorageFactory.newInstance());
+        Sample.setStorageFactory(LocalDatastoreStorageFactory.instance());
         Sample.main(EMPTY_STRING_ARRAY);
     }
 }

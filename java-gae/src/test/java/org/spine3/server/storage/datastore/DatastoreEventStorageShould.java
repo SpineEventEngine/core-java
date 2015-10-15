@@ -25,23 +25,16 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageShould;
-import org.spine3.server.storage.EventStoreRecord;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
  * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed.
+ * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
 public class DatastoreEventStorageShould extends EventStorageShould {
 
-    private static final LocalDatastoreManager<EventStoreRecord> DATASTORE_MANAGER =
-            LocalDatastoreManager.newInstance(EventStoreRecord.getDescriptor());
-
-    private static final EventStorage STORAGE = DatastoreEventStorage.newInstance(DATASTORE_MANAGER);
-
-    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+    private static final EventStorage STORAGE = LocalDatastoreStorageFactory.instance().createEventStorage();
 
     public DatastoreEventStorageShould() {
         super(STORAGE);
@@ -49,20 +42,16 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        if (!IS_WINDOWS) { // Temporary solution
-            DATASTORE_MANAGER.start();
-        }
+        LocalDatastoreStorageFactory.instance().setUp();
     }
 
     @After
     public void tearDownTest() {
-        DATASTORE_MANAGER.clear();
+        LocalDatastoreManager.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        if (!IS_WINDOWS) { // Temporary solution
-            DATASTORE_MANAGER.stop();
-        }
+        LocalDatastoreStorageFactory.instance().tearDown();
     }
 }

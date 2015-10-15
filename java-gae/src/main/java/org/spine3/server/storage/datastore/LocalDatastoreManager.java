@@ -36,6 +36,13 @@ import static com.google.protobuf.Descriptors.Descriptor;
  */
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
+    /**
+     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+     */
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
     @SuppressWarnings("CallToSystemGetenv")
     private static final String GCD_HOME = System.getenv("GCD_HOME");
     private static final String LOCALHOST = "http://localhost:8080";
@@ -59,13 +66,20 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
 
     /**
      * Starts the local Datastore server in testing mode.
+     * <p>
+     * NOTE: does not work on Windows. Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
      *
      * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#start(String, String, String...)}
      *                          throws LocalDevelopmentDatastoreException
      * @see <a href="https://cloud.google.com/datastore/docs/tools/devserver#local_development_server_command-line_arguments">
      * Documentation</a> ("testing" option)
      */
-    public void start() {
+    public static void start() {
+
+        if (IS_WINDOWS) {
+            throw new UnsupportedOperationException("Cannot start server on Windows. See method docs for details.");
+        }
+
         try {
             LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
@@ -79,7 +93,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
      * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#clear()}
      *                          throws LocalDevelopmentDatastoreException
      */
-    public void clear() {
+    public static void clear() {
         try {
             LOCAL_DATASTORE.clear();
         } catch (LocalDevelopmentDatastoreException e) {
@@ -93,7 +107,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
      * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#stop()}
      *                          throws LocalDevelopmentDatastoreException
      */
-    public void stop() {
+    public static void stop() {
         try {
             LOCAL_DATASTORE.stop();
         } catch (LocalDevelopmentDatastoreException e) {

@@ -26,13 +26,49 @@ import static com.google.protobuf.Descriptors.Descriptor;
 
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    public static LocalDatastoreStorageFactory newInstance() {
-        return new LocalDatastoreStorageFactory();
-    }
+    /**
+     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+     */
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
-    @SuppressWarnings("RefusedBequest")
+    @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
     protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
-        return LocalDatastoreManager.newInstance(descriptor);
+        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);
+        return manager;
+    }
+
+    @Override
+    public void setUp() {
+
+        super.setUp();
+
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.start();
+        }
+    }
+
+    @Override
+    public void tearDown() {
+
+        super.tearDown();
+
+        LocalDatastoreManager.clear();
+
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.stop();
+        }
+    }
+
+    public static LocalDatastoreStorageFactory instance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory();
     }
 }

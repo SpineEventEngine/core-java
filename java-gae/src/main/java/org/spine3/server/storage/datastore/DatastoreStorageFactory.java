@@ -45,8 +45,11 @@ public class DatastoreStorageFactory implements StorageFactory {
         return DatastoreEventStorage.newInstance(manager);
     }
 
+    /**
+     * The parameter is unused.
+     */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> ignored) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
         final DatastoreManager<AggregateStorageRecord> manager = getManager(AggregateStorageRecord.getDescriptor());
         return DatastoreAggregateStorage.newInstance(manager);
     }
@@ -68,11 +71,11 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public void setUp() {
-        // TODO:2015-10-14:alexander.litus: impl
+        // NOP
     }
 
     @Override
     public void tearDown() {
-        // TODO:2015-10-14:alexander.litus: impl
+        // NOP
     }
 }

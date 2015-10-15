@@ -22,7 +22,7 @@ package org.spine3.sample.server;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import org.spine3.server.storage.datastore.DatastoreStorageFactory;
+import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 
 import java.io.IOException;
 
@@ -36,11 +36,11 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Mikhail Mikhaylov
  */
 public class DataStoreSampleServer extends BaseSampleServer {
-
+// TODO:2015-10-15:alexander.litus: deprecated
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     public DataStoreSampleServer() {
-        super(new DatastoreStorageFactory(), getLogger(DataStoreSampleServer.class));
+        super(new LocalDatastoreStorageFactory(), getLogger(DataStoreSampleServer.class));
     }
 
     @Override
