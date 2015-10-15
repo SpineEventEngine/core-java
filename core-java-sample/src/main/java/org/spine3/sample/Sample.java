@@ -60,9 +60,7 @@ public class Sample {
      *
      * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
      *
-     */
-
-    /**
+     *
      * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
      *
      * StorageFactory storageFactory = LocalDatastoreStorageFactory.newInstance();
@@ -135,6 +133,9 @@ public class Sample {
 
     public static void setStorageFactory(StorageFactory storageFactory) {
         Sample.storageFactory = storageFactory;
+    }
+
+    private Sample() {
     }
 
     private static Logger log() {
