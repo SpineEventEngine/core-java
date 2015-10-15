@@ -38,7 +38,7 @@ public class SampleShould {
 
     @Test
     public void run_on_file_system_storage() {
-        Sample.setStorageFactory(FileSystemStorageFactory.newInstance());
+        Sample.setStorageFactory(FileSystemStorageFactory.newInstance(SampleShould.class));
         Sample.main(EMPTY_STRING_ARRAY);
     }
 

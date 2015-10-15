@@ -43,7 +43,8 @@ public class FileSystemStorageFactoryShould {
 
     @Test
     public void create_storages_successfully() {
-        final StorageFactory factory = new FileSystemStorageFactory();
+
+        final StorageFactory factory = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
 
         final EventStorage eventStorage = factory.createEventStorage();
         final CommandStorage commandStorage = factory.createCommandStorage();

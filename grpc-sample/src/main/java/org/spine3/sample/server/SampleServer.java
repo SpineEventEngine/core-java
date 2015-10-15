@@ -23,11 +23,13 @@ import io.grpc.ServerImpl;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
 
@@ -39,47 +41,52 @@ import static org.spine3.sample.Sample.tearDownEnvironment;
  *
  * @author Mikhail Melnik
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public abstract class BaseSampleServer {
+@SuppressWarnings("UtilityClass")
+public class SampleServer {
 
     public static final int SERVER_PORT = 50051;
 
-    private ServerImpl server;
-    private final StorageFactory storageFactory;
-    private final Logger logger;
+    private static final ServerImpl SERVER = NettyServerBuilder.forPort(SERVER_PORT)
+            .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
+            .build();
 
-    protected BaseSampleServer(StorageFactory storageFactory, Logger logger) {
-        this.storageFactory = storageFactory;
-        this.logger = logger;
-    }
+    private static final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
-    protected void start() throws IOException {
+    /**
+     * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
+     *
+     * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
+     *
+     *
+     * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
+     *
+     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
+     */
+
+    public static void main(String[] args) throws IOException {
 
         setUpEnvironment(storageFactory);
 
-        server = NettyServerBuilder.forPort(SERVER_PORT)
-                .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
-                .build()
-                .start();
+        SERVER.start();
 
-        logger.info("Server started, listening on " + SERVER_PORT);
+        log().info("Server started, listening on " + SERVER_PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+                //noinspection UseOfSystemOutOrSystemErr
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                BaseSampleServer.this.stop();
+                SampleServer.stop();
+                //noinspection UseOfSystemOutOrSystemErr
                 System.err.println("*** server shut down");
             }
         });
     }
 
-    protected void stop() {
-        if (server != null) {
-            tearDownEnvironment(storageFactory);
-            server.shutdown();
-        }
+    private static void stop() {
+        tearDownEnvironment(storageFactory);
+        SERVER.shutdown();
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
@@ -97,5 +104,18 @@ public abstract class BaseSampleServer {
             //TODO:2015-06-25:mikhail.melnik: implement
             return null;
         }
+    }
+
+    private SampleServer() {
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(SampleServer.class);
     }
 }

@@ -63,7 +63,7 @@ public class Sample {
      *
      * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
      *
-     * StorageFactory storageFactory = LocalDatastoreStorageFactory.newInstance();
+     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
      */
 
     public static void main(String[] args) {
@@ -102,8 +102,14 @@ public class Sample {
     }
 
     public static void tearDownEnvironment(StorageFactory storageFactory) {
+
+        // Tear down storage
         storageFactory.tearDown();
+
+        // Unregister event handlers
         EventBus.getInstance().unregister(log());
+
+        // Stop the engine
         Engine.stop();
     }
 

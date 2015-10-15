@@ -34,8 +34,19 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
-    public static StorageFactory newInstance() {
-        return new FileSystemStorageFactory();
+    private final Class executorClass;
+
+    /**
+     * Creates new storage factory instance.
+     *
+     * @param executorClass execution context class which is used as {@link FileSystemHelper#configure(Class)} method parameter.
+     */
+    public static StorageFactory newInstance(Class executorClass) {
+        return new FileSystemStorageFactory(executorClass);
+    }
+
+    private FileSystemStorageFactory(Class executorClass) {
+        this.executorClass = executorClass;
     }
 
     @Override
@@ -64,7 +75,7 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public void setUp() {
-        FileSystemHelper.configure(FileSystemStorageFactory.class);
+        FileSystemHelper.configure(executorClass);
     }
 
     @Override
