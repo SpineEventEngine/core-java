@@ -26,13 +26,13 @@ import org.slf4j.Logger;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.sample.EventLogger;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
 
-import static org.spine3.sample.BaseSample.*;
+import static org.spine3.sample.Sample.setUpEnvironment;
+import static org.spine3.sample.Sample.tearDownEnvironment;
 
 /**
  * Sample gRPC server implementation.
@@ -48,8 +48,6 @@ public abstract class BaseSampleServer {
     private final StorageFactory storageFactory;
     private final Logger logger;
 
-    private EventLogger eventLogger;
-
     protected BaseSampleServer(StorageFactory storageFactory, Logger logger) {
         this.storageFactory = storageFactory;
         this.logger = logger;
@@ -57,8 +55,7 @@ public abstract class BaseSampleServer {
 
     protected void start() throws IOException {
 
-        setupEnvironment(storageFactory);
-        eventLogger = setupEventLogger();
+        setUpEnvironment(storageFactory);
 
         server = NettyServerBuilder.forPort(SERVER_PORT)
                 .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
@@ -80,8 +77,7 @@ public abstract class BaseSampleServer {
 
     protected void stop() {
         if (server != null) {
-            tearDownEventLogger(eventLogger);
-            tearDownEnvironment();
+            tearDownEnvironment(storageFactory);
             server.shutdown();
         }
     }

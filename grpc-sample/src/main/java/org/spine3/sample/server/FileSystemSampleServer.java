@@ -20,7 +20,6 @@
 
 package org.spine3.sample.server;
 
-import org.spine3.sample.FileSystemBasedSample;
 import org.spine3.server.storage.filesystem.FileSystemHelper;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 
@@ -44,7 +43,7 @@ public class FileSystemSampleServer extends BaseSampleServer {
      */
     public static void main(String[] args) throws IOException {
 
-        FileSystemHelper.configure(FileSystemBasedSample.class);
+        FileSystemHelper.configure(FileSystemSampleServer.class);
 
         final BaseSampleServer server = new FileSystemSampleServer();
 

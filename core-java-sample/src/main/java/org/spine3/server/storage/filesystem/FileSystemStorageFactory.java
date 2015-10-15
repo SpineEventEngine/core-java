@@ -33,6 +33,10 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
+    public static StorageFactory newInstance() {
+        return new FileSystemStorageFactory();
+    }
+
     @Override
     public CommandStorage createCommandStorage() {
         return FileSystemCommandStorage.newInstance();
@@ -55,5 +59,15 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
         return FileSystemEntityStorage.newInstance();
+    }
+
+    @Override
+    public void setUp() {
+        FileSystemHelper.configure(FileSystemStorageFactory.class);
+    }
+
+    @Override
+    public void tearDown() {
+        FileSystemHelper.cleanTestData();
     }
 }

@@ -20,39 +20,31 @@
 
 package org.spine3.sample;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spine3.server.storage.StorageFactory;
+import org.junit.Test;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
-/**
- * Entry point for core-java sample without gRPC. Works with in-memory-storage.
- */
-@SuppressWarnings("UtilityClass")
-public class InMemorySample extends BaseSample {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class SampleShould {
 
-    private InMemorySample() {
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    @Test
+    public void run_on_in_memory_storage() {
+        Sample.setStorageFactory(InMemoryStorageFactory.getInstance());
+        Sample.main(EMPTY_STRING_ARRAY);
     }
 
-    @Override
-    protected StorageFactory storageFactory() {
-        return InMemoryStorageFactory.getInstance();
+    @Test
+    public void run_on_in_file_system_storage() {
+        Sample.setStorageFactory(FileSystemStorageFactory.newInstance());
+        Sample.main(EMPTY_STRING_ARRAY);
     }
 
-    @Override
-    protected Logger log() {
-        return LogSingleton.INSTANCE.value;
+    //@Test
+    public void run_on_Datastore_storage() {
+        // TODO:2015-10-15:alexander.litus: set LocalDatastoreStorageFactory
+        //Sample.setStorageFactory(LocalDatastoreStorageFactory.newInstance());
+        Sample.main(EMPTY_STRING_ARRAY);
     }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(InMemorySample.class);
-    }
-
-    public static void main(String[] args) {
-        BaseSample sample = new InMemorySample();
-        sample.execute();
-    }
-
 }

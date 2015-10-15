@@ -22,15 +22,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandRequest;
-import org.spine3.server.Engine;
-import org.spine3.server.storage.datastore.DatastoreStorageFactory;
-
-import java.util.List;
-
-import static org.spine3.sample.BaseSample.*;
-import static org.spine3.sample.BaseSample.SUCCESS_MESSAGE;
-import static org.spine3.sample.BaseSample.generateRequests;
 
 /**
  * Simple Spine framework example. Uses server implementation, but invokes requests on it manually.
@@ -45,21 +36,23 @@ public class GrpcServerSample {
 
     public static void main(String[] args) {
 
+        // TODO:2015-10-14:alexander.litus: ???
         // as we don't start server, we have to manually setup DataStore helper
-        helper.setUp();
+        /*helper.setUp();
 
-        setupEnvironment(new DatastoreStorageFactory());
-        final EventLogger eventLogger = setupEventLogger();
+        setUpEnvironment(STORAGE_FACTORY);
 
+        // Generate test requests
         List<CommandRequest> requests = generateRequests();
+
+        // Process requests
         for (CommandRequest request : requests) {
             Engine.getInstance().process(request);
         }
 
         log().info(SUCCESS_MESSAGE);
 
-        tearDownEventLogger(eventLogger);
-        tearDownEnvironment();
+        tearDownEnvironment(STORAGE_FACTORY);*/
 
         helper.tearDown();
     }

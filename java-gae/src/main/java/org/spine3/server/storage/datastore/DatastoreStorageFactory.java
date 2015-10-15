@@ -49,4 +49,14 @@ public class DatastoreStorageFactory implements StorageFactory {
         //TODO:2015-09-21:alexander.yevsyukov: Implement
         return null;
     }
+
+    @Override
+    public void setUp() {
+        // TODO:2015-10-14:alexander.litus: impl
+    }
+
+    @Override
+    public void tearDown() {
+        // TODO:2015-10-14:alexander.litus: impl
+    }
 }

@@ -52,6 +52,16 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryEntityStorage<>();
     }
 
+    @Override
+    public void setUp() {
+        // NOP
+    }
+
+    @Override
+    public void tearDown() {
+        // NOP
+    }
+
     public static InMemoryStorageFactory getInstance() {
         return Singleton.INSTANCE.value;
     }
