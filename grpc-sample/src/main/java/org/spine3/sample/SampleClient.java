@@ -35,13 +35,12 @@ import org.spine3.util.Users;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.spine3.sample.server.BaseSampleServer.SERVER_PORT;
+import static org.spine3.sample.server.SampleServer.SERVER_PORT;
 
-//TODO:2015-09-23:alexander.yevsyukov: Eliminate code duplication with BaseSample.
+//TODO:2015-09-23:alexander.yevsyukov: Eliminate code duplication with Sample class.
 
 /**
- * Sample gRPC client implementation. Can be used with {@link org.spine3.sample.server.DataStoreSampleServer} and
- * {@link org.spine3.sample.server.FileSystemSampleServer}.
+ * Sample gRPC client implementation.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
@@ -73,7 +72,7 @@ public class SampleClient {
      */
     public static void main(String[] args) throws InterruptedException {
 
-        /* Access a service running on the local machine on port 50051 */
+        // Access a service running on the local machine
         SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
 
         try {
