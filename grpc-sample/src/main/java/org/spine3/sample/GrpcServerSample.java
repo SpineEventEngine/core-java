@@ -20,18 +20,15 @@ package org.spine3.sample;/*
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
-import org.spine3.base.UserId;
-import org.spine3.sample.order.OrderId;
-import org.spine3.sample.server.BaseSampleServer;
-import org.spine3.sample.server.DataStoreSampleServer;
 import org.spine3.server.Engine;
-import org.spine3.util.Users;
+import org.spine3.server.storage.datastore.DatastoreStorageFactory;
 
 import java.util.List;
+
+import static org.spine3.sample.BaseSample.*;
 
 /**
  * Simple Spine framework example. Uses server implementation, but invokes requests on it manually.
@@ -49,37 +46,16 @@ public class GrpcServerSample {
         // as we don't start server, we have to manually setup DataStore helper
         helper.setUp();
 
-        BaseSampleServer server = new DataStoreSampleServer();
-        server.registerEventSubscribers();
-        server.prepareEngine();
+        setupEnvironment(new DatastoreStorageFactory());
 
-        List<CommandRequest> requests = prepareRequests();
+        List<CommandRequest> requests = generateRequests();
         for (CommandRequest request : requests) {
             Engine.getInstance().process(request);
         }
 
-        log().info("All the requests were handled.");
+        log().info(SUCCESS_MESSAGE);
+
         helper.tearDown();
-    }
-
-    //TODO:2015-09-23:alexander.yevsyukov: Don't we have similar code in BaseSample?
-    private static List<CommandRequest> prepareRequests() {
-        List<CommandRequest> result = Lists.newArrayList();
-
-        for (int i = 0; i < 10; i++) {
-            OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            UserId userId = Users.createId("user" + i);
-
-            CommandRequest createOrder = Requests.createOrder(userId, orderId);
-            CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payOrder = Requests.payForOrder(userId, orderId);
-
-            result.add(createOrder);
-            result.add(addOrderLine);
-            result.add(payOrder);
-        }
-
-        return result;
     }
 
     private GrpcServerSample() {
@@ -95,5 +71,4 @@ public class GrpcServerSample {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

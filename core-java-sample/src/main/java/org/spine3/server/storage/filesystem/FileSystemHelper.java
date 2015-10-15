@@ -139,7 +139,7 @@ public class FileSystemHelper {
         }
     }
 
-    /*
+    /**
      * Closes streams in turn silently. Logs IOException if occurs.
      */
     @SuppressWarnings("ConstantConditions")
@@ -160,7 +160,7 @@ public class FileSystemHelper {
         }
     }
 
-    /*
+    /**
      * Flushes streams in turn silently. Logs IOException if occurs.
      */
     public static void flushSilently(@Nullable Flushable... flushables) {
@@ -197,7 +197,7 @@ public class FileSystemHelper {
         }
     }
 
-    /*
+    /**
      * Flushes and closes output streams in turn silently. Logs IOException if occurs.
      */
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {

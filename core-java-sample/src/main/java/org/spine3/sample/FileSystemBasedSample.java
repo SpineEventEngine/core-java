@@ -34,8 +34,6 @@ import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class FileSystemBasedSample extends BaseSample {
 
-    public static final String STORAGE_PATH = '/' + FileSystemBasedSample.class.getName();
-
     public static void main(String[] args) {
 
         FileSystemHelper.configure(FileSystemBasedSample.class);

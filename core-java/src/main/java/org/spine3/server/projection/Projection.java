@@ -28,9 +28,11 @@ import org.spine3.server.Entity;
 import org.spine3.util.Classes;
 import org.spine3.util.MethodMap;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
@@ -47,6 +49,20 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
         super(id);
     }
 
+    /**
+     * @return non-null state of the projection
+     * @throws IllegalStateException if the state was not set to default by calling {@link #setDefault()}
+     *                               upon creation of the new instance
+     */
+    @Nonnull
+    @Override
+    public M getState() {
+        final M state = super.getState();
+        // The state must be set for newly created projections by calling setDefault();
+        checkState(state != null, "null projection state. Call setDefault() after creating new instance.");
+        return state;
+    }
+
     protected void handle(Message event, EventContext ctx) {
         init();
         dispatch(event, ctx);
@@ -56,8 +72,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
         final Class<? extends Message> eventClass = event.getClass();
         Method method = handlers.get(eventClass);
         if (method == null) {
-            throw new IllegalStateException(String.format("Missing event handler for event class %s in the projection class %s",
-                    eventClass, this.getClass()));
+            throw missingEventHandler(eventClass);
         }
         EventHandlerMethod handler = new EventHandlerMethod(this, method);
         try {
@@ -96,6 +111,11 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
      */
     public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Projection> clazz) {
         return Classes.getHandledMessageClasses(clazz, EventHandlerMethod.isEventHandlerPredicate);
+    }
+
+    private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
+        return new IllegalStateException(String.format("Missing event handler for event class %s in the projection class %s",
+                eventClass, this.getClass()));
     }
 
     private static class Registry {

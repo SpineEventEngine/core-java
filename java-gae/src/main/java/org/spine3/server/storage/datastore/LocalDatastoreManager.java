@@ -30,7 +30,7 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.Descriptor;
 
 /**
- * Provides access to local Google Cloud Datastore. Used for testing.
+ * Provides access to local Google Cloud Datastore. For usage in tests.
  *
  * @author Alexander Litus
  */
@@ -40,6 +40,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
     private static final String GCD_HOME = System.getenv("GCD_HOME");
     private static final String LOCALHOST = "http://localhost:8080";
     private static final String LOCAL_DATASET_NAME = "spine-local-dataset";
+    private static final String OPTION_TESTING_MODE = "testing";
 
     private static final DatastoreOptions DEFAULT_OPTIONS = new DatastoreOptions.Builder()
             .host(LOCALHOST)
@@ -58,19 +59,25 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
 
     /**
      * Starts the local Datastore server in testing mode.
+     *
+     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#start(String, String, String...)}
+     *                          throws LocalDevelopmentDatastoreException
      * @see <a href="https://cloud.google.com/datastore/docs/tools/devserver#local_development_server_command-line_arguments">
-     *      Documentation</a> ("testing" option)
+     * Documentation</a> ("testing" option)
      */
     public void start() {
         try {
-            LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, "testing");
+            LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
     }
 
-    /*
+    /**
      * Clears all data in the local Datastore.
+     *
+     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#clear()}
+     *                          throws LocalDevelopmentDatastoreException
      */
     public void clear() {
         try {
@@ -80,8 +87,11 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         }
     }
 
-    /*
+    /**
      * Stops the local Datastore server.
+     *
+     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#stop()}
+     *                          throws LocalDevelopmentDatastoreException
      */
     public void stop() {
         try {

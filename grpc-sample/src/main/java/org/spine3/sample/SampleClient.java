@@ -35,6 +35,8 @@ import org.spine3.util.Users;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.spine3.sample.server.BaseSampleServer.SERVER_PORT;
+
 //TODO:2015-09-23:alexander.yevsyukov: Eliminate code duplication with BaseSample.
 
 /**
@@ -46,13 +48,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class SampleClient {
 
-    private static final int PORT = 50051;
-    private final ChannelImpl channel;
-    private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
-
+    private static final String LOCALHOST = "localhost";
     private static final String RPC_FAILED = "RPC failed";
     private static final String USER = "User ";
     private static final String RESULT = "Result: ";
+
+    private final ChannelImpl channel;
+    private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
 
     /**
      * Construct the client connecting to server at {@code host:port}.
@@ -63,6 +65,31 @@ public class SampleClient {
                 .negotiationType(NegotiationType.PLAINTEXT)
                 .build();
         blockingStub = CommandServiceGrpc.newBlockingStub(channel);
+    }
+
+    /**
+     * Greet server. If provided, the first element of {@code args} is the name to use in the
+     * greeting.
+     */
+    public static void main(String[] args) throws InterruptedException {
+
+        /* Access a service running on the local machine on port 50051 */
+        SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
+
+        try {
+
+            for (int i = 0; i < 10; i++) {
+                OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
+                UserId userId = Users.createId("user" + i);
+
+                client.createOrder(userId, orderId);
+                client.addOrderLine(userId, orderId);
+                client.payOrder(userId, orderId);
+            }
+
+        } finally {
+            client.shutdown();
+        }
     }
 
     public void shutdown() throws InterruptedException {
@@ -105,31 +132,6 @@ public class SampleClient {
         }
     }
 
-    /**
-     * Greet server. If provided, the first element of {@code args} is the name to use in the
-     * greeting.
-     */
-    public static void main(String[] args) throws InterruptedException {
-
-        /* Access a service running on the local machine on port 50051 */
-        SampleClient client = new SampleClient("localhost", PORT);
-
-        try {
-
-            for (int i = 0; i < 10; i++) {
-                OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-                UserId userId = Users.createId("user" + i);
-
-                client.createOrder(userId, orderId);
-                client.addOrderLine(userId, orderId);
-                client.payOrder(userId, orderId);
-            }
-
-        } finally {
-            client.shutdown();
-        }
-    }
-
     private enum LogSingleton {
         INSTANCE;
 
@@ -140,5 +142,4 @@ public class SampleClient {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

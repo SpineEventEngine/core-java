@@ -37,7 +37,7 @@ import static org.spine3.util.Identifiers.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "DuplicateStringLiteralInspection"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
@@ -142,6 +142,29 @@ public class IdentifiersShould {
         final String result = idToString(idToConvert);
 
         assertEquals(TEST_ID, result);
+    }
+
+    @Test
+    public void convert_to_string_message_id_with_several_fields() {
+
+        final String nestedString = "nested_string";
+        final String outerString = "outer_string";
+        final Integer number = 256;
+
+        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder()
+                .setString(outerString)
+                .setInt(number)
+                .setMessage(newTestIdWithStringField(nestedString))
+                .build();
+
+        final String expected =
+                "string=\"" + outerString + '\"' +
+                " int=" + number +
+                " message { id=\"" + nestedString + "\" }";
+
+        final String actual = idToString(idToConvert);
+
+        assertEquals(expected, actual);
     }
 
     @Test
