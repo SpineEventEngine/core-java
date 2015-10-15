@@ -36,7 +36,7 @@ public class GrpcServerSample {
 
     public static void main(String[] args) {
 
-        // TODO:2015-10-14:alexander.litus: ???
+        // TODO:2015-10-14:alexander.litus: impl
         // as we don't start server, we have to manually setup DataStore helper
         /*helper.setUp();
 

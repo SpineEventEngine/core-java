@@ -17,28 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.gae.datastore;
 
-import com.google.appengine.api.datastore.Key;
+package org.spine3.server.storage.datastore;
+
 import com.google.protobuf.Message;
-import org.spine3.util.Commands;
 
-/**
- * Exception is thrown if the data store could not read entity by id.
- * <p>
- * To be found entity should first be stored into data store.
- *
- * @author Mikhail Meikhaylov
- */
-public class MissingEntityException extends RuntimeException {
+import static com.google.protobuf.Descriptors.Descriptor;
 
-    public MissingEntityException(Key key, Throwable cause) {
-        super(createMessage(key), cause);
+public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
+
+    public static LocalDatastoreStorageFactory newInstance() {
+        return new LocalDatastoreStorageFactory();
     }
 
-    private static String createMessage(Key key) {
-        return "Unable to find entity by key " + key + " in data store";
+    @SuppressWarnings("RefusedBequest")
+    @Override
+    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
+        return LocalDatastoreManager.newInstance(descriptor);
     }
-
-    private static final long serialVersionUID = 0L;
 }

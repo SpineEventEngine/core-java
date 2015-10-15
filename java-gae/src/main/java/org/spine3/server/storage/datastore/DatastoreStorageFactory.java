@@ -25,29 +25,45 @@ import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
+import static com.google.protobuf.Descriptors.Descriptor;
+import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.util.Classes.getGenericParameterType;
+
 public class DatastoreStorageFactory implements StorageFactory {
+
+    private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
+
     @Override
     public CommandStorage createCommandStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        final DatastoreManager<CommandStoreRecord> manager = getManager(CommandStoreRecord.getDescriptor());
+        return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+        final DatastoreManager<EventStoreRecord> manager = getManager(EventStoreRecord.getDescriptor());
+        return DatastoreEventStorage.newInstance(manager);
     }
 
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> ignored) {
+        final DatastoreManager<AggregateStorageRecord> manager = getManager(AggregateStorageRecord.getDescriptor());
+        return DatastoreAggregateStorage.newInstance(manager);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        //TODO:2015-09-21:alexander.yevsyukov: Implement
-        return null;
+
+        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
+
+        final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
+
+        final DatastoreManager<M> manager = getManager(descriptor);
+        return DatastoreEntityStorage.newInstance(manager);
+    }
+
+    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
+        return DatastoreManager.newInstance(descriptor);
     }
 
     @Override

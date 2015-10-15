@@ -20,131 +20,36 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
-import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class FileSystemAggregateStorageShould {
-
-    private static final String AGGREGATE_ID = "aggregateId";
-
-    private static final ProjectId PROJECT_ID = ProjectId.newBuilder().setId(AGGREGATE_ID).build();
+public class FileSystemAggregateStorageShould extends AggregateStorageShould {
 
     @SuppressWarnings("unchecked")
     private static final FileSystemAggregateStorage<ProjectId> STORAGE =
             new FileSystemAggregateStorage(ProjectId.getDescriptor().getName());
 
+    public FileSystemAggregateStorageShould() {
+        super(STORAGE);
+    }
+
     @Before
     public void setUpTest() {
-        STORAGE.releaseResources();
         configure(FileSystemAggregateStorageShould.class);
-        cleanTestData();
     }
 
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        FileSystemHelper.cleanTestData();
-    }
-
-    @Test
-    public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
-
-        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test
-    public void return_iterator_over_empty_collection_if_read_by_null_id() {
-
-        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(null);
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null_record() {
-        STORAGE.write(null);
-    }
-
-    @Test
-    public void save_and_read_one_record() {
-
-        final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), PROJECT_ID.getId());
-        STORAGE.write(expected);
-
-        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
-
-        assertTrue(iterator.hasNext());
-
-        final AggregateStorageRecord actual = iterator.next();
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void save_records_and_return_sorted_by_timestamp_descending() {
-
-        final List<AggregateStorageRecord> records = getSequentialRecords(PROJECT_ID.getId());
-
-        for (AggregateStorageRecord record : records) {
-            STORAGE.write(record);
-        }
-
-        final Iterator<AggregateStorageRecord> iterator = STORAGE.historyBackward(PROJECT_ID);
-        final List<AggregateStorageRecord> actual = newArrayList(iterator);
-
-        Collections.reverse(records); // expected records should be in reverse order
-
-        assertEquals(records, actual);
-    }
-
-    /*
-     * Returns records sorted by timestamp ascending
-     */
-    private static List<AggregateStorageRecord> getSequentialRecords(String aggregateId) {
-
-        final Duration delta = Duration.newBuilder().setSeconds(10).build();
-
-        final Timestamp timestampFirst = getCurrentTime();
-        final Timestamp timestampSecond = TimeUtil.add(timestampFirst, delta);
-        final Timestamp timestampLast = TimeUtil.add(timestampSecond, delta);
-
-        final AggregateStorageRecord recordFirst = newAggregateStorageRecord(timestampFirst, aggregateId);
-        final AggregateStorageRecord recordSecond = newAggregateStorageRecord(timestampSecond, aggregateId);
-        final AggregateStorageRecord recordLast = newAggregateStorageRecord(timestampLast, aggregateId);
-
-        return newArrayList(recordFirst, recordSecond, recordLast);
-    }
-
-    private static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, String aggregateId) {
-        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setAggregateId(aggregateId)
-                .setTimestamp(timestamp);
-        return builder.build();
+        cleanTestData();
     }
 }
 

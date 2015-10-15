@@ -32,25 +32,36 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings({"DuplicateStringLiteralInspection", "UtilityClass"})
 class FileSystemStoragePathHelper {
 
-    protected static final String STORAGE_PATH_IS_NOT_SET = "Storage path is not set.";
+    protected static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
     protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
     protected static final String EVENT_STORE_FILE_NAME = "/event-store";
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
     protected static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
+
     @SuppressWarnings("StaticNonFinalField")
-    private static String fileStoragePath = null;
+    private static String fileStorePath = null;
+
+    @SuppressWarnings("StaticNonFinalField")
+    private static String commandStoreFilePath = null;
+
+    @SuppressWarnings("StaticNonFinalField")
+    private static String eventStoreFilePath = null;
+
 
     private FileSystemStoragePathHelper() {}
 
-    protected static String getFileStoragePath() {
-        return fileStoragePath;
-    }
-
     protected static void configure(Class executorClass) {
+
         final String tempDir = getTempDir().getAbsolutePath();
 
-        fileStoragePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
+        fileStorePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
+        commandStoreFilePath = fileStorePath + COMMAND_STORE_FILE_NAME;
+        eventStoreFilePath = fileStorePath + EVENT_STORE_FILE_NAME;
+    }
+
+    protected static String getFileStorePath() {
+        return fileStorePath;
     }
 
     /**
@@ -63,14 +74,19 @@ class FileSystemStoragePathHelper {
     protected static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
 
-        final String filePath = fileStoragePath + AGGREGATE_FILE_NAME_PREFIX +
+        final String filePath = fileStorePath + AGGREGATE_FILE_NAME_PREFIX +
                 aggregateType + PATH_DELIMITER + aggregateIdString;
         return filePath;
     }
 
+    /**
+     * Returns common command store file path.
+     *
+     * @return absolute path string
+     */
     protected static String getCommandStoreFilePath() {
         checkConfigured();
-        return fileStoragePath + COMMAND_STORE_FILE_NAME;
+        return commandStoreFilePath;
     }
 
     /**
@@ -80,12 +96,12 @@ class FileSystemStoragePathHelper {
      */
     protected static String getEventStoreFilePath() {
         checkConfigured();
-        return fileStoragePath + EVENT_STORE_FILE_NAME;
+        return eventStoreFilePath;
     }
 
     protected static String getEntityStoreFilePath(String entityId) {
         checkConfigured();
-        final String filePath = fileStoragePath + ENTITY_STORE_DIR + entityId;
+        final String filePath = fileStorePath + ENTITY_STORE_DIR + entityId;
         return filePath;
     }
 
@@ -97,8 +113,8 @@ class FileSystemStoragePathHelper {
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
     protected static void checkConfigured() {
-        if (isNullOrEmpty(fileStoragePath)) {
-            throw new IllegalStateException(STORAGE_PATH_IS_NOT_SET);
+        if (isNullOrEmpty(fileStorePath)) {
+            throw new IllegalStateException(NOT_CONFIGURED_MESSAGE);
         }
     }
 

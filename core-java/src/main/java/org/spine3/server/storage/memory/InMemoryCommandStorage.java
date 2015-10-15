@@ -34,8 +34,15 @@ class InMemoryCommandStorage extends CommandStorage {
 
     @Override
     protected void write(CommandStoreRecord record) {
+
         checkNotNull(record);
-        checkNotNull(record.getAggregateId());
-        storage.put(record.getAggregateId(), record);
+
+        final String id = record.getCommandId();
+
+        if (id.isEmpty() || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("Command record id shouldn't be empty or blank.");
+        }
+
+        storage.put(id, record);
     }
 }

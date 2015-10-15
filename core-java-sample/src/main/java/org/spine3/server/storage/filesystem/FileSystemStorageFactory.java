@@ -21,13 +21,14 @@
 package org.spine3.server.storage.filesystem;
 
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
-import org.spine3.util.Classes;
+
+import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.util.Classes.getGenericParameterType;
 
 public class FileSystemStorageFactory implements StorageFactory {
 
@@ -50,8 +51,8 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         final Class<Message> messageClazz =
-                Classes.getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
-        final Descriptors.GenericDescriptor msgClassDescriptor = Messages.getClassDescriptor(messageClazz);
+                getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
+        final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
         return new FileSystemAggregateStorage<>(msgDescriptorName);
     }

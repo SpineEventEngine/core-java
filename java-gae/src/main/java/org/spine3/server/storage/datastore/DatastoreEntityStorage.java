@@ -18,52 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage.datastore;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Identifiers.idToString;
 
 /**
- * Memory-based implementation of {@link org.spine3.server.storage.EntityStorage}.
+ * {@link org.spine3.server.storage.EntityStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
  */
-class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final Map<I, M> storage = newHashMap();
+    private final DatastoreManager<M> datastoreManager;
 
-    protected static <I, M extends Message> InMemoryEntityStorage<I, M> newInstance() {
-        return new InMemoryEntityStorage<>();
+    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
+        this.datastoreManager = datastoreManager;
+    }
+
+    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
+        return new DatastoreEntityStorage<>(datastoreManager);
     }
 
     @Override
     public M read(I id) {
 
-        final M message = storage.get(id);
+        final String idString = idToString(id);
 
-        if (message == null) {
-            @SuppressWarnings("unchecked") // cast is safe because Any is Message
-            final M empty = (M) Any.getDefaultInstance();
-            return empty;
-        }
+        final Message message = datastoreManager.read(idString);
 
-        return message;
+        @SuppressWarnings("unchecked") // save because messages of only this type are written
+        final M result = (M) message;
+        return result;
     }
 
     @Override
     public void write(I id, M message) {
+
         checkNotNull(id);
         checkNotNull(message);
-        storage.put(id, message);
-    }
 
-    protected void clear() {
-        storage.clear();
+        final String idString = idToString(id);
+
+        datastoreManager.storeEntity(idString, message);
     }
 }

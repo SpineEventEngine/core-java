@@ -18,7 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@ParametersAreNonnullByDefault
-package org.spine3.gae;
+package org.spine3.server.storage.datastore;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStoreRecord;
+
+/**
+ * Storage for command records based on Google Cloud Datastore.
+ *
+ * @author Alexander Litus
+ */
+public class DatastoreCommandStorage extends CommandStorage {
+
+    private final DatastoreManager<CommandStoreRecord> datastoreManager;
+
+    private DatastoreCommandStorage(DatastoreManager<CommandStoreRecord> datastoreManager) {
+        this.datastoreManager = datastoreManager;
+    }
+
+    protected static CommandStorage newInstance(DatastoreManager<CommandStoreRecord> datastoreManager) {
+        return new DatastoreCommandStorage(datastoreManager);
+    }
+
+    @Override
+    protected void write(CommandStoreRecord record) {
+        datastoreManager.storeCommandRecord(record.getCommandId(), record);
+    }
+}

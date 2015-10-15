@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.FileNameEscaper;
@@ -99,18 +100,20 @@ public class FileSystemHelper {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
-        writeMessage(file, message);
+        final Any any = Messages.toAny(message);
+        writeMessage(file, any);
     }
 
     /**
      * Reads the {@code Message} from common event store by string id.
+     * @return a message instance or empty message if there is no message with such ID
      */
     public static Message readEntity(String idString) {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
 
-        Message message = null;
+        Message message = Any.getDefaultInstance();
 
         if (file.exists()) {
             message = readMessage(file);
@@ -124,7 +127,7 @@ public class FileSystemHelper {
      */
     public static void cleanTestData() {
 
-        final File folder = new File(getFileStoragePath());
+        final File folder = new File(getFileStorePath());
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
@@ -136,8 +139,8 @@ public class FileSystemHelper {
         }
     }
 
-    /*
-     * Closes streams in turn.
+    /**
+     * Closes streams in turn silently. Logs IOException if occurs.
      */
     @SuppressWarnings("ConstantConditions")
     public static void closeSilently(@Nullable Closeable... closeables) {
@@ -157,20 +160,12 @@ public class FileSystemHelper {
         }
     }
 
-    /*
-     * Flushes streams in turn.
+    /**
+     * Flushes streams in turn silently. Logs IOException if occurs.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void flushSilently(@Nullable Flushable... flushables) {
-        if (flushables == null) {
-            return;
-        }
         try {
-            for (Flushable f : flushables) {
-                if (f != null) {
-                    f.flush();
-                }
-            }
+            flush(flushables);
         } catch (IOException e) {
             if (log().isWarnEnabled()) {
                 log().warn("Exception while flushing stream", e);
@@ -178,10 +173,33 @@ public class FileSystemHelper {
         }
     }
 
-    /*
-     * Flushes and closes output streams in turn.
+    /**
+     * Flushes streams in turn.
+     * @throws java.lang.RuntimeException if IOException occurs
      */
+    public static void tryToFlush(@Nullable Flushable... flushables) {
+        try {
+            flush(flushables);
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
     @SuppressWarnings("ConstantConditions")
+    private static void flush(@Nullable Flushable[] flushables) throws IOException {
+        if (flushables == null) {
+            return;
+        }
+        for (Flushable f : flushables) {
+            if (f != null) {
+                f.flush();
+            }
+        }
+    }
+
+    /**
+     * Flushes and closes output streams in turn silently. Logs IOException if occurs.
+     */
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
         if (streams == null) {
             return;
@@ -301,25 +319,25 @@ public class FileSystemHelper {
         }
     }
 
-    @SuppressWarnings({"OverlyBroadCatchBlock", "TypeMayBeWeakened"})
-    private static Any readMessage(File file) {
+    private static Message readMessage(File file) {
 
         checkFileExists(file);
 
         InputStream fileInputStream = tryOpenFileInputStream(file);
         InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
-        Any message;
+        Any any;
 
         try {
-            message = Any.parseDelimitedFrom(bufferedInputStream);
+            any = Any.parseDelimitedFrom(bufferedInputStream);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
         } finally {
             closeSilently(fileInputStream, bufferedInputStream);
         }
 
-        return message;
+        final Message result = Messages.fromAny(any);
+        return result;
     }
 
     private static void restoreFromBackup(File file) {

@@ -20,14 +20,11 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Any;
-import org.spine3.TypeName;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.util.Events;
 
 import java.util.Iterator;
+
+import static org.spine3.util.Events.toEventStoreRecord;
 
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
@@ -38,20 +35,8 @@ public abstract class EventStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {
-        final Any event = record.getEvent();
-        final EventContext context = record.getContext();
-        final TypeName typeName = TypeName.ofEnclosed(event);
-        final EventId eventId = context.getEventId();
-        final String eventIdStr = Events.idToString(eventId);
-        EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
-                .setTimestamp(Events.getTimestamp(eventId))
-                .setEventType(typeName.nameOnly())
-                .setAggregateId(context.getAggregateId().toString())
-                .setEventId(eventIdStr)
-                .setEvent(event)
-                .setContext(context);
-
-        write(builder.build());
+        EventStoreRecord storeRecord = toEventStoreRecord(record);
+        write(storeRecord);
     }
 
     /**

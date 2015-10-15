@@ -18,7 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@ParametersAreNonnullByDefault
-package org.spine3.gae.datastore;
+package org.spine3.protobuf;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Timestamp;
+import org.junit.Test;
+
+import java.util.Date;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.spine3.protobuf.Timestamps.*;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class TimestampsShould {
+
+    @Test
+    public void convert_timestamp_to_date_to_nearest_second() {
+
+        final Timestamp expectedTime = getCurrentTime();
+
+        final Date actualDate = convertToDate(expectedTime);
+        final long actualSeconds = actualDate.getTime() / MILLISECONDS_PER_SECOND;
+
+        assertEquals(expectedTime.getSeconds(), actualSeconds);
+    }
+}
