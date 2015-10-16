@@ -115,7 +115,6 @@ public class Sample {
      */
     public static void tearDown(StorageFactory storageFactory) {
 
-        // Tear down storage
         storageFactory.tearDown();
 
         // Unregister event handlers
