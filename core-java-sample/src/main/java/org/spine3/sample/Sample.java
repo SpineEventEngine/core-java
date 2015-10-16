@@ -50,25 +50,29 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 @SuppressWarnings("UtilityClass")
 public class Sample {
 
-    public static final String SUCCESS_MESSAGE = "All the requests were handled.";
+    private static final String SUCCESS_MESSAGE = "All the requests were handled.";
 
+    // field is not final because test code injects it via setter
     @SuppressWarnings({"FieldMayBeFinal", "StaticNonFinalField"})
     private static StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
     /**
      * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
      *
-     * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
+     * StorageFactory storageFactory = org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(MySampleClass.class);
      *
      *
      * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
      *
-     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
+     * StorageFactory storageFactory = org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.instance();
      */
 
+    /**
+     * The entry point of the sample.
+     */
     public static void main(String[] args) {
 
-        setUpEnvironment(storageFactory);
+        setUp(storageFactory);
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -80,10 +84,14 @@ public class Sample {
 
         log().info(SUCCESS_MESSAGE);
 
-        tearDownEnvironment(storageFactory);
+        tearDown(storageFactory);
     }
 
-    public static void setUpEnvironment(StorageFactory storageFactory) {
+    /**
+     * Sets up the storage, starts the engine, registers repositories, handlers etc.
+     * @param storageFactory storage factory to use for storages setup and creation.
+     */
+    public static void setUp(StorageFactory storageFactory) {
 
         // Set up the storage
         storageFactory.setUp();
@@ -101,7 +109,11 @@ public class Sample {
         IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
-    public static void tearDownEnvironment(StorageFactory storageFactory) {
+    /**
+     * The method to call after {@link Sample#setUp(StorageFactory)}.
+     * @param storageFactory storage factory used for storages setup and creation.
+     */
+    public static void tearDown(StorageFactory storageFactory) {
 
         // Tear down storage
         storageFactory.tearDown();
@@ -116,7 +128,7 @@ public class Sample {
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
     // See Amazon screens for correct naming of domain things.
 
-    public static List<CommandRequest> generateRequests() {
+    private static List<CommandRequest> generateRequests() {
 
         List<CommandRequest> result = Lists.newArrayList();
 
@@ -137,7 +149,7 @@ public class Sample {
         return result;
     }
 
-    public static void setStorageFactory(StorageFactory storageFactory) {
+    protected static void setStorageFactory(StorageFactory storageFactory) {
         Sample.storageFactory = storageFactory;
     }
 

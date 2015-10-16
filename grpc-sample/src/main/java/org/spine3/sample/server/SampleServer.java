@@ -20,6 +20,7 @@
 package org.spine3.sample.server;
 
 import io.grpc.ServerImpl;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -27,14 +28,12 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
+import org.spine3.sample.Sample;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
-
-import static org.spine3.sample.Sample.setUpEnvironment;
-import static org.spine3.sample.Sample.tearDownEnvironment;
 
 /**
  * Sample gRPC server implementation.
@@ -44,28 +43,29 @@ import static org.spine3.sample.Sample.tearDownEnvironment;
 @SuppressWarnings("UtilityClass")
 public class SampleServer {
 
+    /**
+     * The port on which the server runs.
+     */
     public static final int SERVER_PORT = 50051;
 
-    private static final ServerImpl SERVER = NettyServerBuilder.forPort(SERVER_PORT)
-            .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
-            .build();
+    private static final ServerImpl SERVER = buildServer(SERVER_PORT);
 
     private static final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
     /**
      * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
      *
-     * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
+     * StorageFactory storageFactory = org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(MySampleClass.class);
      *
      *
      * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
      *
-     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
+     * StorageFactory storageFactory = org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.instance();
      */
 
     public static void main(String[] args) throws IOException {
 
-        setUpEnvironment(storageFactory);
+        Sample.setUp(storageFactory);
 
         SERVER.start();
 
@@ -85,7 +85,7 @@ public class SampleServer {
     }
 
     private static void stop() {
-        tearDownEnvironment(storageFactory);
+        Sample.tearDown(storageFactory);
         SERVER.shutdown();
     }
 
@@ -104,6 +104,13 @@ public class SampleServer {
             //TODO:2015-06-25:mikhail.melnik: implement
             return null;
         }
+    }
+
+    private static ServerImpl buildServer(int serverPort) {
+        final NettyServerBuilder builder = NettyServerBuilder.forPort(serverPort);
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl());
+        builder.addService(service);
+        return builder.build();
     }
 
     private SampleServer() {
