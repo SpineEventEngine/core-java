@@ -34,7 +34,7 @@ import org.spine3.server.storage.EventStorageShould;
  */
 public class DatastoreEventStorageShould extends EventStorageShould {
 
-    private static final EventStorage STORAGE = LocalDatastoreStorageFactory.instance().createEventStorage();
+    private static final EventStorage STORAGE = LocalDatastoreStorageFactory.getInstance().createEventStorage();
 
     public DatastoreEventStorageShould() {
         super(STORAGE);
@@ -42,7 +42,7 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.instance().setUp();
+        LocalDatastoreStorageFactory.getInstance().setUp();
     }
 
     @After
@@ -52,6 +52,6 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.instance().tearDown();
+        LocalDatastoreStorageFactory.getInstance().tearDown();
     }
 }

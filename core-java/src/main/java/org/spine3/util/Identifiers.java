@@ -125,7 +125,7 @@ public class Identifiers {
     private static String idMessageToString(Message message) {
 
         String result;
-        final IdConverterRegistry registry = IdConverterRegistry.instance();
+        final IdConverterRegistry registry = IdConverterRegistry.getInstance();
 
         if (registry.containsConverter(message)) {
             final Function<Message, String> converter = registry.getConverter(message);
@@ -299,7 +299,7 @@ public class Identifiers {
             private final IdConverterRegistry value = new IdConverterRegistry();
         }
 
-        public static IdConverterRegistry instance() {
+        public static IdConverterRegistry getInstance() {
             return Singleton.INSTANCE.value;
         }
 

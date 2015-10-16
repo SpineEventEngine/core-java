@@ -48,7 +48,7 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.instance().setUp();
+        LocalDatastoreStorageFactory.getInstance().setUp();
     }
 
     @After
@@ -58,6 +58,6 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.instance().tearDown();
+        LocalDatastoreStorageFactory.getInstance().tearDown();
     }
 }

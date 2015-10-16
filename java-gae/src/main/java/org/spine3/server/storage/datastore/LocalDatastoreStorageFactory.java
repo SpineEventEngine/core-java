@@ -62,7 +62,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         }
     }
 
-    public static LocalDatastoreStorageFactory instance() {
+    public static LocalDatastoreStorageFactory getInstance() {
         return Singleton.INSTANCE.value;
     }
 

@@ -92,7 +92,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
      */
     protected void init() {
         if (!isInitialized()) {
-            final Registry registry = Registry.instance();
+            final Registry registry = Registry.getInstance();
             final Class<? extends Projection> thisClass = getClass();
 
             if (!registry.contains(thisClass)) {
@@ -134,7 +134,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
             return result;
         }
 
-        static Registry instance() {
+        static Registry getInstance() {
             return RegistrySingleton.INSTANCE.value;
         }
 

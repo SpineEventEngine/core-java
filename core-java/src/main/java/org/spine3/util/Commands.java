@@ -46,7 +46,7 @@ import static org.spine3.util.Identifiers.*;
 public class Commands {
 
     static {
-        IdConverterRegistry.instance().register(CommandId.class, new CommandIdToStringConverter());
+        IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
     }
 
     private Commands() {

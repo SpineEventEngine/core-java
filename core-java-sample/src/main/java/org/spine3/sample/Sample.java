@@ -106,7 +106,7 @@ public class Sample {
         EventBus.getInstance().register(new EventLogger());
 
         // Register id converters
-        IdConverterRegistry.instance().register(OrderId.class, new OrderIdToStringConverter());
+        IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
     /**

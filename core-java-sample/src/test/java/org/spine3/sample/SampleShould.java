@@ -44,7 +44,7 @@ public class SampleShould {
 
     @Test
     public void run_on_Datastore_storage() {
-        Sample.setStorageFactory(LocalDatastoreStorageFactory.instance());
+        Sample.setStorageFactory(LocalDatastoreStorageFactory.getInstance());
         Sample.main(EMPTY_STRING_ARRAY);
     }
 }
