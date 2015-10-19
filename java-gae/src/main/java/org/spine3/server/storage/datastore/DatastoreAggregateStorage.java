@@ -30,9 +30,10 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direct
 import static org.spine3.util.Identifiers.idToString;
 
 /**
- * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
+ * A storage of aggregate root events and snapshots based on local Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @see LocalDatastoreManager
  */
 public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 

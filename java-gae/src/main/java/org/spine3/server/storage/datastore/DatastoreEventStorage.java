@@ -31,9 +31,10 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direct
 import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
- * Storage for event records based on Google Cloud Datastore.
+ * Storage for event records based on local Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @see LocalDatastoreManager
  */
 public class DatastoreEventStorage extends EventStorage {
 
