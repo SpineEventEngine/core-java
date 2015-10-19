@@ -20,36 +20,51 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.After;
-import org.junit.Before;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.TestIdWithStringField;
+import org.junit.*;
+import org.spine3.base.CommandRequest;
+import org.spine3.server.aggregate.AggregateId;
+import org.spine3.test.project.ProjectId;
+import org.spine3.util.testutil.CommandRequestFactory;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 
 /**
- * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
+ * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
  *
  * @author Alexander Litus
  */
-public class FileSystemEntityStorageShould extends EntityStorageShould {
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
+public class FileSystemCommandStorageShould {
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FileSystemEntityStorage.newInstance();
+    private static final FileSystemCommandStorage STORAGE = (FileSystemCommandStorage) FileSystemCommandStorage.newInstance();
 
-    public FileSystemEntityStorageShould() {
-        super(STORAGE);
+    private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
+
+    @BeforeClass
+    public static void setUp() {
+        configure(FileSystemCommandStorageShould.class);
     }
-
 
     @Before
     public void setUpTest() {
-        configure(FileSystemEntityStorageShould.class);
+        cleanTestData();
     }
 
-    @After
-    public void tearDownTest() {
+    @AfterClass
+    public static void tearDownClass() {
         cleanTestData();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_write_null() {
+        STORAGE.write(null);
+    }
+
+    @Test
+    public void save_command() {
+        final CommandRequest commandRequest = CommandRequestFactory.create();
+        STORAGE.store(AggregateId.of(ID), commandRequest);
     }
 }

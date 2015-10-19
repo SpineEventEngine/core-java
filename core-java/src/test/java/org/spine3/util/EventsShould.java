@@ -67,8 +67,7 @@ public class EventsShould {
         CommandId commandId = generateId(userIdString, commandTime);
         EventId id = EventId.newBuilder().setCommandId(commandId).setDeltaNanos(deltaNanos).build();
 
-        /* TODO:2015-09-21:alexander.litus:
-           create parse() method that would restore an object from its String representation.
+        /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
            Use the restored object for equality check with the original object.
          */
         final String expected = userIdString + USER_ID_AND_TIME_DELIMITER + timestampToString(commandTime) +

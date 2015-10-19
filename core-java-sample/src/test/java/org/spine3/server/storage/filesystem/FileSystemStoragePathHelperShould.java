@@ -18,18 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
+package org.spine3.server.storage.filesystem;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.spine3.util.Tests;
 
-public class InMemorySampleShould {
+import static org.junit.Assert.fail;
+import static org.spine3.server.storage.filesystem.FileSystemHelperShould.UTILITY_CLASS_SHOULD_HAVE_PRIVATE_CONSTRUCTOR;
 
-    //TODO:2015-09-23:alexander.yevsyukov: Find out why the test passes under IDEA and fails in Gradle build.
-//    @Ignore
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class FileSystemStoragePathHelperShould {
+
     @Test
-    public void execute() {
-        //noinspection ZeroLengthArrayAllocation
-        InMemorySample.main(new String[0]);
+    @SuppressWarnings("OverlyBroadCatchBlock")
+    public void have_private_constructor() {
+        try {
+            Tests.callPrivateUtilityConstructor(FileSystemStoragePathHelper.class);
+        } catch (Exception ignored) {
+            fail(UTILITY_CLASS_SHOULD_HAVE_PRIVATE_CONSTRUCTOR);
+        }
     }
+
+    //TODO:2015-09-28:mikhail.mikhaylov: How to test FileSystemStoragePathHelper.checkConfigured()?
 }

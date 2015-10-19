@@ -5,10 +5,13 @@ buildscript {
 }
 
 dependencies {
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile project (path: ":core-java", configuration: 'testArtifacts')
 
     compile project(':core-java')
     compile project(':test-common')
+    compile project(':java-gae')
 
     compile 'commons-io:commons-io:2.4'
 }

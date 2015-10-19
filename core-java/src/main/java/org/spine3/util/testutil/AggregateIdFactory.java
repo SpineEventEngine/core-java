@@ -40,7 +40,7 @@ public class AggregateIdFactory {
      *
      * @return ProjectId instance
      */
-    public static ProjectId createCommon() {
+    public static ProjectId newProjectId() {
         return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
     }
 }

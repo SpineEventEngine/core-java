@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.common.base.Throwables;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -29,8 +28,11 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static com.google.common.base.Throwables.propagate;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.tryToFlush;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
-import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Max available message size is about 2GB.
@@ -49,10 +51,6 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void write(AggregateStorageRecord r) {
 
-        if (r.getAggregateId() == null) {
-            Throwables.propagate(new NullPointerException(INVALID_AGGREGATE_ID));
-        }
-
         final String aggregateFilePath = FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
@@ -63,7 +61,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
                 //noinspection ResultOfMethodCallIgnored
                 aggregateFile.createNewFile();
             } catch (IOException e) {
-                Throwables.propagate(e);
+                propagate(e);
             }
         }
 
@@ -72,7 +70,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-        final String stringId = idToString(id);
+        final String stringId = idToStringWithEscaping(id);
         final File file = new File(getAggregateFilePath(shortTypeName, stringId));
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
@@ -85,27 +83,23 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
+
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(aggregateFilePath, true);
         } catch (FileNotFoundException e) {
-            Throwables.propagate(e);
+            propagate(e);
         }
         DataOutputStream dos = new DataOutputStream(fos);
 
         try {
             writeRecord(dos, r);
         } catch (IOException e) {
-            Throwables.propagate(e);
-        }
-        try {
-            dos.flush();
-        } catch (IOException e) {
-            Throwables.propagate(e);
+            propagate(e);
         }
 
-        FileSystemHelper.closeSilently(dos);
-        FileSystemHelper.closeSilently(fos);
+        tryToFlush(dos);
+        closeSilently(fos, dos);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
@@ -149,7 +143,7 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             try {
                 record = readEntry();
             } catch (IOException e) {
-                Throwables.propagate(e);
+                propagate(e);
             }
             if (record == null) {
                 //noinspection NewExceptionWithoutArguments

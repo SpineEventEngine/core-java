@@ -56,7 +56,8 @@ public class ContextFactory {
                 .build();
     }
 
-    public static EventContext getEventContext(int version) {
+    public static EventContext newEventContext() {
+
         final Timestamp now = TimeUtil.getCurrentTime();
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(UserId.getDefaultInstance())
@@ -66,8 +67,7 @@ public class ContextFactory {
 
         return EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(AggregateIdFactory.createCommon()))
-                .setVersion(version)
+                .setAggregateId(Messages.toAny(AggregateIdFactory.newProjectId()))
                 .build();
     }
 

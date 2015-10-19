@@ -20,20 +20,13 @@
 
 package org.spine3.server.storage.memory;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
+import org.spine3.base.EventId;
+import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
-import org.spine3.test.project.ProjectId;
-import org.spine3.util.Users;
 
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
-import static org.spine3.util.testutil.ContextFactory.getEventContext;
-import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
+import static org.junit.Assert.assertNull;
 
 /**
  * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -42,74 +35,30 @@ import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
         "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class InMemoryEventStorageShould {
+public class InMemoryEventStorageShould extends EventStorageShould {
 
-    private InMemoryEventStorage storage;
-    private ProjectId projectId;
-    private EventContext eventContext;
+    private static final InMemoryEventStorage STORAGE = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
 
-    @Before
-    public void setUp() {
+    public InMemoryEventStorageShould() {
+        super(STORAGE);
+    }
 
-        storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
-        UserId userId = Users.createId("user@testing-in-memory-storage.org");
-        projectId = ProjectId.newBuilder().setId("project_id").build();
-        eventContext = getEventContext(userId, projectId);
+    @After
+    public void tearDownTest() {
+        STORAGE.clear();
     }
 
     @Test
     public void return_null_if_read_one_record_from_empty_storage() {
 
-        final EventStoreRecord record = storage.read(eventContext.getEventId());
+        final EventStoreRecord record = STORAGE.read(EventId.getDefaultInstance());
         assertNull(record);
     }
 
     @Test
     public void return_null_if_read_one_record_by_null_id() {
 
-        final EventStoreRecord record = storage.read(null);
+        final EventStoreRecord record = STORAGE.read(null);
         assertNull(record);
-    }
-
-    @Test
-    public void return_iterator_over_empty_collection_if_read_all_records_from_empty_storage() {
-
-        final Iterator<EventRecord> iterator = storage.allEvents();
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null() {
-        storage.write(null);
-    }
-
-    @Test
-    public void save_and_read_event() {
-
-        final EventRecord expected = projectCreated(projectId, eventContext);
-        storage.store(expected);
-
-        final EventStoreRecord actual = storage.read(eventContext.getEventId());
-
-        assertEquals(expected.getEvent(), actual.getEvent());
-        assertEquals(expected.getContext(), actual.getContext());
-    }
-
-    @Test
-    public void save_and_read_all_events() {
-
-        final EventRecord expected = projectCreated(projectId, eventContext);
-        storage.store(expected);
-
-        final Iterator<EventRecord> iterator = storage.allEvents();
-
-        assertTrue(iterator.hasNext());
-
-        final EventRecord actual = iterator.next();
-
-        assertEquals(expected.getEvent(), actual.getEvent());
-        assertEquals(expected.getContext(), actual.getContext());
-
-        assertFalse(iterator.hasNext());
     }
 }

@@ -38,14 +38,10 @@ import java.util.Date;
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
 
-    private static final long NANOS_PER_SECOND = 1_000_000_000;
     private static final long NANOS_PER_MILLISECOND = 1_000_000;
-    private static final long NANOS_PER_MICROSECOND = 1000;
-    private static final long MILLIS_PER_SECOND = 1000;
+    public static final long MILLISECONDS_PER_SECOND = 1000;
     private static final long MICROS_PER_SECOND = 1000000;
     private static final int SECONDS_PER_MINUTE = 60;
-
-    private static final long MILLION = 1_000_000;
 
     /**
      * @return timestamp of the moment a minute ago from now.
@@ -86,10 +82,14 @@ public class Timestamps {
         return new TimestampComparator();
     }
 
-    //TODO:2015-08-30:alexander.yevsyukov: Test this. It doesn't seem to be correct.
+    /*
+     * Converts Timestamp to Date to the nearest millisecond.
+     */
     public static Date convertToDate(TimestampOrBuilder timestamp) {
-        final long millis = timestamp.getNanos() / MILLION * timestamp.getSeconds();
-        final Date date = new Date(millis);
+
+        final long millisecsFromNanos = timestamp.getNanos() / NANOS_PER_MILLISECOND;
+        final long millisecsFromSeconds = timestamp.getSeconds() * MILLISECONDS_PER_SECOND;
+        final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
     }
 

@@ -17,28 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.gae.datastore;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.protobuf.Message;
-import org.spine3.util.Commands;
+package org.spine3.protobuf;
 
-/**
- * Exception is thrown if the data store could not read entity by id.
- * <p>
- * To be found entity should first be stored into data store.
- *
- * @author Mikhail Meikhaylov
- */
-public class MissingEntityException extends RuntimeException {
+import com.google.protobuf.Timestamp;
+import org.junit.Test;
 
-    public MissingEntityException(Key key, Throwable cause) {
-        super(createMessage(key), cause);
+import java.util.Date;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.spine3.protobuf.Timestamps.*;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class TimestampsShould {
+
+    @Test
+    public void convert_timestamp_to_date_to_nearest_second() {
+
+        final Timestamp expectedTime = getCurrentTime();
+
+        final Date actualDate = convertToDate(expectedTime);
+        final long actualSeconds = actualDate.getTime() / MILLISECONDS_PER_SECOND;
+
+        assertEquals(expectedTime.getSeconds(), actualSeconds);
     }
-
-    private static String createMessage(Key key) {
-        return "Unable to find entity by key " + key + " in data store";
-    }
-
-    private static final long serialVersionUID = 0L;
 }

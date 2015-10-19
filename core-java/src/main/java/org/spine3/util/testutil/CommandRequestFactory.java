@@ -42,7 +42,7 @@ public class CommandRequestFactory {
     public static CommandRequest createAt(Timestamp when) {
         final UserId userId = UserId.getDefaultInstance();
         final Any command = Messages.toAny(CreateProject.newBuilder().setProjectId(
-                AggregateIdFactory.createCommon()).build());
+                AggregateIdFactory.newProjectId()).build());
 
         final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
                 .setContext(ContextFactory.getCommandContext(userId, when))

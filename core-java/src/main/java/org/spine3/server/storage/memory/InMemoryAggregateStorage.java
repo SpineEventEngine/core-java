@@ -44,6 +44,10 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
             new AggregateStorageRecordReverseComparator()
     );
 
+    protected static <I> InMemoryAggregateStorage<I> newInstance() {
+        return new InMemoryAggregateStorage<>();
+    }
+
     @Override
     protected void write(AggregateStorageRecord record) {
         checkNotNull(record);
@@ -62,6 +66,10 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void releaseResources() {
         // NOP
+    }
+
+    protected void clear() {
+        storage.clear();
     }
 
 

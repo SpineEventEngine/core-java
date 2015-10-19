@@ -18,59 +18,57 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Message;
-import org.spine3.server.Entity;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.*;
 
-/**
- * A factory for in-memory storages.
- *
- * @author Alexander Yevsyukov
- */
-public class InMemoryStorageFactory implements StorageFactory {
+import static com.google.protobuf.Descriptors.Descriptor;
 
+public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
+
+    /**
+     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+     */
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
+    @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
-    public CommandStorage createCommandStorage() {
-        return new InMemoryCommandStorage();
-    }
-
-    @Override
-    public EventStorage createEventStorage() {
-        return new InMemoryEventStorage();
-    }
-
-    @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
-        return new InMemoryAggregateStorage<>();
-    }
-
-    @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return InMemoryEntityStorage.newInstance();
+    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
+        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);
+        return manager;
     }
 
     @Override
     public void setUp() {
-        // NOP
+
+        super.setUp();
+
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.start();
+        }
     }
 
     @Override
     public void tearDown() {
-        // NOP
+
+        super.tearDown();
+
+        LocalDatastoreManager.clear();
+
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.stop();
+        }
     }
 
-    public static InMemoryStorageFactory getInstance() {
+    public static LocalDatastoreStorageFactory instance() {
         return Singleton.INSTANCE.value;
     }
 
     private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final InMemoryStorageFactory value = new InMemoryStorageFactory();
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory();
     }
-
-    private InMemoryStorageFactory() {}
 }

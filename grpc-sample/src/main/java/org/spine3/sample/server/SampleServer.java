@@ -23,66 +23,74 @@ import io.grpc.ServerImpl;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.eventbus.EventBus;
-import org.spine3.sample.EventLogger;
-import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+
+import java.io.IOException;
+
+import static org.spine3.sample.Sample.setUpEnvironment;
+import static org.spine3.sample.Sample.tearDownEnvironment;
 
 /**
  * Sample gRPC server implementation.
  *
  * @author Mikhail Melnik
  */
-public abstract class BaseSampleServer {
+@SuppressWarnings("UtilityClass")
+public class SampleServer {
 
-    public void registerEventSubscribers() {
-        EventBus.getInstance().register(new EventLogger());
-    }
+    public static final int SERVER_PORT = 50051;
 
-    public void prepareEngine() {
-        Engine.start(getStorageFactory());
-        Engine.getInstance().getCommandDispatcher().register(new OrderRepository());
-    }
+    private static final ServerImpl SERVER = NettyServerBuilder.forPort(SERVER_PORT)
+            .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
+            .build();
 
-    /* The port on which the server should run */
-    private int port = 50051;
-    private ServerImpl server;
+    private static final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
-    protected void start() throws Exception {
+    /**
+     * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
+     *
+     * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
+     *
+     *
+     * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
+     *
+     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
+     */
 
-        prepareEngine();
-        registerEventSubscribers();
+    public static void main(String[] args) throws IOException {
 
-        server = NettyServerBuilder.forPort(port)
-                .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
-                .build()
-                .start();
+        setUpEnvironment(storageFactory);
 
-        log().info("Server started, listening on " + port);
+        SERVER.start();
+
+        log().info("Server started, listening on " + SERVER_PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+                //noinspection UseOfSystemOutOrSystemErr
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                BaseSampleServer.this.stop();
+                SampleServer.stop();
+                //noinspection UseOfSystemOutOrSystemErr
                 System.err.println("*** server shut down");
             }
         });
-
     }
 
-    protected void stop() {
-        if (server != null) {
-            server.shutdown();
-        }
+    private static void stop() {
+        tearDownEnvironment(storageFactory);
+        SERVER.shutdown();
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
+
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
             CommandResult reply = Engine.getInstance().process(req);
@@ -93,16 +101,21 @@ public abstract class BaseSampleServer {
 
         @Override
         public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
-            StreamObserver<CommandRequest> o = null;
             //TODO:2015-06-25:mikhail.melnik: implement
-            return o;
+            return null;
         }
     }
 
-    //TODO:2015-09-21:alexander.yevsyukov: We have such factory methods already in BaseSample. Why duplicate?
+    private SampleServer() {
+    }
 
-    protected abstract StorageFactory getStorageFactory();
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
 
-    protected abstract Logger log();
-
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(SampleServer.class);
+    }
 }

@@ -21,17 +21,33 @@
 package org.spine3.server.storage.filesystem;
 
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
-import org.spine3.util.Classes;
+
+import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.util.Classes.getGenericParameterType;
 
 public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
+
+    private final Class executorClass;
+
+    /**
+     * Creates new storage factory instance.
+     *
+     * @param executorClass execution context class which is used as {@link FileSystemHelper#configure(Class)} method parameter.
+     */
+    public static StorageFactory newInstance(Class executorClass) {
+        return new FileSystemStorageFactory(executorClass);
+    }
+
+    private FileSystemStorageFactory(Class executorClass) {
+        this.executorClass = executorClass;
+    }
 
     @Override
     public CommandStorage createCommandStorage() {
@@ -46,8 +62,8 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         final Class<Message> messageClazz =
-                Classes.getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
-        final Descriptors.GenericDescriptor msgClassDescriptor = Messages.getClassDescriptor(messageClazz);
+                getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
+        final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
         return new FileSystemAggregateStorage<>(msgDescriptorName);
     }
@@ -55,5 +71,15 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
         return FileSystemEntityStorage.newInstance();
+    }
+
+    @Override
+    public void setUp() {
+        FileSystemHelper.configure(executorClass);
+    }
+
+    @Override
+    public void tearDown() {
+        FileSystemHelper.cleanTestData();
     }
 }

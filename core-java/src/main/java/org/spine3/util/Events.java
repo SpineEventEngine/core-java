@@ -21,11 +21,14 @@ package org.spine3.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.TypeName;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
@@ -34,6 +37,7 @@ import org.spine3.server.storage.EventStoreRecord;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -189,13 +193,65 @@ public class Events {
     /**
      * Converts EventStoreRecord to EventRecord.
      */
-    @SuppressWarnings("TypeMayBeWeakened")
     public static EventRecord toEventRecord(EventStoreRecord storeRecord) {
-        final EventRecord.Builder builder = EventRecord.newBuilder()
-                .setEvent(storeRecord.getEvent())
-                .setContext(storeRecord.getContext());
+        return TO_EVENT_RECORD.apply(storeRecord);
+    }
+
+    /**
+     * Converts EventStoreRecords to EventRecords.
+     */
+    public static List<EventRecord> toEventRecordsList(List<EventStoreRecord> records) {
+        return Lists.transform(records, TO_EVENT_RECORD);
+    }
+
+    /**
+     * Converts EventStoreRecords to EventRecords.
+     */
+    public static Iterator<EventRecord> toEventRecordsIterator(Iterable<EventStoreRecord> records) {
+        return Iterators.transform(records.iterator(), TO_EVENT_RECORD);
+    }
+
+    public static EventStoreRecord toEventStoreRecord(EventRecordOrBuilder record) {
+
+        final Any event = record.getEvent();
+        final EventContext context = record.getContext();
+        final TypeName typeName = TypeName.ofEnclosed(event);
+        final EventId eventId = context.getEventId();
+        final String eventIdStr = idToString(eventId);
+
+        final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
+                .setTimestamp(getTimestamp(eventId))
+                .setEventType(typeName.nameOnly())
+                .setAggregateId(context.getAggregateId().toString())
+                .setEventId(eventIdStr)
+                .setEvent(event)
+                .setContext(context);
+
         return builder.build();
     }
+
+    private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
+        @Override
+        public EventRecord apply(@Nullable EventStoreRecord input) {
+            if (input == null) {
+                return EventRecord.getDefaultInstance();
+            }
+            final EventRecord.Builder builder = EventRecord.newBuilder()
+                    .setEvent(input.getEvent())
+                    .setContext(input.getContext());
+            return builder.build();
+        }
+    };
+
+    private static final Function<EventRecord, EventStoreRecord> TO_EVENT_STORE_RECORD = new Function<EventRecord, EventStoreRecord>() {
+        @Override
+        public EventStoreRecord apply(@Nullable EventRecord input) {
+            if (input == null) {
+                return EventStoreRecord.getDefaultInstance();
+            }
+            return toEventStoreRecord(input);
+        }
+    };
 
     @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
     public static class EventIdToStringConverter implements Function<EventId, String> {

@@ -32,11 +32,33 @@ import org.spine3.server.aggregate.Aggregate;
  */
 public interface StorageFactory {
 
+    /**
+     * Creates a new {@link CommandStorage} instance.
+     */
     CommandStorage createCommandStorage();
 
+    /**
+     * Creates a new {@link EventStorage} instance.
+     */
     EventStorage createEventStorage();
 
+    /**
+     * Creates a new {@link AggregateStorage} instance.
+     */
     <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass);
 
+    /**
+     * Creates a new {@link EntityStorage} instance.
+     */
     <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass);
+
+    /**
+     * Sets up storages if needed.
+     */
+    void setUp();
+
+    /**
+     * Perform operations required after storages usage (e.g. release resources, clear file system etc) if needed.
+     */
+    void tearDown();
 }

@@ -20,67 +20,25 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.junit.Before;
-import org.junit.Test;
-import org.spine3.server.storage.EntityStorage;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.After;
+import org.spine3.server.storage.EntityStorageShould;
+import org.spine3.test.TestIdWithStringField;
 
 /**
  * In-memory implementation of {@link org.spine3.server.storage.EntityStorage} tests.
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
-        "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class InMemoryEntityStorageShould {
+public class InMemoryEntityStorageShould extends EntityStorageShould {
 
-    private EntityStorage<String, Any> storage;
-    private Any message;
+    private static final InMemoryEntityStorage<String, TestIdWithStringField> STORAGE = InMemoryEntityStorage.newInstance();
 
-    @Before
-    public void setUp() {
-
-        storage = InMemoryStorageFactory.getInstance().createEntityStorage(null);
-        message = Any.newBuilder().setTypeUrl("typeUrl").build();
+    public InMemoryEntityStorageShould() {
+        super(STORAGE);
     }
 
-    @Test
-    public void return_null_if_read_one_record_from_empty_storage() {
-
-        final Message message = storage.read("testId");
-        assertNull(message);
-    }
-
-    @Test
-    public void return_null_if_read_one_record_by_null_id() {
-
-        final Message message = storage.read(null);
-        assertNull(message);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        storage.write(null, message);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_message() {
-        storage.write("testId", null);
-    }
-
-    @Test
-    public void save_and_read_message() {
-
-        final String id = "testId";
-
-        storage.write(id, message);
-
-        final Any messageFromStorage = storage.read(id);
-
-        assertEquals(message, messageFromStorage);
+    @After
+    public void tearDownTest() {
+        STORAGE.clear();
     }
 }

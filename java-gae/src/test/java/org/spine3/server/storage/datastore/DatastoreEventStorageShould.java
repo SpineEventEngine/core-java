@@ -18,25 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage.datastore;
 
 import org.junit.After;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventStorageShould;
 
 /**
- * @author Alexander Litus
+ * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
+ * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
+ * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
+ * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+public class DatastoreEventStorageShould extends EventStorageShould {
 
-    private static final InMemoryAggregateStorage<ProjectId> STORAGE = InMemoryAggregateStorage.newInstance();
+    private static final EventStorage STORAGE = LocalDatastoreStorageFactory.instance().createEventStorage();
 
-    public InMemoryAggregateStorageShould() {
+    public DatastoreEventStorageShould() {
         super(STORAGE);
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+        LocalDatastoreStorageFactory.instance().setUp();
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.clear();
+        LocalDatastoreManager.clear();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        LocalDatastoreStorageFactory.instance().tearDown();
     }
 }

@@ -85,7 +85,15 @@ public class Messages {
      * @throws UnknownTypeInAnyException if there is no Java class in the classpath for the enclosed type
      */
     public static <T extends Message> T fromAny(Any any) {
+
         checkNotNull(any);
+
+        if (any.is(Any.class)) {
+            @SuppressWarnings("unchecked") // cast is safe because Any is Message
+            final T message = (T) any;
+            return message;
+        }
+
         T result = null;
         String typeStr = "";
         try {
@@ -100,6 +108,7 @@ public class Messages {
         } catch (InvalidProtocolBufferException e) {
             propagate(e);
         }
+
         return result;
     }
 

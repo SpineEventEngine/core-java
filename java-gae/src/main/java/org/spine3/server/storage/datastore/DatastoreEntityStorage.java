@@ -18,30 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.filesystem;
+package org.spine3.server.storage.datastore;
 
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
+import static org.spine3.util.Identifiers.idToString;
 
-public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+/**
+ * {@link org.spine3.server.storage.EntityStorage} implementation based on Google App Engine Datastore.
+ *
+ * @author Alexander Litus
+ */
+public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
-        return new FileSystemEntityStorage<>();
+    private final DatastoreManager<M> datastoreManager;
+
+    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
+        this.datastoreManager = datastoreManager;
     }
 
-    private FileSystemEntityStorage() {}
+    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
+        return new DatastoreEntityStorage<>(datastoreManager);
+    }
 
     @Override
     public M read(I id) {
 
-        final String idString = idToStringWithEscaping(id);
+        final String idString = idToString(id);
 
-        Message message = readEntity(idString);
+        final Message message = datastoreManager.read(idString);
 
-        @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
+        @SuppressWarnings("unchecked") // save because messages of only this type are written
         final M result = (M) message;
         return result;
     }
@@ -52,8 +61,8 @@ public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage
         checkNotNull(id);
         checkNotNull(message);
 
-        final String idString = idToStringWithEscaping(id);
+        final String idString = idToString(id);
 
-        writeEntity(idString, message);
+        datastoreManager.storeEntity(idString, message);
     }
 }

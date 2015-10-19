@@ -97,7 +97,9 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final CommandRequest commandRequest1 = CommandRequestFactory.create();
+        final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
+
+        final CommandRequest commandRequest1 = CommandRequestFactory.createAt(when);
         final CommandRequest commandRequest2 = CommandRequestFactory.create();
         final CommandRequest commandRequest3 = CommandRequestFactory.create();
 
@@ -145,8 +147,7 @@ public class CommandsShould {
         final Timestamp currentTime = getCurrentTime();
         CommandId id = generateId(userIdString, currentTime);
 
-        /* TODO:2015-09-21:alexander.litus:
-           create parse() method that would restore an object from its String representation.
+        /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
            Use the restored object for equality check with the original object.
          */
         final String expected = userIdString + USER_ID_AND_TIME_DELIMITER + timestampToString(currentTime);

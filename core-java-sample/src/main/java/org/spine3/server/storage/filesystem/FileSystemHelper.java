@@ -21,19 +21,25 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.CommandStoreRecord;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.util.FileNameEscaper;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.util.Map;
 
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
+import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Util class for working with file system
@@ -94,18 +100,20 @@ public class FileSystemHelper {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
-        writeMessage(file, message);
+        final Any any = Messages.toAny(message);
+        writeMessage(file, any);
     }
 
     /**
      * Reads the {@code Message} from common event store by string id.
+     * @return a message instance or empty message if there is no message with such ID
      */
     public static Message readEntity(String idString) {
 
         final String path = getEntityStoreFilePath(idString);
         File file = new File(path);
 
-        Message message = null;
+        Message message = Any.getDefaultInstance();
 
         if (file.exists()) {
             message = readMessage(file);
@@ -119,7 +127,7 @@ public class FileSystemHelper {
      */
     public static void cleanTestData() {
 
-        final File folder = new File(getFileStoragePath());
+        final File folder = new File(getFileStorePath());
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
@@ -131,8 +139,8 @@ public class FileSystemHelper {
         }
     }
 
-    /*
-     * Closes streams in turn.
+    /**
+     * Closes streams in turn silently. Logs IOException if occurs.
      */
     @SuppressWarnings("ConstantConditions")
     public static void closeSilently(@Nullable Closeable... closeables) {
@@ -146,35 +154,52 @@ public class FileSystemHelper {
                 }
             }
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while closing stream", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while closing stream", e);
             }
         }
     }
 
-    /*
-     * Flushes streams in turn.
+    /**
+     * Flushes streams in turn silently. Logs IOException if occurs.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void flushSilently(@Nullable Flushable... flushables) {
+        try {
+            flush(flushables);
+        } catch (IOException e) {
+            if (log().isWarnEnabled()) {
+                log().warn("Exception while flushing stream", e);
+            }
+        }
+    }
+
+    /**
+     * Flushes streams in turn.
+     * @throws java.lang.RuntimeException if IOException occurs
+     */
+    public static void tryToFlush(@Nullable Flushable... flushables) {
+        try {
+            flush(flushables);
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void flush(@Nullable Flushable[] flushables) throws IOException {
         if (flushables == null) {
             return;
         }
-        try {
-            for (Flushable f : flushables) {
-                if (f != null) {
-                    f.flush();
-                }
-            }
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {log().warn("Exception while flushing stream", e);
+        for (Flushable f : flushables) {
+            if (f != null) {
+                f.flush();
             }
         }
     }
 
-    /*
-     * Flushes and closes output streams in turn.
+    /**
+     * Flushes and closes output streams in turn silently. Logs IOException if occurs.
      */
-    @SuppressWarnings("ConstantConditions")
     public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
         if (streams == null) {
             return;
@@ -184,8 +209,8 @@ public class FileSystemHelper {
     }
 
     /**
-     * @throws IllegalStateException if there is no such file
      * @param file file to check
+     * @throws IllegalStateException if there is no such file
      */
     public static void checkFileExists(File file) {
         if (!file.exists()) {
@@ -195,6 +220,7 @@ public class FileSystemHelper {
 
     /**
      * Tries to open {@code FileInputStream} from file
+     *
      * @throws RuntimeException if there is no such file
      */
     public static FileInputStream tryOpenFileInputStream(File file) {
@@ -207,6 +233,55 @@ public class FileSystemHelper {
         }
 
         return fileInputStream;
+    }
+
+    /**
+     * Creates string representation of the passed ID. Escapes characters which are not allowed in file names.
+     *
+     * @param id the ID to convert
+     * @return string representation of the ID
+     * @see org.spine3.util.Identifiers#idToString(Object)
+     * @see org.spine3.util.FileNameEscaper#escape(String)
+     */
+    public static <I> String idToStringWithEscaping(I id) {
+
+        final I idNormalized = escapeStringFieldsIfIsMessage(id);
+        String result = idToString(idNormalized);
+        result = FileNameEscaper.getInstance().escape(result);
+
+        return result;
+    }
+
+    private static <I> I escapeStringFieldsIfIsMessage(I input) {
+        I result = input;
+        if (input instanceof Message) {
+            final Message message = escapeStringFields((Message) input);
+            @SuppressWarnings("unchecked")
+            I castedMessage = (I) message; // cast is safe because input is Message
+            result = castedMessage;
+        }
+        return result;
+    }
+
+    private static Message escapeStringFields(Message message) {
+
+        final Message.Builder result = message.toBuilder();
+        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
+
+        final FileNameEscaper escaper = FileNameEscaper.getInstance();
+
+        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
+
+            Object value = fields.get(descriptor);
+
+            if (descriptor.getJavaType() == STRING) {
+                value = escaper.escape(value.toString());
+            }
+
+            result.setField(descriptor, value);
+        }
+
+        return result.build();
     }
 
     /**
@@ -244,25 +319,25 @@ public class FileSystemHelper {
         }
     }
 
-    @SuppressWarnings({"OverlyBroadCatchBlock", "TypeMayBeWeakened"})
-    private static Any readMessage(File file) {
+    private static Message readMessage(File file) {
 
         checkFileExists(file);
 
         InputStream fileInputStream = tryOpenFileInputStream(file);
         InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
-        Any message;
+        Any any;
 
         try {
-            message = Any.parseDelimitedFrom(bufferedInputStream);
+            any = Any.parseDelimitedFrom(bufferedInputStream);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
         } finally {
             closeSilently(fileInputStream, bufferedInputStream);
         }
 
-        return message;
+        final Message result = Messages.fromAny(any);
+        return result;
     }
 
     private static void restoreFromBackup(File file) {
