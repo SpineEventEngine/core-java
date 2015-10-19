@@ -147,7 +147,7 @@ public class CommandsShould {
         /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
            Use the restored object for equality check with the original object.
          */
-        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER +  timestampToString(currentTime);
+        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER + timestampToString(currentTime);
 
         final String actual = Commands.idToString(id);
 
