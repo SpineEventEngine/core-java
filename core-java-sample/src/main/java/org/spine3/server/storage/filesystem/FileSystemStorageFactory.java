@@ -40,6 +40,7 @@ public class FileSystemStorageFactory implements StorageFactory {
      * Creates new storage factory instance.
      *
      * @param executorClass execution context class which is used as {@link FileSystemHelper#configure(Class)} method parameter.
+     * @see FileSystemHelper#configure(Class)
      */
     public static StorageFactory newInstance(Class executorClass) {
         return new FileSystemStorageFactory(executorClass);

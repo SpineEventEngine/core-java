@@ -51,6 +51,11 @@ class FileSystemStoragePathHelper {
 
     private FileSystemStoragePathHelper() {}
 
+    /**
+     * Configures helper with file storage path.
+     *
+     * @param executorClass execution context class. Is used to choose target directory for storage.
+     */
     protected static void configure(Class executorClass) {
 
         final String tempDir = getTempDir().getAbsolutePath();
