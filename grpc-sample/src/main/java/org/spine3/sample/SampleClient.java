@@ -28,29 +28,25 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.base.UserId;
-import org.spine3.protobuf.Messages;
-import org.spine3.sample.order.OrderId;
-import org.spine3.util.Users;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.spine3.protobuf.Messages.toText;
 import static org.spine3.sample.server.SampleServer.SERVER_PORT;
-
-//TODO:2015-09-23:alexander.yevsyukov: Eliminate code duplication with Sample class.
 
 /**
  * Sample gRPC client implementation.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
+ * @author Alexander Litus
  */
 public class SampleClient {
 
     private static final String LOCALHOST = "localhost";
     private static final String RPC_FAILED = "RPC failed";
-    private static final String USER = "User ";
-    private static final String RESULT = "Result: ";
+    private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
     private final ChannelImpl channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
@@ -67,23 +63,24 @@ public class SampleClient {
     }
 
     /**
-     * Greet server. If provided, the first element of {@code args} is the name to use in the
-     * greeting.
+     * Sends requests to the server.
      */
     public static void main(String[] args) throws InterruptedException {
 
         // Access a service running on the local machine
         SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
 
+        final List<CommandRequest> requests = Sample.generateRequests();
+
         try {
 
-            for (int i = 0; i < 10; i++) {
-                OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-                UserId userId = Users.createId("user" + i);
+            for (CommandRequest request : requests) {
 
-                client.createOrder(userId, orderId);
-                client.addOrderLine(userId, orderId);
-                client.payOrder(userId, orderId);
+                log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
+
+                final CommandResult result = client.send(request);
+
+                log().info("Result: " + toText(result));
             }
 
         } finally {
@@ -91,44 +88,25 @@ public class SampleClient {
         }
     }
 
+    /**
+     * Shutdown the connection channel.
+     * @throws InterruptedException if waiting is interrupted.
+     */
     public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+        channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
-    private void createOrder(UserId userId, OrderId orderId) {
+    /**
+     * Sends a request to the server.
+     */
+    public CommandResult send(CommandRequest request) {
+        CommandResult result = null;
         try {
-            log().info(USER + userId + " tries to create new order " + orderId + " ...");
-            CommandRequest request = Requests.createOrder(userId, orderId);
-
-            CommandResult result = blockingStub.handle(request);
-            log().info(RESULT + Messages.toText(result));
+            result = blockingStub.handle(request);
         } catch (RuntimeException e) {
             log().warn(RPC_FAILED, e);
         }
-    }
-
-    private void addOrderLine(UserId userId, OrderId orderId) {
-        try {
-            log().info(USER + userId + " tries to add new order line in order " + orderId + " ...");
-            CommandRequest request = Requests.addOrderLine(userId, orderId);
-
-            CommandResult result = blockingStub.handle(request);
-            log().info(RESULT + Messages.toText(result));
-        } catch (RuntimeException e) {
-            log().warn(RPC_FAILED, e);
-        }
-    }
-
-    private void payOrder(UserId userId, OrderId orderId) {
-        try {
-            log().info(USER + userId + " tries to pay money for order " + orderId + " ...");
-            CommandRequest request = Requests.payForOrder(userId, orderId);
-
-            CommandResult result = blockingStub.handle(request);
-            log().info(RESULT + Messages.toText(result));
-        } catch (RuntimeException e) {
-            log().warn(RPC_FAILED, e);
-        }
+        return result;
     }
 
     private enum LogSingleton {
