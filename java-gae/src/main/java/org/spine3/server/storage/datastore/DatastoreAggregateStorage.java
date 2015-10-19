@@ -36,13 +36,13 @@ import static org.spine3.util.Identifiers.idToString;
  */
 public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DatastoreManager<AggregateStorageRecord> datastoreManager;
+    private final LocalDatastoreManager<AggregateStorageRecord> datastoreManager;
 
-    private DatastoreAggregateStorage(DatastoreManager<AggregateStorageRecord> manager) {
+    private DatastoreAggregateStorage(LocalDatastoreManager<AggregateStorageRecord> manager) {
         this.datastoreManager = manager;
     }
 
-    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreManager<AggregateStorageRecord> manager) {
+    protected static <I> DatastoreAggregateStorage<I> newInstance(LocalDatastoreManager<AggregateStorageRecord> manager) {
         return new DatastoreAggregateStorage<>(manager);
     }
 

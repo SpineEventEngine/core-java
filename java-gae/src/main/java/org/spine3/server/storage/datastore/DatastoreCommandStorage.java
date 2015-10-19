@@ -30,13 +30,13 @@ import org.spine3.server.storage.CommandStoreRecord;
  */
 public class DatastoreCommandStorage extends CommandStorage {
 
-    private final DatastoreManager<CommandStoreRecord> datastoreManager;
+    private final LocalDatastoreManager<CommandStoreRecord> datastoreManager;
 
-    private DatastoreCommandStorage(DatastoreManager<CommandStoreRecord> datastoreManager) {
+    private DatastoreCommandStorage(LocalDatastoreManager<CommandStoreRecord> datastoreManager) {
         this.datastoreManager = datastoreManager;
     }
 
-    protected static CommandStorage newInstance(DatastoreManager<CommandStoreRecord> datastoreManager) {
+    protected static CommandStorage newInstance(LocalDatastoreManager<CommandStoreRecord> datastoreManager) {
         return new DatastoreCommandStorage(datastoreManager);
     }
 

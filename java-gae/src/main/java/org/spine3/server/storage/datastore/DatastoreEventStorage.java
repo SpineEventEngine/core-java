@@ -37,13 +37,13 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 public class DatastoreEventStorage extends EventStorage {
 
-    private final DatastoreManager<EventStoreRecord> datastoreManager;
+    private final LocalDatastoreManager<EventStoreRecord> datastoreManager;
 
-    private DatastoreEventStorage(DatastoreManager<EventStoreRecord> manager) {
+    private DatastoreEventStorage(LocalDatastoreManager<EventStoreRecord> manager) {
         this.datastoreManager = manager;
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreManager<EventStoreRecord> manager) {
+    protected static DatastoreEventStorage newInstance(LocalDatastoreManager<EventStoreRecord> manager) {
         return new DatastoreEventStorage(manager);
     }
 

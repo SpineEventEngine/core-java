@@ -46,14 +46,14 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreManager<CommandStoreRecord> manager =
+        final LocalDatastoreManager<CommandStoreRecord> manager =
                 LocalDatastoreManager.newInstance(CommandStoreRecord.getDescriptor());
         return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreManager<EventStoreRecord> manager =
+        final LocalDatastoreManager<EventStoreRecord> manager =
                 LocalDatastoreManager.newInstance(EventStoreRecord.getDescriptor());
         return DatastoreEventStorage.newInstance(manager);
     }
@@ -63,7 +63,7 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DatastoreManager<AggregateStorageRecord> manager =
+        final LocalDatastoreManager<AggregateStorageRecord> manager =
                 LocalDatastoreManager.newInstance(AggregateStorageRecord.getDescriptor());
         return DatastoreAggregateStorage.newInstance(manager);
     }
@@ -75,7 +75,7 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);;
+        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);;
         return DatastoreEntityStorage.newInstance(manager);
     }
 
