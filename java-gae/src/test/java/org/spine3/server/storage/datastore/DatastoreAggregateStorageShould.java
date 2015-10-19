@@ -37,7 +37,7 @@ import org.spine3.test.project.ProjectId;
 public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
-    private static final AggregateStorage<ProjectId> STORAGE = DatastoreStorageFactory.getInstance().createAggregateStorage(null);
+    private static final AggregateStorage<ProjectId> STORAGE = LocalDatastoreStorageFactory.getInstance().createAggregateStorage(null);
 
     public DatastoreAggregateStorageShould() {
         super(STORAGE);
@@ -46,7 +46,7 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        DatastoreStorageFactory.getInstance().setUp();
+        LocalDatastoreStorageFactory.getInstance().setUp();
     }
 
     @After
@@ -56,6 +56,6 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @AfterClass
     public static void tearDownClass() {
-        DatastoreStorageFactory.getInstance().tearDown();
+        LocalDatastoreStorageFactory.getInstance().tearDown();
     }
 }

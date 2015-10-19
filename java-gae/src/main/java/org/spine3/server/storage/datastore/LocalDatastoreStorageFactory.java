@@ -29,7 +29,10 @@ import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
-public class DatastoreStorageFactory implements StorageFactory {
+/**
+ * Creates local GAE Datastores.
+ */
+public class LocalDatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
@@ -93,13 +96,13 @@ public class DatastoreStorageFactory implements StorageFactory {
         }
     }
 
-    public static DatastoreStorageFactory getInstance() {
+    public static LocalDatastoreStorageFactory getInstance() {
         return Singleton.INSTANCE.value;
     }
 
     private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final DatastoreStorageFactory value = new DatastoreStorageFactory();
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory();
     }
 }
