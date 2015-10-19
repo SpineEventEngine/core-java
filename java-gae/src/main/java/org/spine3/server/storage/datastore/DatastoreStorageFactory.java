@@ -33,15 +33,25 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
+    /**
+     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
+     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
+     */
+    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
+
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreManager<CommandStoreRecord> manager = getManager(CommandStoreRecord.getDescriptor());
+        final DatastoreManager<CommandStoreRecord> manager =
+                LocalDatastoreManager.newInstance(CommandStoreRecord.getDescriptor());
         return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreManager<EventStoreRecord> manager = getManager(EventStoreRecord.getDescriptor());
+        final DatastoreManager<EventStoreRecord> manager =
+                LocalDatastoreManager.newInstance(EventStoreRecord.getDescriptor());
         return DatastoreEventStorage.newInstance(manager);
     }
 
@@ -50,7 +60,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DatastoreManager<AggregateStorageRecord> manager = getManager(AggregateStorageRecord.getDescriptor());
+        final DatastoreManager<AggregateStorageRecord> manager =
+                LocalDatastoreManager.newInstance(AggregateStorageRecord.getDescriptor());
         return DatastoreAggregateStorage.newInstance(manager);
     }
 
@@ -61,21 +72,34 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DatastoreManager<M> manager = getManager(descriptor);
+        final DatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);;
         return DatastoreEntityStorage.newInstance(manager);
-    }
-
-    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
-        return DatastoreManager.newInstance(descriptor);
     }
 
     @Override
     public void setUp() {
-        // NOP
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.start();
+        }
     }
 
     @Override
     public void tearDown() {
-        // NOP
+
+        LocalDatastoreManager.clear();
+
+        if (!IS_WINDOWS) {
+            LocalDatastoreManager.stop();
+        }
+    }
+
+    public static DatastoreStorageFactory getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final DatastoreStorageFactory value = new DatastoreStorageFactory();
     }
 }
