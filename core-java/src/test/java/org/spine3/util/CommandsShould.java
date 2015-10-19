@@ -22,7 +22,6 @@ package org.spine3.util;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
