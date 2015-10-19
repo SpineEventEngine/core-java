@@ -76,8 +76,6 @@ public class CommandsShould {
         assertEquals("getAggregateRootId", MessageFields.toAccessorMethodName("aggregate_root_id"));
     }
 
-    //todo:2015-10-08:mikhail.mikhaylov: Find out why this test fails.
-    @Ignore
     @Test
     public void return_correct_were_after_predicate() throws InterruptedException {
         final Timestamp timestamp = TimeUtil.getCurrentTime();
