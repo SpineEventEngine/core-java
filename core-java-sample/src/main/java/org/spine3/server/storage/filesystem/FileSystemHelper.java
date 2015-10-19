@@ -58,7 +58,7 @@ public class FileSystemHelper {
     /**
      * Configures helper with file storage path.
      *
-     * @param executorClass execution context class. Is used to choose target directory.
+     * @param executorClass execution context class. Is used to choose target directory for storage.
      */
     public static void configure(Class executorClass) {
         FileSystemStoragePathHelper.configure(executorClass);
