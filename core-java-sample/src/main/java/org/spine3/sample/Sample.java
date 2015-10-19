@@ -43,7 +43,7 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
- * Framework sample.
+ * Framework usage sample.
  * <p>
  * To change storage implementation, just pass another {@link Sample.StorageType} parameter
  * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link Sample#main(String[])}.
