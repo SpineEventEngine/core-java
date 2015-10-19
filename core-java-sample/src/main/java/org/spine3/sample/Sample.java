@@ -57,7 +57,7 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 public class Sample {
 
     private final StorageFactory storageFactory;
-    private final EventLogger eventLogger;
+    private final EventLogger eventLogger = new EventLogger();
 
     /**
      * Creates a new sample with the specified storage factory.
@@ -65,7 +65,6 @@ public class Sample {
      */
     public Sample(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
-        this.eventLogger = new EventLogger();
     }
 
     /**
