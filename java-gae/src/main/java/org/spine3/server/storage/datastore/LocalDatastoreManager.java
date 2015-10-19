@@ -94,10 +94,16 @@ public class LocalDatastoreManager<M extends Message> {
             .build();
 
     private static final LocalDevelopmentDatastore DATASTORE = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_OPTIONS);
+
     private final TypeName typeName;
+
     private final Key commonAncestorKey;
 
-    protected static <M extends Message> LocalDatastoreManager<M> newInstance(Descriptor descriptor) {
+    /**
+     * Creates a new manager instance.
+     * @param descriptor the descriptor of the type of messages to save to the storage.
+     */
+    public static <M extends Message> LocalDatastoreManager<M> newInstance(Descriptor descriptor) {
         return new LocalDatastoreManager<>(descriptor);
     }
 
