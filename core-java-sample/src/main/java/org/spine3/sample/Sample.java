@@ -43,8 +43,12 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
- * Framework sample. To change storage implementation,
- * just pass another {@link StorageType} parameter to {@link Sample#getStorageFactory} in {@link Sample#main}.
+ * Framework sample.
+ * <p>
+ * To change storage implementation, just pass another {@link Sample.StorageType} parameter
+ * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link Sample#main(String[])}.
+ *
+ * @see Sample#getStorageFactory(Sample.StorageType)
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
@@ -175,8 +179,10 @@ public class Sample {
     }
 
     /**
-     * Retrieves a {@link StorageFactory} implementation depending on passed parameter.
+     * Retrieves a {@link StorageFactory} implementation depending on the passed parameter.
+     *
      * @param storageType the type of storage to retrieve.
+     * @see Sample.StorageType
      */
     public static StorageFactory getStorageFactory(StorageType storageType) {
 
@@ -198,8 +204,14 @@ public class Sample {
      */
     public static enum StorageType {
 
+        /**
+         * In-memory based storage.
+         */
         IN_MEMORY,
 
+        /**
+         * Filesystem based storage.
+         */
         FILE_SYSTEM,
 
         /**

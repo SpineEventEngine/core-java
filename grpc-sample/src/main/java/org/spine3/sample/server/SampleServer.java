@@ -35,8 +35,12 @@ import org.spine3.server.storage.StorageFactory;
 import java.io.IOException;
 
 /**
- * Sample gRPC server implementation. To change storage implementation,
- * just pass another {@link Sample.StorageType} parameter to {@link Sample#getStorageFactory} in {@link SampleServer#main}.
+ * Sample gRPC server implementation.
+ * <p>
+ * To change storage implementation, just pass another {@link Sample.StorageType} parameter
+ * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link SampleServer#main(String[])}.
+ *
+ * @see Sample#getStorageFactory(Sample.StorageType)
  *
  * @author Mikhail Melnik
  * @author Alexander Litus
