@@ -31,6 +31,7 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
 
@@ -42,37 +43,42 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
- * Framework sample. To change storage implementation, see instructions under {@code storageFactory} field.
+ * Framework sample. To change storage implementation,
+ * just pass another {@link StorageType} parameter to {@link Sample#getStorageFactory} in {@link Sample#main}.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class Sample {
 
-    private static final String SUCCESS_MESSAGE = "All the requests were handled.";
-
-    // field is not final because test code injects it via setter
-    @SuppressWarnings({"FieldMayBeFinal", "StaticNonFinalField"})
-    private static StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private final StorageFactory storageFactory;
 
     /**
-     * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(MySampleClass.class);
-     *
-     *
-     * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.instance();
+     * Creates a new sample with the specified storage factory.
+     * @param storageFactory factory used to create and set up storages.
      */
+    public Sample(StorageFactory storageFactory) {
+        this.storageFactory = storageFactory;
+    }
 
     /**
      * The entry point of the sample.
      */
     public static void main(String[] args) {
 
-        setUp(storageFactory);
+        final StorageFactory factory = getStorageFactory(StorageType.IN_MEMORY);
+
+        Sample sample = new Sample(factory);
+
+        sample.execute();
+    }
+
+    /**
+     * Executes the sample: generates some command requests and then the {@link Engine} processes them.
+     */
+    protected void execute() {
+
+        setUp();
 
         // Generate test requests
         List<CommandRequest> requests = generateRequests();
@@ -82,16 +88,15 @@ public class Sample {
             Engine.getInstance().process(request);
         }
 
-        log().info(SUCCESS_MESSAGE);
+        log().info("All the requests were handled.");
 
-        tearDown(storageFactory);
+        tearDown();
     }
 
     /**
      * Sets up the storage, starts the engine, registers repositories, handlers etc.
-     * @param storageFactory storage factory to use for storages setup and creation.
      */
-    public static void setUp(StorageFactory storageFactory) {
+    public void setUp() {
 
         // Set up the storage
         storageFactory.setUp();
@@ -110,10 +115,9 @@ public class Sample {
     }
 
     /**
-     * The method to call after {@link Sample#setUp(StorageFactory)}.
-     * @param storageFactory storage factory used for storages setup and creation.
+     * Tear down storages, unregister event handlers and stop the engine.
      */
-    public static void tearDown(StorageFactory storageFactory) {
+    public void tearDown() {
 
         storageFactory.tearDown();
 
@@ -127,7 +131,10 @@ public class Sample {
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
     // See Amazon screens for correct naming of domain things.
 
-    private static List<CommandRequest> generateRequests() {
+    /**
+     * Creates several dozens of requests.
+     */
+    public static List<CommandRequest> generateRequests() {
 
         List<CommandRequest> result = Lists.newArrayList();
 
@@ -148,24 +155,6 @@ public class Sample {
         return result;
     }
 
-    protected static void setStorageFactory(StorageFactory storageFactory) {
-        Sample.storageFactory = storageFactory;
-    }
-
-    private Sample() {
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Sample.class);
-
-    }
-
     private static class OrderIdToStringConverter implements Function<OrderId, String> {
 
         @Override
@@ -183,5 +172,50 @@ public class Sample {
 
             return value;
         }
+    }
+
+    /**
+     * Retrieves a {@link StorageFactory} implementation depending on passed parameter.
+     * @param storageType the type of storage to retrieve.
+     */
+    public static StorageFactory getStorageFactory(StorageType storageType) {
+
+        switch (storageType) {
+            case IN_MEMORY:
+                return InMemoryStorageFactory.getInstance();
+            case FILE_SYSTEM:
+                return FileSystemStorageFactory.newInstance(Sample.class);
+            case LOCAL_DATASTORE:
+                // TODO:2015-10-16:alexander.litus: investigate why cannot use datastore classes
+                return null;
+            default:
+                throw new IllegalArgumentException("Unknown storage type: " + storageType);
+        }
+    }
+
+    /**
+     * Storage implementation types.
+     */
+    public static enum StorageType {
+
+        IN_MEMORY,
+
+        FILE_SYSTEM,
+
+        /**
+         * GAE local Datastore based storage.
+         */
+        LOCAL_DATASTORE
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(Sample.class);
+
     }
 }

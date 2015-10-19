@@ -28,23 +28,21 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class SampleShould {
 
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
     @Test
-    public void run_on_in_memory_storage() {
-        Sample.setStorageFactory(InMemoryStorageFactory.getInstance());
-        Sample.main(EMPTY_STRING_ARRAY);
+    public void execute_on_in_memory_storage() {
+        final Sample sample = new Sample(InMemoryStorageFactory.getInstance());
+        sample.execute();
     }
 
     @Test
-    public void run_on_file_system_storage() {
-        Sample.setStorageFactory(FileSystemStorageFactory.newInstance(SampleShould.class));
-        Sample.main(EMPTY_STRING_ARRAY);
+    public void execute_on_file_system_storage() {
+        final Sample sample = new Sample(FileSystemStorageFactory.newInstance(SampleShould.class));
+        sample.execute();
     }
 
     @Test
-    public void run_on_Datastore_storage() {
-        Sample.setStorageFactory(LocalDatastoreStorageFactory.getInstance());
-        Sample.main(EMPTY_STRING_ARRAY);
+    public void execute_on_Datastore_storage() {
+        final Sample sample = new Sample(LocalDatastoreStorageFactory.getInstance());
+        sample.execute();
     }
 }

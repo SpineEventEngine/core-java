@@ -31,61 +31,83 @@ import org.spine3.base.CommandServiceGrpc;
 import org.spine3.sample.Sample;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
 
 /**
- * Sample gRPC server implementation.
+ * Sample gRPC server implementation. To change storage implementation,
+ * just pass another {@link Sample.StorageType} parameter to {@link Sample#getStorageFactory} in {@link SampleServer#main}.
  *
  * @author Mikhail Melnik
+ * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class SampleServer {
 
     /**
-     * The port on which the server runs.
+     * The default port on which the server runs.
      */
     public static final int SERVER_PORT = 50051;
 
-    private static final ServerImpl SERVER = buildServer(SERVER_PORT);
-
-    private static final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private final ServerImpl serverImpl;
+    private final Sample sample;
 
     /**
-     * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(MySampleClass.class);
-     *
-     *
-     * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.instance();
+     * @param serverPort the port on which the server should run.
+     * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
+    public SampleServer(int serverPort, StorageFactory storageFactory) {
 
+        this.serverImpl = buildServerImpl(serverPort);
+        this.sample = new Sample(storageFactory);
+    }
+
+    /**
+     * The entry point of the sample.
+     */
     public static void main(String[] args) throws IOException {
 
-        Sample.setUp(storageFactory);
+        final StorageFactory storageFactory = Sample.getStorageFactory(Sample.StorageType.IN_MEMORY);
 
-        SERVER.start();
+        final SampleServer server = new SampleServer(SERVER_PORT, storageFactory);
 
-        log().info("Server started, listening on " + SERVER_PORT);
+        server.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        log().info("Server started, listening on the port " + SERVER_PORT);
+
+        addShutdownHook(server);
+    }
+
+    /**
+     * Starts the server.
+     * @throws IOException if unable to bind.
+     */
+    public void start() throws IOException {
+
+        sample.setUp();
+        serverImpl.start();
+    }
+
+    /**
+     * Stops the server.
+     */
+    public void stop() {
+
+        sample.tearDown();
+        serverImpl.shutdown();
+    }
+
+    private static void addShutdownHook(final SampleServer server) {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-                System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                SampleServer.stop();
-                System.err.println("*** server shut down");
+                System.err.println("Shutting down the gRPC server since JVM is shutting down...");
+                server.stop();
+                System.err.println("Server shut down.");
             }
-        });
-    }
-
-    private static void stop() {
-        Sample.tearDown(storageFactory);
-        SERVER.shutdown();
+        }));
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
@@ -105,14 +127,11 @@ public class SampleServer {
         }
     }
 
-    private static ServerImpl buildServer(int serverPort) {
+    private static ServerImpl buildServerImpl(int serverPort) {
         final NettyServerBuilder builder = NettyServerBuilder.forPort(serverPort);
         final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl());
         builder.addService(service);
         return builder.build();
-    }
-
-    private SampleServer() {
     }
 
     private static Logger log() {
