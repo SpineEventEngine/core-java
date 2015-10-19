@@ -57,6 +57,7 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 public class Sample {
 
     private final StorageFactory storageFactory;
+    private final EventLogger eventLogger;
 
     /**
      * Creates a new sample with the specified storage factory.
@@ -64,6 +65,7 @@ public class Sample {
      */
     public Sample(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
+        this.eventLogger = new EventLogger();
     }
 
     /**
@@ -113,7 +115,7 @@ public class Sample {
         Engine.getInstance().register(new OrderRepository());
 
         // Register event handlers
-        EventBus.getInstance().register(new EventLogger());
+        EventBus.getInstance().register(eventLogger);
 
         // Register id converters
         IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
@@ -127,7 +129,7 @@ public class Sample {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        EventBus.getInstance().unregister(log());
+        EventBus.getInstance().unregister(eventLogger);
 
         // Stop the engine
         Engine.stop();
