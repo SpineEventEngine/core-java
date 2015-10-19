@@ -39,19 +39,6 @@ if (credentialsFile.exists()) {
     repositoryUserPassword = properties.getProperty("user.password")
 }
 
-task removeSavedProtoNames << {
-    File propsFile = file(protoPropertiesFilePath())
-    if (propsFile.exists()) {
-        propsFile.delete()
-    }
-}
-
-clean.dependsOn removeSavedProtoNames
-
-String protoPropertiesFilePath() {
-    return "${project(":core-java").projectDir}" + project.PROPERTIES_FILE_PATH + project.PROPERTIES_FILE_NAME;
-}
-
 String replaceFileSeparatorWithDot(String filePath) {
     return filePath.replace((char) File.separatorChar, (char) '.');
 }
