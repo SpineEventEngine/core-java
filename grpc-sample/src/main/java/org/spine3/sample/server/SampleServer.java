@@ -39,6 +39,9 @@ import java.io.IOException;
  * <p>
  * To change storage implementation, just pass another {@link Sample.StorageType} parameter
  * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link SampleServer#main(String[])}.
+ * <p>
+ * <b>NOTE:</b> see the <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-GAE-Local-Datastore-Environment">
+ *     instructions</a> on how to run on GAE local Datastore.
  *
  * @see Sample#getStorageFactory(Sample.StorageType)
  *

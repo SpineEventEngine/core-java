@@ -30,7 +30,7 @@ import org.spine3.test.TestIdWithStringField;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
+ * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-GAE-Local-Datastore-Environment">docs</a> for details.<br>
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
