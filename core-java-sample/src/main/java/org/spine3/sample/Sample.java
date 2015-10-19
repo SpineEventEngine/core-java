@@ -31,6 +31,7 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
@@ -192,8 +193,7 @@ public class Sample {
             case FILE_SYSTEM:
                 return FileSystemStorageFactory.newInstance(Sample.class);
             case LOCAL_DATASTORE:
-                // TODO:2015-10-16:alexander.litus: investigate why cannot use datastore classes
-                return null;
+                return LocalDatastoreStorageFactory.getInstance();
             default:
                 throw new IllegalArgumentException("Unknown storage type: " + storageType);
         }
