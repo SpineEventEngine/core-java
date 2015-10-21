@@ -27,20 +27,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
- * {@link org.spine3.server.storage.EntityStorage} implementation based on local Google App Engine Datastore.
+ * {@link org.spine3.server.storage.EntityStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
- * @see LocalDatastoreManager
+ * @see DatastoreManager
  */
 public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final LocalDatastoreManager<M> datastoreManager;
+    private final DatastoreManager<M> datastoreManager;
 
-    private DatastoreEntityStorage(LocalDatastoreManager<M> datastoreManager) {
+    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
         this.datastoreManager = datastoreManager;
     }
 
-    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(LocalDatastoreManager<M> datastoreManager) {
+    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
         return new DatastoreEntityStorage<>(datastoreManager);
     }
 

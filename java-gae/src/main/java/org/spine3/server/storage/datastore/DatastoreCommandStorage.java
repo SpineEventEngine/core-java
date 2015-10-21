@@ -24,20 +24,20 @@ import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
 /**
- * Storage for command records based on local Google Cloud Datastore.
+ * Storage for command records based on Google Cloud Datastore.
  *
- * @see LocalDatastoreManager
+ * @see DatastoreManager
  * @author Alexander Litus
  */
 public class DatastoreCommandStorage extends CommandStorage {
 
-    private final LocalDatastoreManager<CommandStoreRecord> datastoreManager;
+    private final DatastoreManager<CommandStoreRecord> datastoreManager;
 
-    private DatastoreCommandStorage(LocalDatastoreManager<CommandStoreRecord> datastoreManager) {
+    private DatastoreCommandStorage(DatastoreManager<CommandStoreRecord> datastoreManager) {
         this.datastoreManager = datastoreManager;
     }
 
-    protected static CommandStorage newInstance(LocalDatastoreManager<CommandStoreRecord> datastoreManager) {
+    protected static CommandStorage newInstance(DatastoreManager<CommandStoreRecord> datastoreManager) {
         return new DatastoreCommandStorage(datastoreManager);
     }
 

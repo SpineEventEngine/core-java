@@ -20,21 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.server.Entity;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.*;
-
-import static com.google.protobuf.Descriptors.Descriptor;
-import static org.spine3.protobuf.Messages.getClassDescriptor;
-import static org.spine3.util.Classes.getGenericParameterType;
 
 /**
- * Creates local GAE Datastores.
+ * Creates storages based on local GAE Datastore.
  */
-public class LocalDatastoreStorageFactory implements StorageFactory {
-
-    private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
+public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
@@ -43,44 +35,18 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
-
+    @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
-    public CommandStorage createCommandStorage() {
-        final LocalDatastoreManager<CommandStoreRecord> manager =
-                LocalDatastoreManager.newInstance(CommandStoreRecord.getDescriptor());
-        return DatastoreCommandStorage.newInstance(manager);
-    }
-
-    @Override
-    public EventStorage createEventStorage() {
-        final LocalDatastoreManager<EventStoreRecord> manager =
-                LocalDatastoreManager.newInstance(EventStoreRecord.getDescriptor());
-        return DatastoreEventStorage.newInstance(manager);
-    }
-
-    /**
-     * The parameter is unused.
-     */
-    @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final LocalDatastoreManager<AggregateStorageRecord> manager =
-                LocalDatastoreManager.newInstance(AggregateStorageRecord.getDescriptor());
-        return DatastoreAggregateStorage.newInstance(manager);
-    }
-
-    @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-
-        final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-
-        final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-
-        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);;
-        return DatastoreEntityStorage.newInstance(manager);
+    protected <M extends Message> DatastoreManager<M> createManager(Descriptors.Descriptor descriptor) {
+        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);
+        return manager;
     }
 
     @Override
     public void setUp() {
+
+        super.setUp();
+
         if (!IS_WINDOWS) {
             LocalDatastoreManager.start();
         }
@@ -89,6 +55,8 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
     @Override
     public void tearDown() {
 
+        super.tearDown();
+
         LocalDatastoreManager.clear();
 
         if (!IS_WINDOWS) {
@@ -96,6 +64,9 @@ public class LocalDatastoreStorageFactory implements StorageFactory {
         }
     }
 
+    /**
+     * @return the factory instance object.
+     */
     public static LocalDatastoreStorageFactory getInstance() {
         return Singleton.INSTANCE.value;
     }

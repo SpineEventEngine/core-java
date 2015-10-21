@@ -31,7 +31,7 @@ import static org.spine3.server.aggregate.AggregateShould.ProjectAggregate;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreStorageFactoryShould {
 
-    private static final StorageFactory FACTORY = new LocalDatastoreStorageFactory();
+    private static final StorageFactory FACTORY = new DatastoreStorageFactory();
 
     @Test
     public void create_entity_storage_using_class_parameter() {
