@@ -36,15 +36,18 @@ import static org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.I
  *
  * @author Alexander Litus
  */
+@SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
 
-    @SuppressWarnings("CallToSystemGetenv")
-    private static final String GCD_HOME = System.getenv("GCD_HOME");
+    private static final String GCD_HOME_VAR_NAME = "GCD_HOME";
+
+    private static final String DATASET_VAR_NAME = "GAE_DATASET_ID";
+
+    private static final String GCD_HOME = System.getenv(GCD_HOME_VAR_NAME);
 
     private static final String LOCALHOST = "http://localhost:8080";
 
-    //TODO:2015-10-19:alexander.yevsyukov: Need to have separate datasets for tests and user's apps.
-    private static final String LOCAL_DATASET_NAME = "spine-local-dataset";
+    private static final String LOCAL_DATASET_NAME = getDatasetName();
 
     private static final String OPTION_TESTING_MODE = "testing";
 
@@ -124,5 +127,10 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
+    }
+
+    private static String getDatasetName() {
+        final String datasetName = System.getenv(DATASET_VAR_NAME);
+        return datasetName != null ? datasetName : "spine-local-dataset";
     }
 }
