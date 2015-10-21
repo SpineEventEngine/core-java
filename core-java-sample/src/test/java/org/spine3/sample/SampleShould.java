@@ -41,7 +41,7 @@ public class SampleShould {
     }
 
     @Test
-    public void execute_on_Datastore_storage() {
+    public void execute_on_local_Datastore_storage() {
         final Sample sample = new Sample(LocalDatastoreStorageFactory.getInstance());
         sample.execute();
     }
