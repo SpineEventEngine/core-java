@@ -42,7 +42,6 @@ import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.CommitRequest.Mode.NON_TRANSACTIONAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
-import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.HAS_ANCESTOR;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
@@ -71,10 +70,6 @@ public class DatastoreManager<M extends Message> {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
-    private static final String KEY_PROPERTY_NAME = "__key__";
-
-    private static final String COMMON_ENTITY_GROUP_NAME = "CommonGroupName";
-
     // TODO:2015.10.08:alexander.litus: change to real Datastore project ID
     private static final String DATASET_NAME = "dummy-datastore-project-id";
 
@@ -85,7 +80,6 @@ public class DatastoreManager<M extends Message> {
 
     private final Datastore datastore;
     private final TypeName typeName;
-    private final Key commonAncestorKey;
 
     /**
      * Creates a new manager instance.
@@ -103,9 +97,6 @@ public class DatastoreManager<M extends Message> {
     protected DatastoreManager(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
         this.typeName = TypeName.of(descriptor);
-        //TODO:2015-10-21:alexander.yevsyukov: We need to group data differently, not by their class.
-        // Such a way won't work in multi-user systems.
-        this.commonAncestorKey = makeKey(COMMON_ENTITY_GROUP_NAME, typeName.nameOnly()).build();
     }
 
     /**
@@ -147,7 +138,7 @@ public class DatastoreManager<M extends Message> {
 
     private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
 
-        Entity.Builder entity = messageToEntity(message, makeKey(commonAncestorKey, typeName.nameOnly()));
+        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
         entity.addProperty(makeTimestampProperty(timestamp));
         entity.addProperty(aggregateId);
 
@@ -250,12 +241,11 @@ public class DatastoreManager<M extends Message> {
         Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(typeName.nameOnly());
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
-        query.setFilter(makeFilter(KEY_PROPERTY_NAME, HAS_ANCESTOR, makeValue(commonAncestorKey)));
         return query;
     }
 
     private Key.Builder makeCommonKey(String id) {
-        return makeKey(commonAncestorKey, typeName.nameOnly(), id);
+        return makeKey(typeName.nameOnly(), id);
     }
 
     private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
