@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.Descriptor;
+import static org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.IS_WINDOWS;
 
 /**
  * Provides access to local Google Cloud Datastore. For usage in tests and samples.
@@ -36,14 +37,6 @@ import static com.google.protobuf.Descriptors.Descriptor;
  * @author Alexander Litus
  */
 public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
-
-    /**
-     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
-     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
-     */
-    //TODO:2015-10-21:alexander.yevsyukov: Avoid duplication of IS_WINDOWS constant even if is a temporary code.
-    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
     @SuppressWarnings("CallToSystemGetenv")
     private static final String GCD_HOME = System.getenv("GCD_HOME");
@@ -81,6 +74,9 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
      * <p>
      * NOTE: does not work on Windows. Reported an issue
      * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
+     *
+     * NOTE: start local Datastore Server manually on Windows.<br>
+     * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
      *                          throws LocalDevelopmentDatastoreException.

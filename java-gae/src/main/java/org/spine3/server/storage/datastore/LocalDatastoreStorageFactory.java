@@ -33,7 +33,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+    public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
     @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
@@ -47,6 +47,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         super.setUp();
 
+        /**
+         * NOTE: start local Datastore Server manually on Windows.<br>
+         * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
+         */
         if (!IS_WINDOWS) {
             LocalDatastoreManager.start();
         }
