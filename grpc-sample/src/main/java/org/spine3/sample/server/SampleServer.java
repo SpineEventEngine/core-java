@@ -36,14 +36,6 @@ import java.io.IOException;
 
 /**
  * Sample gRPC server implementation.
- * <p>
- * To change storage implementation, just pass another {@link Sample.StorageType} parameter
- * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link SampleServer#main(String[])}.
- * <p>
- * <b>NOTE:</b> see the <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-GAE-Local-Datastore-Environment">
- *     instructions</a> on how to run on GAE local Datastore.
- *
- * @see Sample#getStorageFactory(Sample.StorageType)
  *
  * @author Mikhail Melnik
  * @author Alexander Litus
@@ -70,10 +62,11 @@ public class SampleServer {
 
     /**
      * The entry point of the sample.
+     * To change the storage implementation, change {@link Sample#getStorageFactory()} method implementation.
      */
     public static void main(String[] args) throws IOException {
 
-        final StorageFactory storageFactory = Sample.getStorageFactory(Sample.StorageType.IN_MEMORY);
+        final StorageFactory storageFactory = Sample.getStorageFactory();
 
         final SampleServer server = new SampleServer(SERVER_PORT, storageFactory);
 

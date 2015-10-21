@@ -31,8 +31,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
-import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
 
@@ -45,14 +43,7 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * Framework usage sample.
- * <p>
- * To change storage implementation, just pass another {@link Sample.StorageType} parameter
- * to {@link Sample#getStorageFactory(Sample.StorageType)} in {@link Sample#main(String[])}.
- * <p>
- * <b>NOTE:</b> see the <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-GAE-Local-Datastore-Environment">
- *     instructions</a> on how to run on GAE local Datastore.
  *
- * @see Sample#getStorageFactory(Sample.StorageType)
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
@@ -71,10 +62,11 @@ public class Sample {
 
     /**
      * The entry point of the sample.
+     * To change the storage implementation, change {@link Sample#getStorageFactory()} method implementation.
      */
     public static void main(String[] args) {
 
-        final StorageFactory factory = getStorageFactory(StorageType.IN_MEMORY);
+        final StorageFactory factory = getStorageFactory();
 
         Sample sample = new Sample(factory);
 
@@ -183,44 +175,23 @@ public class Sample {
     }
 
     /**
-     * Retrieves a {@link StorageFactory} implementation depending on the passed parameter.
-     *
-     * @param storageType the type of storage to retrieve.
-     * @see Sample.StorageType
+     * @return the {@link StorageFactory} implementation.
      */
-    public static StorageFactory getStorageFactory(StorageType storageType) {
+    public static StorageFactory getStorageFactory() {
 
-        switch (storageType) {
-            case IN_MEMORY:
-                return InMemoryStorageFactory.getInstance();
-            case FILE_SYSTEM:
-                return FileSystemStorageFactory.newInstance(Sample.class);
-            case LOCAL_DATASTORE:
-                return LocalDatastoreStorageFactory.getInstance();
-            default:
-                throw new IllegalArgumentException("Unknown storage type: " + storageType);
-        }
-    }
-
-    /**
-     * Storage implementation types.
-     */
-    public static enum StorageType {
+        return InMemoryStorageFactory.getInstance();
 
         /**
-         * In-memory based storage.
+         * To run the sample on the filesystem storage, uncomment the following line (and comment out return statement above).
          */
-        IN_MEMORY,
+        // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
 
         /**
-         * Filesystem based storage.
+         * To run the sample on GAE local Datastore, uncomment the following line (and comment out return statement above).
+         * Instructions on how to configure the local Datastore environment:
+         * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
          */
-        FILE_SYSTEM,
-
-        /**
-         * GAE local Datastore based storage.
-         */
-        LOCAL_DATASTORE
+        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getInstance();
     }
 
     private static Logger log() {
