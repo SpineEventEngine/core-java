@@ -35,7 +35,7 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEventStoreFilePath;
 import static org.spine3.util.Events.toEventRecord;
 
-public class FileSystemEventStorage extends EventStorage {
+class FileSystemEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 

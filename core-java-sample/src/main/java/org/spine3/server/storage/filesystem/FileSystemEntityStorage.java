@@ -26,7 +26,7 @@ import org.spine3.server.storage.EntityStorage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 
-public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
         return new FileSystemEntityStorage<>();

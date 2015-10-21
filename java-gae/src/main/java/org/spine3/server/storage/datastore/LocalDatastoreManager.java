@@ -26,6 +26,7 @@ import com.google.api.services.datastore.client.LocalDevelopmentDatastoreExcepti
 import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
 import com.google.protobuf.Message;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.Descriptor;
 
@@ -40,6 +41,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
      * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
      * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
+    //TODO:2015-10-21:alexander.yevsyukov: Avoid duplication of IS_WINDOWS constant even if is a temporary code.
     @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -48,6 +50,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
 
     private static final String LOCALHOST = "http://localhost:8080";
 
+    //TODO:2015-10-19:alexander.yevsyukov: Need to have separate datasets for tests and user's apps.
     private static final String LOCAL_DATASET_NAME = "spine-local-dataset";
 
     private static final String OPTION_TESTING_MODE = "testing";
@@ -79,7 +82,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
      * NOTE: does not work on Windows. Reported an issue
      * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
      *
-     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#start(String, String, String...)}
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
      *                          throws LocalDevelopmentDatastoreException.
      * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
      * Documentation</a> ("testing" option)
@@ -91,6 +94,10 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
         }
 
         try {
+            checkState(GCD_HOME != null,
+                "GCD_HOME environment variable is not configured. " +
+                "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment");
+
             LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
@@ -100,7 +107,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
     /**
      * Clears all data in the local Datastore.
      *
-     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#clear()} throws LocalDevelopmentDatastoreException.
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#clear()} throws LocalDevelopmentDatastoreException.
      */
     public static void clear() {
         try {
@@ -113,7 +120,7 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
     /**
      * Stops the local Datastore server.
      *
-     * @throws RuntimeException if {@link com.google.api.services.datastore.client.LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
      */
     public static void stop() {
         try {

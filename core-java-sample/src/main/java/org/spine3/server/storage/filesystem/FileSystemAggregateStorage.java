@@ -29,9 +29,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.tryToFlush;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 
 /**
@@ -40,7 +38,6 @@ import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.g
 class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
-    private static final String INVALID_AGGREGATE_ID = "Aggregate Id can not be null";
 
     private final String shortTypeName;
 

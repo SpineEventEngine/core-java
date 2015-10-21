@@ -25,7 +25,7 @@ import org.spine3.server.storage.CommandStoreRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class FileSystemCommandStorage extends CommandStorage {
+class FileSystemCommandStorage extends CommandStorage {
 
     protected static CommandStorage newInstance() {
         return new FileSystemCommandStorage();
@@ -35,7 +35,7 @@ public class FileSystemCommandStorage extends CommandStorage {
 
     @Override
     protected void write(CommandStoreRecord record) {
-        checkNotNull(record, "CommandRecord shouldn't be null.");
+        checkNotNull(record);
         FileSystemHelper.write(record);
     }
 }

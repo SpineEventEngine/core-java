@@ -47,8 +47,8 @@ import static org.spine3.util.Identifiers.idToString;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
-public class FileSystemHelper {
+@SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
+class FileSystemHelper {
 
     @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;

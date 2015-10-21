@@ -103,6 +103,8 @@ public class DatastoreManager<M extends Message> {
     protected DatastoreManager(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
         this.typeName = TypeName.of(descriptor);
+        //TODO:2015-10-21:alexander.yevsyukov: We need to group data differently, not by their class.
+        // Such a way won't work in multi-user systems.
         this.commonAncestorKey = makeKey(COMMON_ENTITY_GROUP_NAME, typeName.nameOnly()).build();
     }
 
