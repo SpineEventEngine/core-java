@@ -20,40 +20,22 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.protobuf.Message;
-import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStoreRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 
-class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class FsCommandStorage extends CommandStorage {
 
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
-        return new FileSystemEntityStorage<>();
+    protected static CommandStorage newInstance() {
+        return new FsCommandStorage();
     }
 
-    private FileSystemEntityStorage() {}
+    private FsCommandStorage() {}
 
     @Override
-    public M read(I id) {
-
-        final String idString = idToStringWithEscaping(id);
-
-        Message message = readEntity(idString);
-
-        @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
-        final M result = (M) message;
-        return result;
-    }
-
-    @Override
-    public void write(I id, M message) {
-
-        checkNotNull(id);
-        checkNotNull(message);
-
-        final String idString = idToStringWithEscaping(id);
-
-        writeEntity(idString, message);
+    protected void write(CommandStoreRecord record) {
+        checkNotNull(record);
+        FileSystemHelper.write(record);
     }
 }

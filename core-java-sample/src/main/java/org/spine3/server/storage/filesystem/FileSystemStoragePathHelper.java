@@ -26,8 +26,12 @@ import java.io.IOException;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 
+//TODO:2015-10-27:alexander.yevsyukov: Refactor to move these methods where they really belong.
+
 /*
- * Provides with file system storage paths
+ * Provides with file system storage paths.
+ *
+ * @author Alexander Litus
  */
 @SuppressWarnings({"DuplicateStringLiteralInspection", "UtilityClass"})
 class FileSystemStoragePathHelper {
@@ -39,6 +43,7 @@ class FileSystemStoragePathHelper {
     protected static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
 
+    //TODO:2015-10-27:alexander.yevsyukov: What would happen if we want to use this class with two executors?
     @SuppressWarnings("StaticNonFinalField")
     private static String fileStorePath = null;
 

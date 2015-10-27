@@ -25,8 +25,8 @@ import org.junit.Before;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
-import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
 
 /**
  * @author Mikhail Mikhaylov
@@ -34,8 +34,8 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 public class FileSystemAggregateStorageShould extends AggregateStorageShould {
 
     @SuppressWarnings("unchecked")
-    private static final FileSystemAggregateStorage<ProjectId> STORAGE =
-            new FileSystemAggregateStorage(ProjectId.getDescriptor().getName());
+    private static final FsAggregateStorage<ProjectId> STORAGE =
+            new FsAggregateStorage(ProjectId.getDescriptor().getName());
 
     public FileSystemAggregateStorageShould() {
         super(STORAGE);
@@ -49,7 +49,7 @@ public class FileSystemAggregateStorageShould extends AggregateStorageShould {
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-        cleanTestData();
+        deleteAll();
     }
 }
 

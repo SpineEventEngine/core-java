@@ -26,8 +26,8 @@ import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
-import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
@@ -36,7 +36,7 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
  */
 public class FileSystemEntityStorageShould extends EntityStorageShould {
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FileSystemEntityStorage.newInstance();
+    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance();
 
     public FileSystemEntityStorageShould() {
         super(STORAGE);
@@ -50,6 +50,6 @@ public class FileSystemEntityStorageShould extends EntityStorageShould {
 
     @After
     public void tearDownTest() {
-        cleanTestData();
+        deleteAll();
     }
 }

@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.filesystem;
 
-
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
@@ -30,6 +29,7 @@ import org.spine3.server.storage.*;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
+//TODO:2015-10-27:alexander.yevsyukov: Document
 public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
@@ -52,12 +52,12 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        return FileSystemCommandStorage.newInstance();
+        return FsCommandStorage.newInstance();
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return FileSystemEventStorage.newInstance();
+        return FsEventStorage.newInstance();
     }
 
     @Override
@@ -66,12 +66,12 @@ public class FileSystemStorageFactory implements StorageFactory {
                 getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
         final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
-        return new FileSystemAggregateStorage<>(msgDescriptorName);
+        return new FsAggregateStorage<>(msgDescriptorName);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return FileSystemEntityStorage.newInstance();
+        return FsEntityStorage.newInstance();
     }
 
     @Override
@@ -81,6 +81,6 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public void tearDown() {
-        FileSystemHelper.cleanTestData();
+        FileSystemHelper.deleteAll();
     }
 }

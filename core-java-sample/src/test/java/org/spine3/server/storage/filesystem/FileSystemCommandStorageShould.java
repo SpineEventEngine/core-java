@@ -20,15 +20,17 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.CommandRequestFactory;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
+import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -38,7 +40,7 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FileSystemCommandStorageShould {
 
-    private static final FileSystemCommandStorage STORAGE = (FileSystemCommandStorage) FileSystemCommandStorage.newInstance();
+    private static final FsCommandStorage STORAGE = (FsCommandStorage) FsCommandStorage.newInstance();
 
     private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
 
@@ -49,12 +51,12 @@ public class FileSystemCommandStorageShould {
 
     @Before
     public void setUpTest() {
-        cleanTestData();
+        deleteAll();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        cleanTestData();
+        deleteAll();
     }
 
     @Test(expected = NullPointerException.class)

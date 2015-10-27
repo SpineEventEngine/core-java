@@ -41,8 +41,9 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
 import static org.spine3.util.Identifiers.idToString;
 
+//TODO:2015-10-27:alexander.yevsyukov: Refactor to move methods to corresponding classes.
 /**
- * Util class for working with file system
+ * Utility class for working with file system.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
@@ -124,9 +125,9 @@ class FileSystemHelper {
     }
 
     /**
-     * Removes all previous existing data from file system storage.
+     * Removes all data from the file system storage.
      */
-    public static void cleanTestData() {
+    public static void deleteAll() {
 
         final File folder = new File(getFileStorePath());
         if (!folder.exists() || !folder.isDirectory()) {
@@ -141,9 +142,11 @@ class FileSystemHelper {
     }
 
     /**
-     * Closes streams in turn silently. Logs IOException if occurs.
+     * Closes passed closables one by one silently.
+     * <p/>
+     * Logs each {@link IOException} if it occurs.
      */
-    @SuppressWarnings("ConstantConditions")
+     @SuppressWarnings("ConstantConditions")
     public static void closeSilently(@Nullable Closeable... closeables) {
         if (closeables == null) {
             return;
@@ -162,7 +165,9 @@ class FileSystemHelper {
     }
 
     /**
-     * Flushes streams in turn silently. Logs IOException if occurs.
+     * Flushes passed streams one by one.
+     * <p/>
+     * Logs each {@link IOException} if it occurs.
      */
     public static void flushSilently(@Nullable Flushable... flushables) {
         try {
@@ -176,7 +181,8 @@ class FileSystemHelper {
 
     /**
      * Flushes streams in turn.
-     * @throws java.lang.RuntimeException if IOException occurs
+     *
+     * @throws java.lang.RuntimeException if {@link IOException} occurs
      */
     public static void tryToFlush(@Nullable Flushable... flushables) {
         try {
@@ -224,7 +230,7 @@ class FileSystemHelper {
      *
      * @throws RuntimeException if there is no such file
      */
-    public static FileInputStream tryOpenFileInputStream(File file) {
+    public static FileInputStream open(File file) {
         FileInputStream fileInputStream = null;
 
         try {
@@ -237,7 +243,8 @@ class FileSystemHelper {
     }
 
     /**
-     * Creates string representation of the passed ID. Escapes characters which are not allowed in file names.
+     * Creates string representation of the passed ID escaping characters
+     * that are not allowed in file names.
      *
      * @param id the ID to convert
      * @return string representation of the ID
@@ -324,7 +331,7 @@ class FileSystemHelper {
 
         checkFileExists(file);
 
-        InputStream fileInputStream = tryOpenFileInputStream(file);
+        InputStream fileInputStream = open(file);
         InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
         Any any;

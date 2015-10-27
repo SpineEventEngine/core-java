@@ -35,16 +35,16 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEventStoreFilePath;
 import static org.spine3.util.Events.toEventRecord;
 
-class FileSystemEventStorage extends EventStorage {
+class FsEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
 
     protected static EventStorage newInstance() {
-        return new FileSystemEventStorage();
+        return new FsEventStorage();
     }
 
-    private FileSystemEventStorage() {}
+    private FsEventStorage() {}
 
     @Override
     public Iterator<EventRecord> allEvents() {
@@ -132,7 +132,7 @@ class FileSystemEventStorage extends EventStorage {
         private InputStream getInputStream() {
 
             if (bufferedInputStream == null || fileInputStream == null) {
-                fileInputStream = tryOpenFileInputStream(file);
+                fileInputStream = open(file);
                 bufferedInputStream = new BufferedInputStream(fileInputStream);
             }
 

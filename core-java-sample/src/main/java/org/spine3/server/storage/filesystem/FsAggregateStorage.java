@@ -32,16 +32,17 @@ import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 
+//TODO:2015-10-27:alexander.yevsyukov: Document
 /**
  * Max available message size is about 2GB.
  */
-class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
+class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
     private final String shortTypeName;
 
-    /*package*/ FileSystemAggregateStorage(String shortTypeName) {
+    /*package*/ FsAggregateStorage(String shortTypeName) {
         this.shortTypeName = shortTypeName;
     }
 
