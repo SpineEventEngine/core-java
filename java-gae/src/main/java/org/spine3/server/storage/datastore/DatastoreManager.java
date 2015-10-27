@@ -70,7 +70,10 @@ public class DatastoreManager<M extends Message> {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
-    // TODO:2015.10.08:alexander.litus: change to real Datastore project ID
+    /**
+     * TODO:2015.10.08:alexander.litus: change to real Datastore project ID:
+     * https://cloud.google.com/datastore/docs/activate#project_id
+     */
     private static final String DATASET_NAME = "dummy-datastore-project-id";
 
     // TODO:2015.10.08:alexander.litus: use credentials
