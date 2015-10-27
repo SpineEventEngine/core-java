@@ -22,34 +22,34 @@ package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
 import org.junit.Before;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageShould;
+import org.spine3.test.TestIdWithStringField;
 
 import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
 
 /**
- * @author Mikhail Mikhaylov
+ * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
+ *
+ * @author Alexander Litus
  */
-public class FileSystemAggregateStorageShould extends AggregateStorageShould {
+public class FsEntityStorageShould extends EntityStorageShould {
 
-    @SuppressWarnings("unchecked")
-    private static final FsAggregateStorage<ProjectId> STORAGE =
-            new FsAggregateStorage(ProjectId.getDescriptor().getName());
+    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance();
 
-    public FileSystemAggregateStorageShould() {
+    public FsEntityStorageShould() {
         super(STORAGE);
     }
 
+
     @Before
     public void setUpTest() {
-        configure(FileSystemAggregateStorageShould.class);
+        configure(FsEntityStorageShould.class);
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.releaseResources();
         deleteAll();
     }
 }
-

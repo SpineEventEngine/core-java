@@ -43,17 +43,17 @@ import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class FileSystemEventStorageShould extends EventStorageShould {
+public class FsEventStorageShould extends EventStorageShould {
 
     private static final FsEventStorage STORAGE = (FsEventStorage) FsEventStorage.newInstance();
 
-    public FileSystemEventStorageShould() {
+    public FsEventStorageShould() {
         super(STORAGE);
     }
 
     @Before
     public void setUpTest() {
-        configure(FileSystemEventStorageShould.class);
+        configure(FsEventStorageShould.class);
     }
 
     @After

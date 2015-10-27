@@ -38,7 +38,7 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class FileSystemCommandStorageShould {
+public class FsCommandStorageShould {
 
     private static final FsCommandStorage STORAGE = (FsCommandStorage) FsCommandStorage.newInstance();
 
@@ -46,7 +46,7 @@ public class FileSystemCommandStorageShould {
 
     @BeforeClass
     public static void setUp() {
-        configure(FileSystemCommandStorageShould.class);
+        configure(FsCommandStorageShould.class);
     }
 
     @Before
