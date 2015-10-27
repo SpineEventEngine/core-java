@@ -23,6 +23,7 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageShould;
 
@@ -32,6 +33,7 @@ import org.spine3.server.storage.EventStorageShould;
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreEventStorageShould extends EventStorageShould {
 
     private static final EventStorage STORAGE = LocalDatastoreStorageFactory.getInstance().createEventStorage();
@@ -53,5 +55,10 @@ public class DatastoreEventStorageShould extends EventStorageShould {
     @AfterClass
     public static void tearDownClass() {
         LocalDatastoreStorageFactory.getInstance().tearDown();
+    }
+
+    @Test
+    public void have_empty_release_resources_method() {
+        ((DatastoreEventStorage) STORAGE).releaseResources();
     }
 }
