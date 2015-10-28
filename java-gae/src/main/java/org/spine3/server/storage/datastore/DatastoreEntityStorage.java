@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
- * {@link org.spine3.server.storage.EntityStorage} implementation based on Google App Engine Datastore.
+ * {@link EntityStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
  * @see DatastoreManager

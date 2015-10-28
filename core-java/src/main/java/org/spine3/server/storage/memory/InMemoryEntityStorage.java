@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
- * Memory-based implementation of {@link org.spine3.server.storage.EntityStorage}.
+ * Memory-based implementation of {@link EntityStorage}.
  *
  * @author Alexander Litus
  */
@@ -63,6 +63,9 @@ class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         storage.put(id, message);
     }
 
+    /**
+     * Clears all data in the storage.
+     */
     protected void clear() {
         storage.clear();
     }

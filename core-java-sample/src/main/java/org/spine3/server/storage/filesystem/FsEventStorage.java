@@ -35,11 +35,19 @@ import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEventStoreFilePath;
 import static org.spine3.util.Events.toEventRecord;
 
+/**
+ * An event storage based on the file system.
+ *
+ * @author Alexander Litus
+ */
 class FsEventStorage extends EventStorage {
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
 
+    /**
+     * Creates new storage instance.
+     */
     protected static EventStorage newInstance() {
         return new FsEventStorage();
     }

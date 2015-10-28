@@ -32,9 +32,11 @@ import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 
-//TODO:2015-10-27:alexander.yevsyukov: Document
 /**
+ * A storage of aggregate root events and snapshots based on the file system.
  * Max available message size is about 2GB.
+ *
+ * @author Mikhail Mikhaylov
  */
 class FsAggregateStorage<I> extends AggregateStorage<I> {
 

@@ -34,6 +34,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
+ * In-memory storage for aggregate root events and snapshots.
+ *
  * @author Alexander Litus
  */
 @SuppressWarnings("ComparatorNotSerializable")
@@ -44,6 +46,9 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
             new AggregateStorageRecordReverseComparator()
     );
 
+    /**
+     * Creates new storage instance.
+     */
     protected static <I> InMemoryAggregateStorage<I> newInstance() {
         return new InMemoryAggregateStorage<>();
     }
@@ -68,6 +73,9 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         // NOP
     }
 
+    /**
+     * Clears all data in the storage.
+     */
     protected void clear() {
         storage.clear();
     }

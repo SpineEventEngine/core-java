@@ -26,8 +26,16 @@ import org.spine3.server.storage.EntityStorage;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
 
+/**
+ * An entity storage based on the file system.
+ *
+ * @author Alexander Litus
+ */
 class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
+    /**
+     * Creates new storage instance.
+     */
     protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
         return new FsEntityStorage<>();
     }

@@ -29,7 +29,13 @@ import org.spine3.server.storage.*;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
-//TODO:2015-10-27:alexander.yevsyukov: Document
+/**
+ * A factory for storages based on the file system.
+ *
+ * @author Alexander Litus
+ * @author Alexander Mikhaylov
+ * @author Alexander Yevsyukov
+ */
 public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;

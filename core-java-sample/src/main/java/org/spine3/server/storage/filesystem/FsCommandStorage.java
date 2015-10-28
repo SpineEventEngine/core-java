@@ -25,8 +25,16 @@ import org.spine3.server.storage.CommandStoreRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * A storage for aggregate root events and snapshots based on the file system.
+ *
+ * @author Alexander Litus
+ */
 class FsCommandStorage extends CommandStorage {
 
+    /**
+     * Creates new storage instance.
+     */
     protected static CommandStorage newInstance() {
         return new FsCommandStorage();
     }
