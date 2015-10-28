@@ -45,14 +45,14 @@ public class FileSystemStorageFactory implements StorageFactory {
     /**
      * Creates new storage factory instance.
      *
-     * @param depository the depository to use for storing data.
+     * executorClass execution context class used to choose target directory for storage.
      */
-    public static StorageFactory newInstance(FileSystemDepository depository) {
-        return new FileSystemStorageFactory(depository);
+    public static StorageFactory newInstance(Class executorClass) {
+        return new FileSystemStorageFactory(executorClass);
     }
 
-    private FileSystemStorageFactory(FileSystemDepository depository) {
-        this.depository = depository;
+    private FileSystemStorageFactory(Class executorClass) {
+        this.depository = FileSystemDepository.newInstance(executorClass);
     }
 
     @Override

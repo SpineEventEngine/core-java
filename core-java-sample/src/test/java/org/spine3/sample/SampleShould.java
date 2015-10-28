@@ -22,7 +22,6 @@ package org.spine3.sample;
 
 import org.junit.Test;
 import org.spine3.server.storage.datastore.LocalDatastoreStorageFactory;
-import org.spine3.server.storage.filesystem.FileSystemDepository;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -37,8 +36,7 @@ public class SampleShould {
 
     @Test
     public void execute_on_file_system_storage() {
-        final FileSystemDepository depository = FileSystemDepository.newInstance(SampleShould.class);
-        final Sample sample = new Sample(FileSystemStorageFactory.newInstance(depository));
+        final Sample sample = new Sample(FileSystemStorageFactory.newInstance(SampleShould.class));
         sample.execute();
     }
 

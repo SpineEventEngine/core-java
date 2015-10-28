@@ -35,25 +35,20 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class FileSystemStorageFactoryShould {
 
-    private final FileSystemDepository fileSystemDepository =
-            FileSystemDepository.newInstance(FileSystemStorageFactoryShould.class);
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
 
     @After
     public void tearDownTest() {
-        fileSystemDepository.deleteAll();
+        FACTORY.tearDown();
     }
 
     @Test
     public void create_storages_successfully() {
 
-        final StorageFactory factory = FileSystemStorageFactory.newInstance(fileSystemDepository);
-
-        final EventStorage eventStorage = factory.createEventStorage();
-        final CommandStorage commandStorage = factory.createCommandStorage();
-        final EntityStorage<String, Project> entityStorage =
-                factory.createEntityStorage(TestEntity.class);
-        final AggregateStorage<String> aggregateRootStorage =
-                factory.createAggregateStorage(TestAggregateWithIdString.class);
+        final EventStorage eventStorage = FACTORY.createEventStorage();
+        final CommandStorage commandStorage = FACTORY.createCommandStorage();
+        final EntityStorage<String, Project> entityStorage = FACTORY.createEntityStorage(TestEntity.class);
+        final AggregateStorage<String> aggregateRootStorage = FACTORY.createAggregateStorage(TestAggregateWithIdString.class);
 
         assertNotNull(eventStorage);
         assertNotNull(commandStorage);
@@ -65,7 +60,6 @@ public class FileSystemStorageFactoryShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
-
         @SuppressWarnings("ReturnOfNull")
         @Override
         protected Project getDefaultState() {
