@@ -31,7 +31,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.util.Users;
 
 import javax.annotation.Nullable;
@@ -179,7 +178,7 @@ public class Sample {
      */
     public static StorageFactory getStorageFactory() {
 
-        return InMemoryStorageFactory.getInstance();
+        return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
 
         /**
          * To run the sample on the filesystem storage, uncomment the following line (and comment out return statement above).
