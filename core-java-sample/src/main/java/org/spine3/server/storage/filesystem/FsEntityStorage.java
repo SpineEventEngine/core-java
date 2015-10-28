@@ -29,7 +29,7 @@ import java.io.File;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.*;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.readMessage;
 
 /**
  * An entity storage based on the file system.
@@ -38,21 +38,25 @@ import static org.spine3.server.storage.filesystem.FileSystemDepository.*;
  */
 class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
+    private final FileSystemDepository fileSystemDepository;
+
     /**
      * Creates new storage instance.
      */
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
-        return new FsEntityStorage<>();
+    protected static <I, M extends Message> EntityStorage<I, M> newInstance(FileSystemDepository fileSystemDepository) {
+        return new FsEntityStorage<>(fileSystemDepository);
     }
 
-    private FsEntityStorage() {}
+    private FsEntityStorage(FileSystemDepository fileSystemDepository) {
+        this.fileSystemDepository = fileSystemDepository;
+    }
 
     @Override
     public M read(I id) {
 
         final String idString = idToStringWithEscaping(id);
 
-        final String path = getEntityStoreFilePath(idString);
+        final String path = fileSystemDepository.getEntityStoreFilePath(idString);
         File file = new File(path);
 
         Message message = Any.getDefaultInstance();
@@ -74,9 +78,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
 
-        final String path = getEntityStoreFilePath(idString);
+        final String path = fileSystemDepository.getEntityStoreFilePath(idString);
         File file = new File(path);
         final Any any = toAny(message);
-        writeMessage(file, any);
+        fileSystemDepository.writeMessage(file, any);
     }
 }

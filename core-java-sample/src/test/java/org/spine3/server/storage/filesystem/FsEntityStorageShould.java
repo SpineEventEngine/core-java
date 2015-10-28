@@ -21,13 +21,9 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.Before;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
-
-import static org.spine3.server.storage.filesystem.FileSystemDepository.configure;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAll;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
@@ -36,20 +32,17 @@ import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAl
  */
 public class FsEntityStorageShould extends EntityStorageShould {
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance();
+    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsEntityStorageShould.class);
+
+    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance(DEPOSITORY);
 
     public FsEntityStorageShould() {
         super(STORAGE);
     }
 
 
-    @Before
-    public void setUpTest() {
-        configure(FsEntityStorageShould.class);
-    }
-
     @After
     public void tearDownTest() {
-        deleteAll();
+        DEPOSITORY.deleteAll();
     }
 }

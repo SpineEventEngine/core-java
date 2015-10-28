@@ -40,30 +40,29 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
-    private final Class executorClass;
+    private final FileSystemDepository depository;
 
     /**
      * Creates new storage factory instance.
      *
-     * @param executorClass execution context class which is used as {@link FileSystemDepository#configure(Class)} method parameter.
-     * @see FileSystemDepository#configure(Class)
+     * @param depository the depository to use for storing data.
      */
-    public static StorageFactory newInstance(Class executorClass) {
-        return new FileSystemStorageFactory(executorClass);
+    public static StorageFactory newInstance(FileSystemDepository depository) {
+        return new FileSystemStorageFactory(depository);
     }
 
-    private FileSystemStorageFactory(Class executorClass) {
-        this.executorClass = executorClass;
+    private FileSystemStorageFactory(FileSystemDepository depository) {
+        this.depository = depository;
     }
 
     @Override
     public CommandStorage createCommandStorage() {
-        return FsCommandStorage.newInstance();
+        return FsCommandStorage.newInstance(depository);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return FsEventStorage.newInstance();
+        return FsEventStorage.newInstance(depository);
     }
 
     @Override
@@ -72,21 +71,21 @@ public class FileSystemStorageFactory implements StorageFactory {
                 getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
         final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
-        return new FsAggregateStorage<>(msgDescriptorName);
+        return new FsAggregateStorage<>(depository, msgDescriptorName);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return FsEntityStorage.newInstance();
+        return FsEntityStorage.newInstance(depository);
     }
 
     @Override
     public void setUp() {
-        FileSystemDepository.configure(executorClass);
+        // NOP
     }
 
     @Override
     public void tearDown() {
-        FileSystemDepository.deleteAll();
+        depository.deleteAll();
     }
 }

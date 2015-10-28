@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
@@ -35,16 +35,18 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class FileSystemStorageFactoryShould {
 
-    @Before
-    public void setUpTest() {
-        FileSystemDepository.configure(FileSystemStorageFactoryShould.class);
-        FileSystemDepository.deleteAll();
+    private final FileSystemDepository fileSystemDepository =
+            FileSystemDepository.newInstance(FileSystemStorageFactoryShould.class);
+
+    @After
+    public void tearDownTest() {
+        fileSystemDepository.deleteAll();
     }
 
     @Test
     public void create_storages_successfully() {
 
-        final StorageFactory factory = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
+        final StorageFactory factory = FileSystemStorageFactory.newInstance(fileSystemDepository);
 
         final EventStorage eventStorage = factory.createEventStorage();
         final CommandStorage commandStorage = factory.createCommandStorage();

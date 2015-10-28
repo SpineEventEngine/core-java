@@ -26,8 +26,6 @@ import org.spine3.server.storage.CommandStoreRecord;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.getCommandStoreFile;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.writeMessage;
 
 /**
  * A storage for aggregate root events and snapshots based on the file system.
@@ -36,21 +34,26 @@ import static org.spine3.server.storage.filesystem.FileSystemDepository.writeMes
  */
 class FsCommandStorage extends CommandStorage {
 
+    private final FileSystemDepository depository;
+
     /**
      * Creates new storage instance.
+     * @param depository to use for storing data.
      */
-    protected static CommandStorage newInstance() {
-        return new FsCommandStorage();
+    protected static CommandStorage newInstance(FileSystemDepository depository) {
+        return new FsCommandStorage(depository);
     }
 
-    private FsCommandStorage() {}
+    private FsCommandStorage(FileSystemDepository depository) {
+        this.depository = depository;
+    }
 
     @Override
     protected void write(CommandStoreRecord record) {
 
         checkNotNull(record);
 
-        File file = getCommandStoreFile();
-        writeMessage(file, record);
+        File file = depository.getCommandStoreFile();
+        depository.writeMessage(file, record);
     }
 }

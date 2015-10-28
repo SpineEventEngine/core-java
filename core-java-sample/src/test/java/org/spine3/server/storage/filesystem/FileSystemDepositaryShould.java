@@ -23,29 +23,16 @@ package org.spine3.server.storage.filesystem;
 import org.junit.Test;
 import org.spine3.test.TestIdWithMultipleFields;
 import org.spine3.test.TestIdWithStringField;
-import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
-public class FileSystemHelperShould {
+public class FileSystemDepositaryShould {
 
     // quotes escaped
     private static final String QUOT = "&#34;";
 
-    protected static final String UTILITY_CLASS_SHOULD_HAVE_PRIVATE_CONSTRUCTOR = "Utility class should have private constructor";
-
-    @Test
-    @SuppressWarnings("OverlyBroadCatchBlock")
-    public void have_private_constructor() {
-        try {
-            Tests.callPrivateUtilityConstructor(FileSystemDepository.class);
-        } catch (Exception ignored) {
-            fail(UTILITY_CLASS_SHOULD_HAVE_PRIVATE_CONSTRUCTOR);
-        }
-    }
     
     @Test
     @SuppressWarnings("LocalVariableNamingConvention")
@@ -80,5 +67,5 @@ public class FileSystemHelperShould {
         assertEquals(expected, actual);
     }
 
-    //TODO:2015-09-28:mikhail.mikhaylov: How to test FileSystemHelper.checkConfigured()?
+    // TODO:2015-10-28:alexander.litus: add more tests
 }

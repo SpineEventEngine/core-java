@@ -21,35 +21,28 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.Before;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
-
-import static org.spine3.server.storage.filesystem.FileSystemDepository.configure;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAll;
 
 /**
  * @author Mikhail Mikhaylov
  */
 public class FsAggregateStorageShould extends AggregateStorageShould {
 
+    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsAggregateStorageShould.class);
+
     @SuppressWarnings("unchecked")
     private static final FsAggregateStorage<ProjectId> STORAGE =
-            new FsAggregateStorage(ProjectId.getDescriptor().getName());
+            new FsAggregateStorage(DEPOSITORY, ProjectId.getDescriptor().getName());
 
     public FsAggregateStorageShould() {
         super(STORAGE);
     }
 
-    @Before
-    public void setUpTest() {
-        configure(FsAggregateStorageShould.class);
-    }
-
     @After
     public void tearDownTest() {
         STORAGE.releaseResources();
-        deleteAll();
+        DEPOSITORY.deleteAll();
     }
 }
 

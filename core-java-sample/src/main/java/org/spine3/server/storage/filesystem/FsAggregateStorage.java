@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.getAggregateFilePath;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
 
@@ -44,16 +43,18 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
+    private final FileSystemDepository depository;
     private final String shortTypeName;
 
-    /*package*/ FsAggregateStorage(String shortTypeName) {
+    /*package*/ FsAggregateStorage(FileSystemDepository depository, String shortTypeName) {
+        this.depository = depository;
         this.shortTypeName = shortTypeName;
     }
 
     @Override
     protected void write(AggregateStorageRecord r) {
 
-        final String aggregateFilePath = getAggregateFilePath(shortTypeName, r.getAggregateId());
+        final String aggregateFilePath = depository.getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
         if (!aggregateFile.exists()) {
@@ -73,7 +74,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToStringWithEscaping(id);
-        final File file = new File(getAggregateFilePath(shortTypeName, stringId));
+        final File file = new File(depository.getAggregateFilePath(shortTypeName, stringId));
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
     }

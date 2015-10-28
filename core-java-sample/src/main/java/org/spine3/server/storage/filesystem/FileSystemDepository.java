@@ -44,8 +44,7 @@ import static org.spine3.util.IoUtil.*;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
-class FileSystemDepository {
+public class FileSystemDepository {
 
     protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
     protected static final String EVENT_STORE_FILE_NAME = "/event-store";
@@ -53,29 +52,24 @@ class FileSystemDepository {
     protected static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
 
-    //TODO:2015-10-27:alexander.yevsyukov: What would happen if we want to use this class with two executors?
-    @SuppressWarnings("StaticNonFinalField")
-    private static String fileStorePath = null;
-
-    @SuppressWarnings("StaticNonFinalField")
-    private static String commandStoreFilePath = null;
-
-    @SuppressWarnings("StaticNonFinalField")
-    private static String eventStoreFilePath = null;
-
     private static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
 
-    @SuppressWarnings("StaticNonFinalField")
-    private static File backup = null;
+    private final String fileStorePath;
+    private final String commandStoreFilePath;
+    private final String eventStoreFilePath;
 
-    private FileSystemDepository() {}
+    private File backup = null;
 
     /**
-     * Configures helper with file storage path.
+     * Creates new depository instance.
      *
-     * @param executorClass execution context class. Is used to choose target directory for storage.
+     * @param executorClass execution context class used to choose target directory for storage.
      */
-    protected static void configure(Class executorClass) {
+    public static FileSystemDepository newInstance(Class executorClass) {
+        return new FileSystemDepository(executorClass);
+    }
+
+    private FileSystemDepository(Class executorClass) {
 
         final String tempDir = getTempDir().getAbsolutePath();
 
@@ -91,7 +85,7 @@ class FileSystemDepository {
      * @param message the data to extract
      */
     @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
-    protected static void writeMessage(File file, Message message) {
+    protected void writeMessage(File file, Message message) {
 
         FileOutputStream fileOutputStream = null;
         OutputStream bufferedOutputStream = null;
@@ -148,7 +142,7 @@ class FileSystemDepository {
     /**
      * Removes all data from the file system storage.
      */
-    public static void deleteAll() {
+    public void deleteAll() {
 
         checkConfigured();
 
@@ -171,7 +165,7 @@ class FileSystemDepository {
      * @param aggregateIdString String representation of aggregate id
      * @return absolute path string
      */
-    protected static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
+    protected String getAggregateFilePath(String aggregateType, String aggregateIdString) {
         checkConfigured();
 
         final String filePath = fileStorePath + AGGREGATE_FILE_NAME_PREFIX +
@@ -183,7 +177,7 @@ class FileSystemDepository {
      * @return common command store file.
      * @throws IllegalStateException if helper is not configured.
      */
-    protected static File getCommandStoreFile() {
+    protected File getCommandStoreFile() {
 
         checkConfigured();
 
@@ -196,25 +190,25 @@ class FileSystemDepository {
      *
      * @return absolute path string
      */
-    protected static String getEventStoreFilePath() {
+    protected String getEventStoreFilePath() {
         checkConfigured();
         return eventStoreFilePath;
     }
 
-    protected static String getEntityStoreFilePath(String entityId) {
+    protected String getEntityStoreFilePath(String entityId) {
         checkConfigured();
         final String filePath = fileStorePath + ENTITY_STORE_DIR + entityId;
         return filePath;
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
-    private static void checkConfigured() {
+    private void checkConfigured() {
         if (isNullOrEmpty(fileStorePath)) {
             throw new IllegalStateException(NOT_CONFIGURED_MESSAGE);
         }
     }
 
-    private static void restoreFromBackup(File file) {
+    private void restoreFromBackup(File file) {
         boolean isDeleted = file.delete();
         if (isDeleted && backup != null) {
             //noinspection ResultOfMethodCallIgnored
@@ -222,7 +216,7 @@ class FileSystemDepository {
         }
     }
 
-    private static File makeBackupCopy(File sourceFile) throws IOException {
+    private File makeBackupCopy(File sourceFile) throws IOException {
 
         checkConfigured();
 
@@ -252,6 +246,7 @@ class FileSystemDepository {
     /**
      * Utility class for converting IDs to strings acceptable for file names.
      */
+    @SuppressWarnings("UtilityClass")
     public static class FsIdentifiers {
 
         private FsIdentifiers() {}

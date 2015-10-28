@@ -31,8 +31,6 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.getEventStoreFilePath;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.writeMessage;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.IoUtil.*;
 
@@ -43,22 +41,27 @@ import static org.spine3.util.IoUtil.*;
  */
 class FsEventStorage extends EventStorage {
 
+    private final FileSystemDepository depository;
+
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
 
     /**
      * Creates new storage instance.
+     * @param depository the depository to use for storing data.
      */
-    protected static EventStorage newInstance() {
-        return new FsEventStorage();
+    protected static EventStorage newInstance(FileSystemDepository depository) {
+        return new FsEventStorage(depository);
     }
 
-    private FsEventStorage() {}
+    private FsEventStorage(FileSystemDepository depository) {
+        this.depository = depository;
+    }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = new File(getEventStoreFilePath());
+        final File file = new File(depository.getEventStoreFilePath());
 
         final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
 
@@ -72,9 +75,9 @@ class FsEventStorage extends EventStorage {
 
         checkNotNull(record);
 
-        final String filePath = getEventStoreFilePath();
+        final String filePath = depository.getEventStoreFilePath();
         File file = new File(filePath);
-        writeMessage(file, record);
+        depository.writeMessage(file, record);
     }
 
     @Override
