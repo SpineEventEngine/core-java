@@ -25,7 +25,6 @@ import org.spine3.test.TestIdWithMultipleFields;
 import org.spine3.test.TestIdWithStringField;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class FileSystemDepositaryShould {
@@ -39,7 +38,7 @@ public class FileSystemDepositaryShould {
     public void convert_id_to_string_and_escape_chars_not_allowed_in_file_name() {
 
         final String charsNotAllowedInFileName = "\\/:*?\"<>|";
-        final String result = idToStringWithEscaping(charsNotAllowedInFileName);
+        final String result = FileSystemDepository.FsIdentifiers.idToStringWithEscaping(charsNotAllowedInFileName);
 
         assertEquals("&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;", result);
     }
@@ -62,7 +61,7 @@ public class FileSystemDepositaryShould {
                 " int=" + number +
                 " message { id=" + QUOT + nestedString + QUOT + " }";
 
-        final String actual = idToStringWithEscaping(idToConvert);
+        final String actual = FileSystemDepository.FsIdentifiers.idToStringWithEscaping(idToConvert);
 
         assertEquals(expected, actual);
     }
