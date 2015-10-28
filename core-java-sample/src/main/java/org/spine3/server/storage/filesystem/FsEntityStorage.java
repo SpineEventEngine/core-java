@@ -29,7 +29,6 @@ import java.io.File;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEntityStoreFilePath;
 
 /**
  * An entity storage based on the file system.

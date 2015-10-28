@@ -25,8 +25,8 @@ import org.spine3.test.TestIdWithMultipleFields;
 import org.spine3.test.TestIdWithStringField;
 import org.spine3.util.Tests;
 
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
@@ -79,4 +79,6 @@ public class FileSystemHelperShould {
 
         assertEquals(expected, actual);
     }
+
+    //TODO:2015-09-28:mikhail.mikhaylov: How to test FileSystemHelper.checkConfigured()?
 }

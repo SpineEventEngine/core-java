@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
 
 /**
  * A storage of aggregate root events and snapshots based on the file system.
@@ -51,7 +50,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void write(AggregateStorageRecord r) {
 
-        final String aggregateFilePath = FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, r.getAggregateId());
+        final String aggregateFilePath = getAggregateFilePath(shortTypeName, r.getAggregateId());
         final File aggregateFile = new File(aggregateFilePath);
 
         if (!aggregateFile.exists()) {

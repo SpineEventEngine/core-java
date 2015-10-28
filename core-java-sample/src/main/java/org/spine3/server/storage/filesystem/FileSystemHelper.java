@@ -32,12 +32,11 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getBackupFilePath;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getFileStorePath;
 import static org.spine3.util.Identifiers.idToString;
 
 //TODO:2015-10-27:alexander.yevsyukov: Refactor to move methods to corresponding classes.
@@ -50,6 +49,24 @@ import static org.spine3.util.Identifiers.idToString;
 @SuppressWarnings("UtilityClass")
 class FileSystemHelper {
 
+    protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    protected static final String EVENT_STORE_FILE_NAME = "/event-store";
+    private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
+    protected static final String PATH_DELIMITER = "/";
+    private static final String ENTITY_STORE_DIR = "/entity-store/";
+
+    //TODO:2015-10-27:alexander.yevsyukov: What would happen if we want to use this class with two executors?
+    @SuppressWarnings("StaticNonFinalField")
+    private static String fileStorePath = null;
+
+    @SuppressWarnings("StaticNonFinalField")
+    private static String commandStoreFilePath = null;
+
+    @SuppressWarnings("StaticNonFinalField")
+    private static String eventStoreFilePath = null;
+
+    protected static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
+
     @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;
 
@@ -59,10 +76,14 @@ class FileSystemHelper {
      * Configures helper with file storage path.
      *
      * @param executorClass execution context class. Is used to choose target directory for storage.
-     * @see FileSystemStoragePathHelper#configure(Class)
      */
-    public static void configure(Class executorClass) {
-        FileSystemStoragePathHelper.configure(executorClass);
+    protected static void configure(Class executorClass) {
+
+        final String tempDir = getTempDir().getAbsolutePath();
+
+        fileStorePath = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
+        commandStoreFilePath = fileStorePath + COMMAND_STORE_FILE_NAME;
+        eventStoreFilePath = fileStorePath + EVENT_STORE_FILE_NAME;
     }
 
     /**
@@ -140,6 +161,64 @@ class FileSystemHelper {
             deleteDirectory(folder);
         } catch (IOException e) {
             propagate(e);
+        }
+    }
+
+    protected static String getFileStorePath() {
+        return fileStorePath;
+    }
+
+    /**
+     * Returns path for aggregate storage file.
+     *
+     * @param aggregateType     the type of an aggregate
+     * @param aggregateIdString String representation of aggregate id
+     * @return absolute path string
+     */
+    protected static String getAggregateFilePath(String aggregateType, String aggregateIdString) {
+        checkConfigured();
+
+        final String filePath = fileStorePath + AGGREGATE_FILE_NAME_PREFIX +
+                aggregateType + PATH_DELIMITER + aggregateIdString;
+        return filePath;
+    }
+
+    /**
+     * Returns common command store file path.
+     *
+     * @return absolute path string
+     */
+    protected static String getCommandStoreFilePath() {
+        checkConfigured();
+        return commandStoreFilePath;
+    }
+
+    /**
+     * Returns common event store file path.
+     *
+     * @return absolute path string
+     */
+    protected static String getEventStoreFilePath() {
+        checkConfigured();
+        return eventStoreFilePath;
+    }
+
+    protected static String getEntityStoreFilePath(String entityId) {
+        checkConfigured();
+        final String filePath = fileStorePath + ENTITY_STORE_DIR + entityId;
+        return filePath;
+    }
+
+    protected static String getBackupFilePath(File sourceFile) {
+        checkConfigured();
+        final String path = sourceFile.toPath() + "_backup";
+        return path;
+    }
+
+    @SuppressWarnings("StaticVariableUsedBeforeInitialization")
+    protected static void checkConfigured() {
+        if (isNullOrEmpty(fileStorePath)) {
+            throw new IllegalStateException(NOT_CONFIGURED_MESSAGE);
         }
     }
 
@@ -309,6 +388,21 @@ class FileSystemHelper {
         copy(sourceFile.toPath(), backupFile.toPath());
 
         return backupFile;
+    }
+
+    private static File getTempDir() {
+        try {
+            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
+            File result = new File(tmpFile.getParent());
+            if (tmpFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                tmpFile.delete();
+            }
+            return result;
+        } catch (IOException e) {
+            propagate(e);
+        }
+        throw new IllegalStateException("Unable to get temporary directory for storage");
     }
 
     private enum LogSingleton {

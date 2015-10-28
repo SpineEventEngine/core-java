@@ -32,7 +32,6 @@ import java.util.NoSuchElementException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEventStoreFilePath;
 import static org.spine3.util.Events.toEventRecord;
 
 /**
