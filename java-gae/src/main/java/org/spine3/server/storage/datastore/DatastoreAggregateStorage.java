@@ -37,26 +37,26 @@ import static org.spine3.util.Identifiers.idToString;
  */
 public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DatastoreDepository<AggregateStorageRecord> datastoreDepository;
+    private final DatastoreDepository<AggregateStorageRecord> depository;
 
-    private DatastoreAggregateStorage(DatastoreDepository<AggregateStorageRecord> manager) {
-        this.datastoreDepository = manager;
+    private DatastoreAggregateStorage(DatastoreDepository<AggregateStorageRecord> depository) {
+        this.depository = depository;
     }
 
-    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreDepository<AggregateStorageRecord> manager) {
-        return new DatastoreAggregateStorage<>(manager);
+    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreDepository<AggregateStorageRecord> depository) {
+        return new DatastoreAggregateStorage<>(depository);
     }
 
     @Override
     protected void write(AggregateStorageRecord record) {
-        datastoreDepository.storeAggregateRecord(record.getAggregateId(), record);
+        depository.storeAggregateRecord(record.getAggregateId(), record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final List<AggregateStorageRecord> records = datastoreDepository.readByAggregateIdSortedByTime(idString, DESCENDING);
+        final List<AggregateStorageRecord> records = depository.readByAggregateIdSortedByTime(idString, DESCENDING);
         return records.iterator();
     }
 

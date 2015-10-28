@@ -37,9 +37,9 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
-    protected <M extends Message> DatastoreDepository<M> createManager(Descriptors.Descriptor descriptor) {
-        final LocalDatastoreDepository<M> manager = LocalDatastoreDepository.newInstance(descriptor);
-        return manager;
+    protected <M extends Message> DatastoreDepository<M> createDepository(Descriptors.Descriptor descriptor) {
+        final LocalDatastoreDepository<M> depository = LocalDatastoreDepository.newInstance(descriptor);
+        return depository;
     }
 
     @Override

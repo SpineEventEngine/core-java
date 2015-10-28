@@ -38,14 +38,14 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreDepository<CommandStoreRecord> manager = createManager(CommandStoreRecord.getDescriptor());
-        return DatastoreCommandStorage.newInstance(manager);
+        final DatastoreDepository<CommandStoreRecord> depository = createDepository(CommandStoreRecord.getDescriptor());
+        return DatastoreCommandStorage.newInstance(depository);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreDepository<EventStoreRecord> manager = createManager(EventStoreRecord.getDescriptor());
-        return DatastoreEventStorage.newInstance(manager);
+        final DatastoreDepository<EventStoreRecord> depository = createDepository(EventStoreRecord.getDescriptor());
+        return DatastoreEventStorage.newInstance(depository);
     }
 
     /**
@@ -53,8 +53,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DatastoreDepository<AggregateStorageRecord> manager = createManager(AggregateStorageRecord.getDescriptor());
-        return DatastoreAggregateStorage.newInstance(manager);
+        final DatastoreDepository<AggregateStorageRecord> depository = createDepository(AggregateStorageRecord.getDescriptor());
+        return DatastoreAggregateStorage.newInstance(depository);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DatastoreDepository<M> manager = createManager(descriptor);;
-        return DatastoreEntityStorage.newInstance(manager);
+        final DatastoreDepository<M> depository = createDepository(descriptor);;
+        return DatastoreEntityStorage.newInstance(depository);
     }
 
     @Override
@@ -79,9 +79,9 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     /**
-     * @return the manager implementation.
+     * @return the depository implementation.
      */
-    protected <M extends Message> DatastoreDepository<M> createManager(Descriptor descriptor) {
+    protected <M extends Message> DatastoreDepository<M> createDepository(Descriptor descriptor) {
         return DatastoreDepository.newInstance(descriptor);
     }
 

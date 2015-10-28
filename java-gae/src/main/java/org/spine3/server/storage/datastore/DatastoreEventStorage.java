@@ -38,27 +38,27 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 public class DatastoreEventStorage extends EventStorage {
 
-    private final DatastoreDepository<EventStoreRecord> datastoreDepository;
+    private final DatastoreDepository<EventStoreRecord> depository;
 
-    private DatastoreEventStorage(DatastoreDepository<EventStoreRecord> manager) {
-        this.datastoreDepository = manager;
+    private DatastoreEventStorage(DatastoreDepository<EventStoreRecord> depository) {
+        this.depository = depository;
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreDepository<EventStoreRecord> manager) {
-        return new DatastoreEventStorage(manager);
+    protected static DatastoreEventStorage newInstance(DatastoreDepository<EventStoreRecord> depository) {
+        return new DatastoreEventStorage(depository);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final List<EventStoreRecord> records = datastoreDepository.readAllSortedByTime(ASCENDING);
+        final List<EventStoreRecord> records = depository.readAllSortedByTime(ASCENDING);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        datastoreDepository.storeEventRecord(record.getEventId(), record);
+        depository.storeEventRecord(record.getEventId(), record);
     }
 
     @Override

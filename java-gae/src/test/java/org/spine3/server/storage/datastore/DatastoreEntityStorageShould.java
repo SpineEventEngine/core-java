@@ -36,11 +36,11 @@ import org.spine3.test.TestIdWithStringField;
  */
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
-    private static final DatastoreDepository<TestIdWithStringField> DATASTORE_MANAGER =
+    private static final DatastoreDepository<TestIdWithStringField> DATASTORE_DEPOSITORY =
             LocalDatastoreDepository.newInstance(TestIdWithStringField.getDescriptor());
 
     private static final EntityStorage<String, TestIdWithStringField> STORAGE =
-            DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
+            DatastoreEntityStorage.newInstance(DATASTORE_DEPOSITORY);
 
     public DatastoreEntityStorageShould() {
         super(STORAGE);
