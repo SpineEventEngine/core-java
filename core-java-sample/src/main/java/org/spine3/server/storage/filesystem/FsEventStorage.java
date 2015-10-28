@@ -61,10 +61,8 @@ class FsEventStorage extends EventStorage {
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = new File(depository.getEventStoreFilePath());
-
+        final File file = depository.getEventStoreFile();
         final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
-
         iterators.add(iterator);
 
         return iterator;
@@ -75,8 +73,7 @@ class FsEventStorage extends EventStorage {
 
         checkNotNull(record);
 
-        final String filePath = depository.getEventStoreFilePath();
-        File file = new File(filePath);
+        final File file = depository.getEventStoreFile();
         depository.writeMessage(file, record);
     }
 

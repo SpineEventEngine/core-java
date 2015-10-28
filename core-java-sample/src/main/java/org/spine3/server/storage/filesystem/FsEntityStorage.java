@@ -55,10 +55,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     public M read(I id) {
 
         final String idString = idToStringWithEscaping(id);
-
-        final String path = fileSystemDepository.getEntityStoreFilePath(idString);
-        File file = new File(path);
-
+        final File file = fileSystemDepository.getEntityStoreFile(idString);
         Message message = Any.getDefaultInstance();
 
         if (file.exists()) {
@@ -78,9 +75,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
 
-        final String path = fileSystemDepository.getEntityStoreFilePath(idString);
-        File file = new File(path);
+        final File file = fileSystemDepository.getEntityStoreFile(idString);
         final Any any = toAny(message);
+
         fileSystemDepository.writeMessage(file, any);
     }
 }

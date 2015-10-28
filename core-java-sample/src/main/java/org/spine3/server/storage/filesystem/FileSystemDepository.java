@@ -29,7 +29,6 @@ import org.spine3.util.FileNameEscaper;
 import java.io.*;
 import java.util.Map;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
@@ -37,22 +36,19 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.spine3.util.Identifiers.idToString;
 import static org.spine3.util.IoUtil.*;
 
-//TODO:2015-10-27:alexander.yevsyukov: Refactor to move methods to corresponding classes.
 /**
- * Used for reading/writing messages from/to file system.
+ * Reads/writes messages from/to file system.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
 public class FileSystemDepository {
 
-    protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
-    protected static final String EVENT_STORE_FILE_NAME = "/event-store";
+    private static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    private static final String EVENT_STORE_FILE_NAME = "/event-store";
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
-    protected static final String PATH_DELIMITER = "/";
+    private static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
-
-    private static final String NOT_CONFIGURED_MESSAGE = "Depository is not configured. Call 'configure' method.";
 
     private final String fileStorePath;
     private final String commandStoreFilePath;
@@ -85,7 +81,7 @@ public class FileSystemDepository {
      * @param message the data to extract
      */
     @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
-    protected void writeMessage(File file, Message message) {
+    public void writeMessage(File file, Message message) {
 
         FileOutputStream fileOutputStream = null;
         OutputStream bufferedOutputStream = null;
@@ -118,7 +114,7 @@ public class FileSystemDepository {
      *
      * @param file the {@link File} to read from.
      */
-    protected static Message readMessage(File file) {
+    public static Message readMessage(File file) {
 
         checkFileExists(file);
 
@@ -144,8 +140,6 @@ public class FileSystemDepository {
      */
     public void deleteAll() {
 
-        checkConfigured();
-
         final File folder = new File(fileStorePath);
         if (!folder.exists() || !folder.isDirectory()) {
             return;
@@ -159,53 +153,41 @@ public class FileSystemDepository {
     }
 
     /**
-     * Returns path for aggregate storage file.
-     *
-     * @param aggregateType     the type of an aggregate
-     * @param aggregateIdString String representation of aggregate id
-     * @return absolute path string
+     * @param aggregateType the type of an aggregate.
+     * @param aggregateIdString String representation of aggregate id.
+     * @return path for aggregate storage file.
      */
-    protected String getAggregateFilePath(String aggregateType, String aggregateIdString) {
-        checkConfigured();
+    public File getAggregateFile(String aggregateType, String aggregateIdString) {
 
         final String filePath = fileStorePath + AGGREGATE_FILE_NAME_PREFIX +
                 aggregateType + PATH_DELIMITER + aggregateIdString;
-        return filePath;
+        final File file = new File(filePath);
+        return file;
     }
 
     /**
      * @return common command store file.
-     * @throws IllegalStateException if depository is not configured.
      */
-    protected File getCommandStoreFile() {
-
-        checkConfigured();
-
+    public File getCommandStoreFile() {
         final File file = new File(commandStoreFilePath);
         return file;
     }
 
     /**
-     * Returns common event store file path.
-     *
-     * @return absolute path string
+     * @return common event store file path.
      */
-    protected String getEventStoreFilePath() {
-        checkConfigured();
-        return eventStoreFilePath;
+    public File getEventStoreFile() {
+        final File file = new File(eventStoreFilePath);
+        return file;
     }
 
-    protected String getEntityStoreFilePath(String entityId) {
-        checkConfigured();
+    /**
+     * @return entity file path.
+     */
+    public File getEntityStoreFile(String entityId) {
         final String filePath = fileStorePath + ENTITY_STORE_DIR + entityId;
-        return filePath;
-    }
-
-    @SuppressWarnings("StaticVariableUsedBeforeInitialization")
-    private void checkConfigured() {
-        if (isNullOrEmpty(fileStorePath)) {
-            throw new IllegalStateException(NOT_CONFIGURED_MESSAGE);
-        }
+        final File file = new File(filePath);
+        return file;
     }
 
     private void restoreFromBackup(File file) {
@@ -216,9 +198,7 @@ public class FileSystemDepository {
         }
     }
 
-    private File makeBackupCopy(File sourceFile) throws IOException {
-
-        checkConfigured();
+    private static File makeBackupCopy(File sourceFile) throws IOException {
 
         final String backupFilePath = sourceFile.toPath() + "_backup";
         File backupFile = new File(backupFilePath);

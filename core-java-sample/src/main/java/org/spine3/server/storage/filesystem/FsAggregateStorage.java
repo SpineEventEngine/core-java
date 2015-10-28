@@ -52,10 +52,9 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord r) {
+    protected void write(AggregateStorageRecord record) {
 
-        final String aggregateFilePath = depository.getAggregateFilePath(shortTypeName, r.getAggregateId());
-        final File aggregateFile = new File(aggregateFilePath);
+        final File aggregateFile = depository.getAggregateFile(shortTypeName, record.getAggregateId());
 
         if (!aggregateFile.exists()) {
             //noinspection ResultOfMethodCallIgnored
@@ -68,13 +67,13 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
             }
         }
 
-        writeToFile(aggregateFilePath, r);
+        writeToFile(aggregateFile, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToStringWithEscaping(id);
-        final File file = new File(depository.getAggregateFilePath(shortTypeName, stringId));
+        final File file = depository.getAggregateFile(shortTypeName, stringId);
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
     }
@@ -85,11 +84,11 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
         //reading mechanism closes streams as soon as the page is read.
     }
 
-    private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
+    private static void writeToFile(File file, AggregateStorageRecord r) {
 
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(aggregateFilePath, true);
+            fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException e) {
             propagate(e);
         }
