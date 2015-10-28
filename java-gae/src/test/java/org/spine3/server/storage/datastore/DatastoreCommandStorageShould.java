@@ -50,7 +50,7 @@ public class DatastoreCommandStorageShould {
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        LocalDatastoreDepository.clear();
     }
 
     @AfterClass

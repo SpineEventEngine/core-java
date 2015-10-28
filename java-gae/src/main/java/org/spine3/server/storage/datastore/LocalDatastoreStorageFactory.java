@@ -37,8 +37,8 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
     @Override
-    protected <M extends Message> DatastoreManager<M> createManager(Descriptors.Descriptor descriptor) {
-        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);
+    protected <M extends Message> DatastoreDepository<M> createManager(Descriptors.Descriptor descriptor) {
+        final LocalDatastoreDepository<M> manager = LocalDatastoreDepository.newInstance(descriptor);
         return manager;
     }
 
@@ -52,7 +52,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
          * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
          */
         if (!IS_WINDOWS) {
-            LocalDatastoreManager.start();
+            LocalDatastoreDepository.start();
         }
     }
 
@@ -61,10 +61,10 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         super.tearDown();
 
-        LocalDatastoreManager.clear();
+        LocalDatastoreDepository.clear();
 
         if (!IS_WINDOWS) {
-            LocalDatastoreManager.stop();
+            LocalDatastoreDepository.stop();
         }
     }
 

@@ -30,18 +30,18 @@ import static org.spine3.util.Identifiers.idToString;
  * {@link EntityStorage} implementation based on Google App Engine Datastore.
  *
  * @author Alexander Litus
- * @see DatastoreManager
+ * @see DatastoreDepository
  */
 public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DatastoreManager<M> datastoreManager;
+    private final DatastoreDepository<M> datastoreDepository;
 
-    private DatastoreEntityStorage(DatastoreManager<M> datastoreManager) {
-        this.datastoreManager = datastoreManager;
+    private DatastoreEntityStorage(DatastoreDepository<M> datastoreDepository) {
+        this.datastoreDepository = datastoreDepository;
     }
 
-    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreManager<M> datastoreManager) {
-        return new DatastoreEntityStorage<>(datastoreManager);
+    protected static <I, M extends Message> DatastoreEntityStorage<I, M> newInstance(DatastoreDepository<M> datastoreDepository) {
+        return new DatastoreEntityStorage<>(datastoreDepository);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<
 
         final String idString = idToString(id);
 
-        final Message message = datastoreManager.read(idString);
+        final Message message = datastoreDepository.read(idString);
 
         @SuppressWarnings("unchecked") // save because messages of only this type are written
         final M result = (M) message;
@@ -64,6 +64,6 @@ public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<
 
         final String idString = idToString(id);
 
-        datastoreManager.storeEntity(idString, message);
+        datastoreDepository.storeEntity(idString, message);
     }
 }

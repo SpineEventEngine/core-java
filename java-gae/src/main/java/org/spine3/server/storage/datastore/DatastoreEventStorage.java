@@ -34,31 +34,31 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  * Storage for event records based on Google Cloud Datastore.
  *
  * @author Alexander Litus
- * @see DatastoreManager
+ * @see DatastoreDepository
  */
 public class DatastoreEventStorage extends EventStorage {
 
-    private final DatastoreManager<EventStoreRecord> datastoreManager;
+    private final DatastoreDepository<EventStoreRecord> datastoreDepository;
 
-    private DatastoreEventStorage(DatastoreManager<EventStoreRecord> manager) {
-        this.datastoreManager = manager;
+    private DatastoreEventStorage(DatastoreDepository<EventStoreRecord> manager) {
+        this.datastoreDepository = manager;
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreManager<EventStoreRecord> manager) {
+    protected static DatastoreEventStorage newInstance(DatastoreDepository<EventStoreRecord> manager) {
         return new DatastoreEventStorage(manager);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final List<EventStoreRecord> records = datastoreManager.readAllSortedByTime(ASCENDING);
+        final List<EventStoreRecord> records = datastoreDepository.readAllSortedByTime(ASCENDING);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        datastoreManager.storeEventRecord(record.getEventId(), record);
+        datastoreDepository.storeEventRecord(record.getEventId(), record);
     }
 
     @Override

@@ -33,30 +33,30 @@ import static org.spine3.util.Identifiers.idToString;
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
  * @author Alexander Litus
- * @see DatastoreManager
+ * @see DatastoreDepository
  */
 public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DatastoreManager<AggregateStorageRecord> datastoreManager;
+    private final DatastoreDepository<AggregateStorageRecord> datastoreDepository;
 
-    private DatastoreAggregateStorage(DatastoreManager<AggregateStorageRecord> manager) {
-        this.datastoreManager = manager;
+    private DatastoreAggregateStorage(DatastoreDepository<AggregateStorageRecord> manager) {
+        this.datastoreDepository = manager;
     }
 
-    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreManager<AggregateStorageRecord> manager) {
+    protected static <I> DatastoreAggregateStorage<I> newInstance(DatastoreDepository<AggregateStorageRecord> manager) {
         return new DatastoreAggregateStorage<>(manager);
     }
 
     @Override
     protected void write(AggregateStorageRecord record) {
-        datastoreManager.storeAggregateRecord(record.getAggregateId(), record);
+        datastoreDepository.storeAggregateRecord(record.getAggregateId(), record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final List<AggregateStorageRecord> records = datastoreManager.readByAggregateIdSortedByTime(idString, DESCENDING);
+        final List<AggregateStorageRecord> records = datastoreDepository.readByAggregateIdSortedByTime(idString, DESCENDING);
         return records.iterator();
     }
 

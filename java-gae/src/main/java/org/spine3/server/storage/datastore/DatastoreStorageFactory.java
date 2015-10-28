@@ -38,13 +38,13 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreManager<CommandStoreRecord> manager = createManager(CommandStoreRecord.getDescriptor());
+        final DatastoreDepository<CommandStoreRecord> manager = createManager(CommandStoreRecord.getDescriptor());
         return DatastoreCommandStorage.newInstance(manager);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreManager<EventStoreRecord> manager = createManager(EventStoreRecord.getDescriptor());
+        final DatastoreDepository<EventStoreRecord> manager = createManager(EventStoreRecord.getDescriptor());
         return DatastoreEventStorage.newInstance(manager);
     }
 
@@ -53,7 +53,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DatastoreManager<AggregateStorageRecord> manager = createManager(AggregateStorageRecord.getDescriptor());
+        final DatastoreDepository<AggregateStorageRecord> manager = createManager(AggregateStorageRecord.getDescriptor());
         return DatastoreAggregateStorage.newInstance(manager);
     }
 
@@ -64,7 +64,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DatastoreManager<M> manager = createManager(descriptor);;
+        final DatastoreDepository<M> manager = createManager(descriptor);;
         return DatastoreEntityStorage.newInstance(manager);
     }
 
@@ -81,8 +81,8 @@ public class DatastoreStorageFactory implements StorageFactory {
     /**
      * @return the manager implementation.
      */
-    protected <M extends Message> DatastoreManager<M> createManager(Descriptor descriptor) {
-        return DatastoreManager.newInstance(descriptor);
+    protected <M extends Message> DatastoreDepository<M> createManager(Descriptor descriptor) {
+        return DatastoreDepository.newInstance(descriptor);
     }
 
     /**

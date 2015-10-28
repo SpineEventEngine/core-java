@@ -36,8 +36,8 @@ import org.spine3.test.TestIdWithStringField;
  */
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
-    private static final DatastoreManager<TestIdWithStringField> DATASTORE_MANAGER =
-            LocalDatastoreManager.newInstance(TestIdWithStringField.getDescriptor());
+    private static final DatastoreDepository<TestIdWithStringField> DATASTORE_MANAGER =
+            LocalDatastoreDepository.newInstance(TestIdWithStringField.getDescriptor());
 
     private static final EntityStorage<String, TestIdWithStringField> STORAGE =
             DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
@@ -53,7 +53,7 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        LocalDatastoreDepository.clear();
     }
 
     @AfterClass

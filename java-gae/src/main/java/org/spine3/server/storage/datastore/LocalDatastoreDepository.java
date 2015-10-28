@@ -37,7 +37,7 @@ import static org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.I
  * @author Alexander Litus
  */
 @SuppressWarnings("CallToSystemGetenv")
-public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M> {
+public class LocalDatastoreDepository<M extends Message> extends DatastoreDepository<M> {
 
     private static final String GCD_HOME_VAR_NAME = "GCD_HOME";
 
@@ -59,16 +59,16 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
 
     private static final LocalDevelopmentDatastore LOCAL_DATASTORE = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_OPTIONS);
 
-    private LocalDatastoreManager(Descriptor descriptor) {
+    private LocalDatastoreDepository(Descriptor descriptor) {
         super(descriptor, LOCAL_DATASTORE);
     }
 
     /**
-     * Creates a new manager instance.
+     * Creates a new depository instance.
      * @param descriptor the descriptor of the type of messages to save to the storage.
      */
-    public static <M extends Message> LocalDatastoreManager<M> newInstance(Descriptor descriptor) {
-        return new LocalDatastoreManager<>(descriptor);
+    public static <M extends Message> LocalDatastoreDepository<M> newInstance(Descriptor descriptor) {
+        return new LocalDatastoreDepository<>(descriptor);
     }
 
 
@@ -97,6 +97,8 @@ public class LocalDatastoreManager<M extends Message> extends DatastoreManager<M
                 "GCD_HOME environment variable is not configured. " +
                 "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment");
 
+            // GCD_HOME is not null
+            // noinspection ConstantConditions
             LOCAL_DATASTORE.start(GCD_HOME, LOCAL_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);

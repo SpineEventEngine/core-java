@@ -49,7 +49,7 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        LocalDatastoreDepository.clear();
     }
 
     @AfterClass

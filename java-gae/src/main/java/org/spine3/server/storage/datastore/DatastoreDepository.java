@@ -59,7 +59,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * @param <M> the type of messages to save to the storage.
  * @author Alexander Litus
  */
-public class DatastoreManager<M extends Message> {
+public class DatastoreDepository<M extends Message> {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -87,19 +87,19 @@ public class DatastoreManager<M extends Message> {
     private final TypeName typeName;
 
     /**
-     * Creates a new manager instance.
+     * Creates a new depository instance.
      * @param descriptor the descriptor of the type of messages to save to the storage.
      */
-    public static <M extends Message> DatastoreManager<M> newInstance(Descriptor descriptor) {
-        return new DatastoreManager<>(descriptor, DatastoreFactory.get().create(DEFAULT_OPTIONS));
+    public static <M extends Message> DatastoreDepository<M> newInstance(Descriptor descriptor) {
+        return new DatastoreDepository<>(descriptor, DatastoreFactory.get().create(DEFAULT_OPTIONS));
     }
 
     /**
-     * Creates a new manager instance.
+     * Creates a new depository instance.
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore the datastore implementation to use.
      */
-    protected DatastoreManager(Descriptor descriptor, Datastore datastore) {
+    protected DatastoreDepository(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
         this.typeName = TypeName.of(descriptor);
     }

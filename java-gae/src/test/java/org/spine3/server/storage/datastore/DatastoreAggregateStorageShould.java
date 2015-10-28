@@ -53,7 +53,7 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        LocalDatastoreDepository.clear();
     }
 
     @AfterClass
