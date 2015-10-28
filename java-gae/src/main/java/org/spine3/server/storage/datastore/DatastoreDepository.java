@@ -51,8 +51,6 @@ import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 
-//TODO:2015-10-27:alexander.yevsyukov: What does it manage?
-
 /**
  * Provides access to Google App Engine Cloud Datastore.
  *
