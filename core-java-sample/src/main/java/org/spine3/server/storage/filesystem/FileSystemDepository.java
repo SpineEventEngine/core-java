@@ -214,56 +214,6 @@ class FileSystemDepository {
         }
     }
 
-    /**
-     * Creates string representation of the passed ID escaping characters
-     * that are not allowed in file names.
-     *
-     * @param id the ID to convert
-     * @return string representation of the ID
-     * @see org.spine3.util.Identifiers#idToString(Object)
-     * @see org.spine3.util.FileNameEscaper#escape(String)
-     */
-    public static <I> String idToStringWithEscaping(I id) {
-
-        final I idNormalized = escapeStringFieldsIfIsMessage(id);
-        String result = idToString(idNormalized);
-        result = FileNameEscaper.getInstance().escape(result);
-
-        return result;
-    }
-
-    private static <I> I escapeStringFieldsIfIsMessage(I input) {
-        I result = input;
-        if (input instanceof Message) {
-            final Message message = escapeStringFields((Message) input);
-            @SuppressWarnings("unchecked")
-            I castedMessage = (I) message; // cast is safe because input is Message
-            result = castedMessage;
-        }
-        return result;
-    }
-
-    private static Message escapeStringFields(Message message) {
-
-        final Message.Builder result = message.toBuilder();
-        final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
-
-        final FileNameEscaper escaper = FileNameEscaper.getInstance();
-
-        for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
-
-            Object value = fields.get(descriptor);
-
-            if (descriptor.getJavaType() == STRING) {
-                value = escaper.escape(value.toString());
-            }
-
-            result.setField(descriptor, value);
-        }
-
-        return result.build();
-    }
-
     private static void restoreFromBackup(File file) {
         boolean isDeleted = file.delete();
         if (isDeleted && backup != null) {
@@ -297,5 +247,63 @@ class FileSystemDepository {
             propagate(e);
         }
         throw new IllegalStateException("Unable to get temporary directory for storage");
+    }
+
+    /**
+     * Utility class for converting IDs to strings acceptable for file names.
+     */
+    public static class Identifiers {
+
+        private Identifiers() {}
+
+        /**
+         * Creates string representation of the passed ID escaping characters
+         * that are not allowed in file names.
+         *
+         * @param id the ID to convert
+         * @return string representation of the ID
+         * @see org.spine3.util.Identifiers#idToString(Object)
+         * @see FileNameEscaper#escape(String)
+         */
+        public static <I> String idToStringWithEscaping(I id) {
+
+            final I idNormalized = escapeStringFieldsIfIsMessage(id);
+            String result = idToString(idNormalized);
+            result = FileNameEscaper.getInstance().escape(result);
+
+            return result;
+        }
+
+        private static <I> I escapeStringFieldsIfIsMessage(I input) {
+            I result = input;
+            if (input instanceof Message) {
+                final Message message = escapeStringFields((Message) input);
+                @SuppressWarnings("unchecked")
+                I castedMessage = (I) message; // cast is safe because input is Message
+                result = castedMessage;
+            }
+            return result;
+        }
+
+        private static Message escapeStringFields(Message message) {
+
+            final Message.Builder result = message.toBuilder();
+            final Map<Descriptors.FieldDescriptor, Object> fields = message.getAllFields();
+
+            final FileNameEscaper escaper = FileNameEscaper.getInstance();
+
+            for (Descriptors.FieldDescriptor descriptor : fields.keySet()) {
+
+                Object value = fields.get(descriptor);
+
+                if (descriptor.getJavaType() == STRING) {
+                    value = escaper.escape(value.toString());
+                }
+
+                result.setField(descriptor, value);
+            }
+
+            return result.build();
+        }
     }
 }

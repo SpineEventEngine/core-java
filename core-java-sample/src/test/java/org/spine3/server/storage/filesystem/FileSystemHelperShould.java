@@ -27,7 +27,7 @@ import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.Identifiers.idToStringWithEscaping;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class FileSystemHelperShould {

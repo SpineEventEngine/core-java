@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.Identifiers.idToStringWithEscaping;
 import static org.spine3.server.storage.filesystem.FileSystemDepository.getAggregateFilePath;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.idToStringWithEscaping;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
 
