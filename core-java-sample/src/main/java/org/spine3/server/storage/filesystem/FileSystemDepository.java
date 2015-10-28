@@ -52,7 +52,7 @@ public class FileSystemDepository {
     protected static final String PATH_DELIMITER = "/";
     private static final String ENTITY_STORE_DIR = "/entity-store/";
 
-    private static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
+    private static final String NOT_CONFIGURED_MESSAGE = "Depository is not configured. Call 'configure' method.";
 
     private final String fileStorePath;
     private final String commandStoreFilePath;
@@ -175,7 +175,7 @@ public class FileSystemDepository {
 
     /**
      * @return common command store file.
-     * @throws IllegalStateException if helper is not configured.
+     * @throws IllegalStateException if depository is not configured.
      */
     protected File getCommandStoreFile() {
 
