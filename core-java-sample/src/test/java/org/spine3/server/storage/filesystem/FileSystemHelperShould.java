@@ -27,7 +27,7 @@ import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.idToStringWithEscaping;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class FileSystemHelperShould {
@@ -41,7 +41,7 @@ public class FileSystemHelperShould {
     @SuppressWarnings("OverlyBroadCatchBlock")
     public void have_private_constructor() {
         try {
-            Tests.callPrivateUtilityConstructor(FileSystemHelper.class);
+            Tests.callPrivateUtilityConstructor(FileSystemDepository.class);
         } catch (Exception ignored) {
             fail(UTILITY_CLASS_SHOULD_HAVE_PRIVATE_CONSTRUCTOR);
         }

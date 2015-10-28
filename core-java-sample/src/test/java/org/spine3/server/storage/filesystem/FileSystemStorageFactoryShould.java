@@ -37,8 +37,8 @@ public class FileSystemStorageFactoryShould {
 
     @Before
     public void setUpTest() {
-        FileSystemHelper.configure(FileSystemStorageFactoryShould.class);
-        FileSystemHelper.deleteAll();
+        FileSystemDepository.configure(FileSystemStorageFactoryShould.class);
+        FileSystemDepository.deleteAll();
     }
 
     @Test

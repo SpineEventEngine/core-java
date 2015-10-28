@@ -29,8 +29,8 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.CommandRequestFactory;
 
-import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.configure;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAll;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.

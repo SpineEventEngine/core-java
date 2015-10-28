@@ -23,12 +23,9 @@ package org.spine3.server.storage.filesystem;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.Messages;
 import org.spine3.util.FileNameEscaper;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Map;
 
@@ -38,16 +35,17 @@ import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.util.IoUtil.*;
 
 //TODO:2015-10-27:alexander.yevsyukov: Refactor to move methods to corresponding classes.
 /**
- * Utility class for working with file system.
+ * Used for reading/writing messages from/to file system.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
-class FileSystemHelper {
+class FileSystemDepository {
 
     protected static final String COMMAND_STORE_FILE_NAME = "/command-store";
     protected static final String EVENT_STORE_FILE_NAME = "/event-store";
@@ -65,12 +63,12 @@ class FileSystemHelper {
     @SuppressWarnings("StaticNonFinalField")
     private static String eventStoreFilePath = null;
 
-    protected static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
+    private static final String NOT_CONFIGURED_MESSAGE = "Helper is not configured. Call 'configure' method.";
 
     @SuppressWarnings("StaticNonFinalField")
     private static File backup = null;
 
-    private FileSystemHelper() {}
+    private FileSystemDepository() {}
 
     /**
      * Configures helper with file storage path.
@@ -152,7 +150,9 @@ class FileSystemHelper {
      */
     public static void deleteAll() {
 
-        final File folder = new File(getFileStorePath());
+        checkConfigured();
+
+        final File folder = new File(fileStorePath);
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
@@ -162,10 +162,6 @@ class FileSystemHelper {
         } catch (IOException e) {
             propagate(e);
         }
-    }
-
-    protected static String getFileStorePath() {
-        return fileStorePath;
     }
 
     /**
@@ -184,13 +180,15 @@ class FileSystemHelper {
     }
 
     /**
-     * Returns common command store file path.
-     *
-     * @return absolute path string
+     * @return common command store file.
+     * @throws IllegalStateException if helper is not configured.
      */
-    protected static String getCommandStoreFilePath() {
+    protected static File getCommandStoreFile() {
+
         checkConfigured();
-        return commandStoreFilePath;
+
+        final File file = new File(commandStoreFilePath);
+        return file;
     }
 
     /**
@@ -209,118 +207,11 @@ class FileSystemHelper {
         return filePath;
     }
 
-    protected static String getBackupFilePath(File sourceFile) {
-        checkConfigured();
-        final String path = sourceFile.toPath() + "_backup";
-        return path;
-    }
-
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
-    protected static void checkConfigured() {
+    private static void checkConfigured() {
         if (isNullOrEmpty(fileStorePath)) {
             throw new IllegalStateException(NOT_CONFIGURED_MESSAGE);
         }
-    }
-
-    /**
-     * Closes passed closeables one by one silently.
-     * <p/>
-     * Logs each {@link IOException} if it occurs.
-     */
-     @SuppressWarnings("ConstantConditions")
-    public static void closeSilently(@Nullable Closeable... closeables) {
-        if (closeables == null) {
-            return;
-        }
-        try {
-            for (Closeable c : closeables) {
-                if (c != null) {
-                    c.close();
-                }
-            }
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Exception while closing stream", e);
-            }
-        }
-    }
-
-    /**
-     * Flushes passed streams one by one.
-     * <p/>
-     * Logs each {@link IOException} if it occurs.
-     */
-    public static void flushSilently(@Nullable Flushable... flushables) {
-        try {
-            flush(flushables);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Exception while flushing stream", e);
-            }
-        }
-    }
-
-    /**
-     * Flushes streams in turn.
-     *
-     * @throws java.lang.RuntimeException if {@link IOException} occurs
-     */
-    public static void tryToFlush(@Nullable Flushable... flushables) {
-        try {
-            flush(flushables);
-        } catch (IOException e) {
-            propagate(e);
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private static void flush(@Nullable Flushable[] flushables) throws IOException {
-        if (flushables == null) {
-            return;
-        }
-        for (Flushable f : flushables) {
-            if (f != null) {
-                f.flush();
-            }
-        }
-    }
-
-    /**
-     * Flushes and closes output streams in turn silently. Logs IOException if occurs.
-     */
-    public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
-        if (streams == null) {
-            return;
-        }
-        flushSilently(streams);
-        closeSilently(streams);
-    }
-
-    /**
-     * @param file file to check
-     * @throws IllegalStateException if there is no such file
-     */
-    public static void checkFileExists(File file) {
-        if (!file.exists()) {
-            throw new IllegalStateException("No such file: " + file.getAbsolutePath());
-        }
-    }
-
-    /**
-     * Tries to open {@code FileInputStream} from file
-     *
-     * @throws RuntimeException if there is no such file
-     */
-    public static FileInputStream open(File file) {
-        FileInputStream fileInputStream = null;
-
-        try {
-            fileInputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            propagate(e);
-        }
-
-        return fileInputStream;
     }
 
     /**
@@ -382,7 +273,10 @@ class FileSystemHelper {
     }
 
     private static File makeBackupCopy(File sourceFile) throws IOException {
-        final String backupFilePath = getBackupFilePath(sourceFile);
+
+        checkConfigured();
+
+        final String backupFilePath = sourceFile.toPath() + "_backup";
         File backupFile = new File(backupFilePath);
 
         copy(sourceFile.toPath(), backupFile.toPath());
@@ -403,16 +297,5 @@ class FileSystemHelper {
             propagate(e);
         }
         throw new IllegalStateException("Unable to get temporary directory for storage");
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(FileSystemHelper.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

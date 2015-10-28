@@ -45,8 +45,8 @@ public class FileSystemStorageFactory implements StorageFactory {
     /**
      * Creates new storage factory instance.
      *
-     * @param executorClass execution context class which is used as {@link FileSystemHelper#configure(Class)} method parameter.
-     * @see FileSystemHelper#configure(Class)
+     * @param executorClass execution context class which is used as {@link FileSystemDepository#configure(Class)} method parameter.
+     * @see FileSystemDepository#configure(Class)
      */
     public static StorageFactory newInstance(Class executorClass) {
         return new FileSystemStorageFactory(executorClass);
@@ -82,11 +82,11 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public void setUp() {
-        FileSystemHelper.configure(executorClass);
+        FileSystemDepository.configure(executorClass);
     }
 
     @Override
     public void tearDown() {
-        FileSystemHelper.deleteAll();
+        FileSystemDepository.deleteAll();
     }
 }

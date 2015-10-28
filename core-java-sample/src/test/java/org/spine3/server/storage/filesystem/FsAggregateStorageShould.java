@@ -25,8 +25,8 @@ import org.junit.Before;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
-import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.configure;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAll;
 
 /**
  * @author Mikhail Mikhaylov

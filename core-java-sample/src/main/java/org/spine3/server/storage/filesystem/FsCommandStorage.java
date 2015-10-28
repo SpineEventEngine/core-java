@@ -26,8 +26,8 @@ import org.spine3.server.storage.CommandStoreRecord;
 import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.getCommandStoreFilePath;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.writeMessage;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.getCommandStoreFile;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.writeMessage;
 
 /**
  * A storage for aggregate root events and snapshots based on the file system.
@@ -50,8 +50,7 @@ class FsCommandStorage extends CommandStorage {
 
         checkNotNull(record);
 
-        final String filePath = getCommandStoreFilePath();
-        File file = new File(filePath);
+        File file = getCommandStoreFile();
         writeMessage(file, record);
     }
 }

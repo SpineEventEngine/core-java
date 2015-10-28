@@ -32,8 +32,8 @@ import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.deleteAll;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.configure;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.deleteAll;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 
