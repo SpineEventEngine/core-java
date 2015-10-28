@@ -28,7 +28,7 @@ import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.Identifiers.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
 import static org.spine3.server.storage.filesystem.FileSystemDepository.*;
 
 /**

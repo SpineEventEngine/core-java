@@ -252,9 +252,9 @@ class FileSystemDepository {
     /**
      * Utility class for converting IDs to strings acceptable for file names.
      */
-    public static class Identifiers {
+    public static class FsIdentifiers {
 
-        private Identifiers() {}
+        private FsIdentifiers() {}
 
         /**
          * Creates string representation of the passed ID escaping characters
