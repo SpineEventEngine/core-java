@@ -39,23 +39,18 @@ import static org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.I
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreDepository<M extends Message> extends DatastoreDepository<M> {
 
-    private static final String GCD_HOME_VAR_NAME = "GCD_HOME";
-
-    private static final String DATASET_VAR_NAME = "GAE_DATASET_ID";
-
-    private static final String GCD_HOME = System.getenv(GCD_HOME_VAR_NAME);
-
-    private static final String LOCALHOST = "http://localhost:8080";
+    private static final String GCD_HOME = System.getenv("GCD_HOME");
 
     private static final String LOCAL_DATASET_NAME = getDatasetName();
+    private static final String DEFAULT_DATASET_NAME = "spine-local-dataset";
+    private static final String DATASET_VAR_NAME = "GAE_DATASET_ID";
+
+    private static final String DEFAULT_HOST = "http://localhost:8080";
+    private static final String HOST_VAR_NAME = "LOCAL_DATASTORE_HOST";
 
     private static final String OPTION_TESTING_MODE = "testing";
 
-    private static final DatastoreOptions DEFAULT_OPTIONS = new DatastoreOptions.Builder()
-            .host(LOCALHOST)
-            .dataset(LOCAL_DATASET_NAME)
-            .build();
-
+    private static final DatastoreOptions DEFAULT_OPTIONS = getLocalDatastoreOptions();
 
     private static final LocalDevelopmentDatastore LOCAL_DATASTORE = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_OPTIONS);
 
@@ -70,7 +65,6 @@ public class LocalDatastoreDepository<M extends Message> extends DatastoreDeposi
     public static <M extends Message> LocalDatastoreDepository<M> newInstance(Descriptor descriptor) {
         return new LocalDatastoreDepository<>(descriptor);
     }
-
 
     /**
      * Starts the local Datastore server in testing mode.
@@ -131,8 +125,21 @@ public class LocalDatastoreDepository<M extends Message> extends DatastoreDeposi
         }
     }
 
+    private static DatastoreOptions getLocalDatastoreOptions() {
+        final String hostName = getHostName();
+        return new DatastoreOptions.Builder()
+                .host(hostName)
+                .dataset(LOCAL_DATASET_NAME)
+                .build();
+    }
+
     private static String getDatasetName() {
         final String datasetName = System.getenv(DATASET_VAR_NAME);
-        return datasetName != null ? datasetName : "spine-local-dataset";
+        return datasetName != null ? datasetName : DEFAULT_DATASET_NAME;
+    }
+
+    private static String getHostName() {
+        final String host = System.getenv(HOST_VAR_NAME);
+        return host != null ? host : DEFAULT_HOST;
     }
 }
