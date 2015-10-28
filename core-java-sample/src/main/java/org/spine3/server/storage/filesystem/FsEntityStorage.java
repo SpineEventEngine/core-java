@@ -20,11 +20,16 @@
 
 package org.spine3.server.storage.filesystem;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
+import java.io.File;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getEntityStoreFilePath;
 
 /**
  * An entity storage based on the file system.
@@ -47,7 +52,14 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
 
-        Message message = readEntity(idString);
+        final String path = getEntityStoreFilePath(idString);
+        File file = new File(path);
+
+        Message message = Any.getDefaultInstance();
+
+        if (file.exists()) {
+            message = readMessage(file);
+        }
 
         @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
         final M result = (M) message;
@@ -62,6 +74,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
 
-        writeEntity(idString, message);
+        final String path = getEntityStoreFilePath(idString);
+        File file = new File(path);
+        final Any any = toAny(message);
+        writeMessage(file, any);
     }
 }

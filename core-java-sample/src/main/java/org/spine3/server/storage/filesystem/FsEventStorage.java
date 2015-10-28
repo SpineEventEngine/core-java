@@ -68,8 +68,12 @@ class FsEventStorage extends EventStorage {
 
     @Override
     protected void write(EventStoreRecord record) {
-        checkNotNull(record, "Record shouldn't be null.");
-        FileSystemHelper.write(record);
+
+        checkNotNull(record);
+
+        final String filePath = getEventStoreFilePath();
+        File file = new File(filePath);
+        writeMessage(file, record);
     }
 
     @Override

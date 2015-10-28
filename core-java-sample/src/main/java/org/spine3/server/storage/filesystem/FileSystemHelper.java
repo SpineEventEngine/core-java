@@ -26,8 +26,6 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.storage.CommandStoreRecord;
-import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.FileNameEscaper;
 
 import javax.annotation.Nullable;
@@ -38,7 +36,8 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.*;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getBackupFilePath;
+import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getFileStorePath;
 import static org.spine3.util.Identifiers.idToString;
 
 //TODO:2015-10-27:alexander.yevsyukov: Refactor to move methods to corresponding classes.
@@ -48,7 +47,7 @@ import static org.spine3.util.Identifiers.idToString;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-@SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
+@SuppressWarnings("UtilityClass")
 class FileSystemHelper {
 
     @SuppressWarnings("StaticNonFinalField")
@@ -67,61 +66,64 @@ class FileSystemHelper {
     }
 
     /**
-     * Writes the {@code CommandStoreRecord} to common command store.
+     * Writes {@link Message} into {@link File} using {@link Message#writeDelimitedTo}.
      *
-     * @param record {@code CommandStoreRecord} instance
+     * @param file    the {@link File} to write data in
+     * @param message the data to extract
      */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public static void write(CommandStoreRecord record) {
+    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
+    protected static void writeMessage(File file, Message message) {
 
-        final String filePath = getCommandStoreFilePath();
-        File file = new File(filePath);
-        writeMessage(file, record);
+        FileOutputStream fileOutputStream = null;
+        OutputStream bufferedOutputStream = null;
+
+        try {
+            if (file.exists()) {
+                backup = makeBackupCopy(file);
+            } else {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            fileOutputStream = new FileOutputStream(file, true);
+            bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+
+            message.writeDelimitedTo(bufferedOutputStream);
+
+            if (backup != null) {
+                backup.delete();
+            }
+        } catch (IOException ignored) {
+            restoreFromBackup(file);
+        } finally {
+            flushAndCloseSilently(fileOutputStream, bufferedOutputStream);
+        }
     }
 
     /**
-     * Writes the {@code EventStoreRecord} to common event store.
+     * Reads {@link Message} from {@link File}.
      *
-     * @param record {@code EventStoreRecord} instance
+     * @param file the {@link File} to read from.
      */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public static void write(EventStoreRecord record) {
+    protected static Message readMessage(File file) {
 
-        final String filePath = getEventStoreFilePath();
-        File file = new File(filePath);
-        writeMessage(file, record);
-    }
+        checkFileExists(file);
 
-    /**
-     * Writes the {@code Message} to common event store.
-     *
-     * @param message {@code Message} message to write
-     */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public static void writeEntity(String idString, Message message) {
+        InputStream fileInputStream = open(file);
+        InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
-        final String path = getEntityStoreFilePath(idString);
-        File file = new File(path);
-        final Any any = Messages.toAny(message);
-        writeMessage(file, any);
-    }
+        Any any;
 
-    /**
-     * Reads the {@code Message} from common event store by string id.
-     * @return a message instance or empty message if there is no message with such ID
-     */
-    public static Message readEntity(String idString) {
-
-        final String path = getEntityStoreFilePath(idString);
-        File file = new File(path);
-
-        Message message = Any.getDefaultInstance();
-
-        if (file.exists()) {
-            message = readMessage(file);
+        try {
+            any = Any.parseDelimitedFrom(bufferedInputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
+        } finally {
+            closeSilently(fileInputStream, bufferedInputStream);
         }
 
-        return message;
+        final Message result = Messages.fromAny(any);
+        return result;
     }
 
     /**
@@ -142,7 +144,7 @@ class FileSystemHelper {
     }
 
     /**
-     * Closes passed closables one by one silently.
+     * Closes passed closeables one by one silently.
      * <p/>
      * Logs each {@link IOException} if it occurs.
      */
@@ -292,62 +294,6 @@ class FileSystemHelper {
         return result.build();
     }
 
-    /**
-     * Writes {@code Message} into {@code File} using {@code Message.writeDelimitedTo}.
-     *
-     * @param file    a {@code File} to write data in
-     * @param message data to extract
-     */
-    @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
-    private static void writeMessage(File file, Message message) {
-
-        FileOutputStream fileOutputStream = null;
-        OutputStream bufferedOutputStream = null;
-
-        try {
-            if (file.exists()) {
-                backup = makeBackupCopy(file);
-            } else {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-
-            fileOutputStream = new FileOutputStream(file, true);
-            bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-
-            message.writeDelimitedTo(bufferedOutputStream);
-
-            if (backup != null) {
-                backup.delete();
-            }
-        } catch (IOException ignored) {
-            restoreFromBackup(file);
-        } finally {
-            flushAndCloseSilently(fileOutputStream, bufferedOutputStream);
-        }
-    }
-
-    private static Message readMessage(File file) {
-
-        checkFileExists(file);
-
-        InputStream fileInputStream = open(file);
-        InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
-        Any any;
-
-        try {
-            any = Any.parseDelimitedFrom(bufferedInputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
-        } finally {
-            closeSilently(fileInputStream, bufferedInputStream);
-        }
-
-        final Message result = Messages.fromAny(any);
-        return result;
-    }
-
     private static void restoreFromBackup(File file) {
         boolean isDeleted = file.delete();
         if (isDeleted && backup != null) {
@@ -375,5 +321,4 @@ class FileSystemHelper {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }
