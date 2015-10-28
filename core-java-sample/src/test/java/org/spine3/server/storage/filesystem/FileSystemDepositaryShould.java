@@ -65,6 +65,4 @@ public class FileSystemDepositaryShould {
 
         assertEquals(expected, actual);
     }
-
-    // TODO:2015-10-28:alexander.litus: add more tests
 }
