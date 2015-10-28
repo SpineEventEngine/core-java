@@ -42,7 +42,7 @@ import static org.spine3.util.IoUtil.*;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class FileSystemDepository {
+class FsDepository {
 
     private static final String COMMAND_STORE_FILE_NAME = "/command-store";
     private static final String EVENT_STORE_FILE_NAME = "/event-store";
@@ -61,11 +61,11 @@ public class FileSystemDepository {
      *
      * @param executorClass execution context class used to choose target directory for storage.
      */
-    public static FileSystemDepository newInstance(Class executorClass) {
-        return new FileSystemDepository(executorClass);
+    public static FsDepository newInstance(Class executorClass) {
+        return new FsDepository(executorClass);
     }
 
-    private FileSystemDepository(Class executorClass) {
+    private FsDepository(Class executorClass) {
 
         final String tempDir = getTempDir().getAbsolutePath();
 

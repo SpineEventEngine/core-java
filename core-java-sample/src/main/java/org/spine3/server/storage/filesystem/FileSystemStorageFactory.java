@@ -40,7 +40,7 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
-    private final FileSystemDepository depository;
+    private final FsDepository depository;
 
     /**
      * Creates new storage factory instance.
@@ -52,7 +52,7 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     private FileSystemStorageFactory(Class executorClass) {
-        this.depository = FileSystemDepository.newInstance(executorClass);
+        this.depository = FsDepository.newInstance(executorClass);
     }
 
     @Override

@@ -42,7 +42,7 @@ import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class FsEventStorageShould extends EventStorageShould {
 
-    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsEventStorageShould.class);
+    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsEventStorageShould.class);
 
     private static final FsEventStorage STORAGE = (FsEventStorage) FsEventStorage.newInstance(DEPOSITORY);
 

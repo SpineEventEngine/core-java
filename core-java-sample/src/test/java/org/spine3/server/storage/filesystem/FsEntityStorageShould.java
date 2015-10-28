@@ -32,7 +32,7 @@ import org.spine3.test.TestIdWithStringField;
  */
 public class FsEntityStorageShould extends EntityStorageShould {
 
-    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsEntityStorageShould.class);
+    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsEntityStorageShould.class);
 
     private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance(DEPOSITORY);
 

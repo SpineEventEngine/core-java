@@ -28,8 +28,8 @@ import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.readMessage;
+import static org.spine3.server.storage.filesystem.FsDepository.FsIdentifiers.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FsDepository.readMessage;
 
 /**
  * An entity storage based on the file system.
@@ -38,16 +38,16 @@ import static org.spine3.server.storage.filesystem.FileSystemDepository.readMess
  */
 class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final FileSystemDepository fileSystemDepository;
+    private final FsDepository fileSystemDepository;
 
     /**
      * Creates new storage instance.
      */
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance(FileSystemDepository fileSystemDepository) {
+    protected static <I, M extends Message> EntityStorage<I, M> newInstance(FsDepository fileSystemDepository) {
         return new FsEntityStorage<>(fileSystemDepository);
     }
 
-    private FsEntityStorage(FileSystemDepository fileSystemDepository) {
+    private FsEntityStorage(FsDepository fileSystemDepository) {
         this.fileSystemDepository = fileSystemDepository;
     }
 

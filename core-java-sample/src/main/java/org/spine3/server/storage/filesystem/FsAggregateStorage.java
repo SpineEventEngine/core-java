@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemDepository.FsIdentifiers.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FsDepository.FsIdentifiers.idToStringWithEscaping;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
 
@@ -43,10 +43,10 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
-    private final FileSystemDepository depository;
+    private final FsDepository depository;
     private final String shortTypeName;
 
-    /*package*/ FsAggregateStorage(FileSystemDepository depository, String shortTypeName) {
+    /*package*/ FsAggregateStorage(FsDepository depository, String shortTypeName) {
         this.depository = depository;
         this.shortTypeName = shortTypeName;
     }

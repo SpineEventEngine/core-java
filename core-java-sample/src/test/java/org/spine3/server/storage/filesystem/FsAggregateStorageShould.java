@@ -29,7 +29,7 @@ import org.spine3.test.project.ProjectId;
  */
 public class FsAggregateStorageShould extends AggregateStorageShould {
 
-    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsAggregateStorageShould.class);
+    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsAggregateStorageShould.class);
 
     @SuppressWarnings("unchecked")
     private static final FsAggregateStorage<ProjectId> STORAGE =

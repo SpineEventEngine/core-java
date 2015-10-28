@@ -41,7 +41,7 @@ import static org.spine3.util.IoUtil.*;
  */
 class FsEventStorage extends EventStorage {
 
-    private final FileSystemDepository depository;
+    private final FsDepository depository;
 
     private final List<EventRecordFileIterator> iterators = newLinkedList();
 
@@ -50,11 +50,11 @@ class FsEventStorage extends EventStorage {
      * Creates new storage instance.
      * @param depository the depository to use for storing data.
      */
-    protected static EventStorage newInstance(FileSystemDepository depository) {
+    protected static EventStorage newInstance(FsDepository depository) {
         return new FsEventStorage(depository);
     }
 
-    private FsEventStorage(FileSystemDepository depository) {
+    private FsEventStorage(FsDepository depository) {
         this.depository = depository;
     }
 

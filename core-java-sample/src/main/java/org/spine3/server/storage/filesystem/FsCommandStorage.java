@@ -34,17 +34,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class FsCommandStorage extends CommandStorage {
 
-    private final FileSystemDepository depository;
+    private final FsDepository depository;
 
     /**
      * Creates new storage instance.
      * @param depository to use for storing data.
      */
-    protected static CommandStorage newInstance(FileSystemDepository depository) {
+    protected static CommandStorage newInstance(FsDepository depository) {
         return new FsCommandStorage(depository);
     }
 
-    private FsCommandStorage(FileSystemDepository depository) {
+    private FsCommandStorage(FsDepository depository) {
         this.depository = depository;
     }
 

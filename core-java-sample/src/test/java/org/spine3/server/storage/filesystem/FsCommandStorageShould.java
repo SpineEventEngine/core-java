@@ -36,7 +36,7 @@ import org.spine3.util.testutil.CommandRequestFactory;
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FsCommandStorageShould {
 
-    private static final FileSystemDepository DEPOSITORY = FileSystemDepository.newInstance(FsCommandStorageShould.class);
+    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsCommandStorageShould.class);
 
     private static final FsCommandStorage STORAGE = (FsCommandStorage) FsCommandStorage.newInstance(DEPOSITORY);
 
