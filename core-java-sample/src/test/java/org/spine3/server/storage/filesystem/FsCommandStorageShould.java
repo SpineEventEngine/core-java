@@ -29,7 +29,7 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.CommandRequestFactory;
 
 /**
- * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
  *
  * @author Alexander Litus
  */

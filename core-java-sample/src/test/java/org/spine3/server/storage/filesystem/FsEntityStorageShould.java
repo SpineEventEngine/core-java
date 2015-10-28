@@ -26,7 +26,7 @@ import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.test.TestIdWithStringField;
 
 /**
- * File system implementation of {@link org.spine3.server.storage.EntityStorage} tests.
+ * File system implementation of {@link EntityStorage} tests.
  *
  * @author Alexander Litus
  */
