@@ -31,9 +31,8 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
 
     private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsAggregateStorageShould.class);
 
-    @SuppressWarnings("unchecked")
     private static final FsAggregateStorage<ProjectId> STORAGE =
-            new FsAggregateStorage(DEPOSITORY, ProjectId.getDescriptor().getName());
+            new FsAggregateStorage<>(DEPOSITORY, ProjectId.getDescriptor().getName());
 
     public FsAggregateStorageShould() {
         super(STORAGE);
