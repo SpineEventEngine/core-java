@@ -78,6 +78,6 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         final File file = fileSystemDepository.getEntityStoreFile(idString);
         final Any any = toAny(message);
 
-        fileSystemDepository.writeMessage(file, any);
+        FsDepository.writeMessage(file, any);
     }
 }

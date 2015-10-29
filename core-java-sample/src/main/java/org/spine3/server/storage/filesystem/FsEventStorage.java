@@ -74,7 +74,7 @@ class FsEventStorage extends EventStorage {
         checkNotNull(record);
 
         final File file = depository.getEventStoreFile();
-        depository.writeMessage(file, record);
+        FsDepository.writeMessage(file, record);
     }
 
     @Override

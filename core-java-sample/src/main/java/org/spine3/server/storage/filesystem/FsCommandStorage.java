@@ -54,6 +54,6 @@ class FsCommandStorage extends CommandStorage {
         checkNotNull(record);
 
         File file = depository.getCommandStoreFile();
-        depository.writeMessage(file, record);
+        FsDepository.writeMessage(file, record);
     }
 }

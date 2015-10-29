@@ -54,7 +54,7 @@ class FsDepository {
     private final String commandStoreFilePath;
     private final String eventStoreFilePath;
 
-    private File backup = null;
+    private static File backup = null;
 
     /**
      * Creates new depository instance.
@@ -81,7 +81,7 @@ class FsDepository {
      * @param message the data to extract
      */
     @SuppressWarnings({"TypeMayBeWeakened", "ResultOfMethodCallIgnored", "OverlyBroadCatchBlock"})
-    public void writeMessage(File file, Message message) {
+    public static void writeMessage(File file, Message message) {
 
         FileOutputStream fileOutputStream = null;
         OutputStream bufferedOutputStream = null;
@@ -190,7 +190,7 @@ class FsDepository {
         return file;
     }
 
-    private void restoreFromBackup(File file) {
+    private static void restoreFromBackup(File file) {
         boolean isDeleted = file.delete();
         if (isDeleted && backup != null) {
             //noinspection ResultOfMethodCallIgnored
