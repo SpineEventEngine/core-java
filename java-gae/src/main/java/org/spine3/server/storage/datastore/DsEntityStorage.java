@@ -35,13 +35,13 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DsDepository<M> datastoreDepository;
+    private final DsStorage<M> datastoreDepository;
 
-    private DsEntityStorage(DsDepository<M> datastoreDepository) {
+    private DsEntityStorage(DsStorage<M> datastoreDepository) {
         this.datastoreDepository = datastoreDepository;
     }
 
-    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(DsDepository<M> datastoreDepository) {
+    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(DsStorage<M> datastoreDepository) {
         return new DsEntityStorage<>(datastoreDepository);
     }
 

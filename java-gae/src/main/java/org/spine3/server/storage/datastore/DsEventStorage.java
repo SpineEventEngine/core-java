@@ -39,13 +39,13 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 class DsEventStorage extends EventStorage {
 
-    private final DsDepository<EventStoreRecord> depository;
+    private final DsStorage<EventStoreRecord> depository;
 
-    private DsEventStorage(DsDepository<EventStoreRecord> depository) {
+    private DsEventStorage(DsStorage<EventStoreRecord> depository) {
         this.depository = depository;
     }
 
-    protected static DsEventStorage newInstance(DsDepository<EventStoreRecord> depository) {
+    protected static DsEventStorage newInstance(DsStorage<EventStoreRecord> depository) {
         return new DsEventStorage(depository);
     }
 

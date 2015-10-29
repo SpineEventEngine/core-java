@@ -38,13 +38,13 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DsDepository<AggregateStorageRecord> depository;
+    private final DsStorage<AggregateStorageRecord> depository;
 
-    private DsAggregateStorage(DsDepository<AggregateStorageRecord> depository) {
+    private DsAggregateStorage(DsStorage<AggregateStorageRecord> depository) {
         this.depository = depository;
     }
 
-    protected static <I> DsAggregateStorage<I> newInstance(DsDepository<AggregateStorageRecord> depository) {
+    protected static <I> DsAggregateStorage<I> newInstance(DsStorage<AggregateStorageRecord> depository) {
         return new DsAggregateStorage<>(depository);
     }
 

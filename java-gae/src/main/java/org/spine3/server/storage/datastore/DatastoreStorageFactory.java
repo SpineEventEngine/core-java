@@ -55,13 +55,13 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DsDepository<CommandStoreRecord> depository = createDepository(CommandStoreRecord.getDescriptor());
+        final DsStorage<CommandStoreRecord> depository = createDepository(CommandStoreRecord.getDescriptor());
         return DsCommandStorage.newInstance(depository);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DsDepository<EventStoreRecord> depository = createDepository(EventStoreRecord.getDescriptor());
+        final DsStorage<EventStoreRecord> depository = createDepository(EventStoreRecord.getDescriptor());
         return DsEventStorage.newInstance(depository);
     }
 
@@ -70,7 +70,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DsDepository<AggregateStorageRecord> depository = createDepository(AggregateStorageRecord.getDescriptor());
+        final DsStorage<AggregateStorageRecord> depository = createDepository(AggregateStorageRecord.getDescriptor());
         return DsAggregateStorage.newInstance(depository);
     }
 
@@ -81,7 +81,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DsDepository<M> depository = createDepository(descriptor);;
+        final DsStorage<M> depository = createDepository(descriptor);;
         return DsEntityStorage.newInstance(depository);
     }
 
@@ -95,7 +95,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
-    private <M extends Message> DsDepository<M> createDepository(Descriptor descriptor) {
-        return new DsDepository<>(descriptor, datastore);
+    private <M extends Message> DsStorage<M> createDepository(Descriptor descriptor) {
+        return new DsStorage<>(descriptor, datastore);
     }
 }

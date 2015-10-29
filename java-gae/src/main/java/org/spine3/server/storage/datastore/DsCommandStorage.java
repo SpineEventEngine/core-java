@@ -32,13 +32,13 @@ import org.spine3.server.storage.CommandStoreRecord;
  */
 class DsCommandStorage extends CommandStorage {
 
-    private final DsDepository<CommandStoreRecord> datastoreDepository;
+    private final DsStorage<CommandStoreRecord> datastoreDepository;
 
-    private DsCommandStorage(DsDepository<CommandStoreRecord> datastoreDepository) {
+    private DsCommandStorage(DsStorage<CommandStoreRecord> datastoreDepository) {
         this.datastoreDepository = datastoreDepository;
     }
 
-    protected static CommandStorage newInstance(DsDepository<CommandStoreRecord> datastoreDepository) {
+    protected static CommandStorage newInstance(DsStorage<CommandStoreRecord> datastoreDepository) {
         return new DsCommandStorage(datastoreDepository);
     }
 
