@@ -72,7 +72,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * Creates a new factory instance.
-     * @param options options used to create a {@link LocalDevelopmentDatastore}
+     * @param options {@link DatastoreOptions} used to create a {@link LocalDevelopmentDatastore}
      */
     public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
         final LocalDevelopmentDatastore datastore = LocalDevelopmentDatastoreFactory.get().create(options);
