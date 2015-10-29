@@ -35,7 +35,7 @@ import static org.spine3.util.Identifiers.idToString;
  * @author Alexander Litus
  * @see DatastoreDepository
  */
-public class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
+class DatastoreAggregateStorage<I> extends AggregateStorage<I> {
 
     private final DatastoreDepository<AggregateStorageRecord> depository;
 

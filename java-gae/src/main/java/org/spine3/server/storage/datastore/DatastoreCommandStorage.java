@@ -29,7 +29,7 @@ import org.spine3.server.storage.CommandStoreRecord;
  * @see DatastoreDepository
  * @author Alexander Litus
  */
-public class DatastoreCommandStorage extends CommandStorage {
+class DatastoreCommandStorage extends CommandStorage {
 
     private final DatastoreDepository<CommandStoreRecord> datastoreDepository;
 

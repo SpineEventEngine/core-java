@@ -36,7 +36,7 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  * @author Alexander Litus
  * @see DatastoreDepository
  */
-public class DatastoreEventStorage extends EventStorage {
+class DatastoreEventStorage extends EventStorage {
 
     private final DatastoreDepository<EventStoreRecord> depository;
 

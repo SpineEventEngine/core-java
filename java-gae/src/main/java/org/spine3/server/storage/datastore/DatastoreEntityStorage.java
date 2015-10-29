@@ -32,7 +32,7 @@ import static org.spine3.util.Identifiers.idToString;
  * @author Alexander Litus
  * @see DatastoreDepository
  */
-public class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     private final DatastoreDepository<M> datastoreDepository;
 
