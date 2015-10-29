@@ -36,14 +36,14 @@ import org.spine3.test.project.ProjectId;
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class DatastoreAggregateStorageShould extends AggregateStorageShould {
+public class DsAggregateStorageShould extends AggregateStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
 
     @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
     private static final AggregateStorage<ProjectId> STORAGE = DATASTORE_FACTORY.createAggregateStorage(null);
 
-    public DatastoreAggregateStorageShould() {
+    public DsAggregateStorageShould() {
         super(STORAGE);
     }
 

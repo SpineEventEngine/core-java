@@ -37,7 +37,7 @@ import org.spine3.util.testutil.CommandRequestFactory;
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class DatastoreCommandStorageShould {
+public class DsCommandStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
 

@@ -34,13 +34,13 @@ import org.spine3.test.project.ProjectId;
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
-public class DatastoreEntityStorageShould extends EntityStorageShould {
+public class DsEntityStorageShould extends EntityStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
 
     private static final EntityStorage<String, ProjectId> STORAGE = DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
 
-    public DatastoreEntityStorageShould() {
+    public DsEntityStorageShould() {
         super(STORAGE);
     }
 

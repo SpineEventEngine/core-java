@@ -34,13 +34,13 @@ import org.spine3.server.storage.EventStorageShould;
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class DatastoreEventStorageShould extends EventStorageShould {
+public class DsEventStorageShould extends EventStorageShould {
 
     private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
 
     private static final EventStorage STORAGE = DATASTORE_FACTORY.createEventStorage();
 
-    public DatastoreEventStorageShould() {
+    public DsEventStorageShould() {
         super(STORAGE);
     }
 
