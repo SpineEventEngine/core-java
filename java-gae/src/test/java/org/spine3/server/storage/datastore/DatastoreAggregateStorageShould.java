@@ -65,6 +65,6 @@ public class DatastoreAggregateStorageShould extends AggregateStorageShould {
 
     @Test
     public void have_empty_release_resources_method() {
-        ((DatastoreAggregateStorage) STORAGE).releaseResources();
+        ((DsAggregateStorage) STORAGE).releaseResources();
     }
 }

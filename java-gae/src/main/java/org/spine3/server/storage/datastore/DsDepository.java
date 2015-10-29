@@ -57,7 +57,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DatastoreDepository<M extends Message> {
+class DsDepository<M extends Message> {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -78,7 +78,7 @@ class DatastoreDepository<M extends Message> {
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore the datastore implementation to use.
      */
-    protected DatastoreDepository(Descriptor descriptor, Datastore datastore) {
+    protected DsDepository(Descriptor descriptor, Datastore datastore) {
         this.datastore = datastore;
         this.typeName = TypeName.of(descriptor);
     }

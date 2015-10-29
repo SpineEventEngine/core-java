@@ -20,46 +20,45 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.spine3.base.EventRecord;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.AggregateStorageRecord;
 
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
-import static org.spine3.util.Events.toEventRecordsIterator;
+import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
+import static org.spine3.util.Identifiers.idToString;
 
 /**
- * Storage for event records based on Google Cloud Datastore.
+ * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  * @author Alexander Litus
  */
-class DatastoreEventStorage extends EventStorage {
+class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final DatastoreDepository<EventStoreRecord> depository;
+    private final DsDepository<AggregateStorageRecord> depository;
 
-    private DatastoreEventStorage(DatastoreDepository<EventStoreRecord> depository) {
+    private DsAggregateStorage(DsDepository<AggregateStorageRecord> depository) {
         this.depository = depository;
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreDepository<EventStoreRecord> depository) {
-        return new DatastoreEventStorage(depository);
+    protected static <I> DsAggregateStorage<I> newInstance(DsDepository<AggregateStorageRecord> depository) {
+        return new DsAggregateStorage<>(depository);
     }
 
     @Override
-    public Iterator<EventRecord> allEvents() {
-
-        final List<EventStoreRecord> records = depository.readAllSortedByTime(ASCENDING);
-        final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
-        return iterator;
+    protected void write(AggregateStorageRecord record) {
+        depository.storeAggregateRecord(record.getAggregateId(), record);
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
-        depository.storeEventRecord(record.getEventId(), record);
+    protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+
+        final String idString = idToString(id);
+        final List<AggregateStorageRecord> records = depository.readByAggregateIdSortedByTime(idString, DESCENDING);
+        return records.iterator();
     }
 
     @Override

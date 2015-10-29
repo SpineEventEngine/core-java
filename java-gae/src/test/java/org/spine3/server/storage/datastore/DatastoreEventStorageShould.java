@@ -61,6 +61,6 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @Test
     public void have_empty_release_resources_method() {
-        ((DatastoreEventStorage) STORAGE).releaseResources();
+        ((DsEventStorage) STORAGE).releaseResources();
     }
 }
