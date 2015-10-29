@@ -21,7 +21,11 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 
 /**
@@ -29,10 +33,9 @@ import org.spine3.test.project.ProjectId;
  */
 public class FsAggregateStorageShould extends AggregateStorageShould {
 
-    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsAggregateStorageShould.class);
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsAggregateStorageShould.class);
 
-    private static final FsAggregateStorage<ProjectId> STORAGE =
-            new FsAggregateStorage<>(DEPOSITORY, ProjectId.getDescriptor().getName());
+    private static final AggregateStorage<ProjectId> STORAGE = FACTORY.createAggregateStorage(AggregateForStorageTests.class);
 
     public FsAggregateStorageShould() {
         super(STORAGE);
@@ -40,7 +43,16 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
 
     @After
     public void tearDownTest() {
-        STORAGE.releaseResources();
-        DEPOSITORY.deleteAll();
+        FACTORY.tearDown();
+    }
+
+    public static class AggregateForStorageTests extends Aggregate<ProjectId, Project> {
+        protected AggregateForStorageTests(ProjectId id) {
+            super(id);
+        }
+        @SuppressWarnings("ReturnOfNull")
+        @Override protected Project getDefaultState() {
+            return null;
+        }
     }
 }

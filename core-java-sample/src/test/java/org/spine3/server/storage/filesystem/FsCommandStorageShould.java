@@ -20,11 +20,11 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.CommandRequestFactory;
 
@@ -36,21 +36,16 @@ import org.spine3.util.testutil.CommandRequestFactory;
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class FsCommandStorageShould {
 
-    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsCommandStorageShould.class);
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsCommandStorageShould.class);
 
-    private static final FsCommandStorage STORAGE = (FsCommandStorage) FsCommandStorage.newInstance(DEPOSITORY);
+    private static final FsCommandStorage STORAGE = (FsCommandStorage) FACTORY.createCommandStorage();
 
     private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
 
 
-    @Before
-    public void setUpTest() {
-        DEPOSITORY.deleteAll();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        DEPOSITORY.deleteAll();
+    @After
+    public void tearDownTest() {
+        FACTORY.tearDown();
     }
 
     @Test(expected = NullPointerException.class)

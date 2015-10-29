@@ -26,6 +26,9 @@ import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
@@ -41,6 +44,8 @@ public class FileSystemStorageFactory implements StorageFactory {
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
     private final FsDepository depository;
+
+    private final List<FsEventStorage> eventStorages = newLinkedList();
 
     /**
      * Creates new storage factory instance.
@@ -62,7 +67,9 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public EventStorage createEventStorage() {
-        return FsEventStorage.newInstance(depository);
+        final FsEventStorage storage = FsEventStorage.newInstance(depository);
+        eventStorages.add(storage);
+        return storage;
     }
 
     @Override
@@ -86,6 +93,9 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public void tearDown() {
+        for (FsEventStorage storage : eventStorages) {
+            storage.releaseResources();
+        }
         depository.deleteAll();
     }
 }

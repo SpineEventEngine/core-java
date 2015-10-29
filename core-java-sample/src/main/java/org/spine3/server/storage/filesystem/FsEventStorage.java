@@ -50,7 +50,7 @@ class FsEventStorage extends EventStorage {
      * Creates new storage instance.
      * @param depository the depository to use for storing data.
      */
-    protected static EventStorage newInstance(FsDepository depository) {
+    protected static FsEventStorage newInstance(FsDepository depository) {
         return new FsEventStorage(depository);
     }
 

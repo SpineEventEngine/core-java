@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.StorageFactory;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -42,9 +43,9 @@ import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class FsEventStorageShould extends EventStorageShould {
 
-    private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsEventStorageShould.class);
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsEventStorageShould.class);
 
-    private static final FsEventStorage STORAGE = (FsEventStorage) FsEventStorage.newInstance(DEPOSITORY);
+    private static final FsEventStorage STORAGE = (FsEventStorage) FACTORY.createEventStorage();
 
     public FsEventStorageShould() {
         super(STORAGE);
@@ -52,8 +53,7 @@ public class FsEventStorageShould extends EventStorageShould {
 
     @After
     public void tearDownTest() {
-        STORAGE.releaseResources();
-        DEPOSITORY.deleteAll();
+        FACTORY.tearDown();
     }
 
     @Test(expected = UnsupportedOperationException.class)
