@@ -44,10 +44,7 @@ public class IoUtil {
      * Logs each {@link java.io.IOException} if it occurs.
      */
     @SuppressWarnings("ConstantConditions")
-    public static void closeSilently(@Nullable Closeable... closeables) {
-        if (closeables == null) {
-            return;
-        }
+    public static void closeSilently(Closeable... closeables) {
         try {
             for (Closeable c : closeables) {
                 if (c != null) {
@@ -55,8 +52,8 @@ public class IoUtil {
                 }
             }
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Exception while closing stream", e);
+            if (log().isErrorEnabled()) {
+                log().error("Exception while closing stream", e);
             }
         }
     }
@@ -70,8 +67,8 @@ public class IoUtil {
         try {
             flush(flushables);
         } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Exception while flushing stream", e);
+            if (log().isErrorEnabled()) {
+                log().error("Exception while flushing stream", e);
             }
         }
     }
@@ -113,29 +110,32 @@ public class IoUtil {
     }
 
     /**
+     * Checks if the file exists.
+     *
      * @param file file to check
+     * @param fileDescription the description for error message
      * @throws IllegalStateException if there is no such file
      */
-    public static void checkFileExists(File file) {
+    public static void checkFileExists(File file, String fileDescription) {
         if (!file.exists()) {
-            throw new IllegalStateException("No such file: " + file.getAbsolutePath());
+            final FileNotFoundException fileNotFound = new FileNotFoundException(fileDescription + ": " + file.getAbsolutePath());
+            throw propagate(fileNotFound);
         }
     }
 
     /**
-     * Tries to open {@code FileInputStream} from file
+     * Tries to open {@code FileInputStream} from file.
      *
      * @throws RuntimeException if there is no such file
      */
     public static FileInputStream open(File file) {
-        FileInputStream fileInputStream = null;
 
+        FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             propagate(e);
         }
-
         return fileInputStream;
     }
     

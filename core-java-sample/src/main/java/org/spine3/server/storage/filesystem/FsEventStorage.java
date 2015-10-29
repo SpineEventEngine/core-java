@@ -115,7 +115,7 @@ class FsEventStorage extends EventStorage {
         @Override
         public EventRecord next() {
 
-            checkFileExists(file);
+            checkFileExists(file, "event storage");
             checkHasNextBytes();
 
             EventStoreRecord storeRecord = parseEventRecord();

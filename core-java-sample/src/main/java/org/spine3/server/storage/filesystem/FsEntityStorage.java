@@ -97,7 +97,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      */
     private static Message readMessage(File file) {
 
-        checkFileExists(file);
+        checkFileExists(file, "entity storage");
 
         InputStream fileInputStream = open(file);
         InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
