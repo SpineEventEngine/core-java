@@ -27,7 +27,7 @@ import org.spine3.test.TestIdWithStringField;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
-public class FsDepositaryShould {
+public class FsUtilShould {
 
     // quotes escaped
     private static final String QUOT = "&#34;";

@@ -35,14 +35,14 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DsStorage<M> datastoreDepository;
+    private final DsStorage<M> storage;
 
-    private DsEntityStorage(DsStorage<M> datastoreDepository) {
-        this.datastoreDepository = datastoreDepository;
+    private DsEntityStorage(DsStorage<M> storage) {
+        this.storage = storage;
     }
 
-    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(DsStorage<M> datastoreDepository) {
-        return new DsEntityStorage<>(datastoreDepository);
+    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(DsStorage<M> storage) {
+        return new DsEntityStorage<>(storage);
     }
 
     @Override
@@ -50,7 +50,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToString(id);
 
-        final Message message = datastoreDepository.read(idString);
+        final Message message = storage.read(idString);
 
         @SuppressWarnings("unchecked") // save because messages of only this type are written
         final M result = (M) message;
@@ -65,6 +65,6 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToString(id);
 
-        datastoreDepository.storeEntity(idString, message);
+        storage.storeEntity(idString, message);
     }
 }

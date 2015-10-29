@@ -74,7 +74,7 @@ class DsStorage<M extends Message> {
     private final TypeName typeName;
 
     /**
-     * Creates a new depository instance.
+     * Creates a new storage instance.
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore the datastore implementation to use.
      */

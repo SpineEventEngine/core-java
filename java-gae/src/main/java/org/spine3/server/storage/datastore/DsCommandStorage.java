@@ -32,18 +32,18 @@ import org.spine3.server.storage.CommandStoreRecord;
  */
 class DsCommandStorage extends CommandStorage {
 
-    private final DsStorage<CommandStoreRecord> datastoreDepository;
+    private final DsStorage<CommandStoreRecord> storage;
 
-    private DsCommandStorage(DsStorage<CommandStoreRecord> datastoreDepository) {
-        this.datastoreDepository = datastoreDepository;
+    private DsCommandStorage(DsStorage<CommandStoreRecord> storage) {
+        this.storage = storage;
     }
 
-    protected static CommandStorage newInstance(DsStorage<CommandStoreRecord> datastoreDepository) {
-        return new DsCommandStorage(datastoreDepository);
+    protected static CommandStorage newInstance(DsStorage<CommandStoreRecord> storage) {
+        return new DsCommandStorage(storage);
     }
 
     @Override
     protected void write(CommandStoreRecord record) {
-        datastoreDepository.storeCommandRecord(record.getCommandId(), record);
+        storage.storeCommandRecord(record.getCommandId(), record);
     }
 }

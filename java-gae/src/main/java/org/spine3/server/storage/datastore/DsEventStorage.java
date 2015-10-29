@@ -39,27 +39,27 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 class DsEventStorage extends EventStorage {
 
-    private final DsStorage<EventStoreRecord> depository;
+    private final DsStorage<EventStoreRecord> storage;
 
-    private DsEventStorage(DsStorage<EventStoreRecord> depository) {
-        this.depository = depository;
+    private DsEventStorage(DsStorage<EventStoreRecord> storage) {
+        this.storage = storage;
     }
 
-    protected static DsEventStorage newInstance(DsStorage<EventStoreRecord> depository) {
-        return new DsEventStorage(depository);
+    protected static DsEventStorage newInstance(DsStorage<EventStoreRecord> storage) {
+        return new DsEventStorage(storage);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final List<EventStoreRecord> records = depository.readAllSortedByTime(ASCENDING);
+        final List<EventStoreRecord> records = storage.readAllSortedByTime(ASCENDING);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        depository.storeEventRecord(record.getEventId(), record);
+        storage.storeEventRecord(record.getEventId(), record);
     }
 
     @Override

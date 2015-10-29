@@ -55,14 +55,14 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DsStorage<CommandStoreRecord> depository = createDepository(CommandStoreRecord.getDescriptor());
-        return DsCommandStorage.newInstance(depository);
+        final DsStorage<CommandStoreRecord> storage = createStorage(CommandStoreRecord.getDescriptor());
+        return DsCommandStorage.newInstance(storage);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DsStorage<EventStoreRecord> depository = createDepository(EventStoreRecord.getDescriptor());
-        return DsEventStorage.newInstance(depository);
+        final DsStorage<EventStoreRecord> storage = createStorage(EventStoreRecord.getDescriptor());
+        return DsEventStorage.newInstance(storage);
     }
 
     /**
@@ -70,8 +70,8 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DsStorage<AggregateStorageRecord> depository = createDepository(AggregateStorageRecord.getDescriptor());
-        return DsAggregateStorage.newInstance(depository);
+        final DsStorage<AggregateStorageRecord> storage = createStorage(AggregateStorageRecord.getDescriptor());
+        return DsAggregateStorage.newInstance(storage);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DsStorage<M> depository = createDepository(descriptor);;
-        return DsEntityStorage.newInstance(depository);
+        final DsStorage<M> storage = createStorage(descriptor);;
+        return DsEntityStorage.newInstance(storage);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
-    private <M extends Message> DsStorage<M> createDepository(Descriptor descriptor) {
+    private <M extends Message> DsStorage<M> createStorage(Descriptor descriptor) {
         return new DsStorage<>(descriptor, datastore);
     }
 }
