@@ -25,11 +25,12 @@ import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FsDepository.FsIdentifiers.idToStringWithEscaping;
-import static org.spine3.server.storage.filesystem.FsDepository.readMessage;
+import static org.spine3.server.storage.filesystem.FsUtil.*;
 
 /**
  * An entity storage based on the file system.
@@ -38,24 +39,27 @@ import static org.spine3.server.storage.filesystem.FsDepository.readMessage;
  */
 class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final FsDepository fileSystemDepository;
+    private static final String ENTITY_STORE_DIR_NAME = "/entity-store/";
+
+    private final String entityStorageRootPath;
 
     /**
-     * Creates new storage instance.
+     * Creates a new storage instance.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
      */
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance(FsDepository fileSystemDepository) {
-        return new FsEntityStorage<>(fileSystemDepository);
+    protected static <I, M extends Message> EntityStorage<I, M> newInstance(String rootDirectoryPath) {
+        return new FsEntityStorage<>(rootDirectoryPath);
     }
 
-    private FsEntityStorage(FsDepository fileSystemDepository) {
-        this.fileSystemDepository = fileSystemDepository;
+    private FsEntityStorage(String rootDirectoryPath) {
+        this.entityStorageRootPath = rootDirectoryPath + ENTITY_STORE_DIR_NAME;
     }
 
     @Override
     public M read(I id) {
 
         final String idString = idToStringWithEscaping(id);
-        final File file = fileSystemDepository.getEntityStoreFile(idString);
+        final File file = getEntityStoreFile(idString);
         Message message = Any.getDefaultInstance();
 
         if (file.exists()) {
@@ -75,9 +79,21 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
 
-        final File file = fileSystemDepository.getEntityStoreFile(idString);
+        final File file = getEntityStoreFile(idString);
         final Any any = toAny(message);
 
-        FsDepository.writeMessage(file, any);
+        FsUtil.writeMessage(file, any);
+    }
+
+    /**
+     * @return entity file path.
+     */
+    public File getEntityStoreFile(String entityId) {
+        final String filePath = entityStorageRootPath + entityId;
+        try {
+            return createIfDoesNotExist(filePath);
+        } catch (IOException e) {
+            throw propagate(e);
+        }
     }
 }

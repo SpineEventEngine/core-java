@@ -31,6 +31,8 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.spine3.server.storage.filesystem.FsUtil.createIfDoesNotExist;
+import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.IoUtil.*;
 
@@ -41,30 +43,29 @@ import static org.spine3.util.IoUtil.*;
  */
 class FsEventStorage extends EventStorage {
 
-    private final FsDepository depository;
-
+    private static final String EVENT_STORE_FILE_NAME = "/event-store";
     private final List<EventRecordFileIterator> iterators = newLinkedList();
+    private final File eventStorageFile;
 
 
     /**
      * Creates new storage instance.
-     * @param depository the depository to use for storing data.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
+     * @throws IOException - if failed to create event storage file
      */
-    protected static FsEventStorage newInstance(FsDepository depository) {
-        return new FsEventStorage(depository);
+    protected static FsEventStorage newInstance(String rootDirectoryPath) throws IOException {
+        return new FsEventStorage(rootDirectoryPath);
     }
 
-    private FsEventStorage(FsDepository depository) {
-        this.depository = depository;
+    private FsEventStorage(String rootDirectoryPath) throws IOException {
+        this.eventStorageFile = createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final File file = depository.getEventStoreFile();
-        final EventRecordFileIterator iterator = new EventRecordFileIterator(file);
+        final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
         iterators.add(iterator);
-
         return iterator;
     }
 
@@ -72,9 +73,7 @@ class FsEventStorage extends EventStorage {
     protected void write(EventStoreRecord record) {
 
         checkNotNull(record);
-
-        final File file = depository.getEventStoreFile();
-        FsDepository.writeMessage(file, record);
+        writeMessage(eventStorageFile, record);
     }
 
     @Override

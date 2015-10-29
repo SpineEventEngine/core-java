@@ -24,8 +24,11 @@ import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.filesystem.FsUtil.createIfDoesNotExist;
+import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 
 /**
  * A storage for aggregate root events and snapshots based on the file system.
@@ -34,26 +37,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class FsCommandStorage extends CommandStorage {
 
-    private final FsDepository depository;
+    private static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    private final File commandStoreFile;
 
     /**
      * Creates new storage instance.
-     * @param depository to use for storing data.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
+     * @throws IOException - if failed to create command storage file
      */
-    protected static CommandStorage newInstance(FsDepository depository) {
-        return new FsCommandStorage(depository);
+    protected static FsCommandStorage newInstance(String rootDirectoryPath) throws IOException {
+        return new FsCommandStorage(rootDirectoryPath);
     }
 
-    private FsCommandStorage(FsDepository depository) {
-        this.depository = depository;
+    private FsCommandStorage(String rootDirectoryPath) throws IOException {
+        commandStoreFile = createIfDoesNotExist(rootDirectoryPath + COMMAND_STORE_FILE_NAME);
     }
 
     @Override
     protected void write(CommandStoreRecord record) {
 
         checkNotNull(record);
-
-        File file = depository.getCommandStoreFile();
-        FsDepository.writeMessage(file, record);
+        writeMessage(commandStoreFile, record);
     }
 }

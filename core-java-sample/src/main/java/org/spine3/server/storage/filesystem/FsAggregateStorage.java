@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FsDepository.FsIdentifiers.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FileSystemStorageFactory.PATH_DELIMITER;
+import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
 
@@ -43,18 +44,27 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
-    private final FsDepository depository;
-    private final String shortTypeName;
+    private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
 
-    /*package*/ FsAggregateStorage(FsDepository depository, String shortTypeName) {
-        this.depository = depository;
-        this.shortTypeName = shortTypeName;
+    private final String aggregateStorageRootPath;
+
+    /**
+     * Creates a new storage instance.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
+     */
+    protected static<I> FsAggregateStorage<I> newInstance(String rootDirectoryPath, String shortTypeName) {
+        return new FsAggregateStorage<>(rootDirectoryPath, shortTypeName);
+    }
+
+    private FsAggregateStorage(String rootDirectoryPath, String shortTypeName) {
+        this.aggregateStorageRootPath = rootDirectoryPath + AGGREGATE_FILE_NAME_PREFIX +
+                shortTypeName + PATH_DELIMITER;
     }
 
     @Override
     protected void write(AggregateStorageRecord record) {
 
-        final File aggregateFile = depository.getAggregateFile(shortTypeName, record.getAggregateId());
+        final File aggregateFile = new File(aggregateStorageRootPath + record.getAggregateId());
 
         if (!aggregateFile.exists()) {
             //noinspection ResultOfMethodCallIgnored
@@ -73,15 +83,15 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToStringWithEscaping(id);
-        final File file = depository.getAggregateFile(shortTypeName, stringId);
+        final File file = new File(aggregateStorageRootPath + stringId);
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
     }
 
     @Override
     protected void releaseResources() {
-        //NOP
-        //reading mechanism closes streams as soon as the page is read.
+        // NOP
+        // a reading mechanism closes streams as soon as the page is read.
     }
 
     private static void writeToFile(File file, AggregateStorageRecord r) {

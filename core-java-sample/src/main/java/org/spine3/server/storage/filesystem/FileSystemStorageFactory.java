@@ -22,12 +22,16 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
+import org.apache.commons.io.FileUtils;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
@@ -43,31 +47,34 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
-    private final FsDepository depository;
+    protected static final String PATH_DELIMITER = "/";
 
     private final List<FsEventStorage> eventStorages = newLinkedList();
 
+    private final String rootDirectoryPath;
+
     /**
-     * Creates new storage factory instance.
+     * Creates a new storage factory instance.
      *
-     * executorClass execution context class used to choose target directory for storage.
+     * @param executorClass an execution context class used to choose target directory for a storage.
      */
     public static StorageFactory newInstance(Class executorClass) {
         return new FileSystemStorageFactory(executorClass);
     }
 
     private FileSystemStorageFactory(Class executorClass) {
-        this.depository = FsDepository.newInstance(executorClass);
+        this.rootDirectoryPath = buildRootDirectoryPath(executorClass);
     }
 
     @Override
     public CommandStorage createCommandStorage() {
-        return FsCommandStorage.newInstance(depository);
+        final FsCommandStorage storage = tryCreateCommandStorage();
+        return storage;
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final FsEventStorage storage = FsEventStorage.newInstance(depository);
+        FsEventStorage storage = tryCreateEventStorage();
         eventStorages.add(storage);
         return storage;
     }
@@ -78,12 +85,12 @@ public class FileSystemStorageFactory implements StorageFactory {
                 getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
         final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
-        return new FsAggregateStorage<>(depository, msgDescriptorName);
+        return FsAggregateStorage.newInstance(rootDirectoryPath, msgDescriptorName);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
-        return FsEntityStorage.newInstance(depository);
+        return FsEntityStorage.newInstance(rootDirectoryPath);
     }
 
     @Override
@@ -93,9 +100,65 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public void tearDown() {
+
         for (FsEventStorage storage : eventStorages) {
             storage.releaseResources();
         }
-        depository.deleteAll();
+
+        deleteDirectory(rootDirectoryPath);
+    }
+
+    private static String buildRootDirectoryPath(Class executorClass) {
+        final String tempDir = getTempDir().getAbsolutePath();
+        final String root = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
+        return root;
+    }
+
+    /**
+     * Creates an empty file in the default temporary-file directory using {@link java.io.File#createTempFile(String, String)},
+     * removes it and returns its parent directory.
+     */
+    private static File getTempDir() {
+        try {
+            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
+            File result = new File(tmpFile.getParent());
+            if (tmpFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                tmpFile.delete();
+            }
+            return result;
+        } catch (IOException e) {
+            throw propagate(e);
+        }
+    }
+
+    private static void deleteDirectory(String rootDirectoryPath) {
+
+        final File folder = new File(rootDirectoryPath);
+        if (!folder.exists() || !folder.isDirectory()) {
+            return;
+        }
+
+        try {
+            FileUtils.deleteDirectory(folder);
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
+    private FsEventStorage tryCreateEventStorage() {
+        try {
+            return FsEventStorage.newInstance(rootDirectoryPath);
+        } catch (IOException e) {
+            throw propagate(e);
+        }
+    }
+
+    private FsCommandStorage tryCreateCommandStorage() {
+        try {
+            return FsCommandStorage.newInstance(rootDirectoryPath);
+        } catch (IOException e) {
+            throw propagate(e);
+        }
     }
 }
