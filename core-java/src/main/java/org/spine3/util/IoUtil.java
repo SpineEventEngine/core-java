@@ -142,7 +142,23 @@ public class IoUtil {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-    
+
+    /**
+     * Creates a file with the given path if it does not exist.
+     * @return the created file
+     * @throws java.io.IOException - If an I/O error occurred
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored") // result is redundant in this case
+    public static File createIfDoesNotExist(String path) throws IOException {
+
+        final File file = new File(path);
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        }
+        return file;
+    }
+
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")

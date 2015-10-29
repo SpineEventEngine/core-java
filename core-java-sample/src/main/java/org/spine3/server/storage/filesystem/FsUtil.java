@@ -20,10 +20,8 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.Messages;
 import org.spine3.util.FileNameEscaper;
 import org.spine3.util.Identifiers;
 
@@ -32,10 +30,10 @@ import java.util.Map;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
-import static org.spine3.util.IoUtil.*;
+import static org.spine3.util.IoUtil.flushAndCloseSilently;
 
 /**
- * Utility class for reading/writing messages from/to file system.
+ * A utility class which contains common util methods used by file system storages.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
@@ -85,47 +83,6 @@ class FsUtil {
         } finally {
             flushAndCloseSilently(fileOutputStream, bufferedOutputStream);
         }
-    }
-
-    /**
-     * Creates a file with the given path if it does not exist.
-     * @throws IOException - If an I/O error occurred
-     */
-    @SuppressWarnings("ResultOfMethodCallIgnored") // result is redundant in this case
-    public static File createIfDoesNotExist(String path) throws IOException {
-
-        final File file = new File(path);
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-        }
-        return file;
-    }
-
-    /**
-     * Reads {@link Message} from {@link File}.
-     *
-     * @param file the {@link File} to read from.
-     */
-    public static Message readMessage(File file) {
-
-        checkFileExists(file);
-
-        InputStream fileInputStream = open(file);
-        InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
-        Any any = Any.getDefaultInstance();
-
-        try {
-            any = Any.parseDelimitedFrom(bufferedInputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
-        } finally {
-            closeSilently(fileInputStream, bufferedInputStream);
-        }
-
-        final Message result = (any != null) ? Messages.fromAny(any) : Any.getDefaultInstance();
-        return result;
     }
 
     private static File makeBackupCopy(File sourceFile) throws IOException {

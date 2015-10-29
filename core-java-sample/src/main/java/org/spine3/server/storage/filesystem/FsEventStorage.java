@@ -31,7 +31,6 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.server.storage.filesystem.FsUtil.createIfDoesNotExist;
 import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.IoUtil.*;

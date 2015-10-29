@@ -22,15 +22,20 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.util.IoUtil;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FsUtil.*;
+import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
+import static org.spine3.util.IoUtil.*;
 
 /**
  * An entity storage based on the file system.
@@ -86,12 +91,38 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     }
 
     /**
+     * Reads {@link com.google.protobuf.Message} from {@link java.io.File}.
+     *
+     * @param file the {@link java.io.File} to read from.
+     */
+    private static Message readMessage(File file) {
+
+        checkFileExists(file);
+
+        InputStream fileInputStream = open(file);
+        InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+
+        Any any = Any.getDefaultInstance();
+
+        try {
+            any = Any.parseDelimitedFrom(bufferedInputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
+        } finally {
+            closeSilently(fileInputStream, bufferedInputStream);
+        }
+
+        final Message result = (any != null) ? Messages.fromAny(any) : Any.getDefaultInstance();
+        return result;
+    }
+
+    /**
      * @return entity file path.
      */
     public File getEntityStoreFile(String entityId) {
         final String filePath = entityStorageRootPath + entityId;
         try {
-            return createIfDoesNotExist(filePath);
+            return IoUtil.createIfDoesNotExist(filePath);
         } catch (IOException e) {
             throw propagate(e);
         }
