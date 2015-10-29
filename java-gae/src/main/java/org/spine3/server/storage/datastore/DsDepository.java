@@ -50,7 +50,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 
 /**
- * Provides access to Google App Engine Cloud Datastore.
+ * Provides access to Google App Engine Cloud {@link Datastore}.
  *
  * @param <M> the type of messages to save to the storage.
  * @author Alexander Litus
