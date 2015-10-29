@@ -26,7 +26,8 @@ import org.spine3.server.storage.CommandStoreRecord;
 /**
  * Storage for command records based on Google Cloud Datastore.
  *
- * @see DatastoreDepository
+ * @see DatastoreStorageFactory
+ * @see LocalDatastoreStorageFactory
  * @author Alexander Litus
  */
 class DatastoreCommandStorage extends CommandStorage {

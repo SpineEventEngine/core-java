@@ -32,7 +32,7 @@ import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
 /**
- * Creates storages based on GAE Datastore.
+ * Creates storages based on GAE {@link Datastore}.
  */
 public class DatastoreStorageFactory implements StorageFactory {
 

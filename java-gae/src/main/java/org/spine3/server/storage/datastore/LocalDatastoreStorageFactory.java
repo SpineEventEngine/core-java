@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Creates storages based on local GAE Datastore: {@link LocalDevelopmentDatastore}.
+ * Creates storages based on local Google {@link LocalDevelopmentDatastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {

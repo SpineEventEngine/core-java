@@ -29,8 +29,9 @@ import static org.spine3.util.Identifiers.idToString;
 /**
  * {@link EntityStorage} implementation based on Google App Engine Datastore.
  *
+ * @see DatastoreStorageFactory
+ * @see LocalDatastoreStorageFactory
  * @author Alexander Litus
- * @see DatastoreDepository
  */
 class DatastoreEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
