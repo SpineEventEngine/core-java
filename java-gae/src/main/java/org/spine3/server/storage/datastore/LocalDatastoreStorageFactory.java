@@ -59,15 +59,14 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     private final LocalDevelopmentDatastore localDatastore;
 
     /**
-     * Creates a new factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
+     * Returns a default factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
      * <ul>
      *     <li>Dataset name: {@code spine-local-dataset}</li>
      *     <li>Host: {@code http://localhost:8080}</li>
      * </ul>
      */
-    public static LocalDatastoreStorageFactory newInstance() {
-        final LocalDevelopmentDatastore datastore = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_LOCAL_OPTIONS);
-        return new LocalDatastoreStorageFactory(datastore);
+    public static LocalDatastoreStorageFactory getDefaultInstance() {
+        return DefaultInstanceSingleton.INSTANCE.value;
     }
 
     /**
@@ -167,5 +166,17 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         final String gcdHome = System.getenv("GCD_HOME");
         checkState(gcdHome != null, ENVIRONMENT_NOT_CONFIGURED_MESSAGE);
         return gcdHome;
+    }
+
+    private enum DefaultInstanceSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
+    }
+
+    private enum DefaultDatastoreSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final LocalDevelopmentDatastore value = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_LOCAL_OPTIONS);
     }
 }

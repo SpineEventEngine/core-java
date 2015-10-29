@@ -36,7 +36,7 @@ import org.spine3.test.project.ProjectId;
  */
 public class DsEntityStorageShould extends EntityStorageShould {
 
-    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
     private static final EntityStorage<String, ProjectId> STORAGE = DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
 
