@@ -190,7 +190,7 @@ public class Sample {
          * Instructions on how to configure the local Datastore environment:
          * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
          */
-        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getInstance();
+        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.newInstance();
     }
 
     private static Logger log() {

@@ -36,7 +36,9 @@ import org.spine3.server.storage.EventStorageShould;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreEventStorageShould extends EventStorageShould {
 
-    private static final EventStorage STORAGE = LocalDatastoreStorageFactory.getInstance().createEventStorage();
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
+
+    private static final EventStorage STORAGE = DATASTORE_FACTORY.createEventStorage();
 
     public DatastoreEventStorageShould() {
         super(STORAGE);
@@ -44,17 +46,17 @@ public class DatastoreEventStorageShould extends EventStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.getInstance().setUp();
+        DATASTORE_FACTORY.setUp();
     }
 
     @After
     public void tearDownTest() {
-        LocalDatastoreDepository.clear();
+        DATASTORE_FACTORY.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.getInstance().tearDown();
+        DATASTORE_FACTORY.tearDown();
     }
 
     @Test

@@ -24,8 +24,6 @@ import com.google.api.services.datastore.DatastoreV1.*;
 import com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction;
 import com.google.api.services.datastore.client.Datastore;
 import com.google.api.services.datastore.client.DatastoreException;
-import com.google.api.services.datastore.client.DatastoreFactory;
-import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
@@ -57,7 +55,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * @param <M> the type of messages to save to the storage.
  * @author Alexander Litus
  */
-public class DatastoreDepository<M extends Message> {
+class DatastoreDepository<M extends Message> {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -70,27 +68,8 @@ public class DatastoreDepository<M extends Message> {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
-    /**
-     * TODO:2015.10.08:alexander.litus: change to real Datastore project ID:
-     * https://cloud.google.com/datastore/docs/activate#project_id
-     */
-    private static final String DATASET_NAME = "dummy-datastore-project-id";
-
-    // TODO:2015.10.08:alexander.litus: use credentials
-    private static final DatastoreOptions DEFAULT_OPTIONS = new DatastoreOptions.Builder()
-            .dataset(DATASET_NAME)
-            .build();
-
     private final Datastore datastore;
     private final TypeName typeName;
-
-    /**
-     * Creates a new depository instance.
-     * @param descriptor the descriptor of the type of messages to save to the storage.
-     */
-    public static <M extends Message> DatastoreDepository<M> newInstance(Descriptor descriptor) {
-        return new DatastoreDepository<>(descriptor, DatastoreFactory.get().create(DEFAULT_OPTIONS));
-    }
 
     /**
      * Creates a new depository instance.

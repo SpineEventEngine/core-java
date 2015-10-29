@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.client.Datastore;
+import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
@@ -35,6 +37,21 @@ import static org.spine3.util.Classes.getGenericParameterType;
 public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
+
+    private final Datastore datastore;
+
+    /**
+     * @return creates new factory instance.
+     * @param datastore the {@link Datastore} implementation to use.
+     * @see DatastoreOptions
+     */
+    public static DatastoreStorageFactory newInstance(Datastore datastore) {
+        return new DatastoreStorageFactory(datastore);
+    }
+
+    protected DatastoreStorageFactory(Datastore datastore) {
+        this.datastore = datastore;
+    }
 
     @Override
     public CommandStorage createCommandStorage() {
@@ -78,23 +95,7 @@ public class DatastoreStorageFactory implements StorageFactory {
         // NOP
     }
 
-    /**
-     * @return the depository implementation.
-     */
-    protected <M extends Message> DatastoreDepository<M> createDepository(Descriptor descriptor) {
-        return DatastoreDepository.newInstance(descriptor);
-    }
-
-    /**
-     * @return the factory instance.
-     */
-    public static DatastoreStorageFactory getInstance() {
-        return Singleton.INSTANCE.value;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final DatastoreStorageFactory value = new DatastoreStorageFactory();
+    private <M extends Message> DatastoreDepository<M> createDepository(Descriptor descriptor) {
+        return new DatastoreDepository<>(descriptor, datastore);
     }
 }

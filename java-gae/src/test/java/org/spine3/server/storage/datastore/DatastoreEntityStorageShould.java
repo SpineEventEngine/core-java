@@ -25,7 +25,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.TestIdWithStringField;
+import org.spine3.test.project.ProjectId;
 
 
 /**
@@ -36,11 +36,9 @@ import org.spine3.test.TestIdWithStringField;
  */
 public class DatastoreEntityStorageShould extends EntityStorageShould {
 
-    private static final DatastoreDepository<TestIdWithStringField> DATASTORE_DEPOSITORY =
-            LocalDatastoreDepository.newInstance(TestIdWithStringField.getDescriptor());
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE =
-            DatastoreEntityStorage.newInstance(DATASTORE_DEPOSITORY);
+    private static final EntityStorage<String, ProjectId> STORAGE = DATASTORE_FACTORY.createEntityStorage(TestEntity.class);
 
     public DatastoreEntityStorageShould() {
         super(STORAGE);
@@ -48,16 +46,16 @@ public class DatastoreEntityStorageShould extends EntityStorageShould {
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.getInstance().setUp();
+        DATASTORE_FACTORY.setUp();
     }
 
     @After
     public void tearDownTest() {
-        LocalDatastoreDepository.clear();
+        DATASTORE_FACTORY.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.getInstance().tearDown();
+        DATASTORE_FACTORY.tearDown();
     }
 }

@@ -39,23 +39,25 @@ import org.spine3.util.testutil.CommandRequestFactory;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class DatastoreCommandStorageShould {
 
-    private static final CommandStorage STORAGE =  LocalDatastoreStorageFactory.getInstance().createCommandStorage();
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.newInstance();
+
+    private static final CommandStorage STORAGE =  DATASTORE_FACTORY.createCommandStorage();
 
     private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();;
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.getInstance().setUp();
+        DATASTORE_FACTORY.setUp();
     }
 
     @After
     public void tearDownTest() {
-        LocalDatastoreDepository.clear();
+        DATASTORE_FACTORY.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.getInstance().tearDown();
+        DATASTORE_FACTORY.tearDown();
     }
 
     @SuppressWarnings("ConstantConditions")

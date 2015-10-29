@@ -23,17 +23,19 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.test.TestIdWithStringField;
+import org.spine3.server.Entity;
+import org.spine3.test.project.ProjectId;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
         "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
 public abstract class EntityStorageShould {
 
-    private final EntityStorage<String, TestIdWithStringField> storage;
+    private final EntityStorage<String, ProjectId> storage;
 
-    public EntityStorageShould(EntityStorage<String, TestIdWithStringField> storage) {
+    public EntityStorageShould(EntityStorage<String, ProjectId> storage) {
         this.storage = storage;
     }
 
@@ -55,7 +57,7 @@ public abstract class EntityStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
 
-        storage.write(null, createMessage("testId"));
+        storage.write(null, newProjectId("testId"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -79,16 +81,31 @@ public abstract class EntityStorageShould {
 
     private void testSaveAndReadMessage(String messageId) {
 
-        final TestIdWithStringField expected = createMessage(messageId);
+        final ProjectId expected = newProjectId(messageId);
 
         storage.write(expected.getId(), expected);
 
-        final TestIdWithStringField actual = storage.read(expected.getId());
+        final ProjectId actual = storage.read(expected.getId());
 
         assertEquals(expected, actual);
     }
 
-    private static TestIdWithStringField createMessage(String id) {
-        return TestIdWithStringField.newBuilder().setId(id).build();
+    public static class TestEntity extends Entity<String, ProjectId> {
+
+        private static final ProjectId DEFAULT_STATE = newProjectId();
+
+        protected TestEntity(String id) {
+            super(id);
+        }
+
+        @Override
+        protected ProjectId getDefaultState() {
+            return DEFAULT_STATE;
+        }
+
+        @Override
+        protected void validate(ProjectId state) throws IllegalStateException {
+            super.validate(state);
+        }
     }
 }

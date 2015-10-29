@@ -23,7 +23,7 @@ package org.spine3.server.storage.filesystem;
 import org.junit.After;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.TestIdWithStringField;
+import org.spine3.test.project.ProjectId;
 
 /**
  * File system implementation of {@link EntityStorage} tests.
@@ -34,7 +34,7 @@ public class FsEntityStorageShould extends EntityStorageShould {
 
     private static final FsDepository DEPOSITORY = FsDepository.newInstance(FsEntityStorageShould.class);
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE = FsEntityStorage.newInstance(DEPOSITORY);
+    private static final EntityStorage<String, ProjectId> STORAGE = FsEntityStorage.newInstance(DEPOSITORY);
 
     public FsEntityStorageShould() {
         super(STORAGE);
