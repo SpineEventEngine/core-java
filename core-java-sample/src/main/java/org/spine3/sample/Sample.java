@@ -201,6 +201,5 @@ public class Sample {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Sample.class);
-
     }
 }

@@ -44,4 +44,3 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
         DEPOSITORY.deleteAll();
     }
 }
-
