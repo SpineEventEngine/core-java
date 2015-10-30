@@ -49,9 +49,6 @@ class DsCommandStorage extends CommandStorage {
         return new DsCommandStorage(storage);
     }
 
-    /**
-     * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
-     */
     @Override
     protected void write(CommandStoreRecord record) {
 
