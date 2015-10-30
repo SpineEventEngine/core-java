@@ -20,12 +20,13 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
+import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -51,55 +52,30 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     public M read(I id) {
 
         final String idString = idToString(id);
+        final Key.Builder key = storage.makeCommonKey(idString);
+        final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
-        final Message message = readEntity(idString);
-
-        @SuppressWarnings("unchecked") // save because messages of only this type are written
-        final M result = (M) message;
-        return result;
-    }
-
-    @Override
-    public void write(I id, M message) {
-
-        checkNotNull(id);
-        checkNotNull(message);
-
-        final String idString = idToString(id);
-
-        storeEntity(idString, message);
-    }
-
-    /**
-     * Reads the first element by the {@code id}.
-     */
-    private M readEntity(String id) {
-
-        final DatastoreV1.Key.Builder key = storage.makeCommonKey(id);
-        DatastoreV1.LookupRequest request = DatastoreV1.LookupRequest.newBuilder().addKey(key).build();
-
-        final DatastoreV1.LookupResponse response = storage.lookup(request);
+        final LookupResponse response = storage.lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
             @SuppressWarnings("unchecked") // cast is save because Any is Message
             final M empty = (M) Any.getDefaultInstance();
             return empty;
         }
-
-        DatastoreV1.EntityResult entity = response.getFound(0);
-        final M message = storage.entityToMessage(entity);
-
-        return message;
+        final EntityResult entity = response.getFound(0);
+        final M result = storage.entityToMessage(entity);
+        return result;
     }
 
-    /**
-     * Stores the {@code message} by the {@code id}. Only one message could be stored by given id.
-     */
-    private void storeEntity(String id, M message) {
+    @Override
+    public void write(I id, M message) {
 
-        DatastoreV1.Entity.Builder entity = DsStorage.messageToEntity(message, storage.makeCommonKey(id));
+        checkNotNull(id, "Id is null.");
+        checkNotNull(message, "Message is null.");
 
-        final DatastoreV1.Mutation.Builder mutation = DatastoreV1.Mutation.newBuilder().addInsert(entity);
+        final String idString = idToString(id);
+        final Entity.Builder entity = messageToEntity(message, storage.makeCommonKey(idString));
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         storage.commit(mutation);
     }
 }
