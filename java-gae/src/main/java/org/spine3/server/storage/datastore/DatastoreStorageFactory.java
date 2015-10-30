@@ -38,7 +38,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
-    private final Datastore datastore;
+    private final DatastoreWrapper datastore;
 
     /**
      * @return creates new factory instance.
@@ -50,7 +50,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     }
 
     protected DatastoreStorageFactory(Datastore datastore) {
-        this.datastore = datastore;
+        this.datastore = new DatastoreWrapper(datastore);
     }
 
     @Override
@@ -75,9 +75,7 @@ public class DatastoreStorageFactory implements StorageFactory {
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
 
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-
         return DsEntityStorage.newInstance(descriptor, datastore);
     }
 

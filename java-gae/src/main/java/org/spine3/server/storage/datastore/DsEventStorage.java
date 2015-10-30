@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
 import org.spine3.TypeName;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
@@ -47,12 +46,12 @@ class DsEventStorage extends EventStorage {
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStoreRecord.class.getName();
 
-    protected static DsEventStorage newInstance(Datastore datastore) {
+    protected static DsEventStorage newInstance(DatastoreWrapper datastore) {
         return new DsEventStorage(datastore);
     }
 
-    private DsEventStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper(datastore);
+    private DsEventStorage(DatastoreWrapper datastore) {
+        this.datastore = datastore;
     }
 
     @Override

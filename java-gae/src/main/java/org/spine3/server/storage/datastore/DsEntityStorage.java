@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
@@ -46,7 +45,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     private final DatastoreWrapper datastore;
     private final TypeName typeName;
 
-    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, Datastore datastore) {
+    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, DatastoreWrapper datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
     }
 
@@ -55,9 +54,9 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore the datastore implementation to use.
      */
-    private DsEntityStorage(Descriptor descriptor, Datastore datastore) {
+    private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore) {
         this.typeName = TypeName.of(descriptor);
-        this.datastore = new DatastoreWrapper(datastore);
+        this.datastore = datastore;
     }
 
     @Override

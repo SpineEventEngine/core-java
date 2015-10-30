@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
@@ -42,12 +41,12 @@ class DsCommandStorage extends CommandStorage {
 
     private final DatastoreWrapper datastore;
 
-    protected static CommandStorage newInstance(Datastore datastore) {
+    protected static CommandStorage newInstance(DatastoreWrapper datastore) {
         return new DsCommandStorage(datastore);
     }
 
-    private DsCommandStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper(datastore);
+    private DsCommandStorage(DatastoreWrapper datastore) {
+        this.datastore = datastore;
     }
 
     @Override

@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.client.Datastore;
 import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
@@ -50,12 +49,12 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private final DatastoreWrapper datastore;
 
-    protected static <I> DsAggregateStorage<I> newInstance(Datastore datastore) {
+    protected static <I> DsAggregateStorage<I> newInstance(DatastoreWrapper datastore) {
         return new DsAggregateStorage<>(datastore);
     }
 
-    private DsAggregateStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper(datastore);
+    private DsAggregateStorage(DatastoreWrapper datastore) {
+        this.datastore = datastore;
     }
 
     @Override
