@@ -52,7 +52,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     public M read(I id) {
 
         final String idString = idToString(id);
-        final Key.Builder key = storage.makeCommonKey(idString);
+        final Key.Builder key = storage.makeKindKey(idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
         final LookupResponse response = storage.lookup(request);
@@ -74,7 +74,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         checkNotNull(message, "Message is null.");
 
         final String idString = idToString(id);
-        final Entity.Builder entity = messageToEntity(message, storage.makeCommonKey(idString));
+        final Entity.Builder entity = messageToEntity(message, storage.makeKindKey(idString));
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         storage.commit(mutation);
     }

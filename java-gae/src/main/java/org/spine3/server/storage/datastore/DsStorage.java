@@ -147,7 +147,7 @@ class DsStorage<M extends Message> {
         return query;
     }
 
-    protected Key.Builder makeCommonKey(String id) {
+    protected Key.Builder makeKindKey(String id) {
         return makeKey(typeName.nameOnly(), id);
     }
 

@@ -64,7 +64,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected void write(EventStoreRecord record) {
 
-        final Key.Builder key = storage.makeCommonKey(record.getEventId());
+        final Key.Builder key = storage.makeKindKey(record.getEventId());
         final Entity.Builder entity = messageToEntity(record, key);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 
