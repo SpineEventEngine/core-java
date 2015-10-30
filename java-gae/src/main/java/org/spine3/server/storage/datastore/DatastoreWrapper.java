@@ -46,7 +46,6 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
 /**
  * The Google App Engine Cloud {@link Datastore} wrapper.
  *
- * @param <M> the type of messages to save to the storage.
  * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
@@ -104,9 +103,18 @@ class DatastoreWrapper {
         return response;
     }
 
-    protected List<EntityResult> runQuery(Query.Builder query) {
-
+    protected List<EntityResult> runQuery(Query query) {
         final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        return runQueryRequest(queryRequest);
+    }
+
+    protected List<EntityResult> runQuery(Query.Builder query) {
+        final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        return runQueryRequest(queryRequest);
+    }
+
+    private List<EntityResult> runQueryRequest(RunQueryRequest queryRequest) {
+
         List<EntityResult> entityResults = newArrayList();
         try {
             entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultList();
