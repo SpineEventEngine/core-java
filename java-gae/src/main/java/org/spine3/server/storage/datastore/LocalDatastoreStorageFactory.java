@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Creates storages based on local Google {@link LocalDevelopmentDatastore}.
+ * Creates storages based on the local Google {@link LocalDevelopmentDatastore}.
  */
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
@@ -83,20 +83,39 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         localDatastore = datastore;
     }
 
+    /**
+     * Starts the local Datastore server in testing mode.
+     * <p>
+     * NOTE: does nothing on Windows. Reported an issue
+     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
+     * <p>
+     * Start local Datastore Server manually on Windows.
+     * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
+     *
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
+     *                          throws LocalDevelopmentDatastoreException.
+     * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
+     * Documentation</a> ("testing" option)
+     */
     @Override
     public void setUp() {
 
         super.setUp();
 
-        /**
-         * NOTE: start local Datastore Server manually on Windows.<br>
-         * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
-         */
         if (!IS_WINDOWS) {
-            start();
+            try {
+                localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+            } catch (LocalDevelopmentDatastoreException e) {
+                propagate(e);
+            }
         }
     }
 
+    /**
+     * Clears all data and stops the local Datastore server.
+     *
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
+     */
     @Override
     public void tearDown() {
 
@@ -105,34 +124,11 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
         clear();
 
         if (!IS_WINDOWS) {
-            stop();
-        }
-    }
-
-    /**
-     * Starts the local Datastore server in testing mode.
-     * <p>
-     * NOTE: does not work on Windows. Reported an issue
-     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
-     *
-     * NOTE: start local Datastore Server manually on Windows.<br>
-     * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
-     *
-     * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
-     *                          throws LocalDevelopmentDatastoreException.
-     * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
-     * Documentation</a> ("testing" option)
-     */
-    private void start() {
-
-        if (IS_WINDOWS) {
-            throw new UnsupportedOperationException("Cannot start server on Windows. See method docs for details.");
-        }
-
-        try {
-            localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
-        } catch (LocalDevelopmentDatastoreException e) {
-            propagate(e);
+            try {
+                localDatastore.stop();
+            } catch (LocalDevelopmentDatastoreException e) {
+                propagate(e);
+            }
         }
     }
 
@@ -144,19 +140,6 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     public void clear() {
         try {
             localDatastore.clear();
-        } catch (LocalDevelopmentDatastoreException e) {
-            propagate(e);
-        }
-    }
-
-    /**
-     * Stops the local Datastore server.
-     *
-     * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
-     */
-    private void stop() {
-        try {
-            localDatastore.stop();
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }
