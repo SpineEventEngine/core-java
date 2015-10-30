@@ -29,8 +29,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
-import org.spine3.server.storage.AggregateStorageRecord;
-import org.spine3.server.storage.CommandStoreRecord;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -68,24 +66,6 @@ class DatastoreWrapper {
      */
     protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
-    }
-
-    protected void storeWithAutoId(Property.Builder aggregateId, CommandStoreRecord record) {
-        storeWithAutoId(aggregateId, record, record.getTimestamp(), CommandStoreRecord.class.getName());
-    }
-
-    protected void storeWithAutoId(Property.Builder aggregateId, AggregateStorageRecord record) {
-        storeWithAutoId(aggregateId, record, record.getTimestamp(), AggregateStorageRecord.class.getName());
-    }
-
-    private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp, String kind) {
-
-        final Entity.Builder entity = messageToEntity(message, makeKey(kind));
-        entity.addProperty(makeTimestampProperty(timestamp));
-        entity.addProperty(aggregateId);
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
-        commit(mutation);
     }
 
     protected void commit(Mutation mutation) {

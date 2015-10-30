@@ -31,8 +31,7 @@ import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Opera
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static org.spine3.TypeName.toTypeUrl;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.makeQuery;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -61,9 +60,14 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected void write(AggregateStorageRecord record) {
 
-        final Value.Builder id = makeValue(record.getAggregateId());
-        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, id);
-        datastore.storeWithAutoId(idProperty, record);
+        final Value.Builder idValue = makeValue(record.getAggregateId());
+        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
+        final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
+        entity.addProperty(idProperty);
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
+        datastore.commit(mutation);
     }
 
     @Override

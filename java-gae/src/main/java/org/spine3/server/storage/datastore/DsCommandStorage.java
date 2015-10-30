@@ -23,10 +23,10 @@ package org.spine3.server.storage.datastore;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
-import static com.google.api.services.datastore.DatastoreV1.Property;
-import static com.google.api.services.datastore.DatastoreV1.Value;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
-import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
+import static com.google.api.services.datastore.DatastoreV1.*;
+import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.makeTimestampProperty;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 
 /**
  * Storage for command records based on Google Cloud Datastore.
@@ -39,6 +39,8 @@ class DsCommandStorage extends CommandStorage {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
+
+    private static final String KIND = CommandStoreRecord.class.getName();
 
     private final DatastoreWrapper datastore;
 
@@ -55,6 +57,11 @@ class DsCommandStorage extends CommandStorage {
 
         final Value.Builder id = makeValue(record.getCommandId());
         final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, id);
-        datastore.storeWithAutoId(idProperty, record);
+        final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
+        entity.addProperty(idProperty);
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsertAutoId(entity);
+        datastore.commit(mutation);
     }
 }
