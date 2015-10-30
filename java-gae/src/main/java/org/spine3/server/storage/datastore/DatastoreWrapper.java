@@ -88,17 +88,30 @@ class DatastoreWrapper<M extends Message> {
         commit(mutation);
     }
 
-    protected void commit(Mutation.Builder mutation) {
-
-        final CommitRequest commitRequest = CommitRequest.newBuilder()
-                .setMode(NON_TRANSACTIONAL)
+    protected void commit(Mutation mutation) {
+        final CommitRequest commitRequest = createCommitRequest()
                 .setMutation(mutation)
                 .build();
+        tryCommit(commitRequest);
+    }
+
+    protected void commit(Mutation.Builder mutation) {
+        final CommitRequest commitRequest = createCommitRequest()
+                .setMutation(mutation)
+                .build();
+        tryCommit(commitRequest);
+    }
+
+    private void tryCommit(CommitRequest commitRequest) {
         try {
             datastore.commit(commitRequest);
         } catch (DatastoreException e) {
             propagate(e);
         }
+    }
+
+    private static CommitRequest.Builder createCommitRequest() {
+        return CommitRequest.newBuilder().setMode(NON_TRANSACTIONAL);
     }
 
     protected LookupResponse lookup(LookupRequest request) {
@@ -111,30 +124,19 @@ class DatastoreWrapper<M extends Message> {
         return response;
     }
 
-    protected List<M> runQuery(Query.Builder query, final String typeUrl) {
+    protected List<EntityResult> runQuery(Query.Builder query) {
 
         final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         List<EntityResult> entityResults = newArrayList();
-
         try {
             entityResults = datastore.runQuery(queryRequest).getBatch().getEntityResultList();
         } catch (DatastoreException e) {
             propagate(e);
         }
-
-        if (entityResults == null || entityResults.isEmpty()) {
-            return newArrayList();
+        if (entityResults == null) {
+            entityResults = newArrayList();
         }
-
-        final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
-            @Override
-            public M apply(@Nullable EntityResult entity) {
-                return entityToMessage(entity, typeUrl);
-            }
-        };
-
-        final List<M> result = transform(entityResults, entityToMessage);
-        return result;
+        return entityResults;
     }
 
     protected static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
@@ -142,9 +144,19 @@ class DatastoreWrapper<M extends Message> {
         return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
     }
 
-    protected Query.Builder makeQuery(Direction sortDirection, String kind) {
+    /**
+     * Builds a query with the given {@code Entity} kind and the {@code Timestamp} sort direction.
+     *
+     * @param sortDirection the {@code Timestamp} sort direction
+     * @param entityKind    the {@code Entity} kind
+     * @return a new {@code Query} instance.
+     * @see Entity
+     * @see com.google.protobuf.Timestamp
+     * @see Query
+     */
+    protected static Query.Builder makeQuery(Direction sortDirection, String entityKind) {
         final Query.Builder query = Query.newBuilder();
-        query.addKindBuilder().setName(kind);
+        query.addKindBuilder().setName(entityKind);
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
         return query;
     }
@@ -157,7 +169,7 @@ class DatastoreWrapper<M extends Message> {
         return entity;
     }
 
-    protected M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
+    protected static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
@@ -179,5 +191,17 @@ class DatastoreWrapper<M extends Message> {
 
         final M result = fromAny(any.build());
         return result;
+    }
+
+    protected static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
+
+        final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
+            @Override
+            public M apply(@Nullable EntityResult entity) {
+                return entityToMessage(entity, typeUrl);
+            }
+        };
+        final List<M> messages = transform(entities, entityToMessage);
+        return messages;
     }
 }

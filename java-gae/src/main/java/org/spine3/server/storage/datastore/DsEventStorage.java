@@ -32,8 +32,7 @@ import java.util.List;
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.makeTimestampProperty;
-import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
@@ -59,10 +58,11 @@ class DsEventStorage extends EventStorage {
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final Query.Builder query = datastore.makeQuery(ASCENDING, KIND);
+        final Query.Builder query = makeQuery(ASCENDING, KIND);
         // TODO:2015-10-30:alexander.litus: change
         final String typeUrl = TypeName.of(EventStoreRecord.getDescriptor()).toTypeUrl();
-        final List<EventStoreRecord> records = datastore.runQuery(query, typeUrl);
+        final List<EntityResult> entityResults = datastore.runQuery(query);
+        final List<EventStoreRecord> records = entitiesToMessages(entityResults, typeUrl);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }

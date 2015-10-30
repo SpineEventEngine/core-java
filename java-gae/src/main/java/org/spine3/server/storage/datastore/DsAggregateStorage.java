@@ -32,6 +32,7 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.makeQuery;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -68,12 +69,13 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Query.Builder query = datastore.makeQuery(DESCENDING, KIND);
+        final Query.Builder query = makeQuery(DESCENDING, KIND);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
         query.setFilter(idFilter).build();
 
         final String typeUrl = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
-        final List<AggregateStorageRecord> records = datastore.runQuery(query, typeUrl);
+        final List<EntityResult> entityResults = datastore.runQuery(query);
+        final List<AggregateStorageRecord> records = DatastoreWrapper.entitiesToMessages(entityResults, typeUrl);
         return records.iterator();
     }
 

@@ -30,6 +30,7 @@ import org.spine3.server.storage.EntityStorage;
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entityToMessage;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 import static org.spine3.util.Identifiers.idToString;
 
@@ -74,7 +75,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
             return empty;
         }
         final EntityResult entity = response.getFound(0);
-        final M result = datastore.entityToMessage(entity, typeName.toTypeUrl());
+        final M result = entityToMessage(entity, typeName.toTypeUrl());
         return result;
     }
 
