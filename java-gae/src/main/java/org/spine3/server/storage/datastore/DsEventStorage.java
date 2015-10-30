@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.spine3.TypeName;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
@@ -31,6 +30,7 @@ import java.util.List;
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
+import static org.spine3.TypeName.toTypeUrl;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.util.Events.toEventRecordsIterator;
 
@@ -45,6 +45,7 @@ class DsEventStorage extends EventStorage {
 
     private final DatastoreWrapper datastore;
     private static final String KIND = EventStoreRecord.class.getName();
+    private static final String TYPE_URL = toTypeUrl(EventStoreRecord.getDescriptor());
 
     protected static DsEventStorage newInstance(DatastoreWrapper datastore) {
         return new DsEventStorage(datastore);
@@ -58,10 +59,8 @@ class DsEventStorage extends EventStorage {
     public Iterator<EventRecord> allEvents() {
 
         final Query.Builder query = makeQuery(ASCENDING, KIND);
-        // TODO:2015-10-30:alexander.litus: change
-        final String typeUrl = TypeName.of(EventStoreRecord.getDescriptor()).toTypeUrl();
         final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<EventStoreRecord> records = entitiesToMessages(entityResults, typeUrl);
+        final List<EventStoreRecord> records = entitiesToMessages(entityResults, TYPE_URL);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }

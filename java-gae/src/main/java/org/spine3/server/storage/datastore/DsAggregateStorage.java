@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -31,6 +30,7 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static org.spine3.TypeName.toTypeUrl;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.makeQuery;
 import static org.spine3.util.Identifiers.idToString;
@@ -46,6 +46,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String KIND = AggregateStorageRecord.class.getName();
+    private static final String TYPE_URL = toTypeUrl(AggregateStorageRecord.getDescriptor());
 
     private final DatastoreWrapper datastore;
 
@@ -69,13 +70,12 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Query.Builder query = makeQuery(DESCENDING, KIND);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
+        final Query.Builder query = makeQuery(DESCENDING, KIND);
         query.setFilter(idFilter).build();
 
-        final String typeUrl = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
         final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, typeUrl);
+        final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, TYPE_URL);
         return records.iterator();
     }
 
