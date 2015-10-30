@@ -61,7 +61,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public EventStorage createEventStorage() {
-        final DsStorage storage = new DsStorage(EventStoreRecord.getDescriptor(), datastore);
+        final DsStorage<EventStoreRecord> storage = createStorage(EventStoreRecord.getDescriptor());
         return DsEventStorage.newInstance(storage);
     }
 
