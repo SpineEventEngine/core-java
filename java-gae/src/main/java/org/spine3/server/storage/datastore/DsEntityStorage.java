@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.DatastoreV1;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
 
@@ -50,7 +52,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToString(id);
 
-        final Message message = storage.read(idString);
+        final Message message = readEntity(idString);
 
         @SuppressWarnings("unchecked") // save because messages of only this type are written
         final M result = (M) message;
@@ -65,6 +67,39 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToString(id);
 
-        storage.storeEntity(idString, message);
+        storeEntity(idString, message);
+    }
+
+    /**
+     * Reads the first element by the {@code id}.
+     */
+    private M readEntity(String id) {
+
+        final DatastoreV1.Key.Builder key = storage.makeCommonKey(id);
+        DatastoreV1.LookupRequest request = DatastoreV1.LookupRequest.newBuilder().addKey(key).build();
+
+        final DatastoreV1.LookupResponse response = storage.lookup(request);
+
+        if (response == null || response.getFoundCount() == 0) {
+            @SuppressWarnings("unchecked") // cast is save because Any is Message
+            final M empty = (M) Any.getDefaultInstance();
+            return empty;
+        }
+
+        DatastoreV1.EntityResult entity = response.getFound(0);
+        final M message = storage.entityToMessage(entity);
+
+        return message;
+    }
+
+    /**
+     * Stores the {@code message} by the {@code id}. Only one message could be stored by given id.
+     */
+    private void storeEntity(String id, M message) {
+
+        DatastoreV1.Entity.Builder entity = DsStorage.messageToEntity(message, storage.makeCommonKey(id));
+
+        final DatastoreV1.Mutation.Builder mutation = DatastoreV1.Mutation.newBuilder().addInsert(entity);
+        storage.commit(mutation);
     }
 }

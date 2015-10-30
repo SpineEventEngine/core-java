@@ -32,7 +32,6 @@ import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.server.storage.CommandStoreRecord;
-import org.spine3.server.storage.EventStoreRecord;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -84,29 +83,6 @@ class DsStorage<M extends Message> {
     }
 
     /**
-     * Stores the {@code message} by the {@code id}. Only one message could be stored by given id.
-     */
-    public void storeEntity(String id, M message) {
-
-        Entity.Builder entity = messageToEntity(message, makeCommonKey(id));
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        commit(mutation);
-    }
-
-    /**
-     * Stores the {@code record} by the {@code id}. Only one record could be stored by given id.
-     */
-    public void storeEventRecord(String id, EventStoreRecord record) {
-
-        Entity.Builder entity = messageToEntity(record, makeCommonKey(id));
-        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
-
-        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        commit(mutation);
-    }
-
-    /**
      * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
      */
     public void storeCommandRecord(String id, CommandStoreRecord record) {
@@ -131,38 +107,6 @@ class DsStorage<M extends Message> {
     }
 
     /**
-     * Reads the first element by the {@code id}.
-     */
-    public M read(String id) {
-
-        final Key.Builder key = makeCommonKey(id);
-        LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
-
-        final LookupResponse response = lookup(request);
-
-        if (response == null || response.getFoundCount() == 0) {
-            @SuppressWarnings("unchecked") // cast is save because Any is Message
-            final M empty = (M) Any.getDefaultInstance();
-            return empty;
-        }
-
-        EntityResult entity = response.getFound(0);
-        final M message = entityToMessage(entity);
-
-        return message;
-    }
-
-    /**
-     * Reads all the elements.
-     * @return the elements sorted by {@code timestamp} in specified {@code sortDirection}.
-     */
-    public List<M> readAllSortedByTime(Direction sortDirection) {
-
-        Query.Builder query = makeQuery(sortDirection);
-        return runQuery(query);
-    }
-
-    /**
      * Reads all the elements by the {@code aggregateId}.
      * @return the elements sorted by {@code timestamp} in specified {@code sortDirection}.
      */
@@ -174,7 +118,7 @@ class DsStorage<M extends Message> {
         return runQuery(query);
     }
 
-    private void commit(Mutation.Builder mutation) {
+    protected void commit(Mutation.Builder mutation) {
 
         CommitRequest commitRequest = CommitRequest.newBuilder()
                 .setMode(NON_TRANSACTIONAL)
@@ -187,7 +131,7 @@ class DsStorage<M extends Message> {
         }
     }
 
-    private LookupResponse lookup(LookupRequest request) {
+    protected LookupResponse lookup(LookupRequest request) {
         LookupResponse response = null;
         try {
             response = datastore.lookup(request);
@@ -197,7 +141,7 @@ class DsStorage<M extends Message> {
         return response;
     }
 
-    private List<M> runQuery(Query.Builder query) {
+    protected List<M> runQuery(Query.Builder query) {
 
         RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         List<EntityResult> entityResults = newArrayList();
@@ -216,23 +160,23 @@ class DsStorage<M extends Message> {
         return result;
     }
 
-    private static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
+    protected static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
         final Date date = convertToDate(timestamp);
         return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
     }
 
-    private Query.Builder makeQuery(Direction sortDirection) {
+    protected Query.Builder makeQuery(Direction sortDirection) {
         Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(typeName.nameOnly());
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
         return query;
     }
 
-    private Key.Builder makeCommonKey(String id) {
+    protected Key.Builder makeCommonKey(String id) {
         return makeKey(typeName.nameOnly(), id);
     }
 
-    private static Entity.Builder messageToEntity(Message message, Key.Builder key) {
+    protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         return Entity.newBuilder()
                 .setKey(key)
@@ -246,7 +190,7 @@ class DsStorage<M extends Message> {
         }
     };
 
-    private M entityToMessage(@Nullable EntityResultOrBuilder entity) {
+    protected M entityToMessage(@Nullable EntityResultOrBuilder entity) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
