@@ -63,15 +63,13 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     public M read(I id) {
 
         final String idString = idToString(id);
-        final Key.Builder key = makeKey(typeName.nameOnly(), idString);
+        final Key.Builder key = createKey(idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
         final LookupResponse response = datastore.lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
-            @SuppressWarnings("unchecked") // cast is save because Any is Message
-            final M empty = (M) Any.getDefaultInstance();
-            return empty;
+            return getEmptyMessage();
         }
         final EntityResult entity = response.getFound(0);
         final M result = entityToMessage(entity, typeName.toTypeUrl());
@@ -85,9 +83,19 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         checkNotNull(message, "Message is null.");
 
         final String idString = idToString(id);
-        final Key.Builder kindKey = makeKey(typeName.nameOnly(), idString);
-        final Entity.Builder entity = messageToEntity(message, kindKey);
+        final Key.Builder key = createKey(idString);
+        final Entity.Builder entity = messageToEntity(message, key);
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         datastore.commit(mutation);
+    }
+
+    private Key.Builder createKey(String idString) {
+        return makeKey(typeName.nameOnly(), idString);
+    }
+
+    private M getEmptyMessage() {
+        @SuppressWarnings("unchecked") // cast is save because Any is Message
+        final M empty = (M) Any.getDefaultInstance();
+        return empty;
     }
 }

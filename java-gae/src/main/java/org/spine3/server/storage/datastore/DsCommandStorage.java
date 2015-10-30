@@ -24,6 +24,7 @@ import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
 import static com.google.api.services.datastore.DatastoreV1.Property;
+import static com.google.api.services.datastore.DatastoreV1.Value;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
 
@@ -52,8 +53,8 @@ class DsCommandStorage extends CommandStorage {
     @Override
     protected void write(CommandStoreRecord record) {
 
-        final String id = record.getCommandId();
-        final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, makeValue(id));
+        final Value.Builder id = makeValue(record.getCommandId());
+        final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, id);
         datastore.storeWithAutoId(idProperty, record);
     }
 }
