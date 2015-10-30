@@ -37,9 +37,9 @@ import static org.spine3.util.Events.toEventRecordsIterator;
 /**
  * Storage for event records based on Google Cloud Datastore.
  *
+ * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
- * @author Alexander Litus
  */
 class DsEventStorage extends EventStorage {
 

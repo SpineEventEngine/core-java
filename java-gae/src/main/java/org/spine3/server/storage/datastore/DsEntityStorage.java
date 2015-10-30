@@ -36,9 +36,9 @@ import static org.spine3.util.Identifiers.idToString;
 /**
  * {@link EntityStorage} implementation based on Google App Engine Datastore.
  *
+ * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
- * @author Alexander Litus
  */
 class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
@@ -51,8 +51,9 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     /**
      * Creates a new storage instance.
+     *
      * @param descriptor the descriptor of the type of messages to save to the storage.
-     * @param datastore the datastore implementation to use.
+     * @param datastore  the datastore implementation to use.
      */
     private DsEntityStorage(Descriptor descriptor, DatastoreWrapper datastore) {
         this.typeName = TypeName.of(descriptor);

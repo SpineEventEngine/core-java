@@ -37,9 +37,9 @@ import static org.spine3.util.Identifiers.idToString;
 /**
  * A storage of aggregate root events and snapshots based on Google Cloud Datastore.
  *
+ * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
- * @author Alexander Litus
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 

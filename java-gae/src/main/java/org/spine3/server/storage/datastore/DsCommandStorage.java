@@ -31,9 +31,9 @@ import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEnti
 /**
  * Storage for command records based on Google Cloud Datastore.
  *
+ * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
- * @author Alexander Litus
  */
 class DsCommandStorage extends CommandStorage {
 
