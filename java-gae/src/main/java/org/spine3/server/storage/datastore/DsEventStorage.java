@@ -27,37 +27,53 @@ import org.spine3.server.storage.EventStoreRecord;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
+import static org.spine3.TypeName.toTypeUrl;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.*;
 import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
  * Storage for event records based on Google Cloud Datastore.
  *
  * @author Alexander Litus
+ * @see DatastoreStorageFactory
+ * @see LocalDatastoreStorageFactory
  */
-public class DatastoreEventStorage extends EventStorage {
+class DsEventStorage extends EventStorage {
 
-    private final DatastoreManager<EventStoreRecord> datastoreManager;
+    private final DatastoreWrapper datastore;
+    private static final String KIND = EventStoreRecord.class.getName();
+    private static final String TYPE_URL = toTypeUrl(EventStoreRecord.getDescriptor());
 
-    private DatastoreEventStorage(DatastoreManager<EventStoreRecord> manager) {
-        this.datastoreManager = manager;
+    protected static DsEventStorage newInstance(DatastoreWrapper datastore) {
+        return new DsEventStorage(datastore);
     }
 
-    protected static DatastoreEventStorage newInstance(DatastoreManager<EventStoreRecord> manager) {
-        return new DatastoreEventStorage(manager);
+    private DsEventStorage(DatastoreWrapper datastore) {
+        this.datastore = datastore;
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final List<EventStoreRecord> records = datastoreManager.readAllSortedByTime(ASCENDING);
+        final Query.Builder query = makeQuery(ASCENDING, KIND);
+        final List<EntityResult> entityResults = datastore.runQuery(query);
+        final List<EventStoreRecord> records = entitiesToMessages(entityResults, TYPE_URL);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        datastoreManager.storeEventRecord(record.getEventId(), record);
+
+        final Key.Builder key = makeKey(KIND, record.getEventId());
+        final Entity.Builder entity = messageToEntity(record, key);
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        datastore.commit(mutation);
     }
 
     @Override

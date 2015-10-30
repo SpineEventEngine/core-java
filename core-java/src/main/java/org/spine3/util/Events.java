@@ -57,7 +57,7 @@ public class Events {
     }
 
     static {
-        IdConverterRegistry.instance().register(EventId.class, new EventIdToStringConverter());
+        IdConverterRegistry.getInstance().register(EventId.class, new EventIdToStringConverter());
     }
 
     /**

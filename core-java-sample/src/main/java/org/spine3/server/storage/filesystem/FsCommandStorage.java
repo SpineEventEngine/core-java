@@ -23,19 +23,40 @@ package org.spine3.server.storage.filesystem;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
+import java.io.File;
+import java.io.IOException;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
+import static org.spine3.util.IoUtil.createIfDoesNotExist;
 
-public class FileSystemCommandStorage extends CommandStorage {
+/**
+ * A storage for aggregate root events and snapshots based on the file system.
+ *
+ * @author Alexander Litus
+ */
+class FsCommandStorage extends CommandStorage {
 
-    protected static CommandStorage newInstance() {
-        return new FileSystemCommandStorage();
+    private static final String COMMAND_STORE_FILE_NAME = "/command-store";
+    private final File commandStoreFile;
+
+    /**
+     * Creates new storage instance.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
+     * @throws IOException - if failed to create command storage file
+     */
+    protected static FsCommandStorage newInstance(String rootDirectoryPath) throws IOException {
+        return new FsCommandStorage(rootDirectoryPath);
     }
 
-    private FileSystemCommandStorage() {}
+    private FsCommandStorage(String rootDirectoryPath) throws IOException {
+        commandStoreFile = createIfDoesNotExist(rootDirectoryPath + COMMAND_STORE_FILE_NAME);
+    }
 
     @Override
     protected void write(CommandStoreRecord record) {
-        checkNotNull(record, "CommandRecord shouldn't be null.");
-        FileSystemHelper.write(record);
+
+        checkNotNull(record);
+        writeMessage(commandStoreFile, record);
     }
 }

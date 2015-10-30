@@ -23,41 +23,44 @@ package org.spine3.server.storage.datastore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.TestIdWithStringField;
-
+import org.junit.Test;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventStorageShould;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
+ * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
  * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
  * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
  */
-public class DatastoreEntityStorageShould extends EntityStorageShould {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class DsEventStorageShould extends EventStorageShould {
 
-    private static final LocalDatastoreManager<TestIdWithStringField> DATASTORE_MANAGER =
-            LocalDatastoreManager.newInstance(TestIdWithStringField.getDescriptor());
+    private static final LocalDatastoreStorageFactory DATASTORE_FACTORY = LocalDatastoreStorageFactory.getDefaultInstance();
 
-    private static final EntityStorage<String, TestIdWithStringField> STORAGE =
-            DatastoreEntityStorage.newInstance(DATASTORE_MANAGER);
+    private static final EventStorage STORAGE = DATASTORE_FACTORY.createEventStorage();
 
-    public DatastoreEntityStorageShould() {
+    public DsEventStorageShould() {
         super(STORAGE);
     }
 
     @BeforeClass
     public static void setUpClass() {
-        LocalDatastoreStorageFactory.instance().setUp();
+        DATASTORE_FACTORY.setUp();
     }
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        DATASTORE_FACTORY.clear();
     }
 
     @AfterClass
     public static void tearDownClass() {
-        LocalDatastoreStorageFactory.instance().tearDown();
+        DATASTORE_FACTORY.tearDown();
+    }
+
+    @Test
+    public void have_empty_release_resources_method() {
+        ((DsEventStorage) STORAGE).releaseResources();
     }
 }

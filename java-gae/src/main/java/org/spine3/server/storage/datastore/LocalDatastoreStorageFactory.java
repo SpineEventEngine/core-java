@@ -20,55 +20,146 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.protobuf.Message;
+import com.google.api.services.datastore.client.DatastoreOptions;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastore;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastoreException;
+import com.google.api.services.datastore.client.LocalDevelopmentDatastoreFactory;
 
-import static com.google.protobuf.Descriptors.Descriptor;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.propagate;
 
+/**
+ * Creates storages based on the local Google {@link LocalDevelopmentDatastore}.
+ */
+@SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     /**
      * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
      * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
      */
-    @SuppressWarnings({"AccessOfSystemProperties", "DuplicateStringLiteralInspection"})
+    @SuppressWarnings("AccessOfSystemProperties")
     private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 
-    @SuppressWarnings("RefusedBequest") // overriding getter, no sense to call base method
-    @Override
-    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
-        final LocalDatastoreManager<M> manager = LocalDatastoreManager.newInstance(descriptor);
-        return manager;
+    private static final String DEFAULT_DATASET_NAME = "spine-local-dataset";
+    private static final String DEFAULT_HOST = "http://localhost:8080";
+
+    private static final DatastoreOptions DEFAULT_LOCAL_OPTIONS = new DatastoreOptions.Builder()
+            .dataset(DEFAULT_DATASET_NAME)
+            .host(DEFAULT_HOST)
+            .build();
+
+    private static final String GCD_HOME = retrieveGcdHome();
+
+    private static final String OPTION_TESTING_MODE = "testing";
+
+    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = "GCD_HOME environment variable is not configured. " +
+                    "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
+
+    private final LocalDevelopmentDatastore localDatastore;
+
+    /**
+     * Returns a default factory instance. A {@link LocalDevelopmentDatastore} is created with default {@link DatastoreOptions}:
+     * <ul>
+     *     <li>Dataset name: {@code spine-local-dataset}</li>
+     *     <li>Host: {@code http://localhost:8080}</li>
+     * </ul>
+     */
+    public static LocalDatastoreStorageFactory getDefaultInstance() {
+        return DefaultInstanceSingleton.INSTANCE.value;
     }
 
+    /**
+     * Creates a new factory instance.
+     * @param options {@link DatastoreOptions} used to create a {@link LocalDevelopmentDatastore}
+     */
+    public static LocalDatastoreStorageFactory newInstance(DatastoreOptions options) {
+        final LocalDevelopmentDatastore datastore = LocalDevelopmentDatastoreFactory.get().create(options);
+        return new LocalDatastoreStorageFactory(datastore);
+    }
+
+    private LocalDatastoreStorageFactory(LocalDevelopmentDatastore datastore) {
+        super(datastore);
+        localDatastore = datastore;
+    }
+
+    /**
+     * Starts the local Datastore server in testing mode.
+     * <p>
+     * NOTE: does nothing on Windows. Reported an issue
+     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
+     * <p>
+     * Start local Datastore Server manually on Windows.
+     * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
+     *
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
+     *                          throws LocalDevelopmentDatastoreException.
+     * @see <a href="https://cloud.google.com/DATASTORE/docs/tools/devserver#local_development_server_command-line_arguments">
+     * Documentation</a> ("testing" option)
+     */
     @Override
     public void setUp() {
 
         super.setUp();
 
         if (!IS_WINDOWS) {
-            LocalDatastoreManager.start();
+            try {
+                localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+            } catch (LocalDevelopmentDatastoreException e) {
+                propagate(e);
+            }
         }
     }
 
+    /**
+     * Clears all data and stops the local Datastore server.
+     *
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
+     */
     @Override
     public void tearDown() {
 
         super.tearDown();
 
-        LocalDatastoreManager.clear();
+        clear();
 
         if (!IS_WINDOWS) {
-            LocalDatastoreManager.stop();
+            try {
+                localDatastore.stop();
+            } catch (LocalDevelopmentDatastoreException e) {
+                propagate(e);
+            }
         }
     }
 
-    public static LocalDatastoreStorageFactory instance() {
-        return Singleton.INSTANCE.value;
+    /**
+     * Clears all data in the local Datastore.
+     *
+     * @throws RuntimeException if {@link LocalDevelopmentDatastore#clear()} throws LocalDevelopmentDatastoreException.
+     */
+    public void clear() {
+        try {
+            localDatastore.clear();
+        } catch (LocalDevelopmentDatastoreException e) {
+            propagate(e);
+        }
     }
 
-    private enum Singleton {
+    private static String retrieveGcdHome() {
+        final String gcdHome = System.getenv("GCD_HOME");
+        checkState(gcdHome != null, ENVIRONMENT_NOT_CONFIGURED_MESSAGE);
+        return gcdHome;
+    }
+
+    private enum DefaultInstanceSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory();
+        private final LocalDatastoreStorageFactory value = new LocalDatastoreStorageFactory(DefaultDatastoreSingleton.INSTANCE.value);
+    }
+
+    private enum DefaultDatastoreSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final LocalDevelopmentDatastore value = LocalDevelopmentDatastoreFactory.get().create(DEFAULT_LOCAL_OPTIONS);
     }
 }

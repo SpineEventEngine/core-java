@@ -21,19 +21,17 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.StorageFactory;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 
@@ -43,23 +41,19 @@ import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class FileSystemEventStorageShould extends EventStorageShould {
+public class FsEventStorageShould extends EventStorageShould {
 
-    private static final FileSystemEventStorage STORAGE = (FileSystemEventStorage) FileSystemEventStorage.newInstance();
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsEventStorageShould.class);
 
-    public FileSystemEventStorageShould() {
+    private static final FsEventStorage STORAGE = (FsEventStorage) FACTORY.createEventStorage();
+
+    public FsEventStorageShould() {
         super(STORAGE);
-    }
-
-    @Before
-    public void setUpTest() {
-        configure(FileSystemEventStorageShould.class);
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.releaseResources();
-        cleanTestData();
+        FACTORY.tearDown();
     }
 
     @Test(expected = UnsupportedOperationException.class)

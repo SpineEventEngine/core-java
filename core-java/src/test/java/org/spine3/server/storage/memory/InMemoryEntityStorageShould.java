@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import org.junit.After;
 import org.spine3.server.storage.EntityStorageShould;
-import org.spine3.test.TestIdWithStringField;
+import org.spine3.test.project.ProjectId;
 
 /**
  * In-memory implementation of {@link org.spine3.server.storage.EntityStorage} tests.
@@ -31,7 +31,7 @@ import org.spine3.test.TestIdWithStringField;
  */
 public class InMemoryEntityStorageShould extends EntityStorageShould {
 
-    private static final InMemoryEntityStorage<String, TestIdWithStringField> STORAGE = InMemoryEntityStorage.newInstance();
+    private static final InMemoryEntityStorage<String, ProjectId> STORAGE = InMemoryEntityStorage.newInstance();
 
     public InMemoryEntityStorageShould() {
         super(STORAGE);

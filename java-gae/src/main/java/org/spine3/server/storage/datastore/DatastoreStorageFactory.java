@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.client.Datastore;
+import com.google.api.services.datastore.client.DatastoreOptions;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
@@ -29,44 +31,52 @@ import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.util.Classes.getGenericParameterType;
 
+/**
+ * Creates storages based on GAE {@link Datastore}.
+ */
 public class DatastoreStorageFactory implements StorageFactory {
 
     private static final int ENTITY_MESSAGE_TYPE_PARAMETER_INDEX = 1;
 
+    private final DatastoreWrapper datastore;
+
+    /**
+     * @return creates new factory instance.
+     * @param datastore the {@link Datastore} implementation to use.
+     * @see DatastoreOptions
+     */
+    public static DatastoreStorageFactory newInstance(Datastore datastore) {
+        return new DatastoreStorageFactory(datastore);
+    }
+
+    protected DatastoreStorageFactory(Datastore datastore) {
+        this.datastore = new DatastoreWrapper(datastore);
+    }
+
     @Override
     public CommandStorage createCommandStorage() {
-        final DatastoreManager<CommandStoreRecord> manager = getManager(CommandStoreRecord.getDescriptor());
-        return DatastoreCommandStorage.newInstance(manager);
+        return DsCommandStorage.newInstance(datastore);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DatastoreManager<EventStoreRecord> manager = getManager(EventStoreRecord.getDescriptor());
-        return DatastoreEventStorage.newInstance(manager);
+        return DsEventStorage.newInstance(datastore);
     }
 
     /**
-     * The parameter is unused.
+     * NOTE: the parameter is not used.
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DatastoreManager<AggregateStorageRecord> manager = getManager(AggregateStorageRecord.getDescriptor());
-        return DatastoreAggregateStorage.newInstance(manager);
+        return DsAggregateStorage.newInstance(datastore);
     }
 
     @Override
     public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
 
         final Class<Message> messageClass = getGenericParameterType(entityClass, ENTITY_MESSAGE_TYPE_PARAMETER_INDEX);
-
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
-
-        final DatastoreManager<M> manager = getManager(descriptor);
-        return DatastoreEntityStorage.newInstance(manager);
-    }
-
-    protected <M extends Message> DatastoreManager<M> getManager(Descriptor descriptor) {
-        return DatastoreManager.newInstance(descriptor);
+        return DsEntityStorage.newInstance(descriptor, datastore);
     }
 
     @Override

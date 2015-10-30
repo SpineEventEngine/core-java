@@ -29,30 +29,42 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.closeSilently;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.tryToFlush;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.idToStringWithEscaping;
-import static org.spine3.server.storage.filesystem.FileSystemStoragePathHelper.getAggregateFilePath;
+import static org.spine3.server.storage.filesystem.FileSystemStorageFactory.PATH_DELIMITER;
+import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
+import static org.spine3.util.IoUtil.closeSilently;
+import static org.spine3.util.IoUtil.tryToFlush;
 
 /**
+ * A storage of aggregate root events and snapshots based on the file system.
  * Max available message size is about 2GB.
+ *
+ * @author Mikhail Mikhaylov
  */
-class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
+class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
-    private static final String INVALID_AGGREGATE_ID = "Aggregate Id can not be null";
 
-    private final String shortTypeName;
+    private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
 
-    /*package*/ FileSystemAggregateStorage(String shortTypeName) {
-        this.shortTypeName = shortTypeName;
+    private final String aggregateStorageRootPath;
+
+    /**
+     * Creates a new storage instance.
+     * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
+     */
+    protected static<I> FsAggregateStorage<I> newInstance(String rootDirectoryPath, String shortTypeName) {
+        return new FsAggregateStorage<>(rootDirectoryPath, shortTypeName);
+    }
+
+    private FsAggregateStorage(String rootDirectoryPath, String shortTypeName) {
+        this.aggregateStorageRootPath = rootDirectoryPath + AGGREGATE_FILE_NAME_PREFIX +
+                shortTypeName + PATH_DELIMITER;
     }
 
     @Override
-    protected void write(AggregateStorageRecord r) {
+    protected void write(AggregateStorageRecord record) {
 
-        final String aggregateFilePath = FileSystemStoragePathHelper.getAggregateFilePath(shortTypeName, r.getAggregateId());
-        final File aggregateFile = new File(aggregateFilePath);
+        final File aggregateFile = new File(aggregateStorageRootPath + record.getAggregateId());
 
         if (!aggregateFile.exists()) {
             //noinspection ResultOfMethodCallIgnored
@@ -65,28 +77,28 @@ class FileSystemAggregateStorage<I> extends AggregateStorage<I> {
             }
         }
 
-        writeToFile(aggregateFilePath, r);
+        writeToFile(aggregateFile, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         final String stringId = idToStringWithEscaping(id);
-        final File file = new File(getAggregateFilePath(shortTypeName, stringId));
+        final File file = new File(aggregateStorageRootPath + stringId);
         final Iterator<AggregateStorageRecord> iterator = new FileIterator(file);
         return iterator;
     }
 
     @Override
     protected void releaseResources() {
-        //NOP
-        //reading mechanism closes streams as soon as the page is read.
+        // NOP
+        // a reading mechanism closes streams as soon as the page is read.
     }
 
-    private static void writeToFile(String aggregateFilePath, AggregateStorageRecord r) {
+    private static void writeToFile(File file, AggregateStorageRecord r) {
 
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(aggregateFilePath, true);
+            fos = new FileOutputStream(file, true);
         } catch (FileNotFoundException e) {
             propagate(e);
         }

@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
@@ -35,23 +35,20 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class FileSystemStorageFactoryShould {
 
-    @Before
-    public void setUpTest() {
-        FileSystemStoragePathHelper.configure(FileSystemStorageFactoryShould.class);
-        FileSystemHelper.cleanTestData();
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
+
+    @After
+    public void tearDownTest() {
+        FACTORY.tearDown();
     }
 
     @Test
     public void create_storages_successfully() {
 
-        final StorageFactory factory = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
-
-        final EventStorage eventStorage = factory.createEventStorage();
-        final CommandStorage commandStorage = factory.createCommandStorage();
-        final EntityStorage<String, Project> entityStorage =
-                factory.createEntityStorage(TestEntity.class);
-        final AggregateStorage<String> aggregateRootStorage =
-                factory.createAggregateStorage(TestAggregateWithIdString.class);
+        final EventStorage eventStorage = FACTORY.createEventStorage();
+        final CommandStorage commandStorage = FACTORY.createCommandStorage();
+        final EntityStorage<String, Project> entityStorage = FACTORY.createEntityStorage(TestEntity.class);
+        final AggregateStorage<String> aggregateRootStorage = FACTORY.createAggregateStorage(TestAggregateWithIdString.class);
 
         assertNotNull(eventStorage);
         assertNotNull(commandStorage);
@@ -63,7 +60,6 @@ public class FileSystemStorageFactoryShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
-
         @SuppressWarnings("ReturnOfNull")
         @Override
         protected Project getDefaultState() {

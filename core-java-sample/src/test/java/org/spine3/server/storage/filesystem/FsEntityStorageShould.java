@@ -20,40 +20,29 @@
 
 package org.spine3.server.storage.filesystem;
 
-import com.google.protobuf.Message;
+import org.junit.After;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageShould;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.test.project.ProjectId;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.*;
+/**
+ * File system implementation of {@link EntityStorage} tests.
+ *
+ * @author Alexander Litus
+ */
+public class FsEntityStorageShould extends EntityStorageShould {
 
-public class FileSystemEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsEntityStorageShould.class);
 
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance() {
-        return new FileSystemEntityStorage<>();
+    private static final EntityStorage<String, ProjectId> STORAGE = FACTORY.createEntityStorage(TestEntity.class);
+
+    public FsEntityStorageShould() {
+        super(STORAGE);
     }
 
-    private FileSystemEntityStorage() {}
-
-    @Override
-    public M read(I id) {
-
-        final String idString = idToStringWithEscaping(id);
-
-        Message message = readEntity(idString);
-
-        @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
-        final M result = (M) message;
-        return result;
-    }
-
-    @Override
-    public void write(I id, M message) {
-
-        checkNotNull(id);
-        checkNotNull(message);
-
-        final String idString = idToStringWithEscaping(id);
-
-        writeEntity(idString, message);
+    @After
+    public void tearDownTest() {
+        FACTORY.tearDown();
     }
 }

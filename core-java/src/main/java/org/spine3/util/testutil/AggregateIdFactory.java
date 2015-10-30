@@ -43,4 +43,14 @@ public class AggregateIdFactory {
     public static ProjectId newProjectId() {
         return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
     }
+
+    /**
+     * Generates new ProjectId.
+     *
+     * @param id the project id
+     * @return ProjectId instance
+     */
+    public static ProjectId newProjectId(String id) {
+        return ProjectId.newBuilder().setId(id).build();
+    }
 }

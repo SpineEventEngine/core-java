@@ -116,7 +116,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     private void init() {
         if (!this.initialized) {
-            final Registry registry = Registry.instance();
+            final Registry registry = Registry.getInstance();
             final Class<? extends Aggregate> thisClass = getClass();
 
             // Register this aggregate root class if it wasn't.
@@ -436,7 +436,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         }
 
         @CheckReturnValue
-        static Registry instance() {
+        static Registry getInstance() {
             return Singleton.INSTANCE.value;
         }
 

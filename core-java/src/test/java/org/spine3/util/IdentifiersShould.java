@@ -79,7 +79,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_registered_project_id_message() {
 
-        IdConverterRegistry.instance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
+        IdConverterRegistry.getInstance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
 
         ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
         final String result = idToString(id);

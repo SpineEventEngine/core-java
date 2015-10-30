@@ -18,44 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.datastore;
+package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 
-
 /**
- * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
- * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Setup-the-Test-Environment">docs</a> for details.<br>
- * Reported an issue <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.<br>
- * TODO:2015.10.07:alexander.litus: remove this comment when this issue is fixed.
+ * @author Mikhail Mikhaylov
  */
-public class DatastoreAggregateStorageShould extends AggregateStorageShould {
+public class FsAggregateStorageShould extends AggregateStorageShould {
 
-    @SuppressWarnings("ConstantConditions") // passing null because this parameter isn't used in this implementation
-    private static final AggregateStorage<ProjectId> STORAGE = LocalDatastoreStorageFactory.instance().createAggregateStorage(null);
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsAggregateStorageShould.class);
 
-    public DatastoreAggregateStorageShould() {
+    private static final AggregateStorage<ProjectId> STORAGE = FACTORY.createAggregateStorage(AggregateForStorageTests.class);
+
+    public FsAggregateStorageShould() {
         super(STORAGE);
-    }
-
-
-    @BeforeClass
-    public static void setUpClass() {
-        LocalDatastoreStorageFactory.instance().setUp();
     }
 
     @After
     public void tearDownTest() {
-        LocalDatastoreManager.clear();
+        FACTORY.tearDown();
     }
 
-    @AfterClass
-    public static void tearDownClass() {
-        LocalDatastoreStorageFactory.instance().tearDown();
+    public static class AggregateForStorageTests extends Aggregate<ProjectId, Project> {
+        protected AggregateForStorageTests(ProjectId id) {
+            super(id);
+        }
+        @SuppressWarnings("ReturnOfNull")
+        @Override protected Project getDefaultState() {
+            return null;
+        }
     }
 }

@@ -20,6 +20,7 @@
 package org.spine3.sample.server;
 
 import io.grpc.ServerImpl;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -27,66 +28,86 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
+import org.spine3.sample.Sample;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
-
-import static org.spine3.sample.Sample.setUpEnvironment;
-import static org.spine3.sample.Sample.tearDownEnvironment;
 
 /**
  * Sample gRPC server implementation.
  *
  * @author Mikhail Melnik
+ * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class SampleServer {
 
+    /**
+     * The default port on which the server runs.
+     */
     public static final int SERVER_PORT = 50051;
 
-    private static final ServerImpl SERVER = NettyServerBuilder.forPort(SERVER_PORT)
-            .addService(CommandServiceGrpc.bindService(new CommandServiceImpl()))
-            .build();
-
-    private static final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private final ServerImpl serverImpl;
+    private final Sample sample;
 
     /**
-     * To run the sample on a FileSystemStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = FileSystemStorageFactory.newInstance(MySampleClass.class);
-     *
-     *
-     * To run the sample on a LocalDatastoreStorageFactory, replace the above initialization with the following:
-     *
-     * StorageFactory storageFactory = LocalDatastoreStorageFactory.instance();
+     * @param serverPort the port on which the server should run.
+     * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
+    public SampleServer(int serverPort, StorageFactory storageFactory) {
 
-    public static void main(String[] args) throws IOException {
-
-        setUpEnvironment(storageFactory);
-
-        SERVER.start();
-
-        log().info("Server started, listening on " + SERVER_PORT);
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-                //noinspection UseOfSystemOutOrSystemErr
-                System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                SampleServer.stop();
-                //noinspection UseOfSystemOutOrSystemErr
-                System.err.println("*** server shut down");
-            }
-        });
+        this.serverImpl = buildServerImpl(serverPort);
+        this.sample = new Sample(storageFactory);
     }
 
-    private static void stop() {
-        tearDownEnvironment(storageFactory);
-        SERVER.shutdown();
+    /**
+     * The entry point of the sample.
+     * To change the storage implementation, change {@link Sample#getStorageFactory()} method implementation.
+     */
+    public static void main(String[] args) throws IOException {
+
+        final StorageFactory storageFactory = Sample.getStorageFactory();
+
+        final SampleServer server = new SampleServer(SERVER_PORT, storageFactory);
+
+        server.start();
+
+        log().info("Server started, listening on the port " + SERVER_PORT);
+
+        addShutdownHook(server);
+    }
+
+    /**
+     * Starts the server.
+     * @throws IOException if unable to bind.
+     */
+    public void start() throws IOException {
+
+        sample.setUp();
+        serverImpl.start();
+    }
+
+    /**
+     * Stops the server.
+     */
+    public void stop() {
+
+        sample.tearDown();
+        serverImpl.shutdown();
+    }
+
+    private static void addShutdownHook(final SampleServer server) {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+            @SuppressWarnings("UseOfSystemOutOrSystemErr")
+            @Override
+            public void run() {
+                System.err.println("Shutting down the gRPC server since JVM is shutting down...");
+                server.stop();
+                System.err.println("Server shut down.");
+            }
+        }));
     }
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
@@ -106,7 +127,11 @@ public class SampleServer {
         }
     }
 
-    private SampleServer() {
+    private static ServerImpl buildServerImpl(int serverPort) {
+        final NettyServerBuilder builder = NettyServerBuilder.forPort(serverPort);
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl());
+        builder.addService(service);
+        return builder.build();
     }
 
     private static Logger log() {

@@ -39,7 +39,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.util.Events.idToString;
 
 /**
- * In-memory implementation of {@link org.spine3.server.storage.EventStorage}.
+ * In-memory implementation of {@link EventStorage}.
  *
  * @author Alexander Litus
  */
@@ -78,6 +78,9 @@ class InMemoryEventStorage extends EventStorage {
         // NOP
     }
 
+    /**
+     * Clears all data in the storage.
+     */
     protected void clear() {
         storage.clear();
     }

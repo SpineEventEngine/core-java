@@ -122,6 +122,18 @@ public final class TypeName extends StringTypeValue {
     }
 
     /**
+     * Returns string to be used as a type URL in {@code Any}.
+     *
+     * @return string with "type.googleapis.com/" prefix followed by the full type name
+     * @see Any#getTypeUrl()
+     * @see #toTypeUrl()
+     */
+    public static String toTypeUrl(Descriptors.Descriptor descriptor) {
+        final TypeName typeName = of(descriptor);
+        return typeName.toTypeUrl();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

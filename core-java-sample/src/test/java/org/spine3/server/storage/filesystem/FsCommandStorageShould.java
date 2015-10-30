@@ -20,41 +20,32 @@
 
 package org.spine3.server.storage.filesystem;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Test;
 import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.util.testutil.CommandRequestFactory;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.cleanTestData;
-import static org.spine3.server.storage.filesystem.FileSystemHelper.configure;
-
 /**
- * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
  *
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
-public class FileSystemCommandStorageShould {
+public class FsCommandStorageShould {
 
-    private static final FileSystemCommandStorage STORAGE = (FileSystemCommandStorage) FileSystemCommandStorage.newInstance();
+    private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsCommandStorageShould.class);
+
+    private static final FsCommandStorage STORAGE = (FsCommandStorage) FACTORY.createCommandStorage();
 
     private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
 
-    @BeforeClass
-    public static void setUp() {
-        configure(FileSystemCommandStorageShould.class);
-    }
 
-    @Before
-    public void setUpTest() {
-        cleanTestData();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        cleanTestData();
+    @After
+    public void tearDownTest() {
+        FACTORY.tearDown();
     }
 
     @Test(expected = NullPointerException.class)
