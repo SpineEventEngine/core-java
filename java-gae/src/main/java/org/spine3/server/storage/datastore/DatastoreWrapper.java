@@ -61,27 +61,25 @@ class DatastoreWrapper {
 
     /**
      * Creates a new storage instance.
+     *
      * @param datastore the datastore implementation to use.
      */
     protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
     }
 
+    /**
+     * Commits the given mutation.
+     *
+     * @param mutation the mutation to commit.
+     * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
+     */
     protected void commit(Mutation mutation) {
-        final CommitRequest commitRequest = createCommitRequest()
+
+        final CommitRequest commitRequest = CommitRequest.newBuilder()
+                .setMode(NON_TRANSACTIONAL)
                 .setMutation(mutation)
                 .build();
-        tryCommit(commitRequest);
-    }
-
-    protected void commit(Mutation.Builder mutation) {
-        final CommitRequest commitRequest = createCommitRequest()
-                .setMutation(mutation)
-                .build();
-        tryCommit(commitRequest);
-    }
-
-    private void tryCommit(CommitRequest commitRequest) {
         try {
             datastore.commit(commitRequest);
         } catch (DatastoreException e) {
@@ -89,10 +87,24 @@ class DatastoreWrapper {
         }
     }
 
-    private static CommitRequest.Builder createCommitRequest() {
-        return CommitRequest.newBuilder().setMode(NON_TRANSACTIONAL);
+    /**
+     * Commits the given mutation.
+     *
+     * @param mutation the mutation to commit.
+     * @throws RuntimeException if {@link Datastore#commit(CommitRequest)} throws a {@link DatastoreException}
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
+    protected void commit(Mutation.Builder mutation) {
+        commit(mutation.build());
     }
 
+    /**
+     * Commits the {@link LookupRequest}.
+     *
+     * @param request the request to commit
+     * @return the {@link LookupResponse} received
+     * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
+     */
     protected LookupResponse lookup(LookupRequest request) {
         LookupResponse response = null;
         try {
@@ -103,14 +115,28 @@ class DatastoreWrapper {
         return response;
     }
 
+    /**
+     * Runs the given {@link Query}.
+     *
+     * @param query the query to run.
+     * @return the {@link EntityResult} list received or an empty list
+     * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
+     */
     protected List<EntityResult> runQuery(Query query) {
         final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         return runQueryRequest(queryRequest);
     }
 
+    /**
+     * Runs the {@link Query} got from the given builder.
+     *
+     * @param query the query builder to build and run.
+     * @return the {@link EntityResult} list received or an empty list
+     * @throws RuntimeException if {@link Datastore#lookup(LookupRequest)} throws a {@link DatastoreException}
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // no, it cannot
     protected List<EntityResult> runQuery(Query.Builder query) {
-        final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
-        return runQueryRequest(queryRequest);
+        return runQuery(query.build());
     }
 
     private List<EntityResult> runQueryRequest(RunQueryRequest queryRequest) {
@@ -127,6 +153,9 @@ class DatastoreWrapper {
         return entityResults;
     }
 
+    /**
+     * Makes a property from the given timestamp using {@link org.spine3.protobuf.Timestamps#convertToDate(TimestampOrBuilder)}.
+     */
     protected static Property.Builder makeTimestampProperty(TimestampOrBuilder timestamp) {
         final Date date = convertToDate(timestamp);
         return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
@@ -149,6 +178,13 @@ class DatastoreWrapper {
         return query;
     }
 
+    /**
+     * Converts the given {@link Message} to the {@link Entity.Builder}.
+     *
+     * @param message the message to convert
+     * @param key the entity key to set
+     * @return the {@link Entity.Builder} with the given key and property created from the serialized message
+     */
     protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
         final Entity.Builder entity = Entity.newBuilder()
@@ -157,6 +193,14 @@ class DatastoreWrapper {
         return entity;
     }
 
+    /**
+     * Converts the given {@link EntityResultOrBuilder} to the {@link Message}.
+     *
+     * @param entity the entity to convert
+     * @param typeUrl the type url of the message
+     * @return the deserialized message
+     * @see Any#getTypeUrl()
+     */
     protected static <M extends Message> M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
@@ -181,6 +225,14 @@ class DatastoreWrapper {
         return result;
     }
 
+    /**
+     * Converts the given {@link EntityResult} list to the {@link Message} list.
+     *
+     * @param entities the entities to convert
+     * @param typeUrl the type url of the messages
+     * @return the deserialized messages
+     * @see Any#getTypeUrl()
+     */
     protected static <M extends Message> List<M> entitiesToMessages(List<EntityResult> entities, final String typeUrl) {
 
         final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
