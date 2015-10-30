@@ -29,7 +29,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
-import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.server.storage.CommandStoreRecord;
 
@@ -42,7 +41,6 @@ import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static com.google.protobuf.Descriptors.Descriptor;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.convertToDate;
@@ -63,29 +61,26 @@ class DsStorage<M extends Message> {
     private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
 
     private final Datastore datastore;
-    private final TypeName typeName;
 
     /**
      * Creates a new storage instance.
-     * @param descriptor the descriptor of the type of messages to save to the storage.
      * @param datastore the datastore implementation to use.
      */
-    protected DsStorage(Descriptor descriptor, Datastore datastore) {
+    protected DsStorage(Datastore datastore) {
         this.datastore = datastore;
-        this.typeName = TypeName.of(descriptor);
     }
 
     protected void storeWithAutoId(Property.Builder aggregateId, CommandStoreRecord record) {
-        storeWithAutoId(aggregateId, record, record.getTimestamp());
+        storeWithAutoId(aggregateId, record, record.getTimestamp(), CommandStoreRecord.class.getName());
     }
 
     protected void storeWithAutoId(Property.Builder aggregateId, AggregateStorageRecord record) {
-        storeWithAutoId(aggregateId, record, record.getTimestamp());
+        storeWithAutoId(aggregateId, record, record.getTimestamp(), AggregateStorageRecord.class.getName());
     }
 
-    private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
+    private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp, String kind) {
 
-        final Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
+        final Entity.Builder entity = messageToEntity(message, makeKey(kind));
         entity.addProperty(makeTimestampProperty(timestamp));
         entity.addProperty(aggregateId);
 
@@ -116,7 +111,7 @@ class DsStorage<M extends Message> {
         return response;
     }
 
-    protected List<M> runQuery(Query.Builder query) {
+    protected List<M> runQuery(Query.Builder query, final String typeUrl) {
 
         final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         List<EntityResult> entityResults = newArrayList();
@@ -131,6 +126,13 @@ class DsStorage<M extends Message> {
             return newArrayList();
         }
 
+        final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
+            @Override
+            public M apply(@Nullable EntityResult entity) {
+                return entityToMessage(entity, typeUrl);
+            }
+        };
+
         final List<M> result = transform(entityResults, entityToMessage);
         return result;
     }
@@ -140,15 +142,11 @@ class DsStorage<M extends Message> {
         return makeProperty(TIMESTAMP_PROPERTY_NAME, makeValue(date));
     }
 
-    protected Query.Builder makeQuery(Direction sortDirection) {
+    protected Query.Builder makeQuery(Direction sortDirection, String kind) {
         final Query.Builder query = Query.newBuilder();
-        query.addKindBuilder().setName(typeName.nameOnly());
+        query.addKindBuilder().setName(kind);
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
         return query;
-    }
-
-    protected Key.Builder makeKindKey(String id) {
-        return makeKey(typeName.nameOnly(), id);
     }
 
     protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
@@ -159,7 +157,7 @@ class DsStorage<M extends Message> {
         return entity;
     }
 
-    protected M entityToMessage(@Nullable EntityResultOrBuilder entity) {
+    protected M entityToMessage(@Nullable EntityResultOrBuilder entity, String typeUrl) {
 
         if (entity == null) {
             @SuppressWarnings("unchecked") // cast is safe because Any is Message
@@ -177,16 +175,9 @@ class DsStorage<M extends Message> {
             }
         }
 
-        any.setTypeUrl(typeName.toTypeUrl());
+        any.setTypeUrl(typeUrl);
 
         final M result = fromAny(any.build());
         return result;
     }
-
-    private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
-        @Override
-        public M apply(@Nullable EntityResult entity) {
-            return entityToMessage(entity);
-        }
-    };
 }

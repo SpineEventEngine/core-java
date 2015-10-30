@@ -20,11 +20,15 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.client.Datastore;
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
+import org.spine3.TypeName;
 import org.spine3.server.storage.EntityStorage;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
 import static org.spine3.util.Identifiers.idToString;
@@ -40,19 +44,29 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     private final DsStorage<M> storage;
 
-    private DsEntityStorage(DsStorage<M> storage) {
-        this.storage = storage;
+    private final TypeName typeName;
+    private final Datastore datastore;
+
+    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, Datastore datastore) {
+        return new DsEntityStorage<>(descriptor, datastore);
     }
 
-    protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(DsStorage<M> storage) {
-        return new DsEntityStorage<>(storage);
+    /**
+     * Creates a new storage instance.
+     * @param descriptor the descriptor of the type of messages to save to the storage.
+     * @param datastore the datastore implementation to use.
+     */
+    private DsEntityStorage(Descriptor descriptor, Datastore datastore) {
+        this.typeName = TypeName.of(descriptor);
+        this.datastore = datastore;
+        this.storage = new DsStorage<>(datastore);
     }
 
     @Override
     public M read(I id) {
 
         final String idString = idToString(id);
-        final Key.Builder key = storage.makeKindKey(idString);
+        final Key.Builder key = makeKey(typeName.nameOnly(), idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
         final LookupResponse response = storage.lookup(request);
@@ -63,7 +77,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
             return empty;
         }
         final EntityResult entity = response.getFound(0);
-        final M result = storage.entityToMessage(entity);
+        final M result = storage.entityToMessage(entity, typeName.toTypeUrl());
         return result;
     }
 
@@ -74,7 +88,8 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         checkNotNull(message, "Message is null.");
 
         final String idString = idToString(id);
-        final Entity.Builder entity = messageToEntity(message, storage.makeKindKey(idString));
+        final Key.Builder kindKey = makeKey(typeName.nameOnly(), idString);
+        final Entity.Builder entity = messageToEntity(message, kindKey);
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         storage.commit(mutation);
     }

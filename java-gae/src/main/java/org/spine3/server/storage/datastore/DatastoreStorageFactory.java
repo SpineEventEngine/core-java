@@ -55,14 +55,12 @@ public class DatastoreStorageFactory implements StorageFactory {
 
     @Override
     public CommandStorage createCommandStorage() {
-        final DsStorage<CommandStoreRecord> storage = createStorage(CommandStoreRecord.getDescriptor());
-        return DsCommandStorage.newInstance(storage);
+        return DsCommandStorage.newInstance(datastore);
     }
 
     @Override
     public EventStorage createEventStorage() {
-        final DsStorage<EventStoreRecord> storage = createStorage(EventStoreRecord.getDescriptor());
-        return DsEventStorage.newInstance(storage);
+        return DsEventStorage.newInstance(datastore);
     }
 
     /**
@@ -70,8 +68,7 @@ public class DatastoreStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
-        final DsStorage<AggregateStorageRecord> storage = createStorage(AggregateStorageRecord.getDescriptor());
-        return DsAggregateStorage.newInstance(storage);
+        return DsAggregateStorage.newInstance(datastore);
     }
 
     @Override
@@ -81,8 +78,7 @@ public class DatastoreStorageFactory implements StorageFactory {
 
         final Descriptor descriptor = (Descriptor) getClassDescriptor(messageClass);
 
-        final DsStorage<M> storage = createStorage(descriptor);;
-        return DsEntityStorage.newInstance(storage);
+        return DsEntityStorage.newInstance(descriptor, datastore);
     }
 
     @Override
@@ -93,9 +89,5 @@ public class DatastoreStorageFactory implements StorageFactory {
     @Override
     public void tearDown() {
         // NOP
-    }
-
-    private <M extends Message> DsStorage<M> createStorage(Descriptor descriptor) {
-        return new DsStorage<>(descriptor, datastore);
     }
 }

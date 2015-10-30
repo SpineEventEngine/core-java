@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.client.Datastore;
+import org.spine3.TypeName;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
@@ -29,6 +31,7 @@ import java.util.List;
 
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static org.spine3.server.storage.datastore.DsStorage.makeTimestampProperty;
 import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
 import static org.spine3.util.Events.toEventRecordsIterator;
@@ -43,20 +46,23 @@ import static org.spine3.util.Events.toEventRecordsIterator;
 class DsEventStorage extends EventStorage {
 
     private final DsStorage<EventStoreRecord> storage;
+    private static final String KIND = EventStoreRecord.class.getName();
 
-    private DsEventStorage(DsStorage<EventStoreRecord> storage) {
-        this.storage = storage;
+    protected static DsEventStorage newInstance(Datastore datastore) {
+        return new DsEventStorage(datastore);
     }
 
-    protected static DsEventStorage newInstance(DsStorage<EventStoreRecord> storage) {
-        return new DsEventStorage(storage);
+    private DsEventStorage(Datastore datastore) {
+        this.storage = new DsStorage<>(datastore);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final Query.Builder query = storage.makeQuery(ASCENDING);
-        final List<EventStoreRecord> records = storage.runQuery(query);
+        final Query.Builder query = storage.makeQuery(ASCENDING, KIND);
+        // TODO:2015-10-30:alexander.litus: change
+        final String typeUrl = TypeName.of(EventStoreRecord.getDescriptor()).toTypeUrl();
+        final List<EventStoreRecord> records = storage.runQuery(query, typeUrl);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
@@ -64,7 +70,7 @@ class DsEventStorage extends EventStorage {
     @Override
     protected void write(EventStoreRecord record) {
 
-        final Key.Builder key = storage.makeKindKey(record.getEventId());
+        final Key.Builder key = makeKey(KIND, record.getEventId());
         final Entity.Builder entity = messageToEntity(record, key);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 

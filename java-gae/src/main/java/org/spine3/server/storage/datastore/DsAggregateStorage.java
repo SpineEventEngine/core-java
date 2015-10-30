@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.datastore;
 
+import com.google.api.services.datastore.client.Datastore;
+import org.spine3.TypeName;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -42,15 +44,16 @@ import static org.spine3.util.Identifiers.idToString;
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
+    private static final String KIND = AggregateStorageRecord.class.getName();
 
     private final DsStorage<AggregateStorageRecord> storage;
 
-    private DsAggregateStorage(DsStorage<AggregateStorageRecord> storage) {
-        this.storage = storage;
+    protected static <I> DsAggregateStorage<I> newInstance(Datastore datastore) {
+        return new DsAggregateStorage<>(datastore);
     }
 
-    protected static <I> DsAggregateStorage<I> newInstance(DsStorage<AggregateStorageRecord> storage) {
-        return new DsAggregateStorage<>(storage);
+    private DsAggregateStorage(Datastore datastore) {
+        this.storage = new DsStorage<>(datastore);
     }
 
     @Override
@@ -65,11 +68,12 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Query.Builder query = storage.makeQuery(DESCENDING);
+        final Query.Builder query = storage.makeQuery(DESCENDING, KIND);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
         query.setFilter(idFilter).build();
 
-        final List<AggregateStorageRecord> records = storage.runQuery(query);
+        final String typeUrl = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
+        final List<AggregateStorageRecord> records = storage.runQuery(query, typeUrl);
         return records.iterator();
     }
 
