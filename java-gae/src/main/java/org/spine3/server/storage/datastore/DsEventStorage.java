@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.datastore;
 
-import com.google.api.services.datastore.DatastoreV1;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
@@ -28,7 +27,10 @@ import org.spine3.server.storage.EventStoreRecord;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
+import static org.spine3.server.storage.datastore.DsStorage.makeTimestampProperty;
+import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
 import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
@@ -40,55 +42,36 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 class DsEventStorage extends EventStorage {
 
-    private final DsStorage storage;
+    private final DsStorage<EventStoreRecord> storage;
 
-    private DsEventStorage(DsStorage storage) {
+    private DsEventStorage(DsStorage<EventStoreRecord> storage) {
         this.storage = storage;
     }
 
-    protected static DsEventStorage newInstance(DsStorage storage) {
+    protected static DsEventStorage newInstance(DsStorage<EventStoreRecord> storage) {
         return new DsEventStorage(storage);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final List<EventStoreRecord> records = readAllSortedByTime(ASCENDING);
+        Query.Builder query = storage.makeQuery(ASCENDING);
+        final List<EventStoreRecord> records = storage.runQuery(query);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
-        saveEvent(record.getEventId(), record);
+
+        Entity.Builder entity = messageToEntity(record, storage.makeCommonKey(record.getEventId()));
+        entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+        final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
+        storage.commit(mutation);
     }
 
     @Override
     protected void releaseResources() {
         // NOP
-    }
-
-    /**
-     * Stores the {@code record} by the {@code id}. Only one record could be stored by given id.
-     */
-    private void saveEvent(String id, EventStoreRecord record) {
-
-        DatastoreV1.Entity.Builder entity = DsStorage.messageToEntity(record, storage.makeCommonKey(id));
-        entity.addProperty(DsStorage.makeTimestampProperty(record.getTimestamp()));
-
-        final DatastoreV1.Mutation.Builder mutation = DatastoreV1.Mutation.newBuilder().addInsert(entity);
-        storage.commit(mutation);
-    }
-
-    /**
-     * Reads all the elements.
-     * @return the elements sorted by {@code timestamp} in specified {@code sortDirection}.
-     */
-    private List<EventStoreRecord> readAllSortedByTime(DatastoreV1.PropertyOrder.Direction sortDirection) {
-
-        DatastoreV1.Query.Builder query = storage.makeQuery(sortDirection);
-        @SuppressWarnings("unchecked") // TODO:2015-10-30:alexander.litus: avoid this
-        final List<EventStoreRecord> records = (List<EventStoreRecord>) storage.runQuery(query);
-        return records;
     }
 }

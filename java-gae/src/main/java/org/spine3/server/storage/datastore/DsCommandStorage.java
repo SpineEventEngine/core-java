@@ -23,6 +23,10 @@ package org.spine3.server.storage.datastore;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
+import static com.google.api.services.datastore.DatastoreV1.Property;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeProperty;
+import static com.google.api.services.datastore.client.DatastoreHelper.makeValue;
+
 /**
  * Storage for command records based on Google Cloud Datastore.
  *
@@ -31,6 +35,9 @@ import org.spine3.server.storage.CommandStoreRecord;
  * @author Alexander Litus
  */
 class DsCommandStorage extends CommandStorage {
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
     private final DsStorage<CommandStoreRecord> storage;
 
@@ -42,8 +49,14 @@ class DsCommandStorage extends CommandStorage {
         return new DsCommandStorage(storage);
     }
 
+    /**
+     * Stores the {@code record} by the {@code id}. Several records could be stored by given id.
+     */
     @Override
     protected void write(CommandStoreRecord record) {
-        storage.storeCommandRecord(record.getCommandId(), record);
+
+        final String id = record.getCommandId();
+        final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, makeValue(id));
+        storage.storeWithAutoId(idProperty, record, record.getTimestamp());
     }
 }

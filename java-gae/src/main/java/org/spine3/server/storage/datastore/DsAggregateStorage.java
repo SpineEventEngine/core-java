@@ -26,7 +26,10 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.api.services.datastore.DatastoreV1.*;
+import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
+import static com.google.api.services.datastore.client.DatastoreHelper.*;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -38,6 +41,8 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
+    protected static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
+
     private final DsStorage<AggregateStorageRecord> storage;
 
     private DsAggregateStorage(DsStorage<AggregateStorageRecord> storage) {
@@ -48,16 +53,26 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         return new DsAggregateStorage<>(storage);
     }
 
+    /**
+     * Stores the {@code record} by its {@code aggregateId}. Several records could be stored by this {@code aggregateId}.
+     */
     @Override
     protected void write(AggregateStorageRecord record) {
-        storage.storeAggregateRecord(record.getAggregateId(), record);
+
+        final Value.Builder id = makeValue(record.getAggregateId());
+        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, id);
+        storage.storeWithAutoId(idProperty, record, record.getTimestamp());
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final List<AggregateStorageRecord> records = storage.readByAggregateIdSortedByTime(idString, DESCENDING);
+        Query.Builder query = storage.makeQuery(DESCENDING);
+        final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
+        query.setFilter(idFilter).build();
+
+        final List<AggregateStorageRecord> records = storage.runQuery(query);
         return records.iterator();
     }
 
