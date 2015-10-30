@@ -46,14 +46,14 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.convertToDate;
 
 /**
- * Provides access to Google App Engine Cloud {@link Datastore}.
+ * The Google App Engine Cloud {@link Datastore} wrapper.
  *
  * @param <M> the type of messages to save to the storage.
  * @author Alexander Litus
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DsStorage<M extends Message> {
+class DatastoreWrapper<M extends Message> {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 
@@ -66,7 +66,7 @@ class DsStorage<M extends Message> {
      * Creates a new storage instance.
      * @param datastore the datastore implementation to use.
      */
-    protected DsStorage(Datastore datastore) {
+    protected DatastoreWrapper(Datastore datastore) {
         this.datastore = datastore;
     }
 

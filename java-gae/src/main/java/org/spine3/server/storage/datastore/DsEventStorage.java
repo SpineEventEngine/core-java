@@ -32,8 +32,8 @@ import java.util.List;
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.ASCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
-import static org.spine3.server.storage.datastore.DsStorage.makeTimestampProperty;
-import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.makeTimestampProperty;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 import static org.spine3.util.Events.toEventRecordsIterator;
 
 /**
@@ -45,7 +45,7 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 class DsEventStorage extends EventStorage {
 
-    private final DsStorage<EventStoreRecord> storage;
+    private final DatastoreWrapper<EventStoreRecord> datastore;
     private static final String KIND = EventStoreRecord.class.getName();
 
     protected static DsEventStorage newInstance(Datastore datastore) {
@@ -53,16 +53,16 @@ class DsEventStorage extends EventStorage {
     }
 
     private DsEventStorage(Datastore datastore) {
-        this.storage = new DsStorage<>(datastore);
+        this.datastore = new DatastoreWrapper<>(datastore);
     }
 
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        final Query.Builder query = storage.makeQuery(ASCENDING, KIND);
+        final Query.Builder query = datastore.makeQuery(ASCENDING, KIND);
         // TODO:2015-10-30:alexander.litus: change
         final String typeUrl = TypeName.of(EventStoreRecord.getDescriptor()).toTypeUrl();
-        final List<EventStoreRecord> records = storage.runQuery(query, typeUrl);
+        final List<EventStoreRecord> records = datastore.runQuery(query, typeUrl);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
     }
@@ -75,7 +75,7 @@ class DsEventStorage extends EventStorage {
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
 
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        storage.commit(mutation);
+        datastore.commit(mutation);
     }
 
     @Override

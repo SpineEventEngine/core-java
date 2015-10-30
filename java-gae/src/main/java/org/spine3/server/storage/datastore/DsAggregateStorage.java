@@ -46,14 +46,14 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String KIND = AggregateStorageRecord.class.getName();
 
-    private final DsStorage<AggregateStorageRecord> storage;
+    private final DatastoreWrapper<AggregateStorageRecord> datastore;
 
     protected static <I> DsAggregateStorage<I> newInstance(Datastore datastore) {
         return new DsAggregateStorage<>(datastore);
     }
 
     private DsAggregateStorage(Datastore datastore) {
-        this.storage = new DsStorage<>(datastore);
+        this.datastore = new DatastoreWrapper<>(datastore);
     }
 
     @Override
@@ -61,19 +61,19 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Value.Builder id = makeValue(record.getAggregateId());
         final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, id);
-        storage.storeWithAutoId(idProperty, record);
+        datastore.storeWithAutoId(idProperty, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Query.Builder query = storage.makeQuery(DESCENDING, KIND);
+        final Query.Builder query = datastore.makeQuery(DESCENDING, KIND);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
         query.setFilter(idFilter).build();
 
         final String typeUrl = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
-        final List<AggregateStorageRecord> records = storage.runQuery(query, typeUrl);
+        final List<AggregateStorageRecord> records = datastore.runQuery(query, typeUrl);
         return records.iterator();
     }
 

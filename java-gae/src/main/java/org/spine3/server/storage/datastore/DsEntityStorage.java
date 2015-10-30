@@ -30,7 +30,7 @@ import org.spine3.server.storage.EntityStorage;
 import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.client.DatastoreHelper.makeKey;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.datastore.DsStorage.messageToEntity;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.messageToEntity;
 import static org.spine3.util.Identifiers.idToString;
 
 /**
@@ -42,10 +42,8 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DsStorage<M> storage;
-
+    private final DatastoreWrapper<M> datastore;
     private final TypeName typeName;
-    private final Datastore datastore;
 
     protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, Datastore datastore) {
         return new DsEntityStorage<>(descriptor, datastore);
@@ -58,8 +56,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      */
     private DsEntityStorage(Descriptor descriptor, Datastore datastore) {
         this.typeName = TypeName.of(descriptor);
-        this.datastore = datastore;
-        this.storage = new DsStorage<>(datastore);
+        this.datastore = new DatastoreWrapper<>(datastore);
     }
 
     @Override
@@ -69,7 +66,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         final Key.Builder key = makeKey(typeName.nameOnly(), idString);
         final LookupRequest request = LookupRequest.newBuilder().addKey(key).build();
 
-        final LookupResponse response = storage.lookup(request);
+        final LookupResponse response = datastore.lookup(request);
 
         if (response == null || response.getFoundCount() == 0) {
             @SuppressWarnings("unchecked") // cast is save because Any is Message
@@ -77,7 +74,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
             return empty;
         }
         final EntityResult entity = response.getFound(0);
-        final M result = storage.entityToMessage(entity, typeName.toTypeUrl());
+        final M result = datastore.entityToMessage(entity, typeName.toTypeUrl());
         return result;
     }
 
@@ -91,6 +88,6 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         final Key.Builder kindKey = makeKey(typeName.nameOnly(), idString);
         final Entity.Builder entity = messageToEntity(message, kindKey);
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
-        storage.commit(mutation);
+        datastore.commit(mutation);
     }
 }
