@@ -53,7 +53,7 @@ import static org.spine3.protobuf.Timestamps.convertToDate;
  * @see DatastoreStorageFactory
  * @see LocalDatastoreStorageFactory
  */
-class DatastoreWrapper<M extends Message> {
+class DatastoreWrapper {
 
     private static final String VALUE_PROPERTY_NAME = "value";
 

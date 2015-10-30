@@ -40,14 +40,14 @@ class DsCommandStorage extends CommandStorage {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String COMMAND_ID_PROPERTY_NAME = "commandId";
 
-    private final DatastoreWrapper<CommandStoreRecord> datastore;
+    private final DatastoreWrapper datastore;
 
     protected static CommandStorage newInstance(Datastore datastore) {
         return new DsCommandStorage(datastore);
     }
 
     private DsCommandStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper<>(datastore);
+        this.datastore = new DatastoreWrapper(datastore);
     }
 
     @Override

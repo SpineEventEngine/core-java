@@ -44,7 +44,7 @@ import static org.spine3.util.Events.toEventRecordsIterator;
  */
 class DsEventStorage extends EventStorage {
 
-    private final DatastoreWrapper<EventStoreRecord> datastore;
+    private final DatastoreWrapper datastore;
     private static final String KIND = EventStoreRecord.class.getName();
 
     protected static DsEventStorage newInstance(Datastore datastore) {
@@ -52,7 +52,7 @@ class DsEventStorage extends EventStorage {
     }
 
     private DsEventStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper<>(datastore);
+        this.datastore = new DatastoreWrapper(datastore);
     }
 
     @Override

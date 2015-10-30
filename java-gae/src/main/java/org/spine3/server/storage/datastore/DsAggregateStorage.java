@@ -32,6 +32,7 @@ import static com.google.api.services.datastore.DatastoreV1.*;
 import static com.google.api.services.datastore.DatastoreV1.PropertyFilter.Operator.EQUAL;
 import static com.google.api.services.datastore.DatastoreV1.PropertyOrder.Direction.DESCENDING;
 import static com.google.api.services.datastore.client.DatastoreHelper.*;
+import static org.spine3.server.storage.datastore.DatastoreWrapper.entitiesToMessages;
 import static org.spine3.server.storage.datastore.DatastoreWrapper.makeQuery;
 import static org.spine3.util.Identifiers.idToString;
 
@@ -47,14 +48,14 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String KIND = AggregateStorageRecord.class.getName();
 
-    private final DatastoreWrapper<AggregateStorageRecord> datastore;
+    private final DatastoreWrapper datastore;
 
     protected static <I> DsAggregateStorage<I> newInstance(Datastore datastore) {
         return new DsAggregateStorage<>(datastore);
     }
 
     private DsAggregateStorage(Datastore datastore) {
-        this.datastore = new DatastoreWrapper<>(datastore);
+        this.datastore = new DatastoreWrapper(datastore);
     }
 
     @Override
@@ -75,7 +76,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final String typeUrl = TypeName.of(AggregateStorageRecord.getDescriptor()).toTypeUrl();
         final List<EntityResult> entityResults = datastore.runQuery(query);
-        final List<AggregateStorageRecord> records = DatastoreWrapper.entitiesToMessages(entityResults, typeUrl);
+        final List<AggregateStorageRecord> records = entitiesToMessages(entityResults, typeUrl);
         return records.iterator();
     }
 

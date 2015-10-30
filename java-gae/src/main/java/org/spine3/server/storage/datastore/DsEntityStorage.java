@@ -43,7 +43,7 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
-    private final DatastoreWrapper<M> datastore;
+    private final DatastoreWrapper datastore;
     private final TypeName typeName;
 
     protected static <I, M extends Message> DsEntityStorage<I, M> newInstance(Descriptor descriptor, Datastore datastore) {
@@ -57,7 +57,7 @@ class DsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      */
     private DsEntityStorage(Descriptor descriptor, Datastore datastore) {
         this.typeName = TypeName.of(descriptor);
-        this.datastore = new DatastoreWrapper<>(datastore);
+        this.datastore = new DatastoreWrapper(datastore);
     }
 
     @Override
