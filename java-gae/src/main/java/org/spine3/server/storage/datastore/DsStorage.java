@@ -75,7 +75,7 @@ class DsStorage<M extends Message> {
 
     protected void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
 
-        Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
+        final Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
         entity.addProperty(makeTimestampProperty(timestamp));
         entity.addProperty(aggregateId);
 
@@ -85,7 +85,7 @@ class DsStorage<M extends Message> {
 
     protected void commit(Mutation.Builder mutation) {
 
-        CommitRequest commitRequest = CommitRequest.newBuilder()
+        final CommitRequest commitRequest = CommitRequest.newBuilder()
                 .setMode(NON_TRANSACTIONAL)
                 .setMutation(mutation)
                 .build();
@@ -108,7 +108,7 @@ class DsStorage<M extends Message> {
 
     protected List<M> runQuery(Query.Builder query) {
 
-        RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
+        final RunQueryRequest queryRequest = RunQueryRequest.newBuilder().setQuery(query).build();
         List<EntityResult> entityResults = newArrayList();
 
         try {
@@ -131,7 +131,7 @@ class DsStorage<M extends Message> {
     }
 
     protected Query.Builder makeQuery(Direction sortDirection) {
-        Query.Builder query = Query.newBuilder();
+        final Query.Builder query = Query.newBuilder();
         query.addKindBuilder().setName(typeName.nameOnly());
         query.addOrder(makeOrder(TIMESTAMP_PROPERTY_NAME, sortDirection));
         return query;
@@ -143,9 +143,10 @@ class DsStorage<M extends Message> {
 
     protected static Entity.Builder messageToEntity(Message message, Key.Builder key) {
         final ByteString serializedMessage = toAny(message).getValue();
-        return Entity.newBuilder()
+        final Entity.Builder entity = Entity.newBuilder()
                 .setKey(key)
                 .addProperty(makeProperty(VALUE_PROPERTY_NAME, makeValue(serializedMessage)));
+        return entity;
     }
 
     private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {

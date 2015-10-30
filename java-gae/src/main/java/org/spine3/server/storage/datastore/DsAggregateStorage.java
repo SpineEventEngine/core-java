@@ -41,7 +41,7 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    protected static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
+    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
 
     private final DsStorage<AggregateStorageRecord> storage;
 
@@ -53,9 +53,6 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
         return new DsAggregateStorage<>(storage);
     }
 
-    /**
-     * Stores the {@code record} by its {@code aggregateId}. Several records could be stored by this {@code aggregateId}.
-     */
     @Override
     protected void write(AggregateStorageRecord record) {
 
@@ -68,7 +65,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        Query.Builder query = storage.makeQuery(DESCENDING);
+        final Query.Builder query = storage.makeQuery(DESCENDING);
         final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
         query.setFilter(idFilter).build();
 

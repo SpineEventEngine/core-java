@@ -55,7 +55,7 @@ class DsEventStorage extends EventStorage {
     @Override
     public Iterator<EventRecord> allEvents() {
 
-        Query.Builder query = storage.makeQuery(ASCENDING);
+        final Query.Builder query = storage.makeQuery(ASCENDING);
         final List<EventStoreRecord> records = storage.runQuery(query);
         final Iterator<EventRecord> iterator = toEventRecordsIterator(records);
         return iterator;
@@ -64,8 +64,10 @@ class DsEventStorage extends EventStorage {
     @Override
     protected void write(EventStoreRecord record) {
 
-        Entity.Builder entity = messageToEntity(record, storage.makeCommonKey(record.getEventId()));
+        final Key.Builder key = storage.makeCommonKey(record.getEventId());
+        final Entity.Builder entity = messageToEntity(record, key);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
+
         final Mutation.Builder mutation = Mutation.newBuilder().addInsert(entity);
         storage.commit(mutation);
     }
