@@ -30,6 +30,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.TimestampOrBuilder;
 import org.spine3.TypeName;
+import org.spine3.server.storage.AggregateStorageRecord;
+import org.spine3.server.storage.CommandStoreRecord;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -73,7 +75,15 @@ class DsStorage<M extends Message> {
         this.typeName = TypeName.of(descriptor);
     }
 
-    protected void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
+    protected void storeWithAutoId(Property.Builder aggregateId, CommandStoreRecord record) {
+        storeWithAutoId(aggregateId, record, record.getTimestamp());
+    }
+
+    protected void storeWithAutoId(Property.Builder aggregateId, AggregateStorageRecord record) {
+        storeWithAutoId(aggregateId, record, record.getTimestamp());
+    }
+
+    private void storeWithAutoId(Property.Builder aggregateId, Message message, TimestampOrBuilder timestamp) {
 
         final Entity.Builder entity = messageToEntity(message, makeKey(typeName.nameOnly()));
         entity.addProperty(makeTimestampProperty(timestamp));

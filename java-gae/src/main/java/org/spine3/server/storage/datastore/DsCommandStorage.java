@@ -54,6 +54,6 @@ class DsCommandStorage extends CommandStorage {
 
         final String id = record.getCommandId();
         final Property.Builder idProperty = makeProperty(COMMAND_ID_PROPERTY_NAME, makeValue(id));
-        storage.storeWithAutoId(idProperty, record, record.getTimestamp());
+        storage.storeWithAutoId(idProperty, record);
     }
 }

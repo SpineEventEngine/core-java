@@ -58,7 +58,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
 
         final Value.Builder id = makeValue(record.getAggregateId());
         final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, id);
-        storage.storeWithAutoId(idProperty, record, record.getTimestamp());
+        storage.storeWithAutoId(idProperty, record);
     }
 
     @Override
