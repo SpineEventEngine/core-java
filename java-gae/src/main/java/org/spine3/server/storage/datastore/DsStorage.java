@@ -149,13 +149,6 @@ class DsStorage<M extends Message> {
         return entity;
     }
 
-    private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
-        @Override
-        public M apply(@Nullable EntityResult entity) {
-            return entityToMessage(entity);
-        }
-    };
-
     protected M entityToMessage(@Nullable EntityResultOrBuilder entity) {
 
         if (entity == null) {
@@ -179,4 +172,11 @@ class DsStorage<M extends Message> {
         final M result = fromAny(any.build());
         return result;
     }
+
+    private final Function<EntityResult, M> entityToMessage = new Function<EntityResult, M>() {
+        @Override
+        public M apply(@Nullable EntityResult entity) {
+            return entityToMessage(entity);
+        }
+    };
 }
