@@ -45,8 +45,7 @@ import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequenti
 import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
-"ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber", "NoopMethodInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
 public abstract class AggregateStorageShould {
 
     private final ProjectId aggregateId = AggregateIdFactory.newProjectId();
@@ -66,13 +65,14 @@ public abstract class AggregateStorageShould {
 
     @Test
     public void return_iterator_over_empty_collection_if_read_by_null_id() {
-
+        // noinspection ConstantConditions
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(null);
         assertFalse(iterator.hasNext());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_record() {
+        // noinspection ConstantConditions
         storage.write(null);
     }
 
@@ -190,6 +190,7 @@ public abstract class AggregateStorageShould {
     }
 
     private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
+        @SuppressWarnings("ConstantConditions") // NPE is OK
         @Override
         public EventRecord apply(@Nullable AggregateStorageRecord input) {
             return input.getEventRecord();
