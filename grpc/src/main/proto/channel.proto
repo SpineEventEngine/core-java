@@ -36,6 +36,7 @@ message ChannelRequest {
 }
 
 message ChannelResponse {
-    //TODO:2015-04-28:alexander.yevsyukov: Review channel API and see what data we need here.
     string channel_id = 1;
 }
+
+//TODO:2015-04-28:alexander.yevsyukov: Review channel API and see what data we need here.
