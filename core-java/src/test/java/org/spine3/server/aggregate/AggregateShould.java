@@ -53,7 +53,6 @@ import java.util.Set;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
@@ -61,14 +60,14 @@ import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.util.Commands.createContext;
+import static org.spine3.util.Tests.currentTimeSeconds;
 import static org.spine3.util.testutil.ContextFactory.getEventContext;
 import static org.spine3.util.testutil.EventRecordFactory.*;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
-"ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
     private ProjectId projectId;
@@ -82,7 +81,7 @@ public class AggregateShould {
     @Before
     public void setUp() {
         projectId = AggregateIdFactory.newProjectId();
-        final UserId userId = Users.createId("user_id");
+        final UserId userId = Users.createId("user_id_test");
         commandContext = createContext(userId, ZoneOffsets.UTC);
         eventContext = getEventContext(userId, projectId);
         createProject = CreateProject.newBuilder().setProjectId(projectId).build();
@@ -134,8 +133,11 @@ public class AggregateShould {
         }
     }
 
+
     @Test(expected = IllegalArgumentException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void not_accept_to_constructor_id_of_unsupported_type() {
+
         new TestAggregateWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
@@ -253,7 +255,7 @@ public class AggregateShould {
     public void return_time_when_was_last_modified() throws InvocationTargetException {
 
         aggregate.dispatch(createProject, commandContext);
-        final long expectedTimeSec = currentTimeMillis() / 1000L;
+        final long expectedTimeSec = currentTimeSeconds();
 
         final Timestamp whenLastModified = aggregate.whenModified();
 
@@ -358,7 +360,7 @@ public class AggregateShould {
         a.dispatch(startProject, commandContext);
     }
 
-    private Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
+    private static Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
         return transform(events, new Function<EventRecord, Class<? extends Message>>() {
             @SuppressWarnings("NullableProblems")
             @Override
@@ -368,7 +370,7 @@ public class AggregateShould {
         });
     }
 
-    private void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
+    private static void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
         assertEquals(3, classes.size());
         assertTrue(classes.contains(ProjectCreated.class));
         assertTrue(classes.contains(TaskAdded.class));
@@ -383,7 +385,7 @@ public class AggregateShould {
         return events;
     }
 
-    private void assertProjectEventsApplied(ProjectAggregate a) {
+    private static void assertProjectEventsApplied(ProjectAggregate a) {
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
@@ -393,6 +395,7 @@ public class AggregateShould {
         return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
@@ -485,6 +488,7 @@ public class AggregateShould {
         }
 
         @Assign
+        @SuppressWarnings("UnusedDeclaration")
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();

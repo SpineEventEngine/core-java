@@ -34,8 +34,7 @@ import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.Events.toEventRecordsList;
 import static org.spine3.util.testutil.EventStoreRecordFactory.*;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ConstantConditions",
-        "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
 public abstract class EventStorageShould {
 
     private final EventStorage storage;
@@ -53,6 +52,7 @@ public abstract class EventStorageShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
+        //noinspection ConstantConditions
         storage.write(null);
     }
 

@@ -26,6 +26,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+import static java.lang.System.currentTimeMillis;
+
 /**
  * Utilities for testing.
  *
@@ -33,6 +35,8 @@ import java.lang.reflect.Modifier;
  */
 @SuppressWarnings("UtilityClass")
 public class Tests {
+
+    private static final long MSEC_IN_SECOND = 1000L;
 
     private Tests() {}
 
@@ -61,5 +65,9 @@ public class Tests {
 
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    public static long currentTimeSeconds() {
+        return currentTimeMillis() / MSEC_IN_SECOND;
     }
 }

@@ -29,9 +29,9 @@ import org.spine3.test.project.Project;
 import javax.annotation.Nonnull;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.util.Tests.currentTimeSeconds;
 
 /**
  * @author Alexander Litus
@@ -40,7 +40,6 @@ import static org.junit.Assert.assertTrue;
 public class EntityShould {
 
     private static final String TEST_ID = "test_id";
-    private static final long MSEC_IN_SECOND = 1000L;
 
     private TestEntity entity;
     private final Project state = Project.newBuilder().setStatus("test_state").build();
@@ -146,10 +145,6 @@ public class EntityShould {
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
-    }
-
-    private static long currentTimeSeconds() {
-        return currentTimeMillis() / MSEC_IN_SECOND;
     }
 
     public static class TestEntity extends Entity<String, Project> {
