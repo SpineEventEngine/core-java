@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -217,7 +216,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_default_state_by_default() throws InvocationTargetException {
+    public void return_default_state_by_default() {
 
         final Project state = aggregate.getState();
         assertEquals(aggregate.getDefaultState(), state);
@@ -286,7 +285,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_return_any_uncommitted_event_records_by_default() throws InvocationTargetException {
+    public void not_return_any_uncommitted_event_records_by_default() {
 
         final List<EventRecord> events = aggregate.getUncommittedEvents();
         assertTrue(events.isEmpty());
@@ -301,7 +300,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_return_any_event_records_when_commit_by_default() throws InvocationTargetException {
+    public void not_return_any_event_records_when_commit_by_default() {
 
         final List<EventRecord> events = aggregate.commitEvents();
         assertTrue(events.isEmpty());
@@ -328,7 +327,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void transform_current_state_to_snapshot_event() throws InvocationTargetException, InvalidProtocolBufferException {
+    public void transform_current_state_to_snapshot_event() throws InvocationTargetException {
 
         aggregate.dispatch(createProject, commandContext);
 

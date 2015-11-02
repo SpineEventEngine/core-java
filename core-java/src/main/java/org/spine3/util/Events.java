@@ -20,7 +20,6 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
@@ -108,39 +107,6 @@ public class Events {
                 .addAllEventRecord(eventRecords)
                 .addAllError(errors)
                 .build();
-    }
-
-    public static Predicate<EventRecord> getEventPredicate(final int sinceVersion) {
-        return new Predicate<EventRecord>() {
-            @Override
-            public boolean apply(@Nullable EventRecord record) {
-                checkNotNull(record);
-                final int version = record.getContext().getVersion();
-                return version > sinceVersion;
-            }
-        };
-    }
-
-    public static Predicate<EventRecord> getEventPredicate(final Timestamp from) {
-        return new Predicate<EventRecord>() {
-            @Override
-            public boolean apply(@Nullable EventRecord record) {
-                checkNotNull(record);
-                final Timestamp timestamp = getTimestamp(record.getContext().getEventId());
-                return Timestamps.isAfter(timestamp, from);
-            }
-        };
-    }
-
-    public static Predicate<EventRecord> getEventPredicate(final Timestamp from, final Timestamp to) {
-        return new Predicate<EventRecord>() {
-            @Override
-            public boolean apply(@Nullable EventRecord record) {
-                checkNotNull(record);
-                final Timestamp timestamp = getTimestamp(record.getContext().getEventId());
-                return Timestamps.isBetween(timestamp, from, to);
-            }
-        };
     }
 
     /**
@@ -240,16 +206,6 @@ public class Events {
                     .setEvent(input.getEvent())
                     .setContext(input.getContext());
             return builder.build();
-        }
-    };
-
-    private static final Function<EventRecord, EventStoreRecord> TO_EVENT_STORE_RECORD = new Function<EventRecord, EventStoreRecord>() {
-        @Override
-        public EventStoreRecord apply(@Nullable EventRecord input) {
-            if (input == null) {
-                return EventStoreRecord.getDefaultInstance();
-            }
-            return toEventStoreRecord(input);
         }
     };
 
