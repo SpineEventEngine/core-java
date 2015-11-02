@@ -27,7 +27,6 @@ import org.spine3.server.storage.EntityStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -51,7 +50,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     @Override
     public void store(E obj) {
         final M state = obj.getState();
-        checkArgument(state != null, "Entity does not have state.");
         final EntityStorage<I, M> storage = checkStorage();
         storage.write(obj.getId(), state);
     }
@@ -75,10 +73,12 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return null;
     }
 
+
     @Nonnull
     private EntityStorage<I, M> checkStorage() {
         final EntityStorage<I, M> storage = getStorage();
         checkState(storage != null, "Storage not assigned");
+        // noinspection ConstantConditions
         return storage;
     }
 
