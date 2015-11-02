@@ -65,7 +65,7 @@ public final class Engine {
      * Obtains instance of the engine.
      *
      * @return {@code Engine} instance
-     * @throws IllegalStateException if the engine wasn't started before callling this method
+     * @throws IllegalStateException if the engine wasn't started before calling this method
      * @see #start(StorageFactory)
      */
     @CheckReturnValue

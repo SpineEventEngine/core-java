@@ -70,7 +70,7 @@ public class MessagesShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void fail_on_attempt_to_conver_null_id() {
+    public void fail_on_attempt_to_convert_null_id() {
         //noinspection ConstantConditions
         Messages.toAny(null);
     }
