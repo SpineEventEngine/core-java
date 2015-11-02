@@ -19,14 +19,12 @@
  */
 package org.spine3.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.MessageFields;
 import org.spine3.util.testutil.CommandRequestFactory;
 
@@ -42,33 +40,32 @@ import static org.junit.Assert.assertFalse;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Identifiers.timestampToString;
-import static org.spine3.util.Lists.filter;
 
 /**
  * @author Mikhail Melnik
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
+"DuplicateStringLiteralInspection"/*ok in this case*/})
 public class CommandsShould {
 
     @Test
     public void generate() {
+
         final UserId userId = Users.createId("commands-should-test");
 
         final CommandId result = generateId(userId);
 
-        //noinspection DuplicateStringLiteralInspection
         assertThat(result, allOf(
                 hasProperty("actor", equalTo(userId)),
                 hasProperty("timestamp")));
     }
 
+    @SuppressWarnings("ConstantConditions"/*ok in this case*/)
     @Test(expected = NullPointerException.class)
     public void fail_on_null_parameter() {
-        //noinspection ConstantConditions
         generateId(null);
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     @Test
     public void convert_field_name_to_method_name() {
         assertEquals("getUserId", MessageFields.toAccessorMethodName("user_id"));
@@ -77,24 +74,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void return_correct_were_after_predicate() throws InterruptedException {
-        final Timestamp timestamp = TimeUtil.getCurrentTime();
-        final CommandRequest commandRequest = CommandRequestFactory.create();
-        final CommandRequest commandRequestAfter = CommandRequestFactory.createAt(TimeUtil.add(timestamp, Durations.minutes(3)));
-
-        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
-                .add(commandRequest)
-                .add(commandRequestAfter)
-                .build();
-
-        final List<CommandRequest> filteredList = filter(commandList, Commands.wereAfter(timestamp));
-
-        assertEquals(1, filteredList.size());
-        assertEquals(commandRequestAfter, filteredList.get(0));
-    }
-
-    @Test
     public void sort() {
+
         final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
 
         final CommandRequest commandRequest1 = CommandRequestFactory.createAt(when);
@@ -116,26 +97,6 @@ public class CommandsShould {
         Commands.sort(unSortedList);
 
         assertEquals(sortedList, unSortedList);
-    }
-
-    @SuppressWarnings("MagicNumber")
-    @Test
-    public void return_correct_were_within_period_predicate() throws InterruptedException {
-        final CommandRequest req1 = CommandRequestFactory.create();
-        final Timestamp from = TimeUtil.getCurrentTime();
-        final Timestamp ofSecondRequest = TimeUtil.add(from, Durations.ofSeconds(1));
-        final CommandRequest req2 = CommandRequestFactory.createAt(ofSecondRequest);
-        final Timestamp to = TimeUtil.add(ofSecondRequest, Durations.ofSeconds(1));
-
-        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
-                .add(req1)
-                .add(req2)
-                .build();
-
-        final List<CommandRequest> filteredList = filter(commandList, Commands.wereWithinPeriod(from, to));
-
-        assertEquals(1, filteredList.size());
-        assertEquals(req2, filteredList.get(0));
     }
 
     @Test
