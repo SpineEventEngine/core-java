@@ -48,7 +48,9 @@ public class Math {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static long safeMultiply(long a, int b) {
-        //noinspection SwitchStatementWithoutDefaultBranch - no need for default branch here.
+
+        // no need for default branch here
+        // noinspection SwitchStatementWithoutDefaultBranch
         switch (b) {
             case -1:
                 if (a == Long.MIN_VALUE) {
