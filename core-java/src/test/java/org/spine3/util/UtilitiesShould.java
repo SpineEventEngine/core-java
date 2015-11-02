@@ -36,10 +36,11 @@ import static org.junit.Assert.fail;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
-"OverlyCoupledMethod", "OverlyCoupledClass"/*ok in this case*/})
+"OverlyCoupledClass"/*ok in this case*/})
 public class UtilitiesShould {
 
     @Test
+    @SuppressWarnings("OverlyCoupledMethod"/*ok in this case*/)
     public void have_private_constructors() {
 
         // util package

@@ -31,8 +31,8 @@ import javax.annotation.Nonnull;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
-        "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
+        "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection"})
 public abstract class EntityStorageShould {
 
     private final EntityStorage<String, ProjectId> storage;
@@ -51,20 +51,20 @@ public abstract class EntityStorageShould {
 
     @Test
     public void return_empty_message_if_read_one_record_by_null_id() {
-
+        //noinspection ConstantConditions
         final Message message = storage.read(null);
         assertEquals(Any.getDefaultInstance(), message);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
-
+        //noinspection ConstantConditions
         storage.write(null, newProjectId("testId"));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_message() {
-
+        //noinspection ConstantConditions
         storage.write("nothing", null);
     }
 

@@ -37,7 +37,7 @@ import static org.spine3.util.Identifiers.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
