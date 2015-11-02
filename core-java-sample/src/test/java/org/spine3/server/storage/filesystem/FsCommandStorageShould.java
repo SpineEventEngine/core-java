@@ -40,7 +40,7 @@ public class FsCommandStorageShould {
 
     private static final FsCommandStorage STORAGE = (FsCommandStorage) FACTORY.createCommandStorage();
 
-    private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
+    private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();
 
 
     @After

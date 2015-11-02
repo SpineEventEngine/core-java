@@ -43,7 +43,7 @@ public class DsCommandStorageShould {
 
     private static final CommandStorage STORAGE =  DATASTORE_FACTORY.createCommandStorage();
 
-    private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();;
+    private static final ProjectId ID = ProjectId.newBuilder().setId("projectId").build();
 
     @BeforeClass
     public static void setUpClass() {
