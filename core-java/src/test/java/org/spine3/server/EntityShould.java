@@ -36,11 +36,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfObjectAllocationIgnored", "MagicNumber",
-"ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
     private static final String TEST_ID = "test_id";
+    private static final long MSEC_IN_SECOND = 1000L;
 
     private TestEntity entity;
     private final Project state = Project.newBuilder().setStatus("test_state").build();
@@ -86,11 +86,13 @@ public class EntityShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
+        // noinspection ConstantConditions
         entity.setState(null, 0, TimeUtil.getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_modification_time() {
+        // noinspection ConstantConditions
         entity.setState(state, 0, null);
     }
 
@@ -98,7 +100,7 @@ public class EntityShould {
     public void set_default_state() {
 
         entity.setDefault();
-        final long expectedTimeSec = currentTimeMillis() / 1000L;
+        final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(entity.getDefaultState(), entity.getState());
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
@@ -117,7 +119,7 @@ public class EntityShould {
     public void record_modification_time_when_incrementing_version() {
 
         entity.incrementVersion();
-        final long expectedTimeSec = currentTimeMillis() / 1000L;
+        final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
@@ -141,9 +143,13 @@ public class EntityShould {
     public void record_modification_time_when_updating_state() {
 
         entity.incrementState(state);
-        final long expectedTimeSec = currentTimeMillis() / 1000L;
+        final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
+    }
+
+    private static long currentTimeSeconds() {
+        return currentTimeMillis() / MSEC_IN_SECOND;
     }
 
     public static class TestEntity extends Entity<String, Project> {
