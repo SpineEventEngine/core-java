@@ -34,6 +34,7 @@ import java.util.List;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
 import static org.spine3.util.Classes.getGenericParameterType;
 
 /**
@@ -46,8 +47,6 @@ import static org.spine3.util.Classes.getGenericParameterType;
 public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
-
-    protected static final String PATH_DELIMITER = "/";
 
     private final List<FsEventStorage> eventStorages = newLinkedList();
 

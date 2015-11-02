@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemStorageFactory.PATH_DELIMITER;
 import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
@@ -45,6 +44,8 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
+
+    protected static final String PATH_DELIMITER = "/";
 
     private final String aggregateStorageRootPath;
 
