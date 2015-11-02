@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.spine3.server.Entity;
 import org.spine3.test.project.ProjectId;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.Assert.assertEquals;
 import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
 
@@ -98,6 +100,7 @@ public abstract class EntityStorageShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected ProjectId getDefaultState() {
             return DEFAULT_STATE;

@@ -44,6 +44,7 @@ import org.spine3.util.Classes;
 import org.spine3.util.Users;
 import org.spine3.util.testutil.AggregateIdFactory;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
@@ -375,7 +376,7 @@ public class AggregateShould {
     }
 
     private List<EventRecord> getProjectEventRecords() {
-        List<EventRecord> events = newLinkedList();
+        final List<EventRecord> events = newLinkedList();
         events.add(projectCreated(projectId, eventContext));
         events.add(taskAdded(projectId, eventContext));
         events.add(projectStarted(projectId, eventContext));
@@ -409,6 +410,7 @@ public class AggregateShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -436,7 +438,7 @@ public class AggregateShould {
         @Apply
         private void event(ProjectCreated event) {
 
-            Project newState = newBuilder(getState())
+            final Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_NEW)
                     .build();
@@ -454,7 +456,7 @@ public class AggregateShould {
         @Apply
         private void event(ProjectStarted event) {
 
-            Project newState = newBuilder(getState())
+            final Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_STARTED)
                     .build();
@@ -476,6 +478,7 @@ public class AggregateShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -492,8 +495,9 @@ public class AggregateShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -501,8 +505,9 @@ public class AggregateShould {
         protected TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -510,8 +515,9 @@ public class AggregateShould {
         protected TestAggregateWithIdLong(Long id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -519,8 +525,9 @@ public class AggregateShould {
         protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 }

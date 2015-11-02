@@ -57,14 +57,14 @@ public class MessagesShould {
 
     @Test
     public void convert_id_to_Any() {
-        Any test = Messages.toAny(id);
+        final Any test = Messages.toAny(id);
 
         assertEquals(any, test);
     }
 
     @Test
     public void convert_from_Any_to_id() {
-        UserId test = Messages.fromAny(any);
+        final UserId test = Messages.fromAny(any);
 
         assertEquals(id, test);
     }

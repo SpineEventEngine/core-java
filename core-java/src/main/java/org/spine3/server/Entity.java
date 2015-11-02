@@ -24,8 +24,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -38,10 +39,8 @@ public abstract class Entity<I, M extends Message> {
 
     private final I id;
 
-    @Nullable
     private M state;
 
-    @Nullable
     private Timestamp whenModified;
 
     private int version;
@@ -51,15 +50,18 @@ public abstract class Entity<I, M extends Message> {
     }
 
     @CheckReturnValue
+    @Nonnull
     protected abstract M getDefaultState();
 
     /**
-     * @return the current state object or {@code null} if the state wasn't set
+     * Obtains the entity state.
+     *
+     * @return the current state object or the value produced by {@link #getDefaultState()} if the state wasn't set
      */
     @CheckReturnValue
-    @Nullable
+    @Nonnull
     public M getState() {
-        return state;
+        return (state == null) ? getDefaultState() : state;
     }
 
     /**
@@ -81,13 +83,16 @@ public abstract class Entity<I, M extends Message> {
      * Validates and sets the state.
      *
      * @param state the state object to set
+     * @param version the entity version to set
+     * @param whenLastModified the time of the last modification to set
+     * @throws NullPointerException if the state or whenLastModified is {@code null}
      * @see #validate(M)
      */
     protected void setState(M state, int version, Timestamp whenLastModified) {
         validate(state);
-        this.state = state;
+        this.state = checkNotNull(state, "state mustn't be null");
         this.version = version;
-        this.whenModified = whenLastModified;
+        this.whenModified = checkNotNull(whenLastModified, "whenLastModified mustn't be null");
     }
 
     /**
@@ -142,12 +147,12 @@ public abstract class Entity<I, M extends Message> {
     /**
      * Obtains the timestamp of the last modification.
      *
-     * @return the timestamp instance or {@code null} if the state wasn't set
+     * @return the timestamp instance or the value produced by {@link Timestamp#getDefaultInstance()} if the state wasn't set
      * @see #setState(Message, int, Timestamp)
      */
     @CheckReturnValue
-    @Nullable
+    @Nonnull
     public Timestamp whenModified() {
-        return this.whenModified;
+        return (whenModified == null) ? Timestamp.getDefaultInstance() : whenModified;
     }
 }

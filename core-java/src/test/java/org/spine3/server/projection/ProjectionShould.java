@@ -24,9 +24,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
+
+import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertTrue;
 
@@ -40,6 +43,7 @@ public class ProjectionShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();
@@ -47,13 +51,13 @@ public class ProjectionShould {
 
         @Subscribe
         public void on(StringValue event, EventContext ignored) {
-            StringValue newSate = createNewState("string", event.getValue());
+            final StringValue newSate = createNewState("string", event.getValue());
             incrementState(newSate);
         }
 
         @Subscribe
         public void on(UInt32Value event, EventContext ignored) {
-            StringValue newSate = createNewState("integer", String.valueOf(event.getValue()));
+            final StringValue newSate = createNewState("integer", String.valueOf(event.getValue()));
             incrementState(newSate);
         }
 
@@ -70,7 +74,7 @@ public class ProjectionShould {
          * This is checked by {@link #check_default_state_when_queried()}.
          */
         @Override
-        @VisibleForTesting //
+        @VisibleForTesting
         protected void setDefault() {
             super.setDefault();
         }
@@ -84,9 +88,15 @@ public class ProjectionShould {
         test.setDefault();
     }
 
+    /**
+     * TODO:2015-11-02:alexander.litus: Entity returns default state instead of null now (like protobuf generated classes do).
+     * If projection throws the exception in this case, it is the violation of Liskov Substitution principle.
+     * So, should we remove this test?
+     */
+    @Ignore
     @Test(expected = IllegalStateException.class)
     public void check_default_state_when_queried() {
-        TestProjection test = new TestProjection(1);
+        final TestProjection test = new TestProjection(1);
         test.getState();
     }
 

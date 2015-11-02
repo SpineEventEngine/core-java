@@ -21,13 +21,17 @@
 package org.spine3.server;
 
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
 
+import javax.annotation.Nonnull;
+
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.lang.System.currentTimeMillis;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus
@@ -36,10 +40,10 @@ import static org.junit.Assert.*;
 "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public class EntityShould {
 
-    private static final Project stubState = Project.newBuilder().setStatus("stub_state").build();
     private static final String TEST_ID = "test_id";
 
     private TestEntity entity;
+    private final Project state = Project.newBuilder().setStatus("test_state").build();
 
     @Before
     public void setUp() {
@@ -47,10 +51,10 @@ public class EntityShould {
     }
 
     @Test
-    public void have_null_fields_by_default() {
+    public void have_non_null_fields_by_default() {
 
-        assertNull(entity.getState());
-        assertNull(entity.whenModified());
+        assertEquals(entity.getState(), entity.getDefaultState());
+        assertEquals(entity.whenModified(), Timestamp.getDefaultInstance());
         assertEquals(0, entity.getVersion());
     }
 
@@ -76,8 +80,18 @@ public class EntityShould {
     @Test
     public void validate_state_when_set_it() {
 
-        entity.setState(stubState, 0, null);
+        entity.setState(state, 0, TimeUtil.getCurrentTime());
         assertTrue(entity.isValidateMethodCalled);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_null_state() {
+        entity.setState(null, 0, TimeUtil.getCurrentTime());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_null_modification_time() {
+        entity.setState(state, 0, null);
     }
 
     @Test
@@ -119,14 +133,14 @@ public class EntityShould {
     @Test
     public void increment_version_when_updating_state() {
 
-        entity.incrementState(stubState);
+        entity.incrementState(state);
         assertEquals(1, entity.getVersion());
     }
 
     @Test
     public void record_modification_time_when_updating_state() {
 
-        entity.incrementState(stubState);
+        entity.incrementState(state);
         final long expectedTimeSec = currentTimeMillis() / 1000L;
 
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
@@ -141,6 +155,7 @@ public class EntityShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return DEFAULT_STATE;

@@ -37,7 +37,6 @@ import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -115,7 +114,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * in the {@link Registry} if it is not registered yet.
      */
     private void init() {
+
         if (!this.initialized) {
+
             final Registry registry = Registry.getInstance();
             final Class<? extends Aggregate> thisClass = getClass();
 
@@ -127,71 +128,30 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
             commandHandlers = registry.getCommandHandlers(thisClass);
             eventAppliers = registry.getEventAppliers(thisClass);
 
-            if (super.getState() == null) {
-                setDefault();
-            }
-
             this.initialized = true;
         }
     }
 
     private Object invokeHandler(Message command, CommandContext context) throws InvocationTargetException {
         final Class<? extends Message> commandClass = command.getClass();
-        Method method = commandHandlers.get(commandClass);
+        final Method method = commandHandlers.get(commandClass);
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final Object result = commandHandler.invoke(command, context);
         return result;
     }
 
     private void invokeApplier(Message event) throws InvocationTargetException {
         final Class<? extends Message> eventClass = event.getClass();
-        Method method = eventAppliers.get(eventClass);
+        final Method method = eventAppliers.get(eventClass);
         if (method == null) {
             throw missingEventApplier(eventClass);
         }
 
-        EventApplier applier = new EventApplier(this, method);
+        final EventApplier applier = new EventApplier(this, method);
         applier.invoke(event);
-    }
-
-    /**
-     * Returns the current state of the aggregate root.
-     *
-     * @return a non-null state object or default state instance
-     */
-    @Nonnull
-    @Override
-    public M getState() {
-        init();
-        final M state = super.getState();
-        // An aggregate root when initialized may not have a null state because:
-        // 1. Its initialization sets the state to default.
-        // 2. Modifications are performed via command handlers or event appliers,
-        //     which involves prior initialization.
-        assert state != null;
-        return state;
-    }
-
-    /**
-     * Returns a non-null timestamp of the last modification.
-     *
-     * @return a non-null instance, which is the timestamp of the last modification or
-     * the timestamp of setting the default state of the aggregate
-     */
-    @Nonnull
-    @Override
-    public Timestamp whenModified() {
-        init();
-        final Timestamp lastModified = super.whenModified();
-        // An aggregate when initialized may not have a null modification timestamp because:
-        // 1. Its initialization sets the timestamp.
-        // 2. Modifications are performed via command handlers or event appliers,
-        //     which involves prior initialization.
-        assert lastModified != null;
-        return lastModified;
     }
 
     private Any getIdAsAny() {
@@ -208,8 +168,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
     @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
-        List<? extends Message> events = generateEvents(command, context);
-        CommandId commandId = context.getCommandId();
+        final List<? extends Message> events = generateEvents(command, context);
+        final CommandId commandId = context.getCommandId();
         apply(events, commandId);
     }
 
@@ -224,8 +184,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
 
-        checkNotNull(command);
-        checkNotNull(context);
+        checkNotNull(command, "The command mustn't be null.");
+        checkNotNull(context, "The context mustn't be null.");
 
         final Object handlingResult = invokeHandler(command, context);
         final Class<?> resultClass = handlingResult.getClass();
@@ -268,11 +228,11 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
              */
             apply(event);
 
-            int currentVersion = getVersion();
+            final int currentVersion = getVersion();
             final M state = getState();
-            EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
+            final EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
 
-            EventRecord eventRecord = Events.createEventRecord(event, eventContext);
+            final EventRecord eventRecord = Events.createEventRecord(event, eventContext);
 
             putUncommitted(eventRecord);
         }
@@ -307,7 +267,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @param snapshot the snapshot with the state to restore
      */
     public void restore(SnapshotOrBuilder snapshot) {
-        M stateToRestore = Messages.fromAny(snapshot.getState());
+        final M stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
@@ -326,7 +286,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      * @return the list of event records
      */
     public List<EventRecord> commitEvents() {
-        List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
+        final List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
     }
@@ -348,9 +308,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
     @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
 
-        EventId eventId = Events.createId(commandId, whenModified);
+        final EventId eventId = Events.createId(commandId, whenModified);
 
-        EventContext.Builder builder = EventContext.newBuilder()
+        final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
@@ -388,7 +348,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         final Any state = Any.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();
-        Snapshot.Builder builder = Snapshot.newBuilder()
+        final Snapshot.Builder builder = Snapshot.newBuilder()
                 .setState(state)
                 .setWhenModified(whenModified)
                 .setVersion(version)
@@ -419,19 +379,19 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
         @CheckReturnValue
         boolean contains(Class<? extends Aggregate> clazz) {
-            boolean result = commandHandlers.contains(clazz);
+            final boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
         MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
-            MethodMap result = commandHandlers.get(clazz);
+            final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
         MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
-            MethodMap result = eventAppliers.get(clazz);
+            final MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
