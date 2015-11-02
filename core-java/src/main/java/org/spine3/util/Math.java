@@ -46,7 +46,6 @@ public class Math {
      * @return the new total
      * @throws ArithmeticException if the result overflows a long
      */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static long safeMultiply(long a, int b) {
 
         // no need for default branch here
@@ -83,6 +82,7 @@ public class Math {
      * @param b  the divisor
      * @return the floor division
      */
+    @SuppressWarnings("JavaDoc")
     public static long floorDiv(long a, long b) {
         return (a >= 0 ? a / b : ((a + 1) / b) - 1);
     }

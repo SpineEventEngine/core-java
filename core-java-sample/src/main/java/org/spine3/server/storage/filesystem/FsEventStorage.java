@@ -111,7 +111,6 @@ class FsEventStorage extends EventStorage {
             return hasNext;
         }
 
-        @SuppressWarnings({"ReturnOfNull", "IteratorNextCanNotThrowNoSuchElementException"})
         @Override
         public EventRecord next() {
 

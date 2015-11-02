@@ -33,7 +33,7 @@ import org.spine3.util.testutil.CommandRequestFactory;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class FsCommandStorageShould {
 
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsCommandStorageShould.class);
@@ -50,6 +50,7 @@ public class FsCommandStorageShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
+        //noinspection ConstantConditions
         STORAGE.write(null);
     }
 

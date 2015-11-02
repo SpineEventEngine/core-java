@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.EventRecordOrBuilder;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.util.Events;
@@ -64,12 +64,14 @@ public class EventBus {
      * @param object the event applier object whose subscriber methods should be registered
      */
     public void register(Object object) {
+
         checkNotNull(object);
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         putHandlersToBus(handlers);
     }
 
     private void putHandlersToBus(Map<EventClass, EventHandlerMethod> handlers) {
+
         lockOnHandlersByClass.writeLock().lock();
         try {
             for (Map.Entry<EventClass, EventHandlerMethod> handler : handlers.entrySet()) {
@@ -87,6 +89,7 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object object) {
+
         checkNotNull(object);
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         unsubscribe(handlers);
@@ -97,7 +100,9 @@ public class EventBus {
      * @param handlers a map of the event handlers to remove
      */
     private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
+
         for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
+
             final EventClass c = entry.getKey();
             final EventHandlerMethod handler = entry.getValue();
 
@@ -120,16 +125,16 @@ public class EventBus {
      *
      * @param eventRecord the event record to be handled by all subscribers
      */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public void post(EventRecord eventRecord) {
+    public void post(EventRecordOrBuilder eventRecord) {
+
         final Message event = Events.getEvent(eventRecord);
         final EventContext context = eventRecord.getContext();
 
         post(event, context);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private void post(Message event, EventContext context) {
+
         final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
         if (handlers.isEmpty()) {

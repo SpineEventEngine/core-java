@@ -98,7 +98,7 @@ public class Commands {
         return result.build();
     }
 
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class CommandIdToStringConverter implements Function<CommandId, String> {
         @Nullable
         @Override
@@ -112,11 +112,11 @@ public class Commands {
 
             String userId = NULL_ID_OR_FIELD;
 
-            if (commandId != null && commandId.getActor() != null) {
+            if (commandId.getActor() != null) {
                 userId = commandId.getActor().getValue();
             }
 
-            final String commandTime = (commandId != null) ? timestampToString(commandId.getTimestamp()) : "";
+            final String commandTime = timestampToString(commandId.getTimestamp());
 
             builder.append(userId)
                     .append(USER_ID_AND_TIME_DELIMITER)

@@ -43,7 +43,7 @@ public class IoUtil {
      * <p/>
      * Logs each {@link java.io.IOException} if it occurs.
      */
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static void closeSilently(Closeable... closeables) {
         try {
             for (Closeable c : closeables) {
@@ -86,7 +86,7 @@ public class IoUtil {
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     private static void flush(@Nullable Flushable[] flushables) throws IOException {
         if (flushables == null) {
             return;

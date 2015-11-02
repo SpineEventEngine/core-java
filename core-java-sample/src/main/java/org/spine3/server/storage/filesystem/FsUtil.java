@@ -117,8 +117,8 @@ class FsUtil {
         I result = input;
         if (input instanceof Message) {
             final Message message = escapeStringFields((Message) input);
-            @SuppressWarnings("unchecked") final
-            I castedMessage = (I) message; // cast is safe because input is Message
+            @SuppressWarnings("unchecked")
+            final I castedMessage = (I) message; // cast is safe because input is Message
             result = castedMessage;
         }
         return result;

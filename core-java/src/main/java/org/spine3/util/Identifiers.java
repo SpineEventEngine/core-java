@@ -121,7 +121,6 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings("IfMayBeConditional")
     private static String idMessageToString(Message message) {
 
         final String result;

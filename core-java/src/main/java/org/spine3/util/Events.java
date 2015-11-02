@@ -253,7 +253,7 @@ public class Events {
         }
     };
 
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Nullable
         @Override
