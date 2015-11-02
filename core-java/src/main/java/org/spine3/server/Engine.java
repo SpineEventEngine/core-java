@@ -24,10 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.CommandResult;
-import org.spine3.base.EventRecord;
+import org.spine3.base.*;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -218,8 +215,7 @@ public final class Engine {
         commandStore.store(request);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static CommandResult dispatch(CommandRequest request) {
+    private static CommandResult dispatch(CommandRequestOrBuilder request) {
         final CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
             final Message command = Messages.fromAny(request.getCommand());
@@ -231,11 +227,7 @@ public final class Engine {
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
             //TODO:2015-06-15:mikhail.melnik: handle errors
-            final CommandResult result = Events.toCommandResult(
-                    Collections.<EventRecord>emptyList(),
-                    Collections.<Any>singleton(Any.getDefaultInstance()));
             throw propagate(e);
-//            return result;
         }
     }
 
