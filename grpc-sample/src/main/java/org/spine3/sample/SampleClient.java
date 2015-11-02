@@ -68,7 +68,7 @@ public class SampleClient {
     public static void main(String[] args) throws InterruptedException {
 
         // Access a service running on the local machine
-        SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
+        final SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
 
         final List<CommandRequest> requests = Sample.generateRequests();
 

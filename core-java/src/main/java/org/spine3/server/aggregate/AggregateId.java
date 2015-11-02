@@ -87,12 +87,12 @@ public final class AggregateId<I> {
     public String getShortTypeName() {
         if (this.value instanceof Message) {
             //noinspection TypeMayBeWeakened
-            Message message = (Message)this.value;
-            Descriptors.Descriptor descriptor = message.getDescriptorForType();
+            final Message message = (Message)this.value;
+            final Descriptors.Descriptor descriptor = message.getDescriptorForType();
             final String result = descriptor.getName();
             return result;
         } else {
-            String result = value.getClass().getSimpleName();
+            final String result = value.getClass().getSimpleName();
             return result;
         }
     }

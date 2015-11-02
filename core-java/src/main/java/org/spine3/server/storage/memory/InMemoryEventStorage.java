@@ -90,7 +90,7 @@ class InMemoryEventStorage extends EventStorage {
         @Override
         public EventRecord apply(EventStoreRecord record) {
 
-            EventRecord.Builder builder = EventRecord.newBuilder()
+            final EventRecord.Builder builder = EventRecord.newBuilder()
                     .setEvent(record.getEvent())
                     .setContext(record.getContext());
 

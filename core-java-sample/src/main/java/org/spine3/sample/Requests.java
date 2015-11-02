@@ -45,13 +45,13 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
-        CreateOrder createOrder = CreateOrder.newBuilder()
+        final CreateOrder createOrder = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
 
-        CommandContext context = getCommandContext(userId);
+        final CommandContext context = getCommandContext(userId);
 
-        CommandRequest result = CommandRequest.newBuilder()
+        final CommandRequest result = CommandRequest.newBuilder()
                 .setCommand(Messages.toAny(createOrder))
                 .setContext(context)
                 .build();
@@ -61,41 +61,41 @@ public class Requests {
 
     public static CommandRequest addOrderLine(UserId userId, OrderId orderId) {
         //noinspection MagicNumber
-        Book book = Book.newBuilder()
+        final Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
                 .setAuthor("Eric Evans")
                 .setTitle("Domain Driven Design.")
                 .setPrice(51.33)
                 .build();
 
-        int quantity = 1;
-        double price = book.getPrice() * quantity;
+        final int quantity = 1;
+        final double price = book.getPrice() * quantity;
 
-        org.spine3.sample.order.OrderLine orderLine = org.spine3.sample.order.OrderLine.newBuilder()
+        final org.spine3.sample.order.OrderLine orderLine = org.spine3.sample.order.OrderLine.newBuilder()
                 .setProductId(Messages.toAny(book.getBookId()))
                 .setQuantity(quantity)
                 .setTotal(price)
                 .build();
 
-        AddOrderLine cmd = AddOrderLine.newBuilder()
+        final AddOrderLine cmd = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
 
-        CommandRequest result = CommandRequest.newBuilder()
+        final CommandRequest result = CommandRequest.newBuilder()
                 .setCommand(Messages.toAny(cmd))
                 .setContext(getCommandContext(userId)).build();
         return result;
     }
 
     public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
-        BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
+        final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
 
-        PayForOrder cmd = PayForOrder.newBuilder()
+        final PayForOrder cmd = PayForOrder.newBuilder()
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
 
-        CommandRequest result = CommandRequest.newBuilder()
+        final CommandRequest result = CommandRequest.newBuilder()
                 .setCommand(Messages.toAny(cmd))
                 .setContext(getCommandContext(userId))
                 .build();
@@ -103,7 +103,7 @@ public class Requests {
     }
 
     public static CommandContext getCommandContext(UserId userId) {
-        CommandId commandId = CommandId.newBuilder()
+        final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .build();

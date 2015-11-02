@@ -101,7 +101,7 @@ public final class TypeName extends StringTypeValue {
 
     private static String getTypeName(String typeUrl)
             throws InvalidProtocolBufferException {
-        String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
+        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
         if (parts.length != 2 || !parts[0].equals(TYPE_URL_PREFIX)) {
             throw new InvalidProtocolBufferException(
                     "Invalid type url encountered: " + typeUrl);
@@ -117,7 +117,7 @@ public final class TypeName extends StringTypeValue {
      * @see #ofEnclosed(AnyOrBuilder)
      */
     public String toTypeUrl() {
-        String result = TYPE_URL_PREFIX + TYPE_URL_SEPARATOR + value();
+        final String result = TYPE_URL_PREFIX + TYPE_URL_SEPARATOR + value();
         return result;
     }
 
@@ -150,12 +150,12 @@ public final class TypeName extends StringTypeValue {
      * @return string with the type name
      */
     public String nameOnly() {
-        String value = value();
-        String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
+        final String value = value();
+        final String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
         if (parts.length == 0) {
             return value;
         }
-        String result = parts[parts.length - 1];
+        final String result = parts[parts.length - 1];
         return result;
     }
 }

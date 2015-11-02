@@ -91,7 +91,7 @@ public class Commands {
      * @param offset the timezone offset
      */
     public static CommandContext createContext(UserId userId, ZoneOffset offset) {
-        CommandId commandId = create(userId, getCurrentTime());
+        final CommandId commandId = create(userId, getCurrentTime());
         final CommandContext.Builder result = CommandContext.newBuilder()
                 .setCommandId(commandId)
                 .setZoneOffset(offset);
@@ -134,7 +134,7 @@ public class Commands {
      * @see Identifiers#idToString(Object)
      */
     public static String idToString(CommandId commandId) {
-        String result = Identifiers.idToString(commandId);
+        final String result = Identifiers.idToString(commandId);
         return result;
     }
 
@@ -151,7 +151,7 @@ public class Commands {
             @Override
             public boolean apply(@Nullable CommandRequest request) {
                 checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
+                final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isAfter(timestamp, from);
             }
         };
@@ -162,7 +162,7 @@ public class Commands {
             @Override
             public boolean apply(@Nullable CommandRequest request) {
                 checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
+                final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isBetween(timestamp, from, to);
             }
         };
@@ -183,8 +183,8 @@ public class Commands {
         Collections.sort(commandRequests, new Comparator<CommandRequest>() {
             @Override
             public int compare(CommandRequest o1, CommandRequest o2) {
-                Timestamp timestamp1 = getTimestamp(o1);
-                Timestamp timestamp2 = getTimestamp(o2);
+                final Timestamp timestamp1 = getTimestamp(o1);
+                final Timestamp timestamp2 = getTimestamp(o2);
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });

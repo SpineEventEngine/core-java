@@ -60,7 +60,7 @@ public class Math {
             case 1:
                 return a;
         }
-        long total = a * b;
+        final long total = a * b;
         if (total / b != a) {
             throw new ArithmeticException(MULTIPLICATION_OVERFLOWS_A_LONG + a + " * " + b);
         }

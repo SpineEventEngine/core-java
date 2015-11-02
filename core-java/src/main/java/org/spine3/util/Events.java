@@ -99,7 +99,7 @@ public class Events {
     public static Timestamp getTimestamp(EventIdOrBuilder eventId) {
         final Timestamp commandTimestamp = eventId.getCommandId().getTimestamp();
         final Duration delta = TimeUtil.createDurationFromNanos(eventId.getDeltaNanos());
-        Timestamp result = TimeUtil.add(commandTimestamp, delta);
+        final Timestamp result = TimeUtil.add(commandTimestamp, delta);
         return result;
     }
 
@@ -115,7 +115,7 @@ public class Events {
             @Override
             public boolean apply(@Nullable EventRecord record) {
                 checkNotNull(record);
-                int version = record.getContext().getVersion();
+                final int version = record.getContext().getVersion();
                 return version > sinceVersion;
             }
         };
@@ -126,7 +126,7 @@ public class Events {
             @Override
             public boolean apply(@Nullable EventRecord record) {
                 checkNotNull(record);
-                Timestamp timestamp = getTimestamp(record.getContext().getEventId());
+                final Timestamp timestamp = getTimestamp(record.getContext().getEventId());
                 return Timestamps.isAfter(timestamp, from);
             }
         };
@@ -137,7 +137,7 @@ public class Events {
             @Override
             public boolean apply(@Nullable EventRecord record) {
                 checkNotNull(record);
-                Timestamp timestamp = getTimestamp(record.getContext().getEventId());
+                final Timestamp timestamp = getTimestamp(record.getContext().getEventId());
                 return Timestamps.isBetween(timestamp, from, to);
             }
         };
@@ -152,8 +152,8 @@ public class Events {
         Collections.sort(eventRecords, new Comparator<EventRecord>() {
             @Override
             public int compare(EventRecord o1, EventRecord o2) {
-                Timestamp timestamp1 = getTimestamp(o1.getContext().getEventId());
-                Timestamp timestamp2 = getTimestamp(o2.getContext().getEventId());
+                final Timestamp timestamp1 = getTimestamp(o1.getContext().getEventId());
+                final Timestamp timestamp2 = getTimestamp(o2.getContext().getEventId());
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
@@ -174,7 +174,7 @@ public class Events {
      * Creates {@code EventRecord} instance with the passed event and context.
      */
     public static EventRecord createEventRecord(Message event, EventContext context) {
-        EventRecord result = EventRecord.newBuilder()
+        final EventRecord result = EventRecord.newBuilder()
                 .setEvent(Messages.toAny(event))
                 .setContext(context)
                 .build();

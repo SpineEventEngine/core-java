@@ -176,8 +176,8 @@ public class Durations {
      * @return duration in minutes
      */
     public static long toMinutes(Duration duration) {
-        long millis = toMillis(duration);
-        long result = (millis / MILLIS_PER_SECOND) / SECONDS_PER_MINUTE;
+        final long millis = toMillis(duration);
+        final long result = (millis / MILLIS_PER_SECOND) / SECONDS_PER_MINUTE;
         return result;
     }
 
@@ -188,8 +188,8 @@ public class Durations {
      * @return number of hours
      */
     public static long getHours(Duration value) {
-        long hours = toMinutes(value);
-        long result = hours / MINUTES_PER_HOUR;
+        final long hours = toMinutes(value);
+        final long result = hours / MINUTES_PER_HOUR;
         return result;
     }
 
@@ -210,7 +210,7 @@ public class Durations {
      * @return {@code true} of the passed value is greater or equal zero, {@code false} otherwise
      */
     public static boolean isPositiveOrZero(Duration value) {
-        long millis = toMillis(value);
+        final long millis = toMillis(value);
         return millis >= 0;
     }
 
@@ -233,8 +233,8 @@ public class Durations {
      * @return {@code true} if the first argument is greater than the second, {@code false} otherwise
      */
     public static boolean isGreaterThan(Duration value, Duration another) {
-        long nanos = toNanos(value);
-        long anotherNanos = toNanos(another);
+        final long nanos = toNanos(value);
+        final long anotherNanos = toNanos(another);
         return nanos > anotherNanos;
     }
 
@@ -242,8 +242,8 @@ public class Durations {
      * @return {@code true} if the first argument is less than the second, {@code false} otherwise
      */
     public static boolean isLessThan(Duration value, Duration another) {
-        long nanos = toNanos(value);
-        long anotherNanos = toNanos(another);
+        final long nanos = toNanos(value);
+        final long anotherNanos = toNanos(another);
         return nanos < anotherNanos;
     }
 
@@ -251,8 +251,8 @@ public class Durations {
      * Numerically compare passed durations as nanosecond values.
      */
     public static int compare(Duration d1, Duration d2) {
-        long nanos = toNanos(d1);
-        long otherNanos = toNanos(d2);
+        final long nanos = toNanos(d1);
+        final long otherNanos = toNanos(d2);
         return Long.compare(nanos, otherNanos);
     }
 
@@ -260,7 +260,7 @@ public class Durations {
      * @return {@code true} if the passed duration is negative, {@code false} otherwise
      */
     public static boolean isNegative(Duration value) {
-        long nanos = toNanos(value);
+        final long nanos = toNanos(value);
         return nanos < 0;
     }
 }

@@ -97,7 +97,7 @@ public class TypeToClassMap {
     }
 
     private static void readPropertiesFromStream(InputStream stream) {
-        Properties properties = new Properties();
+        final Properties properties = new Properties();
 
         try {
             properties.load(stream);

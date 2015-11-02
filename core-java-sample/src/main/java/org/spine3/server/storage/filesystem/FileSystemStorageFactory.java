@@ -74,7 +74,7 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public EventStorage createEventStorage() {
-        FsEventStorage storage = tryCreateEventStorage();
+        final FsEventStorage storage = tryCreateEventStorage();
         eventStorages.add(storage);
         return storage;
     }
@@ -120,8 +120,8 @@ public class FileSystemStorageFactory implements StorageFactory {
      */
     private static File getTempDir() {
         try {
-            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
-            File result = new File(tmpFile.getParent());
+            final File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
+            final File result = new File(tmpFile.getParent());
             if (tmpFile.exists()) {
                 //noinspection ResultOfMethodCallIgnored
                 tmpFile.delete();

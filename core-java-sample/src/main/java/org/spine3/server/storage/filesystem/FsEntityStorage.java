@@ -99,8 +99,8 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         checkFileExists(file, "entity storage");
 
-        InputStream fileInputStream = open(file);
-        InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+        final InputStream fileInputStream = open(file);
+        final InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
 
         Any any = Any.getDefaultInstance();
 

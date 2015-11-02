@@ -65,7 +65,7 @@ public class EventBus {
      */
     public void register(Object object) {
         checkNotNull(object);
-        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         putHandlersToBus(handlers);
     }
 
@@ -88,7 +88,7 @@ public class EventBus {
      */
     public void unregister(Object object) {
         checkNotNull(object);
-        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         unsubscribe(handlers);
     }
 
@@ -99,11 +99,11 @@ public class EventBus {
     private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
         for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
             final EventClass c = entry.getKey();
-            EventHandlerMethod handler = entry.getValue();
+            final EventHandlerMethod handler = entry.getValue();
 
             lockOnHandlersByClass.writeLock().lock();
             try {
-                Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
+                final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
                 if (!currentSubscribers.contains(handler)) {
                     throw new IllegalArgumentException(
                             "missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
@@ -122,15 +122,15 @@ public class EventBus {
      */
     @SuppressWarnings("TypeMayBeWeakened")
     public void post(EventRecord eventRecord) {
-        Message event = Events.getEvent(eventRecord);
-        EventContext context = eventRecord.getContext();
+        final Message event = Events.getEvent(eventRecord);
+        final EventContext context = eventRecord.getContext();
 
         post(event, context);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
     private void post(Message event, EventContext context) {
-        Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
+        final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             //TODO:2015-09-09:alexander.yevsyukov: This must be missing event handler

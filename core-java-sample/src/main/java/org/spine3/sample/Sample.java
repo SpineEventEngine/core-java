@@ -67,7 +67,7 @@ public class Sample {
 
         final StorageFactory factory = getStorageFactory();
 
-        Sample sample = new Sample(factory);
+        final Sample sample = new Sample(factory);
 
         sample.execute();
     }
@@ -80,7 +80,7 @@ public class Sample {
         setUp();
 
         // Generate test requests
-        List<CommandRequest> requests = generateRequests();
+        final List<CommandRequest> requests = generateRequests();
 
         // Process requests
         for (CommandRequest request : requests) {
@@ -135,16 +135,16 @@ public class Sample {
      */
     public static List<CommandRequest> generateRequests() {
 
-        List<CommandRequest> result = Lists.newArrayList();
+        final List<CommandRequest> result = Lists.newArrayList();
 
         for (int i = 0; i < 10; i++) {
 
-            OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            UserId userId = Users.createId("user_" + i);
+            final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
+            final UserId userId = Users.createId("user_" + i);
 
-            CommandRequest createOrder = Requests.createOrder(userId, orderId);
-            CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
+            final CommandRequest createOrder = Requests.createOrder(userId, orderId);
+            final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
+            final CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);

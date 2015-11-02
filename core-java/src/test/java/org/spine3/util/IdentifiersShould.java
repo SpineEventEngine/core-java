@@ -81,7 +81,7 @@ public class IdentifiersShould {
 
         IdConverterRegistry.getInstance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
 
-        ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
+        final ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
         final String result = idToString(id);
 
         assertEquals(TEST_ID, result);

@@ -42,7 +42,7 @@ public abstract class CommandStorage {
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
         final String commandIdStr = Commands.idToString(commandId);
-        CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
+        final CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
                 .setTimestamp(commandId.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)

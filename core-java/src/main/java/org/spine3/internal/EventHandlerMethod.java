@@ -80,17 +80,17 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     @CheckReturnValue
     public static boolean isEventHandler(Method method) {
 
-        boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+        final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
 
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
 
         //noinspection LocalVariableNamingConvention
-        boolean acceptsMessageAndEventContext =
+        final boolean acceptsMessageAndEventContext =
                 parameterTypes.length == 2
                         && Message.class.isAssignableFrom(parameterTypes[0])
                         && EventContext.class.equals(parameterTypes[1]);
 
-        boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
 
         return isAnnotated
                 && acceptsMessageAndEventContext
@@ -108,7 +108,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> result = ImmutableMap.builder();
 
         // Scan for declared event handler methods.
-        MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
+        final MethodMap handlers = new MethodMap(target.getClass(), isEventHandlerPredicate);
 
         checkModifiers(handlers.values());
 
@@ -120,8 +120,8 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
         // If the passed object is MultiHandler add its methods too.
         if (target instanceof MultiHandler) {
-            MultiHandler multiHandler = (MultiHandler) target;
-            Map<EventClass, EventHandlerMethod> map = createMap(multiHandler);
+            final MultiHandler multiHandler = (MultiHandler) target;
+            final Map<EventClass, EventHandlerMethod> map = createMap(multiHandler);
 
             checkModifiers(toMethods(map.values()));
 
@@ -132,7 +132,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     }
 
     private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
-        Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
 
         // Add entries exposed by the object as MultiHandler.
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
@@ -160,10 +160,10 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     private static Map<EventClass, EventHandlerMethod> createMap(Object target,
                                                                  Method method,
                                                                  Iterable<Class<? extends Message>> classes) {
-        ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
         for (Class<? extends Message> messageClass : classes) {
-            EventClass key = EventClass.of(messageClass);
-            EventHandlerMethod value = new EventHandlerMethod(target, method);
+            final EventClass key = EventClass.of(messageClass);
+            final EventHandlerMethod value = new EventHandlerMethod(target, method);
             builder.put(key, value);
         }
         return builder.build();
@@ -183,7 +183,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
-            boolean isPublic = Modifier.isPublic(method.getModifiers());
+            final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
                 log().warn(String.format("Event handler %s must be declared 'public'",
                         Methods.getFullMethodName(method)));

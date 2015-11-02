@@ -36,7 +36,7 @@ public class UsersShould {
     public void create_id_by_string() {
         final String testIdString = "12345";
 
-        UserId userId = Users.createId(testIdString);
+        final UserId userId = Users.createId(testIdString);
 
         final UserId expected = UserId.newBuilder().setValue(testIdString).build();
         assertEquals(expected, userId);

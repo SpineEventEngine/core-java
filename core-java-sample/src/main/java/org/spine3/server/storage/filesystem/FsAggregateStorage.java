@@ -102,7 +102,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
         } catch (FileNotFoundException e) {
             propagate(e);
         }
-        DataOutputStream dos = new DataOutputStream(fos);
+        final DataOutputStream dos = new DataOutputStream(fos);
 
         try {
             writeRecord(dos, r);
@@ -116,7 +116,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private static void writeRecord(DataOutputStream stream, AggregateStorageRecord r) throws IOException {
-        byte[] bytes = r.toByteArray();
+        final byte[] bytes = r.toByteArray();
         stream.write(bytes);
         stream.writeInt(bytes.length);
     }
@@ -218,7 +218,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
             longBuffer.put(page, pageOffset, INT_SIZE_IN_BYTES);
 
             longBuffer.flip();
-            int messageSize = longBuffer.getInt();
+            final int messageSize = longBuffer.getInt();
 
             if (pageOffset < messageSize) {
                 allocatePage(messageSize + INT_SIZE_IN_BYTES);

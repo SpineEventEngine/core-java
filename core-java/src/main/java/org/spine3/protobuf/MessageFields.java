@@ -91,14 +91,14 @@ public class MessageFields {
      * Converts Protobuf field name into Java accessor method name.
      */
     public static String toAccessorMethodName(CharSequence fieldName) {
-        StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
+        final StringBuilder out = new StringBuilder(checkNotNull(fieldName).length() + 3);
         out.append(GETTER_METHOD_PREFIX);
         final char uppercaseFirstChar = Character.toUpperCase(fieldName.charAt(0));
         out.append(uppercaseFirstChar);
 
         boolean nextUpperCase = false;
         for (int i = 1; i < fieldName.length(); i++) {
-            char c = fieldName.charAt(i);
+            final char c = fieldName.charAt(i);
             if (PROPERTY_NAME_SEPARATOR == c) {
                 nextUpperCase = true;
                 continue;
@@ -135,7 +135,7 @@ public class MessageFields {
             }
         }
         try {
-            Object result = method.invoke(command);
+            final Object result = method.invoke(command);
             return result;
         } catch (InvocationTargetException | IllegalAccessException e) {
             throw propagate(e);

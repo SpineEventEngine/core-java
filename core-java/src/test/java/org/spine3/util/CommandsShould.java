@@ -52,9 +52,9 @@ public class CommandsShould {
 
     @Test
     public void generate() {
-        UserId userId = Users.createId("commands-should-test");
+        final UserId userId = Users.createId("commands-should-test");
 
-        CommandId result = generateId(userId);
+        final CommandId result = generateId(userId);
 
         //noinspection DuplicateStringLiteralInspection
         assertThat(result, allOf(
@@ -68,6 +68,7 @@ public class CommandsShould {
         generateId(null);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     @Test
     public void convert_field_name_to_method_name() {
         assertEquals("getUserId", MessageFields.toAccessorMethodName("user_id"));
@@ -142,7 +143,7 @@ public class CommandsShould {
 
         final String userIdString = "user123";
         final Timestamp currentTime = getCurrentTime();
-        CommandId id = generateId(userIdString, currentTime);
+        final CommandId id = generateId(userIdString, currentTime);
 
         /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
            Use the restored object for equality check with the original object.

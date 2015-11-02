@@ -51,7 +51,7 @@ public class Tests {
     @SuppressWarnings("MethodWithTooExceptionsDeclared")
     public static void callPrivateUtilityConstructor(Class<?> utilityClass)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Constructor constructor = utilityClass.getDeclaredConstructor();
+        final Constructor constructor = utilityClass.getDeclaredConstructor();
 
         // We throw exception if the modified isn't private instead of asserting via JUnit to avoid dependency
         // on JUnit in the main part of the code.

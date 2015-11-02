@@ -46,7 +46,7 @@ public class ContextFactory {
     }
 
     public static CommandContext getCommandContext(UserId userId, Timestamp when) {
-        CommandId commandId = CommandId.newBuilder()
+        final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(when)
                 .build();

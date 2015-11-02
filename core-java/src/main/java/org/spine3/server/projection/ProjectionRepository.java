@@ -45,9 +45,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
 
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
-        Class<? extends Projection> projectionClass = getEntityClass();
-        Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
-        Method forward = dispatchAsMethod();
+        final Class<? extends Projection> projectionClass = getEntityClass();
+        final Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
+        final Method forward = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
                 .build();
@@ -56,7 +56,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @SuppressWarnings("TypeMayBeWeakened")
     protected I getEntityId(Message event, EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
-        @SuppressWarnings("unchecked") I id = (I)aggregateId;
+        @SuppressWarnings("unchecked") final I id = (I)aggregateId;
 
         return id;
     }
@@ -94,8 +94,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @SuppressWarnings("unused") // This method is used by reflection
     protected void dispatch(Message event, EventContext context) {
-        I id = getEntityId(event, context);
-        P p = load(id);
+        final I id = getEntityId(event, context);
+        final P p = load(id);
         p.handle(event, context);
         store(p);
     }

@@ -61,13 +61,13 @@ public class CommandDispatcher {
      */
     public void register(Object object) {
         checkNotNull(object);
-        Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
         registerMap(handlers);
     }
 
     public void unregister(Object object) {
         checkNotNull(object);
-        Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
+        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
         unregisterMap(subscribers);
     }
 
@@ -85,8 +85,8 @@ public class CommandDispatcher {
         for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
             final CommandClass commandClass = entry.getKey();
             if (handlerRegistered(commandClass)) {
-                CommandHandlerMethod registered = getHandler(commandClass);
-                CommandHandlerMethod passed = entry.getValue();
+                final CommandHandlerMethod registered = getHandler(commandClass);
+                final CommandHandlerMethod passed = entry.getValue();
                 if (registered.equals(passed)) {
                     removeFor(commandClass);
                 }
@@ -100,7 +100,7 @@ public class CommandDispatcher {
 
     private void checkDuplicates(Map<CommandClass, CommandHandlerMethod> handlers) {
         for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
-            CommandClass commandClass = entry.getKey();
+            final CommandClass commandClass = entry.getKey();
 
             if (handlerRegistered(commandClass)) {
                 final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
@@ -127,13 +127,13 @@ public class CommandDispatcher {
         checkNotNull(command);
         checkNotNull(context);
 
-        CommandClass commandClass = CommandClass.of(command);
+        final CommandClass commandClass = CommandClass.of(command);
         if (!handlerRegistered(commandClass)) {
             throw new UnsupportedCommandException(command);
         }
 
-        CommandHandlerMethod method = getHandler(commandClass);
-        List<EventRecord> result = method.invoke(command, context);
+        final CommandHandlerMethod method = getHandler(commandClass);
+        final List<EventRecord> result = method.invoke(command, context);
         return result;
     }
 

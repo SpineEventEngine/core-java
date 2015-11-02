@@ -124,7 +124,7 @@ public class Identifiers {
     @SuppressWarnings("IfMayBeConditional")
     private static String idMessageToString(Message message) {
 
-        String result;
+        final String result;
         final IdConverterRegistry registry = IdConverterRegistry.getInstance();
 
         if (registry.containsConverter(message)) {
@@ -140,7 +140,7 @@ public class Identifiers {
     @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
     private static String convert(Message message) {
 
-        String result;
+        final String result;
         final Collection<Object> values = message.getAllFields().values();
 
         if (values.isEmpty()) {
@@ -188,19 +188,19 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed value is not of the supported type
      */
     public static <I> Any idToAny(I id) {
-        Any anyId;
+        final Any anyId;
         //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
         if (id instanceof Message) {
-            Message message = (Message) id;
+            final Message message = (Message) id;
             anyId = Messages.toAny(message);
         } else if (id instanceof String) {
-            String s = (String) id;
+            final String s = (String) id;
             anyId = Messages.toAny(StringValue.newBuilder().setValue(s).build());
         } else if (id instanceof Integer) {
-            Integer intValue = (Integer) id;
+            final Integer intValue = (Integer) id;
             anyId = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
         } else if (id instanceof Long) {
-            Long longValue = (Long) id;
+            final Long longValue = (Long) id;
             anyId = Messages.toAny(UInt64Value.newBuilder().setValue(longValue).build());
         } else {
             throw unsupportedIdType(id);
@@ -222,19 +222,19 @@ public class Identifiers {
      * </ul>
      */
     public static Object idFromAny(Any idInAny) {
-        Message extracted = fromAny(idInAny);
+        final Message extracted = fromAny(idInAny);
 
         //noinspection ChainOfInstanceofChecks
         if (extracted instanceof StringValue) {
-            StringValueOrBuilder stringValue = (StringValue) extracted;
+            final StringValueOrBuilder stringValue = (StringValue) extracted;
             return stringValue.getValue();
         }
         if (extracted instanceof UInt32Value) {
-            UInt32Value uInt32Value = (UInt32Value) extracted;
+            final UInt32Value uInt32Value = (UInt32Value) extracted;
             return uInt32Value.getValue();
         }
         if (extracted instanceof UInt64Value) {
-            UInt64Value uInt64Value = (UInt64Value) extracted;
+            final UInt64Value uInt64Value = (UInt64Value) extracted;
             return uInt64Value.getValue();
         }
         return extracted;

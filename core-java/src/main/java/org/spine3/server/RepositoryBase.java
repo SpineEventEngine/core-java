@@ -47,10 +47,10 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     }
 
     private Constructor<E> getEntityConstructor() {
-        Constructor<E> result;
+        final Constructor<E> result;
         try {
-            Class<E> entityClass = getEntityClass();
-            Class<I> idClass = getIdClass();
+            final Class<E> entityClass = getEntityClass();
+            final Class<I> idClass = getIdClass();
 
             result = entityClass.getConstructor(idClass);
         } catch (NoSuchMethodException e) {
@@ -101,7 +101,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
      */
     public E create(I id) {
         try {
-            E result = entityConstructor.newInstance(id);
+            final E result = entityConstructor.newInstance(id);
             result.setDefault();
 
             return result;

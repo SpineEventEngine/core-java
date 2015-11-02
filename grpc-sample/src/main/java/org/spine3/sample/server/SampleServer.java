@@ -114,7 +114,7 @@ public class SampleServer {
 
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
-            CommandResult reply = Engine.getInstance().process(req);
+            final CommandResult reply = Engine.getInstance().process(req);
 
             responseObserver.onValue(reply);
             responseObserver.onCompleted();

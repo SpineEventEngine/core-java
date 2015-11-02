@@ -81,7 +81,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
 
     @SuppressWarnings("RefusedBequest") // We override to check our type of storage.
     protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"})
+        @SuppressWarnings({"unused", "unchecked"}) final
         AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
     }
 
@@ -103,9 +103,9 @@ public abstract class AggregateRepositoryBase<I extends Message,
 
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
-        Class<? extends Aggregate> aggregateClass = getEntityClass();
-        Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
-        Method dispatch = dispatchAsMethod();
+        final Class<? extends Aggregate> aggregateClass = getEntityClass();
+        final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
+        final Method dispatch = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(dispatch, aggregateCommands)
                 .build();
@@ -135,11 +135,11 @@ public abstract class AggregateRepositoryBase<I extends Message,
         final AggregateEvents aggregateEvents = aggregateStorage().load(id);
 
         try {
-            Snapshot snapshot = aggregateEvents.hasSnapshot()
+            final Snapshot snapshot = aggregateEvents.hasSnapshot()
                         ? aggregateEvents.getSnapshot()
                         : null;
-            A result = create(id);
-            List<EventRecord> events = aggregateEvents.getEventRecordList();
+            final A result = create(id);
+            final List<EventRecord> events = aggregateEvents.getEventRecordList();
 
             if (snapshot != null) {
                 result.restore(snapshot);
@@ -175,7 +175,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
     }
 
     private void createAndStoreSnapshot(A aggregateRoot) {
-        Snapshot snapshot = aggregateRoot.toSnapshot();
+        final Snapshot snapshot = aggregateRoot.toSnapshot();
         final I aggregateRootId = aggregateRoot.getId();
         aggregateStorage().store(aggregateRootId, snapshot);
     }
@@ -187,8 +187,8 @@ public abstract class AggregateRepositoryBase<I extends Message,
 
     @Override
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
-        I aggregateId = getAggregateId(command);
-        A aggregateRoot = load(aggregateId);
+        final I aggregateId = getAggregateId(command);
+        final A aggregateRoot = load(aggregateId);
 
         aggregateRoot.dispatch(command, context);
 

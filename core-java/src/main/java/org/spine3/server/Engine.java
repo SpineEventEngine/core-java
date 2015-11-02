@@ -139,12 +139,12 @@ public final class Engine {
         if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
+            final AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
             repository.assignStorage(aggregateStorage);
         } else {
-            Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
+            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
+            final EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
             repository.assignStorage(entityStorage);
         }
 
@@ -165,7 +165,7 @@ public final class Engine {
      * </ul>
      */
     public static void stop() {
-        Engine engine = instance();
+        final Engine engine = instance();
 
         engine.doStop();
 
@@ -173,8 +173,8 @@ public final class Engine {
     }
 
     private void shutDownRepositories() {
-        CommandDispatcher dispatcher = getCommandDispatcher();
-        EventBus eventBus = getEventBus();
+        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final EventBus eventBus = getEventBus();
         for (Repository<?, ?> repository : repositories) {
             dispatcher.unregister(repository);
             eventBus.unregister(repository);
@@ -208,7 +208,7 @@ public final class Engine {
 
         store(request);
 
-        CommandResult result = dispatch(request);
+        final CommandResult result = dispatch(request);
         storeAndPost(result.getEventRecordList());
 
         return result;
@@ -220,18 +220,18 @@ public final class Engine {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private static CommandResult dispatch(CommandRequest request) {
-        CommandDispatcher dispatcher = CommandDispatcher.getInstance();
+        final CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
-            Message command = Messages.fromAny(request.getCommand());
-            CommandContext context = request.getContext();
+            final Message command = Messages.fromAny(request.getCommand());
+            final CommandContext context = request.getContext();
 
-            List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
+            final List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
 
-            CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
+            final CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
             //TODO:2015-06-15:mikhail.melnik: handle errors
-            CommandResult result = Events.toCommandResult(
+            final CommandResult result = Events.toCommandResult(
                     Collections.<EventRecord>emptyList(),
                     Collections.<Any>singleton(Any.getDefaultInstance()));
             throw propagate(e);
