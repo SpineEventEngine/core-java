@@ -66,7 +66,7 @@ public abstract class Entity<I, M extends Message> {
 
     /**
      * Validates the passed state.
-     * <p/>
+     * <p>
      * Does nothing by default. Aggregate roots may override this method to
      * specify logic of validating initial or intermediate state of the root.
      *
@@ -106,14 +106,14 @@ public abstract class Entity<I, M extends Message> {
 
     /**
      * Sets the object into the default state.
-     * <p/>
+     * <p>
      * Results of this method call are:
      * <ul>
      *   <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
      *   <li>The version number is set to zero.</li>
      *   <li>The {@link #whenModified} field is set to the system time of the call.</li>
      * </ul>
-     * <p/>
+     * <p>
      * The timestamp is set to current system time.
      */
     protected void setDefault() {

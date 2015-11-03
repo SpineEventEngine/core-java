@@ -40,7 +40,7 @@ public class IoUtil {
 
     /**
      * Closes passed closeables one by one silently.
-     * <p/>
+     * <p>
      * Logs each {@link java.io.IOException} if it occurs.
      */
     @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
@@ -60,7 +60,7 @@ public class IoUtil {
 
     /**
      * Flushes passed streams one by one.
-     * <p/>
+     * <p>
      * Logs each {@link IOException} if it occurs.
      */
     public static void flushSilently(@Nullable Flushable... flushables) {

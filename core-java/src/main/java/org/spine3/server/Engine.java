@@ -95,8 +95,8 @@ public final class Engine {
 
     /**
      * Starts the engine with the passed storage factory instance.
-     * <p/>
-     * <p>There can be only one started instance of {@code Engine} per application. Calling this method
+     * <p>
+     * There can be only one started instance of {@code Engine} per application. Calling this method
      * without invoking {@link #stop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
@@ -119,13 +119,13 @@ public final class Engine {
 
     /**
      * Registers the passed repository with the Engine.
-     *
-     * <p>The Engine creates and assigns a storage depending on the type of the passed repository.
-     *
-     * <p>For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * <p>
+     * The Engine creates and assigns a storage depending on the type of the passed repository.
+     * <p>
+     * For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
      * created and assigned.
-     *
-     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
+     * <p>
+     * For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
      *
      * @param repository the repository to register
@@ -153,12 +153,12 @@ public final class Engine {
 
     /**
      * Stops the engine.
-     *
-     * <p>This method shuts down all registered repositories. Each registered repository is:
-     *  <ul>
-     *      <li>un-registered from {@link CommandDispatcher}</li>
-     *      <li>un-registered from {@link EventBus}</li>
-     *      <li>detached from storage</li>
+     * <p>
+     * This method shuts down all registered repositories. Each registered repository is:
+     * <ul>
+     * <li>un-registered from {@link CommandDispatcher}</li>
+     * <li>un-registered from {@link EventBus}</li>
+     * <li>detached from storage</li>
      * </ul>
      */
     public static void stop() {
@@ -189,10 +189,10 @@ public final class Engine {
 
     /**
      * Processed the incoming command requests.
-     * <p/>
-     * <p>This method is the entry point of a command in to a backend of an application.
-     * <p/>
-     * <p>The engine must be started.
+     * <p>
+     * This method is the entry point of a command in to a backend of an application.
+     * <p>
+     * The engine must be started.
      *
      * @param request incoming command request to handle
      * @return the result of command handling
