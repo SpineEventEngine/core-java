@@ -154,26 +154,10 @@ public class Sample {
         return result;
     }
 
-    private static class OrderIdToStringConverter implements Function<OrderId, String> {
-
-        @Override
-        public String apply(@Nullable OrderId orderId) {
-
-            if (orderId == null) {
-                return NULL_ID_OR_FIELD;
-            }
-
-            final String value = orderId.getValue();
-
-            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
-                return NULL_ID_OR_FIELD;
-            }
-
-            return value;
-        }
-    }
-
     /**
+     * Retrieves the storage factory instance.
+     * Change this method implementation if needed.
+     *
      * @return the {@link StorageFactory} implementation.
      */
     public static StorageFactory getStorageFactory() {
@@ -191,6 +175,25 @@ public class Sample {
          * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
          */
         // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getDefaultInstance();
+    }
+
+    private static class OrderIdToStringConverter implements Function<OrderId, String> {
+
+        @Override
+        public String apply(@Nullable OrderId orderId) {
+
+            if (orderId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            final String value = orderId.getValue();
+
+            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            return value;
+        }
     }
 
     private static Logger log() {
