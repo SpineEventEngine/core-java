@@ -44,6 +44,7 @@ import org.spine3.util.Users;
 import org.spine3.util.testutil.AggregateIdFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
@@ -69,24 +70,20 @@ import static org.spine3.util.testutil.EventRecordFactory.*;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private ProjectId projectId;
+    private final ProjectId projectId = AggregateIdFactory.newProjectId();
+    private final ProjectAggregate aggregate = new ProjectAggregate(projectId);
+    private final CreateProject createProject = CreateProject.newBuilder().setProjectId(projectId).build();
+    private final AddTask addTask = AddTask.newBuilder().setProjectId(projectId).build();
+    private final StartProject startProject = StartProject.newBuilder().setProjectId(projectId).build();
     private CommandContext commandContext;
     private EventContext eventContext;
-    private CreateProject createProject;
-    private AddTask addTask;
-    private StartProject startProject;
-    private ProjectAggregate aggregate;
 
     @Before
     public void setUp() {
-        projectId = AggregateIdFactory.newProjectId();
+
         final UserId userId = Users.createId("user_id_test");
         commandContext = createContext(userId, ZoneOffsets.UTC);
         eventContext = getEventContext(userId, projectId);
-        createProject = CreateProject.newBuilder().setProjectId(projectId).build();
-        addTask = AddTask.newBuilder().setProjectId(projectId).build();
-        startProject = StartProject.newBuilder().setProjectId(projectId).build();
-        aggregate = new ProjectAggregate(projectId);
     }
 
     @Test
@@ -182,12 +179,14 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
+
         final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(projectId);
         r.dispatch(addTask, commandContext);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier() throws InvocationTargetException {
+
         final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(projectId);
         try {
             r.dispatch(createProject, commandContext);
@@ -354,22 +353,28 @@ public class AggregateShould {
 
 
     private void dispatchAllProjectCommands(Aggregate a) throws InvocationTargetException {
+
         a.dispatch(createProject, commandContext);
         a.dispatch(addTask, commandContext);
         a.dispatch(startProject, commandContext);
     }
 
     private static Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
+
         return transform(events, new Function<EventRecord, Class<? extends Message>>() {
-            @SuppressWarnings("NullableProblems")
+            @SuppressWarnings("ReturnOfNull"/*return null because an exception won't be propagated in this case*/)
             @Override
-            public Class<? extends Message> apply(EventRecord record) {
+            public Class<? extends Message> apply(@Nullable EventRecord record) {
+                if (record == null) {
+                    return null;
+                }
                 return fromAny(record.getEvent()).getClass();
             }
         });
     }
 
     private static void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
+
         assertEquals(3, classes.size());
         assertTrue(classes.contains(ProjectCreated.class));
         assertTrue(classes.contains(TaskAdded.class));
@@ -377,6 +382,7 @@ public class AggregateShould {
     }
 
     private List<EventRecord> getProjectEventRecords() {
+
         final List<EventRecord> events = newLinkedList();
         events.add(projectCreated(projectId, eventContext));
         events.add(taskAdded(projectId, eventContext));
@@ -385,6 +391,7 @@ public class AggregateShould {
     }
 
     private static void assertProjectEventsApplied(ProjectAggregate a) {
+
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
