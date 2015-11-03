@@ -180,7 +180,7 @@ public final class Engine {
         repositories.clear();
     }
 
-    private  void doStop() {
+    private void doStop() {
         shutDownRepositories();
         storageFactory = null;
         commandStore = null;
@@ -273,7 +273,6 @@ public final class Engine {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Engine.class);
     }
@@ -281,5 +280,4 @@ public final class Engine {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }
