@@ -190,10 +190,10 @@ public abstract class AggregateStorageShould {
     }
 
     private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
-        @SuppressWarnings("ConstantConditions") // NPE is OK
+        @Nullable // return null because an exception won't be propagated in this case
         @Override
         public EventRecord apply(@Nullable AggregateStorageRecord input) {
-            return input.getEventRecord();
+            return (input == null) ? null : input.getEventRecord();
         }
     };
 

@@ -141,7 +141,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
 
     private static Iterable<Method> toMethods(Iterable<CommandHandlerMethod> handlerMethods) {
         return Iterables.transform(handlerMethods, new Function<CommandHandlerMethod, Method>() {
-            @Nullable
+            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Method apply(@Nullable CommandHandlerMethod eventHandlerMethod) {
                 if (eventHandlerMethod == null) {

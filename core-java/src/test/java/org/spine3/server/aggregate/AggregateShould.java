@@ -362,7 +362,7 @@ public class AggregateShould {
     private static Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
 
         return transform(events, new Function<EventRecord, Class<? extends Message>>() {
-            @SuppressWarnings("ReturnOfNull"/*return null because an exception won't be propagated in this case*/)
+            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Class<? extends Message> apply(@Nullable EventRecord record) {
                 if (record == null) {

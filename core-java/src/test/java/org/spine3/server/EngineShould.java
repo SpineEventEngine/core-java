@@ -44,14 +44,21 @@ public class EngineShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_not_configured_and_try_to_get_instance() {
-        Engine.stop();
+    public void throw_exception_if_not_started_and_try_to_get_instance() {
 
+        Engine.stop();
         Engine.getInstance();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_start_running_engine() {
+
+        Engine.start(InMemoryStorageFactory.getInstance());
+    }
+
     @Test
-    public void return_instance_if_configured_correctly() {
+    public void return_instance_if_started() {
+
         final Engine engine = Engine.getInstance();
         assertNotNull(engine);
     }

@@ -146,7 +146,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
     private static Iterable<Method> toMethods(Iterable<EventHandlerMethod> handlerMethods) {
         return Iterables.transform(handlerMethods, new Function<EventHandlerMethod, Method>() {
-            @Nullable
+            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Method apply(@Nullable EventHandlerMethod eventHandlerMethod) {
                 if (eventHandlerMethod == null) {
