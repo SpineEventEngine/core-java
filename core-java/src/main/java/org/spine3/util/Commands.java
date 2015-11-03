@@ -35,6 +35,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.util.Identifiers.*;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
@@ -138,7 +139,7 @@ public class Commands {
     }
 
     public static CommandId generateId(String userIdString, Timestamp currentTime) {
-        final UserId userId = Users.createId(userIdString);
+        final UserId userId = newUserId(userIdString);
         final CommandId.Builder builder = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(currentTime);

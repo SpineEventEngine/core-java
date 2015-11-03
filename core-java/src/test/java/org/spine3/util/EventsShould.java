@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.*;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Mikhail Melnik
@@ -40,7 +41,7 @@ public class EventsShould {
 
     @Test
     public void generate_event_id() {
-        final UserId userId = Users.createId("events_test");
+        final UserId userId = newUserId("events_test");
         final CommandId commandId = Commands.generateId(userId);
 
         final EventId result = Events.generateId(commandId);

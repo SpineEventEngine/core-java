@@ -31,7 +31,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.util.Users;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.List;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * Framework usage sample.
@@ -140,7 +140,7 @@ public class Sample {
         for (int i = 0; i < 10; i++) {
 
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            final UserId userId = Users.createId("user_" + i);
+            final UserId userId = newUserId("user_" + i);
 
             final CommandRequest createOrder = Requests.createOrder(userId, orderId);
             final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);

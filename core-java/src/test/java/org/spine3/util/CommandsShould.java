@@ -26,7 +26,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.MessageFields;
-import org.spine3.util.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,8 @@ import static org.junit.Assert.assertFalse;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Identifiers.timestampToString;
+import static org.spine3.util.Users.newUserId;
+import static org.spine3.util.testutil.CommandRequestFactory.createProject;
 
 /**
  * @author Mikhail Melnik
@@ -51,7 +52,7 @@ public class CommandsShould {
     @Test
     public void generate() {
 
-        final UserId userId = Users.createId("commands-should-test");
+        final UserId userId = newUserId("commands-should-test");
 
         final CommandId result = generateId(userId);
 
@@ -78,9 +79,9 @@ public class CommandsShould {
 
         final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
 
-        final CommandRequest commandRequest1 = CommandRequestFactory.createAt(when);
-        final CommandRequest commandRequest2 = CommandRequestFactory.create();
-        final CommandRequest commandRequest3 = CommandRequestFactory.create();
+        final CommandRequest commandRequest1 = createProject(when);
+        final CommandRequest commandRequest2 = createProject();
+        final CommandRequest commandRequest3 = createProject();
 
         final Collection<CommandRequest> sortedList = new ArrayList<>();
         sortedList.add(commandRequest1);

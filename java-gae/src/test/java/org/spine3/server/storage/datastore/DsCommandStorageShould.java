@@ -28,7 +28,8 @@ import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.test.project.ProjectId;
-import org.spine3.util.testutil.CommandRequestFactory;
+
+import static org.spine3.util.testutil.CommandRequestFactory.createProject;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
@@ -63,12 +64,14 @@ public class DsCommandStorageShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_store_null() {
+
         STORAGE.store(null, null);
     }
 
     @Test
     public void store_command() {
-        final CommandRequest commandRequest = CommandRequestFactory.create();
+
+        final CommandRequest commandRequest = createProject();
         STORAGE.store(AggregateId.of(ID), commandRequest);
     }
 }

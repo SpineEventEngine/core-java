@@ -20,13 +20,21 @@
 
 package org.spine3.util.testutil;
 
-import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.CommandContext;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.Messages;
+import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.command.StartProject;
+
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.util.Users.newUserId;
+import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
+import static org.spine3.util.testutil.ContextFactory.getCommandContext;
 
 /**
  * The utility class which is used for creating CommandRequests for tests.
@@ -39,19 +47,40 @@ public class CommandRequestFactory {
     private CommandRequestFactory() {
     }
 
-    public static CommandRequest createAt(Timestamp when) {
-        final UserId userId = UserId.getDefaultInstance();
-        final Any command = Messages.toAny(CreateProject.newBuilder().setProjectId(
-                AggregateIdFactory.newProjectId()).build());
-
-        final CommandRequest dummyCommandRequest = CommandRequest.newBuilder()
-                .setContext(ContextFactory.getCommandContext(userId, when))
-                .setCommand(command)
-                .build();
-        return dummyCommandRequest;
+    public static CommandRequest createProject() {
+        return createProject(TimeUtil.getCurrentTime());
     }
 
-    public static CommandRequest create() {
-        return createAt(TimeUtil.getCurrentTime());
+    public static CommandRequest createProject(Timestamp when) {
+
+        return createProject(newUserId("projectCreated"), newProjectId(), when);
+    }
+
+    public static CommandRequest createProject(UserId userId, ProjectId projectId, Timestamp when) {
+
+        final CreateProject command = CreateProject.newBuilder().setProjectId(projectId).build();
+        return createCommandRequest(command, userId, when);
+    }
+
+    public static CommandRequest addTask(UserId userId, ProjectId projectId, Timestamp when) {
+
+        final AddTask command = AddTask.newBuilder().setProjectId(projectId).build();
+        return createCommandRequest(command, userId, when);
+    }
+
+    public static CommandRequest startProject(UserId userId, ProjectId projectId, Timestamp when) {
+
+        final StartProject command = StartProject.newBuilder().setProjectId(projectId).build();
+        return createCommandRequest(command, userId, when);
+    }
+
+    public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
+
+        final CommandContext context = getCommandContext(userId, when);
+        final CommandRequest.Builder result = CommandRequest.newBuilder()
+                .setContext(context)
+                .setCommand(toAny(command));
+
+        return result.build();
     }
 }

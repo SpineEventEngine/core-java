@@ -20,12 +20,12 @@
 package org.spine3.util;
 
 import com.google.protobuf.Any;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Mikhail Melnik
@@ -33,15 +33,8 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MessagesShould {
 
-    private UserId id;
-    private Any any;
-
-    @Before
-    public void setUp() {
-        id = Users.createId("messages_test");
-
-        any = Any.pack(id);
-    }
+    private final UserId id = newUserId("messages_test");
+    private final Any any = Any.pack(id);
 
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
