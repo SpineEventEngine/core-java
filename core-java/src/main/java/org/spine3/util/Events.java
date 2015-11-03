@@ -211,7 +211,6 @@ public class Events {
 
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class EventIdToStringConverter implements Function<EventId, String> {
-        @Nullable
         @Override
         public String apply(@Nullable EventId eventId) {
 

@@ -100,7 +100,6 @@ public class Commands {
 
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class CommandIdToStringConverter implements Function<CommandId, String> {
-        @Nullable
         @Override
         public String apply(@Nullable CommandId commandId) {
 
