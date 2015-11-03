@@ -42,13 +42,19 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryEventStorage();
     }
 
+    /**
+     * NOTE: the parameter is unused.
+     */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
         return new InMemoryAggregateStorage<>();
     }
 
+    /**
+     * NOTE: the parameter is unused.
+     */
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
+    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> unused) {
         return InMemoryEntityStorage.newInstance();
     }
 
