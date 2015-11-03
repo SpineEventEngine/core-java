@@ -37,7 +37,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Utility class for generating sample command requests.
- * For test usage only.
+ * For usage in samples only.
  *
  * @author Mikhail Melnik
  */
