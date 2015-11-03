@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
@@ -71,7 +70,6 @@ public class ProjectionShould {
         /**
          * We expose this method to be called directly in {@link #setUp()}.
          * Normally this method would be called by a repository upon creation of a new instance.
-         * This is checked by {@link #check_default_state_when_queried()}.
          */
         @Override
         @VisibleForTesting
@@ -86,18 +84,6 @@ public class ProjectionShould {
     public void setUp() {
         test = new TestProjection(1);
         test.setDefault();
-    }
-
-    /**
-     * TODO:2015-11-02:alexander.litus: Entity returns default state instead of null now (like protobuf generated classes do).
-     * If projection throws the exception in this case, it is the violation of Liskov Substitution principle.
-     * So, should we remove this test?
-     */
-    @Ignore
-    @Test(expected = IllegalStateException.class)
-    public void check_default_state_when_queried() {
-        final TestProjection test = new TestProjection(1);
-        test.getState();
     }
 
     @Test
