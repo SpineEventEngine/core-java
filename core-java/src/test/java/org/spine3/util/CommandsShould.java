@@ -36,11 +36,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.spine3.testdata.CommandRequestFactory.createProject;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Identifiers.timestampToString;
 import static org.spine3.util.Users.newUserId;
-import static org.spine3.util.testutil.CommandRequestFactory.createProject;
 
 /**
  * @author Mikhail Melnik

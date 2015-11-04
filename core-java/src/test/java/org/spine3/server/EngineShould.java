@@ -38,8 +38,8 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.AggregateIdFactory;
 import org.spine3.util.Users;
-import org.spine3.util.testutil.AggregateIdFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -51,7 +51,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.util.testutil.CommandRequestFactory.*;
+import static org.spine3.testdata.CommandRequestFactory.*;
 
 /**
  * @author Alexander Litus

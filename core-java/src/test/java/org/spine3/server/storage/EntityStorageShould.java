@@ -29,7 +29,7 @@ import org.spine3.test.project.ProjectId;
 import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.AggregateIdFactory.newProjectId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
         "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection"})

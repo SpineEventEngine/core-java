@@ -21,7 +21,7 @@
 package org.spine3.util;
 
 import org.junit.Test;
-import org.spine3.util.testutil.*;
+import org.spine3.testdata.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

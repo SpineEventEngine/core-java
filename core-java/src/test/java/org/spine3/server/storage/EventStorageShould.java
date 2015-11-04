@@ -23,16 +23,16 @@ package org.spine3.server.storage;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.base.EventRecordOrBuilder;
-import org.spine3.util.testutil.EventRecordFactory;
+import org.spine3.testdata.EventRecordFactory;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
+import static org.spine3.testdata.EventStoreRecordFactory.*;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.Events.toEventRecordsList;
-import static org.spine3.util.testutil.EventStoreRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
 public abstract class EventStorageShould {

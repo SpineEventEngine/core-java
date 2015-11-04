@@ -29,7 +29,7 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.test.project.ProjectId;
 
-import static org.spine3.util.testutil.CommandRequestFactory.createProject;
+import static org.spine3.testdata.CommandRequestFactory.createProject;
 
 /**
  * NOTE: to run these tests on Windows, start local Datastore Server manually.<br>
