@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
+import org.spine3.util.IoUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,8 +59,7 @@ public class TypeToClassMap {
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PRODUCTION_PROPERTIES_FILE_PATH = "protos/properties/proto_to_java_class_production.properties";
-    private static final String TEST_PROPERTIES_FILE_PATH = "protos/properties/proto_to_java_class_test.properties";
+    private static final String PROPERTIES_FILE_PATH = "protos/properties/proto_to_java_class.properties";
 
     //TODO:2015-09-17:alexander.yevsyukov:  @mikhail.mikhaylov: Have immutable instance here.
     // Transform static methods into inner Builder class
@@ -67,8 +67,7 @@ public class TypeToClassMap {
     private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
     static {
-        loadClasses(PRODUCTION_PROPERTIES_FILE_PATH);
-        loadClasses(TEST_PROPERTIES_FILE_PATH);
+        loadClasses();
     }
 
     /**
@@ -88,8 +87,7 @@ public class TypeToClassMap {
      */
     public static ClassName get(TypeName protoType) {
         if (!namesMap.containsKey(protoType)) {
-            loadClasses(PRODUCTION_PROPERTIES_FILE_PATH);
-            loadClasses(TEST_PROPERTIES_FILE_PATH);
+            loadClasses();
         }
         if (!namesMap.containsKey(protoType)) {
             final ClassName className = searchAsSubclass(protoType);
@@ -106,6 +104,8 @@ public class TypeToClassMap {
             properties.load(stream);
         } catch (IOException e) {
             //NOP
+        } finally {
+            IoUtil.closeSilently(stream);
         }
 
         readProperties(properties);
@@ -156,12 +156,12 @@ public class TypeToClassMap {
         return className;
     }
 
-    private static void loadClasses(String propertiesFilePath) {
+    private static void loadClasses() {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         Enumeration<URL> resources = null;
         try {
-            resources = classLoader.getResources(propertiesFilePath);
+            resources = classLoader.getResources(PROPERTIES_FILE_PATH);
         } catch (IOException ignored) {
         }
 
@@ -182,5 +182,4 @@ public class TypeToClassMap {
             LOG.info("Total classes in TypeToClassMap: " + namesMap.size());
         }
     }
-
 }
