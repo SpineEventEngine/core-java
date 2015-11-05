@@ -59,7 +59,7 @@ public class TypeToClassMap {
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PROPERTIES_FILES_PATH = "proto_to_java_class.properties";
+    private static final String PROPERTIES_FILE_PATH = "proto_to_java_class.properties";
 
     //TODO:2015-09-17:alexander.yevsyukov:  @mikhail.mikhaylov: Have immutable instance here.
     // Transform static methods into inner Builder class
