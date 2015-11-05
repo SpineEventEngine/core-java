@@ -154,25 +154,6 @@ public class Application {
         return result;
     }
 
-    private static class OrderIdToStringConverter implements Function<OrderId, String> {
-
-        @Override
-        public String apply(@Nullable OrderId orderId) {
-
-            if (orderId == null) {
-                return NULL_ID_OR_FIELD;
-            }
-
-            final String value = orderId.getValue();
-
-            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
-                return NULL_ID_OR_FIELD;
-            }
-
-            return value;
-        }
-    }
-
     /**
      * Retrieves the storage factory instance.
      * Change this method implementation if needed.
