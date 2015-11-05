@@ -10,6 +10,7 @@
 */generated/*
 
 # Gradle build files
+build/*
 */build/*
 
 # Login details to Maven repository.

@@ -33,7 +33,7 @@ import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.protobuf.Messages.toText;
-import static org.spine3.sample.server.SampleServer.SERVER_PORT;
+import static org.spine3.sample.server.Server.SERVER_PORT;
 
 /**
  * Sample gRPC client implementation.
@@ -42,7 +42,7 @@ import static org.spine3.sample.server.SampleServer.SERVER_PORT;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class SampleClient {
+public class Client {
 
     private static final String LOCALHOST = "localhost";
     private static final String RPC_FAILED = "RPC failed";
@@ -54,7 +54,7 @@ public class SampleClient {
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
-    public SampleClient(String host, int port) {
+    public Client(String host, int port) {
         channel = NettyChannelBuilder
                 .forAddress(host, port)
                 .negotiationType(NegotiationType.PLAINTEXT)
@@ -68,9 +68,9 @@ public class SampleClient {
     public static void main(String[] args) throws InterruptedException {
 
         // Access a service running on the local machine
-        SampleClient client = new SampleClient(LOCALHOST, SERVER_PORT);
+        Client client = new Client(LOCALHOST, SERVER_PORT);
 
-        final List<CommandRequest> requests = Sample.generateRequests();
+        final List<CommandRequest> requests = Application.generateRequests();
 
         try {
 
@@ -113,7 +113,7 @@ public class SampleClient {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SampleClient.class);
+        private final Logger value = LoggerFactory.getLogger(Client.class);
     }
 
     private static Logger log() {

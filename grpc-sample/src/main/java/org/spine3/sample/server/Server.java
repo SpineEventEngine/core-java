@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
-import org.spine3.sample.Sample;
+import org.spine3.sample.Application;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 
@@ -40,7 +40,7 @@ import java.io.IOException;
  * @author Mikhail Melnik
  * @author Alexander Litus
  */
-public class SampleServer {
+public class Server {
 
     /**
      * The default port on which the server runs.
@@ -48,27 +48,27 @@ public class SampleServer {
     public static final int SERVER_PORT = 50051;
 
     private final ServerImpl serverImpl;
-    private final Sample sample;
+    private final Application application;
 
     /**
      * @param serverPort the port on which the server should run.
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
-    public SampleServer(int serverPort, StorageFactory storageFactory) {
+    public Server(int serverPort, StorageFactory storageFactory) {
 
         this.serverImpl = buildServerImpl(serverPort);
-        this.sample = new Sample(storageFactory);
+        this.application = new Application(storageFactory);
     }
 
     /**
      * The entry point of the sample.
-     * To change the storage implementation, change {@link Sample#getStorageFactory()} method implementation.
+     * To change the storage implementation, change {@link Application#getStorageFactory()} method implementation.
      */
     public static void main(String[] args) throws IOException {
 
-        final StorageFactory storageFactory = Sample.getStorageFactory();
+        final StorageFactory storageFactory = Application.getStorageFactory();
 
-        final SampleServer server = new SampleServer(SERVER_PORT, storageFactory);
+        final Server server = new Server(SERVER_PORT, storageFactory);
 
         server.start();
 
@@ -83,7 +83,7 @@ public class SampleServer {
      */
     public void start() throws IOException {
 
-        sample.setUp();
+        application.setUp();
         serverImpl.start();
     }
 
@@ -92,11 +92,11 @@ public class SampleServer {
      */
     public void stop() {
 
-        sample.tearDown();
+        application.tearDown();
         serverImpl.shutdown();
     }
 
-    private static void addShutdownHook(final SampleServer server) {
+    private static void addShutdownHook(final Server server) {
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
@@ -141,6 +141,6 @@ public class SampleServer {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SampleServer.class);
+        private final Logger value = LoggerFactory.getLogger(Server.class);
     }
 }
