@@ -58,15 +58,15 @@ public class TestAggregateStorageRecordFactory {
      * Returns several records sorted by timestamp ascending.
      * First record's timestamp is current time.
      */
-    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id) {
-        return getSequentialRecords(id, getCurrentTime());
+    public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id) {
+        return createSequentialRecords(id, getCurrentTime());
     }
 
     /**
      * Returns several records sorted by timestamp ascending.
      * @param timestamp1 the timestamp of first record.
      */
-    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id, Timestamp timestamp1) {
+    public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id, Timestamp timestamp1) {
 
         final Duration delta = seconds(10);
 

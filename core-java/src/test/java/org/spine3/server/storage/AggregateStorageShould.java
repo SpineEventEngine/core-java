@@ -41,7 +41,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.server.storage.EventStorageShould.assertEventRecordListsAreEqual;
-import static org.spine3.testdata.TestAggregateStorageRecordFactory.getSequentialRecords;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
 
@@ -111,7 +111,7 @@ public abstract class AggregateStorageShould {
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(aggregateId);
+        final List<AggregateStorageRecord> records = createSequentialRecords(aggregateId);
 
         writeAll(records);
 
@@ -162,7 +162,7 @@ public abstract class AggregateStorageShould {
 
     private void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(aggregateId, firstRecordTime);
+        final List<AggregateStorageRecord> records = createSequentialRecords(aggregateId, firstRecordTime);
 
         writeAll(records);
 
