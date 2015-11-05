@@ -45,10 +45,16 @@ public class TestContextFactory {
     private TestContextFactory() {
     }
 
+    /**
+     * Creates a new {@link CommandContext} with the given userId and current command time.
+     */
     public static CommandContext createCommandContext(UserId userId) {
         return createCommandContext(userId, TimeUtil.getCurrentTime());
     }
 
+    /**
+     * Creates a new {@link CommandContext} with the given userId and command time.
+     */
     public static CommandContext createCommandContext(UserId userId, Timestamp when) {
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
@@ -60,6 +66,9 @@ public class TestContextFactory {
                 .build();
     }
 
+    /**
+     * Creates a new {@link EventContext} with default properties.
+     */
     public static EventContext createEventContext() {
 
         final Timestamp now = TimeUtil.getCurrentTime();
@@ -75,6 +84,9 @@ public class TestContextFactory {
                 .build();
     }
 
+    /**
+     * Creates a new {@link EventContext} with the given userId and aggregateId.
+     */
     public static EventContext createEventContext(UserId userId, Message aggregateId) {
 
         final CommandId commandId = Commands.generateId(userId);

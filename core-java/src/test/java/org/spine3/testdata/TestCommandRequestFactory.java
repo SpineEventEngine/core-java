@@ -43,39 +43,57 @@ import static org.spine3.util.Users.newUserId;
 @SuppressWarnings("UtilityClass")
 public class TestCommandRequestFactory {
 
-    private static final String STUB_USER_ID = "stub_user_id";
-    private static final String STUB_PROJECT_ID = "stubProjectId";
+    private static final UserId STUB_USER_ID = newUserId("stub_user_id");
+    private static final ProjectId STUB_PROJECT_ID = createProjectId("stubProjectId");
 
     private TestCommandRequestFactory() {
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with default properties (current time etc).
+     */
     public static CommandRequest createProject() {
         return createProject(TimeUtil.getCurrentTime());
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with the given timestamp.
+     */
     public static CommandRequest createProject(Timestamp when) {
 
-        return createProject(newUserId(STUB_USER_ID), createProjectId(STUB_PROJECT_ID), when);
+        return createProject(STUB_USER_ID, STUB_PROJECT_ID, when);
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     */
     public static CommandRequest createProject(UserId userId, ProjectId projectId, Timestamp when) {
 
         final CreateProject command = CreateProject.newBuilder().setProjectId(projectId).build();
         return createCommandRequest(command, userId, when);
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     */
     public static CommandRequest addTask(UserId userId, ProjectId projectId, Timestamp when) {
 
         final AddTask command = AddTask.newBuilder().setProjectId(projectId).build();
         return createCommandRequest(command, userId, when);
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     */
     public static CommandRequest startProject(UserId userId, ProjectId projectId, Timestamp when) {
 
         final StartProject command = StartProject.newBuilder().setProjectId(projectId).build();
         return createCommandRequest(command, userId, when);
     }
 
+    /**
+     * Creates a new {@link CommandRequest} with the given command, userId and timestamp.
+     */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
 
         final CommandContext context = TestContextFactory.createCommandContext(userId, when);

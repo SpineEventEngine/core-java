@@ -35,19 +35,32 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
 
 
+/**
+ * Creates AggregateStorageRecords for tests.
+ *
+ * @author Alexander Litus
+ */
 @SuppressWarnings("UtilityClass")
 public class TestAggregateStorageRecordFactory {
 
     private TestAggregateStorageRecordFactory() {}
 
+    /**
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp and aggregateId.
+     */
     public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId) {
+
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setAggregateId(aggregateId.getId())
                 .setTimestamp(timestamp);
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp, aggregateId and event record.
+     */
     public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, EventRecord event) {
+
         final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp, aggregateId)
                 .toBuilder()
                 .setEventRecord(event);

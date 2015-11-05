@@ -43,37 +43,57 @@ public class TestEventRecordFactory {
 
     private static final ProjectId STUB_PROJECT_ID = createProjectId("dummy_project_id_456");
     private static final UserId STUB_USER_ID = newUserId("test_user_id_147");
+    private static final EventContext STUB_EVENT_CONTEXT = createEventContext();
 
 
     private TestEventRecordFactory() {}
 
 
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord projectCreated() {
-        return projectCreated(STUB_PROJECT_ID, createEventContext());
+        return projectCreated(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord taskAdded() {
-        return taskAdded(STUB_PROJECT_ID, createEventContext());
+        return taskAdded(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord projectStarted() {
-        return projectStarted(STUB_PROJECT_ID, createEventContext());
+        return projectStarted(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
-
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord projectCreated(ProjectId projectId) {
         return projectCreated(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord taskAdded(ProjectId projectId) {
         return taskAdded(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord projectStarted(ProjectId projectId) {
         return projectStarted(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
-
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
@@ -81,6 +101,9 @@ public class TestEventRecordFactory {
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord taskAdded(ProjectId projectId, EventContext eventContext) {
 
         final TaskAdded event = TaskAdded.newBuilder().setProjectId(projectId).build();
@@ -88,6 +111,9 @@ public class TestEventRecordFactory {
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord projectStarted(ProjectId projectId, EventContext eventContext) {
 
         final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();
