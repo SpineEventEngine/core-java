@@ -6,8 +6,6 @@ buildscript {
 
 apply plugin: 'org.spine3.tools.protolookup';
 
-tasks.getByPath("scanProtos").dependsOn("generateTestProto");
-
 // required for usage of test classes from other modules
 configurations {
     testArtifacts.extendsFrom testRuntime
