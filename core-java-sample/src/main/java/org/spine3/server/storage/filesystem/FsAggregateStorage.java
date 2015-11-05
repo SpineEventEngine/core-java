@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FileSystemStorageFactory.PATH_DELIMITER;
 import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 import static org.spine3.util.IoUtil.closeSilently;
 import static org.spine3.util.IoUtil.tryToFlush;
@@ -45,6 +44,8 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     private static final String INVALID_OBJECT_EXCEPTION = "Could not deserialize record";
 
     private static final String AGGREGATE_FILE_NAME_PREFIX = "/aggregate/";
+
+    protected static final String PATH_DELIMITER = "/";
 
     private final String aggregateStorageRootPath;
 
@@ -102,7 +103,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
         } catch (FileNotFoundException e) {
             propagate(e);
         }
-        DataOutputStream dos = new DataOutputStream(fos);
+        final DataOutputStream dos = new DataOutputStream(fos);
 
         try {
             writeRecord(dos, r);
@@ -116,7 +117,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private static void writeRecord(DataOutputStream stream, AggregateStorageRecord r) throws IOException {
-        byte[] bytes = r.toByteArray();
+        final byte[] bytes = r.toByteArray();
         stream.write(bytes);
         stream.writeInt(bytes.length);
     }
@@ -218,7 +219,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
             longBuffer.put(page, pageOffset, INT_SIZE_IN_BYTES);
 
             longBuffer.flip();
-            int messageSize = longBuffer.getInt();
+            final int messageSize = longBuffer.getInt();
 
             if (pageOffset < messageSize) {
                 allocatePage(messageSize + INT_SIZE_IN_BYTES);

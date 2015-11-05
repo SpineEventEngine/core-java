@@ -64,7 +64,7 @@ public class Messages {
      * @return new {@code Any} instance
      */
     public static Any ofType(TypeName type, ByteString value) {
-        String typeUrl = type.toTypeUrl();
+        final String typeUrl = type.toTypeUrl();
         final Any result = Any.newBuilder()
                 .setValue(value)
                 .setTypeUrl(typeUrl)
@@ -123,7 +123,7 @@ public class Messages {
      * @see #fromAny(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeName messageType) throws ClassNotFoundException {
-        ClassName className = TypeToClassMap.get(messageType);
+        final ClassName className = TypeToClassMap.get(messageType);
         @SuppressWarnings("unchecked")
         final Class<T> result = (Class<T>) Class.forName(className.value());
         return result;
@@ -169,11 +169,11 @@ public class Messages {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeName typeName : TypeToClassMap.knownTypes()) {
             try {
-                Class<? extends Message> clazz = toMessageClass(typeName);
-                Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
+                final Class<? extends Message> clazz = toMessageClass(typeName);
+                final Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
                 // Skip outer class descriptors.
                 if (descriptor instanceof Descriptors.Descriptor) {
-                    Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
+                    final Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
                     builder.add(typeDescriptor);
                 }
 

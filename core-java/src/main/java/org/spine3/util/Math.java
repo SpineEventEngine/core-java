@@ -46,9 +46,10 @@ public class Math {
      * @return the new total
      * @throws ArithmeticException if the result overflows a long
      */
-    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static long safeMultiply(long a, int b) {
-        //noinspection SwitchStatementWithoutDefaultBranch - no need for default branch here.
+
+        // no need for default branch here
+        // noinspection SwitchStatementWithoutDefaultBranch
         switch (b) {
             case -1:
                 if (a == Long.MIN_VALUE) {
@@ -60,7 +61,7 @@ public class Math {
             case 1:
                 return a;
         }
-        long total = a * b;
+        final long total = a * b;
         if (total / b != a) {
             throw new ArithmeticException(MULTIPLICATION_OVERFLOWS_A_LONG + a + " * " + b);
         }
@@ -81,6 +82,7 @@ public class Math {
      * @param b  the divisor
      * @return the floor division
      */
+    @SuppressWarnings("JavaDoc")
     public static long floorDiv(long a, long b) {
         return (a >= 0 ? a / b : ((a + 1) / b) - 1);
     }

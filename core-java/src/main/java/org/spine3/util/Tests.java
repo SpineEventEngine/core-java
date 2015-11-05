@@ -26,6 +26,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+import static java.lang.System.currentTimeMillis;
+
 /**
  * Utilities for testing.
  *
@@ -33,6 +35,8 @@ import java.lang.reflect.Modifier;
  */
 @SuppressWarnings("UtilityClass")
 public class Tests {
+
+    private static final long MSEC_IN_SECOND = 1000L;
 
     private Tests() {}
 
@@ -51,7 +55,7 @@ public class Tests {
     @SuppressWarnings("MethodWithTooExceptionsDeclared")
     public static void callPrivateUtilityConstructor(Class<?> utilityClass)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Constructor constructor = utilityClass.getDeclaredConstructor();
+        final Constructor constructor = utilityClass.getDeclaredConstructor();
 
         // We throw exception if the modified isn't private instead of asserting via JUnit to avoid dependency
         // on JUnit in the main part of the code.
@@ -61,5 +65,9 @@ public class Tests {
 
         constructor.setAccessible(true);
         constructor.newInstance();
+    }
+
+    public static long currentTimeSeconds() {
+        return currentTimeMillis() / MSEC_IN_SECOND;
     }
 }

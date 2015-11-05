@@ -28,6 +28,8 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Mikhail Mikhaylov
  */
@@ -50,9 +52,9 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
         protected AggregateForStorageTests(ProjectId id) {
             super(id);
         }
-        @SuppressWarnings("ReturnOfNull")
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 }

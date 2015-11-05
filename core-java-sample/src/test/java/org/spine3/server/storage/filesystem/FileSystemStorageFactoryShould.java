@@ -27,6 +27,8 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
 import org.spine3.test.project.Project;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -60,22 +62,22 @@ public class FileSystemStorageFactoryShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
-        @SuppressWarnings("ReturnOfNull")
+        @Nonnull
         @Override
         protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
     public static class TestEntity extends Entity<String, Project> {
 
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        private static final Project DEFAULT_STATE = Project.newBuilder().setStatus("default state").build();
+        private static final Project DEFAULT_STATE = Project.newBuilder().setStatus("default_state").build();
 
         protected TestEntity(String id) {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return DEFAULT_STATE;

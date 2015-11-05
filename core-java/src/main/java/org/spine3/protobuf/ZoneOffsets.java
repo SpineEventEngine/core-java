@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import org.spine3.time.ZoneOffset;
 
+@SuppressWarnings("UtilityClass")
 public class ZoneOffsets {
 
     private ZoneOffsets() {}

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -33,7 +33,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.util.testutil.EventRecordFactory.*;
 
 @SuppressWarnings("UtilityClass")
 public class AggregateStorageRecordFactory {
@@ -73,9 +72,9 @@ public class AggregateStorageRecordFactory {
         final Timestamp timestamp2 = add(timestamp1, delta);
         final Timestamp timestamp3 = add(timestamp2, delta);
 
-        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, projectCreated(id));
-        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, taskAdded(id));
-        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, projectStarted(id));
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, EventRecordFactory.projectCreated(id));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, EventRecordFactory.taskAdded(id));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, EventRecordFactory.projectStarted(id));
 
         return newArrayList(record1, record2, record3);
     }

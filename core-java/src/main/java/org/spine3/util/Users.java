@@ -37,7 +37,7 @@ public class Users {
      * @param value new user ID value
      * @return new instance
      */
-    public static UserId createId(String value) {
+    public static UserId newUserId(String value) {
         checkNotNull(value);
 
         return UserId.newBuilder()

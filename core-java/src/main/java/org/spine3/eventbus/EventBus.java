@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.EventRecordOrBuilder;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.util.Events;
@@ -64,12 +64,14 @@ public class EventBus {
      * @param object the event applier object whose subscriber methods should be registered
      */
     public void register(Object object) {
+
         checkNotNull(object);
-        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         putHandlersToBus(handlers);
     }
 
     private void putHandlersToBus(Map<EventClass, EventHandlerMethod> handlers) {
+
         lockOnHandlersByClass.writeLock().lock();
         try {
             for (Map.Entry<EventClass, EventHandlerMethod> handler : handlers.entrySet()) {
@@ -87,8 +89,9 @@ public class EventBus {
      * @throws IllegalArgumentException if the object was not previously registered
      */
     public void unregister(Object object) {
+
         checkNotNull(object);
-        Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         unsubscribe(handlers);
     }
 
@@ -97,13 +100,15 @@ public class EventBus {
      * @param handlers a map of the event handlers to remove
      */
     private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
+
         for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
+
             final EventClass c = entry.getKey();
-            EventHandlerMethod handler = entry.getValue();
+            final EventHandlerMethod handler = entry.getValue();
 
             lockOnHandlersByClass.writeLock().lock();
             try {
-                Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
+                final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
                 if (!currentSubscribers.contains(handler)) {
                     throw new IllegalArgumentException(
                             "missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
@@ -120,17 +125,17 @@ public class EventBus {
      *
      * @param eventRecord the event record to be handled by all subscribers
      */
-    @SuppressWarnings("TypeMayBeWeakened")
-    public void post(EventRecord eventRecord) {
-        Message event = Events.getEvent(eventRecord);
-        EventContext context = eventRecord.getContext();
+    public void post(EventRecordOrBuilder eventRecord) {
+
+        final Message event = Events.getEvent(eventRecord);
+        final EventContext context = eventRecord.getContext();
 
         post(event, context);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private void post(Message event, EventContext context) {
-        Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
+
+        final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             //TODO:2015-09-09:alexander.yevsyukov: This must be missing event handler

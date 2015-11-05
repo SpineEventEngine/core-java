@@ -45,7 +45,7 @@ public abstract class AggregateStorage<I> {
 
     public AggregateEvents load(I aggregateId) {
 
-        Deque<EventRecord> history = newLinkedList();
+        final Deque<EventRecord> history = newLinkedList();
         Snapshot snapshot = null;
 
         final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
@@ -53,7 +53,7 @@ public abstract class AggregateStorage<I> {
         while (historyBackward.hasNext()
                 && snapshot == null) {
 
-            AggregateStorageRecord record = historyBackward.next();
+            final AggregateStorageRecord record = historyBackward.next();
 
             switch (record.getKindCase()) {
                 case EVENT_RECORD:
@@ -68,7 +68,7 @@ public abstract class AggregateStorage<I> {
             }
         }
 
-        AggregateEvents.Builder builder = AggregateEvents.newBuilder();
+        final AggregateEvents.Builder builder = AggregateEvents.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
@@ -81,7 +81,7 @@ public abstract class AggregateStorage<I> {
 
     public void store(I aggregateId, Snapshot snapshot) {
 
-        AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
                 .setAggregateId(Identifiers.idToString(aggregateId))
                 .setEventType(SNAPSHOT_TYPE_NAME)
@@ -101,7 +101,7 @@ public abstract class AggregateStorage<I> {
         final String eventIdStr = Identifiers.idToString(eventId);
         final String typeName = TypeName.ofEnclosed(event).nameOnly();
 
-        AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
+        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(Events.getTimestamp(eventId))
                 .setAggregateId(aggregateId)
                 .setEventType(typeName)

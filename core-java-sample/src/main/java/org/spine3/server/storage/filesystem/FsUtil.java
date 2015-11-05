@@ -75,7 +75,7 @@ class FsUtil {
             }
         } catch (IOException ignored) {
             // restore from backup
-            boolean isDeleted = file.delete();
+            final boolean isDeleted = file.delete();
             if (isDeleted && backup != null) {
                 //noinspection ResultOfMethodCallIgnored
                 backup.renameTo(file);
@@ -88,7 +88,7 @@ class FsUtil {
     private static File makeBackupCopy(File sourceFile) throws IOException {
 
         final String backupFilePath = sourceFile.toPath() + "_backup";
-        File backupFile = new File(backupFilePath);
+        final File backupFile = new File(backupFilePath);
 
         copy(sourceFile.toPath(), backupFile.toPath());
 
@@ -118,7 +118,7 @@ class FsUtil {
         if (input instanceof Message) {
             final Message message = escapeStringFields((Message) input);
             @SuppressWarnings("unchecked")
-            I castedMessage = (I) message; // cast is safe because input is Message
+            final I castedMessage = (I) message; // cast is safe because input is Message
             result = castedMessage;
         }
         return result;

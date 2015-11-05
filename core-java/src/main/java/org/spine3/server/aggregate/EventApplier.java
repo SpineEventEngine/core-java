@@ -102,8 +102,8 @@ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
      */
     public static void checkModifiers(MethodMap methods) {
         for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
-            Method method = entry.getValue();
-            boolean isPrivate = Modifier.isPrivate(method.getModifiers());
+            final Method method = entry.getValue();
+            final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
             if (!isPrivate) {
                 log().warn(String.format("Event applier method %s must be declared 'private'.",
                         Methods.getFullMethodName(method)));

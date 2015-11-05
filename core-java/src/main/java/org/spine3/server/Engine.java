@@ -24,10 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandRequest;
-import org.spine3.base.CommandResult;
-import org.spine3.base.EventRecord;
+import org.spine3.base.*;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -68,7 +65,7 @@ public final class Engine {
      * Obtains instance of the engine.
      *
      * @return {@code Engine} instance
-     * @throws IllegalStateException if the engine wasn't started before callling this method
+     * @throws IllegalStateException if the engine wasn't started before calling this method
      * @see #start(StorageFactory)
      */
     @CheckReturnValue
@@ -98,8 +95,8 @@ public final class Engine {
 
     /**
      * Starts the engine with the passed storage factory instance.
-     * <p/>
-     * <p>There can be only one started instance of {@code Engine} per application. Calling this method
+     * <p>
+     * There can be only one started instance of {@code Engine} per application. Calling this method
      * without invoking {@link #stop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
@@ -122,13 +119,13 @@ public final class Engine {
 
     /**
      * Registers the passed repository with the Engine.
-     *
-     * <p>The Engine creates and assigns a storage depending on the type of the passed repository.
-     *
-     * <p>For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * <p>
+     * The Engine creates and assigns a storage depending on the type of the passed repository.
+     * <p>
+     * For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
      * created and assigned.
-     *
-     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
+     * <p>
+     * For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
      *
      * @param repository the repository to register
@@ -139,12 +136,12 @@ public final class Engine {
         if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
+            final AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
             repository.assignStorage(aggregateStorage);
         } else {
-            Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
+            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
 
-            EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
+            final EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
             repository.assignStorage(entityStorage);
         }
 
@@ -156,16 +153,16 @@ public final class Engine {
 
     /**
      * Stops the engine.
-     *
-     * <p>This method shuts down all registered repositories. Each registered repository is:
-     *  <ul>
-     *      <li>un-registered from {@link CommandDispatcher}</li>
-     *      <li>un-registered from {@link EventBus}</li>
-     *      <li>detached from storage</li>
+     * <p>
+     * This method shuts down all registered repositories. Each registered repository is:
+     * <ul>
+     * <li>un-registered from {@link CommandDispatcher}</li>
+     * <li>un-registered from {@link EventBus}</li>
+     * <li>detached from storage</li>
      * </ul>
      */
     public static void stop() {
-        Engine engine = instance();
+        final Engine engine = instance();
 
         engine.doStop();
 
@@ -173,8 +170,8 @@ public final class Engine {
     }
 
     private void shutDownRepositories() {
-        CommandDispatcher dispatcher = getCommandDispatcher();
-        EventBus eventBus = getEventBus();
+        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final EventBus eventBus = getEventBus();
         for (Repository<?, ?> repository : repositories) {
             dispatcher.unregister(repository);
             eventBus.unregister(repository);
@@ -183,7 +180,7 @@ public final class Engine {
         repositories.clear();
     }
 
-    private  void doStop() {
+    private void doStop() {
         shutDownRepositories();
         storageFactory = null;
         commandStore = null;
@@ -192,10 +189,10 @@ public final class Engine {
 
     /**
      * Processed the incoming command requests.
-     * <p/>
-     * <p>This method is the entry point of a command in to a backend of an application.
-     * <p/>
-     * <p>The engine must be started.
+     * <p>
+     * This method is the entry point of a command in to a backend of an application.
+     * <p>
+     * The engine must be started.
      *
      * @param request incoming command request to handle
      * @return the result of command handling
@@ -208,7 +205,7 @@ public final class Engine {
 
         store(request);
 
-        CommandResult result = dispatch(request);
+        final CommandResult result = dispatch(request);
         storeAndPost(result.getEventRecordList());
 
         return result;
@@ -218,24 +215,19 @@ public final class Engine {
         commandStore.store(request);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static CommandResult dispatch(CommandRequest request) {
-        CommandDispatcher dispatcher = CommandDispatcher.getInstance();
+    private static CommandResult dispatch(CommandRequestOrBuilder request) {
+        final CommandDispatcher dispatcher = CommandDispatcher.getInstance();
         try {
-            Message command = Messages.fromAny(request.getCommand());
-            CommandContext context = request.getContext();
+            final Message command = Messages.fromAny(request.getCommand());
+            final CommandContext context = request.getContext();
 
-            List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
+            final List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
 
-            CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
+            final CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
             //TODO:2015-06-15:mikhail.melnik: handle errors
-            CommandResult result = Events.toCommandResult(
-                    Collections.<EventRecord>emptyList(),
-                    Collections.<Any>singleton(Any.getDefaultInstance()));
             throw propagate(e);
-//            return result;
         }
     }
 
@@ -281,7 +273,6 @@ public final class Engine {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Engine.class);
     }
@@ -289,5 +280,4 @@ public final class Engine {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

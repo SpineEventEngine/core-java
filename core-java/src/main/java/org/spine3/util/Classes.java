@@ -55,11 +55,11 @@ public class Classes {
     @CheckReturnValue
     public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
         try {
-            Type genericSuperclass = clazz.getGenericSuperclass();
-            Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
+            final Type genericSuperclass = clazz.getGenericSuperclass();
+            final Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
 
             actualTypeArguments.setAccessible(true);
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked") final
             Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
             actualTypeArguments.setAccessible(false);
 
@@ -77,14 +77,14 @@ public class Classes {
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<?> clazz, Predicate<Method> methodPredicate) {
 
-        Set<Class<? extends Message>> result = Sets.newHashSet();
+        final Set<Class<? extends Message>> result = Sets.newHashSet();
 
         for (Method method : clazz.getDeclaredMethods()) {
 
-            boolean methodMatches = methodPredicate.apply(method);
+            final boolean methodMatches = methodPredicate.apply(method);
 
             if (methodMatches) {
-                Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
+                final Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
                 result.add(firstParamType);
             }
         }

@@ -55,9 +55,9 @@ public class FileNameEscaper extends CharEscaper {
     private static String performDecoding(String value) {
         String interim = value;
         for (BrokenChar brokenChar : BrokenChar.values()) {
-            StringBuffer buffer = new StringBuffer(interim.length());
+            final StringBuffer buffer = new StringBuffer(interim.length());
 
-            Matcher m = brokenChar.backPattern.matcher(interim);
+            final Matcher m = brokenChar.backPattern.matcher(interim);
             while (m.find()) {
                 m.appendReplacement(buffer, brokenChar.charBack);
             }
@@ -126,7 +126,7 @@ public class FileNameEscaper extends CharEscaper {
         }
 
         static String valuesAsString() {
-            StringBuilder builder = new StringBuilder(values().length);
+            final StringBuilder builder = new StringBuilder(values().length);
             for (BrokenChar brokenChar : values()) {
                 builder.append(brokenChar.value);
             }

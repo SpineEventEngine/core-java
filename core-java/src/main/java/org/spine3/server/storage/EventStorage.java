@@ -35,7 +35,7 @@ public abstract class EventStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {
-        EventStoreRecord storeRecord = toEventStoreRecord(record);
+        final EventStoreRecord storeRecord = toEventStoreRecord(record);
         write(storeRecord);
     }
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util.testutil;
+package org.spine3.testdata;
 
 import org.spine3.test.project.ProjectId;
 

@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.ProjectId;
-import org.spine3.util.testutil.AggregateIdFactory;
+import org.spine3.testdata.AggregateIdFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -41,12 +41,11 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.server.storage.EventStorageShould.assertEventRecordListsAreEqual;
-import static org.spine3.util.testutil.AggregateStorageRecordFactory.getSequentialRecords;
-import static org.spine3.util.testutil.AggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.util.testutil.EventRecordFactory.projectCreated;
+import static org.spine3.testdata.AggregateStorageRecordFactory.getSequentialRecords;
+import static org.spine3.testdata.AggregateStorageRecordFactory.newAggregateStorageRecord;
+import static org.spine3.testdata.EventRecordFactory.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions",
-"ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods", "MagicNumber", "NoopMethodInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
 public abstract class AggregateStorageShould {
 
     private final ProjectId aggregateId = AggregateIdFactory.newProjectId();
@@ -66,13 +65,14 @@ public abstract class AggregateStorageShould {
 
     @Test
     public void return_iterator_over_empty_collection_if_read_by_null_id() {
-
+        // noinspection ConstantConditions
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(null);
         assertFalse(iterator.hasNext());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_record() {
+        // noinspection ConstantConditions
         storage.write(null);
     }
 
@@ -190,9 +190,10 @@ public abstract class AggregateStorageShould {
     }
 
     private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
+        @Nullable // return null because an exception won't be propagated in this case
         @Override
         public EventRecord apply(@Nullable AggregateStorageRecord input) {
-            return input.getEventRecord();
+            return (input == null) ? null : input.getEventRecord();
         }
     };
 

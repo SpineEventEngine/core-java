@@ -69,7 +69,7 @@ public class MethodMap {
         }
 
         public MethodMap build() {
-            MethodMap result = new MethodMap(map);
+            final MethodMap result = new MethodMap(map);
             return result;
         }
     }
@@ -125,7 +125,7 @@ public class MethodMap {
          */
         @CheckReturnValue
         public boolean contains(Class<? extends T> clazz) {
-            boolean result = entries.containsKey(clazz);
+            final boolean result = entries.containsKey(clazz);
             return result;
         }
 
@@ -142,7 +142,7 @@ public class MethodMap {
                 throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
             }
 
-            MethodMap entry = new MethodMap(clazz, filter);
+            final MethodMap entry = new MethodMap(clazz, filter);
             entries.put(clazz, entry);
         }
 
@@ -151,7 +151,7 @@ public class MethodMap {
          */
         @CheckReturnValue
         public MethodMap get(Class<? extends T> clazz) {
-            MethodMap result = entries.get(clazz);
+            final MethodMap result = entries.get(clazz);
             return result;
         }
     }

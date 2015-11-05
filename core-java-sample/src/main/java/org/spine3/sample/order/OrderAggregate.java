@@ -30,6 +30,8 @@ import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -42,6 +44,7 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
         super(id);
     }
 
+    @Nonnull
     @Override
     protected Order getDefaultState() {
         return Order.getDefaultInstance();
@@ -49,7 +52,7 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     @Assign
     public OrderCreated handle(CreateOrder cmd, CommandContext ctx) {
-        OrderCreated result = OrderCreated.newBuilder()
+        final OrderCreated result = OrderCreated.newBuilder()
                 .setOrderId(cmd.getOrderId())
                 .build();
         return result;
@@ -59,8 +62,8 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
     public OrderLineAdded handle(AddOrderLine cmd, CommandContext ctx) {
         validateCommand(cmd);
 
-        OrderLine orderLine = cmd.getOrderLine();
-        OrderLineAdded result = OrderLineAdded.newBuilder()
+        final OrderLine orderLine = cmd.getOrderLine();
+        final OrderLineAdded result = OrderLineAdded.newBuilder()
                 .setOrderId(cmd.getOrderId())
                 .setOrderLine(orderLine)
                 .build();
@@ -71,7 +74,7 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
     public OrderPaid handle(PayForOrder cmd, CommandContext ctx) {
         validateCommand(cmd);
 
-        OrderPaid result = OrderPaid.newBuilder()
+        final OrderPaid result = OrderPaid.newBuilder()
                 .setBillingInfo(cmd.getBillingInfo())
                 .setOrderId(cmd.getOrderId())
                 .build();
@@ -80,7 +83,7 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     @Apply
     private void event(OrderCreated event) {
-        Order newState = Order.newBuilder(getState())
+        final Order newState = Order.newBuilder(getState())
                 .setOrderId(event.getOrderId())
                 .setStatus(Order.Status.NEW)
                 .build();
@@ -91,9 +94,9 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     @Apply
     private void event(OrderLineAdded event) {
-        OrderLine orderLine = event.getOrderLine();
-        Order currentState = getState();
-        Order newState = Order.newBuilder(currentState)
+        final OrderLine orderLine = event.getOrderLine();
+        final Order currentState = getState();
+        final Order newState = Order.newBuilder(currentState)
                 .setOrderId(event.getOrderId())
                 .addOrderLine(orderLine)
                 .setTotal(currentState.getTotal() + orderLine.getTotal())
@@ -105,8 +108,8 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     @Apply
     private void event(OrderPaid event) {
-        Order currentState = getState();
-        Order newState = Order.newBuilder(currentState)
+        final Order currentState = getState();
+        final Order newState = Order.newBuilder(currentState)
                 .setBillingInfo(event.getBillingInfo())
                 .setStatus(Order.Status.PAID)
                 .build();
@@ -116,7 +119,7 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
     }
 
     private static void validateCommand(AddOrderLine cmd) {
-        OrderLine orderLine = cmd.getOrderLine();
+        final OrderLine orderLine = cmd.getOrderLine();
 
         if (orderLine.getProductId() == null) {
             throw new IllegalArgumentException("Product is not set");

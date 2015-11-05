@@ -35,6 +35,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.util.Identifiers.*;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
@@ -91,16 +92,15 @@ public class Commands {
      * @param offset the timezone offset
      */
     public static CommandContext createContext(UserId userId, ZoneOffset offset) {
-        CommandId commandId = create(userId, getCurrentTime());
+        final CommandId commandId = create(userId, getCurrentTime());
         final CommandContext.Builder result = CommandContext.newBuilder()
                 .setCommandId(commandId)
                 .setZoneOffset(offset);
         return result.build();
     }
 
-    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "StringBufferWithoutInitialCapacity", "ConstantConditions"})
+    @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class CommandIdToStringConverter implements Function<CommandId, String> {
-        @Nullable
         @Override
         public String apply(@Nullable CommandId commandId) {
 
@@ -112,11 +112,11 @@ public class Commands {
 
             String userId = NULL_ID_OR_FIELD;
 
-            if (commandId != null && commandId.getActor() != null) {
+            if (commandId.getActor() != null) {
                 userId = commandId.getActor().getValue();
             }
 
-            final String commandTime = (commandId != null) ? timestampToString(commandId.getTimestamp()) : "";
+            final String commandTime = timestampToString(commandId.getTimestamp());
 
             builder.append(userId)
                     .append(USER_ID_AND_TIME_DELIMITER)
@@ -134,12 +134,12 @@ public class Commands {
      * @see Identifiers#idToString(Object)
      */
     public static String idToString(CommandId commandId) {
-        String result = Identifiers.idToString(commandId);
+        final String result = Identifiers.idToString(commandId);
         return result;
     }
 
     public static CommandId generateId(String userIdString, Timestamp currentTime) {
-        final UserId userId = Users.createId(userIdString);
+        final UserId userId = newUserId(userIdString);
         final CommandId.Builder builder = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(currentTime);
@@ -151,7 +151,7 @@ public class Commands {
             @Override
             public boolean apply(@Nullable CommandRequest request) {
                 checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
+                final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isAfter(timestamp, from);
             }
         };
@@ -162,7 +162,7 @@ public class Commands {
             @Override
             public boolean apply(@Nullable CommandRequest request) {
                 checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
+                final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isBetween(timestamp, from, to);
             }
         };
@@ -183,8 +183,8 @@ public class Commands {
         Collections.sort(commandRequests, new Comparator<CommandRequest>() {
             @Override
             public int compare(CommandRequest o1, CommandRequest o2) {
-                Timestamp timestamp1 = getTimestamp(o1);
-                Timestamp timestamp2 = getTimestamp(o2);
+                final Timestamp timestamp1 = getTimestamp(o1);
+                final Timestamp timestamp2 = getTimestamp(o2);
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });

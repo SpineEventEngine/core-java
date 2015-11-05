@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util.testutil;
+package org.spine3.testdata;
 
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.test.project.event.ProjectCreated;
@@ -26,7 +26,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.AggregateIdFactory.newProjectId;
 
 /**
  * The utility class for creating EventStoreRecords for tests.

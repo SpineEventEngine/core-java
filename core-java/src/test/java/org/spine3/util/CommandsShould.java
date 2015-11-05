@@ -19,16 +19,13 @@
  */
 package org.spine3.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.MessageFields;
-import org.spine3.util.testutil.CommandRequestFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,32 +36,34 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.spine3.testdata.CommandRequestFactory.createProject;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Identifiers.timestampToString;
-import static org.spine3.util.Lists.filter;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Mikhail Melnik
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
+"DuplicateStringLiteralInspection"/*ok in this case*/})
 public class CommandsShould {
 
     @Test
     public void generate() {
-        UserId userId = Users.createId("commands-should-test");
 
-        CommandId result = generateId(userId);
+        final UserId userId = newUserId("commands-should-test");
 
-        //noinspection DuplicateStringLiteralInspection
+        final CommandId result = generateId(userId);
+
         assertThat(result, allOf(
                 hasProperty("actor", equalTo(userId)),
                 hasProperty("timestamp")));
     }
 
+    @SuppressWarnings("ConstantConditions"/*ok in this case*/)
     @Test(expected = NullPointerException.class)
     public void fail_on_null_parameter() {
-        //noinspection ConstantConditions
         generateId(null);
     }
 
@@ -76,29 +75,13 @@ public class CommandsShould {
     }
 
     @Test
-    public void return_correct_were_after_predicate() throws InterruptedException {
-        final Timestamp timestamp = TimeUtil.getCurrentTime();
-        final CommandRequest commandRequest = CommandRequestFactory.create();
-        final CommandRequest commandRequestAfter = CommandRequestFactory.createAt(TimeUtil.add(timestamp, Durations.minutes(3)));
-
-        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
-                .add(commandRequest)
-                .add(commandRequestAfter)
-                .build();
-
-        final List<CommandRequest> filteredList = filter(commandList, Commands.wereAfter(timestamp));
-
-        assertEquals(1, filteredList.size());
-        assertEquals(commandRequestAfter, filteredList.get(0));
-    }
-
-    @Test
     public void sort() {
+
         final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
 
-        final CommandRequest commandRequest1 = CommandRequestFactory.createAt(when);
-        final CommandRequest commandRequest2 = CommandRequestFactory.create();
-        final CommandRequest commandRequest3 = CommandRequestFactory.create();
+        final CommandRequest commandRequest1 = createProject(when);
+        final CommandRequest commandRequest2 = createProject();
+        final CommandRequest commandRequest3 = createProject();
 
         final Collection<CommandRequest> sortedList = new ArrayList<>();
         sortedList.add(commandRequest1);
@@ -117,32 +100,12 @@ public class CommandsShould {
         assertEquals(sortedList, unSortedList);
     }
 
-    @SuppressWarnings("MagicNumber")
-    @Test
-    public void return_correct_were_within_period_predicate() throws InterruptedException {
-        final CommandRequest req1 = CommandRequestFactory.create();
-        final Timestamp from = TimeUtil.getCurrentTime();
-        final Timestamp ofSecondRequest = TimeUtil.add(from, Durations.ofSeconds(1));
-        final CommandRequest req2 = CommandRequestFactory.createAt(ofSecondRequest);
-        final Timestamp to = TimeUtil.add(ofSecondRequest, Durations.ofSeconds(1));
-
-        final List<CommandRequest> commandList = ImmutableList.<CommandRequest>builder()
-                .add(req1)
-                .add(req2)
-                .build();
-
-        final List<CommandRequest> filteredList = filter(commandList, Commands.wereWithinPeriod(from, to));
-
-        assertEquals(1, filteredList.size());
-        assertEquals(req2, filteredList.get(0));
-    }
-
     @Test
     public void convert_to_string_command_id_message() {
 
         final String userIdString = "user123";
         final Timestamp currentTime = getCurrentTime();
-        CommandId id = generateId(userIdString, currentTime);
+        final CommandId id = generateId(userIdString, currentTime);
 
         /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
            Use the restored object for equality check with the original object.
