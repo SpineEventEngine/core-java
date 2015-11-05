@@ -28,8 +28,8 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.AggregateIdFactory.newProjectId;
-import static org.spine3.testdata.ContextFactory.newEventContext;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
 
 /**
  * The utility class which is used for creating EventRecords for tests.
@@ -37,34 +37,34 @@ import static org.spine3.testdata.ContextFactory.newEventContext;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class EventRecordFactory {
+public class TestEventRecordFactory {
 
-    private EventRecordFactory() {}
+    private TestEventRecordFactory() {}
 
 
     public static EventRecord projectCreated() {
-        return projectCreated(newProjectId(), newEventContext());
+        return projectCreated(newProjectId(), createEventContext());
     }
 
     public static EventRecord taskAdded() {
-        return taskAdded(newProjectId(), newEventContext());
+        return taskAdded(newProjectId(), createEventContext());
     }
 
     public static EventRecord projectStarted() {
-        return projectStarted(newProjectId(), newEventContext());
+        return projectStarted(newProjectId(), createEventContext());
     }
 
 
     public static EventRecord projectCreated(ProjectId projectId) {
-        return projectCreated(projectId, newEventContext());
+        return projectCreated(projectId, createEventContext());
     }
 
     public static EventRecord taskAdded(ProjectId projectId) {
-        return taskAdded(projectId, newEventContext());
+        return taskAdded(projectId, createEventContext());
     }
 
     public static EventRecord projectStarted(ProjectId projectId) {
-        return projectStarted(projectId, newEventContext());
+        return projectStarted(projectId, createEventContext());
     }
 
 

@@ -36,16 +36,16 @@ import org.spine3.util.Events;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class ContextFactory {
+public class TestContextFactory {
 
-    private ContextFactory() {
+    private TestContextFactory() {
     }
 
-    public static CommandContext getCommandContext(UserId userId) {
-        return getCommandContext(userId, TimeUtil.getCurrentTime());
+    public static CommandContext createCommandContext(UserId userId) {
+        return createCommandContext(userId, TimeUtil.getCurrentTime());
     }
 
-    public static CommandContext getCommandContext(UserId userId, Timestamp when) {
+    public static CommandContext createCommandContext(UserId userId, Timestamp when) {
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(when)
@@ -56,7 +56,7 @@ public class ContextFactory {
                 .build();
     }
 
-    public static EventContext newEventContext() {
+    public static EventContext createEventContext() {
 
         final Timestamp now = TimeUtil.getCurrentTime();
         final CommandId commandId = CommandId.newBuilder()
@@ -67,11 +67,11 @@ public class ContextFactory {
 
         return EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(AggregateIdFactory.newProjectId()))
+                .setAggregateId(Messages.toAny(TestAggregateIdFactory.newProjectId()))
                 .build();
     }
 
-    public static EventContext getEventContext(UserId userId, Message aggregateId) {
+    public static EventContext createEventContext(UserId userId, Message aggregateId) {
 
         final CommandId commandId = Commands.generateId(userId);
         final EventId eventId = Events.generateId(commandId);

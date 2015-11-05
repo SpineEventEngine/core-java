@@ -34,10 +34,11 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
 
-@SuppressWarnings("UtilityClass")
-public class AggregateStorageRecordFactory {
 
-    private AggregateStorageRecordFactory() {}
+@SuppressWarnings("UtilityClass")
+public class TestAggregateStorageRecordFactory {
+
+    private TestAggregateStorageRecordFactory() {}
 
     public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId) {
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
@@ -72,9 +73,9 @@ public class AggregateStorageRecordFactory {
         final Timestamp timestamp2 = add(timestamp1, delta);
         final Timestamp timestamp3 = add(timestamp2, delta);
 
-        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, EventRecordFactory.projectCreated(id));
-        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, EventRecordFactory.taskAdded(id));
-        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, EventRecordFactory.projectStarted(id));
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, TestEventRecordFactory.projectCreated(id));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, TestEventRecordFactory.taskAdded(id));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, TestEventRecordFactory.projectStarted(id));
 
         return newArrayList(record1, record2, record3);
     }

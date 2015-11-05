@@ -28,11 +28,11 @@ import org.spine3.test.project.ProjectId;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class AggregateIdFactory {
+public class TestAggregateIdFactory {
 
     public static final String DUMMY_PROJECT_ID = "dummy_project_id";
 
-    private AggregateIdFactory() {
+    private TestAggregateIdFactory() {
     }
 
     /**
@@ -45,12 +45,12 @@ public class AggregateIdFactory {
     }
 
     /**
-     * Generates new ProjectId.
+     * Generates a new ProjectId.
      *
      * @param id the project id
      * @return ProjectId instance
      */
-    public static ProjectId newProjectId(String id) {
+    public static ProjectId createProjectId(String id) {
         return ProjectId.newBuilder().setId(id).build();
     }
 }

@@ -38,7 +38,7 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.AggregateIdFactory;
+import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.util.Users;
 
 import javax.annotation.Nonnull;
@@ -51,7 +51,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.CommandRequestFactory.*;
+import static org.spine3.testdata.TestCommandRequestFactory.*;
 
 /**
  * @author Alexander Litus
@@ -60,7 +60,7 @@ import static org.spine3.testdata.CommandRequestFactory.*;
 public class EngineShould {
 
     private final UserId userId = Users.newUserId("test_user");
-    private final ProjectId projectId = AggregateIdFactory.newProjectId("test_project_id");
+    private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
     private final EventSubscriber eventSubscriber = new EventSubscriber();
 
     private boolean handlersRegistered = false;

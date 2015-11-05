@@ -32,7 +32,7 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.util.Users.newUserId;
 
 /**
@@ -41,9 +41,9 @@ import static org.spine3.util.Users.newUserId;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class CommandRequestFactory {
+public class TestCommandRequestFactory {
 
-    private CommandRequestFactory() {
+    private TestCommandRequestFactory() {
     }
 
     public static CommandRequest createProject() {
@@ -75,7 +75,7 @@ public class CommandRequestFactory {
 
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
 
-        final CommandContext context = ContextFactory.getCommandContext(userId, when);
+        final CommandContext context = TestContextFactory.createCommandContext(userId, when);
         final CommandRequest.Builder result = CommandRequest.newBuilder()
                 .setContext(context)
                 .setCommand(toAny(command));

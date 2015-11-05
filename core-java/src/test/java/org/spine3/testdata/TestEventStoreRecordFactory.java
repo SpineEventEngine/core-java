@@ -26,7 +26,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 /**
  * The utility class for creating EventStoreRecords for tests.
@@ -34,9 +34,9 @@ import static org.spine3.testdata.AggregateIdFactory.newProjectId;
  * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
-public class EventStoreRecordFactory {
+public class TestEventStoreRecordFactory {
 
-    private EventStoreRecordFactory() {}
+    private TestEventStoreRecordFactory() {}
 
     public static EventStoreRecord projectCreated() {
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(newProjectId()).build();

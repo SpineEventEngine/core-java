@@ -39,7 +39,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.AggregateIdFactory;
+import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.util.Classes;
 
 import javax.annotation.Nonnull;
@@ -58,8 +58,8 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testdata.ContextFactory.getEventContext;
-import static org.spine3.testdata.EventRecordFactory.*;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 import static org.spine3.util.Tests.currentTimeSeconds;
 import static org.spine3.util.Users.newUserId;
@@ -70,7 +70,7 @@ import static org.spine3.util.Users.newUserId;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private final ProjectId projectId = AggregateIdFactory.newProjectId();
+    private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
     private final ProjectAggregate aggregate = new ProjectAggregate(projectId);
     private final CreateProject createProject = CreateProject.newBuilder().setProjectId(projectId).build();
     private final AddTask addTask = AddTask.newBuilder().setProjectId(projectId).build();
@@ -83,7 +83,7 @@ public class AggregateShould {
 
         final UserId userId = newUserId("user_id_test");
         commandContext = createContext(userId, ZoneOffsets.UTC);
-        eventContext = getEventContext(userId, projectId);
+        eventContext = createEventContext(userId, projectId);
     }
 
     @Test

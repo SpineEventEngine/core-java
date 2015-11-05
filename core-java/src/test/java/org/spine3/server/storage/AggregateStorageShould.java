@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.AggregateIdFactory;
+import org.spine3.testdata.TestAggregateIdFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -41,14 +41,14 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.server.storage.EventStorageShould.assertEventRecordListsAreEqual;
-import static org.spine3.testdata.AggregateStorageRecordFactory.getSequentialRecords;
-import static org.spine3.testdata.AggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testdata.EventRecordFactory.projectCreated;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.getSequentialRecords;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
+import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
 public abstract class AggregateStorageShould {
 
-    private final ProjectId aggregateId = AggregateIdFactory.newProjectId();
+    private final ProjectId aggregateId = TestAggregateIdFactory.newProjectId();
 
     private final AggregateStorage<ProjectId> storage;
 
