@@ -32,7 +32,7 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.util.Users.newUserId;
 
 /**
@@ -43,6 +43,9 @@ import static org.spine3.util.Users.newUserId;
 @SuppressWarnings("UtilityClass")
 public class TestCommandRequestFactory {
 
+    private static final String STUB_USER_ID = "stub_user_id";
+    private static final String STUB_PROJECT_ID = "stubProjectId";
+
     private TestCommandRequestFactory() {
     }
 
@@ -52,7 +55,7 @@ public class TestCommandRequestFactory {
 
     public static CommandRequest createProject(Timestamp when) {
 
-        return createProject(newUserId("projectCreated"), newProjectId(), when);
+        return createProject(newUserId(STUB_USER_ID), createProjectId(STUB_PROJECT_ID), when);
     }
 
     public static CommandRequest createProject(UserId userId, ProjectId projectId, Timestamp when) {

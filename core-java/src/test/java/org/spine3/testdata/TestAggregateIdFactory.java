@@ -30,18 +30,7 @@ import org.spine3.test.project.ProjectId;
 @SuppressWarnings("UtilityClass")
 public class TestAggregateIdFactory {
 
-    public static final String DUMMY_PROJECT_ID = "dummy_project_id";
-
     private TestAggregateIdFactory() {
-    }
-
-    /**
-     * Generates the same ProjectId for each request.
-     *
-     * @return ProjectId instance
-     */
-    public static ProjectId newProjectId() {
-        return ProjectId.newBuilder().setId(DUMMY_PROJECT_ID).build();
     }
 
     /**

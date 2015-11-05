@@ -29,6 +29,8 @@ import org.spine3.time.ZoneOffset;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+
 
 /**
  * Creates Context for tests.
@@ -37,6 +39,8 @@ import org.spine3.util.Events;
  */
 @SuppressWarnings("UtilityClass")
 public class TestContextFactory {
+
+    private static final String STUB_PROJECT_ID = "dummy_project_id_123";
 
     private TestContextFactory() {
     }
@@ -67,7 +71,7 @@ public class TestContextFactory {
 
         return EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(TestAggregateIdFactory.newProjectId()))
+                .setAggregateId(Messages.toAny(createProjectId(STUB_PROJECT_ID)))
                 .build();
     }
 

@@ -30,7 +30,7 @@ import org.spine3.testdata.TestAggregateIdFactory;
 import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
         "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection"})
@@ -95,7 +95,7 @@ public abstract class EntityStorageShould {
 
     public static class TestEntity extends Entity<String, ProjectId> {
 
-        private static final ProjectId DEFAULT_STATE = newProjectId();
+        private static final ProjectId DEFAULT_STATE = createProjectId("defaultProjectId");
 
         protected TestEntity(String id) {
             super(id);
