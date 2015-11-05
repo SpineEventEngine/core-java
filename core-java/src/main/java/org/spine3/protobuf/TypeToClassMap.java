@@ -58,7 +58,8 @@ public class TypeToClassMap {
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PROPERTIES_FILES_PATH = "protos/properties/proto_to_java_class.properties";
+    private static final String PRODUCTION_PROPERTIES_FILE_PATH = "protos/properties/proto_to_java_class_production.properties";
+    private static final String TEST_PROPERTIES_FILE_PATH = "protos/properties/proto_to_java_class_test.properties";
 
     //TODO:2015-09-17:alexander.yevsyukov:  @mikhail.mikhaylov: Have immutable instance here.
     // Transform static methods into inner Builder class
@@ -66,7 +67,8 @@ public class TypeToClassMap {
     private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
     static {
-        loadClasses();
+        loadClasses(PRODUCTION_PROPERTIES_FILE_PATH);
+        loadClasses(TEST_PROPERTIES_FILE_PATH);
     }
 
     /**
@@ -86,7 +88,8 @@ public class TypeToClassMap {
      */
     public static ClassName get(TypeName protoType) {
         if (!namesMap.containsKey(protoType)) {
-            loadClasses();
+            loadClasses(PRODUCTION_PROPERTIES_FILE_PATH);
+            loadClasses(TEST_PROPERTIES_FILE_PATH);
         }
         if (!namesMap.containsKey(protoType)) {
             final ClassName className = searchAsSubclass(protoType);
@@ -153,12 +156,12 @@ public class TypeToClassMap {
         return className;
     }
 
-    private static void loadClasses() {
+    private static void loadClasses(String propertiesFilePath) {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         Enumeration<URL> resources = null;
         try {
-            resources = classLoader.getResources(PROPERTIES_FILES_PATH);
+            resources = classLoader.getResources(propertiesFilePath);
         } catch (IOException ignored) {
         }
 

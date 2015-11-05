@@ -19,20 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.project;
+package spine.test.project.command;
 
-option java_package="org.spine3.test.project";
-option java_multiple_files = true;
-
+import "spine/test/project/project.proto";
 import "spine/test/project/task.proto";
 
-message Project {
+option java_package="org.spine3.test.project.command";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
+
+message CreateProject {
     ProjectId project_id = 1;
-    repeated Task task = 2;
-    string status = 3;
-    int32 tasks_count = 4;
 }
 
-message ProjectId {
-    string id = 1;
+message AddTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
+message StartProject {
+    ProjectId project_id = 1;
 }

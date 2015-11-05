@@ -19,24 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.project.command;
+package spine.test.project.event;
 
 import "spine/test/project/project.proto";
 import "spine/test/project/task.proto";
 
-option java_package="org.spine3.test.project.command";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.test.project.event";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-message CreateProject {
+message ProjectCreated {
     ProjectId project_id = 1;
 }
 
-message AddTask {
+message TaskAdded {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message StartProject {
+message ProjectStarted {
     ProjectId project_id = 1;
 }
