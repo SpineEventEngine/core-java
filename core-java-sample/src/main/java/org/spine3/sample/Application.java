@@ -41,12 +41,12 @@ import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
- * Framework usage sample.
+ * A sample application showing basic usage of the framework.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class Sample {
+public class Application {
 
     private final StorageFactory storageFactory;
     private final EventLogger eventLogger = new EventLogger();
@@ -55,21 +55,21 @@ public class Sample {
      * Creates a new sample with the specified storage factory.
      * @param storageFactory factory used to create and set up storages.
      */
-    public Sample(StorageFactory storageFactory) {
+    public Application(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
     }
 
     /**
      * The entry point of the sample.
-     * To change the storage implementation, change {@link Sample#getStorageFactory()} method implementation.
+     * To change the storage implementation, change {@link Application#getStorageFactory()} method implementation.
      */
     public static void main(String[] args) {
 
         final StorageFactory factory = getStorageFactory();
 
-        Sample sample = new Sample(factory);
+        Application app = new Application(factory);
 
-        sample.execute();
+        app.execute();
     }
 
     /**
@@ -200,6 +200,6 @@ public class Sample {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Sample.class);
+        private final Logger value = LoggerFactory.getLogger(Application.class);
     }
 }
