@@ -24,7 +24,7 @@ project.ext {
 
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
     GENERATED_RESOURCES = "/generated/main/resources/"
-    PROPERTIES_FILE_PATH = "${project.GENERATED_RESOURCES}protos/properties/"
+    PROPERTIES_FILE_PATH = "${project.GENERATED_RESOURCES}/"
     PROPERTIES_FILE_NAME = "proto_to_java_class.properties"
 }
 
