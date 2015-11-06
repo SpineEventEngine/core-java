@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.ClassPath;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
@@ -36,23 +37,26 @@ import java.net.URL;
 import java.util.*;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.reflect.ClassPath.ClassInfo;
 
 /**
  * Utility class for reading real proto class names from properties file.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
+ * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
 public class TypeToClassMap {
 
-    private static final char CLASS_PACKAGE_DELIMITER = '.';
     private static final Logger LOG = LoggerFactory.getLogger(TypeToClassMap.class);
 
-    private static final List<URL> readResourcesUrls = newLinkedList();
+    private static final char CLASS_PACKAGE_DELIMITER = '.';
 
-    private TypeToClassMap() {
-    }
+    private static final String GOOGLE_PROTOBUF_PACKAGE = "com.google.protobuf";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // OK in this case
+    private static final String PROTOBUF_VALUE_CLASS_SUFFIX = "Value";
 
     //TODO:2015-09-09:mikhail.mikhaylov: Find a way to read it from gradle properties.
     /**
@@ -66,14 +70,19 @@ public class TypeToClassMap {
     // that would populate its internal structure and then emits it to be stored in this field.
     private static final Map<TypeName, ClassName> namesMap = Maps.newHashMap();
 
+    private static final List<URL> readResourcesUrls = newLinkedList();
+
     static {
         loadClasses();
     }
+
+    private TypeToClassMap() {}
 
     /**
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> knownTypes() {
+
         final Set<TypeName> result = namesMap.keySet();
         return ImmutableSet.copyOf(result);
     }
@@ -86,6 +95,7 @@ public class TypeToClassMap {
      * @return Java class name
      */
     public static ClassName get(TypeName protoType) {
+
         if (!namesMap.containsKey(protoType)) {
             loadClasses();
         }
@@ -97,35 +107,8 @@ public class TypeToClassMap {
         return result;
     }
 
-    private static void readPropertiesFromStream(InputStream stream) {
-        final Properties properties = new Properties();
-
-        try {
-            properties.load(stream);
-        } catch (IOException e) {
-            //NOP
-        } finally {
-            IoUtil.closeSilently(stream);
-        }
-
-        readProperties(properties);
-    }
-
-    /**
-     * Adds all data from properties file into memory. Properties file should contain proto type urls and
-     * appropriate java class names.
-     *
-     * @param properties Properties file to read params from
-     */
-    private static void readProperties(Properties properties) {
-        for (String key : properties.stringPropertyNames()) {
-            final TypeName typeName = TypeName.of(key);
-            final ClassName className = ClassName.of(properties.getProperty(key));
-            namesMap.put(typeName, className);
-        }
-    }
-
     private static ClassName searchAsSubclass(TypeName lookupTypeName) {
+
         String lookupType = lookupTypeName.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
@@ -157,29 +140,118 @@ public class TypeToClassMap {
     }
 
     private static void loadClasses() {
+
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        loadClassesFromPropertiesFile(classLoader);
+        loadDefaultProtobufClasses(classLoader);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Total classes in TypeToClassMap: " + namesMap.size());
+        }
+    }
+
+    private static void loadClassesFromPropertiesFile(ClassLoader classLoader) {
 
         Enumeration<URL> resources = null;
         try {
             resources = classLoader.getResources(PROPERTIES_FILE_PATH);
         } catch (IOException ignored) {
         }
+        if (resources == null) {
+            return;
+        }
+        while (resources.hasMoreElements()) {
+            final URL resourceUrl = resources.nextElement();
+            if (!readResourcesUrls.contains(resourceUrl)) {
+                final Properties properties = loadProperties(resourceUrl);
+                addToNamesMap(properties);
+                readResourcesUrls.add(resourceUrl);
+            }
+        }
+    }
 
-        if (resources != null) {
-            while (resources.hasMoreElements()) {
-                final URL resourceUrl = resources.nextElement();
-                if (!readResourcesUrls.contains(resourceUrl)) {
-                    try {
-                        readPropertiesFromStream(resourceUrl.openStream());
-                        readResourcesUrls.add(resourceUrl);
-                    } catch (IOException ignored) {
-                    }
-                }
+    private static Properties loadProperties(URL resourceUrl) {
+
+        final Properties properties = new Properties();
+        InputStream inputStream = null;
+        try {
+            inputStream = resourceUrl.openStream();
+            properties.load(inputStream);
+        } catch (IOException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to load properties file.", e);
+            }
+        } finally {
+            IoUtil.closeSilently(inputStream);
+        }
+        return properties;
+    }
+
+    /**
+     * Adds all data from properties file into memory. Properties file should contain proto type urls and
+     * appropriate java class names.
+     *
+     * @param properties Properties file to read params from
+     */
+    private static void addToNamesMap(Properties properties) {
+
+        for (String key : properties.stringPropertyNames()) {
+            final TypeName typeName = TypeName.of(key);
+            final ClassName className = ClassName.of(properties.getProperty(key));
+            namesMap.put(typeName, className);
+        }
+    }
+
+    private static void loadDefaultProtobufClasses(ClassLoader classLoader) {
+
+        final ClassPath classPath;
+
+        try {
+            classPath = ClassPath.from(classLoader);
+        } catch (IOException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to read protobuf classes.", e);
+            }
+            return;
+        }
+
+        final ImmutableSet<ClassPath.ClassInfo> protobufClasses = getFilteredProtobufClasses(classPath);
+
+        for (ClassInfo classInfo : protobufClasses) {
+            final TypeName typeName = getTypeNameOf(classInfo);
+            final ClassName className = ClassName.of(classInfo.load());
+            namesMap.put(typeName, className);
+        }
+    }
+
+    private static TypeName getTypeNameOf(ClassInfo classInfo) {
+
+        final String fullQualifiedName = classInfo.getName();
+        final int dotIndex = fullQualifiedName.indexOf('.');
+        // name that matches Protobuf conventions
+        final String protoClassName = fullQualifiedName.substring(dotIndex + 1);
+        return TypeName.of(protoClassName);
+    }
+
+    private static ImmutableSet<ClassPath.ClassInfo> getFilteredProtobufClasses(ClassPath classPath) {
+
+        final ImmutableSet<ClassPath.ClassInfo> infos = classPath.getTopLevelClasses(GOOGLE_PROTOBUF_PACKAGE);
+        final ImmutableSet.Builder<ClassPath.ClassInfo> result = ImmutableSet.builder();
+
+        for (ClassInfo info : infos) {
+            if (protobufClassMatches(info)) {
+                result.add(info);
             }
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Total classes in TypeToClassMap: " + namesMap.size());
-        }
+        return result.build();
+    }
+
+    private static boolean protobufClassMatches(ClassInfo info) {
+
+        final String name = info.getSimpleName();
+        final boolean isValueClass =
+                name.endsWith(PROTOBUF_VALUE_CLASS_SUFFIX) &&
+                (name.length() > PROTOBUF_VALUE_CLASS_SUFFIX.length());
+        return isValueClass || name.equals("Duration");
     }
 }

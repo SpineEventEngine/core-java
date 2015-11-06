@@ -20,6 +20,8 @@
 package org.spine3.util;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
@@ -36,30 +38,37 @@ public class MessagesShould {
     private final UserId id = newUserId("messages_test");
     private final Any any = Any.pack(id);
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
-        //noinspection ConstantConditions
         Messages.toText(null);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toJson_fail_on_null() {
-        //noinspection ConstantConditions
         Messages.toJson(null);
     }
 
     @Test
     public void convert_id_to_Any() {
         final Any test = Messages.toAny(id);
-
         assertEquals(any, test);
     }
 
     @Test
     public void convert_from_Any_to_id() {
         final UserId test = Messages.fromAny(any);
-
         assertEquals(id, test);
+    }
+
+    @Test
+    public void convert_from_Any_to_protobuf_class() {
+
+        final StringValue expected = StringValue.newBuilder().setValue("test_value").build();
+        final Any expectedAny = Any.pack(expected);
+        final Message actual = Messages.fromAny(expectedAny);
+        assertEquals(expected, actual);
     }
 
     @Test(expected = NullPointerException.class)
@@ -73,5 +82,4 @@ public class MessagesShould {
         //noinspection ConstantConditions
         Messages.fromAny(null);
     }
-
 }
