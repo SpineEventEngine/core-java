@@ -68,7 +68,7 @@ public class Client {
     public static void main(String[] args) throws InterruptedException {
 
         // Access a service running on the local machine
-        Client client = new Client(LOCALHOST, SERVER_PORT);
+        final Client client = new Client(LOCALHOST, SERVER_PORT);
 
         final List<CommandRequest> requests = Application.generateRequests();
 
