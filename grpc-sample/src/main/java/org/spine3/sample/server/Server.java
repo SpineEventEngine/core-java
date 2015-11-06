@@ -19,9 +19,8 @@
  */
 package org.spine3.sample.server;
 
-import io.grpc.ServerImpl;
+import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
-import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class Server {
      */
     public static final int SERVER_PORT = 50051;
 
-    private final ServerImpl serverImpl;
+    private final io.grpc.Server server;
     private final Application application;
 
     /**
@@ -56,7 +55,7 @@ public class Server {
      */
     public Server(int serverPort, StorageFactory storageFactory) {
 
-        this.serverImpl = buildServerImpl(serverPort);
+        this.server = buildServer(serverPort);
         this.application = new Application(storageFactory);
     }
 
@@ -64,7 +63,7 @@ public class Server {
      * The entry point of the sample.
      * To change the storage implementation, change {@link Application#getStorageFactory()} method implementation.
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         final StorageFactory storageFactory = Application.getStorageFactory();
 
@@ -75,6 +74,8 @@ public class Server {
         log().info("Server started, listening on the port " + SERVER_PORT);
 
         addShutdownHook(server);
+
+        server.awaitTermination();
     }
 
     /**
@@ -84,7 +85,7 @@ public class Server {
     public void start() throws IOException {
 
         application.setUp();
-        serverImpl.start();
+        server.start();
     }
 
     /**
@@ -93,7 +94,15 @@ public class Server {
     public void stop() {
 
         application.tearDown();
-        serverImpl.shutdown();
+        server.shutdown();
+    }
+
+    /**
+     * Waits for the server to become terminated.
+     */
+    public void awaitTermination() throws InterruptedException {
+
+        server.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {
@@ -114,12 +123,13 @@ public class Server {
 
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
-            final CommandResult reply = Engine.getInstance().process(req);
 
-            responseObserver.onValue(reply);
+            final CommandResult reply = Engine.getInstance().process(req);
+            responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
 
+        @SuppressWarnings("ReturnOfNull")
         @Override
         public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
             //TODO:2015-06-25:mikhail.melnik: implement
@@ -127,8 +137,9 @@ public class Server {
         }
     }
 
-    private static ServerImpl buildServerImpl(int serverPort) {
-        final NettyServerBuilder builder = NettyServerBuilder.forPort(serverPort);
+    private static io.grpc.Server buildServer(int serverPort) {
+
+        final ServerBuilder builder = ServerBuilder.forPort(serverPort);
         final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl());
         builder.addService(service);
         return builder.build();
