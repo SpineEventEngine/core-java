@@ -40,12 +40,12 @@ import static com.google.common.base.Throwables.propagate;
 /**
  * Abstract base for aggregate root repositories.
  *
- * @param <A> the type of the aggregated root
  * @param <I> the type of the aggregated root id
+ * @param <A> the type of the aggregated root
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // we can not have instances of AbstractRepository.
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // Repositories will extend this class defining generic types.
 public abstract class AggregateRepositoryBase<I extends Message,
                                               A extends Aggregate<I, ?>>
         extends RepositoryBase<I, A> implements AggregateRepository<I, A> {

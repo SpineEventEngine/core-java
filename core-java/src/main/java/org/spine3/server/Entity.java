@@ -50,7 +50,6 @@ public abstract class Entity<I, M extends Message> {
     }
 
     @CheckReturnValue
-    @Nonnull
     protected abstract M getDefaultState();
 
     /**
@@ -59,9 +58,9 @@ public abstract class Entity<I, M extends Message> {
      * @return the current state object or the value produced by {@link #getDefaultState()} if the state wasn't set
      */
     @CheckReturnValue
-    @Nonnull
     public M getState() {
-        return (state == null) ? getDefaultState() : state;
+        final M result = (state == null) ? getDefaultState() : state;
+        return result;
     }
 
     /**
@@ -90,9 +89,9 @@ public abstract class Entity<I, M extends Message> {
      */
     protected void setState(M state, int version, Timestamp whenLastModified) {
         validate(state);
-        this.state = checkNotNull(state, "state mustn't be null");
+        this.state = checkNotNull(state, "state");
         this.version = version;
-        this.whenModified = checkNotNull(whenLastModified, "whenLastModified mustn't be null");
+        this.whenModified = checkNotNull(whenLastModified, "whenLastModified");
     }
 
     /**

@@ -49,8 +49,6 @@ import static com.google.common.reflect.ClassPath.ClassInfo;
 @SuppressWarnings("UtilityClass")
 public class TypeToClassMap {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TypeToClassMap.class);
-
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "com.google.protobuf";
@@ -144,8 +142,8 @@ public class TypeToClassMap {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         loadClassesFromPropertiesFile(classLoader);
         loadDefaultProtobufClasses(classLoader);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Total classes in TypeToClassMap: " + namesMap.size());
+        if (log().isDebugEnabled()) {
+            log().debug("Total classes in TypeToClassMap: " + namesMap.size());
         }
     }
 
@@ -177,8 +175,8 @@ public class TypeToClassMap {
             inputStream = resourceUrl.openStream();
             properties.load(inputStream);
         } catch (IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Failed to load properties file.", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Failed to load properties file.", e);
             }
         } finally {
             IoUtil.closeSilently(inputStream);
@@ -208,8 +206,8 @@ public class TypeToClassMap {
         try {
             classPath = ClassPath.from(classLoader);
         } catch (IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Failed to read protobuf classes.", e);
+            if (log().isWarnEnabled()) {
+                log().warn("Failed to read protobuf classes.", e);
             }
             return;
         }
@@ -254,4 +252,16 @@ public class TypeToClassMap {
                 (name.length() > PROTOBUF_VALUE_CLASS_SUFFIX.length());
         return isValueClass || name.equals("Duration");
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(TypeToClassMap.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }

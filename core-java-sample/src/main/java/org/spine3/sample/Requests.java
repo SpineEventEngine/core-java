@@ -34,12 +34,11 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Utility class for generating sample command requests.
- * For usage in samples only.
  *
  * @author Mikhail Melnik
  */
 @SuppressWarnings("UtilityClass")
-public class Requests {
+class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
 

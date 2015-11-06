@@ -36,8 +36,7 @@ import javax.annotation.Nonnull;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic"})
-// Use command and event classes passed as parameters instead of SomethingOrBuilder
+@SuppressWarnings("TypeMayBeWeakened" /* Use command and event classes for parameters as messages instead of SomethingOrBuilder */)
 public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     public OrderAggregate(OrderId id) {
