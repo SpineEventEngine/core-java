@@ -21,11 +21,7 @@ allprojects {
 project.ext {
     PROTOBUF_VERSION = '3.0.0-beta-1'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
-    GENERATED_RESOURCES = "/generated/main/resources/"
-    PROPERTIES_FILE_PATH = "${project.GENERATED_RESOURCES}/"
-    PROPERTIES_FILE_NAME = "proto_to_java_class.properties"
 }
 
 def repositoryUserName = null
@@ -37,10 +33,6 @@ if (credentialsFile.exists()) {
 
     repositoryUserName = properties.getProperty("user.name")
     repositoryUserPassword = properties.getProperty("user.password")
-}
-
-String replaceFileSeparatorWithDot(String filePath) {
-    return filePath.replace((char) File.separatorChar, (char) '.');
 }
 
 //todo:2015-09-10:mikhail.mikhaylov: Take care of duplicated code: use plugin here.
@@ -124,9 +116,9 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                groupId "${group}"
-                artifactId "${project.name}"
-                version "${project.version}"
+                groupId = "${group}"
+                artifactId = "${project.name}"
+                version = "${project.version}"
 
                 from components.java
                 artifact sourceJar {
