@@ -44,9 +44,9 @@ public class UsersShould {
         assertEquals(expected, userId);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_null_argument_passed_to_create() {
-        //noinspection ConstantConditions
         newUserId(null);
     }
 
