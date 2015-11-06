@@ -67,7 +67,7 @@ public class Application {
 
         final StorageFactory factory = getStorageFactory();
 
-        Application app = new Application(factory);
+        final Application app = new Application(factory);
 
         app.execute();
     }
