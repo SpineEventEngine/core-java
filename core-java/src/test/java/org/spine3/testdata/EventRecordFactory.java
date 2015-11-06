@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util.testutil;
+package org.spine3.testdata;
 
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
@@ -28,8 +28,8 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.testutil.AggregateIdFactory.newProjectId;
-import static org.spine3.util.testutil.ContextFactory.newEventContext;
+import static org.spine3.testdata.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.ContextFactory.newEventContext;
 
 /**
  * The utility class which is used for creating EventRecords for tests.

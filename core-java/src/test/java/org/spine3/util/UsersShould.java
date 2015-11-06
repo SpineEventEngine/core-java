@@ -25,6 +25,7 @@ import org.spine3.base.UserId;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Mikhail Melnik
@@ -34,18 +35,19 @@ public class UsersShould {
 
     @Test
     public void create_id_by_string() {
-        final String testIdString = "12345";
 
-        UserId userId = Users.createId(testIdString);
+        final String testIdString = "12345";
+        final UserId userId = newUserId(testIdString);
 
         final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+
         assertEquals(expected, userId);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_null_argument_passed_to_create() {
-        //noinspection ConstantConditions
-        Users.createId(null);
+        newUserId(null);
     }
 
     @Test

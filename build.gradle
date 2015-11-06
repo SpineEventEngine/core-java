@@ -101,8 +101,12 @@ subprojects {
             proto.srcDirs = ["src/main/proto"]
             //TODO:2015-08-30:alexander.yevsyukov: Why don't we have the $projectDir prefix in the 2nd item?
             java.srcDirs = ["$projectDir/generated/main/java", "src/main/java"]
-
             resources.srcDirs = ["generated/main/resources"]
+        }
+        test {
+            proto.srcDirs = ["src/test/proto"]
+            java.srcDirs = ["$projectDir/generated/test/java", "src/test/java"]
+            resources.srcDirs = ["generated/test/resources"]
         }
     }
 

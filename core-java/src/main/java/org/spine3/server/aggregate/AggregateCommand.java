@@ -65,13 +65,13 @@ public class AggregateCommand extends AbstractCommand {
      * @return value of the id
      */
     public static AggregateId getAggregateId(Message command) {
-        String fieldName = MessageFields.getFieldName(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+        final String fieldName = MessageFields.getFieldName(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
         if (!fieldName.endsWith(Identifiers.ID_PROPERTY_SUFFIX)) {
             throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
         }
 
         try {
-            Message value = (Message) MessageFields.getFieldValue(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+            final Message value = (Message) MessageFields.getFieldValue(command, Identifiers.AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
             return AggregateId.of(value);
         } catch (RuntimeException e) {
             throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);

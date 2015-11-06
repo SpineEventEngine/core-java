@@ -116,7 +116,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
 
-        MethodMap handlers = new MethodMap(object.getClass(), isCommandHandlerPredicate);
+        final MethodMap handlers = new MethodMap(object.getClass(), isCommandHandlerPredicate);
 
         checkModifiers(handlers.values());
 
@@ -128,8 +128,8 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
 
         // If the passed object is MultiHandler add its methods too.
         if (object instanceof MultiHandler) {
-            MultiHandler multiHandler = (MultiHandler) object;
-            Map<CommandClass, CommandHandlerMethod> map = createMap(multiHandler);
+            final MultiHandler multiHandler = (MultiHandler) object;
+            final Map<CommandClass, CommandHandlerMethod> map = createMap(multiHandler);
 
             checkModifiers(toMethods(map.values()));
 
@@ -141,7 +141,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
 
     private static Iterable<Method> toMethods(Iterable<CommandHandlerMethod> handlerMethods) {
         return Iterables.transform(handlerMethods, new Function<CommandHandlerMethod, Method>() {
-            @Nullable
+            @Nullable // return null because an exception won't be propagated in this case
             @Override
             public Method apply(@Nullable CommandHandlerMethod eventHandlerMethod) {
                 if (eventHandlerMethod == null) {
@@ -163,7 +163,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> createMap(MultiHandler obj) {
-        Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
 
@@ -187,10 +187,10 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     private static Map<CommandClass, CommandHandlerMethod> createMap(Object target,
                                                                      Method method,
                                                                      Iterable<Class<? extends Message>> classes) {
-        ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         for (Class<? extends Message> messageClass : classes) {
-            CommandClass key = CommandClass.of(messageClass);
-            CommandHandlerMethod value = new CommandHandlerMethod(target, method);
+            final CommandClass key = CommandClass.of(messageClass);
+            final CommandHandlerMethod value = new CommandHandlerMethod(target, method);
             builder.put(key, value);
         }
         return builder.build();
@@ -205,7 +205,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
-            boolean isPublic = Modifier.isPublic(method.getModifiers());
+            final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
                 log().warn(String.format("Command handler %s must be declared 'public'.",
                         Methods.getFullMethodName(method)));

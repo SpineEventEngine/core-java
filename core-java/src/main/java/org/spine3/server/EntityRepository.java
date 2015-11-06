@@ -27,7 +27,6 @@ import org.spine3.server.storage.EntityStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -51,7 +50,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     @Override
     public void store(E obj) {
         final M state = obj.getState();
-        checkArgument(state != null, "Entity does not have state.");
         final EntityStorage<I, M> storage = checkStorage();
         storage.write(obj.getId(), state);
     }
@@ -59,11 +57,11 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     @Nullable
     @Override
     public E load(I id) {
-        EntityStorage<I, M> storage = checkStorage();
+        final EntityStorage<I, M> storage = checkStorage();
 
-        M entityState = storage.read(id);
+        final M entityState = storage.read(id);
         if (entityState != null) {
-            E result = create(id);
+            final E result = create(id);
 
             //TODO:2015-09-28:alexander.yevsyukov: What do we pass for version and timestamp?
             // Presumably EntityStorage should store these two fields and set it here.
@@ -75,10 +73,12 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return null;
     }
 
+
     @Nonnull
     private EntityStorage<I, M> checkStorage() {
-        EntityStorage<I, M> storage = getStorage();
+        final EntityStorage<I, M> storage = getStorage();
         checkState(storage != null, "Storage not assigned");
+        // noinspection ConstantConditions
         return storage;
     }
 
@@ -89,7 +89,7 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
      * @throws ClassCastException if the object is not of the required class
      */
     protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"}) EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
+        @SuppressWarnings({"unused", "unchecked"}) final EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
     }
 
 }

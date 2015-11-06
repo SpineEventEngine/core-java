@@ -47,8 +47,8 @@ public class Timestamps {
      * @return timestamp of the moment a minute ago from now.
      */
     public static Timestamp minuteAgo() {
-        Duration minute = TimeUtil.createDurationFromMillis(MICROS_PER_SECOND * SECONDS_PER_MINUTE * -1);
-        Timestamp result = TimeUtil.add(TimeUtil.getCurrentTime(), minute);
+        final Duration minute = TimeUtil.createDurationFromMillis(MICROS_PER_SECOND * SECONDS_PER_MINUTE * -1);
+        final Timestamp result = TimeUtil.add(TimeUtil.getCurrentTime(), minute);
         return result;
     }
 

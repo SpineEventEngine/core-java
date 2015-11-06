@@ -32,8 +32,8 @@ import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.testdata.EventStoreRecordFactory.projectCreated;
 import static org.spine3.util.Events.toEventRecord;
-import static org.spine3.util.testutil.EventStoreRecordFactory.projectCreated;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.

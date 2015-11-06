@@ -63,7 +63,7 @@ public class Methods {
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /** we always expect first param as {@link Message} */
+        @SuppressWarnings("unchecked") final /** we always expect first param as {@link Message} */
                 Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
@@ -77,14 +77,14 @@ public class Methods {
      * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
      */
     public static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass, Predicate<Method> filter) {
-        Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
+        final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
         for (Method method : declaringClass.getDeclaredMethods()) {
             if (filter.apply(method)) {
 
-                Class<? extends Message> messageClass = getFirstParamType(method);
+                final Class<? extends Message> messageClass = getFirstParamType(method);
 
                 if (tempMap.containsKey(messageClass)) {
-                    Method alreadyPresent = tempMap.get(messageClass);
+                    final Method alreadyPresent = tempMap.get(messageClass);
                     throw new DuplicateHandlerMethodException(
                             declaringClass,
                             messageClass,
@@ -94,7 +94,7 @@ public class Methods {
                 tempMap.put(messageClass, method);
             }
         }
-        ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
         builder.putAll(tempMap);
         return builder.build();
     }

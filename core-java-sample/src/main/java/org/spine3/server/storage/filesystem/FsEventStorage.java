@@ -101,7 +101,7 @@ class FsEventStorage extends EventStorage {
                 return false;
             }
 
-            boolean hasNext;
+            final boolean hasNext;
             try {
                 final int availableBytesCount = getInputStream().available();
                 hasNext = availableBytesCount > 0;
@@ -111,15 +111,14 @@ class FsEventStorage extends EventStorage {
             return hasNext;
         }
 
-        @SuppressWarnings({"ReturnOfNull", "IteratorNextCanNotThrowNoSuchElementException"})
         @Override
         public EventRecord next() {
 
             checkFileExists(file, "event storage");
             checkHasNextBytes();
 
-            EventStoreRecord storeRecord = parseEventRecord();
-            EventRecord result = toEventRecord(storeRecord);
+            final EventStoreRecord storeRecord = parseEventRecord();
+            final EventRecord result = toEventRecord(storeRecord);
 
             if (!hasNext()) {
                 releaseResources();
@@ -131,7 +130,7 @@ class FsEventStorage extends EventStorage {
         }
 
         private EventStoreRecord parseEventRecord() {
-            EventStoreRecord event;
+            final EventStoreRecord event;
             try {
                 event = EventStoreRecord.parseDelimitedFrom(getInputStream());
             } catch (IOException e) {

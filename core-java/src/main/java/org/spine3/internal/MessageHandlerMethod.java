@@ -146,7 +146,7 @@ public abstract class MessageHandlerMethod<T, C> {
     protected <R> R invoke(Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked") final
             R result = (R) method.invoke(target, message);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException e) {

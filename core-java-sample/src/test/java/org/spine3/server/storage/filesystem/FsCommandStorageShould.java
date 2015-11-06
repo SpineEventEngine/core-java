@@ -26,21 +26,22 @@ import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
-import org.spine3.util.testutil.CommandRequestFactory;
+
+import static org.spine3.testdata.CommandRequestFactory.createProject;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ConstantConditions"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class FsCommandStorageShould {
 
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsCommandStorageShould.class);
 
     private static final FsCommandStorage STORAGE = (FsCommandStorage) FACTORY.createCommandStorage();
 
-    private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();;
+    private static final ProjectId ID = ProjectId.newBuilder().setId("project_id").build();
 
 
     @After
@@ -50,12 +51,13 @@ public class FsCommandStorageShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
+        //noinspection ConstantConditions
         STORAGE.write(null);
     }
 
     @Test
     public void save_command() {
-        final CommandRequest commandRequest = CommandRequestFactory.create();
+        final CommandRequest commandRequest = createProject();
         STORAGE.store(AggregateId.of(ID), commandRequest);
     }
 }

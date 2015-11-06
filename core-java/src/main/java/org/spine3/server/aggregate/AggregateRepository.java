@@ -53,7 +53,7 @@ public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repos
 
     /**
      * Processes the command by dispatching it to a method of an aggregate.
-     * <p/>
+     * <p>
      * For more details on writing aggregate commands read
      * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
      *

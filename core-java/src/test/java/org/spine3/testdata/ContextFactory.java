@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -46,7 +46,7 @@ public class ContextFactory {
     }
 
     public static CommandContext getCommandContext(UserId userId, Timestamp when) {
-        CommandId commandId = CommandId.newBuilder()
+        final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(when)
                 .build();

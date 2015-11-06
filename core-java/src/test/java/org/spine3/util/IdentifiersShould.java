@@ -37,7 +37,7 @@ import static org.spine3.util.Identifiers.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
@@ -81,7 +81,7 @@ public class IdentifiersShould {
 
         IdConverterRegistry.getInstance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
 
-        ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
+        final ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
         final String result = idToString(id);
 
         assertEquals(TEST_ID, result);

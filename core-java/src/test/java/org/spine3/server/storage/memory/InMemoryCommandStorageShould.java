@@ -24,8 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.CommandStoreRecord;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
-        "DuplicateStringLiteralInspection", "ConstantConditions"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryCommandStorageShould {
 
     private InMemoryCommandStorage storage;
@@ -35,6 +34,7 @@ public class InMemoryCommandStorageShould {
         storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
         storage.write(null);

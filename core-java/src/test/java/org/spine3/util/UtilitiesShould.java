@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import org.junit.Test;
+import org.spine3.testdata.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,17 +35,37 @@ import static org.junit.Assert.fail;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
+"OverlyCoupledClass"/*ok in this case*/})
 public class UtilitiesShould {
 
     @Test
+    @SuppressWarnings("OverlyCoupledMethod"/*ok in this case*/)
     public void have_private_constructors() {
-        checkPrivateConstructor(Lists.class);
-        checkPrivateConstructor(Users.class);
+
+        // util package
+        checkPrivateConstructor(Classes.class);
         checkPrivateConstructor(Commands.class);
+        checkPrivateConstructor(Events.class);
+        checkPrivateConstructor(FileNameEscaper.class);
+        checkPrivateConstructor(Identifiers.class);
+        checkPrivateConstructor(IoUtil.class);
+        checkPrivateConstructor(Math.class);
+        checkPrivateConstructor(Methods.class);
+        checkPrivateConstructor(Tests.class);
+        checkPrivateConstructor(Users.class);
+
+        // testutil package
+        checkPrivateConstructor(AggregateIdFactory.class);
+        checkPrivateConstructor(AggregateStorageRecordFactory.class);
+        checkPrivateConstructor(CommandRequestFactory.class);
+        checkPrivateConstructor(ContextFactory.class);
+        checkPrivateConstructor(EventRecordFactory.class);
+        checkPrivateConstructor(EventStoreRecordFactory.class);
     }
 
     protected static void checkPrivateConstructor(Class<?> clazz) {
+
         Constructor<?> constructor = null;
         try {
             constructor = clazz.getDeclaredConstructor();

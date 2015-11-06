@@ -33,8 +33,7 @@ import static org.junit.Assert.assertNull;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber", "ClassWithTooManyMethods",
-        "DuplicateStringLiteralInspection", "ConstantConditions"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryEventStorageShould extends EventStorageShould {
 
     private static final InMemoryEventStorage STORAGE = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
@@ -56,6 +55,7 @@ public class InMemoryEventStorageShould extends EventStorageShould {
     }
 
     @Test
+    @SuppressWarnings("ConstantConditions")
     public void return_null_if_read_one_record_by_null_id() {
 
         final EventStoreRecord record = STORAGE.read(null);

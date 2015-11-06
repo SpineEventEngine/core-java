@@ -29,11 +29,14 @@ import org.spine3.server.storage.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
+import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
 import static org.spine3.util.Classes.getGenericParameterType;
 
 /**
@@ -47,10 +50,11 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
 
-    protected static final String PATH_DELIMITER = "/";
-
     private final List<FsEventStorage> eventStorages = newLinkedList();
 
+    /**
+     * An absolute path to the root storage directory (without the delimiter at the end)
+     */
     private final String rootDirectoryPath;
 
     /**
@@ -74,7 +78,7 @@ public class FileSystemStorageFactory implements StorageFactory {
 
     @Override
     public EventStorage createEventStorage() {
-        FsEventStorage storage = tryCreateEventStorage();
+        final FsEventStorage storage = tryCreateEventStorage();
         eventStorages.add(storage);
         return storage;
     }
@@ -88,8 +92,11 @@ public class FileSystemStorageFactory implements StorageFactory {
         return FsAggregateStorage.newInstance(rootDirectoryPath, msgDescriptorName);
     }
 
+    /**
+     * NOTE: the parameter is unused.
+     */
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass) {
+    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> unused) {
         return FsEntityStorage.newInstance(rootDirectoryPath);
     }
 
@@ -109,23 +116,21 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     private static String buildRootDirectoryPath(Class executorClass) {
-        final String tempDir = getTempDir().getAbsolutePath();
+        final String tempDir = getTempDir().toString();
         final String root = tempDir + PATH_DELIMITER + executorClass.getSimpleName();
         return root;
     }
 
     /**
-     * Creates an empty file in the default temporary-file directory using {@link java.io.File#createTempFile(String, String)},
+     * Creates an empty directory in the default temporary-file directory using {@link Files#createTempDirectory},
      * removes it and returns its parent directory.
      */
-    private static File getTempDir() {
+    private static Path getTempDir() {
         try {
-            File tmpFile = File.createTempFile("temp-dir-check", ".tmp");
-            File result = new File(tmpFile.getParent());
-            if (tmpFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                tmpFile.delete();
-            }
+            final String prefix = "";
+            final Path tempDirToRemove = Files.createTempDirectory(prefix);
+            final Path result = tempDirToRemove.getParent();
+            deleteDirectory(tempDirToRemove.toString());
             return result;
         } catch (IOException e) {
             throw propagate(e);

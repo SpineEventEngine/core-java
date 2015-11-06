@@ -21,7 +21,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -40,10 +39,11 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.AggregateIdFactory;
 import org.spine3.util.Classes;
-import org.spine3.util.Users;
-import org.spine3.util.testutil.AggregateIdFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
@@ -52,42 +52,38 @@ import java.util.Set;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.System.currentTimeMillis;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
+import static org.spine3.testdata.ContextFactory.getEventContext;
+import static org.spine3.testdata.EventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
-import static org.spine3.util.testutil.ContextFactory.getEventContext;
-import static org.spine3.util.testutil.EventRecordFactory.*;
+import static org.spine3.util.Tests.currentTimeSeconds;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "MethodMayBeStatic", "MagicNumber",
-"ResultOfObjectAllocationIgnored", "ClassWithTooManyMethods", "ReturnOfNull", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private ProjectId projectId;
+    private final ProjectId projectId = AggregateIdFactory.newProjectId();
+    private final ProjectAggregate aggregate = new ProjectAggregate(projectId);
+    private final CreateProject createProject = CreateProject.newBuilder().setProjectId(projectId).build();
+    private final AddTask addTask = AddTask.newBuilder().setProjectId(projectId).build();
+    private final StartProject startProject = StartProject.newBuilder().setProjectId(projectId).build();
     private CommandContext commandContext;
     private EventContext eventContext;
-    private CreateProject createProject;
-    private AddTask addTask;
-    private StartProject startProject;
-    private ProjectAggregate aggregate;
 
     @Before
     public void setUp() {
-        projectId = AggregateIdFactory.newProjectId();
-        final UserId userId = Users.createId("user_id");
+
+        final UserId userId = newUserId("user_id_test");
         commandContext = createContext(userId, ZoneOffsets.UTC);
         eventContext = getEventContext(userId, projectId);
-        createProject = CreateProject.newBuilder().setProjectId(projectId).build();
-        addTask = AddTask.newBuilder().setProjectId(projectId).build();
-        startProject = StartProject.newBuilder().setProjectId(projectId).build();
-        aggregate = new ProjectAggregate(projectId);
     }
 
     @Test
@@ -133,8 +129,11 @@ public class AggregateShould {
         }
     }
 
+
     @Test(expected = IllegalArgumentException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void not_accept_to_constructor_id_of_unsupported_type() {
+
         new TestAggregateWithIdUnsupported(new UnsupportedClassVersionError());
     }
 
@@ -180,12 +179,14 @@ public class AggregateShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
+
         final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(projectId);
         r.dispatch(addTask, commandContext);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier() throws InvocationTargetException {
+
         final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(projectId);
         try {
             r.dispatch(createProject, commandContext);
@@ -214,7 +215,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_default_state_by_default() throws InvocationTargetException {
+    public void return_default_state_by_default() {
 
         final Project state = aggregate.getState();
         assertEquals(aggregate.getDefaultState(), state);
@@ -252,7 +253,7 @@ public class AggregateShould {
     public void return_time_when_was_last_modified() throws InvocationTargetException {
 
         aggregate.dispatch(createProject, commandContext);
-        final long expectedTimeSec = currentTimeMillis() / 1000L;
+        final long expectedTimeSec = currentTimeSeconds();
 
         final Timestamp whenLastModified = aggregate.whenModified();
 
@@ -283,7 +284,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_return_any_uncommitted_event_records_by_default() throws InvocationTargetException {
+    public void not_return_any_uncommitted_event_records_by_default() {
 
         final List<EventRecord> events = aggregate.getUncommittedEvents();
         assertTrue(events.isEmpty());
@@ -298,7 +299,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_return_any_event_records_when_commit_by_default() throws InvocationTargetException {
+    public void not_return_any_event_records_when_commit_by_default() {
 
         final List<EventRecord> events = aggregate.commitEvents();
         assertTrue(events.isEmpty());
@@ -325,7 +326,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void transform_current_state_to_snapshot_event() throws InvocationTargetException, InvalidProtocolBufferException {
+    public void transform_current_state_to_snapshot_event() throws InvocationTargetException {
 
         aggregate.dispatch(createProject, commandContext);
 
@@ -352,22 +353,28 @@ public class AggregateShould {
 
 
     private void dispatchAllProjectCommands(Aggregate a) throws InvocationTargetException {
+
         a.dispatch(createProject, commandContext);
         a.dispatch(addTask, commandContext);
         a.dispatch(startProject, commandContext);
     }
 
-    private Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
+    private static Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
+
         return transform(events, new Function<EventRecord, Class<? extends Message>>() {
-            @SuppressWarnings("NullableProblems")
+            @Nullable // return null because an exception won't be propagated in this case
             @Override
-            public Class<? extends Message> apply(EventRecord record) {
+            public Class<? extends Message> apply(@Nullable EventRecord record) {
+                if (record == null) {
+                    return null;
+                }
                 return fromAny(record.getEvent()).getClass();
             }
         });
     }
 
-    private void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
+    private static void assertContainsAllProjectEvents(Collection<Class<? extends Message>> classes) {
+
         assertEquals(3, classes.size());
         assertTrue(classes.contains(ProjectCreated.class));
         assertTrue(classes.contains(TaskAdded.class));
@@ -375,14 +382,16 @@ public class AggregateShould {
     }
 
     private List<EventRecord> getProjectEventRecords() {
-        List<EventRecord> events = newLinkedList();
+
+        final List<EventRecord> events = newLinkedList();
         events.add(projectCreated(projectId, eventContext));
         events.add(taskAdded(projectId, eventContext));
         events.add(projectStarted(projectId, eventContext));
         return events;
     }
 
-    private void assertProjectEventsApplied(ProjectAggregate a) {
+    private static void assertProjectEventsApplied(ProjectAggregate a) {
+
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
@@ -392,6 +401,7 @@ public class AggregateShould {
         return EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(snapshot)).build();
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
@@ -409,6 +419,7 @@ public class AggregateShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -436,7 +447,7 @@ public class AggregateShould {
         @Apply
         private void event(ProjectCreated event) {
 
-            Project newState = newBuilder(getState())
+            final Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_NEW)
                     .build();
@@ -454,7 +465,7 @@ public class AggregateShould {
         @Apply
         private void event(ProjectStarted event) {
 
-            Project newState = newBuilder(getState())
+            final Project newState = newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_STARTED)
                     .build();
@@ -476,12 +487,14 @@ public class AggregateShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
         }
 
         @Assign
+        @SuppressWarnings("UnusedDeclaration")
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
@@ -492,8 +505,9 @@ public class AggregateShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -501,8 +515,9 @@ public class AggregateShould {
         protected TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -510,8 +525,9 @@ public class AggregateShould {
         protected TestAggregateWithIdLong(Long id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 
@@ -519,8 +535,9 @@ public class AggregateShould {
         protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
+        @Nonnull
         @Override protected Project getDefaultState() {
-            return null;
+            return Project.getDefaultInstance();
         }
     }
 }

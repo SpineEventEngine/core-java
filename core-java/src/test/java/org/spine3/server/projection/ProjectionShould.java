@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -40,6 +42,7 @@ public class ProjectionShould {
             super(id);
         }
 
+        @Nonnull
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();
@@ -47,13 +50,13 @@ public class ProjectionShould {
 
         @Subscribe
         public void on(StringValue event, EventContext ignored) {
-            StringValue newSate = createNewState("string", event.getValue());
+            final StringValue newSate = createNewState("string", event.getValue());
             incrementState(newSate);
         }
 
         @Subscribe
         public void on(UInt32Value event, EventContext ignored) {
-            StringValue newSate = createNewState("integer", String.valueOf(event.getValue()));
+            final StringValue newSate = createNewState("integer", String.valueOf(event.getValue()));
             incrementState(newSate);
         }
 
@@ -67,10 +70,9 @@ public class ProjectionShould {
         /**
          * We expose this method to be called directly in {@link #setUp()}.
          * Normally this method would be called by a repository upon creation of a new instance.
-         * This is checked by {@link #check_default_state_when_queried()}.
          */
         @Override
-        @VisibleForTesting //
+        @VisibleForTesting
         protected void setDefault() {
             super.setDefault();
         }
@@ -82,12 +84,6 @@ public class ProjectionShould {
     public void setUp() {
         test = new TestProjection(1);
         test.setDefault();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void check_default_state_when_queried() {
-        TestProjection test = new TestProjection(1);
-        test.getState();
     }
 
     @Test

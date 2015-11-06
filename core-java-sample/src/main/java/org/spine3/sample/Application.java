@@ -31,7 +31,6 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.util.Users;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.List;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * A sample application showing basic usage of the framework.
@@ -80,7 +80,7 @@ public class Application {
         setUp();
 
         // Generate test requests
-        List<CommandRequest> requests = generateRequests();
+        final List<CommandRequest> requests = generateRequests();
 
         // Process requests
         for (CommandRequest request : requests) {
@@ -135,16 +135,16 @@ public class Application {
      */
     public static List<CommandRequest> generateRequests() {
 
-        List<CommandRequest> result = Lists.newArrayList();
+        final List<CommandRequest> result = Lists.newArrayList();
 
         for (int i = 0; i < 10; i++) {
 
-            OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            UserId userId = Users.createId("user_" + i);
+            final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
+            final UserId userId = newUserId("user_" + i);
 
-            CommandRequest createOrder = Requests.createOrder(userId, orderId);
-            CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
+            final CommandRequest createOrder = Requests.createOrder(userId, orderId);
+            final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
+            final CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);
@@ -152,6 +152,29 @@ public class Application {
         }
 
         return result;
+    }
+
+    /**
+     * Retrieves the storage factory instance.
+     * Change this method implementation if needed.
+     *
+     * @return the {@link StorageFactory} implementation.
+     */
+    public static StorageFactory getStorageFactory() {
+
+        return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
+
+        /**
+         * To run the sample on the filesystem storage, uncomment the following line (and comment out return statement above).
+         */
+        // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
+
+        /**
+         * To run the sample on GAE local Datastore, uncomment the following line (and comment out return statement above).
+         * Instructions on how to configure the local Datastore environment:
+         * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
+         */
+        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getDefaultInstance();
     }
 
     private static class OrderIdToStringConverter implements Function<OrderId, String> {
@@ -171,26 +194,6 @@ public class Application {
 
             return value;
         }
-    }
-
-    /**
-     * @return the {@link StorageFactory} implementation.
-     */
-    public static StorageFactory getStorageFactory() {
-
-        return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
-
-        /**
-         * To run the sample on the filesystem storage, uncomment the following line (and comment out return statement above).
-         */
-        // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
-
-        /**
-         * To run the sample on GAE local Datastore, uncomment the following line (and comment out return statement above).
-         * Instructions on how to configure the local Datastore environment:
-         * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
-         */
-        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getDefaultInstance();
     }
 
     private static Logger log() {
