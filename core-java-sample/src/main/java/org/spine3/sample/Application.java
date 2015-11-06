@@ -61,13 +61,12 @@ public class Application {
 
     /**
      * The entry point of the sample.
-     * To change the storage implementation, change {@link Application#getStorageFactory()} method implementation.
+     * To change the storage implementation, change {@link #getStorageFactory()} method implementation.
      */
     public static void main(String[] args) {
 
         final StorageFactory factory = getStorageFactory();
-
-        Application app = new Application(factory);
+        final Application app = new Application(factory);
 
         app.execute();
     }
@@ -165,13 +164,14 @@ public class Application {
         return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
 
         /**
-         * To run the sample on the filesystem storage, uncomment the following line (and comment out return statement above).
+         * To run the sample on the file system storage, use the following line instead of one above.
          */
         // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
 
         /**
-         * To run the sample on GAE local Datastore, uncomment the following line (and comment out return statement above).
-         * Instructions on how to configure the local Datastore environment:
+         * To run the sample on GAE local Datastore, use the following return statement instead of one above.
+         *
+         * See instructions on configuring local Datastore environment on this page:
          * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
          */
         // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getDefaultInstance();
