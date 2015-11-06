@@ -26,10 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecordOrBuilder;
 import org.spine3.internal.EventHandlerMethod;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
-import org.spine3.util.Events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -40,8 +37,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Manages incoming events to the appropriate registered handler
- * according to the type of incoming event.
+ * Dispatches incoming events to the appropriate registered handler according to the type of incoming event.
+ *
+ * //TODO:2015-11-06:alexander.yevsyukov: Document handler methods.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
@@ -50,6 +48,7 @@ public class EventBus {
 
     /* This code is based on Guava {@link com.google.common.eventbus.EventBus} class. */
 
+    //TODO:2015-11-06:alexander.yevsyukov: Wrap keeping handlers into a HandlerRegistry package access class.
     private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
     private final ReadWriteLock lockOnHandlersByClass = new ReentrantReadWriteLock();
 
@@ -111,7 +110,7 @@ public class EventBus {
                 final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
                 if (!currentSubscribers.contains(handler)) {
                     throw new IllegalArgumentException(
-                            "missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
+                            "Missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
                 }
                 currentSubscribers.remove(handler);
             } finally {
@@ -121,33 +120,29 @@ public class EventBus {
     }
 
     /**
-     * Posts a record with an event to be processed by registered event handlers.
+     * Posts an event and its context to be processed by registered handlers.
      *
-     * @param eventRecord the event record to be handled by all subscribers
+     * @param event the event to be handled
+     * @param context the context of the event
      */
-    public void post(EventRecordOrBuilder eventRecord) {
-
-        final Message event = Events.getEvent(eventRecord);
-        final EventContext context = eventRecord.getContext();
-
-        post(event, context);
-    }
-
-    private void post(Message event, EventContext context) {
+    public void post(Message event, EventContext context) {
 
         final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
+        //TODO:2015-11-06:alexander.yevsyukov: Don't we want to have DeadEvent similar to Guava's EventBus?
+        // The logger would be one of the handlers for this.
         if (handlers.isEmpty()) {
-            //TODO:2015-09-09:alexander.yevsyukov: This must be missing event handler
-            throw new MissingEventApplierException(event);
+            log().warn("No handler defined for event class: " + event.getClass().getName());
+            return;
         }
 
+        //TODO:2015-11-06:alexander.yevsyukov: Make async execution. See Guava EventBus.
         for (EventHandlerMethod handler : handlers) {
             try {
                 handler.invoke(event, context);
             } catch (InvocationTargetException e) {
-                //TODO:2015-09-09:alexander.yevsyukov: Don't we want to handle this somehow? At least log?
-                log().warn("Exception invoking method: " + handler.getFullName(), e);
+                //TODO:2015-11-06:alexander.yevsyukov: Allow configurable exception handlers similarly to Guava.
+                log().error("Exception invoking method: " + handler.getFullName(), e);
             }
         }
     }
@@ -155,6 +150,11 @@ public class EventBus {
     private Collection<EventHandlerMethod> getHandlers(EventClass c) {
         return handlersByClass.get(c);
     }
+
+    //TODO:2015-11-06:alexander.yevsyukov: Since we are likely to allow configurable executors to support
+    // async execution and distributed event handling, the bus cannot be a singleton.
+    // We can require only one instance of the bus per server application, and have its instance
+    // passed to Engine. Note that there's Engine.getEventBus() method already.
 
     /**
      * Returns an singleton instance of the event bus.
@@ -177,7 +177,7 @@ public class EventBus {
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(EventBus.class);
     }
-    
+
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

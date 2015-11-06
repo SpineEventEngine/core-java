@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
@@ -103,10 +102,11 @@ public class Application {
         Engine.start(storageFactory);
 
         // Register repository with the engine. This will register it in the CommandDispatcher too.
-        Engine.getInstance().register(new OrderRepository());
+        final Engine engine = Engine.getInstance();
+        engine.register(new OrderRepository());
 
         // Register event handlers
-        EventBus.getInstance().register(eventLogger);
+        engine.getEventBus().register(eventLogger);
 
         // Register id converters
         IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
@@ -120,7 +120,7 @@ public class Application {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        EventBus.getInstance().unregister(eventLogger);
+        Engine.getInstance().getEventBus().unregister(eventLogger);
 
         // Stop the engine
         Engine.stop();

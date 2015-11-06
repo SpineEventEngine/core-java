@@ -232,12 +232,20 @@ public final class Engine {
     }
 
     private void storeAndPost(Iterable<EventRecord> records) {
-        final EventBus eventBus = EventBus.getInstance();
         for (EventRecord record : records) {
             eventStore.store(record);
-            eventBus.post(record);
+            post(record);
         }
     }
+
+    private void post(EventRecordOrBuilder eventRecord) {
+        final EventBus eventBus = getEventBus();
+        final Message event = Events.getEvent(eventRecord);
+        final EventContext context = eventRecord.getContext();
+
+        eventBus.post(event, context);
+    }
+
 
     /**
      * Convenience method for obtaining instance of {@link CommandDispatcher}.
