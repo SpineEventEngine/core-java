@@ -50,9 +50,9 @@ public abstract class EventStorageShould {
         assertFalse(iterator.hasNext());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
-        //noinspection ConstantConditions
         storage.write(null);
     }
 

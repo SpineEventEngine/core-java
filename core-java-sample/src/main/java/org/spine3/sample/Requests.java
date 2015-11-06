@@ -24,10 +24,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
-import org.spine3.sample.order.BillingInfo;
-import org.spine3.sample.order.Book;
-import org.spine3.sample.order.BookId;
-import org.spine3.sample.order.OrderId;
+import org.spine3.sample.order.*;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayForOrder;
@@ -45,6 +42,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
+
         final CreateOrder createOrder = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
@@ -60,21 +58,22 @@ public class Requests {
     }
 
     public static CommandRequest addOrderLine(UserId userId, OrderId orderId) {
-        //noinspection MagicNumber
+
+        final double price = 51.33;
         final Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
                 .setAuthor("Eric Evans")
                 .setTitle("Domain Driven Design.")
-                .setPrice(51.33)
+                .setPrice(price)
                 .build();
 
         final int quantity = 1;
-        final double price = book.getPrice() * quantity;
+        final double totalPrice = book.getPrice() * quantity;
 
-        final org.spine3.sample.order.OrderLine orderLine = org.spine3.sample.order.OrderLine.newBuilder()
+        final OrderLine orderLine = OrderLine.newBuilder()
                 .setProductId(Messages.toAny(book.getBookId()))
                 .setQuantity(quantity)
-                .setTotal(price)
+                .setTotal(totalPrice)
                 .build();
 
         final AddOrderLine cmd = AddOrderLine.newBuilder()
@@ -88,6 +87,7 @@ public class Requests {
     }
 
     public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
+
         final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
 
         final PayForOrder cmd = PayForOrder.newBuilder()
@@ -103,6 +103,7 @@ public class Requests {
     }
 
     public static CommandContext getCommandContext(UserId userId) {
+
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
@@ -115,5 +116,4 @@ public class Requests {
 
     private Requests() {
     }
-
 }

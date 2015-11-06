@@ -34,9 +34,9 @@ public class InMemoryCommandStorageShould {
         storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        //noinspection ConstantConditions
         storage.write(null);
     }
 
