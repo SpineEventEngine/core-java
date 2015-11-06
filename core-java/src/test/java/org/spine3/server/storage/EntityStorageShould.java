@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.server.Entity;
 import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.TestAggregateIdFactory;
 
 import javax.annotation.Nonnull;
 
@@ -60,7 +59,7 @@ public abstract class EntityStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
         //noinspection ConstantConditions
-        storage.write(null, TestAggregateIdFactory.createProjectId("testId"));
+        storage.write(null, createProjectId("testId"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -84,7 +83,7 @@ public abstract class EntityStorageShould {
 
     private void testSaveAndReadMessage(String messageId) {
 
-        final ProjectId expected = TestAggregateIdFactory.createProjectId(messageId);
+        final ProjectId expected = createProjectId(messageId);
 
         storage.write(expected.getId(), expected);
 
