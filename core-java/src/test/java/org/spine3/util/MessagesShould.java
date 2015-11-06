@@ -71,15 +71,15 @@ public class MessagesShould {
         assertEquals(expected, actual);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_null_id() {
-        //noinspection ConstantConditions
         Messages.toAny(null);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
-        //noinspection ConstantConditions
         Messages.fromAny(null);
     }
 }
