@@ -29,7 +29,7 @@ import org.spine3.test.project.ProjectId;
 import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.testdata.AggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
         "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection"})
@@ -59,7 +59,7 @@ public abstract class EntityStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
         //noinspection ConstantConditions
-        storage.write(null, newProjectId("testId"));
+        storage.write(null, createProjectId("testId"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -83,7 +83,7 @@ public abstract class EntityStorageShould {
 
     private void testSaveAndReadMessage(String messageId) {
 
-        final ProjectId expected = newProjectId(messageId);
+        final ProjectId expected = createProjectId(messageId);
 
         storage.write(expected.getId(), expected);
 
@@ -94,7 +94,7 @@ public abstract class EntityStorageShould {
 
     public static class TestEntity extends Entity<String, ProjectId> {
 
-        private static final ProjectId DEFAULT_STATE = newProjectId();
+        private static final ProjectId DEFAULT_STATE = createProjectId("defaultProjectId");
 
         protected TestEntity(String id) {
             super(id);

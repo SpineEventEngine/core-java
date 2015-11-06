@@ -29,6 +29,8 @@ import org.spine3.time.ZoneOffset;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
 
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+
 
 /**
  * Creates Context for tests.
@@ -36,16 +38,24 @@ import org.spine3.util.Events;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class ContextFactory {
+public class TestContextFactory {
 
-    private ContextFactory() {
+    private static final String STUB_PROJECT_ID = "dummy_project_id_123";
+
+    private TestContextFactory() {
     }
 
-    public static CommandContext getCommandContext(UserId userId) {
-        return getCommandContext(userId, TimeUtil.getCurrentTime());
+    /**
+     * Creates a new {@link CommandContext} with the given userId and current command time.
+     */
+    public static CommandContext createCommandContext(UserId userId) {
+        return createCommandContext(userId, TimeUtil.getCurrentTime());
     }
 
-    public static CommandContext getCommandContext(UserId userId, Timestamp when) {
+    /**
+     * Creates a new {@link CommandContext} with the given userId and command time.
+     */
+    public static CommandContext createCommandContext(UserId userId, Timestamp when) {
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(when)
@@ -56,7 +66,10 @@ public class ContextFactory {
                 .build();
     }
 
-    public static EventContext newEventContext() {
+    /**
+     * Creates a new {@link EventContext} with default properties.
+     */
+    public static EventContext createEventContext() {
 
         final Timestamp now = TimeUtil.getCurrentTime();
         final CommandId commandId = CommandId.newBuilder()
@@ -67,11 +80,14 @@ public class ContextFactory {
 
         return EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(AggregateIdFactory.newProjectId()))
+                .setAggregateId(Messages.toAny(createProjectId(STUB_PROJECT_ID)))
                 .build();
     }
 
-    public static EventContext getEventContext(UserId userId, Message aggregateId) {
+    /**
+     * Creates a new {@link EventContext} with the given userId and aggregateId.
+     */
+    public static EventContext createEventContext(UserId userId, Message aggregateId) {
 
         final CommandId commandId = Commands.generateId(userId);
         final EventId eventId = Events.generateId(commandId);

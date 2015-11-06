@@ -22,14 +22,16 @@ package org.spine3.testdata;
 
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.base.UserId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.AggregateIdFactory.newProjectId;
-import static org.spine3.testdata.ContextFactory.newEventContext;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * The utility class which is used for creating EventRecords for tests.
@@ -37,37 +39,61 @@ import static org.spine3.testdata.ContextFactory.newEventContext;
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class EventRecordFactory {
+public class TestEventRecordFactory {
 
-    private EventRecordFactory() {}
+    private static final ProjectId STUB_PROJECT_ID = createProjectId("dummy_project_id_456");
+    private static final UserId STUB_USER_ID = newUserId("test_user_id_147");
+    private static final EventContext STUB_EVENT_CONTEXT = createEventContext();
 
 
+    private TestEventRecordFactory() {}
+
+
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord projectCreated() {
-        return projectCreated(newProjectId(), newEventContext());
+        return projectCreated(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord taskAdded() {
-        return taskAdded(newProjectId(), newEventContext());
+        return taskAdded(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
+    /**
+     * Creates a new {@link EventRecord} with default properties.
+     */
     public static EventRecord projectStarted() {
-        return projectStarted(newProjectId(), newEventContext());
+        return projectStarted(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
-
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord projectCreated(ProjectId projectId) {
-        return projectCreated(projectId, newEventContext());
+        return projectCreated(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord taskAdded(ProjectId projectId) {
-        return taskAdded(projectId, newEventContext());
+        return taskAdded(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId.
+     */
     public static EventRecord projectStarted(ProjectId projectId) {
-        return projectStarted(projectId, newEventContext());
+        return projectStarted(projectId, createEventContext(STUB_USER_ID, projectId));
     }
 
-
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
 
         final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
@@ -75,6 +101,9 @@ public class EventRecordFactory {
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord taskAdded(ProjectId projectId, EventContext eventContext) {
 
         final TaskAdded event = TaskAdded.newBuilder().setProjectId(projectId).build();
@@ -82,6 +111,9 @@ public class EventRecordFactory {
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link EventRecord} with the given projectId and eventContext.
+     */
     public static EventRecord projectStarted(ProjectId projectId, EventContext eventContext) {
 
         final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();

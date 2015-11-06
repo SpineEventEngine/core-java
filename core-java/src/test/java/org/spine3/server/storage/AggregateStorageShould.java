@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.AggregateIdFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -41,14 +40,15 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.server.storage.EventStorageShould.assertEventRecordListsAreEqual;
-import static org.spine3.testdata.AggregateStorageRecordFactory.getSequentialRecords;
-import static org.spine3.testdata.AggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testdata.EventRecordFactory.projectCreated;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
+import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
 public abstract class AggregateStorageShould {
 
-    private final ProjectId aggregateId = AggregateIdFactory.newProjectId();
+    private final ProjectId aggregateId = createProjectId("dummyAggregateId");
 
     private final AggregateStorage<ProjectId> storage;
 
@@ -111,7 +111,7 @@ public abstract class AggregateStorageShould {
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(aggregateId);
+        final List<AggregateStorageRecord> records = createSequentialRecords(aggregateId);
 
         writeAll(records);
 
@@ -162,7 +162,7 @@ public abstract class AggregateStorageShould {
 
     private void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
 
-        final List<AggregateStorageRecord> records = getSequentialRecords(aggregateId, firstRecordTime);
+        final List<AggregateStorageRecord> records = createSequentialRecords(aggregateId, firstRecordTime);
 
         writeAll(records);
 

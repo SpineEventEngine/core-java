@@ -34,19 +34,33 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
 
+
+/**
+ * Creates AggregateStorageRecords for tests.
+ *
+ * @author Alexander Litus
+ */
 @SuppressWarnings("UtilityClass")
-public class AggregateStorageRecordFactory {
+public class TestAggregateStorageRecordFactory {
 
-    private AggregateStorageRecordFactory() {}
+    private TestAggregateStorageRecordFactory() {}
 
+    /**
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp and aggregateId.
+     */
     public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId) {
+
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setAggregateId(aggregateId.getId())
                 .setTimestamp(timestamp);
         return builder.build();
     }
 
+    /**
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp, aggregateId and event record.
+     */
     public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, EventRecord event) {
+
         final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp, aggregateId)
                 .toBuilder()
                 .setEventRecord(event);
@@ -57,24 +71,24 @@ public class AggregateStorageRecordFactory {
      * Returns several records sorted by timestamp ascending.
      * First record's timestamp is current time.
      */
-    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id) {
-        return getSequentialRecords(id, getCurrentTime());
+    public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id) {
+        return createSequentialRecords(id, getCurrentTime());
     }
 
     /**
      * Returns several records sorted by timestamp ascending.
      * @param timestamp1 the timestamp of first record.
      */
-    public static List<AggregateStorageRecord> getSequentialRecords(ProjectId id, Timestamp timestamp1) {
+    public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id, Timestamp timestamp1) {
 
         final Duration delta = seconds(10);
 
         final Timestamp timestamp2 = add(timestamp1, delta);
         final Timestamp timestamp3 = add(timestamp2, delta);
 
-        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, EventRecordFactory.projectCreated(id));
-        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, EventRecordFactory.taskAdded(id));
-        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, EventRecordFactory.projectStarted(id));
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, TestEventRecordFactory.projectCreated(id));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, TestEventRecordFactory.taskAdded(id));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, TestEventRecordFactory.projectStarted(id));
 
         return newArrayList(record1, record2, record3);
     }

@@ -27,7 +27,7 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 
-import static org.spine3.testdata.CommandRequestFactory.createProject;
+import static org.spine3.testdata.TestCommandRequestFactory.createProject;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.

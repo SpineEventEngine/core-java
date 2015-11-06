@@ -23,14 +23,14 @@ package org.spine3.server.storage;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.base.EventRecordOrBuilder;
-import org.spine3.testdata.EventRecordFactory;
+import org.spine3.testdata.TestEventRecordFactory;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.testdata.EventStoreRecordFactory.*;
+import static org.spine3.testdata.TestEventStoreRecordFactory.*;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.Events.toEventRecordsList;
 
@@ -59,7 +59,7 @@ public abstract class EventStorageShould {
     @Test
     public void store_and_read_one_event() {
 
-        final EventRecord expected = EventRecordFactory.projectCreated();
+        final EventRecord expected = TestEventRecordFactory.projectCreated();
         storage.store(expected);
 
         assertStorageContains(expected);
