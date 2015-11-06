@@ -60,8 +60,9 @@ public class Server {
     }
 
     /**
-     * The entry point of the sample.
-     * To change the storage implementation, change {@link Application#getStorageFactory()} method implementation.
+     * The entry point of the server application.
+     *
+     * <p/>To change the storage implementation, modify {@link Application#getStorageFactory()}.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
 
@@ -129,7 +130,6 @@ public class Server {
             responseObserver.onCompleted();
         }
 
-        @SuppressWarnings("ReturnOfNull")
         @Override
         public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
             //TODO:2015-06-25:mikhail.melnik: implement
