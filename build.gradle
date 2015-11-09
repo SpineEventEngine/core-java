@@ -1,4 +1,4 @@
-final def CREDENTIALS_LOCATION = 'credentials.properties';
+final String CREDENTIALS_LOCATION = 'credentials.properties';
 
 buildscript {
     repositories {
@@ -81,10 +81,10 @@ subprojects {
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
     }
 
-    final def SRC_ROOT_DIR = "$projectDir/src";
-    final def GEN_ROOT_DIR = "$projectDir/generated";
-    final def GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
-    final def GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
+    final String SRC_ROOT_DIR = "$projectDir/src";
+    final String GEN_ROOT_DIR = "$projectDir/generated";
+    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
+    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
 
     idea.module {
         generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
@@ -154,9 +154,9 @@ task readPublishingCredentials << {
 task publish << {}
 
 subprojects.each { final project ->
-    final def credentialsTask = getTasksByName("readPublishingCredentials", false);
+    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
     project.getTasksByName("publish", false).each { final task ->
-        task.dependsOn credentialsTask;
+        task.dependsOn credentialsTasks;
     }
     publish.dependsOn project.getTasksByName("publish", false);
 }
