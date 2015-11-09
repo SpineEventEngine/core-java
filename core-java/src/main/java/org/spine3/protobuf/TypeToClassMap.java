@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -41,7 +42,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Utility class for reading real proto class names from properties file.
@@ -142,7 +142,7 @@ public class TypeToClassMap {
     private static Map<TypeName, ClassName> buildNamesMap() {
 
         final Map<TypeName, ClassName> result = loadNamesFromProperties();
-        final Map<TypeName, ClassName> protobufNames = loadProtobufNames();
+        final ImmutableMap<TypeName, ClassName> protobufNames = loadProtobufNames();
         result.putAll(protobufNames);
         if (log().isDebugEnabled()) {
             log().debug("Total classes in TypeToClassMap: " + result.size());
@@ -160,9 +160,10 @@ public class TypeToClassMap {
         return result;
     }
 
-    private static Map<TypeName, ClassName> loadProtobufNames() {
+    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
+    private static ImmutableMap<TypeName, ClassName> loadProtobufNames() {
 
-        final Map<TypeName, ClassName> result = newHashMap();
+        final ImmutableMap.Builder<TypeName, ClassName> result = ImmutableMap.builder();
         final ImmutableSet<Class<? extends Message>> protobufClasses = loadProtobufClasses();
 
         for (Class<? extends Message> clazz : protobufClasses) {
@@ -170,7 +171,7 @@ public class TypeToClassMap {
             final ClassName className = ClassName.of(clazz);
             result.put(typeName, className);
         }
-        return result;
+        return result.build();
     }
 
     private static void putTo(Map<TypeName, ClassName> result, Properties properties) {
@@ -183,22 +184,23 @@ public class TypeToClassMap {
     }
 
     /**
-     * Loads all data from property file(s) into memory. Properties file should contain proto type urls and
+     * Loads all data from property file(s) into memory. The property file should contain proto type urls and
      * appropriate java class names.
      */
-    private static Set<Properties> loadAllProperties() {
+    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
+    private static ImmutableSet<Properties> loadAllProperties() {
 
         final Enumeration<URL> resources = getResources();
         if (resources == null) {
-            return newHashSet();
+            return ImmutableSet.<Properties>builder().build();
         }
-        final Set<Properties> propertiesSet = newHashSet();
+        final ImmutableSet.Builder<Properties> result = ImmutableSet.builder();
         while (resources.hasMoreElements()) {
             final URL resourceUrl = resources.nextElement();
             final Properties properties = loadPropertiesFile(resourceUrl);
-            propertiesSet.add(properties);
+            result.add(properties);
         }
-        return propertiesSet;
+        return result.build();
     }
 
     private static Enumeration<URL> getResources() {
