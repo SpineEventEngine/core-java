@@ -1,4 +1,4 @@
-def CREDENTIALS_LOCATION = "credentials.properties"
+final String CREDENTIALS_LOCATION = 'credentials.properties';
 
 buildscript {
     repositories {
@@ -21,48 +21,38 @@ allprojects {
 project.ext {
     PROTOBUF_VERSION = '3.0.0-beta-1'
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
-    GENERATED_RESOURCES = "/generated/main/resources/"
-    PROPERTIES_FILE_PATH = "${project.GENERATED_RESOURCES}/"
-    PROPERTIES_FILE_NAME = "proto_to_java_class.properties"
 }
 
-def repositoryUserName = null
-def repositoryUserPassword = null
-Properties properties = new Properties()
-File credentialsFile = file(CREDENTIALS_LOCATION)
+def repositoryUserName = null;
+def repositoryUserPassword = null;
+final Properties properties = new Properties();
+final File credentialsFile = file(CREDENTIALS_LOCATION);
 if (credentialsFile.exists()) {
-    properties.load(credentialsFile.newDataInputStream())
-
-    repositoryUserName = properties.getProperty("user.name")
-    repositoryUserPassword = properties.getProperty("user.password")
+    properties.load(credentialsFile.newDataInputStream());
+    repositoryUserName = properties.getProperty("user.name");
+    repositoryUserPassword = properties.getProperty("user.password");
 }
 
-String replaceFileSeparatorWithDot(String filePath) {
-    return filePath.replace((char) File.separatorChar, (char) '.');
-}
-
-//todo:2015-09-10:mikhail.mikhaylov: Take care of duplicated code: use plugin here.
 subprojects {
 
     buildscript {
         repositories {
             mavenLocal()
             maven {
-                url 'http://maven.teamdev.com/repository/spine'
+                url = project.MAVEN_REPOSITORY_URL
             }
             mavenCentral()
         }
     }
 
-    apply plugin: 'java'
-    apply plugin: "idea"
-    apply plugin: 'com.google.protobuf'
-    apply plugin: 'maven-publish'
+    apply plugin: 'java';
+    apply plugin: "idea";
+    apply plugin: 'com.google.protobuf';
+    apply plugin: 'maven-publish';
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.7;
+    targetCompatibility = 1.7;
 
     // Set Java home to point to JDK7 in gradle.properties file.
     //
@@ -91,27 +81,31 @@ subprojects {
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
     }
 
+    final String SRC_ROOT_DIR = "$projectDir/src";
+    final String GEN_ROOT_DIR = "$projectDir/generated";
+    final String GEN_MAIN_JAVA_DIR = "${GEN_ROOT_DIR}/main/java";
+    final String GEN_TEST_JAVA_DIR = "${GEN_ROOT_DIR}/test/java";
+
     idea.module {
-        generatedSourceDirs += file("$projectDir/generated/main/java")
-        testSourceDirs += file("$projectDir/generated/test/java")
+        generatedSourceDirs += file(GEN_MAIN_JAVA_DIR);
+        testSourceDirs += file(GEN_TEST_JAVA_DIR);
     }
 
     sourceSets {
         main {
-            proto.srcDirs = ["src/main/proto"]
-            //TODO:2015-08-30:alexander.yevsyukov: Why don't we have the $projectDir prefix in the 2nd item?
-            java.srcDirs = ["$projectDir/generated/main/java", "src/main/java"]
-            resources.srcDirs = ["generated/main/resources"]
+            proto.srcDirs = ["${SRC_ROOT_DIR}/main/proto"]
+            java.srcDirs = [GEN_MAIN_JAVA_DIR, "${SRC_ROOT_DIR}/main/java"]
+            resources.srcDirs = ["${GEN_ROOT_DIR}/main/resources"]
         }
         test {
-            proto.srcDirs = ["src/test/proto"]
-            java.srcDirs = ["$projectDir/generated/test/java", "src/test/java"]
-            resources.srcDirs = ["generated/test/resources"]
+            proto.srcDirs = ["${SRC_ROOT_DIR}/test/proto"]
+            java.srcDirs = [GEN_TEST_JAVA_DIR, "${SRC_ROOT_DIR}/test/java"]
+            resources.srcDirs = ["${GEN_ROOT_DIR}/test/resources"]
         }
     }
 
     protobuf {
-        generatedFilesBaseDir = "$projectDir/generated"
+        generatedFilesBaseDir = GEN_ROOT_DIR
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
         }
@@ -124,9 +118,9 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                groupId "${group}"
-                artifactId "${project.name}"
-                version "${project.version}"
+                groupId = "${group}"
+                artifactId = "${project.name}"
+                version = "${project.version}"
 
                 from components.java
                 artifact sourceJar {
@@ -140,10 +134,10 @@ subprojects {
         repositories {
             maven {
                 credentials {
-                    username "${repositoryUserName}"
-                    password "${repositoryUserPassword}"
+                    username = "${repositoryUserName}";
+                    password = "${repositoryUserPassword}";
                 }
-                url "${project.MAVEN_REPOSITORY_URL}"
+                url = project.MAVEN_REPOSITORY_URL;
             }
         }
     }
@@ -152,18 +146,18 @@ subprojects {
 task readPublishingCredentials << {
     if (repositoryUserName == null || repositoryUserPassword == null) {
         throw new InvalidUserDataException("Please set up valid credentials. " +
-                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.")
+                "Credentials should be set in ${CREDENTIALS_LOCATION} file in the project\'s root.");
     }
-    println "Publishing build as ${repositoryUserName}"
+    println "Publishing build as ${repositoryUserName}";
 }
 
 task publish << {}
 
-subprojects.each { project ->
-    def credentialsTask = getTasksByName("readPublishingCredentials", false)
-    project.getTasksByName("publish", false).each { task ->
-        task.dependsOn credentialsTask
+subprojects.each { final project ->
+    final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
+    project.getTasksByName("publish", false).each { final task ->
+        task.dependsOn credentialsTasks;
     }
-    publish.dependsOn project.getTasksByName("publish", false)
+    publish.dependsOn project.getTasksByName("publish", false);
 }
 

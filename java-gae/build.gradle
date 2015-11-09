@@ -5,10 +5,5 @@ dependencies {
 
     testCompile project (path: ":core-java", configuration: 'testArtifacts')
 
-    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.24'
-    compile 'com.google.appengine:appengine-api-labs:1.9.24'
-    compile 'com.google.appengine:appengine-api-stubs:1.9.24'
-    compile 'com.google.appengine:appengine-tools-sdk:1.9.24'
-    compile 'com.google.appengine:appengine-testing:1.9.24'
     compile 'com.google.apis:google-api-services-datastore-protobuf:v1beta2-rev1-3.0.2'
 }
