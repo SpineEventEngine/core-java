@@ -96,6 +96,7 @@ public class TypeToClassMap {
      *
      * @param protoType {@link Any} type url
      * @return Java class name
+     * @throws UnknownTypeInAnyException if there is no such type known to the application
      */
     public static ClassName get(TypeName protoType) {
 
@@ -112,23 +113,17 @@ public class TypeToClassMap {
         String lookupType = lookupTypeName.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
-
         int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         while (className == null && lastDotPosition != -1) {
             suffix.insert(0, lookupType.substring(lastDotPosition));
-
             lookupType = lookupType.substring(0, lastDotPosition);
             final TypeName typeName = TypeName.of(lookupType);
-
             className = NAMES_MAP.get(typeName);
-
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
-
         if (className == null) {
             throw new UnknownTypeInAnyException(lookupTypeName.value());
         }
-
         className = ClassName.of(className.value() + suffix);
         try {
             Class.forName(className.value());
@@ -259,6 +254,7 @@ public class TypeToClassMap {
 
     /**
      * Returns true if class name ends with {@link #PROTOBUF_VALUE_CLASS_SUFFIX} or class is {@link Duration} class.
+     * Other classes from this package are unnecessary.
      */
     private static boolean protobufClassMatches(Class<? extends Message> clazz) {
 
