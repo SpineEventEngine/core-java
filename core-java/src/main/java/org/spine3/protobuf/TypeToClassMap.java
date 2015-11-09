@@ -92,14 +92,22 @@ public class TypeToClassMap {
     public static ClassName get(TypeName protoType) {
 
         if (!NAMES_MAP.containsKey(protoType)) {
-            final ClassName className = searchAsSubclass(protoType);
+            final ClassName className = searchInnerMessageClass(protoType);
             NAMES_MAP.put(protoType, className);
         }
         final ClassName result = NAMES_MAP.get(protoType);
         return result;
     }
 
-    private static ClassName searchAsSubclass(TypeName lookupTypeName) {
+    /**
+     * Finds appropriate ClassName for inner class TypeNames.
+     * <p/>
+     * For example, com.package.OuterClass.InnerClass class name.
+     *
+     * @param lookupTypeName TypeName of searching class
+     * @return ClassName for searching class
+     */
+    private static ClassName searchInnerMessageClass(TypeName lookupTypeName) {
 
         String lookupType = lookupTypeName.value();
         ClassName className = null;
