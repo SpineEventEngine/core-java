@@ -62,8 +62,10 @@ public class TypeToClassMap {
     // Transform static methods into inner Builder class
     // that would populate its internal structure and then emits it to be stored in this field.
     /**
-     * Proto type url on java class name map. Example:
-     * spine.base.EventId - org.spine3.base.EventId
+     * A map from Protobuf type name to Java class name.
+     *
+     * <p>Example:
+     * <p>{@code spine.base.EventId} - {@code org.spine3.base.EventId}
      */
     private static final Map<TypeName, ClassName> NAMES_MAP = buildNamesMap();
 
@@ -100,16 +102,17 @@ public class TypeToClassMap {
     }
 
     /**
-     * Finds appropriate ClassName for inner class TypeNames.
-     * <p/>
-     * For example, com.package.OuterClass.InnerClass class name.
+     * Attempts to find a {@link ClassName} for the passed inner Protobuf type.
      *
-     * @param lookupTypeName TypeName of searching class
-     * @return ClassName for searching class
+     * <p>For example, com.package.OuterClass.InnerClass class name.
+     *
+     * @param type {@link TypeName} of the class to find
+     * @return the found class name
+     * @throws UnknownTypeInAnyException if there is no such type known to the application
      */
-    private static ClassName searchInnerMessageClass(TypeName lookupTypeName) {
+    private static ClassName searchInnerMessageClass(TypeName type) {
 
-        String lookupType = lookupTypeName.value();
+        String lookupType = type.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
         int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
@@ -121,14 +124,14 @@ public class TypeToClassMap {
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
-            throw new UnknownTypeInAnyException(lookupTypeName.value());
+            throw new UnknownTypeInAnyException(type.value());
         }
         className = ClassName.of(className.value() + suffix);
         try {
             Class.forName(className.value());
         } catch (ClassNotFoundException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new UnknownTypeInAnyException(lookupTypeName.value());
+            throw new UnknownTypeInAnyException(type.value());
         }
         return className;
     }
