@@ -19,9 +19,10 @@ allprojects {
 }
 
 project.ext {
-    PROTOBUF_VERSION = '3.0.0-beta-1'
-    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}"
-    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine'
+    // NOTE: if update Protobuf, consider updating TypeToClassMap.buildProtobufNamesMap() method.
+    PROTOBUF_VERSION = '3.0.0-beta-1';
+    PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
+    MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
 }
 
 def repositoryUserName = null;
