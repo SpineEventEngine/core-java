@@ -22,11 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
-import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
+import com.google.protobuf.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.ClassName;
@@ -54,11 +50,6 @@ import static com.google.common.collect.Maps.newHashMap;
 public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
-
-    private static final String GOOGLE_PROTOBUF_PACKAGE = "com.google.protobuf";
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // OK in this case
-    private static final String PROTOBUF_VALUE_CLASS_SUFFIX = "Value";
 
     //TODO:2015-09-09:mikhail.mikhaylov: Find a way to read it from gradle properties.
     /**
@@ -137,12 +128,36 @@ public class TypeToClassMap {
     private static Map<TypeName, ClassName> buildNamesMap() {
 
         final Map<TypeName, ClassName> result = loadNamesFromProperties();
-        final ImmutableMap<TypeName, ClassName> protobufNames = loadProtobufNames();
+        final ImmutableMap<TypeName, ClassName> protobufNames = buildProtobufNamesMap();
         result.putAll(protobufNames);
         if (log().isDebugEnabled()) {
             log().debug("Total classes in TypeToClassMap: " + result.size());
         }
         return result;
+    }
+
+    /**
+     * Returns needed classes from the {@code com.google.protobuf} package.
+     * Every class name ends with {@code Value} (except {@link Duration} class).
+     * Other classes from this package are unnecessary.
+     */
+    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
+    private static ImmutableMap<TypeName, ClassName> buildProtobufNamesMap() {
+
+        return ImmutableMap.<TypeName, ClassName>builder()
+                .put(TypeName.of(ListValue.getDescriptor()), ClassName.of(ListValue.class))
+                .put(TypeName.of(Int64Value.getDescriptor()), ClassName.of(Int64Value.class))
+                .put(TypeName.of(Int32Value.getDescriptor()), ClassName.of(Int32Value.class))
+                .put(TypeName.of(UInt64Value.getDescriptor()), ClassName.of(UInt64Value.class))
+                .put(TypeName.of(UInt32Value.getDescriptor()), ClassName.of(UInt32Value.class))
+                .put(TypeName.of(BytesValue.getDescriptor()), ClassName.of(BytesValue.class))
+                .put(TypeName.of(StringValue.getDescriptor()), ClassName.of(StringValue.class))
+                .put(TypeName.of(DoubleValue.getDescriptor()), ClassName.of(DoubleValue.class))
+                .put(TypeName.of(BoolValue.getDescriptor()), ClassName.of(BoolValue.class))
+                .put(TypeName.of(EnumValue.getDescriptor()), ClassName.of(EnumValue.class))
+                .put(TypeName.of(FloatValue.getDescriptor()), ClassName.of(FloatValue.class))
+                .put(TypeName.of(Duration.getDescriptor()), ClassName.of(Duration.class))
+                .build();
     }
 
     private static Map<TypeName, ClassName> loadNamesFromProperties() {
@@ -153,20 +168,6 @@ public class TypeToClassMap {
             putTo(result, properties);
         }
         return result;
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
-    private static ImmutableMap<TypeName, ClassName> loadProtobufNames() {
-
-        final ImmutableMap.Builder<TypeName, ClassName> result = ImmutableMap.builder();
-        final ImmutableSet<Class<? extends Message>> protobufClasses = loadProtobufClasses();
-
-        for (Class<? extends Message> clazz : protobufClasses) {
-            final TypeName typeName = TypeName.of(clazz);
-            final ClassName className = ClassName.of(clazz);
-            result.put(typeName, className);
-        }
-        return result.build();
     }
 
     private static void putTo(Map<TypeName, ClassName> result, Properties properties) {
@@ -226,43 +227,6 @@ public class TypeToClassMap {
             IoUtil.closeSilently(inputStream);
         }
         return properties;
-    }
-
-    /**
-     * Returns filtered classes from the {@link #GOOGLE_PROTOBUF_PACKAGE}.
-     */
-    private static ImmutableSet<Class<? extends Message>> loadProtobufClasses() {
-
-        final ConfigurationBuilder configuration = new ConfigurationBuilder()
-                .forPackages(GOOGLE_PROTOBUF_PACKAGE)
-                .addClassLoader(getContextClassLoader());
-        final Reflections reflections = new Reflections(configuration);
-        final Set<Class<? extends Message>> messageClasses = reflections.getSubTypesOf(Message.class);
-        return filterProtobufClasses(messageClasses);
-    }
-
-    private static ImmutableSet<Class<? extends Message>> filterProtobufClasses(Iterable<Class<? extends Message>> classes) {
-
-        final ImmutableSet.Builder<Class<? extends Message>> result = ImmutableSet.builder();
-        for (Class<? extends Message> clazz : classes) {
-            if (protobufClassMatches(clazz)) {
-                result.add(clazz);
-            }
-        }
-        return result.build();
-    }
-
-    /**
-     * Returns true if class name ends with {@link #PROTOBUF_VALUE_CLASS_SUFFIX} or class is {@link Duration} class.
-     * Other classes from this package are unnecessary.
-     */
-    private static boolean protobufClassMatches(Class<? extends Message> clazz) {
-
-        final String name = clazz.getSimpleName();
-        final boolean isValueClass =
-                name.endsWith(PROTOBUF_VALUE_CLASS_SUFFIX) &&
-                (name.length() > PROTOBUF_VALUE_CLASS_SUFFIX.length());
-        return isValueClass || clazz.equals(Duration.class);
     }
 
     private static ClassLoader getContextClassLoader() {
