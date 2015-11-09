@@ -73,7 +73,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return null;
     }
 
-
     @Nonnull
     private EntityStorage<I, M> checkStorage() {
         final EntityStorage<I, M> storage = getStorage();

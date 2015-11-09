@@ -20,9 +20,8 @@
 
 package org.spine3.sample;
 
-import io.grpc.ChannelImpl;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
@@ -48,16 +47,16 @@ public class Client {
     private static final String RPC_FAILED = "RPC failed";
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
-    private final ChannelImpl channel;
+    private final ManagedChannel channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
 
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
     public Client(String host, int port) {
-        channel = NettyChannelBuilder
+        channel = ManagedChannelBuilder
                 .forAddress(host, port)
-                .negotiationType(NegotiationType.PLAINTEXT)
+                .usePlaintext(true)
                 .build();
         blockingStub = CommandServiceGrpc.newBlockingStub(channel);
     }
@@ -77,12 +76,9 @@ public class Client {
             for (CommandRequest request : requests) {
 
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
-
                 final CommandResult result = client.send(request);
-
                 log().info("Result: " + toText(result));
             }
-
         } finally {
             client.shutdown();
         }
@@ -100,6 +96,7 @@ public class Client {
      * Sends a request to the server.
      */
     public CommandResult send(CommandRequest request) {
+
         CommandResult result = null;
         try {
             result = blockingStub.handle(request);
@@ -111,7 +108,6 @@ public class Client {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(Client.class);
     }

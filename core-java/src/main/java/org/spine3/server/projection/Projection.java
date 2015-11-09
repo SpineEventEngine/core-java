@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
+import org.spine3.server.EntityRepository;
 import org.spine3.util.Classes;
 import org.spine3.util.MethodMap;
 
@@ -34,10 +35,17 @@ import java.lang.reflect.Method;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Creates data projection from incoming events.
+ * A projection holds a structural representation of data extracted from a stream of events.
  *
- * @param <I> the type of the IDs of the stateful handlers
- * @param <M> the type of the state objects
+ * <p/>The process of projecting the event stream into data we collect is performed
+ * by event handlers for the events of interest. These event handlers are implemented
+ * in the classes extending this abstract class.
+ *
+ * <p/>Event handlers are invoked by an {@link EntityRepository} that manages instances
+ * of a projection class.
+ *
+ * @param <I> the type of the projection IDs
+ * @param <M> the type of the state objects holding projection data
  */
 public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
@@ -71,8 +79,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
     }
 
     /**
-     * Performs initialization of the instance and registers this class of projections in {@link Registry}
-     * if it is not registered yet.
+     * Performs initialization of the instance.
      */
     protected void init() {
         if (!isInitialized()) {
