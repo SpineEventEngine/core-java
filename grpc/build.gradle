@@ -33,7 +33,7 @@ protobuf {
         }
     }
     generateProtoTasks {
-        all().each { task ->
+        all().each { final task ->
             task.plugins {
                 grpc {
 //                    option 'nano=true'
