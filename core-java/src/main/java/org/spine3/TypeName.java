@@ -74,6 +74,20 @@ public final class TypeName extends StringTypeValue {
     }
 
     /**
+     * Creates a new instance with the passed class name.
+     * @param clazz the class to get name from
+     * @return new instance
+     */
+    public static TypeName of(Class<? extends Message> clazz) {
+
+        final String fullQualifiedName = clazz.getName();
+        final int dotIndex = fullQualifiedName.indexOf('.');
+        // name that matches Protobuf conventions (proto type url)
+        final String protoClassName = fullQualifiedName.substring(dotIndex + 1);
+        return of(protoClassName);
+    }
+
+    /**
      * Obtains the type name of the message enclosed into passed instance of {@link Any}.
      *
      * <p>The type name is the string coming after "type.googleapis.com/" in the URL

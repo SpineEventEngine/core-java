@@ -1,0 +1,36 @@
+<component name="ProjectDictionaryState">
+  <dictionary name="common">
+    <words>
+      <w>arraybuffer</w>
+      <w>bytebuffer</w>
+      <w>closeables</w>
+      <w>dataset</w>
+      <w>datastore</w>
+      <w>datastores</w>
+      <w>deserialized</w>
+      <w>escaper</w>
+      <w>flushables</w>
+      <w>googleapis</w>
+      <w>grpc</w>
+      <w>handshaker</w>
+      <w>liskov</w>
+      <w>melnik</w>
+      <w>mergeable</w>
+      <w>mikhaylov</w>
+      <w>millisecs</w>
+      <w>onclose</w>
+      <w>oneof</w>
+      <w>onmessage</w>
+      <w>onopen</w>
+      <w>parameterizing</w>
+      <w>proto's</w>
+      <w>protos</w>
+      <w>stderr</w>
+      <w>testutil</w>
+      <w>threeten</w>
+      <w>unregisters</w>
+      <w>websocket</w>
+      <w>yevsyukov</w>
+    </words>
+  </dictionary>
+</component>
