@@ -49,11 +49,13 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             .host(DEFAULT_HOST)
             .build();
 
-    private static final String GCD_HOME = retrieveGcdHome();
-
     private static final String OPTION_TESTING_MODE = "testing";
 
-    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = "GCD_HOME environment variable is not configured. " +
+    public static final String VAR_NAME_GCD_HOME = "GCD_HOME";
+
+    private static final String GCD_HOME_PATH = retrieveGcdHome();
+
+    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
                     "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
     private final LocalDevelopmentDatastore localDatastore;
@@ -104,7 +106,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         if (!IS_WINDOWS) {
             try {
-                localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+                localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
             } catch (LocalDevelopmentDatastoreException e) {
                 propagate(e);
             }
@@ -146,7 +148,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private static String retrieveGcdHome() {
-        final String gcdHome = System.getenv("GCD_HOME");
+        final String gcdHome = System.getenv(VAR_NAME_GCD_HOME);
         checkState(gcdHome != null, ENVIRONMENT_NOT_CONFIGURED_MESSAGE);
         return gcdHome;
     }

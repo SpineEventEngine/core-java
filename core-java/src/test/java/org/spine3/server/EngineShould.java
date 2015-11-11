@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
@@ -66,7 +67,7 @@ public class EngineShould {
     @Before
     public void setUp() {
 
-        Engine.start(InMemoryStorageFactory.getInstance());
+        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
     }
 
     @After
@@ -87,7 +88,7 @@ public class EngineShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_start_running_engine() {
 
-        Engine.start(InMemoryStorageFactory.getInstance());
+        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
     }
 
     @Test
@@ -233,6 +234,7 @@ public class EngineShould {
         }
     }
 
+    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
     private static class EmptyHandler {
 
         @Subscribe

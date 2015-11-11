@@ -22,6 +22,7 @@ package org.spine3.sample;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
@@ -98,8 +99,9 @@ public class Application {
         // Set up the storage
         storageFactory.setUp();
 
-        // Start the engine
-        Engine.start(storageFactory);
+        // Start the engine.
+        // Real applications are going to use an executor that allows for parallel execution of event handlers.
+        Engine.start(storageFactory, MoreExecutors.directExecutor());
 
         // Register repository with the engine. This will register it in the CommandDispatcher too.
         final Engine engine = Engine.getInstance();
@@ -108,6 +110,7 @@ public class Application {
         // Register event handlers
         engine.getEventBus().register(eventLogger);
 
+        //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters
         IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }

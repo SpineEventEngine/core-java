@@ -38,6 +38,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
@@ -50,15 +51,16 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
+    private EventBus eventBus;
+
     private StorageFactory storageFactory;
-
     private CommandStore commandStore;
-    private EventStore eventStore;
 
+    private EventStore eventStore;
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private Engine() {
-        // Disallow creation of instances from outside.
+        //TODO:2015-11-10:alexander.yevsyukov: Do we do it this way?
     }
 
     /**
@@ -66,7 +68,7 @@ public final class Engine {
      *
      * @return {@code Engine} instance
      * @throws IllegalStateException if the engine wasn't started before calling this method
-     * @see #start(StorageFactory)
+     * @see #start(StorageFactory, Executor)
      */
     @CheckReturnValue
     public static Engine getInstance() {
@@ -75,8 +77,9 @@ public final class Engine {
         return engine;
     }
 
-    private void doStart(StorageFactory storageFactory) {
+    private void doStart(StorageFactory storageFactory, Executor eventHandlerExecutor) {
         this.storageFactory = storageFactory;
+        this.eventBus = new EventBus(eventHandlerExecutor);
         this.commandStore = new CommandStore(storageFactory.createCommandStorage());
         this.eventStore = new EventStore(storageFactory.createEventStorage());
     }
@@ -100,13 +103,14 @@ public final class Engine {
      * without invoking {@link #stop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
+     * @param eventHandlerExecutor the executor for invoking event handlers
      * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
      */
-    public static void start(StorageFactory storageFactory) {
+    public static void start(StorageFactory storageFactory, Executor eventHandlerExecutor) {
         log().info("Starting on storage factory: " + storageFactory.getClass());
         final Engine engine = instance();
         engine.checkNotStarted();
-        engine.doStart(storageFactory);
+        engine.doStart(storageFactory, eventHandlerExecutor);
     }
 
     /**
@@ -115,6 +119,43 @@ public final class Engine {
     @CheckReturnValue
     public boolean isStarted() {
         return storageFactory != null;
+    }
+
+    /**
+     * Stops the engine.
+     * <p>
+     * This method shuts down all registered repositories. Each registered repository is:
+     * <ul>
+     * <li>un-registered from {@link CommandDispatcher}</li>
+     * <li>un-registered from {@link EventBus}</li>
+     * <li>detached from storage</li>
+     * </ul>
+     */
+    public static void stop() {
+        final Engine engine = instance();
+
+        engine.doStop();
+
+        log().info("Engine stopped.");
+    }
+
+    private void shutDownRepositories() {
+        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final EventBus eventBus = getEventBus();
+        for (Repository<?, ?> repository : repositories) {
+            dispatcher.unregister(repository);
+            eventBus.unregister(repository);
+            repository.assignStorage(null);
+        }
+        repositories.clear();
+    }
+
+    private void doStop() {
+        shutDownRepositories();
+        eventBus = null;
+        storageFactory = null;
+        commandStore = null;
+        eventStore = null;
     }
 
     /**
@@ -152,42 +193,6 @@ public final class Engine {
     }
 
     /**
-     * Stops the engine.
-     * <p>
-     * This method shuts down all registered repositories. Each registered repository is:
-     * <ul>
-     * <li>un-registered from {@link CommandDispatcher}</li>
-     * <li>un-registered from {@link EventBus}</li>
-     * <li>detached from storage</li>
-     * </ul>
-     */
-    public static void stop() {
-        final Engine engine = instance();
-
-        engine.doStop();
-
-        log().info("Engine stopped.");
-    }
-
-    private void shutDownRepositories() {
-        final CommandDispatcher dispatcher = getCommandDispatcher();
-        final EventBus eventBus = getEventBus();
-        for (Repository<?, ?> repository : repositories) {
-            dispatcher.unregister(repository);
-            eventBus.unregister(repository);
-            repository.assignStorage(null);
-        }
-        repositories.clear();
-    }
-
-    private void doStop() {
-        shutDownRepositories();
-        storageFactory = null;
-        commandStore = null;
-        eventStore = null;
-    }
-
-    /**
      * Processed the incoming command requests.
      * <p>
      * This method is the entry point of a command in to a backend of an application.
@@ -196,7 +201,7 @@ public final class Engine {
      *
      * @param request incoming command request to handle
      * @return the result of command handling
-     * @see #start(StorageFactory)
+     * @see #start(StorageFactory, Executor)
      */
     @CheckReturnValue
     public CommandResult process(CommandRequest request) {
@@ -262,11 +267,11 @@ public final class Engine {
      * Convenience method for obtaining instance of {@link EventBus}.
      *
      * @return instance of {@code EventBus} used in the application
-     * @see EventBus#getInstance()
      */
     @CheckReturnValue
     public EventBus getEventBus() {
-        return EventBus.getInstance();
+        //TODO:2015-11-10:alexander.yevsyukov: Have eventBus as a parameter passed to the engine or created by the engine depending on the environment we run in.
+        return this.eventBus;
     }
 
     private static Engine instance() {

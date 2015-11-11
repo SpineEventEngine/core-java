@@ -42,6 +42,8 @@ public interface StorageFactory {
      */
     EventStorage createEventStorage();
 
+    //TODO:2015-11-10:alexander.yevsyukov: This parameter is used only for FileSystemStorage. Can we eliminate it then?
+    // Why isn't it used? It doesn't look logical.
     /**
      * Creates a new {@link AggregateStorage} instance.
      */
