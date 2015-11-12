@@ -77,9 +77,9 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     /**
-     * Starts the local Datastore server in testing mode.
+     * Intended to start the local Datastore server in testing mode.
      * <p>
-     * NOTE: does nothing for now because of several issues.
+     * NOTE: does nothing for now because of several issues:
      * <ul>
      *     <li>
      *         This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
@@ -91,7 +91,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      *     </li>
      * </ul>
      * <p>
-     * Start local Datastore Server manually.
+     * Until these issues are not fixed, it is required to start the local Datastore Server manually.
      * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
@@ -104,6 +104,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         super.setUp();
 
+        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified above are fixed
         /*try {
             localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
@@ -112,9 +113,9 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     /**
-     * Clears all data and stops the local Datastore server.
+     * Clears all data in the local Datastore.
      * <p>
-     * NOTE: does nothing for now because of several issues. See {@link #setUp()} method docs.
+     * NOTE: does not stop the server because of several issues. See {@link #setUp()} method doc for details.
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
      */
@@ -125,6 +126,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         clear();
 
+        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified in setUp method javadoc are fixed
         /*try {
             localDatastore.stop();
         } catch (LocalDevelopmentDatastoreException e) {
