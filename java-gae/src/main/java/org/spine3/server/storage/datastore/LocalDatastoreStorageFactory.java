@@ -34,13 +34,6 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("CallToSystemGetenv")
 public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
-    /**
-     * TODO:2015.10.07:alexander.litus: remove OS checking when this issue is fixed:
-     * https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670
-     */
-    @SuppressWarnings("AccessOfSystemProperties")
-    private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
-
     private static final String DEFAULT_DATASET_NAME = "spine-local-dataset";
     private static final String DEFAULT_HOST = "http://localhost:8080";
 
@@ -51,7 +44,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
     private static final String GCD_HOME = retrieveGcdHome();
 
-    private static final String OPTION_TESTING_MODE = "testing";
+    private static final String OPTION_TESTING_MODE = "--testing";
 
     private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = "GCD_HOME environment variable is not configured. " +
                     "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
@@ -86,10 +79,19 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     /**
      * Starts the local Datastore server in testing mode.
      * <p>
-     * NOTE: does nothing on Windows. Reported an issue
-     * <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">here</a>.
+     * NOTE: does nothing for now because of several issues.
+     * <ul>
+     *     <li>
+     *         This <a href="https://github.com/GoogleCloudPlatform/google-cloud-datastore/commit/a077c5b4d6fa2826fd6c376b692686894b719fd9">commit</a>
+     *         seems to fix the first issue, but there is no release with this fix available yet.
+     *     </li>
+     *     <li>
+     *         Also fails to start on Windows:
+     *         <a href="https://code.google.com/p/google-cloud-platform/issues/detail?id=10&thanks=10&ts=1443682670">issue</a>.
+     *     </li>
+     * </ul>
      * <p>
-     * Start local Datastore Server manually on Windows.
+     * Start local Datastore Server manually.
      * See <a href="https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment">docs</a> for details.<br>
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#start(String, String, String...)}
@@ -102,17 +104,17 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         super.setUp();
 
-        if (!IS_WINDOWS) {
-            try {
-                localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
-            } catch (LocalDevelopmentDatastoreException e) {
-                propagate(e);
-            }
-        }
+        /*try {
+            localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+        } catch (LocalDevelopmentDatastoreException e) {
+            propagate(e);
+        }*/
     }
 
     /**
      * Clears all data and stops the local Datastore server.
+     * <p>
+     * NOTE: does nothing for now because of several issues. See {@link #setUp()} method docs.
      *
      * @throws RuntimeException if {@link LocalDevelopmentDatastore#stop()} throws LocalDevelopmentDatastoreException.
      */
@@ -123,13 +125,11 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         clear();
 
-        if (!IS_WINDOWS) {
-            try {
-                localDatastore.stop();
-            } catch (LocalDevelopmentDatastoreException e) {
-                propagate(e);
-            }
-        }
+        /*try {
+            localDatastore.stop();
+        } catch (LocalDevelopmentDatastoreException e) {
+            propagate(e);
+        }*/
     }
 
     /**
