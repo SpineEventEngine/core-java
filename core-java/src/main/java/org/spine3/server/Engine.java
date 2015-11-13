@@ -30,7 +30,6 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
@@ -79,7 +78,10 @@ public final class Engine {
 
     private void doStart(StorageFactory storageFactory, Executor eventHandlerExecutor) {
         this.storageFactory = storageFactory;
-        this.eventBus = new EventBus(eventHandlerExecutor);
+
+        //TODO:2015-11-10:alexander.yevsyukov: Have eventBus as a parameter passed to the engine or created by the engine depending on the environment we run in.
+
+        this.eventBus = EventBus.newInstance(eventHandlerExecutor);
         this.commandStore = new CommandStore(storageFactory.createCommandStorage());
         this.eventStore = new EventStore(storageFactory.createEventStorage());
     }
@@ -131,31 +133,22 @@ public final class Engine {
      * <li>detached from storage</li>
      * </ul>
      */
-    public static void stop() {
-        final Engine engine = instance();
+    public void stop() {
+        shutDownRepositories();
 
-        engine.doStop();
+        this.eventBus = null;
+        this.storageFactory = null;
+        this.commandStore = null;
+        this.eventStore = null;
 
         log().info("Engine stopped.");
     }
 
     private void shutDownRepositories() {
-        final CommandDispatcher dispatcher = getCommandDispatcher();
-        final EventBus eventBus = getEventBus();
         for (Repository<?, ?> repository : repositories) {
-            dispatcher.unregister(repository);
-            eventBus.unregister(repository);
-            repository.assignStorage(null);
+            unregister(repository);
         }
         repositories.clear();
-    }
-
-    private void doStop() {
-        shutDownRepositories();
-        eventBus = null;
-        storageFactory = null;
-        commandStore = null;
-        eventStore = null;
     }
 
     /**
@@ -174,22 +167,33 @@ public final class Engine {
      * @param <E>        the type of entities or aggregates
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        if (repository instanceof AggregateRepository) {
-            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
-
-            final AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
-            repository.assignStorage(aggregateStorage);
-        } else {
-            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
-
-            final EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
-            repository.assignStorage(entityStorage);
-        }
+        assignStorage(repository);
 
         repositories.add(repository);
 
         getCommandDispatcher().register(repository);
         getEventBus().register(repository);
+    }
+
+    private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
+        final Object storage;
+        final Class<? extends Repository> repositoryClass = repository.getClass();
+        if (repository instanceof AggregateRepository) {
+            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repositoryClass);
+
+            storage = storageFactory.createAggregateStorage(aggregateClass);
+        } else {
+            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repositoryClass);
+
+            storage = storageFactory.createEntityStorage(entityClass);
+        }
+        repository.assignStorage(storage);
+    }
+
+    private void unregister(Repository<?, ?> repository) {
+        getCommandDispatcher().unregister(repository);
+        getEventBus().unregister(repository);
+        repository.assignStorage(null);
     }
 
     /**
@@ -210,6 +214,7 @@ public final class Engine {
 
         store(request);
 
+        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchroniously
         final CommandResult result = dispatch(request);
         storeAndPost(result.getEventRecordList());
 
@@ -220,8 +225,8 @@ public final class Engine {
         commandStore.store(request);
     }
 
-    private static CommandResult dispatch(CommandRequestOrBuilder request) {
-        final CommandDispatcher dispatcher = CommandDispatcher.getInstance();
+    private CommandResult dispatch(CommandRequestOrBuilder request) {
+        final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
             final Message command = Messages.fromAny(request.getCommand());
             final CommandContext context = request.getContext();
@@ -270,7 +275,6 @@ public final class Engine {
      */
     @CheckReturnValue
     public EventBus getEventBus() {
-        //TODO:2015-11-10:alexander.yevsyukov: Have eventBus as a parameter passed to the engine or created by the engine depending on the environment we run in.
         return this.eventBus;
     }
 

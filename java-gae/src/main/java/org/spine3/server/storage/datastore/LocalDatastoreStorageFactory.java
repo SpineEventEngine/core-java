@@ -108,7 +108,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
 
         // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified above are fixed
         /*try {
-            localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+            localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
         }*/

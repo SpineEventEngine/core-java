@@ -21,6 +21,7 @@ package org.spine3.eventbus;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,34 @@ public class EventBus {
      */
     private final Executor executor;
 
-    public EventBus(Executor executor) {
+    /**
+     * Creates instance with the passed executor for invoking event handlers.
+     *
+     * @param executor the executor for invoking event handlers
+     */
+    protected EventBus(Executor executor) {
         this.executor = checkNotNull(executor);
+    }
+
+    /**
+     * Creates a new instance configured with the direct executor for invoking handlers.
+     *
+     * @return new EventBus instance
+     */
+    public static EventBus newInstance() {
+        final EventBus result = new EventBus(MoreExecutors.directExecutor());
+        return result;
+    }
+
+    /**
+     * Creates a new instance with the passed executor for invoking handlers.
+     *
+     * @param executor the executor for invoking event handlers
+     * @return a new EventBus instance
+     */
+    public static EventBus newInstance(Executor executor) {
+        final EventBus result = new EventBus(executor);
+        return result;
     }
 
     /**

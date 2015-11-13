@@ -66,23 +66,16 @@ public class EngineShould {
 
     @Before
     public void setUp() {
-
         Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
     }
 
     @After
     public void tearDown() {
+        final Engine engine = Engine.getInstance();
         if (handlersRegistered) {
-            Engine.getInstance().getEventBus().unregister(handler);
+            engine.getEventBus().unregister(handler);
         }
-        Engine.stop();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_not_started_and_try_to_get_instance() {
-
-        Engine.stop();
-        Engine.getInstance();
+        engine.stop();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -93,20 +86,17 @@ public class EngineShould {
 
     @Test
     public void return_instance_if_started() {
-
         final Engine engine = Engine.getInstance();
         assertNotNull(engine);
     }
 
     @Test
     public void return_EventBus() {
-
         assertNotNull(Engine.getInstance().getEventBus());
     }
 
     @Test
     public void return_CommandDispatcher() {
-
         assertNotNull(Engine.getInstance().getCommandDispatcher());
     }
 
@@ -118,26 +108,22 @@ public class EngineShould {
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-
         Engine.getInstance().process(createProject());
     }
 
     @Test
     public void register_test_repositories_and_handlers() {
-
         registerAll();
     }
 
     @Test
     public void return_true_if_started() {
-
         final boolean isStarted = Engine.getInstance().isStarted();
         assertTrue(isStarted);
     }
 
     @Test
     public void process_one_command_and_return_appropriate_result() {
-
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
@@ -148,7 +134,6 @@ public class EngineShould {
 
     @Test
     public void process_several_commands_and_return_appropriate_results() {
-
         registerAll();
         final List<CommandRequest> requests = generateRequests();
 
@@ -185,7 +170,6 @@ public class EngineShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-
         final Engine engine = Engine.getInstance();
         engine.register(new ProjectAggregateRepository());
         engine.register(new TestEntityRepository());

@@ -123,10 +123,11 @@ public class Application {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        Engine.getInstance().getEventBus().unregister(eventLogger);
+        final Engine engine = Engine.getInstance();
+        engine.getEventBus().unregister(eventLogger);
 
         // Stop the engine
-        Engine.stop();
+        engine.stop();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
