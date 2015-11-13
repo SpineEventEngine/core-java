@@ -31,12 +31,12 @@ import org.spine3.sample.order.event.OrderPaid;
 import org.spine3.util.Identifiers;
 
 /**
- * Sample Spine event subscriber implementation.
+ * A sample of event handler class that logs some of the events.
  *
  * @author Mikhail Melnik
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened", "UnusedParameters"})
-public class EventLogger {
+class EventLogger {
 
     private static final String NEW_LINE = System.lineSeparator();
 
