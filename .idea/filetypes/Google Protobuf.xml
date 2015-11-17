@@ -1,0 +1,18 @@
+<filetype binary="false" description="Google Protobuf" name="Google Protobuf">
+  <highlighting>
+    <options>
+      <option name="LINE_COMMENT" value="//" />
+      <option name="COMMENT_START" value="//" />
+      <option name="COMMENT_END" value="//" />
+      <option name="HEX_PREFIX" value="" />
+      <option name="NUM_POSTFIXES" value="" />
+      <option name="HAS_BRACES" value="true" />
+    </options>
+    <keywords keywords="enum;import;map;message;oneof;option;optional;package;public;repeated;required;reserved;returns;service;syntax;true" ignore_case="false" />
+    <keywords2 keywords="bool;bytes;double;fixed32;fixed64;float;int32;int64;rpc;sfixed32;sfixed64;sint32;sint64;string;uint32;uint64" />
+    <keywords3 keywords="java_generate_equals_and_hash;java_multiple_files;java_outer_classname;java_package;optimize_for" />
+  </highlighting>
+  <extensionMap>
+    <mapping ext="proto" />
+  </extensionMap>
+</filetype>
