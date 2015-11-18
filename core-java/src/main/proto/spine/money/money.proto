@@ -26,16 +26,27 @@ option java_multiple_files = true;
 option java_outer_classname = "MoneyProto";
 option java_package = "org.spine3.base";
 
-import "google/protobuf/any.proto";
-
 // Represents the amount of money.
 message MonetaryAmount {
 
-    // Represents the amount of money.
-    google.protobuf.Any amount = 1;
+    // Represents the whole amount of money (e.g. USD).
+    IntegerAmount integer = 1;
+
+    // Represents the remainder of money (e.g. cents).
+    MonetaryRemainder remainder = 2;
 
     // Represents the currency code.
-    CurrencyCode currency_code = 2;
+    CurrencyCode currency_code = 3;
+}
+
+// Represents the whole amount of money (e.g. USD).
+message IntegerAmount {
+    sint64 value = 1;
+}
+
+// Represents the remainder of money (e.g. cents).
+message MonetaryRemainder {
+    int32 value = 1;
 }
 
 // The set of ISO 4217 currency codes.
