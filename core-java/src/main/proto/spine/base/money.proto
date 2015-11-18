@@ -1,0 +1,222 @@
+//
+// Copyright 2015, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "MoneyProto";
+option java_package = "org.spine3.base";
+
+import "google/protobuf/any.proto";
+
+// Represents the amount of money.
+message MonetaryAmount {
+
+    // Represents the amount of money.
+    google.protobuf.Any amount = 1;
+
+    // Represents the currency code.
+    CurrencyCode currency_code = 2;
+}
+
+// The set of ISO 4217 currency codes.
+enum CurrencyCode {
+
+    AED = 0; // UAE Dirham
+    AFN = 1; // Afghani
+    ALL = 2; // Lek
+    AMD = 3; // Armenian Dram
+    ANG = 4; // Netherlands Antillean Guilder
+    AOA = 5; // Kwanza
+    ARS = 6; // Argentine Peso
+    AUD = 7; // Australian Dollar
+    AWG = 8; // Aruban Florin
+    AZN = 9; // Azerbaijanian Manat
+    BAM = 10; // Convertible Mark
+    BBD = 11; // Barbados Dollar
+    BDT = 12; // Taka
+    BGN = 13; // Bulgarian Lev
+    BHD = 14; // Bahraini Dinar
+    BIF = 15; // Burundi Franc
+    BMD = 16; // Bermudian Dollar
+    BND = 17; // Brunei Dollar
+    BOB = 18; // Boliviano
+    BOV = 19; // Mvdol
+    BRL = 20; // Brazilian Real
+    BSD = 21; // Bahamian Dollar
+    BTN = 22; // Ngultrum
+    BWP = 23; // Pula
+    BYR = 24; // Belarussian Ruble
+    BZD = 25; // Belize Dollar
+    CAD = 26; // Canadian Dollar
+    CDF = 27; // Congolese Franc
+    CHE = 28; // WIR Euro
+    CHF = 29; // Swiss Franc
+    CHW = 30; // WIR Franc
+    CLF = 31; // Unidad de Fomento
+    CLP = 32; // Chilean Peso
+    CNY = 33; // Yuan Renminbi
+    COP = 34; // Colombian Peso
+    COU = 35; // Unidad de Valor Real
+    CRC = 36; // Costa Rican Colon
+    CUC = 37; // Peso Convertible
+    CUP = 38; // Cuban Peso
+    CVE = 39; // Cabo Verde Escudo
+    CZK = 40; // Czech Koruna
+    DJF = 41; // Djibouti Franc
+    DKK = 42; // Danish Krone
+    DOP = 43; // Dominican Peso
+    DZD = 44; // Algerian Dinar
+    EGP = 45; // Egyptian Pound
+    ERN = 46; // Nakfa
+    ETB = 47; // Ethiopian Birr
+    EUR = 48; // Euro
+    FJD = 49; // Fiji Dollar
+    FKP = 50; // Falkland Islands Pound
+    GBP = 51; // Pound Sterling
+    GEL = 52; // Lari
+    GHS = 53; // Ghana Cedi
+    GIP = 54; // Gibraltar Pound
+    GMD = 55; // Dalasi
+    GNF = 56; // Guinea Franc
+    GTQ = 57; // Quetzal
+    GYD = 58; // Guyana Dollar
+    HKD = 59; // Hong Kong Dollar
+    HNL = 60; // Lempira
+    HRK = 61; // Kuna
+    HTG = 62; // Gourde
+    HUF = 63; // Forint
+    IDR = 64; // Rupiah
+    ILS = 65; // New Israeli Sheqel
+    INR = 66; // Indian Rupee
+    IQD = 67; // Iraqi Dinar
+    IRR = 68; // Iranian Rial
+    ISK = 69; // Iceland Krona
+    JMD = 70; // Jamaican Dollar
+    JOD = 71; // Jordanian Dinar
+    JPY = 72; // Yen
+    KES = 73; // Kenyan Shilling
+    KGS = 74; // Som
+    KHR = 75; // Riel
+    KMF = 76; // Comoro Franc
+    KPW = 77; // North Korean Won
+    KRW = 78; // Won
+    KWD = 79; // Kuwaiti Dinar
+    KYD = 80; // Cayman Islands Dollar
+    KZT = 81; // Tenge
+    LAK = 82; // Kip
+    LBP = 83; // Lebanese Pound
+    LKR = 84; // Sri Lanka Rupee
+    LRD = 85; // Liberian Dollar
+    LSL = 86; // Loti
+    LYD = 87; // Libyan Dinar
+    MAD = 88; // Moroccan Dirham
+    MDL = 89; // Moldovan Leu
+    MGA = 90; // Malagasy Ariary
+    MKD = 91; // Denar
+    MMK = 92; // Kyat
+    MNT = 93; // Tugrik
+    MOP = 94; // Pataca
+    MRO = 95; // Ouguiya
+    MUR = 96; // Mauritius Rupee
+    MVR = 97; // Rufiyaa
+    MWK = 98; // Kwacha
+    MXN = 99; // Mexican Peso
+    MXV = 100; // Mexican Unidad de Inversion (UDI)
+    MYR = 101; // Malaysian Ringgit
+    MZN = 102; // Mozambique Metical
+    NAD = 103; // Namibia Dollar
+    NGN = 104; // Naira
+    NIO = 105; // Cordoba Oro
+    NOK = 106; // Norwegian Krone
+    NPR = 107; // Nepalese Rupee
+    NZD = 108; // New Zealand Dollar
+    OMR = 109; // Rial Omani
+    PAB = 110; // Balboa
+    PEN = 111; // Nuevo Sol
+    PGK = 112; // Kina
+    PHP = 113; // Philippine Peso
+    PKR = 114; // Pakistan Rupee
+    PLN = 115; // Zloty
+    PYG = 116; // Guarani
+    QAR = 117; // Qatari Rial
+    RON = 118; // Romanian Leu
+    RSD = 119; // Serbian Dinar
+    RUB = 120; // Russian Ruble
+    RWF = 121; // Rwanda Franc
+    SAR = 122; // Saudi Riyal
+    SBD = 123; // Solomon Islands Dollar
+    SCR = 124; // Seychelles Rupee
+    SDG = 125; // Sudanese Pound
+    SEK = 126; // Swedish Krona
+    SGD = 127; // Singapore Dollar
+    SHP = 128; // Saint Helena Pound
+    SLL = 129; // Leone
+    SOS = 130; // Somali Shilling
+    SRD = 131; // Surinam Dollar
+    SSP = 132; // South Sudanese Pound
+    STD = 133; // Dobra
+    SVC = 134; // El Salvador Colon
+    SYP = 135; // Syrian Pound
+    SZL = 136; // Lilangeni
+    THB = 137; // Baht
+    TJS = 138; // Somoni
+    TMT = 139; // Turkmenistan New Manat
+    TND = 140; // Tunisian Dinar
+    TOP = 141; // Pa’anga
+    TRY = 142; // Turkish Lira
+    TTD = 143; // Trinidad and Tobago Dollar
+    TWD = 144; // New Taiwan Dollar
+    TZS = 145; // Tanzanian Shilling
+    UAH = 146; // Hryvnia
+    UGX = 147; // Uganda Shilling
+    USD = 148; // US Dollar
+    USN = 149; // US Dollar (Next day)
+    UYI = 150; // Uruguay Peso en Unidades Indexadas (URUIURUI)
+    UYU = 151; // Peso Uruguayo
+    UZS = 152; // Uzbekistan Sum
+    VEF = 153; // Bolivar
+    VND = 154; // Dong
+    VUV = 155; // Vatu
+    WST = 156; // Tala
+    XAF = 157; // CFA Franc BEAC
+    XAG = 158; // Silver
+    XAU = 159; // Gold
+    XBA = 160; // Bond Markets Unit European Composite Unit (EURCO)
+    XBB = 161; // Bond Markets Unit European Monetary Unit (E.M.U.-6)
+    XBC = 162; // Bond Markets Unit European Unit of Account 9 (E.U.A.-9)
+    XBD = 163; // Bond Markets Unit European Unit of Account 17 (E.U.A.-17)
+    XCD = 164; // East Caribbean Dollar
+    XDR = 165; // SDR (Special Drawing Right)
+    XOF = 166; // CFA Franc BCEAO
+    XPD = 167; // Palladium
+    XPF = 168; // CFP Franc
+    XPT = 169; // Platinum
+    XSU = 170; // Sucre
+    XTS = 171; // Codes specifically reserved for testing purposes
+    XUA = 172; // ADB Unit of Account
+    XXX = 173; // The codes assigned for transactions where no currency is involved
+    YER = 174; // Yemeni Rial
+    ZAR = 175; // Rand
+    ZMW = 176; // Zambian Kwacha
+    ZWL = 177; // Zimbabwe Dollar
+}
