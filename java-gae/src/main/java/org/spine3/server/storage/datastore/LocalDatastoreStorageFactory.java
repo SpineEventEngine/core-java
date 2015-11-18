@@ -103,15 +103,13 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @Override
     public void setUp() {
-
         super.setUp();
-
-        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified above are fixed
-        /*try {
+        if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
+        try {
             localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
-        }*/
+        }
     }
 
     /**
@@ -123,17 +121,14 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @Override
     public void tearDown() {
-
         super.tearDown();
-
         clear();
-
-        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified in setUp method javadoc are fixed
-        /*try {
+        if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
+        try {
             localDatastore.stop();
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
-        }*/
+        }
     }
 
     /**
