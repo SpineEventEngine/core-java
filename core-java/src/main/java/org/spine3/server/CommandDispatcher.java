@@ -44,6 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
+    //TODO:2015-11-10:alexander.yevsyukov: Extract Registry class
     private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
 
     /**
@@ -62,12 +63,14 @@ public class CommandDispatcher {
     public void register(Object object) {
         checkNotNull(object);
         final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+        //TODO:2015-11-10:alexander.yevsyukov: Do we throw IllegalArgumentException if non handlers are discovered?
         registerMap(handlers);
     }
 
     public void unregister(Object object) {
         checkNotNull(object);
         final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
+        //TODO:2015-11-10:alexander.yevsyukov: Do we throw IllegalArgumentException if non handlers are discovered?
         unregisterMap(subscribers);
     }
 
@@ -147,7 +150,7 @@ public class CommandDispatcher {
     }
 
     @CheckReturnValue
-    public boolean handlerRegistered(CommandClass cls) {
+    private boolean handlerRegistered(CommandClass cls) {
         return handlersByClass.containsKey(cls);
     }
 

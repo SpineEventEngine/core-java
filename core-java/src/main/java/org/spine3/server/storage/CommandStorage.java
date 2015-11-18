@@ -28,6 +28,8 @@ import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.util.Commands;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A storage used by {@link org.spine3.server.CommandStore} for keeping command data.
  *
@@ -37,6 +39,9 @@ public abstract class CommandStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {
+        checkNotNull(aggregateId, AggregateId.PARAM_NAME);
+        checkNotNull(request, "request");
+
         final Any command = request.getCommand();
         final CommandContext context = request.getContext();
         final TypeName commandType = TypeName.ofEnclosed(command);

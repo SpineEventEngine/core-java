@@ -52,6 +52,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class AggregateId<I> {
 
+    /**
+     * The standard name for properties holding an ID of an aggregate.
+     */
+    public static final String PROPERTY_NAME = "aggregateId";
+
+    /**
+     * The standard name for a parameter containing an aggregte ID.
+     */
+    public static final String PARAM_NAME = PROPERTY_NAME;
+
+    /**
+     * The value of the id.
+     */
     private final I value;
 
     private AggregateId(I value) {

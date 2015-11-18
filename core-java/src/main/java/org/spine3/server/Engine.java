@@ -30,7 +30,6 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
@@ -38,6 +37,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
@@ -50,15 +50,16 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
+    private EventBus eventBus;
+
     private StorageFactory storageFactory;
-
     private CommandStore commandStore;
-    private EventStore eventStore;
 
+    private EventStore eventStore;
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private Engine() {
-        // Disallow creation of instances from outside.
+        //TODO:2015-11-10:alexander.yevsyukov: Do we do it this way?
     }
 
     /**
@@ -66,7 +67,7 @@ public final class Engine {
      *
      * @return {@code Engine} instance
      * @throws IllegalStateException if the engine wasn't started before calling this method
-     * @see #start(StorageFactory)
+     * @see #start(StorageFactory, Executor)
      */
     @CheckReturnValue
     public static Engine getInstance() {
@@ -75,8 +76,12 @@ public final class Engine {
         return engine;
     }
 
-    private void doStart(StorageFactory storageFactory) {
+    private void doStart(StorageFactory storageFactory, Executor eventHandlerExecutor) {
         this.storageFactory = storageFactory;
+
+        //TODO:2015-11-10:alexander.yevsyukov: Have eventBus as a parameter passed to the engine or created by the engine depending on the environment we run in.
+
+        this.eventBus = EventBus.newInstance(eventHandlerExecutor);
         this.commandStore = new CommandStore(storageFactory.createCommandStorage());
         this.eventStore = new EventStore(storageFactory.createEventStorage());
     }
@@ -100,13 +105,14 @@ public final class Engine {
      * without invoking {@link #stop()} will cause {@code IllegalStateException}
      *
      * @param storageFactory the factory to be used for creating application data storages
+     * @param eventHandlerExecutor the executor for invoking event handlers
      * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
      */
-    public static void start(StorageFactory storageFactory) {
+    public static void start(StorageFactory storageFactory, Executor eventHandlerExecutor) {
         log().info("Starting on storage factory: " + storageFactory.getClass());
         final Engine engine = instance();
         engine.checkNotStarted();
-        engine.doStart(storageFactory);
+        engine.doStart(storageFactory, eventHandlerExecutor);
     }
 
     /**
@@ -115,6 +121,34 @@ public final class Engine {
     @CheckReturnValue
     public boolean isStarted() {
         return storageFactory != null;
+    }
+
+    /**
+     * Stops the engine.
+     * <p>
+     * This method shuts down all registered repositories. Each registered repository is:
+     * <ul>
+     * <li>un-registered from {@link CommandDispatcher}</li>
+     * <li>un-registered from {@link EventBus}</li>
+     * <li>detached from storage</li>
+     * </ul>
+     */
+    public void stop() {
+        shutDownRepositories();
+
+        this.eventBus = null;
+        this.storageFactory = null;
+        this.commandStore = null;
+        this.eventStore = null;
+
+        log().info("Engine stopped.");
+    }
+
+    private void shutDownRepositories() {
+        for (Repository<?, ?> repository : repositories) {
+            unregister(repository);
+        }
+        repositories.clear();
     }
 
     /**
@@ -133,17 +167,7 @@ public final class Engine {
      * @param <E>        the type of entities or aggregates
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        if (repository instanceof AggregateRepository) {
-            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repository.getClass());
-
-            final AggregateStorage<I> aggregateStorage = storageFactory.createAggregateStorage(aggregateClass);
-            repository.assignStorage(aggregateStorage);
-        } else {
-            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repository.getClass());
-
-            final EntityStorage entityStorage = storageFactory.createEntityStorage(entityClass);
-            repository.assignStorage(entityStorage);
-        }
+        assignStorage(repository);
 
         repositories.add(repository);
 
@@ -151,40 +175,25 @@ public final class Engine {
         getEventBus().register(repository);
     }
 
-    /**
-     * Stops the engine.
-     * <p>
-     * This method shuts down all registered repositories. Each registered repository is:
-     * <ul>
-     * <li>un-registered from {@link CommandDispatcher}</li>
-     * <li>un-registered from {@link EventBus}</li>
-     * <li>detached from storage</li>
-     * </ul>
-     */
-    public static void stop() {
-        final Engine engine = instance();
+    private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
+        final Object storage;
+        final Class<? extends Repository> repositoryClass = repository.getClass();
+        if (repository instanceof AggregateRepository) {
+            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repositoryClass);
 
-        engine.doStop();
+            storage = storageFactory.createAggregateStorage(aggregateClass);
+        } else {
+            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repositoryClass);
 
-        log().info("Engine stopped.");
-    }
-
-    private void shutDownRepositories() {
-        final CommandDispatcher dispatcher = getCommandDispatcher();
-        final EventBus eventBus = getEventBus();
-        for (Repository<?, ?> repository : repositories) {
-            dispatcher.unregister(repository);
-            eventBus.unregister(repository);
-            repository.assignStorage(null);
+            storage = storageFactory.createEntityStorage(entityClass);
         }
-        repositories.clear();
+        repository.assignStorage(storage);
     }
 
-    private void doStop() {
-        shutDownRepositories();
-        storageFactory = null;
-        commandStore = null;
-        eventStore = null;
+    private void unregister(Repository<?, ?> repository) {
+        getCommandDispatcher().unregister(repository);
+        getEventBus().unregister(repository);
+        repository.assignStorage(null);
     }
 
     /**
@@ -196,7 +205,7 @@ public final class Engine {
      *
      * @param request incoming command request to handle
      * @return the result of command handling
-     * @see #start(StorageFactory)
+     * @see #start(StorageFactory, Executor)
      */
     @CheckReturnValue
     public CommandResult process(CommandRequest request) {
@@ -205,6 +214,7 @@ public final class Engine {
 
         store(request);
 
+        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchroniously
         final CommandResult result = dispatch(request);
         storeAndPost(result.getEventRecordList());
 
@@ -215,8 +225,8 @@ public final class Engine {
         commandStore.store(request);
     }
 
-    private static CommandResult dispatch(CommandRequestOrBuilder request) {
-        final CommandDispatcher dispatcher = CommandDispatcher.getInstance();
+    private CommandResult dispatch(CommandRequestOrBuilder request) {
+        final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
             final Message command = Messages.fromAny(request.getCommand());
             final CommandContext context = request.getContext();
@@ -232,12 +242,20 @@ public final class Engine {
     }
 
     private void storeAndPost(Iterable<EventRecord> records) {
-        final EventBus eventBus = EventBus.getInstance();
         for (EventRecord record : records) {
             eventStore.store(record);
-            eventBus.post(record);
+            post(record);
         }
     }
+
+    private void post(EventRecordOrBuilder eventRecord) {
+        final EventBus eventBus = getEventBus();
+        final Message event = Events.getEvent(eventRecord);
+        final EventContext context = eventRecord.getContext();
+
+        eventBus.post(event, context);
+    }
+
 
     /**
      * Convenience method for obtaining instance of {@link CommandDispatcher}.
@@ -254,11 +272,10 @@ public final class Engine {
      * Convenience method for obtaining instance of {@link EventBus}.
      *
      * @return instance of {@code EventBus} used in the application
-     * @see EventBus#getInstance()
      */
     @CheckReturnValue
     public EventBus getEventBus() {
-        return EventBus.getInstance();
+        return this.eventBus;
     }
 
     private static Engine instance() {

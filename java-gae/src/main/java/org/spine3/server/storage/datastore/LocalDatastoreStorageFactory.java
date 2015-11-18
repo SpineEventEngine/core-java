@@ -42,11 +42,13 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
             .host(DEFAULT_HOST)
             .build();
 
-    private static final String GCD_HOME = retrieveGcdHome();
-
     private static final String OPTION_TESTING_MODE = "--testing";
 
-    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = "GCD_HOME environment variable is not configured. " +
+    public static final String VAR_NAME_GCD_HOME = "GCD_HOME";
+
+    private static final String GCD_HOME_PATH = retrieveGcdHome();
+
+    private static final String ENVIRONMENT_NOT_CONFIGURED_MESSAGE = VAR_NAME_GCD_HOME + " environment variable is not configured. " +
                     "See https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment";
 
     private final LocalDevelopmentDatastore localDatastore;
@@ -101,15 +103,13 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @Override
     public void setUp() {
-
         super.setUp();
-
-        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified above are fixed
-        /*try {
-            localDatastore.start(GCD_HOME, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
+        if (false) // TODO:2015-11-12:alexander.litus: Remove the condition when issues specified above are fixed
+        try {
+            localDatastore.start(GCD_HOME_PATH, DEFAULT_DATASET_NAME, OPTION_TESTING_MODE);
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
-        }*/
+        }
     }
 
     /**
@@ -121,17 +121,14 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
      */
     @Override
     public void tearDown() {
-
         super.tearDown();
-
         clear();
-
-        // TODO:2015-11-12:alexander.litus: uncomment this code when issues specified in setUp method javadoc are fixed
-        /*try {
+        if (false) // TODO:2015-11-12:alexander.litus: remove the condition when issues specified in setUp method javadoc are fixed
+        try {
             localDatastore.stop();
         } catch (LocalDevelopmentDatastoreException e) {
             propagate(e);
-        }*/
+        }
     }
 
     /**
@@ -148,7 +145,7 @@ public class LocalDatastoreStorageFactory extends DatastoreStorageFactory {
     }
 
     private static String retrieveGcdHome() {
-        final String gcdHome = System.getenv("GCD_HOME");
+        final String gcdHome = System.getenv(VAR_NAME_GCD_HOME);
         checkState(gcdHome != null, ENVIRONMENT_NOT_CONFIGURED_MESSAGE);
         return gcdHome;
     }

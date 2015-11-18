@@ -23,35 +23,23 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "UserProto";
+option java_outer_classname = "PersonName";
 option java_package = "org.spine3.base";
 
-import public "spine/base/user_id.proto";
-import public "spine/base/email.proto";
+// A full name of a person.
+message PersonName {
+  // The honorific prefix (such as "Dr." or "Prof.") for this person.
+  string honorific_prefix = 1;
 
-// A link to the user's photo.
-message PhotoLink {
-  // The address of an image in one of the popular image formats.
-  string url = 1;
-}
-
-// General information about a human user.
-message User {
-  // An identifier of the user in the system.
-  UserId id = 1;
-
-  // A user name to be displayed on the screen.
+  // The given (first) name of the person.
   string given_name = 2;
 
-  // A family name of the user.
-  string family_name = 3;
+  // The middle name or the patronymic of this person.
+  string middle_name = 3;
 
-  // Email address of the user.
-  EmailAddress email = 4;
+  // The family (last) name of the person.
+  string family_name = 4;
 
-  // A reference to the user photo.
-  PhotoLink photo = 5;
-
-  // Flag to say if this user is the administrator of the domain.
-  bool domain_admin = 6;
+  // The honorific suffixes (such as "Jr.") for this person.
+  string honorific_suffix = 5;
 }

@@ -22,11 +22,11 @@ package org.spine3.sample;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.Engine;
@@ -99,15 +99,18 @@ public class Application {
         // Set up the storage
         storageFactory.setUp();
 
-        // Start the engine
-        Engine.start(storageFactory);
+        // Start the engine.
+        // Real applications are going to use an executor that allows for parallel execution of event handlers.
+        Engine.start(storageFactory, MoreExecutors.directExecutor());
 
         // Register repository with the engine. This will register it in the CommandDispatcher too.
-        Engine.getInstance().register(new OrderRepository());
+        final Engine engine = Engine.getInstance();
+        engine.register(new OrderRepository());
 
         // Register event handlers
-        EventBus.getInstance().register(eventLogger);
+        engine.getEventBus().register(eventLogger);
 
+        //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters
         IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }
@@ -120,10 +123,11 @@ public class Application {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        EventBus.getInstance().unregister(eventLogger);
+        final Engine engine = Engine.getInstance();
+        engine.getEventBus().unregister(eventLogger);
 
         // Stop the engine
-        Engine.stop();
+        engine.stop();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.

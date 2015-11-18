@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.datastore;
 
+import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -43,7 +44,6 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class DsAggregateStorage<I> extends AggregateStorage<I> {
 
-    private static final String AGGREGATE_ID_PROPERTY_NAME = "aggregateId";
     private static final String KIND = AggregateStorageRecord.class.getName();
     private static final String TYPE_URL = toTypeUrl(AggregateStorageRecord.getDescriptor());
 
@@ -61,7 +61,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected void write(AggregateStorageRecord record) {
 
         final Value.Builder idValue = makeValue(record.getAggregateId());
-        final Property.Builder idProperty = makeProperty(AGGREGATE_ID_PROPERTY_NAME, idValue);
+        final Property.Builder idProperty = makeProperty(AggregateId.PROPERTY_NAME, idValue);
         final Entity.Builder entity = messageToEntity(record, makeKey(KIND));
         entity.addProperty(idProperty);
         entity.addProperty(makeTimestampProperty(record.getTimestamp()));
@@ -74,7 +74,7 @@ class DsAggregateStorage<I> extends AggregateStorage<I> {
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
 
         final String idString = idToString(id);
-        final Filter.Builder idFilter = makeFilter(AGGREGATE_ID_PROPERTY_NAME, EQUAL, makeValue(idString));
+        final Filter.Builder idFilter = makeFilter(AggregateId.PROPERTY_NAME, EQUAL, makeValue(idString));
         final Query.Builder query = makeQuery(DESCENDING, KIND);
         query.setFilter(idFilter).build();
 

@@ -20,17 +20,16 @@
 
 package org.spine3.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
-import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.aggregate.AggregateShould;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
@@ -61,54 +60,43 @@ public class EngineShould {
 
     private final UserId userId = Users.newUserId("test_user");
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
-    private final EventSubscriber eventSubscriber = new EventSubscriber();
+    private final EmptyHandler handler = new EmptyHandler();
 
     private boolean handlersRegistered = false;
 
     @Before
     public void setUp() {
-
-        Engine.start(InMemoryStorageFactory.getInstance());
+        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
     }
 
     @After
     public void tearDown() {
-
-        Engine.stop();
+        final Engine engine = Engine.getInstance();
         if (handlersRegistered) {
-            EventBus.getInstance().unregister(eventSubscriber);
+            engine.getEventBus().unregister(handler);
         }
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_not_started_and_try_to_get_instance() {
-
-        Engine.stop();
-        Engine.getInstance();
+        engine.stop();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_start_running_engine() {
 
-        Engine.start(InMemoryStorageFactory.getInstance());
+        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
     }
 
     @Test
     public void return_instance_if_started() {
-
         final Engine engine = Engine.getInstance();
         assertNotNull(engine);
     }
 
     @Test
     public void return_EventBus() {
-
         assertNotNull(Engine.getInstance().getEventBus());
     }
 
     @Test
     public void return_CommandDispatcher() {
-
         assertNotNull(Engine.getInstance().getCommandDispatcher());
     }
 
@@ -120,35 +108,22 @@ public class EngineShould {
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-
         Engine.getInstance().process(createProject());
-    }
-
-    @Test(expected = MissingEventApplierException.class)
-    public void throw_exception_if_not_register_any_event_handlers_and_try_to_process_command() {
-
-        final Engine engine = Engine.getInstance();
-        engine.register(new ProjectAggregateRepository());
-
-        engine.process(createProject());
     }
 
     @Test
     public void register_test_repositories_and_handlers() {
-
         registerAll();
     }
 
     @Test
     public void return_true_if_started() {
-
         final boolean isStarted = Engine.getInstance().isStarted();
         assertTrue(isStarted);
     }
 
     @Test
     public void process_one_command_and_return_appropriate_result() {
-
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
@@ -159,7 +134,6 @@ public class EngineShould {
 
     @Test
     public void process_several_commands_and_return_appropriate_results() {
-
         registerAll();
         final List<CommandRequest> requests = generateRequests();
 
@@ -196,10 +170,10 @@ public class EngineShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-
-        Engine.getInstance().register(new ProjectAggregateRepository());
-        Engine.getInstance().register(new TestEntityRepository());
-        EventBus.getInstance().register(eventSubscriber);
+        final Engine engine = Engine.getInstance();
+        engine.register(new ProjectAggregateRepository());
+        engine.register(new TestEntityRepository());
+        engine.getEventBus().register(handler);
         handlersRegistered = true;
     }
 
@@ -244,7 +218,8 @@ public class EngineShould {
         }
     }
 
-    private static class EventSubscriber {
+    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
+    private static class EmptyHandler {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
