@@ -1,0 +1,204 @@
+//
+// Copyright 2015, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "MoneyProto";
+option java_package = "org.spine3.base";
+
+// Represents money.
+message Money {
+
+    // Represents the amount of money.
+    double monetary_amount = 1;
+
+    // Represents the currency code.
+    CurrencyCode currency_code = 2;
+}
+
+// The set of ISO 4217 currency codes.
+enum CurrencyCode {
+
+    AED = 0; // United Arab Emirates Dirham
+    AFN = 1; // Afghanistan Afghani
+    ALL = 2; // Albania Lek
+    AMD = 3; // Armenia Dram
+    ANG = 4; // Netherlands Antilles Guilder
+    AOA = 5; // Angola Kwanza
+    ARS = 6; // Argentina Peso
+    AUD = 7; // Australia Dollar
+    AWG = 8; // Aruba Guilder
+    AZN = 9; // Azerbaijan New Manat
+    BAM = 10; // Bosnia and Herzegovina Convertible Marka
+    BBD = 11; // Barbados Dollar
+    BDT = 12; // Bangladesh Taka
+    BGN = 14; // Bulgaria Lev
+    BHD = 15; // Bahrain Dinar
+    BIF = 16; // Burundi Franc
+    BMD = 17; // Bermuda Dollar
+    BND = 18; // Brunei Darussalam Dollar
+    BOB = 19; // Bolivia Boliviano
+    BRL = 20; // Brazil Real
+    BSD = 21; // Bahamas Dollar
+    BTN = 22; // Bhutan Ngultrum
+    BWP = 23; // Botswana Pula
+    BYR = 24; // Belarus Ruble
+    BZD = 25; // Belize Dollar
+    CAD = 26; // Canada Dollar
+    CDF = 27; // Congo/Kinshasa Franc
+    CHF = 28; // Switzerland Franc
+    CLP = 29; // Chile Peso
+    CNY = 30; // China Yuan Renminbi
+    COP = 31; // Colombia Peso
+    CRC = 32; // Costa Rica Colon
+    CUC = 33; // Cuba Convertible Peso
+    CUP = 34; // Cuba Peso
+    CVE = 35; // Cape Verde Escudo
+    CZK = 36; // Czech Republic Koruna
+    DJF = 37; // Djibouti Franc
+    DKK = 38; // Denmark Krone
+    DOP = 39; // Dominican Republic Peso
+    DZD = 40; // Algeria Dinar
+    EGP = 41; // Egypt Pound
+    ERN = 42; // Eritrea Nakfa
+    ETB = 43; // Ethiopia Birr
+    EUR = 44; // Euro Member Countries
+    FJD = 45; // Fiji Dollar
+    FKP = 46; // Falkland Islands (Malvinas) Pound
+    GBP = 47; // United Kingdom Pound
+    GEL = 48; // Georgia Lari
+    GGP = 49; // Guernsey Pound
+    GHS = 50; // Ghana Cedi
+    GIP = 51; // Gibraltar Pound
+    GMD = 52; // Gambia Dalasi
+    GNF = 53; // Guinea Franc
+    GTQ = 54; // Guatemala Quetzal
+    GYD = 55; // Guyana Dollar
+    HKD = 56; // Hong Kong Dollar
+    HNL = 57; // Honduras Lempira
+    HRK = 58; // Croatia Kuna
+    HTG = 59; // Haiti Gourde
+    HUF = 60; // Hungary Forint
+    IDR = 61; // Indonesia Rupiah
+    ILS = 62; // Israel Shekel
+    IMP = 63; // Isle of Man Pound
+    INR = 64; // India Rupee
+    IQD = 65; // Iraq Dinar
+    IRR = 66; // Iran Rial
+    ISK = 67; // Iceland Krona
+    JEP = 68; // Jersey Pound
+    JMD = 69; // Jamaica Dollar
+    JOD = 70; // Jordan Dinar
+    JPY = 71; // Japan Yen
+    KES = 72; // Kenya Shilling
+    KGS = 73; // Kyrgyzstan Som
+    KHR = 74; // Cambodia Riel
+    KMF = 75; // Comoros Franc
+    KPW = 76; // Korea (North) Won
+    KRW = 77; // Korea (South) Won
+    KWD = 78; // Kuwait Dinar
+    KYD = 79; // Cayman Islands Dollar
+    KZT = 80; // Kazakhstan Tenge
+    LAK = 81; // Laos Kip
+    LBP = 82; // Lebanon Pound
+    LKR = 83; // Sri Lanka Rupee
+    LRD = 84; // Liberia Dollar
+    LSL = 85; // Lesotho Loti
+    LYD = 86; // Libya Dinar
+    MAD = 87; // Morocco Dirham
+    MDL = 88; // Moldova Leu
+    MGA = 89; // Madagascar Ariary
+    MKD = 90; // Macedonia Denar
+    MMK = 91; // Myanmar (Burma) Kyat
+    MNT = 92; // Mongolia Tughrik
+    MOP = 93; // Macau Pataca
+    MRO = 94; // Mauritania Ouguiya
+    MUR = 95; // Mauritius Rupee
+    MVR = 96; // Maldives (Maldive Islands) Rufiyaa
+    MWK = 97; // Malawi Kwacha
+    MXN = 98; // Mexico Peso
+    MYR = 99; // Malaysia Ringgit
+    MZN = 100; // Mozambique Metical
+    NAD = 101; // Namibia Dollar
+    NGN = 102; // Nigeria Naira
+    NIO = 103; // Nicaragua Cordoba
+    NOK = 104; // Norway Krone
+    NPR = 105; // Nepal Rupee
+    NZD = 106; // New Zealand Dollar
+    OMR = 107; // Oman Rial
+    PAB = 108; // Panama Balboa
+    PEN = 109; // Peru Nuevo Sol
+    PGK = 110; // Papua New Guinea Kina
+    PHP = 111; // Philippines Peso
+    PKR = 112; // Pakistan Rupee
+    PLN = 113; // Poland Zloty
+    PYG = 114; // Paraguay Guarani
+    QAR = 115; // Qatar Riyal
+    RON = 116; // Romania New Leu
+    RSD = 117; // Serbia Dinar
+    RUB = 118; // Russia Ruble
+    RWF = 119; // Rwanda Franc
+    SAR = 120; // Saudi Arabia Riyal
+    SBD = 121; // Solomon Islands Dollar
+    SCR = 122; // Seychelles Rupee
+    SDG = 123; // Sudan Pound
+    SEK = 124; // Sweden Krona
+    SGD = 125; // Singapore Dollar
+    SHP = 126; // Saint Helena Pound
+    SLL = 127; // Sierra Leone Leone
+    SOS = 128; // Somalia Shilling
+    SPL = 129; // 	Seborga Luigino
+    SRD = 130; // Suriname Dollar
+    STD = 131; // São Tomé and Príncipe Dobra
+    SVC = 132; // El Salvador Colon
+    SYP = 133; // Syria Pound
+    SZL = 134; // Swaziland Lilangeni
+    THB = 135; // Thailand Baht
+    TJS = 136; // Tajikistan Somoni
+    TMT = 137; // Turkmenistan Manat
+    TND = 138; // Tunisia Dinar
+    TOP = 139; // Tonga Pa'anga
+    TRY = 140; // Turkey Lira
+    TTD = 141; // Trinidad and Tobago Dollar
+    TVD = 142; // Tuvalu Dollar
+    TWD = 143; // Taiwan New Dollar
+    TZS = 144; // Tanzania Shilling
+    UAH = 145; // Ukraine Hryvnia
+    UGX = 146; // Uganda Shilling
+    USD = 147; // United States Dollar
+    UYU = 148; // Uruguay Peso
+    UZS = 149; // Uzbekistan Som
+    VEF = 150; // Venezuela Bolivar
+    VND = 151; // Viet Nam Dong
+    VUV = 152; // Vanuatu Vatu
+    WST = 153; // Samoa Tala
+    XAF = 154; // Communauté Financière Africaine (BEAC) CFA Franc BEAC
+    XCD = 155; // East Caribbean Dollar
+    XDR = 156; // International Monetary Fund (IMF) Special Drawing Rights
+    XOF = 157; // Communauté Financière Africaine (BCEAO) Franc
+    XPF = 158; // Comptoirs Français du Pacifique (CFP) Franc
+    YER = 159; // Yemen Rial
+    ZAR = 160; // South Africa Rand
+    ZMW = 161; // Zambia Kwacha
+    ZWD = 162; // Zimbabwe Dollar
+}
