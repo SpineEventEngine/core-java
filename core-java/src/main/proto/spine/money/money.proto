@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.money;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "MoneyProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.money";
 
 // Represents the amount of money.
 message MonetaryAmount {
