@@ -27,10 +27,10 @@ option java_outer_classname = "MoneyProto";
 option java_package = "org.spine3.base";
 
 // Represents money.
-message Money {
+message MonetaryAmount {
 
     // Represents the amount of money.
-    double monetary_amount = 1;
+    double amount = 1;
 
     // Represents the currency code.
     CurrencyCode currency_code = 2;
