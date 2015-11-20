@@ -58,9 +58,6 @@ public class TypeToClassMap {
      */
     private static final String PROPERTIES_FILE_PATH = "proto_to_java_class.properties";
 
-    //TODO:2015-09-17:alexander.yevsyukov:  @mikhail.mikhaylov: Have immutable instance here.
-    // Transform static methods into inner Builder class
-    // that would populate its internal structure and then emits it to be stored in this field.
     /**
      * A map from Protobuf type name to Java class name.
      *
