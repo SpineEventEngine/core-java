@@ -74,7 +74,7 @@ public class Application {
     /**
      * Executes the sample: generates some command requests and then the {@link Engine} processes them.
      */
-    protected void execute() {
+    public void execute() {
 
         setUp();
 
