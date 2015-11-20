@@ -26,371 +26,382 @@ option java_multiple_files = true;
 option java_outer_classname = "MoneyProto";
 option java_package = "org.spine3.money";
 
+import "google/protobuf/descriptor.proto";
+
 // Represents the amount of money.
 message Money {
-    // Represents the whole amount of money (e.g. cents).
+    // Represents the amount of money (e.g. cents).
     sint64 amount = 1;
 
-    // Represents the currency code.
+    // Represents the currency.
     Currency currency = 2;
 }
 
-// The set of ISO 4217 currency codes.
+message CurrencyOptions {
+    string numeric_code = 1;
+}
+
+extend google.protobuf.EnumValueOptions {
+    // TODO:2015-11-20:alexander.litus: change to globally unique field number
+    CurrencyOptions currency_options = 54321;
+}
+
+// The set of ISO 4217 currency codes (alphabetic and numeric).
 enum Currency {
     // UAE Dirham
-    AED = 0;
+    AED = 0 [(currency_options) = { numeric_code: "784"}];
     // Afghani
-    AFN = 1;
+    AFN = 1 [(currency_options) = { numeric_code: "971"}];
     // Lek
-    ALL = 2;
+    ALL = 2 [(currency_options) = { numeric_code: "008"}];
     // Armenian Dram
-    AMD = 3;
+    AMD = 3 [(currency_options) = { numeric_code: "051"}];
     // Netherlands Antillean Guilder
-    ANG = 4;
+    ANG = 4 [(currency_options) = { numeric_code: "532"}];
     // Kwanza
-    AOA = 5;
+    AOA = 5 [(currency_options) = { numeric_code: "973"}];
     // Argentine Peso
-    ARS = 6;
+    ARS = 6 [(currency_options) = { numeric_code: "032"}];
     // Australian Dollar
-    AUD = 7;
+    AUD = 7 [(currency_options) = { numeric_code: "036"}];
     // Aruban Florin
-    AWG = 8;
+    AWG = 8 [(currency_options) = { numeric_code: "533"}];
     // Azerbaijanian Manat
-    AZN = 9;
+    AZN = 9 [(currency_options) = { numeric_code: "944"}];
     // Convertible Mark
-    BAM = 10;
+    BAM = 10 [(currency_options) = { numeric_code: "977"}];
     // Barbados Dollar
-    BBD = 11;
+    BBD = 11 [(currency_options) = { numeric_code: "052"}];
     // Taka
-    BDT = 12;
+    BDT = 12 [(currency_options) = { numeric_code: "050"}];
     // Bulgarian Lev
-    BGN = 13;
+    BGN = 13 [(currency_options) = { numeric_code: "975"}];
     // Bahraini Dinar
-    BHD = 14;
+    BHD = 14 [(currency_options) = { numeric_code: "048"}];
     // Burundi Franc
-    BIF = 15;
+    BIF = 15 [(currency_options) = { numeric_code: "108"}];
     // Bermudian Dollar
-    BMD = 16;
+    BMD = 16 [(currency_options) = { numeric_code: "060"}];
     // Brunei Dollar
-    BND = 17;
+    BND = 17 [(currency_options) = { numeric_code: "096"}];
     // Boliviano
-    BOB = 18;
+    BOB = 18 [(currency_options) = { numeric_code: "068"}];
     // Mvdol
-    BOV = 19;
+    BOV = 19 [(currency_options) = { numeric_code: "984"}];
     // Brazilian Real
-    BRL = 20;
+    BRL = 20 [(currency_options) = { numeric_code: "986"}];
     // Bahamian Dollar
-    BSD = 21;
+    BSD = 21 [(currency_options) = { numeric_code: "044"}];
     // Ngultrum
-    BTN = 22;
+    BTN = 22 [(currency_options) = { numeric_code: "064"}];
     // Pula
-    BWP = 23;
+    BWP = 23 [(currency_options) = { numeric_code: "072"}];
     // Belarussian Ruble
-    BYR = 24;
+    BYR = 24 [(currency_options) = { numeric_code: "974"}];
     // Belize Dollar
-    BZD = 25;
+    BZD = 25 [(currency_options) = { numeric_code: "084"}];
     // Canadian Dollar
-    CAD = 26;
+    CAD = 26 [(currency_options) = { numeric_code: "124"}];
     // Congolese Franc
-    CDF = 27;
+    CDF = 27 [(currency_options) = { numeric_code: "976"}];
     // WIR Euro
-    CHE = 28;
+    CHE = 28 [(currency_options) = { numeric_code: "947"}];
     // Swiss Franc
-    CHF = 29;
+    CHF = 29 [(currency_options) = { numeric_code: "756"}];
     // WIR Franc
-    CHW = 30;
+    CHW = 30 [(currency_options) = { numeric_code: "948"}];
     // Unidad de Fomento
-    CLF = 31;
+    CLF = 31 [(currency_options) = { numeric_code: "990"}];
     // Chilean Peso
-    CLP = 32;
+    CLP = 32 [(currency_options) = { numeric_code: "152"}];
     // Yuan Renminbi
-    CNY = 33;
+    CNY = 33 [(currency_options) = { numeric_code: "156"}];
     // Colombian Peso
-    COP = 34;
+    COP = 34 [(currency_options) = { numeric_code: "170"}];
     // Unidad de Valor Real
-    COU = 35;
+    COU = 35 [(currency_options) = { numeric_code: "970"}];
     // Costa Rican Colon
-    CRC = 36;
+    CRC = 36 [(currency_options) = { numeric_code: "188"}];
     // Peso Convertible
-    CUC = 37;
+    CUC = 37 [(currency_options) = { numeric_code: "931"}];
     // Cuban Peso
-    CUP = 38;
+    CUP = 38 [(currency_options) = { numeric_code: "192"}];
     // Cabo Verde Escudo
-    CVE = 39;
+    CVE = 39 [(currency_options) = { numeric_code: "132"}];
     // Czech Koruna
-    CZK = 40;
+    CZK = 40 [(currency_options) = { numeric_code: "203"}];
     // Djibouti Franc
-    DJF = 41;
+    DJF = 41 [(currency_options) = { numeric_code: "262"}];
     // Danish Krone
-    DKK = 42;
+    DKK = 42 [(currency_options) = { numeric_code: "208"}];
     // Dominican Peso
-    DOP = 43;
+    DOP = 43 [(currency_options) = { numeric_code: "214"}];
     // Algerian Dinar
-    DZD = 44;
+    DZD = 44 [(currency_options) = { numeric_code: "012"}];
     // Egyptian Pound
-    EGP = 45;
+    EGP = 45 [(currency_options) = { numeric_code: "818"}];
     // Nakfa
-    ERN = 46;
+    ERN = 46 [(currency_options) = { numeric_code: "232"}];
     // Ethiopian Birr
-    ETB = 47;
+    ETB = 47 [(currency_options) = { numeric_code: "230"}];
     // Euro
-    EUR = 48;
+    EUR = 48 [(currency_options) = { numeric_code: "978"}];
     // Fiji Dollar
-    FJD = 49;
+    FJD = 49 [(currency_options) = { numeric_code: "242"}];
     // Falkland Islands Pound
-    FKP = 50;
+    FKP = 50 [(currency_options) = { numeric_code: "238"}];
     // Pound Sterling
-    GBP = 51;
+    GBP = 51 [(currency_options) = { numeric_code: "826"}];
     // Lari
-    GEL = 52;
+    GEL = 52 [(currency_options) = { numeric_code: "981"}];
     // Ghana Cedi
-    GHS = 53;
+    GHS = 53 [(currency_options) = { numeric_code: "936"}];
     // Gibraltar Pound
-    GIP = 54;
+    GIP = 54 [(currency_options) = { numeric_code: "292"}];
     // Dalasi
-    GMD = 55;
+    GMD = 55 [(currency_options) = { numeric_code: "270"}];
     // Guinea Franc
-    GNF = 56;
+    GNF = 56 [(currency_options) = { numeric_code: "324"}];
     // Quetzal
-    GTQ = 57;
+    GTQ = 57 [(currency_options) = { numeric_code: "320"}];
     // Guyana Dollar
-    GYD = 58;
+    GYD = 58 [(currency_options) = { numeric_code: "328"}];
     // Hong Kong Dollar
-    HKD = 59;
+    HKD = 59 [(currency_options) = { numeric_code: "344"}];
     // Lempira
-    HNL = 60;
+    HNL = 60 [(currency_options) = { numeric_code: "340"}];
     // Kuna
-    HRK = 61;
+    HRK = 61 [(currency_options) = { numeric_code: "191"}];
     // Gourde
-    HTG = 62;
+    HTG = 62 [(currency_options) = { numeric_code: "332"}];
     // Forint
-    HUF = 63;
+    HUF = 63 [(currency_options) = { numeric_code: "348"}];
     // Rupiah
-    IDR = 64;
+    IDR = 64 [(currency_options) = { numeric_code: "360"}];
     // New Israeli Sheqel
-    ILS = 65;
+    ILS = 65 [(currency_options) = { numeric_code: "376"}];
     // Indian Rupee
-    INR = 66;
+    INR = 66 [(currency_options) = { numeric_code: "356"}];
     // Iraqi Dinar
-    IQD = 67;
+    IQD = 67 [(currency_options) = { numeric_code: "368"}];
     // Iranian Rial
-    IRR = 68;
+    IRR = 68 [(currency_options) = { numeric_code: "364"}];
     // Iceland Krona
-    ISK = 69;
+    ISK = 69 [(currency_options) = { numeric_code: "352"}];
     // Jamaican Dollar
-    JMD = 70;
+    JMD = 70 [(currency_options) = { numeric_code: "288"}];
     // Jordanian Dinar
-    JOD = 71;
+    JOD = 71 [(currency_options) = { numeric_code: "400"}];
     // Yen
-    JPY = 72;
+    JPY = 72 [(currency_options) = { numeric_code: "392"}];
     // Kenyan Shilling
-    KES = 73;
+    KES = 73 [(currency_options) = { numeric_code: "404"}];
     // Som
-    KGS = 74;
+    KGS = 74 [(currency_options) = { numeric_code: "417"}];
     // Riel
-    KHR = 75;
+    KHR = 75 [(currency_options) = { numeric_code: "116"}];
     // Comoro Franc
-    KMF = 76;
+    KMF = 76 [(currency_options) = { numeric_code: "174"}];
     // North Korean Won
-    KPW = 77;
+    KPW = 77 [(currency_options) = { numeric_code: "408"}];
     // Won
-    KRW = 78;
+    KRW = 78 [(currency_options) = { numeric_code: "410"}];
     // Kuwaiti Dinar
-    KWD = 79;
+    KWD = 79 [(currency_options) = { numeric_code: "414"}];
     // Cayman Islands Dollar
-    KYD = 80;
+    KYD = 80 [(currency_options) = { numeric_code: "136"}];
     // Tenge
-    KZT = 81;
+    KZT = 81 [(currency_options) = { numeric_code: "398"}];
     // Kip
-    LAK = 82;
+    LAK = 82 [(currency_options) = { numeric_code: "418"}];
     // Lebanese Pound
-    LBP = 83;
+    LBP = 83 [(currency_options) = { numeric_code: "422"}];
     // Sri Lanka Rupee
-    LKR = 84;
+    LKR = 84 [(currency_options) = { numeric_code: "144"}];
     // Liberian Dollar
-    LRD = 85;
+    LRD = 85 [(currency_options) = { numeric_code: "430"}];
     // Loti
-    LSL = 86;
+    LSL = 86 [(currency_options) = { numeric_code: "426"}];
     // Libyan Dinar
-    LYD = 87;
+    LYD = 87 [(currency_options) = { numeric_code: "434"}];
     // Moroccan Dirham
-    MAD = 88;
+    MAD = 88 [(currency_options) = { numeric_code: "504"}];
     // Moldovan Leu
-    MDL = 89;
+    MDL = 89 [(currency_options) = { numeric_code: "498"}];
     // Malagasy Ariary
-    MGA = 90;
+    MGA = 90 [(currency_options) = { numeric_code: "969"}];
     // Denar
-    MKD = 91;
+    MKD = 91 [(currency_options) = { numeric_code: "807"}];
     // Kyat
-    MMK = 92;
+    MMK = 92 [(currency_options) = { numeric_code: "104"}];
     // Tugrik
-    MNT = 93;
+    MNT = 93 [(currency_options) = { numeric_code: "496"}];
     // Pataca
-    MOP = 94;
+    MOP = 94 [(currency_options) = { numeric_code: "446"}];
     // Ouguiya
-    MRO = 95;
+    MRO = 95 [(currency_options) = { numeric_code: "478"}];
     // Mauritius Rupee
-    MUR = 96;
+    MUR = 96 [(currency_options) = { numeric_code: "480"}];
     // Rufiyaa
-    MVR = 97;
+    MVR = 97 [(currency_options) = { numeric_code: "462"}];
     // Kwacha
-    MWK = 98;
+    MWK = 98 [(currency_options) = { numeric_code: "454"}];
     // Mexican Peso
-    MXN = 99;
+    MXN = 99 [(currency_options) = { numeric_code: "484"}];
     // Mexican Unidad de Inversion (UDI)
-    MXV = 100;
+    MXV = 100 [(currency_options) = { numeric_code: "979"}];
     // Malaysian Ringgit
-    MYR = 101;
+    MYR = 101 [(currency_options) = { numeric_code: "458"}];
     // Mozambique Metical
-    MZN = 102;
+    MZN = 102 [(currency_options) = { numeric_code: "943"}];
     // Namibia Dollar
-    NAD = 103;
+    NAD = 103 [(currency_options) = { numeric_code: "516"}];
     // Naira
-    NGN = 104;
+    NGN = 104 [(currency_options) = { numeric_code: "566"}];
     // Cordoba Oro
-    NIO = 105;
+    NIO = 105 [(currency_options) = { numeric_code: "558"}];
     // Norwegian Krone
-    NOK = 106;
+    NOK = 106 [(currency_options) = { numeric_code: "578"}];
     // Nepalese Rupee
-    NPR = 107;
+    NPR = 107 [(currency_options) = { numeric_code: "524"}];
     // New Zealand Dollar
-    NZD = 108;
+    NZD = 108 [(currency_options) = { numeric_code: "554"}];
     // Rial Omani
-    OMR = 109;
+    OMR = 109 [(currency_options) = { numeric_code: "512"}];
     // Balboa
-    PAB = 110;
+    PAB = 110 [(currency_options) = { numeric_code: "590"}];
     // Nuevo Sol
-    PEN = 111;
+    PEN = 111 [(currency_options) = { numeric_code: "604"}];
     // Kina
-    PGK = 112;
+    PGK = 112 [(currency_options) = { numeric_code: "598"}];
     // Philippine Peso
-    PHP = 113;
+    PHP = 113 [(currency_options) = { numeric_code: "608"}];
     // Pakistan Rupee
-    PKR = 114;
+    PKR = 114 [(currency_options) = { numeric_code: "586"}];
     // Zloty
-    PLN = 115;
+    PLN = 115 [(currency_options) = { numeric_code: "985"}];
     // Guarani
-    PYG = 116;
+    PYG = 116 [(currency_options) = { numeric_code: "600"}];
     // Qatari Rial
-    QAR = 117;
+    QAR = 117 [(currency_options) = { numeric_code: "634"}];
     // Romanian Leu
-    RON = 118;
+    RON = 118 [(currency_options) = { numeric_code: "946"}];
     // Serbian Dinar
-    RSD = 119;
+    RSD = 119 [(currency_options) = { numeric_code: "941"}];
     // Russian Ruble
-    RUB = 120;
+    RUB = 120 [(currency_options) = { numeric_code: "643"}];
     // Rwanda Franc
-    RWF = 121;
+    RWF = 121 [(currency_options) = { numeric_code: "646"}];
     // Saudi Riyal
-    SAR = 122;
+    SAR = 122 [(currency_options) = { numeric_code: "682"}];
     // Solomon Islands Dollar
-    SBD = 123;
+    SBD = 123 [(currency_options) = { numeric_code: "90"}];
     // Seychelles Rupee
-    SCR = 124;
+    SCR = 124 [(currency_options) = { numeric_code: "690"}];
     // Sudanese Pound
-    SDG = 125;
+    SDG = 125 [(currency_options) = { numeric_code: "938"}];
     // Swedish Krona
-    SEK = 126;
+    SEK = 126 [(currency_options) = { numeric_code: "752"}];
     // Singapore Dollar
-    SGD = 127;
+    SGD = 127 [(currency_options) = { numeric_code: "702"}];
     // Saint Helena Pound
-    SHP = 128;
+    SHP = 128 [(currency_options) = { numeric_code: "654"}];
     // Leone
-    SLL = 129;
+    SLL = 129 [(currency_options) = { numeric_code: "694"}];
     // Somali Shilling
-    SOS = 130;
+    SOS = 130 [(currency_options) = { numeric_code: "706"}];
     // Surinam Dollar
-    SRD = 131;
+    SRD = 131 [(currency_options) = { numeric_code: "968"}];
     // South Sudanese Pound
-    SSP = 132;
+    SSP = 132 [(currency_options) = { numeric_code: "728"}];
     // Dobra
-    STD = 133;
+    STD = 133 [(currency_options) = { numeric_code: "678"}];
     // El Salvador Colon
-    SVC = 134;
+    SVC = 134 [(currency_options) = { numeric_code: "222"}];
     // Syrian Pound
-    SYP = 135;
+    SYP = 135 [(currency_options) = { numeric_code: "760"}];
     // Lilangeni
-    SZL = 136;
+    SZL = 136 [(currency_options) = { numeric_code: "748"}];
     // Baht
-    THB = 137;
+    THB = 137 [(currency_options) = { numeric_code: "764"}];
     // Somoni
-    TJS = 138;
+    TJS = 138 [(currency_options) = { numeric_code: "972"}];
     // Turkmenistan New Manat
-    TMT = 139;
+    TMT = 139 [(currency_options) = { numeric_code: "934"}];
     // Tunisian Dinar
-    TND = 140;
+    TND = 140 [(currency_options) = { numeric_code: "788"}];
     // Pa’anga
-    TOP = 141;
+    TOP = 141 [(currency_options) = { numeric_code: "776"}];
     // Turkish Lira
-    TRY = 142;
+    TRY = 142 [(currency_options) = { numeric_code: "949"}];
     // Trinidad and Tobago Dollar
-    TTD = 143;
+    TTD = 143 [(currency_options) = { numeric_code: "780"}];
     // New Taiwan Dollar
-    TWD = 144;
+    TWD = 144 [(currency_options) = { numeric_code: "901"}];
     // Tanzanian Shilling
-    TZS = 145;
+    TZS = 145 [(currency_options) = { numeric_code: "834"}];
     // Hryvnia
-    UAH = 146;
+    UAH = 146 [(currency_options) = { numeric_code: "980"}];
     // Uganda Shilling
-    UGX = 147;
+    UGX = 147 [(currency_options) = { numeric_code: "800"}];
     // US Dollar
-    USD = 148;
+    USD = 148 [(currency_options) = { numeric_code: "840"}];
     // US Dollar (Next day)
-    USN = 149;
+    USN = 149 [(currency_options) = { numeric_code: "997"}];
     // Uruguay Peso en Unidades Indexadas (URUIURUI)
-    UYI = 150;
+    UYI = 150 [(currency_options) = { numeric_code: "940"}];
     // Peso Uruguayo
-    UYU = 151;
+    UYU = 151 [(currency_options) = { numeric_code: "858"}];
     // Uzbekistan Sum
-    UZS = 152;
+    UZS = 152 [(currency_options) = { numeric_code: "860"}];
     // Bolivar
-    VEF = 153;
+    VEF = 153 [(currency_options) = { numeric_code: "937"}];
     // Dong
-    VND = 154;
+    VND = 154 [(currency_options) = { numeric_code: "704"}];
     // Vatu
-    VUV = 155;
+    VUV = 155 [(currency_options) = { numeric_code: "548"}];
     // Tala
-    WST = 156;
+    WST = 156 [(currency_options) = { numeric_code: "882"}];
     // CFA Franc BEAC
-    XAF = 157;
+    XAF = 157 [(currency_options) = { numeric_code: "950"}];
     // Silver
-    XAG = 158;
+    XAG = 158 [(currency_options) = { numeric_code: "961"}];
     // Gold
-    XAU = 159;
+    XAU = 159 [(currency_options) = { numeric_code: "959"}];
     // Bond Markets Unit European Composite Unit (EURCO)
-    XBA = 160;
+    XBA = 160 [(currency_options) = { numeric_code: "955"}];
     // Bond Markets Unit European Monetary Unit (E.M.U.-6)
-    XBB = 161;
+    XBB = 161 [(currency_options) = { numeric_code: "956"}];
     // Bond Markets Unit European Unit of Account 9 (E.U.A.-9)
-    XBC = 162;
+    XBC = 162 [(currency_options) = { numeric_code: "957"}];
     // Bond Markets Unit European Unit of Account 17 (E.U.A.-17)
-    XBD = 163;
+    XBD = 163 [(currency_options) = { numeric_code: "958"}];
     // East Caribbean Dollar
-    XCD = 164;
+    XCD = 164 [(currency_options) = { numeric_code: "951"}];
     // SDR (Special Drawing Right)
-    XDR = 165;
+    XDR = 165 [(currency_options) = { numeric_code: "960"}];
     // CFA Franc BCEAO
-    XOF = 166;
+    XOF = 166 [(currency_options) = { numeric_code: "952"}];
     // Palladium
-    XPD = 167;
+    XPD = 167 [(currency_options) = { numeric_code: "964"}];
     // CFP Franc
-    XPF = 168;
+    XPF = 168 [(currency_options) = { numeric_code: "953"}];
     // Platinum
-    XPT = 169;
+    XPT = 169 [(currency_options) = { numeric_code: "962"}];
     // Sucre
-    XSU = 170;
+    XSU = 170 [(currency_options) = { numeric_code: "994"}];
     // Codes specifically reserved for testing purposes
-    XTS = 171;
+    XTS = 171 [(currency_options) = { numeric_code: "963"}];
     // ADB Unit of Account
-    XUA = 172;
+    XUA = 172 [(currency_options) = { numeric_code: "965"}];
     // The codes assigned for transactions where no currency is involved
-    XXX = 173;
+    XXX = 173 [(currency_options) = { numeric_code: "999"}];
     // Yemeni Rial
-    YER = 174;
+    YER = 174 [(currency_options) = { numeric_code: "886"}];
     // Rand
-    ZAR = 175;
+    ZAR = 175 [(currency_options) = { numeric_code: "710"}];
     // Zambian Kwacha
-    ZMW = 176;
+    ZMW = 176 [(currency_options) = { numeric_code: "967"}];
     // Zimbabwe Dollar
-    ZWL = 177;
+    ZWL = 177 [(currency_options) = { numeric_code: "932"}];
 }
