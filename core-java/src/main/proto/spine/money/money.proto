@@ -30,7 +30,9 @@ import "google/protobuf/descriptor.proto";
 
 // The amount of money.
 message Money {
-    // The amount of money (e.g. cents).
+    // The amount of minor currency units (for currencies whose minor units are used, e.g. "cents")
+    // or the amount of major currency units (for currencies whose exponent is 0,
+    // which means that minor currency units are unused due to negligible value or do not exist at all).
     sint64 amount = 1;
 
     // The currency of the amount of money.
@@ -38,7 +40,15 @@ message Money {
 }
 
 message CurrencyOptions {
-    int32 numeric_code = 1;
+    // The name of the currency, e.g. "United States dollar".
+    string name = 1;
+    // The symbol of the currency, e.g. "$".
+    string symbol = 2;
+    // The numeric code of the currency.
+    int32 numeric_code = 3;
+    // Number of digits after the decimal separator. See ISO 4217 "exponent" definition for details.
+    int32 exponent_digits = 4;
+
 }
 
 extend google.protobuf.EnumValueOptions {
@@ -46,8 +56,8 @@ extend google.protobuf.EnumValueOptions {
     CurrencyOptions currency = 1025;
 }
 
-// The set of ISO 4217 currency codes (alphabetic and numeric).
-// Numeric codes should consist of 3 digits when displayed (e.g., "008", "050" etc).
+// The set of ISO 4217 currency alphabetic codes with other currency options (such as currency name, numeric code etc).
+// NOTE: numeric codes must consist of 3 digits when displayed (e.g., "008", "050" etc).
 enum Currency {
     // UAE Dirham
     AED = 0 [(currency) = { numeric_code: 784}];
