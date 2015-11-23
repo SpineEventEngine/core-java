@@ -43,13 +43,17 @@ message Money {
 message CurrencyOptions {
     // The name of the currency, e.g. "US dollar".
     string name = 1;
+
     // The symbol of the currency, e.g. "$".
     string symbol = 2;
+
     // The numeric code of the currency.
     int32 numeric_code = 3;
+
     // Number of digits after the decimal separator. See ISO 4217 "exponent" definition for details.
     int32 exponent_digits = 4;
 
+    // TODO:2015-11-23:alexander.litus: define relationship from a country to its currency in spine.map.
 }
 
 extend google.protobuf.EnumValueOptions {
