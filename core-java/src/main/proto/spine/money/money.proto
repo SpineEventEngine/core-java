@@ -28,12 +28,12 @@ option java_package = "org.spine3.money";
 
 import "google/protobuf/descriptor.proto";
 
-// Represents the amount of money.
+// The amount of money.
 message Money {
-    // Represents the amount of money (e.g. cents).
+    // The amount of money (e.g. cents).
     sint64 amount = 1;
 
-    // Represents the currency.
+    // The currency of the amount of money.
     Currency currency = 2;
 }
 
