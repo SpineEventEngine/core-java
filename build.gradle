@@ -114,6 +114,12 @@ subprojects {
 
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
+        classifier "sources"
+    }
+
+    task testOutputJar(type: Jar) {
+        from sourceSets.test.output
+        classifier "test"
     }
 
     publishing {
@@ -124,9 +130,9 @@ subprojects {
                 version = "${project.version}"
 
                 from components.java
-                artifact sourceJar {
-                    classifier "sources"
-                }
+
+                artifact sourceJar;
+                artifact testOutputJar;
             }
         }
     }

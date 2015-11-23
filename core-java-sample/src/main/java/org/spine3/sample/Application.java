@@ -74,7 +74,7 @@ public class Application {
     /**
      * Executes the sample: generates some command requests and then the {@link Engine} processes them.
      */
-    protected void execute() {
+    public void execute() {
 
         setUp();
 
@@ -171,14 +171,6 @@ public class Application {
          * To run the sample on the file system storage, use the following line instead of one above.
          */
         // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
-
-        /**
-         * To run the sample on GAE local Datastore, use the following return statement instead of one above.
-         *
-         * See instructions on configuring local Datastore environment on this page:
-         * https://github.com/SpineEventEngine/core-java/wiki/Configuring-Local-Datastore-Environment
-         */
-        // return org.spine3.server.storage.datastore.LocalDatastoreStorageFactory.getDefaultInstance();
     }
 
     private static class OrderIdToStringConverter implements Function<OrderId, String> {
