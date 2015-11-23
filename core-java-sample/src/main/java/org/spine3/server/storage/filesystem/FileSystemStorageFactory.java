@@ -22,15 +22,15 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
-import org.apache.commons.io.FileUtils;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
+import org.spine3.util.IoUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
@@ -112,7 +112,7 @@ public class FileSystemStorageFactory implements StorageFactory {
             storage.releaseResources();
         }
 
-        deleteDirectory(rootDirectoryPath);
+        IoUtil.deleteDirectory(Paths.get(rootDirectoryPath));
     }
 
     private static String buildRootDirectoryPath(Class executorClass) {
@@ -130,24 +130,10 @@ public class FileSystemStorageFactory implements StorageFactory {
             final String prefix = "";
             final Path tempDirToRemove = Files.createTempDirectory(prefix);
             final Path result = tempDirToRemove.getParent();
-            deleteDirectory(tempDirToRemove.toString());
+            IoUtil.deleteDirectory(tempDirToRemove);
             return result;
         } catch (IOException e) {
             throw propagate(e);
-        }
-    }
-
-    private static void deleteDirectory(String rootDirectoryPath) {
-
-        final File folder = new File(rootDirectoryPath);
-        if (!folder.exists() || !folder.isDirectory()) {
-            return;
-        }
-
-        try {
-            FileUtils.deleteDirectory(folder);
-        } catch (IOException e) {
-            propagate(e);
         }
     }
 
