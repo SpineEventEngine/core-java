@@ -31,8 +31,8 @@ import "google/protobuf/descriptor.proto";
 // The amount of money.
 message Money {
     // The amount of minor currency units (for currencies whose minor units are used, e.g. "cents")
-    // or the amount of major currency units (for currencies whose exponent is 0,
-    // which means that minor currency units are unused due to negligible value or do not exist at all).
+    // or the amount of major currency units (for currencies whose minor currency units are unused
+    // due to negligible value or do not exist at all).
     // See ISO 4217 "exponent" definition for details.
     sint64 amount = 1;
 
@@ -50,7 +50,9 @@ message CurrencyOptions {
     // The numeric code of the currency.
     int32 numeric_code = 3;
 
-    // Number of digits after the decimal separator. See ISO 4217 "exponent" definition for details.
+    // Number of digits after the decimal separator.
+    // The value is less than zero if there are no minor units for this currency (e.g., for gold).
+    // See ISO 4217 "exponent" definition for details.
     int32 exponent_digits = 4;
 
     // TODO:2015-11-23:alexander.litus: define relationship from a country to its currency in spine.map.
@@ -123,11 +125,11 @@ enum Currency {
     BHD = 14 [(currency) = {
         name: "Bahraini Dinar",
 		numeric_code: 48,
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     BIF = 15 [(currency) = {
         name: "Burundi Franc",
 		numeric_code: 108,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     BMD = 16 [(currency) = {
         name: "Bermudian Dollar",
 		numeric_code: 60,
@@ -163,7 +165,7 @@ enum Currency {
     BYR = 24 [(currency) = {
         name: "Belarussian Ruble",
 		numeric_code: 974,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     BZD = 25 [(currency) = {
         name: "Belize Dollar",
 		numeric_code: 84,
@@ -191,11 +193,11 @@ enum Currency {
     CLF = 31 [(currency) = {
         name: "Unidad de Fomento",
 		numeric_code: 990,
-		exponent_digits: 2 }];
+		exponent_digits: 4 }];
     CLP = 32 [(currency) = {
         name: "Chilean Peso",
 		numeric_code: 152,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     CNY = 33 [(currency) = {
         name: "Yuan Renminbi",
 		numeric_code: 156,
@@ -231,7 +233,7 @@ enum Currency {
     DJF = 41 [(currency) = {
         name: "Djibouti Franc",
 		numeric_code: 262,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     DKK = 42 [(currency) = {
         name: "Danish Krone",
 		numeric_code: 208,
@@ -291,7 +293,7 @@ enum Currency {
     GNF = 56 [(currency) = {
         name: "Guinea Franc",
 		numeric_code: 324,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     GTQ = 57 [(currency) = {
         name: "Quetzal",
 		numeric_code: 320,
@@ -335,7 +337,7 @@ enum Currency {
     IQD = 67 [(currency) = {
         name: "Iraqi Dinar",
 		numeric_code: 368,
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     IRR = 68 [(currency) = {
         name: "Iranian Rial",
 		numeric_code: 364,
@@ -343,7 +345,7 @@ enum Currency {
     ISK = 69 [(currency) = {
         name: "Iceland Krona",
 		numeric_code: 352,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     JMD = 70 [(currency) = {
         name: "Jamaican Dollar",
 		numeric_code: 288,
@@ -351,11 +353,11 @@ enum Currency {
     JOD = 71 [(currency) = {
         name: "Jordanian Dinar",
 		numeric_code: 400,
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     JPY = 72 [(currency) = {
         name: "Yen",
 		numeric_code: 392,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     KES = 73 [(currency) = {
         name: "Kenyan Shilling",
 		numeric_code: 404,
@@ -371,7 +373,7 @@ enum Currency {
     KMF = 76 [(currency) = {
         name: "Comoro Franc",
 		numeric_code: 174,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     KPW = 77 [(currency) = {
         name: "North Korean Won",
 		numeric_code: 408,
@@ -379,11 +381,11 @@ enum Currency {
     KRW = 78 [(currency) = {
         name: "Won",
 		numeric_code: 410,
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     KWD = 79 [(currency) = {
         name: "Kuwaiti Dinar",
 		numeric_code: 414,
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     KYD = 80 [(currency) = {
         name: "Cayman Islands Dollar",
 		numeric_code: 136, 
@@ -415,7 +417,7 @@ enum Currency {
     LYD = 87 [(currency) = {
         name: "Libyan Dinar",
 		numeric_code: 434, 
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     MAD = 88 [(currency) = {
         name: "Moroccan Dirham",
 		numeric_code: 504, 
@@ -503,7 +505,7 @@ enum Currency {
     OMR = 109 [(currency) = {
         name: "Rial Omani",
 		numeric_code: 512, 
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     PAB = 110 [(currency) = {
         name: "Balboa",
 		numeric_code: 590, 
@@ -531,7 +533,7 @@ enum Currency {
     PYG = 116 [(currency) = {
         name: "Guarani",
 		numeric_code: 600, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     QAR = 117 [(currency) = {
         name: "Qatari Rial",
 		numeric_code: 634, 
@@ -551,7 +553,7 @@ enum Currency {
     RWF = 121 [(currency) = {
         name: "Rwanda Franc",
 		numeric_code: 646, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     SAR = 122 [(currency) = {
         name: "Saudi Riyal",
 		numeric_code: 682, 
@@ -627,7 +629,7 @@ enum Currency {
     TND = 140 [(currency) = {
         name: "Tunisian Dinar",
 		numeric_code: 788, 
-		exponent_digits: 2 }];
+		exponent_digits: 3 }];
     TOP = 141 [(currency) = {
         name: "Pa’anga",
 		numeric_code: 776, 
@@ -655,7 +657,7 @@ enum Currency {
     UGX = 147 [(currency) = {
         name: "Uganda Shilling",
 		numeric_code: 800, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     USD = 148 [(currency) = {
         name: "US Dollar",
 		numeric_code: 840, 
@@ -667,7 +669,7 @@ enum Currency {
     UYI = 150 [(currency) = {
         name: "Uruguay Peso en Unidades Indexadas (URUIURUI)",
 		numeric_code: 940, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     UYU = 151 [(currency) = {
         name: "Peso Uruguayo",
 		numeric_code: 858, 
@@ -683,11 +685,11 @@ enum Currency {
     VND = 154 [(currency) = {
         name: "Dong",
 		numeric_code: 704, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     VUV = 155 [(currency) = {
         name: "Vatu",
 		numeric_code: 548, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     WST = 156 [(currency) = {
         name: "Tala",
 		numeric_code: 882, 
@@ -695,31 +697,31 @@ enum Currency {
     XAF = 157 [(currency) = {
         name: "CFA Franc BEAC",
 		numeric_code: 950, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     XAG = 158 [(currency) = {
         name: "Silver",
 		numeric_code: 961, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XAU = 159 [(currency) = {
         name: "Gold",
 		numeric_code: 959, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XBA = 160 [(currency) = {
         name: "Bond Markets Unit European Composite Unit (EURCO)",
 		numeric_code: 955, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XBB = 161 [(currency) = {
         name: "Bond Markets Unit European Monetary Unit (E.M.U.-6)",
 		numeric_code: 956, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XBC = 162 [(currency) = {
         name: "Bond Markets Unit European Unit of Account 9 (E.U.A.-9)",
 		numeric_code: 957, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XBD = 163 [(currency) = {
         name: "Bond Markets Unit European Unit of Account 17 (E.U.A.-17)",
 		numeric_code: 958, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XCD = 164 [(currency) = {
         name: "East Caribbean Dollar",
 		numeric_code: 951, 
@@ -727,39 +729,39 @@ enum Currency {
     XDR = 165 [(currency) = {
         name: "SDR (Special Drawing Right)",
 		numeric_code: 960, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XOF = 166 [(currency) = {
         name: "CFA Franc BCEAO",
 		numeric_code: 952, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     XPD = 167 [(currency) = {
         name: "Palladium",
 		numeric_code: 964, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XPF = 168 [(currency) = {
         name: "CFP Franc",
 		numeric_code: 953, 
-		exponent_digits: 2 }];
+		exponent_digits: 0 }];
     XPT = 169 [(currency) = {
         name: "Platinum",
 		numeric_code: 962, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XSU = 170 [(currency) = {
         name: "Sucre",
 		numeric_code: 994, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XTS = 171 [(currency) = {
         name: "Codes specifically reserved for testing purposes",
 		numeric_code: 963, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XUA = 172 [(currency) = {
         name: "ADB Unit of Account",
 		numeric_code: 965, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     XXX = 173 [(currency) = {
         name: "The codes assigned for transactions where no currency is involved",
 		numeric_code: 999, 
-		exponent_digits: 2 }];
+		exponent_digits: -1 }];
     YER = 174 [(currency) = {
         name: "Yemeni Rial",
 		numeric_code: 886, 
