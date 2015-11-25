@@ -26,7 +26,7 @@ import org.spine3.test.project.ProjectId;
 
 import javax.annotation.Nullable;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Litus
@@ -40,7 +40,7 @@ public class RepositoryBaseShould {
         try {
             new RepositoryForEntitiesWithProtectedConstructor();
         } catch (RuntimeException e) {
-            assertTrue(e.getCause().getClass().equals(IllegalAccessException.class));
+            assertEquals(e.getCause().getClass(), IllegalAccessException.class);
         }
     }
 
@@ -50,7 +50,7 @@ public class RepositoryBaseShould {
         try {
             new RepositoryForEntitiesWithPrivateConstructor();
         } catch (RuntimeException e) {
-            assertTrue(e.getCause().getClass().equals(IllegalAccessException.class));
+            assertEquals(e.getCause().getClass(), IllegalAccessException.class);
         }
     }
 
@@ -60,7 +60,7 @@ public class RepositoryBaseShould {
         try {
             new RepositoryForEntitiesWithoutRequiredConstructor();
         } catch (RuntimeException e) {
-            assertTrue(e.getCause().getClass().equals(NoSuchMethodException.class));
+            assertEquals(e.getCause().getClass(), NoSuchMethodException.class);
         }
     }
 
