@@ -10,7 +10,6 @@ dependencies {
     testCompile project(path: ":core-java", configuration: 'testArtifacts')
 
     compile project(path: ':core-java');
-    compile 'commons-io:commons-io:2.4'
 }
 
 apply plugin: 'org.spine3.tools.protolookup'

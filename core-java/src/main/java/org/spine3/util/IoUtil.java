@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -138,17 +140,13 @@ public class IoUtil {
         }
         return fileInputStream;
     }
-    
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
 
     /**
      * Creates a file with the given path if it does not exist.
      * @return the created file
      * @throws java.io.IOException - If an I/O error occurred
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored") // result is redundant in this case
+    @SuppressWarnings("ResultOfMethodCallIgnored") // the result is redundant in this case
     public static File createIfDoesNotExist(String path) throws IOException {
 
         final File file = new File(path);
@@ -157,6 +155,47 @@ public class IoUtil {
             file.createNewFile();
         }
         return file;
+    }
+
+    /**
+     * Deletes a non-directory file using {@link Files#deleteIfExists(Path)}.
+     *
+     * <p>If it is the path to the directory, deletes all the files in it recursively and then deletes this directory.
+     *
+     * @param path the path to the file to delete.
+     * @throws RuntimeException if an I/O error occurs.
+     */
+    public static void deleteDirectory(Path path) {
+        try {
+            if (path.toFile().isDirectory()) {
+                Files.walkFileTree(path, newFilesEliminator());
+            } else {
+                Files.deleteIfExists(path);
+            }
+        } catch (IOException e) {
+            propagate(e);
+        }
+    }
+
+    private static FileVisitor<Path> newFilesEliminator() {
+        return new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                super.visitFile(file, attributes);
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+            @Override
+            public FileVisitResult postVisitDirectory(Path path, IOException exception) throws IOException {
+                super.postVisitDirectory(path, exception);
+                Files.delete(path);
+                return FileVisitResult.CONTINUE;
+            }
+        };
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     private enum LogSingleton {

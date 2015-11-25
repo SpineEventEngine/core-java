@@ -1,0 +1,959 @@
+//
+// Copyright 2015, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.money;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "MoneyProto";
+option java_package = "org.spine3.money";
+
+import "google/protobuf/descriptor.proto";
+
+// The amount of money.
+message Money {
+    // The amount of minor currency units (for currencies whose minor units are used, e.g. "cents")
+    // or the amount of major currency units (for currencies whose minor currency units are unused
+    // due to negligible value or do not exist at all).
+    // See ISO 4217 "exponent" definition for details.
+    sint64 amount = 1;
+
+    // The currency of the amount of money.
+    Currency currency = 2;
+}
+
+// The ISO 4217 currency attributes (unless specifically noted).
+message CurrencyOptions {
+    // The name of the currency, e.g. "US dollar".
+    string name = 1;
+
+    // The symbol of the currency, e.g. "$".
+    // NOTE: ISO 4217 does not define any currency symbols.
+    string symbol = 2;
+
+    // The numeric code of the currency.
+    int32 numeric_code = 3;
+
+    // The number of digits after the decimal separator.
+    // The value is less than zero if there are no minor units for this currency (e.g., for gold).
+    // See ISO 4217 "exponent" definition for details.
+    int32 exponent_digits = 4;
+}
+
+extend google.protobuf.EnumValueOptions {
+    // 1025 is globally unique field number obtained from Google. Do not change it.
+    CurrencyOptions currency = 1025;
+}
+
+// The set of ISO 4217 currency alphabetic codes with other currency options (such as currency name, numeric code etc).
+// NOTE: numeric codes must consist of 3 digits when displayed (e.g., "008", "050" etc).
+enum Currency {
+    AED = 0 [(currency) = {
+        name: "UAE Dirham",
+        symbol: "د.إ",
+        numeric_code: 784,
+        exponent_digits: 2 }];
+    AFN = 1 [(currency) = {
+        name: "Afghani",
+        symbol: "؋",
+        numeric_code: 971,
+        exponent_digits: 2 }];
+    ALL = 2 [(currency) = {
+        name: "Lek",
+        symbol: "Lek",
+        numeric_code: 8,
+        exponent_digits: 2 }];
+    AMD = 3 [(currency) = {
+        name: "Armenian Dram",
+        symbol: "֏",
+        numeric_code: 51,
+        exponent_digits: 2 }];
+    ANG = 4 [(currency) = {
+        name: "Netherlands Antillean Guilder",
+        symbol: "ƒ",
+        numeric_code: 532,
+        exponent_digits: 2 }];
+    AOA = 5 [(currency) = {
+        name: "Kwanza",
+        symbol: "Kz",
+        numeric_code: 973,
+		exponent_digits: 2 }];
+    ARS = 6 [(currency) = {
+        name: "Argentine Peso",
+        symbol: "$",
+        numeric_code: 32,
+		exponent_digits: 2 }];
+    AUD = 7 [(currency) = {
+        name: "Australian Dollar",
+        symbol: "A$",
+		numeric_code: 36,
+        exponent_digits: 2 }];
+    AWG = 8 [(currency) = {
+        name: "Aruban Florin",
+        symbol: "ƒ",
+		numeric_code: 533,
+	    exponent_digits: 2 }];
+    AZN = 9 [(currency) = {
+        name: "Azerbaijanian Manat",
+        symbol: "ман",
+		numeric_code: 944,
+		exponent_digits: 2 }];
+    BAM = 10 [(currency) = {
+        name: "Convertible Mark",
+        symbol: "KM",
+		numeric_code: 977,
+		exponent_digits: 2 }];
+    BBD = 11 [(currency) = {
+        name: "Barbados Dollar",
+        symbol: "Bds$",
+		numeric_code: 52,
+		exponent_digits: 2 }];
+    BDT = 12 [(currency) = {
+        name: "Taka",
+        symbol: "৳",
+		numeric_code: 50,
+		exponent_digits: 2 }];
+    BGN = 13 [(currency) = {
+        name: "Bulgarian Lev",
+        symbol: "лв.",
+		numeric_code: 975,
+		exponent_digits: 2 }];
+    BHD = 14 [(currency) = {
+        name: "Bahraini Dinar",
+        symbol: ".د.ب",
+		numeric_code: 48,
+		exponent_digits: 3 }];
+    BIF = 15 [(currency) = {
+        name: "Burundi Franc",
+        symbol: "FBu",
+		numeric_code: 108,
+		exponent_digits: 0 }];
+    BMD = 16 [(currency) = {
+        name: "Bermudian Dollar",
+        symbol: "BD$",
+		numeric_code: 60,
+		exponent_digits: 2 }];
+    BND = 17 [(currency) = {
+        name: "Brunei Dollar",
+        symbol: "B$",
+		numeric_code: 96,
+		exponent_digits: 2 }];
+    BOB = 18 [(currency) = {
+        name: "Boliviano",
+        symbol: "$b",
+		numeric_code: 68,
+		exponent_digits: 2 }];
+    BOV = 19 [(currency) = {
+        name: "Mvdol",
+        symbol: "$b",
+		numeric_code: 984,
+		exponent_digits: 2 }];
+    BRL = 20 [(currency) = {
+        name: "Brazilian Real",
+        symbol: "R$",
+        numeric_code: 986,
+        exponent_digits: 2 }];
+    BSD = 21 [(currency) = {
+        name: "Bahamian Dollar",
+        symbol: "B$",
+		numeric_code: 44,
+		exponent_digits: 2 }];
+    BTN = 22 [(currency) = {
+        name: "Ngultrum",
+        symbol: "Nu.",
+		numeric_code: 64,
+		exponent_digits: 2 }];
+    BWP = 23 [(currency) = {
+        name: "Pula",
+        symbol: "P",
+		numeric_code: 72,
+		exponent_digits: 2 }];
+    BYR = 24 [(currency) = {
+        name: "Belarussian Ruble",
+        symbol: "Br",
+		numeric_code: 974,
+		exponent_digits: 0 }];
+    BZD = 25 [(currency) = {
+        name: "Belize Dollar",
+        symbol: "BZ$",
+		numeric_code: 84,
+		exponent_digits: 2 }];
+    CAD = 26 [(currency) = {
+        name: "Canadian Dollar",
+        symbol: "C$",
+		numeric_code: 124,
+		exponent_digits: 2 }];
+    CDF = 27 [(currency) = {
+        name: "Congolese Franc",
+        symbol: "Fr.",
+		numeric_code: 976,
+		exponent_digits: 2 }];
+    CHE = 28 [(currency) = {
+        name: "WIR Euro",
+        symbol: "€",
+		numeric_code: 947,
+		exponent_digits: 2 }];
+    CHF = 29 [(currency) = {
+        name: "Swiss Franc",
+        symbol: "SFr.",
+		numeric_code: 756,
+		exponent_digits: 2 }];
+    CHW = 30 [(currency) = {
+        name: "WIR Franc",
+        symbol: "¤", // generic currency sign
+		numeric_code: 948,
+		exponent_digits: 2 }];
+    CLF = 31 [(currency) = {
+        name: "Unidad de Fomento",
+        symbol: "UF",
+		numeric_code: 990,
+		exponent_digits: 4 }];
+    CLP = 32 [(currency) = {
+        name: "Chilean Peso",
+        symbol: "$",
+		numeric_code: 152,
+		exponent_digits: 0 }];
+    CNY = 33 [(currency) = {
+        name: "Yuan Renminbi",
+        symbol: "¥",
+		numeric_code: 156,
+		exponent_digits: 2 }];
+    COP = 34 [(currency) = {
+        name: "Colombian Peso",
+        symbol: "COL$",
+		numeric_code: 170,
+		exponent_digits: 2 }];
+    COU = 35 [(currency) = {
+        name: "Unidad de Valor Real",
+        symbol: "¤", // generic currency sign
+		numeric_code: 970,
+		exponent_digits: 2 }];
+    CRC = 36 [(currency) = {
+        name: "Costa Rican Colon",
+        symbol: "₡",
+		numeric_code: 188,
+		exponent_digits: 2 }];
+    CUC = 37 [(currency) = {
+        name: "Peso Convertible",
+        symbol: "CUC$",
+		numeric_code: 931,
+		exponent_digits: 2 }];
+    CUP = 38 [(currency) = {
+        name: "Cuban Peso",
+        symbol: "$MN",
+		numeric_code: 192,
+		exponent_digits: 2 }];
+    CVE = 39 [(currency) = {
+        name: "Cabo Verde Escudo",
+        symbol: "Esc",
+		numeric_code: 132,
+		exponent_digits: 2 }];
+    CZK = 40 [(currency) = {
+        name: "Czech Koruna",
+        symbol: "Kč",
+		numeric_code: 203,
+		exponent_digits: 2 }];
+    DJF = 41 [(currency) = {
+        name: "Djibouti Franc",
+        symbol: "Fdj",
+		numeric_code: 262,
+		exponent_digits: 0 }];
+    DKK = 42 [(currency) = {
+        name: "Danish Krone",
+        symbol: "kr",
+		numeric_code: 208,
+		exponent_digits: 2 }];
+    DOP = 43 [(currency) = {
+        name: "Dominican Peso",
+        symbol: "RD$",
+		numeric_code: 214,
+		exponent_digits: 2 }];
+    DZD = 44 [(currency) = {
+        name: "Algerian Dinar",
+        symbol: "د.ج",
+		numeric_code: 12,
+		exponent_digits: 2 }];
+    EGP = 45 [(currency) = {
+        name: "Egyptian Pound",
+        symbol: "E£",
+		numeric_code: 818,
+		exponent_digits: 2 }];
+    ERN = 46 [(currency) = {
+        name: "Nakfa",
+        symbol: "Nfk",
+		numeric_code: 232,
+		exponent_digits: 2 }];
+    ETB = 47 [(currency) = {
+        name: "Ethiopian Birr",
+        symbol: "Br.",
+		numeric_code: 230,
+		exponent_digits: 2 }];
+    EUR = 48 [(currency) = {
+        name: "Euro",
+        symbol: "€",
+		numeric_code: 978,
+		exponent_digits: 2 }];
+    FJD = 49 [(currency) = {
+        name: "Fiji Dollar",
+        symbol: "FJ$",
+		numeric_code: 242,
+		exponent_digits: 2 }];
+    FKP = 50 [(currency) = {
+        name: "Falkland Islands Pound",
+        symbol: "FK£",
+		numeric_code: 238,
+		exponent_digits: 2 }];
+    GBP = 51 [(currency) = {
+        name: "Pound Sterling",
+        symbol: "£",
+		numeric_code: 826,
+		exponent_digits: 2 }];
+    GEL = 52 [(currency) = {
+        name: "Lari",
+        symbol: "ლ",
+		numeric_code: 981,
+		exponent_digits: 2 }];
+    GHS = 53 [(currency) = {
+        name: "Ghana Cedi",
+        symbol: "₵",
+		numeric_code: 936,
+		exponent_digits: 2 }];
+    GIP = 54 [(currency) = {
+        name: "Gibraltar Pound",
+        symbol: "£",
+		numeric_code: 292,
+		exponent_digits: 2 }];
+    GMD = 55 [(currency) = {
+        name: "Dalasi",
+        symbol: "D",
+		numeric_code: 270,
+		exponent_digits: 2 }];
+    GNF = 56 [(currency) = {
+        name: "Guinea Franc",
+        symbol: "GFr",
+		numeric_code: 324,
+		exponent_digits: 0 }];
+    GTQ = 57 [(currency) = {
+        name: "Quetzal",
+        symbol: "Q",
+		numeric_code: 320,
+		exponent_digits: 2 }];
+    GYD = 58 [(currency) = {
+        name: "Guyana Dollar",
+        symbol: "GY$",
+		numeric_code: 328,
+		exponent_digits: 2 }];
+    HKD = 59 [(currency) = {
+        name: "Hong Kong Dollar",
+        symbol: "HK$",
+		numeric_code: 344,
+		exponent_digits: 2 }];
+    HNL = 60 [(currency) = {
+        name: "Lempira",
+        symbol: "L",
+		numeric_code: 340,
+		exponent_digits: 2 }];
+    HRK = 61 [(currency) = {
+        name: "Kuna",
+        symbol: "kn",
+		numeric_code: 191,
+		exponent_digits: 2 }];
+    HTG = 62 [(currency) = {
+        name: "Gourde",
+        symbol: "G",
+		numeric_code: 332,
+		exponent_digits: 2 }];
+    HUF = 63 [(currency) = {
+        name: "Forint",
+        symbol: "Ft",
+		numeric_code: 348,
+		exponent_digits: 2 }];
+    IDR = 64 [(currency) = {
+        name: "Rupiah",
+        symbol: "Rp",
+		numeric_code: 360,
+		exponent_digits: 2 }];
+    ILS = 65 [(currency) = {
+        name: "New Israeli Sheqel",
+        symbol: "₪",
+		numeric_code: 376,
+		exponent_digits: 2 }];
+    INR = 66 [(currency) = {
+        name: "Indian Rupee",
+        symbol: "₹",
+		numeric_code: 356,
+		exponent_digits: 2 }];
+    IQD = 67 [(currency) = {
+        name: "Iraqi Dinar",
+        symbol: "ع.د",
+		numeric_code: 368,
+		exponent_digits: 3 }];
+    IRR = 68 [(currency) = {
+        name: "Iranian Rial",
+        symbol: "﷼",
+		numeric_code: 364,
+		exponent_digits: 2 }];
+    ISK = 69 [(currency) = {
+        name: "Iceland Krona",
+        symbol: "kr",
+		numeric_code: 352,
+		exponent_digits: 0 }];
+    JMD = 70 [(currency) = {
+        name: "Jamaican Dollar",
+        symbol: "J$",
+		numeric_code: 288,
+		exponent_digits: 2 }];
+    JOD = 71 [(currency) = {
+        name: "Jordanian Dinar",
+        symbol: "د.ا",
+		numeric_code: 400,
+		exponent_digits: 3 }];
+    JPY = 72 [(currency) = {
+        name: "Yen",
+        symbol: "¥",
+		numeric_code: 392,
+		exponent_digits: 0 }];
+    KES = 73 [(currency) = {
+        name: "Kenyan Shilling",
+        symbol: "Ksh",
+		numeric_code: 404,
+		exponent_digits: 2 }];
+    KGS = 74 [(currency) = {
+        name: "Som",
+        symbol: "лв",
+		numeric_code: 417,
+		exponent_digits: 2 }];
+    KHR = 75 [(currency) = {
+        name: "Riel",
+        symbol: "៛",
+		numeric_code: 116,
+		exponent_digits: 2 }];
+    KMF = 76 [(currency) = {
+        name: "Comoro Franc",
+        symbol: "CF",
+		numeric_code: 174,
+		exponent_digits: 0 }];
+    KPW = 77 [(currency) = {
+        name: "North Korean Won",
+        symbol: "₩",
+		numeric_code: 408,
+		exponent_digits: 2 }];
+    KRW = 78 [(currency) = {
+        name: "Won",
+        symbol: "₩",
+		numeric_code: 410,
+		exponent_digits: 0 }];
+    KWD = 79 [(currency) = {
+        name: "Kuwaiti Dinar",
+        symbol: "د.ك",
+		numeric_code: 414,
+		exponent_digits: 3 }];
+    KYD = 80 [(currency) = {
+        name: "Cayman Islands Dollar",
+        symbol: "CI$",
+		numeric_code: 136, 
+		exponent_digits: 2 }];
+    KZT = 81 [(currency) = {
+        name: "Tenge",
+        symbol: "₸",
+		numeric_code: 398, 
+		exponent_digits: 2 }];
+    LAK = 82 [(currency) = {
+        name: "Kip",
+        symbol: "₭",
+		numeric_code: 418, 
+		exponent_digits: 2 }];
+    LBP = 83 [(currency) = {
+        name: "Lebanese Pound",
+        symbol: "ل.ل",
+		numeric_code: 422, 
+		exponent_digits: 2 }];
+    LKR = 84 [(currency) = {
+        name: "Sri Lanka Rupee",
+        symbol: "Rs",
+		numeric_code: 144, 
+		exponent_digits: 2 }];
+    LRD = 85 [(currency) = {
+        name: "Liberian Dollar",
+        symbol: "L$",
+		numeric_code: 430, 
+		exponent_digits: 2 }];
+    LSL = 86 [(currency) = {
+        name: "Loti",
+        symbol: "L",
+		numeric_code: 426, 
+		exponent_digits: 2 }];
+    LYD = 87 [(currency) = {
+        name: "Libyan Dinar",
+        symbol: "ل.د",
+		numeric_code: 434, 
+		exponent_digits: 3 }];
+    MAD = 88 [(currency) = {
+        name: "Moroccan Dirham",
+        symbol: "د.م.",
+		numeric_code: 504, 
+		exponent_digits: 2 }];
+    MDL = 89 [(currency) = {
+        name: "Moldovan Leu",
+        symbol: "lei",
+		numeric_code: 498, 
+		exponent_digits: 2 }];
+    MGA = 90 [(currency) = {
+        name: "Malagasy Ariary",
+        symbol: "Ar",
+		numeric_code: 969, 
+		exponent_digits: 2 }];
+    MKD = 91 [(currency) = {
+        name: "Denar",
+        symbol: "ден",
+		numeric_code: 807, 
+		exponent_digits: 2 }];
+    MMK = 92 [(currency) = {
+        name: "Kyat",
+        symbol: "Ks",
+		numeric_code: 104, 
+		exponent_digits: 2 }];
+    MNT = 93 [(currency) = {
+        name: "Tugrik",
+        symbol: "₮",
+		numeric_code: 496, 
+		exponent_digits: 2 }];
+    MOP = 94 [(currency) = {
+        name: "Pataca",
+        symbol: "P",
+		numeric_code: 446, 
+		exponent_digits: 2 }];
+    MRO = 95 [(currency) = {
+        name: "Ouguiya",
+        symbol: "UM",
+		numeric_code: 478, 
+		exponent_digits: 2 }];
+    MUR = 96 [(currency) = {
+        name: "Mauritius Rupee",
+        symbol: "₨",
+		numeric_code: 480, 
+		exponent_digits: 2 }];
+    MVR = 97 [(currency) = {
+        name: "Rufiyaa",
+        symbol: "Rf",
+		numeric_code: 462, 
+		exponent_digits: 2 }];
+    MWK = 98 [(currency) = {
+        name: "Kwacha",
+        symbol: "MK",
+		numeric_code: 454, 
+		exponent_digits: 2 }];
+    MXN = 99 [(currency) = {
+        name: "Mexican Peso",
+        symbol: "Mex$",
+		numeric_code: 484,
+		exponent_digits: 2 }];
+    MXV = 100 [(currency) = {
+        name: "Mexican Unidad de Inversion (UDI)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 979, 
+		exponent_digits: 2 }];
+    MYR = 101 [(currency) = {
+        name: "Malaysian Ringgit",
+        symbol: "RM",
+		numeric_code: 458, 
+		exponent_digits: 2 }];
+    MZN = 102 [(currency) = {
+        name: "Mozambique Metical",
+        symbol: "MT",
+		numeric_code: 943, 
+		exponent_digits: 2 }];
+    NAD = 103 [(currency) = {
+        name: "Namibia Dollar",
+        symbol: "N$",
+		numeric_code: 516, 
+		exponent_digits: 2 }];
+    NGN = 104 [(currency) = {
+        name: "Naira",
+        symbol: "₦",
+		numeric_code: 566, 
+		exponent_digits: 2 }];
+    NIO = 105 [(currency) = {
+        name: "Cordoba Oro",
+        symbol: "C$",
+		numeric_code: 558, 
+		exponent_digits: 2 }];
+    NOK = 106 [(currency) = {
+        name: "Norwegian Krone",
+        symbol: "kr",
+		numeric_code: 578, 
+		exponent_digits: 2 }];
+    NPR = 107 [(currency) = {
+        name: "Nepalese Rupee",
+        symbol: "रू",
+		numeric_code: 524, 
+		exponent_digits: 2 }];
+    NZD = 108 [(currency) = {
+        name: "New Zealand Dollar",
+        symbol: "NZ$",
+		numeric_code: 554, 
+		exponent_digits: 2 }];
+    OMR = 109 [(currency) = {
+        name: "Rial Omani",
+        symbol: "ر.ع.",
+		numeric_code: 512, 
+		exponent_digits: 3 }];
+    PAB = 110 [(currency) = {
+        name: "Balboa",
+        symbol: "B/.",
+		numeric_code: 590, 
+		exponent_digits: 2 }];
+    PEN = 111 [(currency) = {
+        name: "Nuevo Sol",
+        symbol: "S/.",
+		numeric_code: 604, 
+		exponent_digits: 2 }];
+    PGK = 112 [(currency) = {
+        name: "Kina",
+        symbol: "K",
+		numeric_code: 598, 
+		exponent_digits: 2 }];
+    PHP = 113 [(currency) = {
+        name: "Philippine Peso",
+        symbol: "₱",
+		numeric_code: 608, 
+		exponent_digits: 2 }];
+    PKR = 114 [(currency) = {
+        name: "Pakistan Rupee",
+        symbol: "₨",
+		numeric_code: 586, 
+		exponent_digits: 2 }];
+    PLN = 115 [(currency) = {
+        name: "Zloty",
+        symbol: "zł",
+		numeric_code: 985, 
+		exponent_digits: 2 }];
+    PYG = 116 [(currency) = {
+        name: "Guarani",
+        symbol: "₲",
+		numeric_code: 600, 
+		exponent_digits: 0 }];
+    QAR = 117 [(currency) = {
+        name: "Qatari Rial",
+        symbol: "ر.ق",
+		numeric_code: 634, 
+		exponent_digits: 2 }];
+    RON = 118 [(currency) = {
+        name: "Romanian Leu",
+        symbol: "lei",
+		numeric_code: 946, 
+		exponent_digits: 2 }];
+    RSD = 119 [(currency) = {
+        name: "Serbian Dinar",
+        symbol: "Дин.",
+		numeric_code: 941, 
+		exponent_digits: 2 }];
+    RUB = 120 [(currency) = {
+        name: "Russian Ruble",
+        symbol: "₽",
+		numeric_code: 643, 
+		exponent_digits: 2 }];
+    RWF = 121 [(currency) = {
+        name: "Rwanda Franc",
+        symbol: "R₣",
+		numeric_code: 646, 
+		exponent_digits: 0 }];
+    SAR = 122 [(currency) = {
+        name: "Saudi Riyal",
+        symbol: "ر.س",
+		numeric_code: 682, 
+		exponent_digits: 2 }];
+    SBD = 123 [(currency) = {
+        name: "Solomon Islands Dollar",
+        symbol: "SI$",
+		numeric_code: 90, 
+		exponent_digits: 2 }];
+    SCR = 124 [(currency) = {
+        name: "Seychelles Rupee",
+        symbol: "₨",
+		numeric_code: 690, 
+		exponent_digits: 2 }];
+    SDG = 125 [(currency) = {
+        name: "Sudanese Pound",
+        symbol: "£",
+		numeric_code: 938, 
+		exponent_digits: 2 }];
+    SEK = 126 [(currency) = {
+        name: "Swedish Krona",
+        symbol: "kr",
+		numeric_code: 752, 
+		exponent_digits: 2 }];
+    SGD = 127 [(currency) = {
+        name: "Singapore Dollar",
+        symbol: "$",
+		numeric_code: 702, 
+		exponent_digits: 2 }];
+    SHP = 128 [(currency) = {
+        name: "Saint Helena Pound",
+        symbol: "£",
+		numeric_code: 654, 
+		exponent_digits: 2 }];
+    SLL = 129 [(currency) = {
+        name: "Leone",
+        symbol: "Le",
+		numeric_code: 694, 
+		exponent_digits: 2 }];
+    SOS = 130 [(currency) = {
+        name: "Somali Shilling",
+        symbol: "Sh.So.",
+		numeric_code: 706, 
+		exponent_digits: 2 }];
+    SRD = 131 [(currency) = {
+        name: "Surinam Dollar",
+        symbol: "$",
+		numeric_code: 968, 
+		exponent_digits: 2 }];
+    SSP = 132 [(currency) = {
+        name: "South Sudanese Pound",
+        symbol: "£",
+		numeric_code: 728, 
+		exponent_digits: 2 }];
+    STD = 133 [(currency) = {
+        name: "Dobra",
+        symbol: "Db",
+		numeric_code: 678, 
+		exponent_digits: 2 }];
+    SVC = 134 [(currency) = {
+        name: "El Salvador Colon",
+        symbol: "$",
+		numeric_code: 222, 
+		exponent_digits: 2 }];
+    SYP = 135 [(currency) = {
+        name: "Syrian Pound",
+        symbol: "S£",
+		numeric_code: 760, 
+		exponent_digits: 2 }];
+    SZL = 136 [(currency) = {
+        name: "Lilangeni",
+        symbol: "L",
+		numeric_code: 748, 
+		exponent_digits: 2 }];
+    THB = 137 [(currency) = {
+        name: "Baht",
+        symbol: "฿",
+		numeric_code: 764, 
+		exponent_digits: 2 }];
+    TJS = 138 [(currency) = {
+        name: "Somoni",
+        symbol: "SM",
+		numeric_code: 972, 
+		exponent_digits: 2 }];
+    TMT = 139 [(currency) = {
+        name: "Turkmenistan New Manat",
+        symbol: "m",
+		numeric_code: 934, 
+		exponent_digits: 2 }];
+    TND = 140 [(currency) = {
+        name: "Tunisian Dinar",
+        symbol: "د.ت",
+		numeric_code: 788, 
+		exponent_digits: 3 }];
+    TOP = 141 [(currency) = {
+        name: "Pa’anga",
+        symbol: "T$",
+		numeric_code: 776, 
+		exponent_digits: 2 }];
+    TRY = 142 [(currency) = {
+        name: "Turkish Lira",
+        symbol: "₺",
+		numeric_code: 949, 
+		exponent_digits: 2 }];
+    TTD = 143 [(currency) = {
+        name: "Trinidad and Tobago Dollar",
+        symbol: "TT$",
+		numeric_code: 780, 
+		exponent_digits: 2 }];
+    TWD = 144 [(currency) = {
+        name: "New Taiwan Dollar",
+        symbol: "NT$",
+		numeric_code: 901, 
+		exponent_digits: 2 }];
+    TZS = 145 [(currency) = {
+        name: "Tanzanian Shilling",
+        symbol: "TSh",
+		numeric_code: 834, 
+		exponent_digits: 2 }];
+    UAH = 146 [(currency) = {
+        name: "Hryvnia",
+        symbol: "₴",
+		numeric_code: 980, 
+		exponent_digits: 2 }];
+    UGX = 147 [(currency) = {
+        name: "Uganda Shilling",
+        symbol: "USh",
+		numeric_code: 800, 
+		exponent_digits: 0 }];
+    USD = 148 [(currency) = {
+        name: "US Dollar",
+        symbol: "$",
+		numeric_code: 840, 
+		exponent_digits: 2 }];
+    USN = 149 [(currency) = {
+        name: "US Dollar (Next day)",
+        symbol: "$",
+		numeric_code: 997, 
+		exponent_digits: 2 }];
+    UYI = 150 [(currency) = {
+        name: "Uruguay Peso en Unidades Indexadas (URUIURUI)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 940, 
+		exponent_digits: 0 }];
+    UYU = 151 [(currency) = {
+        name: "Peso Uruguayo",
+        symbol: "$U",
+		numeric_code: 858, 
+		exponent_digits: 2 }];
+    UZS = 152 [(currency) = {
+        name: "Uzbekistan Sum",
+        symbol: "лв",
+		numeric_code: 860, 
+		exponent_digits: 2 }];
+    VEF = 153 [(currency) = {
+        name: "Bolivar",
+        symbol: "Bs",
+		numeric_code: 937, 
+		exponent_digits: 2 }];
+    VND = 154 [(currency) = {
+        name: "Dong",
+        symbol: "₫",
+		numeric_code: 704, 
+		exponent_digits: 0 }];
+    VUV = 155 [(currency) = {
+        name: "Vatu",
+        symbol: "Vt",
+		numeric_code: 548, 
+		exponent_digits: 0 }];
+    WST = 156 [(currency) = {
+        name: "Tala",
+        symbol: "T",
+		numeric_code: 882, 
+		exponent_digits: 2 }];
+    XAF = 157 [(currency) = {
+        name: "CFA Franc BEAC",
+        symbol: "FCFA",
+		numeric_code: 950, 
+		exponent_digits: 0 }];
+    XAG = 158 [(currency) = {
+        name: "Silver",
+        symbol: "¤", // generic currency sign
+		numeric_code: 961, 
+		exponent_digits: -1 }];
+    XAU = 159 [(currency) = {
+        name: "Gold",
+        symbol: "¤", // generic currency sign
+		numeric_code: 959, 
+		exponent_digits: -1 }];
+    XBA = 160 [(currency) = {
+        name: "Bond Markets Unit European Composite Unit (EURCO)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 955, 
+		exponent_digits: -1 }];
+    XBB = 161 [(currency) = {
+        name: "Bond Markets Unit European Monetary Unit (E.M.U.-6)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 956, 
+		exponent_digits: -1 }];
+    XBC = 162 [(currency) = {
+        name: "Bond Markets Unit European Unit of Account 9 (E.U.A.-9)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 957, 
+		exponent_digits: -1 }];
+    XBD = 163 [(currency) = {
+        name: "Bond Markets Unit European Unit of Account 17 (E.U.A.-17)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 958, 
+		exponent_digits: -1 }];
+    XCD = 164 [(currency) = {
+        name: "East Caribbean Dollar",
+        symbol: "EC$",
+		numeric_code: 951, 
+		exponent_digits: 2 }];
+    XDR = 165 [(currency) = {
+        name: "SDR (Special Drawing Right)",
+        symbol: "¤", // generic currency sign
+		numeric_code: 960, 
+		exponent_digits: -1 }];
+    XOF = 166 [(currency) = {
+        name: "CFA Franc BCEAO",
+        symbol: "CFA",
+		numeric_code: 952, 
+		exponent_digits: 0 }];
+    XPD = 167 [(currency) = {
+        name: "Palladium",
+        symbol: "¤", // generic currency sign
+		numeric_code: 964, 
+		exponent_digits: -1 }];
+    XPF = 168 [(currency) = {
+        name: "CFP Franc",
+        symbol: "F",
+		numeric_code: 953, 
+		exponent_digits: 0 }];
+    XPT = 169 [(currency) = {
+        name: "Platinum",
+        symbol: "¤", // generic currency sign
+		numeric_code: 962, 
+		exponent_digits: -1 }];
+    XSU = 170 [(currency) = {
+        name: "Sucre",
+        symbol: "Sucre",
+		numeric_code: 994, 
+		exponent_digits: -1 }];
+    XTS = 171 [(currency) = {
+        name: "Codes specifically reserved for testing purposes",
+        symbol: "¤", // generic currency sign
+		numeric_code: 963, 
+		exponent_digits: -1 }];
+    XUA = 172 [(currency) = {
+        name: "ADB Unit of Account",
+        symbol: "¤", // generic currency sign
+		numeric_code: 965, 
+		exponent_digits: -1 }];
+    XXX = 173 [(currency) = {
+        name: "The codes assigned for transactions where no currency is involved",
+        symbol: "¤", // generic currency sign
+		numeric_code: 999, 
+		exponent_digits: -1 }];
+    YER = 174 [(currency) = {
+        name: "Yemeni Rial",
+        symbol: "﷼",
+		numeric_code: 886, 
+		exponent_digits: 2 }];
+    ZAR = 175 [(currency) = {
+        name: "Rand",
+        symbol: "R",
+		numeric_code: 710, 
+		exponent_digits: 2 }];
+    ZMW = 176 [(currency) = {
+        name: "Zambian Kwacha",
+        symbol: "ZK",
+		numeric_code: 967, 
+		exponent_digits: 2 }];
+    ZWL = 177 [(currency) = {
+        name: "Zimbabwe Dollar",
+        symbol: "Z$",
+		numeric_code: 932, 
+		exponent_digits: 2 }];
+}
