@@ -29,6 +29,7 @@ import org.spine3.protobuf.Messages;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -251,6 +252,17 @@ public class Identifiers {
         result = PATTERN_T.matcher(result).replaceAll("_T");
 
         return result;
+    }
+
+    /**
+     * Generates a new random UUID.
+     *
+     * @return the generated value
+     * @see UUID#randomUUID()
+     */
+    public static String newUuid() {
+        final String id = UUID.randomUUID().toString();
+        return id;
     }
 
     private static <I> IllegalArgumentException unsupportedIdType(I id) {
