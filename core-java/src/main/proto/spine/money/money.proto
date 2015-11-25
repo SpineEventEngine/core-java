@@ -40,18 +40,19 @@ message Money {
     Currency currency = 2;
 }
 
+// The ISO 4217 currency attributes (unless specifically noted).
 message CurrencyOptions {
-    // The name of the currency, e.g. "US dollar" (ISO 4217).
+    // The name of the currency, e.g. "US dollar".
     string name = 1;
 
     // The symbol of the currency, e.g. "$".
-    // NOTE: ISO 4217 does not define any symbols.
+    // NOTE: ISO 4217 does not define any currency symbols.
     string symbol = 2;
 
-    // The numeric code of the currency (ISO 4217).
+    // The numeric code of the currency.
     int32 numeric_code = 3;
 
-    // The number of digits after the decimal separator (ISO 4217).
+    // The number of digits after the decimal separator.
     // The value is less than zero if there are no minor units for this currency (e.g., for gold).
     // See ISO 4217 "exponent" definition for details.
     int32 exponent_digits = 4;
