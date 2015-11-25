@@ -53,24 +53,23 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
         final Class<I> idClass = getIdClass();
         try {
             final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
-            checkConstructorAccessModifier(result.getModifiers(), entityClass.getSimpleName());
+            checkConstructorAccessModifier(result.getModifiers(), entityClass.getName());
             return result;
         } catch (NoSuchMethodException ignored) {
-            throw noSuchConstructorException(entityClass.getSimpleName());
+            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
         }
     }
 
-    private static void checkConstructorAccessModifier(int modifiers, String entityClassName) {
+    private static void checkConstructorAccessModifier(int modifiers, String entityClass) {
         if (!isPublic(modifiers)) {
             final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
-            final String message = "Constructor must be public in the " + entityClassName + " class, not " + constructorModifier;
+            final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
             throw propagate(new IllegalAccessException(message));
         }
     }
 
-    private static RuntimeException noSuchConstructorException(String entityClassName) {
-        final String message = entityClassName +
-                " class must declare a constructor with a single ID parameter (like in Aggregate class).";
+    private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
+        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
         return propagate(new NoSuchMethodException(message));
     }
 
