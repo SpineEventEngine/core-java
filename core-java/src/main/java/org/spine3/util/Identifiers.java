@@ -255,9 +255,10 @@ public class Identifiers {
     }
 
     /**
-     * A factory to retrieve a randomly generated UUID using {@link UUID#randomUUID()}.
+     * Generates a new random UUID.
      *
-     * @return  A randomly generated {@code UUID}
+     * @return the generated value
+     * @see UUID#randomUUID()
      */
     public static String newUuid() {
         final String id = UUID.randomUUID().toString();

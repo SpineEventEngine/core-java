@@ -26,6 +26,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Throwables.propagate;
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isPublic;
 
 /**
  * Abstract implementation of basic features of repositories.
@@ -47,16 +49,28 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     }
 
     private Constructor<E> getEntityConstructor() {
-        final Constructor<E> result;
+        final Class<E> entityClass = getEntityClass();
+        final Class<I> idClass = getIdClass();
         try {
-            final Class<E> entityClass = getEntityClass();
-            final Class<I> idClass = getIdClass();
-
-            result = entityClass.getConstructor(idClass);
-        } catch (NoSuchMethodException e) {
-            throw propagate(e);
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            checkConstructorAccessModifier(result.getModifiers(), entityClass.getName());
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
         }
-        return result;
+    }
+
+    private static void checkConstructorAccessModifier(int modifiers, String entityClass) {
+        if (!isPublic(modifiers)) {
+            final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
+            final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
+            throw propagate(new IllegalAccessException(message));
+        }
+    }
+
+    private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
+        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
+        return propagate(new NoSuchMethodException(message));
     }
 
     /**
