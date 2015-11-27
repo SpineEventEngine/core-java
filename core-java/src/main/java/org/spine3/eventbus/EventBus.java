@@ -20,6 +20,7 @@
 package org.spine3.eventbus;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
@@ -190,6 +191,7 @@ public class EventBus {
 
 
     private static class Registry {
+
         private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
         private final ReadWriteLock lockOnHandlersByClass = new ReentrantReadWriteLock();
 
@@ -225,7 +227,7 @@ public class EventBus {
         }
 
         private Collection<EventHandlerMethod> getHandlers(EventClass c) {
-            return handlersByClass.get(c);
+            return ImmutableList.copyOf(handlersByClass.get(c));
         }
     }
 
