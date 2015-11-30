@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
-import org.spine3.server.EntityRepository;
 import org.spine3.util.Classes;
 import org.spine3.util.MethodMap;
 
@@ -41,7 +40,7 @@ import static com.google.common.base.Throwables.propagate;
  * by event handlers for the events of interest. These event handlers are implemented
  * in the classes extending this abstract class.
  *
- * <p/>Event handlers are invoked by an {@link EntityRepository} that manages instances
+ * <p/>Event handlers are invoked by a {@link ProjectionRepository} that manages instances
  * of a projection class.
  *
  * @param <I> the type of the projection IDs
