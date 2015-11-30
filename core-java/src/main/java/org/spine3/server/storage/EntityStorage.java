@@ -44,7 +44,7 @@ public abstract class EntityStorage<I, M extends Message> {
     public abstract M read(I id);
 
     /**
-     * Writes message into the storage.
+     * Writes message into the storage. Rewrites it if the message with such ID already exists.
      *
      * @param id ID of the message
      * @param message the message to save

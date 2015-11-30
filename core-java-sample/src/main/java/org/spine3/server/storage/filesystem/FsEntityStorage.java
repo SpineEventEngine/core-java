@@ -24,12 +24,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityStorage;
-import org.spine3.util.IoUtil;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
@@ -62,15 +62,13 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     @Override
     public M read(I id) {
-
         final String idString = idToStringWithEscaping(id);
-        final File file = getEntityStoreFile(idString);
+        final String filePath = createEntityFilePath(idString);
+        final File file = tryCreateIfDoesNotExist(filePath);
         Message message = null;
-
         if (file.exists()) {
             message = readMessage(file);
         }
-
         @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
         final M result = (M) message;
         return result;
@@ -79,15 +77,16 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     @Override
     @SuppressWarnings("DuplicateStringLiteralInspection")
     public void write(I id, M message) {
-
         checkNotNull(id, "id");
         checkNotNull(message, "message");
 
         final String idString = idToStringWithEscaping(id);
+        final String filePath = createEntityFilePath(idString);
 
-        final File file = getEntityStoreFile(idString);
+        deleteIfExists(Paths.get(filePath));
+        final File file = tryCreateIfDoesNotExist(filePath);
+
         final Any any = toAny(message);
-
         FsUtil.writeMessage(file, any);
     }
 
@@ -97,14 +96,11 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * @param file the {@link java.io.File} to read from.
      */
     private static Message readMessage(File file) {
-
         checkFileExists(file, "entity storage");
 
         final InputStream fileInputStream = open(file);
         final InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-
         Any any = Any.getDefaultInstance();
-
         try {
             any = Any.parseDelimitedFrom(bufferedInputStream);
         } catch (IOException e) {
@@ -112,18 +108,17 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         } finally {
             closeSilently(fileInputStream, bufferedInputStream);
         }
-
         final Message result = (any != null) ? Messages.fromAny(any) : null;
         return result;
     }
 
-    /**
-     * @return entity file path.
-     */
-    public File getEntityStoreFile(String entityId) {
-        final String filePath = entityStorageRootPath + entityId;
+    private String createEntityFilePath(String entityId) {
+        return entityStorageRootPath + entityId;
+    }
+
+    private static File tryCreateIfDoesNotExist(String filePath) {
         try {
-            return IoUtil.createIfDoesNotExist(filePath);
+            return createIfDoesNotExist(filePath);
         } catch (IOException e) {
             throw propagate(e);
         }

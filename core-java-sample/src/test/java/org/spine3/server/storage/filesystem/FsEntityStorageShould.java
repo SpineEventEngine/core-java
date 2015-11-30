@@ -20,11 +20,11 @@
 
 package org.spine3.server.storage.filesystem;
 
+import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.test.project.ProjectId;
 
 /**
  * File system implementation of {@link EntityStorage} tests.
@@ -35,7 +35,7 @@ public class FsEntityStorageShould extends EntityStorageShould {
 
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsEntityStorageShould.class);
 
-    private static final EntityStorage<String, ProjectId> STORAGE = FACTORY.createEntityStorage(TestEntity.class);
+    private static final EntityStorage<String, StringValue> STORAGE = FACTORY.createEntityStorage(TestEntity.class);
 
     public FsEntityStorageShould() {
         super(STORAGE);
