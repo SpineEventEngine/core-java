@@ -101,7 +101,8 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         final Class<?> returnType = method.getReturnType();
         final boolean returnsMessageOrList =
                 Message.class.isAssignableFrom(returnType)
-                        || List.class.equals(returnType);
+                        || List.class.equals(returnType)
+                        || Void.TYPE.equals(returnType);
 
         return acceptsMessageAndCommandContext && returnsMessageOrList;
     }
@@ -152,7 +153,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         });
     }
 
-
     @Override
     public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
         return super.invoke(message, context);
@@ -163,7 +163,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> createMap(MultiHandler obj) {
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getCommandHandlers();
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
 

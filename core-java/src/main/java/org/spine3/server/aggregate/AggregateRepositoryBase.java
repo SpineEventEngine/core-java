@@ -102,13 +102,19 @@ public abstract class AggregateRepositoryBase<I extends Message,
     }
 
     @Override
-    public Multimap<Method, Class<? extends Message>> getHandlers() {
+    public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
         final Class<? extends Aggregate> aggregateClass = getEntityClass();
         final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
         final Method dispatch = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(dispatch, aggregateCommands)
                 .build();
+    }
+
+    @Override
+    public Multimap<Method, Class<? extends Message>> getEventHandlers() {
+        // Return an empty map by default.
+        return ImmutableMultimap.<Method, Class<? extends Message>>builder().build();
     }
 
     /**
@@ -131,7 +137,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     @Nonnull
     @Override
-    public A load(I id) throws IllegalStateException {
+    public A load(@Nonnull I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().load(id);
 
         try {

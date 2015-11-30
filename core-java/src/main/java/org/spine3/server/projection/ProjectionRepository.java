@@ -44,13 +44,19 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         extends EntityRepository<I, P, M> implements MultiHandler {
 
     @Override
-    public Multimap<Method, Class<? extends Message>> getHandlers() {
+    public Multimap<Method, Class<? extends Message>> getEventHandlers() {
         final Class<? extends Projection> projectionClass = getEntityClass();
         final Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
         final Method forward = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
                 .build();
+    }
+
+    @Override
+    public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
+        // Return an empty map by default.
+        return ImmutableMultimap.<Method, Class<? extends Message>>builder().build();
     }
 
     @SuppressWarnings("TypeMayBeWeakened")

@@ -36,5 +36,10 @@ public interface MultiHandler {
     /**
      * Returns a map from methods to command classes they handle.
      */
-    Multimap<Method, Class<? extends Message>> getHandlers();
+    Multimap<Method, Class<? extends Message>> getCommandHandlers();
+
+    /**
+     * Returns a map from methods to event classes they handle.
+     */
+    Multimap<Method, Class<? extends Message>> getEventHandlers();
 }

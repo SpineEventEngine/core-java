@@ -132,7 +132,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     }
 
     private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getEventHandlers();
 
         // Add entries exposed by the object as MultiHandler.
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
