@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.server.Entity;
@@ -29,6 +28,7 @@ import org.spine3.test.project.ProjectId;
 import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
@@ -43,16 +43,15 @@ public abstract class EntityStorageShould {
 
 
     @Test
-    public void return_empty_message_if_read_one_record_from_empty_storage() {
-
+    public void return_null_if_read_one_record_from_empty_storage() {
         final Message message = storage.read("nothing");
-        assertEquals(Any.getDefaultInstance(), message);
+        assertNull(message);
     }
 
     @Test
-    public void return_empty_message_if_read_one_record_by_null_id() {
+    public void return_null_if_read_one_record_by_null_id() {
         final Message message = storage.read(null);
-        assertEquals(Any.getDefaultInstance(), message);
+        assertNull(message);
     }
 
     @Test(expected = NullPointerException.class)
@@ -72,18 +71,15 @@ public abstract class EntityStorageShould {
 
     @Test
     public void save_and_read_several_messages() {
-
         testSaveAndReadMessage("testId_1");
         testSaveAndReadMessage("testId_2");
         testSaveAndReadMessage("testId_3");
     }
 
     private void testSaveAndReadMessage(String messageId) {
-
         final ProjectId expected = createProjectId(messageId);
 
         storage.write(expected.getId(), expected);
-
         final ProjectId actual = storage.read(expected.getId());
 
         assertEquals(expected, actual);

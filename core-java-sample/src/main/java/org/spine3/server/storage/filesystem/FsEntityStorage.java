@@ -65,7 +65,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final String idString = idToStringWithEscaping(id);
         final File file = getEntityStoreFile(idString);
-        Message message = Any.getDefaultInstance();
+        Message message = null;
 
         if (file.exists()) {
             message = readMessage(file);
@@ -77,10 +77,11 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
     }
 
     @Override
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     public void write(I id, M message) {
 
-        checkNotNull(id);
-        checkNotNull(message);
+        checkNotNull(id, "id");
+        checkNotNull(message, "message");
 
         final String idString = idToStringWithEscaping(id);
 
@@ -112,7 +113,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
             closeSilently(fileInputStream, bufferedInputStream);
         }
 
-        final Message result = (any != null) ? Messages.fromAny(any) : Any.getDefaultInstance();
+        final Message result = (any != null) ? Messages.fromAny(any) : null;
         return result;
     }
 

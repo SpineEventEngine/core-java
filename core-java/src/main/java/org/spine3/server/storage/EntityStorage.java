@@ -22,6 +22,8 @@ package org.spine3.server.storage;
 
 import com.google.protobuf.Message;
 
+import javax.annotation.Nullable;
+
 /**
  * An entity storage keeps messages with identity.
  *
@@ -33,11 +35,12 @@ import com.google.protobuf.Message;
 public abstract class EntityStorage<I, M extends Message> {
 
     /**
-     * Reads message from the storage by id.
+     * Reads message from the storage by the ID.
      *
-     * @param id ID of the message to load
-     * @return a message instance or empty message if there is no message with such ID
+     * @param id the ID of the message to load
+     * @return a message instance or {@code null} if there is no message with such ID
      */
+    @Nullable
     public abstract M read(I id);
 
     /**
