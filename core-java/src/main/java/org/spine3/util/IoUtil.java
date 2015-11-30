@@ -142,8 +142,8 @@ public class IoUtil {
     }
 
     /**
-     * Creates a file with the given path if it does not exist.
-     * @return the created file
+     * Creates a file with the given path if it does not exist or returns the existed one.
+     * @return the created or existed file
      * @throws java.io.IOException - If an I/O error occurred
      */
     @SuppressWarnings("ResultOfMethodCallIgnored") // the result is redundant in this case
@@ -165,7 +165,7 @@ public class IoUtil {
      * @param path the path to the file to delete.
      * @throws RuntimeException if an I/O error occurs.
      */
-    public static void deleteDirectory(Path path) {
+    public static void deleteIfExists(Path path) {
         try {
             if (path.toFile().isDirectory()) {
                 Files.walkFileTree(path, newFilesEliminator());

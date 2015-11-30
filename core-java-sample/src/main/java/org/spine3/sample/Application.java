@@ -75,20 +75,21 @@ public class Application {
      * Executes the sample: generates some command requests and then the {@link Engine} processes them.
      */
     public void execute() {
+        try {
+            setUp();
 
-        setUp();
+            // Generate test requests
+            final List<CommandRequest> requests = generateRequests();
 
-        // Generate test requests
-        final List<CommandRequest> requests = generateRequests();
+            // Process requests
+            for (CommandRequest request : requests) {
+                Engine.getInstance().process(request);
+            }
 
-        // Process requests
-        for (CommandRequest request : requests) {
-            Engine.getInstance().process(request);
+            log().info("All the requests were handled.");
+        } finally {
+            tearDown();
         }
-
-        log().info("All the requests were handled.");
-
-        tearDown();
     }
 
     /**

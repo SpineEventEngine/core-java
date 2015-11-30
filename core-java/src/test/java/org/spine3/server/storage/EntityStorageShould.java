@@ -20,44 +20,41 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.Entity;
-import org.spine3.test.project.ProjectId;
 
 import javax.annotation.Nonnull;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.junit.Assert.assertNull;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
         "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection", "ConstantConditions"})
 public abstract class EntityStorageShould {
 
-    private final EntityStorage<String, ProjectId> storage;
+    private final EntityStorage<String, StringValue> storage;
 
-    public EntityStorageShould(EntityStorage<String, ProjectId> storage) {
+    public EntityStorageShould(EntityStorage<String, StringValue> storage) {
         this.storage = storage;
     }
 
-
     @Test
-    public void return_empty_message_if_read_one_record_from_empty_storage() {
-
+    public void return_null_if_read_one_record_from_empty_storage() {
         final Message message = storage.read("nothing");
-        assertEquals(Any.getDefaultInstance(), message);
+        assertNull(message);
     }
 
     @Test
-    public void return_empty_message_if_read_one_record_by_null_id() {
+    public void return_null_if_read_one_record_by_null_id() {
         final Message message = storage.read(null);
-        assertEquals(Any.getDefaultInstance(), message);
+        assertNull(message);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
-        storage.write(null, createProjectId("testId"));
+        storage.write(null, newValue("testValue"));
     }
 
     @Test(expected = NullPointerException.class)
@@ -67,45 +64,44 @@ public abstract class EntityStorageShould {
 
     @Test
     public void save_and_read_message() {
-        testSaveAndReadMessage("testId");
+        testSaveAndReadMessage("testId", "testValue");
     }
 
     @Test
-    public void save_and_read_several_messages() {
-
-        testSaveAndReadMessage("testId_1");
-        testSaveAndReadMessage("testId_2");
-        testSaveAndReadMessage("testId_3");
+    public void save_and_read_several_messages_with_different_ids() {
+        testSaveAndReadMessage("id-1", "value-1");
+        testSaveAndReadMessage("id-2", "value-2");
+        testSaveAndReadMessage("id-3", "value-3");
     }
 
-    private void testSaveAndReadMessage(String messageId) {
+    @Test
+    public void rewrite_message_if_write_with_same_id() {
+        final String id = "test-id-rewrite";
+        testSaveAndReadMessage(id, "value-1");
+        testSaveAndReadMessage(id, "value-2");
+    }
 
-        final ProjectId expected = createProjectId(messageId);
+    private void testSaveAndReadMessage(String id, String value) {
+        final StringValue expected = newValue(value);
 
-        storage.write(expected.getId(), expected);
-
-        final ProjectId actual = storage.read(expected.getId());
+        storage.write(id, expected);
+        final StringValue actual = storage.read(id);
 
         assertEquals(expected, actual);
     }
 
-    public static class TestEntity extends Entity<String, ProjectId> {
+    private static StringValue newValue(String value) {
+        return StringValue.newBuilder().setValue(value).build();
+    }
 
-        private static final ProjectId DEFAULT_STATE = createProjectId("defaultProjectId");
-
+    public static class TestEntity extends Entity<String, StringValue> {
         protected TestEntity(String id) {
             super(id);
         }
-
         @Nonnull
         @Override
-        protected ProjectId getDefaultState() {
-            return DEFAULT_STATE;
-        }
-
-        @Override
-        protected void validate(ProjectId state) throws IllegalStateException {
-            super.validate(state);
+        protected StringValue getDefaultState() {
+            return StringValue.getDefaultInstance();
         }
     }
 }
