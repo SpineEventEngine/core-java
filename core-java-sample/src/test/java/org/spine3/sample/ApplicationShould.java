@@ -21,11 +21,14 @@
 package org.spine3.sample;
 
 import org.junit.Test;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ApplicationShould {
+
+    private static final StorageFactory FS_STORAGE_FACTORY = FileSystemStorageFactory.newInstance(ApplicationShould.class);
 
     @Test
     public void execute_on_in_memory_storage() {
@@ -35,7 +38,11 @@ public class ApplicationShould {
 
     @Test
     public void execute_on_file_system_storage() {
-        final Application app = new Application(FileSystemStorageFactory.newInstance(ApplicationShould.class));
-        app.execute();
+        try {
+            final Application app = new Application(FS_STORAGE_FACTORY);
+            app.execute();
+        } finally {
+            FS_STORAGE_FACTORY.tearDown();
+        }
     }
 }
