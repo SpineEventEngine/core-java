@@ -94,6 +94,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * Reads {@link com.google.protobuf.Message} from {@link java.io.File}.
      *
      * @param file the {@link java.io.File} to read from.
+     * @return the message parsed from the file or {@code null}
      */
     private static Message readMessage(File file) {
         checkFileExists(file, "entity storage");
