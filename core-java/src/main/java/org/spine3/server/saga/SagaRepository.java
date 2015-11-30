@@ -20,6 +20,7 @@
 
 package org.spine3.server.saga;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -103,9 +104,20 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
                 .build();
     }
 
-    // TODO:2015-11-30:alexander.litus: make dispatchers private
+    /**
+     * Dispatches the command to a corresponding saga.
+     *
+     * <p>The {@link #getSagaIdOnCommand(Message, CommandContext)} method must be implemented to retrieve the correct saga ID.
+     *
+     * <p>If there is no stored saga with such ID, a new saga is created and stored after it handles the passed command.
+     *
+     * @param command the command to dispatch
+     * @param context the context of the command
+     * @see Saga#dispatchCommand(Message, CommandContext)
+     */
     @SuppressWarnings("unused") // This method is used via reflection
-    public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    @VisibleForTesting
+    protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
         final I id = getSagaIdOnCommand(command, context);
         final S saga = load(id);
         final List<? extends Message> events = saga.dispatchCommand(command, context);
@@ -115,11 +127,22 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
         return ImmutableList.<EventRecord>builder().build();
     }
 
+    /**
+     * Dispatches the event to a corresponding saga.
+     *
+     * <p>The {@link #getSagaIdOnEvent(Message, EventContext)} method must be implemented to retrieve the correct saga ID.
+     *
+     * <p>If there is no stored saga with such ID, a new saga is created and stored after it handles the passed event.
+     *
+     * @param event the event to dispatch
+     * @param context the context of the event
+     * @see Saga#dispatchEvent(Message, EventContext)
+     */
     @SuppressWarnings("unused") // This method is used via reflection
-    public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+    @VisibleForTesting
+    protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
         final I id = getSagaIdOnEvent(event, context);
         final S saga = load(id);
-
         saga.dispatchEvent(event, context);
         store(saga);
     }
@@ -145,20 +168,22 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
     /**
      * Returns the reference to the method {@link #dispatchCommand(Message, CommandContext)} of this repository.
      */
-    private Method commandDispatcherAsMethod() {
+    private static Method commandDispatcherAsMethod() {
         return getDispatcherMethod(COMMAND_DISPATCHER_METHOD_NAME, CommandContext.class);
     }
 
     /**
      * Returns the reference to the method {@link #dispatchEvent(Message, EventContext)} of this repository.
      */
-    private Method eventHandlerAsMethod() {
+    private static Method eventHandlerAsMethod() {
         return getDispatcherMethod(EVENT_DISPATCHER_METHOD_NAME, EventContext.class);
     }
 
-    private Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
+    private static Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
         try {
-            return getClass().getMethod(dispatcherMethodName, Message.class, contextClass);
+            final Method method = SagaRepository.class.getDeclaredMethod(dispatcherMethodName, Message.class, contextClass);
+            method.setAccessible(true);
+            return method;
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }

@@ -42,6 +42,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
 /**
+ * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
+ *
+ * <p>A state machine that is driven forward by incoming events (which may come from many aggregates).
+ *
+ * <p>Aka {@code pipeline} or {@code process manager}.
+ *
+ * <p>Event/command handlers are invoked by the {@link SagaRepository} that manages instances of a saga class.
+ *
+ * @param <I> the type of the saga IDs
+ * @param <M> the type of the state of the saga
+ * @see <a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a>
+ * @see <a href="http://cqrs.nu/Faq/sagas">cqrs.nu/Faq/sagas</a>
  * @author Alexander Litus
  */
 public abstract class Saga<I, M extends Message> extends Entity<I, M> {
