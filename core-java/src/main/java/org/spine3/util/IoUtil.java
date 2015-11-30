@@ -142,8 +142,8 @@ public class IoUtil {
     }
 
     /**
-     * Creates a file with the given path if it does not exist.
-     * @return the created file
+     * Creates a file with the given path if it does not exist or returns the existed one.
+     * @return the created or existed file
      * @throws java.io.IOException - If an I/O error occurred
      */
     @SuppressWarnings("ResultOfMethodCallIgnored") // the result is redundant in this case
