@@ -24,8 +24,6 @@ package spine.sample.processmanager;
 option java_package="org.spine3.sample.processmanager";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
-
 message ProcessManagerState {
 
     State state = 2;
