@@ -155,9 +155,20 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         });
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return the list of event messages/records (or an empty list if the handler returns nothing)
+     */
     @Override
     public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
-        return super.invoke(message, context);
+        final R handlingResult = super.invoke(message, context);
+
+        final List<? extends Message> events = commandHandlingResultToEvents(handlingResult);
+        // The list of event messages/records is the return type expected.
+        @SuppressWarnings("unchecked")
+        final R result = (R) events;
+        return result;
     }
 
     /**
@@ -165,14 +176,15 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      *
      * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages or {@code null}.
      * @return the list of events as messages
+     * @see #isCommandHandler(Method)
      */
-    public static List<? extends Message> commandHandlingResultToEvents(@Nullable Object handlingResult) {
+    private static List<? extends Message> commandHandlingResultToEvents(@Nullable Object handlingResult) {
         if (handlingResult == null) {
             return emptyList();
         }
         final Class<?> resultClass = handlingResult.getClass();
         if (List.class.isAssignableFrom(resultClass)) {
-            // Cast to list of messages as it is one of the return types we expect by methods we can call.
+            // Cast to the list of messages as it is the one of the return types we expect by methods we can call.
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;

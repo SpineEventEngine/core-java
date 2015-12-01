@@ -42,7 +42,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.internal.CommandHandlerMethod.*;
+import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
+import static org.spine3.server.internal.CommandHandlerMethod.isCommandHandlerPredicate;
 import static org.spine3.util.Identifiers.idToAny;
 
 /**
@@ -132,17 +133,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         }
     }
 
-    private Object invokeHandler(Message command, CommandContext context) throws InvocationTargetException {
-        final Class<? extends Message> commandClass = command.getClass();
-        final Method method = commandHandlers.get(commandClass);
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final Object result = commandHandler.invoke(command, context);
-        return result;
-    }
-
     private void invokeApplier(Message event) throws InvocationTargetException {
         final Class<? extends Message> eventClass = event.getClass();
         final Method method = eventAppliers.get(eventClass);
@@ -186,8 +176,14 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         checkNotNull(command, "command");
         checkNotNull(context, "context");
 
-        final Object handlingResult = invokeHandler(command, context);
-        return commandHandlingResultToEvents(handlingResult);
+        final Class<? extends Message> commandClass = command.getClass();
+        final Method method = commandHandlers.get(commandClass);
+        if (method == null) {
+            throw missingCommandHandler(commandClass);
+        }
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final List<? extends Message> result = commandHandler.invoke(command, context);
+        return result;
     }
 
     /**

@@ -42,7 +42,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToEvents;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -119,8 +118,7 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
             throw missingCommandHandler(commandClass);
         }
         final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final Object handlingResult = commandHandler.invoke(command, context);
-        final List<? extends Message> events = commandHandlingResultToEvents(handlingResult);
+        final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
         return eventRecords;
     }
