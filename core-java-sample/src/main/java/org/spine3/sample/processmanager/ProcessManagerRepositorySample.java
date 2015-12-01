@@ -28,7 +28,7 @@ import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
 import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
-import org.spine3.server.processmanager.ProcessManagerRepository;
+import org.spine3.server.process.ProcessManagerRepository;
 import org.spine3.util.Identifiers;
 
 import java.util.Map;

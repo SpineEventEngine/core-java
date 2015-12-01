@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.processmanager;
+package org.spine3.server.process;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;

@@ -32,7 +32,7 @@ import org.spine3.sample.order.event.OrderPaid;
 import org.spine3.sample.processmanager.ProcessManagerState.State;
 import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
 import org.spine3.server.Assign;
-import org.spine3.server.processmanager.ProcessManager;
+import org.spine3.server.process.ProcessManager;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.sample.processmanager.ProcessManagerState.State.DONE;
