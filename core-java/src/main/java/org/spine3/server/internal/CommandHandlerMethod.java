@@ -161,12 +161,12 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
-     * Casts a command handling result to a list of messages.
+     * Casts a command handling result to a list of event messages.
      *
      * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages or {@code null}.
-     * @return the list of messages
+     * @return the list of events as messages
      */
-    public static List<? extends Message> commandHandlingResultToMessages(@Nullable Object handlingResult) {
+    public static List<? extends Message> commandHandlingResultToEvents(@Nullable Object handlingResult) {
         if (handlingResult == null) {
             return emptyList();
         }

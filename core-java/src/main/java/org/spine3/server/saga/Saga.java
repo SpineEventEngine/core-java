@@ -20,17 +20,21 @@
 
 package org.spine3.server.saga;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
+import com.google.protobuf.Timestamp;
+import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Classes;
+import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -38,7 +42,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToMessages;
+import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToEvents;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -104,7 +108,7 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
-    protected List<? extends Message> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
         checkNotNull(command, "command is null");
         checkNotNull(context, "command context is null");
 
@@ -116,7 +120,24 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
         }
         final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final Object handlingResult = commandHandler.invoke(command, context);
-        return commandHandlingResultToMessages(handlingResult);
+        final List<? extends Message> events = commandHandlingResultToEvents(handlingResult);
+        final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
+        return eventRecords;
+    }
+
+    private List<EventRecord> toEventRecords(final List<? extends Message> events, final CommandId commandId) {
+        return Lists.transform(events, new Function<Message, EventRecord>() {
+            @Nullable // return null because an exception won't be propagated in this case
+            @Override
+            public EventRecord apply(@Nullable Message event) {
+                if (event == null) {
+                    return EventRecord.getDefaultInstance();
+                }
+                final EventContext eventContext = createEventContext(commandId, event, getState(), whenModified(), getVersion());
+                final EventRecord result = Events.createEventRecord(event, eventContext);
+                return result;
+            }
+        });
     }
 
     /**
@@ -146,6 +167,49 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
         } catch (InvocationTargetException e) {
             propagate(e);
         }
+    }
+
+    /**
+     * Creates a context for an event.
+     * <p>
+     * The context may optionally have custom attributes added by
+     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     *
+     * @param commandId      the ID of the command, which caused the event
+     * @param event          the event for which to create the context
+     * @param currentState   the state of the saga after the event was applied
+     * @param whenModified   the moment of the aggregate modification for this event
+     * @param currentVersion the version of the aggregate after the event was applied
+     * @return new instance of the {@code EventContext}
+     */
+    @CheckReturnValue
+    protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
+        final EventId eventId = Events.createId(commandId, whenModified);
+        final EventContext.Builder builder = EventContext.newBuilder()
+                .setEventId(eventId)
+                .setVersion(currentVersion);
+
+        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
+
+        return builder.build();
+    }
+
+    /**
+     * Adds custom attributes to an event context builder during the creation of the event context.
+     *
+     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     *
+     * @param builder        a builder for the event context
+     * @param commandId      the id of the command, which cased the event
+     * @param event          the event message
+     * @param currentState   the current state of the aggregate after the event was applied
+     * @param currentVersion the version of the saga after the event was applied
+     * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
+    protected void addEventContextAttributes(EventContext.Builder builder,
+                                             CommandId commandId, Message event, M currentState, int currentVersion) {
+        // Do nothing.
     }
 
     /**

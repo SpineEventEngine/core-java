@@ -20,7 +20,6 @@
 
 package org.spine3.server.saga;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
@@ -118,11 +117,9 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
     public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
         final I id = getSagaIdOnCommand(command, context);
         final S saga = load(id);
-        final List<? extends Message> events = saga.dispatchCommand(command, context);
+        final List<EventRecord> events = saga.dispatchCommand(command, context);
         store(saga);
-
-        // TODO:2015-11-27:alexander.litus: return handling result
-        return ImmutableList.<EventRecord>builder().build();
+        return events;
     }
 
     /**

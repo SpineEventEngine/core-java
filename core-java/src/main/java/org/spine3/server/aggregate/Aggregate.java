@@ -187,7 +187,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         checkNotNull(context, "context");
 
         final Object handlingResult = invokeHandler(command, context);
-        return commandHandlingResultToMessages(handlingResult);
+        return commandHandlingResultToEvents(handlingResult);
     }
 
     /**
