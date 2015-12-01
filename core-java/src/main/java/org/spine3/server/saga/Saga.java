@@ -20,7 +20,6 @@
 
 package org.spine3.server.saga;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
@@ -34,12 +33,12 @@ import org.spine3.util.MethodMap;
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToMessages;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -106,8 +105,8 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
     protected List<? extends Message> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        checkNotNull(command, "command");
-        checkNotNull(context, "command context");
+        checkNotNull(command, "command is null");
+        checkNotNull(context, "command context is null");
 
         init();
         final Class<? extends Message> commandClass = command.getClass();
@@ -117,24 +116,7 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
         }
         final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final Object handlingResult = commandHandler.invoke(command, context);
-
-        if (handlingResult == null) {
-            return ImmutableList.<Message>builder().build();
-        }
-
-        // TODO:2015-11-27:alexander.litus: DRY
-        final Class<?> resultClass = handlingResult.getClass();
-        //noinspection IfMayBeConditional
-        if (List.class.isAssignableFrom(resultClass)) {
-            // Cast to list of messages as it is one of the return types we expect by methods we can call.
-            @SuppressWarnings("unchecked")
-            final List<? extends Message> result = (List<? extends Message>) handlingResult;
-            return result;
-        } else {
-            // Another type of result is single event (as Message).
-            final List<Message> result = Collections.singletonList((Message) handlingResult);
-            return result;
-        }
+        return commandHandlingResultToMessages(handlingResult);
     }
 
     /**

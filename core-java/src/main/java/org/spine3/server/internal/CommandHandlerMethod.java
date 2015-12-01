@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * The wrapper for a command handler method.
@@ -156,6 +158,23 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     @Override
     public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
         return super.invoke(message, context);
+    }
+
+    public static List<? extends Message> commandHandlingResultToMessages(@Nullable Object handlingResult) {
+        if (handlingResult == null) {
+            return emptyList();
+        }
+        final Class<?> resultClass = handlingResult.getClass();
+        if (List.class.isAssignableFrom(resultClass)) {
+            // Cast to list of messages as it is one of the return types we expect by methods we can call.
+            @SuppressWarnings("unchecked")
+            final List<? extends Message> result = (List<? extends Message>) handlingResult;
+            return result;
+        } else {
+            // Another type of result is single event (as Message).
+            final List<Message> result = singletonList((Message) handlingResult);
+            return result;
+        }
     }
 
     /**
