@@ -160,6 +160,12 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         return super.invoke(message, context);
     }
 
+    /**
+     * Casts a command handling result to a list of messages.
+     *
+     * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages or {@code null}.
+     * @return the list of messages
+     */
     public static List<? extends Message> commandHandlingResultToMessages(@Nullable Object handlingResult) {
         if (handlingResult == null) {
             return emptyList();
