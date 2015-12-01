@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.saga;
+package org.spine3.sample.processmanager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,45 +29,48 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
-import org.spine3.sample.saga.command.TestSagaCommand;
+import org.spine3.sample.processmanager.ProcessManagerState.State;
+import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
 import org.spine3.server.Assign;
-import org.spine3.server.saga.Saga;
+import org.spine3.server.processmanager.ProcessManager;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.sample.processmanager.ProcessManagerState.State.DONE;
+import static org.spine3.sample.processmanager.ProcessManagerState.State.IN_PROGRESS;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
-public class SagaSample extends Saga<String, SagaState> {
+public class ProcessManagerSample extends ProcessManager<String, ProcessManagerState> {
 
     private static final String NEW_LINE = System.lineSeparator();
 
-    public SagaSample(String id) {
+    public ProcessManagerSample(String id) {
         super(id);
     }
 
     @Override
-    protected SagaState getDefaultState() {
-        return SagaState.getDefaultInstance();
+    protected ProcessManagerState getDefaultState() {
+        return ProcessManagerState.getDefaultInstance();
     }
 
     @Subscribe
     public void on(OrderCreated event, EventContext context) {
         logMessage(event.getClass().getSimpleName(), event.getOrderId());
 
-        final SagaState.State state = getState().getState();
-        checkState(state == SagaState.State.NEW, state);
+        final State state = getState().getState();
+        checkState(state == State.NEW, state);
     }
 
     @Subscribe
     public void on(OrderLineAdded event, EventContext context) {
         logMessage(event.getClass().getSimpleName(), event.getOrderId());
 
-        final SagaState.State state = getState().getState();
-        checkState(state == SagaState.State.NEW, state);
+        final State state = getState().getState();
+        checkState(state == State.NEW, state);
 
-        final SagaState newState = SagaState.newBuilder().setState(SagaState.State.IN_PROGRESS).build();
+        final ProcessManagerState newState = ProcessManagerState.newBuilder().setState(IN_PROGRESS).build();
         incrementState(newState);
     }
 
@@ -75,23 +78,23 @@ public class SagaSample extends Saga<String, SagaState> {
     public void on(OrderPaid event, EventContext context) {
         logMessage(event.getClass().getSimpleName(), event.getOrderId());
 
-        final SagaState.State state = getState().getState();
-        checkState(state == SagaState.State.IN_PROGRESS, state);
+        final State state = getState().getState();
+        checkState(state == IN_PROGRESS, state);
 
-        final SagaState newState = SagaState.newBuilder().setState(SagaState.State.DONE).build();
+        final ProcessManagerState newState = ProcessManagerState.newBuilder().setState(DONE).build();
         incrementState(newState);
     }
 
     @Assign
-    public void handle(TestSagaCommand command, CommandContext ctx) {
+    public void handle(ProcessManagerSampleCommand command, CommandContext ctx) {
         logMessage(command.getClass().getSimpleName(), command.getOrderId());
 
-        final SagaState.State state = getState().getState();
-        checkState(state == SagaState.State.DONE, state);
+        final State state = getState().getState();
+        checkState(state == DONE, state);
     }
 
     private static void logMessage(String messageName, OrderId orderId) {
-        log().info("SagaSample handled " + messageName + ", order ID: " + orderId.getValue() + NEW_LINE);
+        log().info("Process manager handled '" + messageName + "', order ID: " + orderId.getValue() + NEW_LINE);
     }
 
     private static Logger log() {
@@ -101,6 +104,6 @@ public class SagaSample extends Saga<String, SagaState> {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(SagaSample.class);
+        private final Logger value = LoggerFactory.getLogger(ProcessManagerSample.class);
     }
 }

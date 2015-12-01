@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.saga;
+package org.spine3.server.processmanager;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -38,16 +38,16 @@ import java.util.Set;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * The abstract base for repositories managing Sagas.
+ * The abstract base for repositories for Process Managers.
  *
- * @see Saga
+ * @see ProcessManager
  * @author Alexander Litus
  */
-public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
-        extends EntityRepository<I, S, M> implements MultiHandler {
+public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
+        extends EntityRepository<I, PM, M> implements MultiHandler {
 
     /**
-     * The name of the method used for dispatching commands to sagas.
+     * The name of the method used for dispatching commands to process managers.
      *
      * <p>This constant is used for obtaining {@code Method} instance via reflection.
      *
@@ -56,7 +56,7 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
     private static final String COMMAND_DISPATCHER_METHOD_NAME = "dispatchCommand";
 
     /**
-     * The name of the method used for dispatching events to sagas.
+     * The name of the method used for dispatching events to process managers.
      *
      * <p>This constant is used for obtaining {@code Method} instance via reflection.
      *
@@ -65,27 +65,27 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
     private static final String EVENT_DISPATCHER_METHOD_NAME = "dispatchEvent";
 
     /**
-     * Returns a saga ID based on the information from the command and command context.
+     * Returns a process manager ID based on the information from the command and command context.
      *
-     * @param command command which the saga handles
+     * @param command command which the process manager handles
      * @param context context of the command
-     * @return a saga ID
+     * @return a process manager ID
      */
-    protected abstract I getSagaIdOnCommand(Message command, CommandContext context);
+    protected abstract I getProcessManagerIdOnCommand(Message command, CommandContext context);
 
     /**
-     * Returns a saga ID based on the information from the event and event context.
+     * Returns a process manager ID based on the information from the event and event context.
      *
-     * @param event event which the saga handles
+     * @param event event which the process manager handles
      * @param context context of the event
-     * @return a saga ID
+     * @return a process manager ID
      */
-    protected abstract I getSagaIdOnEvent(Message event, EventContext context);
+    protected abstract I getProcessManagerIdOnEvent(Message event, EventContext context);
 
     @Override
     public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
-        final Class<? extends Saga> sagaClass = getEntityClass();
-        final Set<Class<? extends Message>> commandClasses = Saga.getHandledCommandClasses(sagaClass);
+        final Class<? extends ProcessManager> pmClass = getEntityClass();
+        final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
         final Method handler = commandDispatcherAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, commandClasses)
@@ -94,8 +94,8 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
 
     @Override
     public Multimap<Method, Class<? extends Message>> getEventHandlers() {
-        final Class<? extends Saga> sagaClass = getEntityClass();
-        final Set<Class<? extends Message>> eventClasses = Saga.getHandledEventClasses(sagaClass);
+        final Class<? extends ProcessManager> pmClass = getEntityClass();
+        final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
         final Method handler = eventHandlerAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, eventClasses)
@@ -103,56 +103,60 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
     }
 
     /**
-     * Dispatches the command to a corresponding saga.
+     * Dispatches the command to a corresponding process manager.
      *
-     * <p>The {@link #getSagaIdOnCommand(Message, CommandContext)} method must be implemented to retrieve the correct saga ID.
+     * <p>The {@link #getProcessManagerIdOnCommand(Message, CommandContext)} method must be implemented
+     * to retrieve the correct process manager ID.
      *
-     * <p>If there is no stored saga with such ID, a new saga is created and stored after it handles the passed command.
+     * <p>If there is no stored process manager with such an ID, a new process manager is created
+     * and stored after it handles the passed command.
      *
      * @param command the command to dispatch
      * @param context the context of the command
-     * @see Saga#dispatchCommand(Message, CommandContext)
+     * @see ProcessManager#dispatchCommand(Message, CommandContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        final I id = getSagaIdOnCommand(command, context);
-        final S saga = load(id);
-        final List<EventRecord> events = saga.dispatchCommand(command, context);
-        store(saga);
+        final I id = getProcessManagerIdOnCommand(command, context);
+        final PM manager = load(id);
+        final List<EventRecord> events = manager.dispatchCommand(command, context);
+        store(manager);
         return events;
     }
 
     /**
-     * Dispatches the event to a corresponding saga.
+     * Dispatches the event to a corresponding process manager.
      *
-     * <p>The {@link #getSagaIdOnEvent(Message, EventContext)} method must be implemented to retrieve the correct saga ID.
+     * <p>The {@link #getProcessManagerIdOnEvent(Message, EventContext)} method must be implemented
+     * to retrieve the correct process manager ID.
      *
-     * <p>If there is no stored saga with such ID, a new saga is created and stored after it handles the passed event.
+     * <p>If there is no stored process manager with such ID, a new process manager is created
+     * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
      * @param context the context of the event
-     * @see Saga#dispatchEvent(Message, EventContext)
+     * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
-        final I id = getSagaIdOnEvent(event, context);
-        final S saga = load(id);
-        saga.dispatchEvent(event, context);
-        store(saga);
+        final I id = getProcessManagerIdOnEvent(event, context);
+        final PM manager = load(id);
+        manager.dispatchEvent(event, context);
+        store(manager);
     }
 
     /**
-     * Loads or creates a saga by the passed ID.
+     * Loads or creates a process manager by the passed ID.
      *
-     * <p>The saga is created if there was no saga with such ID stored before.
+     * <p>The process manager is created if there was no manager with such an ID stored before.
      *
-     * @param id the ID of the saga to load
-     * @return loaded or created saga instance
+     * @param id the ID of the process manager to load
+     * @return loaded or created process manager instance
      */
     @Nonnull
     @Override
-    public S load(@Nonnull I id) {
-        S result = super.load(id);
+    public PM load(@Nonnull I id) {
+        PM result = super.load(id);
         if (result == null) {
             result = create(id);
         }
@@ -175,7 +179,7 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
 
     private static Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
         try {
-            return SagaRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
+            return ProcessManagerRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }

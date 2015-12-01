@@ -18,11 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides classes for managing sagas.
- */
-
 @ParametersAreNonnullByDefault
-package org.spine3.server.saga;
+package org.spine3.sample.processmanager;
 
 import javax.annotation.ParametersAreNonnullByDefault;

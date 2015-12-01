@@ -18,7 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package provides classes related to Process Managers.
+ */
+
 @ParametersAreNonnullByDefault
-package org.spine3.sample.saga;
+package org.spine3.server.processmanager;
 
 import javax.annotation.ParametersAreNonnullByDefault;

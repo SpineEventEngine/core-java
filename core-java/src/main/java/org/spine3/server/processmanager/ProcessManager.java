@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.saga;
+package org.spine3.server.processmanager;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -45,66 +45,72 @@ import static com.google.common.base.Throwables.propagate;
 import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToEvents;
 
 /**
+ * A central processing unit used to maintain the state of the sequence and determine the next processing step
+ * based on intermediate results.
+ * <p>
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
+ * Used for externalizing the decisions on the logic flow from the business logic.
+ * <p>
+ * Event/command handlers are invoked by the {@link ProcessManagerRepository}
+ * that manages instances of a process manager class.
+ * <p>
+ * There is a common confusion between Process Managers and Sagas.
+ * See <a href="http://kellabyte.com/2012/05/30/clarifying-the-saga-pattern/">this</a> and
+ * <a href="https://dzone.com/articles/are-sagas-and-workflows-same-t">this topic</a>
+ * to understand the difference between them.
  *
- * <p>A state machine that is driven forward by incoming events (which may come from many aggregates).
- *
- * <p>Aka {@code pipeline} or {@code process manager}.
- *
- * <p>Event/command handlers are invoked by the {@link SagaRepository} that manages instances of a saga class.
- *
- * @param <I> the type of the saga IDs
- * @param <M> the type of the state of the saga
+ * @param <I> the type of the process manager IDs
+ * @param <M> the type of the process manager state
+ * @see <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html">Process Manager Pattern</a>
  * @see <a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a>
- * @see <a href="http://cqrs.nu/Faq/sagas">cqrs.nu/Faq/sagas</a>
  * @author Alexander Litus
  */
-public abstract class Saga<I, M extends Message> extends Entity<I, M> {
+public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
 
     /**
-     * Keeps initialization state of the saga.
+     * Keeps initialization state of the process manager.
      */
     private volatile boolean initialized = false;
 
     /**
-     * The map of command handler methods for this saga.
+     * The map of command handler methods for this process manager.
      *
      * @see Registry
      */
     private MethodMap commandHandlers;
 
     /**
-     * The map of event handlers for this saga.
+     * The map of event handlers for this process manager.
      *
      * @see Registry
      */
     private MethodMap eventHandlers;
 
-    protected Saga(I id) {
+    protected ProcessManager(I id) {
         super(id);
     }
 
     /**
-     * Performs initialization of the instance and registers this class of sagas
+     * Performs initialization of the instance and registers this class of process managers
      * in the {@link Registry} if it is not registered yet.
      */
     private void init() {
         if (!this.initialized) {
             final Registry registry = Registry.getInstance();
-            final Class<? extends Saga> sagaClass = getClass();
-            if (!registry.contains(sagaClass)) {
-                registry.register(sagaClass);
+            final Class<? extends ProcessManager> pmClass = getClass();
+            if (!registry.contains(pmClass)) {
+                registry.register(pmClass);
             }
-            commandHandlers = registry.getCommandHandlers(sagaClass);
-            eventHandlers = registry.getEventHandlers(sagaClass);
+            commandHandlers = registry.getCommandHandlers(pmClass);
+            eventHandlers = registry.getEventHandlers(pmClass);
             this.initialized = true;
         }
     }
 
     /**
-     * Dispatches a command to the command handler method of the saga.
+     * Dispatches a command to the command handler method of the process manager.
      *
-     * @param command the command to be executed on the saga
+     * @param command the command to be executed on the process manager
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
@@ -141,9 +147,9 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
     }
 
     /**
-     * Dispatches an event to the event handler method of the saga.
+     * Dispatches an event to the event handler method of the process manager.
      *
-     * @param event the event to be handled by the saga
+     * @param event the event to be handled by the process manager
      * @param context of the event
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
@@ -177,7 +183,7 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
      *
      * @param commandId      the ID of the command, which caused the event
      * @param event          the event for which to create the context
-     * @param currentState   the state of the saga after the event was applied
+     * @param currentState   the state of the process manager after the event was applied
      * @param whenModified   the moment of the aggregate modification for this event
      * @param currentVersion the version of the aggregate after the event was applied
      * @return new instance of the {@code EventContext}
@@ -203,7 +209,7 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
      * @param commandId      the id of the command, which cased the event
      * @param event          the event message
      * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the saga after the event was applied
+     * @param currentVersion the version of the process manager after the event was applied
      * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
@@ -213,47 +219,47 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
     }
 
     /**
-     * Returns the set of the command types handled by the saga.
+     * Returns the set of the command types handled by the process manager.
      *
-     * @param sagaClass the saga class to inspect
+     * @param pmClass the process manager class to inspect
      * @return immutable set of command classes or an empty set if no commands are handled
      */
-    public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends Saga> sagaClass) {
-        return Classes.getHandledMessageClasses(sagaClass, CommandHandlerMethod.isCommandHandlerPredicate);
+    public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
+        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.isCommandHandlerPredicate);
     }
 
     /**
-     * Returns the set of event classes handled by the saga.
+     * Returns the set of event classes handled by the process manager.
      *
-     * @param sagaClass the saga class to inspect
+     * @param pmClass the process manager class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends Saga> sagaClass) {
-        return Classes.getHandledMessageClasses(sagaClass, EventHandlerMethod.isEventHandlerPredicate);
+    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
+        return Classes.getHandledMessageClasses(pmClass, EventHandlerMethod.isEventHandlerPredicate);
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
-        return new IllegalStateException(String.format("Missing handler for command class %s in saga class %s.",
+        return new IllegalStateException(String.format("Missing handler for command class %s in process manager class %s.",
                         commandClass.getName(), getClass().getName()));
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        return new IllegalStateException(String.format("Missing event handler for event class %s in the sage class %s",
+        return new IllegalStateException(String.format("Missing event handler for event class %s in the process manager class %s",
                 eventClass, this.getClass()));
     }
 
     /**
-     * The registry of method maps for all saga classes.
+     * The registry of method maps for all process manager classes.
      * <p>
      * This registry is used for caching command/event handlers.
-     * Sagas register their classes in {@link Saga#init()} method.
+     * Process managers register their classes in {@link ProcessManager#init()} method.
      */
     private static class Registry {
 
-        private final MethodMap.Registry<Saga> commandHandlers = new MethodMap.Registry<>();
-        private final MethodMap.Registry<Saga> eventHandlers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
-        void register(Class<? extends Saga> clazz) {
+        void register(Class<? extends ProcessManager> clazz) {
             commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
@@ -262,19 +268,19 @@ public abstract class Saga<I, M extends Message> extends Entity<I, M> {
         }
 
         @CheckReturnValue
-        boolean contains(Class<? extends Saga> clazz) {
+        boolean contains(Class<? extends ProcessManager> clazz) {
             final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getCommandHandlers(Class<? extends Saga> clazz) {
+        MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getEventHandlers(Class<? extends Saga> clazz) {
+        MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = eventHandlers.get(clazz);
             return result;
         }

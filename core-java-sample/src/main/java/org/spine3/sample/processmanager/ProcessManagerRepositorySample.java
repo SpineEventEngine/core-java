@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.saga;
+package org.spine3.sample.processmanager;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
@@ -27,8 +27,8 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
-import org.spine3.sample.saga.command.TestSagaCommand;
-import org.spine3.server.saga.SagaRepository;
+import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
+import org.spine3.server.processmanager.ProcessManagerRepository;
 import org.spine3.util.Identifiers;
 
 import java.util.Map;
@@ -39,17 +39,17 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * @author Alexander Litus
  */
 @SuppressWarnings("TypeMayBeWeakened")
-public class SagaRepositorySample extends SagaRepository<String, SagaSample, SagaState> {
+public class ProcessManagerRepositorySample extends ProcessManagerRepository<String, ProcessManagerSample, ProcessManagerState> {
 
     /**
-     * The map from order IDs to saga IDs.
+     * The map from order IDs to process manager IDs.
      */
     private final Map<OrderId, String> identifiers = newConcurrentMap();
 
     @Override
-    protected String getSagaIdOnCommand(Message command, CommandContext context) {
-        if (command instanceof TestSagaCommand) {
-            final TestSagaCommand testCmd = (TestSagaCommand) command;
+    protected String getProcessManagerIdOnCommand(Message command, CommandContext context) {
+        if (command instanceof ProcessManagerSampleCommand) {
+            final ProcessManagerSampleCommand testCmd = (ProcessManagerSampleCommand) command;
             final OrderId orderId = testCmd.getOrderId();
             return identifiers.get(orderId);
         } else {
@@ -59,32 +59,32 @@ public class SagaRepositorySample extends SagaRepository<String, SagaSample, Sag
 
     @Override
     @SuppressWarnings({"IfStatementWithTooManyBranches", "ChainOfInstanceofChecks"})
-    protected String getSagaIdOnEvent(Message event, EventContext context) {
+    protected String getProcessManagerIdOnEvent(Message event, EventContext context) {
         if (event instanceof OrderCreated) {
-            return getSagaId((OrderCreated) event);
+            return getPmId((OrderCreated) event);
         } else if (event instanceof OrderLineAdded) {
-            return getSagaId((OrderLineAdded) event);
+            return getPmId((OrderLineAdded) event);
         } else if (event instanceof OrderPaid) {
-            return getSagaId((OrderPaid) event);
+            return getPmId((OrderPaid) event);
         } else {
             throw newIllegalArgumentException(event);
         }
     }
 
-    private String getSagaId(OrderCreated event) {
-        final String sagaId = Identifiers.newUuid();
-        identifiers.put(event.getOrderId(), sagaId);
-        return sagaId;
+    private String getPmId(OrderCreated event) {
+        final String id = Identifiers.newUuid();
+        identifiers.put(event.getOrderId(), id);
+        return id;
     }
 
-    private String getSagaId(OrderLineAdded event) {
-        final String sagaId = identifiers.get(event.getOrderId());
-        return sagaId;
+    private String getPmId(OrderLineAdded event) {
+        final String id = identifiers.get(event.getOrderId());
+        return id;
     }
 
-    private String getSagaId(OrderPaid event) {
-        final String sagaId = identifiers.get(event.getOrderId());
-        return sagaId;
+    private String getPmId(OrderPaid event) {
+        final String id = identifiers.get(event.getOrderId());
+        return id;
     }
 
     private static IllegalArgumentException newIllegalArgumentException(Message command) {

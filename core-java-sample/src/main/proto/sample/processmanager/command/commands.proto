@@ -19,20 +19,14 @@
 //
 syntax = "proto3";
 
-package spine.sample.saga;
+package spine.sample.processmanager.command;
 
-option java_package="org.spine3.sample.saga";
+import "sample/order/order.proto";
+
+option java_package="org.spine3.sample.processmanager.command";
+option java_outer_classname = "ProcessManagerCommandsProto";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
-
-message SagaState {
-
-    State state = 2;
-
-    enum State {
-        NEW = 0;
-        IN_PROGRESS = 1;
-        DONE = 2;
-    }
+message ProcessManagerSampleCommand {
+    spine.sample.order.OrderId order_id = 1;
 }
