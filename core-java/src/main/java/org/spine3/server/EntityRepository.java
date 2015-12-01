@@ -77,7 +77,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     private EntityStorage<I, M> checkStorage() {
         final EntityStorage<I, M> storage = getStorage();
         checkState(storage != null, "Storage not assigned");
-        // noinspection ConstantConditions
         return storage;
     }
 
@@ -88,7 +87,8 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
      * @throws ClassCastException if the object is not of the required class
      */
     protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"}) final EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
+        @SuppressWarnings({"unused", "unchecked"})
+        final EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
     }
 
 }
