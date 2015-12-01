@@ -55,13 +55,15 @@ public class SagaSample extends Saga<String, SagaState> {
     @Subscribe
     public void on(OrderCreated event, EventContext context) {
         logMessage(event.getClass().getSimpleName(), event.getOrderId());
-        checkState(getState().getState() == SagaState.State.NEW, getState());
+        final SagaState.State state = getState().getState();
+        checkState(state == SagaState.State.NEW, state);
     }
 
     @Subscribe
     public void on(OrderLineAdded event, EventContext context) {
         logMessage(event.getClass().getSimpleName(), event.getOrderId());
-        checkState(getState().getState() == SagaState.State.NEW, getState());
+        final SagaState.State state = getState().getState();
+        checkState(state == SagaState.State.NEW, state);
         final SagaState newState = SagaState.newBuilder().setState(SagaState.State.IN_PROGRESS).build();
         incrementState(newState);
     }
@@ -77,7 +79,8 @@ public class SagaSample extends Saga<String, SagaState> {
     @Assign
     public void handle(TestSagaCommand command, CommandContext ctx) {
         logMessage(command.getClass().getSimpleName(), command.getOrderId());
-        checkState(getState().getState() == SagaState.State.DONE, getState());
+        final SagaState.State state = getState().getState();
+        checkState(state == SagaState.State.DONE, state);
     }
 
     private static void logMessage(String messageName, OrderId orderId) {
