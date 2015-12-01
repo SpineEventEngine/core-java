@@ -33,7 +33,7 @@ import org.spine3.util.Identifiers;
 
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * @author Alexander Litus
@@ -44,7 +44,7 @@ public class SagaRepositorySample extends SagaRepository<String, SagaSample, Sag
     /**
      * The map from order IDs to saga IDs.
      */
-    private final Map<OrderId, String> identifiers = newHashMap();
+    private final Map<OrderId, String> identifiers = newConcurrentMap();
 
     @Override
     protected String getSagaIdOnCommand(Message command, CommandContext context) {
