@@ -20,7 +20,6 @@
 
 package org.spine3.server.saga;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -116,8 +115,7 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
      * @see Saga#dispatchCommand(Message, CommandContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
-    @VisibleForTesting
-    protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
         final I id = getSagaIdOnCommand(command, context);
         final S saga = load(id);
         final List<? extends Message> events = saga.dispatchCommand(command, context);
@@ -139,8 +137,7 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
      * @see Saga#dispatchEvent(Message, EventContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
-    @VisibleForTesting
-    protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+    public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
         final I id = getSagaIdOnEvent(event, context);
         final S saga = load(id);
         saga.dispatchEvent(event, context);
@@ -181,9 +178,7 @@ public abstract class SagaRepository<I, S extends Saga<I, M>, M extends Message>
 
     private static Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
         try {
-            final Method method = SagaRepository.class.getDeclaredMethod(dispatcherMethodName, Message.class, contextClass);
-            method.setAccessible(true);
-            return method;
+            return SagaRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
