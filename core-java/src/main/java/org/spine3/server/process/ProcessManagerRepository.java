@@ -40,6 +40,9 @@ import static com.google.common.base.Throwables.propagate;
 /**
  * The abstract base for repositories for Process Managers.
  *
+ * @param <I> the type of IDs of process managers
+ * @param <PM> the type of process managers
+ * @param <M> the type of process manager state messages
  * @see ProcessManager
  * @author Alexander Litus
  */
