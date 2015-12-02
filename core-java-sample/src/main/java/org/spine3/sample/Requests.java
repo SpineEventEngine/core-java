@@ -31,6 +31,7 @@ import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayForOrder;
 import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
 import org.spine3.time.ZoneOffset;
+import org.spine3.util.Commands;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
@@ -87,10 +88,8 @@ class Requests {
 
     public static CommandRequest newCommandRequest(UserId userId, Message command) {
         final CommandContext context = getCommandContext(userId);
-        final CommandRequest.Builder request = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(command))
-                .setContext(context);
-        return request.build();
+        final CommandRequest request = Commands.newCommandRequest(command, context);
+        return request;
     }
 
     public static CommandContext getCommandContext(UserId userId) {

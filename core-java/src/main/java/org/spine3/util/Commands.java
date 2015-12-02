@@ -22,8 +22,11 @@ package org.spine3.util;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
+import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
@@ -38,7 +41,7 @@ import static org.spine3.util.Identifiers.*;
 import static org.spine3.util.Users.newUserId;
 
 /**
- * Utility class for working with {@link CommandId} and {@link CommandContext} objects.
+ * Utility class for working with commands.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -188,5 +191,19 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
+    }
+
+    /**
+     * Creates a new command request with the given {@code command} converted to {@link Any} and the {@code context}.
+     *
+     * @param command the command to convert to {@link Any} and set to the request
+     * @param context the context to set to the request
+     * @return a new command request
+     */
+    public static CommandRequest newCommandRequest(Message command, CommandContext context) {
+        final CommandRequest.Builder request = CommandRequest.newBuilder()
+                .setCommand(Messages.toAny(command))
+                .setContext(context);
+        return request.build();
     }
 }

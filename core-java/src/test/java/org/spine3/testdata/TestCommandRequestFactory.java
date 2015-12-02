@@ -30,8 +30,8 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
+import org.spine3.util.Commands;
 
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.util.Users.newUserId;
 
@@ -95,12 +95,8 @@ public class TestCommandRequestFactory {
      * Creates a new {@link CommandRequest} with the given command, userId and timestamp.
      */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
-
         final CommandContext context = TestContextFactory.createCommandContext(userId, when);
-        final CommandRequest.Builder result = CommandRequest.newBuilder()
-                .setContext(context)
-                .setCommand(toAny(command));
-
-        return result.build();
+        final CommandRequest result = Commands.newCommandRequest(command, context);
+        return result;
     }
 }
