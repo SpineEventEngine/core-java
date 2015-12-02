@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.MessageFields;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
+import org.spine3.server.internal.AbstractCommand;
 import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -77,5 +78,4 @@ public class AggregateCommand extends AbstractCommand {
             throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);
         }
     }
-
 }

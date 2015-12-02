@@ -68,22 +68,48 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private static final String EVENT_DISPATCHER_METHOD_NAME = "dispatchEvent";
 
     /**
-     * Returns a process manager ID based on the command and command context.
+     * Intended to return a process manager ID based on the command and command context.
+     * <p>
+     * The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
+     * Override any of these methods if you need.
      *
      * @param command command which the process manager handles
      * @param context context of the command
      * @return a process manager ID
+     * @see #getId(Message)
      */
-    protected abstract I getProcessManagerIdOnCommand(Message command, CommandContext context);
+    protected I getId(Message command, CommandContext context) {
+        return getId(command);
+    }
 
     /**
-     * Returns a process manager ID based on the event and event context.
+     * Intended to return a process manager ID based on the event and event context.
+     * <p>
+     * The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
+     * Override any of these methods if you need.
      *
      * @param event event which the process manager handles
      * @param context context of the event
      * @return a process manager ID
      */
-    protected abstract I getProcessManagerIdOnEvent(Message event, EventContext context);
+    protected I getId(Message event, EventContext context) {
+        return getId(event);
+    }
+
+    /**
+     * Returns a process manager ID based on the command/event message.
+     *
+     * @param message a command/event which the process manager handles
+     * @return a process manager ID
+     * @see ProcessManagerMessage#getProcessManagerId(Message)
+     */
+    protected I getId(Message message) {
+        // We cast to this type because assume that all commands/events for the manager refer to IDs of the same type <I>.
+        // If this assumption fails, we would get ClassCastException.
+        @SuppressWarnings("unchecked")
+        final I result = (I) ProcessManagerMessage.getProcessManagerId(message).value();
+        return result;
+    }
 
     @Override
     public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
@@ -108,7 +134,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     /**
      * Dispatches the command to a corresponding process manager.
      *
-     * <p>The {@link #getProcessManagerIdOnCommand(Message, CommandContext)} method must be implemented
+     * <p>The {@link #getId(Message, CommandContext)} method must be implemented
      * to retrieve the correct process manager ID.
      *
      * <p>If there is no stored process manager with such an ID, a new process manager is created
@@ -120,7 +146,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        final I id = getProcessManagerIdOnCommand(command, context);
+        final I id = getId(command, context);
         final PM manager = load(id);
         final List<EventRecord> events = manager.dispatchCommand(command, context);
         store(manager);
@@ -130,7 +156,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     /**
      * Dispatches the event to a corresponding process manager.
      *
-     * <p>The {@link #getProcessManagerIdOnEvent(Message, EventContext)} method must be implemented
+     * <p>The {@link #getId(Message, EventContext)} method must be implemented
      * to retrieve the correct process manager ID.
      *
      * <p>If there is no stored process manager with such ID, a new process manager is created
@@ -142,7 +168,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
-        final I id = getProcessManagerIdOnEvent(event, context);
+        final I id = getId(event, context);
         final PM manager = load(id);
         manager.dispatchEvent(event, context);
         store(manager);
@@ -158,7 +184,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      */
     @Nonnull
     @Override
-    public PM load(@Nonnull I id) {
+    public PM load(I id) {
         PM result = super.load(id);
         if (result == null) {
             result = create(id);

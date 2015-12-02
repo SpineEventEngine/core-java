@@ -18,21 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.procman;
+@ParametersAreNonnullByDefault
+package org.spine3.server.procman.error;
 
-import org.spine3.sample.order.OrderId;
-import org.spine3.server.procman.ProcessManager;
-import org.spine3.server.procman.ProcessManagerRepository;
-
-/**
- * The sample process manager repository.
- *
- * @see ProcessManager
- * @see ProcessManagerRepository
- * @see ProcessManagerSample
- * @author Alexander Litus
- */
-@SuppressWarnings("TypeMayBeWeakened")
-public class ProcessManagerRepositorySample extends ProcessManagerRepository<OrderId, ProcessManagerSample, ProcessManagerState> {
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

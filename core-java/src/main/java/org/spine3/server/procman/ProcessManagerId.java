@@ -18,30 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.procman;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
-import org.spine3.protobuf.Messages;
-import org.spine3.util.MessageValue;
+import org.spine3.server.internal.AbstractEntityId;
 
 /**
- * Abstract base for command classes.
+ * A value object for process manager IDs.
  *
- * @author Alexander Yevsyukov
+ * @param <I> the type of process manager IDs
+ * @author Alexander Litus
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
-abstract class AbstractCommand extends MessageValue {
+public class ProcessManagerId<I> extends AbstractEntityId<I> {
 
-    protected AbstractCommand(Message value) {
+    /**
+     * The standard name for properties holding an ID of a process manager.
+     */
+    public static final String PROPERTY_NAME = "processManagerId";
+
+    /**
+     * The standard name for a parameter containing a process manager ID.
+     */
+    public static final String PARAM_NAME = PROPERTY_NAME;
+
+    private ProcessManagerId(I value) {
         super(value);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
-    public static Message getCommandValue(CommandRequest commandRequest) {
-        final Any command = commandRequest.getCommand();
-        final Message result = Messages.fromAny(command);
-        return result;
+    /**
+     * Creates a new non-null ID of a process manager.
+     *
+     * @param value id value
+     * @return new manager instance
+     */
+    public static <I> ProcessManagerId<I> of(I value) {
+        return new ProcessManagerId<>(value);
     }
 }

@@ -33,20 +33,26 @@ import org.spine3.sample.procman.ProcessManagerState.State;
 import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
 import org.spine3.server.Assign;
 import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.procman.ProcessManagerRepository;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.sample.procman.ProcessManagerState.State.DONE;
 import static org.spine3.sample.procman.ProcessManagerState.State.IN_PROGRESS;
 
 /**
+ * The sample process manager.
+ *
+ * @see ProcessManager
+ * @see ProcessManagerRepository
+ * @see ProcessManagerRepositorySample
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
-public class ProcessManagerSample extends ProcessManager<String, ProcessManagerState> {
+public class ProcessManagerSample extends ProcessManager<OrderId, ProcessManagerState> {
 
     private static final String NEW_LINE = System.lineSeparator();
 
-    public ProcessManagerSample(String id) {
+    public ProcessManagerSample(OrderId id) {
         super(id);
     }
 

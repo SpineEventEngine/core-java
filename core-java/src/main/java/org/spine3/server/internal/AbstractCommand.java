@@ -18,49 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.internal;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
+import org.spine3.base.CommandRequest;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.internal.AbstractEntityId;
+import org.spine3.util.MessageValue;
 
 /**
- * Value object for aggregate IDs.
+ * Abstract base for command classes.
  *
- * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
  */
-public final class AggregateId<I> extends AbstractEntityId<I> {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value base.
+public abstract class AbstractCommand extends MessageValue {
 
-    /**
-     * The standard name for properties holding an ID of an aggregate.
-     */
-    public static final String PROPERTY_NAME = "aggregateId";
-
-    /**
-     * The standard name for a parameter containing an aggregate ID.
-     */
-    public static final String PARAM_NAME = PROPERTY_NAME;
-
-    private AggregateId(I value) {
+    protected AbstractCommand(Message value) {
         super(value);
     }
 
-    /**
-     * Creates a new non-null id of an aggregate root.
-     *
-     * @param value id value
-     * @return new instance
-     */
-    public static <I> AggregateId<I> of(I value) {
-        return new AggregateId<>(value);
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened") // We want already built instances at this level of API.
-    public static AggregateId<? extends Message> of(EventContext value) {
-        final Message message = Messages.fromAny(value.getAggregateId());
-        final AggregateId<Message> result = new AggregateId<>(message);
+    @SuppressWarnings("TypeMayBeWeakened") // We use message types for brevity of API.
+    public static Message getCommandValue(CommandRequest commandRequest) {
+        final Any command = commandRequest.getCommand();
+        final Message result = Messages.fromAny(command);
         return result;
     }
 }
