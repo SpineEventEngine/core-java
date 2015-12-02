@@ -51,7 +51,7 @@ import static com.google.common.base.Throwables.propagate;
 public abstract class MessageHandlerMethod<T, C> {
 
     /**
-     * Object supporting the handler method.
+     * Object sporting the handler method.
      */
     private final T target;
 
