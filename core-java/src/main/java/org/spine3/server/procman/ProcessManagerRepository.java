@@ -134,15 +134,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     /**
      * Dispatches the command to a corresponding process manager.
      *
-     * <p>The {@link #getId(Message, CommandContext)} method must be implemented
-     * to retrieve the correct process manager ID.
-     *
      * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed command.
      *
      * @param command the command to dispatch
      * @param context the context of the command
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
+     * @see #getId(Message, CommandContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
@@ -156,15 +154,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     /**
      * Dispatches the event to a corresponding process manager.
      *
-     * <p>The {@link #getId(Message, EventContext)} method must be implemented
-     * to retrieve the correct process manager ID.
-     *
-     * <p>If there is no stored process manager with such ID, a new process manager is created
+     * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
      * @param context the context of the event
      * @see ProcessManager#dispatchEvent(Message, EventContext)
+     * @see #getId(Message, EventContext)
      */
     @SuppressWarnings("unused") // This method is used via reflection
     public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
