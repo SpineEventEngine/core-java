@@ -31,6 +31,8 @@ import org.spine3.eventbus.Subscribe;
 import org.spine3.server.Assign;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
@@ -46,6 +48,8 @@ import static org.spine3.testdata.TestEventFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
+
+    private static final ProjectId PROJECT_ID = createProjectId("project123");
 
     private final TestProcessManager processManager = new TestProcessManager(1);
 
@@ -81,11 +85,28 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        final AddTask command = addTask(createProjectId("p123"));
+        final AddTask command = addTask(PROJECT_ID);
 
         processManager.dispatchCommand(command, CommandContext.getDefaultInstance());
 
         assertEquals(command, processManager.getState());
+    }
+
+    @Test
+    public void dispatch_several_commands() throws InvocationTargetException {
+        final ProjectId projectId = createProjectId("p15");
+
+        final CreateProject createProject = createProject(projectId);
+        processManager.dispatchCommand(createProject, CommandContext.getDefaultInstance());
+        assertEquals(createProject, processManager.getState());
+
+        final AddTask addTask = addTask(projectId);
+        processManager.dispatchCommand(addTask, CommandContext.getDefaultInstance());
+        assertEquals(addTask, processManager.getState());
+
+        final StartProject startProject = startProject(projectId);
+        processManager.dispatchCommand(startProject, CommandContext.getDefaultInstance());
+        assertEquals(startProject, processManager.getState());
     }
 
     @Test
@@ -118,8 +139,10 @@ public class ProcessManagerShould {
     @Test
     public void return_handled_command_classes() {
         final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(TestProcessManager.class);
-        assertEquals(1, classes.size());
+        assertEquals(3, classes.size());
+        assertTrue(classes.contains(CreateProject.class));
         assertTrue(classes.contains(AddTask.class));
+        assertTrue(classes.contains(StartProject.class));
     }
 
     @Test
@@ -154,9 +177,21 @@ public class ProcessManagerShould {
         }
 
         @Assign
+        public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
+            incrementState(command);
+            return projectCreatedEvent(command.getProjectId());
+        }
+
+        @Assign
         public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
             incrementState(command);
             return taskAddedEvent(command.getProjectId());
+        }
+
+        @Assign
+        public ProjectStarted handleCommand(StartProject command, CommandContext ignored) {
+            incrementState(command);
+            return projectStartedEvent(command.getProjectId());
         }
 
         @Override
@@ -165,7 +200,15 @@ public class ProcessManagerShould {
         }
     }
 
+    private static CreateProject createProject(ProjectId id) {
+        return CreateProject.newBuilder().setProjectId(id).build();
+    }
+
     private static AddTask addTask(ProjectId id) {
         return AddTask.newBuilder().setProjectId(id).build();
+    }
+
+    private static StartProject startProject(ProjectId id) {
+        return StartProject.newBuilder().setProjectId(id).build();
     }
 }
