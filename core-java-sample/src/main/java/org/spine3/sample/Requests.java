@@ -46,7 +46,8 @@ class Requests {
         final CreateOrder command = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        return newCommandRequest(userId, command);
+        final CommandRequest request = newCommandRequest(userId, command);
+        return request;
     }
 
     public static CommandRequest addOrderLine(UserId userId, OrderId orderId) {
@@ -67,7 +68,8 @@ class Requests {
         final AddOrderLine command = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        return newCommandRequest(userId, command);
+        final CommandRequest result = newCommandRequest(userId, command);
+        return result;
     }
 
     public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
@@ -76,7 +78,8 @@ class Requests {
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        return newCommandRequest(userId, command);
+        final CommandRequest result = newCommandRequest(userId, command);
+        return result;
     }
 
     public static CommandRequest newCommandRequest(UserId userId, Message command) {
@@ -90,10 +93,10 @@ class Requests {
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .build();
-        return CommandContext.newBuilder()
+        final CommandContext.Builder context = CommandContext.newBuilder()
                 .setCommandId(commandId)
-                .setZoneOffset(ZoneOffset.getDefaultInstance())
-                .build();
+                .setZoneOffset(ZoneOffset.getDefaultInstance());
+        return context.build();
     }
 
     private Requests() {
