@@ -42,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestEventFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
@@ -61,7 +62,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        final ProjectCreated event = projectCreated();
+        final ProjectCreated event = projectCreatedEvent(PROJECT_ID);
 
         processManager.dispatchEvent(event, EventContext.getDefaultInstance());
 
@@ -70,15 +71,15 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        final ProjectCreated created = projectCreated();
+        final ProjectCreated created = projectCreatedEvent(PROJECT_ID);
         processManager.dispatchEvent(created, EventContext.getDefaultInstance());
         assertEquals(created, processManager.getState());
 
-        final TaskAdded taskAdded = taskAdded();
+        final TaskAdded taskAdded = taskAddedEvent(PROJECT_ID);
         processManager.dispatchEvent(taskAdded, EventContext.getDefaultInstance());
         assertEquals(taskAdded, processManager.getState());
 
-        final ProjectStarted projectStarted = projectStarted();
+        final ProjectStarted projectStarted = projectStartedEvent(PROJECT_ID);
         processManager.dispatchEvent(projectStarted, EventContext.getDefaultInstance());
         assertEquals(projectStarted, processManager.getState());
     }
@@ -131,26 +132,13 @@ public class ProcessManagerShould {
         @Assign
         public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
             incrementState(command);
-            final TaskAdded event = TaskAdded.newBuilder().setProjectId(command.getProjectId()).build();
-            return event;
+            return taskAddedEvent(command.getProjectId());
         }
 
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();
         }
-    }
-
-    private static ProjectCreated projectCreated() {
-        return ProjectCreated.newBuilder().setProjectId(PROJECT_ID).build();
-    }
-
-    private static TaskAdded taskAdded() {
-        return TaskAdded.newBuilder().setProjectId(PROJECT_ID).build();
-    }
-
-    private static ProjectStarted projectStarted() {
-        return ProjectStarted.newBuilder().setProjectId(PROJECT_ID).build();
     }
 
     private static AddTask addTask() {

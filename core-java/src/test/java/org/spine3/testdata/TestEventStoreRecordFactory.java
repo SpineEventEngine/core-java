@@ -21,13 +21,8 @@
 package org.spine3.testdata;
 
 import org.spine3.server.storage.EventStoreRecord;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
 
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestEventFactory.*;
 
 /**
  * Contains EventStoreRecords for tests.
@@ -37,21 +32,16 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 @SuppressWarnings("UtilityClass")
 public class TestEventStoreRecordFactory {
 
-    private static final ProjectId DUMMY_PROJECT_ID = createProjectId("stub_project_id_event_store");
-
-    private static final ProjectCreated PROJECT_CREATED = ProjectCreated.newBuilder().setProjectId(DUMMY_PROJECT_ID).build();
     private static final EventStoreRecord PROJECT_CREATED_RECORD = EventStoreRecord.newBuilder()
-            .setEvent(toAny(PROJECT_CREATED))
+            .setEvent(projectCreatedEventAny())
             .setEventId("project_created").build();
 
-    private static final TaskAdded TASK_ADDED = TaskAdded.newBuilder().setProjectId(DUMMY_PROJECT_ID).build();
     private static final EventStoreRecord TASK_ADDED_RECORD = EventStoreRecord.newBuilder()
-            .setEvent(toAny(TASK_ADDED))
+            .setEvent(taskAddedEventAny())
             .setEventId("task_added").build();
 
-    private static final ProjectStarted PROJECT_STARTED = ProjectStarted.newBuilder().setProjectId(DUMMY_PROJECT_ID).build();
     private static final EventStoreRecord PROJECT_STARTED_RECORD = EventStoreRecord.newBuilder()
-            .setEvent(toAny(PROJECT_STARTED))
+            .setEvent(projectStartedEventAny())
             .setEventId("project_started").build();
 
     private TestEventStoreRecordFactory() {}

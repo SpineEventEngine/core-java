@@ -58,6 +58,7 @@ import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 import static org.spine3.util.Tests.currentTimeSeconds;
@@ -426,19 +427,19 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return projectCreatedEvent(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return TaskAdded.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return taskAddedEvent(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = ProjectStarted.newBuilder().setProjectId(cmd.getProjectId()).build();
+            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -494,7 +495,7 @@ public class AggregateShould {
         @SuppressWarnings("UnusedDeclaration")
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return projectCreatedEvent(cmd.getProjectId());
         }
     }
 
