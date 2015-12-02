@@ -28,8 +28,6 @@ import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
 
-import javax.annotation.Nonnull;
-
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -42,7 +40,6 @@ public class ProjectionShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();

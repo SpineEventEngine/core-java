@@ -40,7 +40,6 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.util.Users;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -211,7 +210,6 @@ public class EngineShould {
         public TestEntity(String id) {
             super(id);
         }
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return Project.getDefaultInstance();

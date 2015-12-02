@@ -39,10 +39,11 @@ import org.spine3.util.MethodMap;
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
+import static org.spine3.server.internal.CommandHandlerMethod.isCommandHandlerPredicate;
 import static org.spine3.util.Identifiers.idToAny;
 
 /**
@@ -106,7 +107,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+        return Classes.getHandledMessageClasses(clazz, isCommandHandlerPredicate);
     }
 
     /**
@@ -130,17 +131,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
             this.initialized = true;
         }
-    }
-
-    private Object invokeHandler(Message command, CommandContext context) throws InvocationTargetException {
-        final Class<? extends Message> commandClass = command.getClass();
-        final Method method = commandHandlers.get(commandClass);
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final Object result = commandHandler.invoke(command, context);
-        return result;
     }
 
     private void invokeApplier(Message event) throws InvocationTargetException {
@@ -183,24 +173,17 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
+        checkNotNull(command, "command");
+        checkNotNull(context, "context");
 
-        checkNotNull(command, "The command mustn't be null.");
-        checkNotNull(context, "The context mustn't be null.");
-
-        final Object handlingResult = invokeHandler(command, context);
-        final Class<?> resultClass = handlingResult.getClass();
-
-        //noinspection IfMayBeConditional
-        if (List.class.isAssignableFrom(resultClass)) {
-            // Cast to list of messages as it is one of the return types we expect by methods we can call.
-            @SuppressWarnings("unchecked")
-            final List<? extends Message> result = (List<? extends Message>) handlingResult;
-            return result;
-        } else {
-            // Another type of result is single event (as Message).
-            final List<Message> result = Collections.singletonList((Message) handlingResult);
-            return result;
+        final Class<? extends Message> commandClass = command.getClass();
+        final Method method = commandHandlers.get(commandClass);
+        if (method == null) {
+            throw missingCommandHandler(commandClass);
         }
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final List<? extends Message> result = commandHandler.invoke(command, context);
+        return result;
     }
 
     /**
@@ -370,8 +353,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
         void register(Class<? extends Aggregate> clazz) {
-            commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
-            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
+            commandHandlers.register(clazz, isCommandHandlerPredicate);
+            checkModifiers(commandHandlers.get(clazz).values());
 
             eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
             EventApplier.checkModifiers(eventAppliers.get(clazz));
@@ -421,5 +404,4 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
     }
-
 }

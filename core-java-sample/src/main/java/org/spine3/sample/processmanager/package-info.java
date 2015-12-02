@@ -18,37 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+@ParametersAreNonnullByDefault
+package org.spine3.sample.processmanager;
 
-import com.google.protobuf.Message;
-
-import javax.annotation.Nullable;
-
-/**
- * An entity storage keeps messages with identity.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of entity state messages written in the storage
- * @author Alexander Yevsyukov
- */
-@SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I, M extends Message> {
-
-    /**
-     * Reads a message from the storage by the ID.
-     *
-     * @param id the ID of the message to load
-     * @return a message instance or {@code null} if there is no message with such ID
-     */
-    @Nullable
-    public abstract M read(I id);
-
-    /**
-     * Writes a message into the storage. Rewrites it if the message with such ID already exists.
-     *
-     * @param id ID of the message
-     * @param message the message to save
-     * @throws java.lang.NullPointerException if id or message is null
-     */
-    public abstract void write(I id, M message);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

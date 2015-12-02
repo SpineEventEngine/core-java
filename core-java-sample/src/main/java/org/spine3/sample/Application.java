@@ -29,6 +29,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
+import org.spine3.sample.processmanager.ProcessManagerRepositorySample;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 
@@ -107,6 +108,7 @@ public class Application {
         // Register repository with the engine. This will register it in the CommandDispatcher too.
         final Engine engine = Engine.getInstance();
         engine.register(new OrderRepository());
+        engine.register(new ProcessManagerRepositorySample());
 
         // Register event handlers
         engine.getEventBus().register(eventLogger);
@@ -149,10 +151,12 @@ public class Application {
             final CommandRequest createOrder = Requests.createOrder(userId, orderId);
             final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
             final CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
+            final CommandRequest pmSampleCommand = Requests.processManagerSampleCommand(userId, orderId);
 
             result.add(createOrder);
             result.add(addOrderLine);
             result.add(payForOrder);
+            result.add(pmSampleCommand);
         }
 
         return result;
