@@ -42,7 +42,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.internal.CommandHandlerMethod.commandHandlingResultToEvents;
 
 /**
  * A central processing unit used to maintain the state of the sequence and determine the next processing step
@@ -125,8 +124,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             throw missingCommandHandler(commandClass);
         }
         final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final Object handlingResult = commandHandler.invoke(command, context);
-        final List<? extends Message> events = commandHandlingResultToEvents(handlingResult);
+        final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
         return eventRecords;
     }
