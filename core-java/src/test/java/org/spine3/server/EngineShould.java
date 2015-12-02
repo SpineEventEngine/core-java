@@ -49,7 +49,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommandRequestFactory.*;
+import static org.spine3.testdata.TestCommandFactory.*;
 
 /**
  * @author Alexander Litus

@@ -36,17 +36,17 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.util.Users.newUserId;
 
 /**
- * The utility class which is used for creating CommandRequests for tests.
+ * The utility class for creating the test data related to commands (command messages, CommandRequests etc.).
  *
  * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
-public class TestCommandRequestFactory {
+public class TestCommandFactory {
 
     private static final UserId STUB_USER_ID = newUserId("stub_user_id");
     private static final ProjectId STUB_PROJECT_ID = createProjectId("stubProjectId");
 
-    private TestCommandRequestFactory() {
+    private TestCommandFactory() {
     }
 
     /**
@@ -98,5 +98,26 @@ public class TestCommandRequestFactory {
         final CommandContext context = TestContextFactory.createCommandContext(userId, when);
         final CommandRequest result = Commands.newCommandRequest(command, context);
         return result;
+    }
+
+    /**
+     * Creates a new {@link CreateProject} command with the given project ID.
+     */
+    public static CreateProject createProject(ProjectId id) {
+        return CreateProject.newBuilder().setProjectId(id).build();
+    }
+
+    /**
+     * Creates a new {@link AddTask} command with the given project ID.
+     */
+    public static AddTask addTask(ProjectId id) {
+        return AddTask.newBuilder().setProjectId(id).build();
+    }
+
+    /**
+     * Creates a new {@link StartProject} command with the given project ID.
+     */
+    public static StartProject startProject(ProjectId id) {
+        return StartProject.newBuilder().setProjectId(id).build();
     }
 }

@@ -44,14 +44,17 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestCommandFactory.*;
 import static org.spine3.testdata.TestEventFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
 
-    private static final ProjectId PROJECT_ID = createProjectId("project123");
+    private static final ProjectId ID = createProjectId("project123");
+    private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
+    private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
-    private final TestProcessManager processManager = new TestProcessManager(1);
+    private final TestProcessManager processManager = new TestProcessManager(ID);
 
 
     @Test
@@ -61,79 +64,66 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        final ProjectCreated event = projectCreatedEvent();
-
-        processManager.dispatchEvent(event, EventContext.getDefaultInstance());
-
-        assertEquals(event, processManager.getState());
+        testDispatchEvent(projectCreatedEvent());
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        final ProjectCreated created = projectCreatedEvent();
-        processManager.dispatchEvent(created, EventContext.getDefaultInstance());
-        assertEquals(created, processManager.getState());
+        testDispatchEvent(projectCreatedEvent());
+        testDispatchEvent(taskAddedEvent());
+        testDispatchEvent(projectStartedEvent());
+    }
 
-        final TaskAdded taskAdded = taskAddedEvent();
-        processManager.dispatchEvent(taskAdded, EventContext.getDefaultInstance());
-        assertEquals(taskAdded, processManager.getState());
-
-        final ProjectStarted projectStarted = projectStartedEvent();
-        processManager.dispatchEvent(projectStarted, EventContext.getDefaultInstance());
-        assertEquals(projectStarted, processManager.getState());
+    private void testDispatchEvent(Message event) throws InvocationTargetException {
+        processManager.dispatchEvent(event, EVENT_CONTEXT);
+        assertEquals(event, processManager.getState());
     }
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        final AddTask command = addTask(PROJECT_ID);
-
-        processManager.dispatchCommand(command, CommandContext.getDefaultInstance());
-
-        assertEquals(command, processManager.getState());
+        testDispatchCommand(addTask(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException {
-        final ProjectId projectId = createProjectId("p15");
+        testDispatchCommand(createProject(ID));
+        testDispatchCommand(addTask(ID));
+        testDispatchCommand(startProject(ID));
+    }
 
-        final CreateProject createProject = createProject(projectId);
-        processManager.dispatchCommand(createProject, CommandContext.getDefaultInstance());
-        assertEquals(createProject, processManager.getState());
-
-        final AddTask addTask = addTask(projectId);
-        processManager.dispatchCommand(addTask, CommandContext.getDefaultInstance());
-        assertEquals(addTask, processManager.getState());
-
-        final StartProject startProject = startProject(projectId);
-        processManager.dispatchCommand(startProject, CommandContext.getDefaultInstance());
-        assertEquals(startProject, processManager.getState());
+    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException {
+        final List<EventRecord> records = processManager.dispatchCommand(command, COMMAND_CONTEXT);
+        assertEquals(command, processManager.getState());
+        return records;
     }
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final ProjectId projectId = createProjectId("p12");
-        final AddTask command = addTask(projectId);
-        final List<EventRecord> records = processManager.dispatchCommand(command, CommandContext.getDefaultInstance());
+        final List<EventRecord> records = testDispatchCommand(createProject(ID));
 
-        assertEquals(command, processManager.getState());
         assertEquals(1, records.size());
-
         final EventRecord record = records.get(0);
         assertNotNull(record);
-        final TaskAdded event = fromAny(record.getEvent());
-        assertEquals(projectId, event.getProjectId());
+        final ProjectCreated event = fromAny(record.getEvent());
+        assertEquals(ID, event.getProjectId());
+    }
+
+    @Test
+    public void dispatch_command_and_return_empty_event_list_if_handler_is_void() throws InvocationTargetException {
+        final List<EventRecord> records = testDispatchCommand(startProject(ID));
+        assertTrue(records.isEmpty());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, CommandContext.getDefaultInstance());
+        processManager.dispatchCommand(unknownCommand, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        processManager.dispatchEvent(unknownEvent, EventContext.getDefaultInstance());
+        processManager.dispatchEvent(unknownEvent, EVENT_CONTEXT);
     }
 
     @Test
@@ -155,9 +145,9 @@ public class ProcessManagerShould {
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    public static class TestProcessManager extends ProcessManager<Integer, Message> {
+    public static class TestProcessManager extends ProcessManager<ProjectId, Message> {
 
-        public TestProcessManager(Integer id) {
+        public TestProcessManager(ProjectId id) {
             super(id);
         }
 
@@ -189,26 +179,13 @@ public class ProcessManagerShould {
         }
 
         @Assign
-        public ProjectStarted handleCommand(StartProject command, CommandContext ignored) {
+        public void handleCommand(StartProject command, CommandContext ignored) {
             incrementState(command);
-            return projectStartedEvent(command.getProjectId());
         }
 
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();
         }
-    }
-
-    private static CreateProject createProject(ProjectId id) {
-        return CreateProject.newBuilder().setProjectId(id).build();
-    }
-
-    private static AddTask addTask(ProjectId id) {
-        return AddTask.newBuilder().setProjectId(id).build();
-    }
-
-    private static StartProject startProject(ProjectId id) {
-        return StartProject.newBuilder().setProjectId(id).build();
     }
 }
