@@ -68,7 +68,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private static final String EVENT_DISPATCHER_METHOD_NAME = "dispatchEvent";
 
     /**
-     * Returns a process manager ID based on the information from the command and command context.
+     * Returns a process manager ID based on the command and command context.
      *
      * @param command command which the process manager handles
      * @param context context of the command
@@ -77,7 +77,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     protected abstract I getProcessManagerIdOnCommand(Message command, CommandContext context);
 
     /**
-     * Returns a process manager ID based on the information from the event and event context.
+     * Returns a process manager ID based on the event and event context.
      *
      * @param event event which the process manager handles
      * @param context context of the event

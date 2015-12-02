@@ -137,7 +137,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     @Nonnull
     @Override
-    public A load(@Nonnull I id) throws IllegalStateException {
+    public A load(I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().load(id);
 
         try {
