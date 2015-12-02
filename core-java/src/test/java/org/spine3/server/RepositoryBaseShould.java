@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +73,7 @@ public class RepositoryBaseShould {
         }
         @Nullable
         @Override
-        public EntityWithProtectedConstructor load(@Nonnull ProjectId id) {
+        public EntityWithProtectedConstructor load(ProjectId id) {
             return null;
         }
     }
@@ -99,7 +98,7 @@ public class RepositoryBaseShould {
         }
         @Nullable
         @Override
-        public EntityWithPrivateConstructor load(@Nonnull ProjectId id) {
+        public EntityWithPrivateConstructor load(ProjectId id) {
             return null;
         }
     }
@@ -124,7 +123,7 @@ public class RepositoryBaseShould {
         }
         @Nullable
         @Override
-        public EntityWithoutRequiredConstructor load(@Nonnull ProjectId id) {
+        public EntityWithoutRequiredConstructor load(ProjectId id) {
             return null;
         }
     }

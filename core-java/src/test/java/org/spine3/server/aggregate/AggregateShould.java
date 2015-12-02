@@ -41,7 +41,6 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.util.Classes;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -419,7 +418,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -487,7 +485,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -505,7 +502,6 @@ public class AggregateShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -515,7 +511,6 @@ public class AggregateShould {
         protected TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -525,7 +520,6 @@ public class AggregateShould {
         protected TestAggregateWithIdLong(Long id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -535,7 +529,6 @@ public class AggregateShould {
         protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
