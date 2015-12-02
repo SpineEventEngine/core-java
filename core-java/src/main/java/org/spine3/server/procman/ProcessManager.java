@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * A central processing unit used to maintain the state of the sequence and determine the next processing step
@@ -162,15 +161,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             throw missingEventHandler(eventClass);
         }
         final EventHandlerMethod handler = new EventHandlerMethod(this, method);
-        invokeHandler(handler, event, context);
-    }
-
-    private static void invokeHandler(EventHandlerMethod handler, Message event, EventContext context) {
-        try {
-            handler.invoke(event, context);
-        } catch (InvocationTargetException e) {
-            propagate(e);
-        }
+        handler.invoke(event, context);
     }
 
     /**
