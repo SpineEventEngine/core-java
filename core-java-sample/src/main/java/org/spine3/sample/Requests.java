@@ -29,7 +29,6 @@ import org.spine3.sample.order.*;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayForOrder;
-import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
 import org.spine3.time.ZoneOffset;
 import org.spine3.util.Commands;
 
@@ -42,12 +41,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  */
 @SuppressWarnings("UtilityClass")
 class Requests {
-
-    public static CommandRequest processManagerSampleCommand(UserId id, OrderId orderId) {
-        final ProcessManagerSampleCommand command = ProcessManagerSampleCommand.newBuilder().setOrderId(orderId).build();
-        final CommandRequest result = newCommandRequest(id, command);
-        return result;
-    }
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
         final CreateOrder command = CreateOrder.newBuilder()
