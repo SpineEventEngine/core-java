@@ -29,7 +29,7 @@ import org.spine3.sample.order.*;
 import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayForOrder;
-import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
+import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
 import org.spine3.time.ZoneOffset;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;

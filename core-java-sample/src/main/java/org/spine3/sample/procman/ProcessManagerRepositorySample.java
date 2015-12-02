@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.processmanager;
+package org.spine3.sample.procman;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
@@ -27,8 +27,8 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
-import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
-import org.spine3.server.process.ProcessManagerRepository;
+import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
+import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.util.Identifiers;
 
 import java.util.Map;

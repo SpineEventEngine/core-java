@@ -29,7 +29,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
-import org.spine3.sample.processmanager.ProcessManagerRepositorySample;
+import org.spine3.sample.procman.ProcessManagerRepositorySample;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 

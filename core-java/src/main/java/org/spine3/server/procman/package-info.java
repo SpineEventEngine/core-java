@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.server.process;
+package org.spine3.server.procman;
 
 import javax.annotation.ParametersAreNonnullByDefault;

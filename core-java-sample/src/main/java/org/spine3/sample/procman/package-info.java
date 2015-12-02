@@ -19,6 +19,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.sample.processmanager;
+package org.spine3.sample.procman;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -19,18 +19,14 @@
 //
 syntax = "proto3";
 
-package spine.sample.processmanager;
+package spine.sample.procman.command;
 
-option java_package="org.spine3.sample.processmanager";
+option java_package="org.spine3.sample.procman.command";
+option java_outer_classname = "ProcessManagerCommandsProto";
 option java_multiple_files = true;
 
-message ProcessManagerState {
+import "sample/order/order.proto";
 
-    State state = 2;
-
-    enum State {
-        NEW = 0;
-        IN_PROGRESS = 1;
-        DONE = 2;
-    }
+message ProcessManagerSampleCommand {
+    spine.sample.order.OrderId order_id = 1;
 }

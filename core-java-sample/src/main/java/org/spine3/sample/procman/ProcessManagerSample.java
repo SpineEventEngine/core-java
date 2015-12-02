@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.processmanager;
+package org.spine3.sample.procman;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +29,14 @@ import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.event.OrderCreated;
 import org.spine3.sample.order.event.OrderLineAdded;
 import org.spine3.sample.order.event.OrderPaid;
-import org.spine3.sample.processmanager.ProcessManagerState.State;
-import org.spine3.sample.processmanager.command.ProcessManagerSampleCommand;
+import org.spine3.sample.procman.ProcessManagerState.State;
+import org.spine3.sample.procman.command.ProcessManagerSampleCommand;
 import org.spine3.server.Assign;
-import org.spine3.server.process.ProcessManager;
+import org.spine3.server.procman.ProcessManager;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.sample.processmanager.ProcessManagerState.State.DONE;
-import static org.spine3.sample.processmanager.ProcessManagerState.State.IN_PROGRESS;
+import static org.spine3.sample.procman.ProcessManagerState.State.DONE;
+import static org.spine3.sample.procman.ProcessManagerState.State.IN_PROGRESS;
 
 /**
  * @author Alexander Litus

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.process;
+package org.spine3.server.procman;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
