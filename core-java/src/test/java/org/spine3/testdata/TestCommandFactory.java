@@ -60,7 +60,6 @@ public class TestCommandFactory {
      * Creates a new {@link CommandRequest} with the given timestamp.
      */
     public static CommandRequest createProject(Timestamp when) {
-
         return createProject(STUB_USER_ID, STUB_PROJECT_ID, when);
     }
 
@@ -68,8 +67,7 @@ public class TestCommandFactory {
      * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
      */
     public static CommandRequest createProject(UserId userId, ProjectId projectId, Timestamp when) {
-
-        final CreateProject command = CreateProject.newBuilder().setProjectId(projectId).build();
+        final CreateProject command = createProject(projectId);
         return createCommandRequest(command, userId, when);
     }
 
@@ -77,8 +75,7 @@ public class TestCommandFactory {
      * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
      */
     public static CommandRequest addTask(UserId userId, ProjectId projectId, Timestamp when) {
-
-        final AddTask command = AddTask.newBuilder().setProjectId(projectId).build();
+        final AddTask command = addTask(projectId);
         return createCommandRequest(command, userId, when);
     }
 
@@ -86,8 +83,7 @@ public class TestCommandFactory {
      * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
      */
     public static CommandRequest startProject(UserId userId, ProjectId projectId, Timestamp when) {
-
-        final StartProject command = StartProject.newBuilder().setProjectId(projectId).build();
+        final StartProject command = startProject(projectId);
         return createCommandRequest(command, userId, when);
     }
 

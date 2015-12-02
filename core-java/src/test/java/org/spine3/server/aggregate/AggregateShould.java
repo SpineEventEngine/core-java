@@ -39,6 +39,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestCommandFactory;
 import org.spine3.util.Classes;
 
 import javax.annotation.Nullable;
@@ -57,6 +58,8 @@ import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestCommandFactory.createProject;
+import static org.spine3.testdata.TestCommandFactory.startProject;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventRecordFactory.*;
@@ -72,9 +75,9 @@ public class AggregateShould {
 
     private final ProjectId projectId = createProjectId("testProjectId");
     private final ProjectAggregate aggregate = new ProjectAggregate(projectId);
-    private final CreateProject createProject = CreateProject.newBuilder().setProjectId(projectId).build();
-    private final AddTask addTask = AddTask.newBuilder().setProjectId(projectId).build();
-    private final StartProject startProject = StartProject.newBuilder().setProjectId(projectId).build();
+    private final CreateProject createProject = createProject(projectId);
+    private final AddTask addTask = TestCommandFactory.addTask(projectId);
+    private final StartProject startProject = startProject(projectId);
     private CommandContext commandContext;
     private EventContext eventContext;
 
