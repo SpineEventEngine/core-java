@@ -63,7 +63,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     private static final int MESSAGE_PARAM_INDEX = 0;
     private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
-    private static final int COMMAND_HANDLER_PARAMETERS_COUNT = 2;
+    private static final int COMMAND_HANDLER_PARAMETER_COUNT = 2;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -82,8 +82,8 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
 
     protected static boolean acceptsCorrectParameters(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
-        final boolean paramsCountIsCorrect = parameterTypes.length == COMMAND_HANDLER_PARAMETERS_COUNT;
-        if (!paramsCountIsCorrect) {
+        final boolean paramCountIsCorrect = parameterTypes.length == COMMAND_HANDLER_PARAMETER_COUNT;
+        if (!paramCountIsCorrect) {
             return false;
         }
         final boolean acceptsCorrectParams =

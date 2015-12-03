@@ -103,8 +103,8 @@ class FsEventStorage extends EventStorage {
 
             final boolean hasNext;
             try {
-                final int availableBytesCount = getInputStream().available();
-                hasNext = availableBytesCount > 0;
+                final int availableByteCount = getInputStream().available();
+                hasNext = availableByteCount > 0;
             } catch (IOException e) {
                 throw new RuntimeException("Failed to get estimate of bytes available.", e);
             }
