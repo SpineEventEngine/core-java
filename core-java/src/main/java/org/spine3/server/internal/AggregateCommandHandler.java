@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("UtilityClass")
 public class AggregateCommandHandler extends CommandHandlerMethod {
 
-
     public static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
