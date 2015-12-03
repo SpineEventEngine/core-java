@@ -45,24 +45,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER_PREDICATE;
 
 /**
- * A central processing unit used to maintain the state of the sequence and determine the next processing step
- * based on intermediate results.
- * <p>
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
- * Used for externalizing the decisions on the logic flow from the business logic.
- * <p>
- * Event/command handlers are invoked by the {@link ProcessManagerRepository}
+ *
+ * <p>A central processing unit used to maintain the state of the business process and determine
+ * the next processing step based on intermediate results.
+ *
+ * <p>Event/command handlers are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.
+ *
  * <p>
- * There is a common confusion between Process Managers and Sagas.
- * See <a href="http://kellabyte.com/2012/05/30/clarifying-the-saga-pattern/">this</a> and
- * <a href="https://dzone.com/articles/are-sagas-and-workflows-same-t">this topic</a>
- * to understand the difference between them.
+ * For more information on Process Managers, please see:
+ * <ul>
+ *     <li><a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html">Process Manager Pattern</a></li>
+ *     <li>
+ *         <a href="http://kellabyte.com/2012/05/30/clarifying-the-saga-pattern/">Clarifying the Saga pattern</a>
+ *         (and the difference between Process Manager and Saga)
+ *     </li>
+ *     <li><a href="https://dzone.com/articles/are-sagas-and-workflows-same-t">Are Sagas and Workflows the same...</a></li>
+ *     <li><a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a></li>
+ * </ul>
  *
  * @param <I> the type of the process manager IDs
  * @param <M> the type of the process manager state
- * @see <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html">Process Manager Pattern</a>
- * @see <a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a>
  * @author Alexander Litus
  */
 public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
