@@ -143,8 +143,6 @@ public final class Engine {
      *
      * <p>This method is the entry point of a command in to a backend of an application.
      *
-     * <p>The engine must be started.
-     *
      * @param request incoming command request to handle
      * @return the result of command handling
      */
