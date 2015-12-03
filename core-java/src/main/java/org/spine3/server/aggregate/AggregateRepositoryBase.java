@@ -210,6 +210,6 @@ public abstract class AggregateRepositoryBase<I extends Message,
     // To double check this we need to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateCommand.getAggregateId(command).value();
+        return (I) AggregateId.getAggregateId(command).value();
     }
 }

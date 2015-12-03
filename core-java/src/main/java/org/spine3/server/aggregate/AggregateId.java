@@ -22,8 +22,12 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.protobuf.MessageFields;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.error.MissingAggregateIdException;
 import org.spine3.server.internal.EntityId;
+
+import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * Value object for aggregate IDs.
@@ -42,6 +46,11 @@ public final class AggregateId<I> extends EntityId<I> {
      * The standard name for a parameter containing an aggregate ID.
      */
     public static final String PARAM_NAME = PROPERTY_NAME;
+
+    /**
+     * Aggregate ID must be the first field of aggregate commands.
+     */
+    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
 
     private AggregateId(I value) {
         super(value);
@@ -62,5 +71,26 @@ public final class AggregateId<I> extends EntityId<I> {
         final Message message = Messages.fromAny(value.getAggregateId());
         final AggregateId<Message> result = new AggregateId<>(message);
         return result;
+    }
+
+    /**
+     * Obtains an aggregate id from the passed command instance.
+     *
+     * <p>The id value must be the first field of the proto file. Its name must end with "id".
+     *
+     * @param command the command to get id from
+     * @return value of the id
+     */
+    public static AggregateId getAggregateId(Message command) {
+        final String fieldName = MessageFields.getFieldName(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+        if (!fieldName.endsWith(ID_PROPERTY_SUFFIX)) {
+            throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
+        }
+        try {
+            final Message value = (Message) MessageFields.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+            return of(value);
+        } catch (RuntimeException e) {
+            throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);
+        }
     }
 }

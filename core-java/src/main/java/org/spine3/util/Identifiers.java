@@ -64,11 +64,6 @@ public class Identifiers {
      */
     public static final String ID_PROPERTY_SUFFIX = "id";
 
-    /**
-     * Aggregate ID must be the first field of aggregate commands.
-     */
-    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
-
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
     private static final Pattern PATTERN_COLON = Pattern.compile(":");
     private static final Pattern PATTERN_T = Pattern.compile("T");
