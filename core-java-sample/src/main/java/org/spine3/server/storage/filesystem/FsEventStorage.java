@@ -124,7 +124,7 @@ class FsEventStorage extends EventStorage {
                 releaseResources();
             }
 
-            checkNotNull(result, "Event record from file shouldn't be null.");
+            checkNotNull(result, "event record from the file");
 
             return result;
         }

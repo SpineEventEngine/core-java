@@ -53,8 +53,7 @@ import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMM
  * <p>Event/command handlers are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.
  *
- * <p>
- * For more information on Process Managers, please see:
+ * <p>For more information on Process Managers, please see:
  * <ul>
  *     <li><a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html">Process Manager Pattern</a></li>
  *     <li>
@@ -119,8 +118,9 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
     protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        checkNotNull(command, "command is null");
-        checkNotNull(context, "command context is null");
+        //noinspection DuplicateStringLiteralInspection
+        checkNotNull(command, "command");
+        checkNotNull(context, "command context");
 
         init();
         final Class<? extends Message> commandClass = command.getClass();
@@ -172,8 +172,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
 
     /**
      * Creates a context for an event.
-     * <p>
-     * The context may optionally have custom attributes added by
+     *
+     * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
@@ -245,8 +245,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
 
     /**
      * The registry of method maps for all process manager classes.
-     * <p>
-     * This registry is used for caching command/event handlers.
+     *
+     * <p>This registry is used for caching command/event handlers.
      * Process managers register their classes in {@link ProcessManager#init()} method.
      */
     private static class Registry {

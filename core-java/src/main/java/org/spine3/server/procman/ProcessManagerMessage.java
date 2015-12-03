@@ -58,8 +58,8 @@ public class ProcessManagerMessage extends MessageValue {
 
     /**
      * Obtains a process manager ID from the passed command/event instance.
-     * <p>
-     * The ID value must be the first field of the proto file. Its name must end with the "id" suffix.
+     *
+     * <p>The ID value must be the first field of the proto file. Its name must end with the "id" suffix.
      *
      * @param message the command/event to get id from
      * @return value of the id

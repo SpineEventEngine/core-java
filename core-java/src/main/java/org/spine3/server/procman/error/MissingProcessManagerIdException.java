@@ -26,8 +26,8 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 /**
  * Exception is thrown if a command/event, which is intended to be used for a process manager,
  * does not have {@code getProcessManagerId()} method.
- * <p>
- * To have this method in Java, corresponding Protobuf message definition must have
+ *
+ * <p>To have this method in Java, corresponding Protobuf message definition must have
  * the property called {@code process_manager_id}.
  *
  * @author Alexander Litus

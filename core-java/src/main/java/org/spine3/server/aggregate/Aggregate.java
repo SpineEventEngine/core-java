@@ -225,8 +225,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
     /**
      * Applies an event to the aggregate.
-     * <p>
-     * If the event is {@link Snapshot} its state is copied. Otherwise, the event
+     *
+     * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
      * @param event the event to apply
@@ -278,8 +278,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
     /**
      * Creates a context for an event.
-     * <p>
-     * The context may optionally have custom attributes added by
+     *
+     * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
      * @param commandId      the ID of the command, which caused the event
@@ -344,8 +344,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
 
     /**
      * The registry of method maps for all aggregate classes.
-     * <p>
-     * This registry is used for caching command handlers and event appliers.
+     *
+     * <p>This registry is used for caching command handlers and event appliers.
      * Aggregates register their classes in {@link Aggregate#init()} method.
      */
     private static class Registry {

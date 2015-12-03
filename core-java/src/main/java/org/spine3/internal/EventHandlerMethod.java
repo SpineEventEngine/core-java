@@ -70,8 +70,8 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
     /**
      * Checks if the passed method is an event handlers.
-     * <p>
-     * An event handler must accept a type derived from {@link Message} as the first parameter,
+     *
+     * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
      * have {@link EventContext} value as the second parameter, and return {@code void}.
      *
      * @param method a method to check

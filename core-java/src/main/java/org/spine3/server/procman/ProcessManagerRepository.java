@@ -69,8 +69,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
 
     /**
      * Intended to return a process manager ID based on the command and command context.
-     * <p>
-     * The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
+     *
+     * <p>The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
      * Override any of these methods if you need.
      *
      * @param command command which the process manager handles
@@ -84,8 +84,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
 
     /**
      * Intended to return a process manager ID based on the event and event context.
-     * <p>
-     * The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
+     *
+     * <p>The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
      * Override any of these methods if you need.
      *
      * @param event event which the process manager handles
