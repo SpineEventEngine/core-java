@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER_PREDICATE;
 
 /**
  * A projection holds a structural representation of data extracted from a stream of events.
@@ -100,7 +101,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
      * @return immutable set of event classes or an empty set if no events are handled
      */
     public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Projection> clazz) {
-        return Classes.getHandledMessageClasses(clazz, EventHandlerMethod.isEventHandlerPredicate);
+        return Classes.getHandledMessageClasses(clazz, IS_EVENT_HANDLER_PREDICATE);
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
@@ -116,7 +117,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
         }
 
         void register(Class<? extends Projection> clazz) {
-            eventHandlers.register(clazz, EventHandlerMethod.isEventHandlerPredicate);
+            eventHandlers.register(clazz, IS_EVENT_HANDLER_PREDICATE);
         }
 
         MethodMap getEventHandlers(Class<? extends Projection> clazz) {

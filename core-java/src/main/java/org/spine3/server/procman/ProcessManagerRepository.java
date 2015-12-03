@@ -111,6 +111,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return result;
     }
 
+    /**
+     * Returns a map from methods to command classes they handle (in the Process Manager class).
+     *
+     * @see ProcessManager#getHandledCommandClasses(Class)
+     */
     @Override
     public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
@@ -121,6 +126,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
                 .build();
     }
 
+    /**
+     * Returns a map from methods to event classes they handle (in the Process Manager class).
+     *
+     * @see ProcessManager#getHandledEventClasses(Class)
+     */
     @Override
     public Multimap<Method, Class<? extends Message>> getEventHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
@@ -204,7 +214,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
 
     private static Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
         try {
-            return ProcessManagerRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
+            final Method method = ProcessManagerRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
+            return method;
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
