@@ -28,6 +28,7 @@ option java_package = "org.spine3.base";
 
 import public "spine/base/user_id.proto";
 import public "spine/base/email.proto";
+import public "spine/base/person.proto";
 
 // A link to the user's photo.
 message PhotoLink {
@@ -41,17 +42,14 @@ message User {
   UserId id = 1;
 
   // A user name to be displayed on the screen.
-  string given_name = 2;
-
-  // A family name of the user.
-  string family_name = 3;
+  PersonName name = 2;
 
   // Email address of the user.
-  EmailAddress email = 4;
+  EmailAddress email = 3;
 
   // A reference to the user photo.
-  PhotoLink photo = 5;
+  PhotoLink photo = 4;
 
   // Flag to say if this user is the administrator of the domain.
-  bool domain_admin = 6;
+  bool domain_admin = 5;
 }
