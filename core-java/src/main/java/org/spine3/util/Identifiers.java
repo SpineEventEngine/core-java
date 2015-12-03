@@ -39,7 +39,9 @@ import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
 
 /*
- * Utility class for Entity ids conversation.
+ * Utility class for working with IDs.
+ *
+ * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
 public class Identifiers {

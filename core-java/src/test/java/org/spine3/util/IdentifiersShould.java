@@ -30,7 +30,7 @@ import org.spine3.test.project.ProjectId;
 import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.util.Identifiers.*;
 
@@ -188,4 +188,13 @@ public class IdentifiersShould {
             return projectId != null ? projectId.getId() : NULL_ID_OR_FIELD;
         }
     };
+
+    @Test
+    public void generate_new_UUID() {
+        // We have non-empty values.
+        assertTrue(Identifiers.newUuid().length() > 0);
+
+        // Values are random.
+        assertNotEquals(Identifiers.newUuid(), Identifiers.newUuid());
+    }
 }
