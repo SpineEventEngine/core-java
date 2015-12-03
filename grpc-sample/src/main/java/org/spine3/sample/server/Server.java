@@ -55,8 +55,8 @@ public class Server {
      */
     public Server(int serverPort, StorageFactory storageFactory) {
 
-        this.server = buildServer(serverPort);
         this.application = new Application(storageFactory);
+        this.server = buildServer(this.application.getEngine(), serverPort);
     }
 
     /**
@@ -122,10 +122,16 @@ public class Server {
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
 
+        private final Engine engine;
+
+        private CommandServiceImpl(Engine engine) {
+            this.engine = engine;
+        }
+
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
 
-            final CommandResult reply = Engine.getInstance().process(req);
+            final CommandResult reply = engine.process(req);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
@@ -137,10 +143,10 @@ public class Server {
         }
     }
 
-    private static io.grpc.Server buildServer(int serverPort) {
+    private static io.grpc.Server buildServer(Engine engine, int serverPort) {
 
         final ServerBuilder builder = ServerBuilder.forPort(serverPort);
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl());
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl(engine));
         builder.addService(service);
         return builder.build();
     }

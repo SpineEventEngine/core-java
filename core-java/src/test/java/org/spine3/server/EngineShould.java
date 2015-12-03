@@ -20,17 +20,18 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
+import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -47,7 +48,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommandRequestFactory.*;
@@ -55,7 +57,7 @@ import static org.spine3.testdata.TestCommandRequestFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class EngineShould {
 
     private final UserId userId = Users.newUserId("test_user");
@@ -64,51 +66,50 @@ public class EngineShould {
 
     private boolean handlersRegistered = false;
 
+    private Engine engine;
+
     @Before
     public void setUp() {
-        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
+        final StorageFactory sf = InMemoryStorageFactory.getInstance();
+        engine = Engine.newBuilder()
+                .setStorageFactory(sf)
+                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setEventBus(EventBus.newInstance())
+                .build();
     }
 
     @After
     public void tearDown() {
-        final Engine engine = Engine.getInstance();
         if (handlersRegistered) {
             engine.getEventBus().unregister(handler);
         }
         engine.stop();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_start_running_engine() {
-
-        Engine.start(InMemoryStorageFactory.getInstance(), MoreExecutors.directExecutor());
-    }
-
     @Test
     public void return_instance_if_started() {
-        final Engine engine = Engine.getInstance();
         assertNotNull(engine);
     }
 
     @Test
     public void return_EventBus() {
-        assertNotNull(Engine.getInstance().getEventBus());
+        assertNotNull(engine.getEventBus());
     }
 
     @Test
     public void return_CommandDispatcher() {
-        assertNotNull(Engine.getInstance().getCommandDispatcher());
+        assertNotNull(engine.getCommandDispatcher());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_call_process_with_null_parameter() {
         // noinspection ConstantConditions
-        Engine.getInstance().process(null);
+        engine.process(null);
     }
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-        Engine.getInstance().process(createProject());
+        engine.process(createProject());
     }
 
     @Test
@@ -117,17 +118,11 @@ public class EngineShould {
     }
 
     @Test
-    public void return_true_if_started() {
-        final boolean isStarted = Engine.getInstance().isStarted();
-        assertTrue(isStarted);
-    }
-
-    @Test
     public void process_one_command_and_return_appropriate_result() {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = Engine.getInstance().process(request);
+        final CommandResult result = engine.process(request);
 
         assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
     }
@@ -170,18 +165,17 @@ public class EngineShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-        final Engine engine = Engine.getInstance();
         engine.register(new ProjectAggregateRepository());
         engine.register(new TestEntityRepository());
         engine.getEventBus().register(handler);
         handlersRegistered = true;
     }
 
-    private static List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
+    private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
 
         final List<CommandResult> results = newLinkedList();
         for (CommandRequest request : requests) {
-            final CommandResult result = Engine.getInstance().process(request);
+            final CommandResult result = engine.process(request);
             results.add(result);
         }
         return results;
@@ -211,6 +205,7 @@ public class EngineShould {
         public TestEntity(String id) {
             super(id);
         }
+
         @Nonnull
         @Override
         protected Project getDefaultState() {
@@ -232,5 +227,78 @@ public class EngineShould {
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
         }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_StorageFactory() {
+        //noinspection ConstantConditions
+        Engine.newBuilder().setStorageFactory(null);
+    }
+
+    @Test
+    public void return_StorageFactory_from_builder() {
+        final StorageFactory sf = InMemoryStorageFactory.getInstance();
+        final Engine.Builder builder = Engine.newBuilder().setStorageFactory(sf);
+        assertEquals(sf, builder.getStorageFactory());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_CommandDispatcher() {
+        //noinspection ConstantConditions
+        Engine.newBuilder().setCommandDispatcher(null);
+    }
+
+    @Test
+    public void return_CommandDispatcher_from_builder() {
+        final CommandDispatcher cd = CommandDispatcher.getInstance();
+        final Engine.Builder builder = Engine.newBuilder().setCommandDispatcher(cd);
+        assertEquals(cd, builder.getCommandDispatcher());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_EventBus() {
+        //noinspection ConstantConditions
+        Engine.newBuilder().setEventBus(null);
+    }
+
+    @Test
+    public void return_EventBus_from_builder() {
+        final EventBus bus = EventBus.newInstance();
+        final Engine.Builder builder = Engine.newBuilder().setEventBus(bus);
+        assertEquals(bus, builder.getEventBus());
+    }
+
+    @Test
+    public void return_CommandStore_from_builder() {
+        final CommandStore cs = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
+        final Engine.Builder builder = Engine.newBuilder().setCommandStore(cs);
+        assertEquals(cs, builder.getCommandStore());
+    }
+
+    @Test
+    public void create_CommandStore_if_not_set_in_builder() {
+        final Engine.Builder builder = Engine.newBuilder()
+                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setEventBus(EventBus.newInstance());
+        final Engine engine = builder.build();
+        assertNotNull(engine.getCommandStore());
+    }
+
+    @Test
+    public void return_EventStore_from_builder() {
+        final EventStore es = new EventStore(InMemoryStorageFactory.getInstance().createEventStorage());
+        final Engine.Builder builder = Engine.newBuilder().setEventStore(es);
+        assertEquals(es, builder.getEventStore());
+    }
+
+    @Test
+    public void create_EventStore_if_not_set_in_builder() {
+        final Engine.Builder builder = Engine.newBuilder()
+                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setEventBus(EventBus.newInstance());
+        final Engine engine = builder.build();
+        assertNotNull(engine.getEventStore());
     }
 }
