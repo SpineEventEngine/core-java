@@ -214,7 +214,7 @@ public final class Engine {
 
         store(request);
 
-        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchroniously
+        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchronously
         final CommandResult result = dispatch(request);
         storeAndPost(result.getEventRecordList());
 
