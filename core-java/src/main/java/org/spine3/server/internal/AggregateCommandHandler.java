@@ -61,12 +61,10 @@ public class AggregateCommandHandler extends CommandHandlerMethod {
      * @return {@code true} if the method is a command handler, {@code false} otherwise
      */
     public static boolean isAggregateCommandHandler(Method method) {
-        final boolean isAnnotated = CommandHandlerMethod.isAnnotatedCorrectly(method);
-        if (!isAnnotated){
+        if (!isAnnotatedCorrectly(method)){
             return false;
         }
-        final boolean acceptsCorrectParams = CommandHandlerMethod.acceptsCorrectParameters(method);
-        if (!acceptsCorrectParams) {
+        if (!acceptsCorrectParams(method)) {
             return false;
         }
         final boolean returnsMessageOrList = returnsMessageOrList(method);
@@ -75,7 +73,14 @@ public class AggregateCommandHandler extends CommandHandlerMethod {
 
     private static boolean returnsMessageOrList(Method method) {
         final Class<?> returnType = method.getReturnType();
-        final boolean result = Message.class.isAssignableFrom(returnType) || List.class.equals(returnType);
-        return result;
+
+        if (Message.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        //noinspection RedundantIfStatement
+        if (List.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        return false;
     }
 }

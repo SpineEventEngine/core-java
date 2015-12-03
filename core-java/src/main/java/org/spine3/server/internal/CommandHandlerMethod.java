@@ -63,7 +63,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     private static final int MESSAGE_PARAM_INDEX = 0;
     private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
-    private static final int COMMAND_HANDLER_PARAMETER_COUNT = 2;
+    private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -80,15 +80,15 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         return isAnnotated;
     }
 
-    protected static boolean acceptsCorrectParameters(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final boolean paramCountIsCorrect = parameterTypes.length == COMMAND_HANDLER_PARAMETER_COUNT;
+    protected static boolean acceptsCorrectParams(Method method) {
+        final Class<?>[] paramTypes = method.getParameterTypes();
+        final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
         if (!paramCountIsCorrect) {
             return false;
         }
         final boolean acceptsCorrectParams =
-                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
-                CommandContext.class.equals(parameterTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+                Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
+                CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
         return acceptsCorrectParams;
     }
 

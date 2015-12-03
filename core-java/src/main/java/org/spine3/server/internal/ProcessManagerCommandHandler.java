@@ -63,25 +63,30 @@ public class ProcessManagerCommandHandler extends CommandHandlerMethod {
      * @return {@code true} if the method is a command handler, {@code false} otherwise
      */
     public static boolean isProcessManagerCommandHandler(Method method) {
-        final boolean isAnnotated = CommandHandlerMethod.isAnnotatedCorrectly(method);
-        if (!isAnnotated){
+        if (!isAnnotatedCorrectly(method)){
             return false;
         }
-        final boolean acceptsCorrectParams = CommandHandlerMethod.acceptsCorrectParameters(method);
-        if (!acceptsCorrectParams) {
+        if (!acceptsCorrectParams(method)) {
             return false;
         }
-        final boolean returnTypeIsCorrect = returnTypeIsCorrect(method);
-        return returnTypeIsCorrect;
+        final boolean isReturnTypeCorrect = isReturnTypeCorrect(method);
+        return isReturnTypeCorrect;
     }
 
-    private static boolean returnTypeIsCorrect(Method method) {
+    private static boolean isReturnTypeCorrect(Method method) {
         final Class<?> returnType = method.getReturnType();
-        final boolean result =
-                Message.class.isAssignableFrom(returnType) ||
-                List.class.equals(returnType) ||
-                Void.TYPE.equals(returnType);
-        return result;
+
+        if (Message.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        if (List.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        //noinspection RedundantIfStatement
+        if (Void.TYPE.equals(returnType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
