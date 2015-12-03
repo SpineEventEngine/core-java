@@ -29,6 +29,7 @@ import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.ProcessManagerCommandHandler;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER_PREDICATE;
 
 /**
  * A central processing unit used to maintain the state of the sequence and determine the next processing step
@@ -122,7 +124,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final CommandHandlerMethod commandHandler = new ProcessManagerCommandHandler(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
         return eventRecords;
@@ -214,7 +216,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.isCommandHandlerPredicate);
+        return Classes.getHandledMessageClasses(pmClass, IS_PM_COMMAND_HANDLER_PREDICATE);
     }
 
     /**
@@ -249,7 +251,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
         void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, CommandHandlerMethod.isCommandHandlerPredicate);
+            commandHandlers.register(clazz, IS_PM_COMMAND_HANDLER_PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, EventHandlerMethod.isEventHandlerPredicate);

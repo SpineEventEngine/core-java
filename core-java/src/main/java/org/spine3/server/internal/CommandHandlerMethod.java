@@ -33,11 +33,14 @@ import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.MultiHandler;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -45,27 +48,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
+import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER_PREDICATE;
 
 /**
  * The wrapper for a command handler method.
  *
  * @author Alexander Yevsyukov
  */
-public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods")
+public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     private static final int MESSAGE_PARAM_INDEX = 0;
     private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
-    public static final Predicate<Method> isCommandHandlerPredicate = new Predicate<Method>() {
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isCommandHandler(method);
-        }
-    };
+    private static final int COMMAND_HANDLER_PARAMETERS_COUNT = 2;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -73,86 +71,25 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public CommandHandlerMethod(Object target, Method method) {
+    protected CommandHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 
-    /**
-     * Checks if a method is a command handler.
-     *
-     * @param method a method to check
-     * @return {@code true} if the method is a command handler, {@code false} otherwise
-     */
-    public static boolean isCommandHandler(Method method) {
-        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-        if (!isAnnotated) {
-            return false;
-        }
+    protected static boolean isAnnotatedCorrectly(AnnotatedElement element) {
+        final boolean isAnnotated = element.isAnnotationPresent(Assign.class);
+        return isAnnotated;
+    }
 
+    protected static boolean acceptsCorrectParameters(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
-        final boolean hasTwoParams = parameterTypes.length == 2;
-        if (!hasTwoParams) {
+        final boolean paramsCountIsCorrect = parameterTypes.length == COMMAND_HANDLER_PARAMETERS_COUNT;
+        if (!paramsCountIsCorrect) {
             return false;
         }
-
-        //noinspection LocalVariableNamingConvention
-        final boolean acceptsMessageAndCommandContext =
-                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX])
-                        && CommandContext.class.equals(parameterTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-
-        final Class<?> returnType = method.getReturnType();
-        final boolean returnsMessageOrList =
-                Message.class.isAssignableFrom(returnType)
-                        || List.class.equals(returnType)
-                        || Void.TYPE.equals(returnType);
-
-        return acceptsMessageAndCommandContext && returnsMessageOrList;
-    }
-
-    /**
-     * Returns a map of the command handler methods from the passed instance.
-     *
-     * @param object the object that keeps command handler methods
-     * @return immutable map
-     */
-    @CheckReturnValue
-    public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
-        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-
-        final MethodMap handlers = new MethodMap(object.getClass(), isCommandHandlerPredicate);
-
-        checkModifiers(handlers.values());
-
-        for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
-            final CommandClass commandClass = CommandClass.of(entry.getKey());
-            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
-            builder.put(commandClass, handler);
-        }
-
-        // If the passed object is MultiHandler add its methods too.
-        if (object instanceof MultiHandler) {
-            final MultiHandler multiHandler = (MultiHandler) object;
-            final Map<CommandClass, CommandHandlerMethod> map = createMap(multiHandler);
-
-            checkModifiers(toMethods(map.values()));
-
-            builder.putAll(map);
-        }
-
-        return builder.build();
-    }
-
-    private static Iterable<Method> toMethods(Iterable<CommandHandlerMethod> handlerMethods) {
-        return Iterables.transform(handlerMethods, new Function<CommandHandlerMethod, Method>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public Method apply(@Nullable CommandHandlerMethod eventHandlerMethod) {
-                if (eventHandlerMethod == null) {
-                    return null;
-                }
-                return eventHandlerMethod.getMethod();
-            }
-        });
+        final boolean acceptsCorrectParams =
+                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
+                CommandContext.class.equals(parameterTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+        return acceptsCorrectParams;
     }
 
     /**
@@ -174,17 +111,15 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     /**
      * Casts a command handling result to a list of event messages.
      *
-     * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages or {@code null}.
+     * @param handlingResult the command handler method return value. Could be a {@link Message} or a list of messages.
      * @return the list of events as messages
-     * @see #isCommandHandler(Method)
+     * @see AggregateCommandHandler#isAggregateCommandHandler(Method)
+     * @see ProcessManagerCommandHandler#isProcessManagerCommandHandler(Method)
      */
-    private static List<? extends Message> commandHandlingResultToEvents(@Nullable Object handlingResult) {
-        if (handlingResult == null) {
-            return emptyList();
-        }
+    protected <R> List<? extends Message> commandHandlingResultToEvents(R handlingResult) {
         final Class<?> resultClass = handlingResult.getClass();
         if (List.class.isAssignableFrom(resultClass)) {
-            // Cast to the list of messages as it is the one of the return types we expect by methods we can call.
+            // Cast to the list of messages as it is the one of the return types we expect by methods we call.
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
@@ -196,10 +131,65 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
+     * Returns a map of the command handler methods from the passed instance.
+     *
+     * @param object the object that keeps command handler methods
+     * @return immutable map
+     */
+    @CheckReturnValue
+    public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
+        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
+
+        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getRegularHandlers(object);
+        result.putAll(regularHandlers);
+
+        if (object instanceof MultiHandler) {
+            final MultiHandler multiHandler = (MultiHandler) object;
+            final Map<CommandClass, CommandHandlerMethod> multiHandlers = getMultiHandlers(multiHandler);
+            checkModifiers(toMethods(multiHandlers.values()));
+            result.putAll(multiHandlers);
+        }
+        return result.build();
+    }
+
+    private static Map<CommandClass, CommandHandlerMethod> getRegularHandlers(Object object) {
+        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
+
+        final Predicate<Method> isHandlerPredicate = getHandlerMethodPredicate(object);
+        final MethodMap handlers = new MethodMap(object.getClass(), isHandlerPredicate);
+        checkModifiers(handlers.values());
+        for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
+            final CommandClass commandClass = CommandClass.of(entry.getKey());
+            final CommandHandlerMethod handler = getCommandHandler(object, entry.getValue());
+            result.put(commandClass, handler);
+        }
+        return result.build();
+    }
+
+    // TODO:2015-12-03:alexander.litus: avoid instanceof checks
+    private static CommandHandlerMethod getCommandHandler(Object object, Method value) {
+        //noinspection IfMayBeConditional
+        if (object instanceof Aggregate || object instanceof AggregateRepository) {
+            return new AggregateCommandHandler(object, value);
+        } else {
+            return new ProcessManagerCommandHandler(object, value);
+        }
+    }
+
+    private static Predicate<Method> getHandlerMethodPredicate(Object object) {
+        //noinspection IfMayBeConditional
+        if (object instanceof Aggregate || object instanceof AggregateRepository) {
+            return IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
+        } else {
+            return IS_PM_COMMAND_HANDLER_PREDICATE;
+        }
+    }
+
+    /**
      * Creates a command handler map from the passed instance of {@link MultiHandler}.
      */
     @CheckReturnValue
-    private static Map<CommandClass, CommandHandlerMethod> createMap(MultiHandler obj) {
+    private static Map<CommandClass, CommandHandlerMethod> getMultiHandlers(MultiHandler obj) {
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getCommandHandlers();
 
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
@@ -227,7 +217,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         for (Class<? extends Message> messageClass : classes) {
             final CommandClass key = CommandClass.of(messageClass);
-            final CommandHandlerMethod value = new CommandHandlerMethod(target, method);
+            final CommandHandlerMethod value = getCommandHandler(target, method);
             builder.put(key, value);
         }
         return builder.build();
@@ -250,9 +240,21 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
     }
 
+    private static Iterable<Method> toMethods(Iterable<CommandHandlerMethod> handlerMethods) {
+        return Iterables.transform(handlerMethods, new Function<CommandHandlerMethod, Method>() {
+            @Nullable // return null because an exception won't be propagated in this case
+            @Override
+            public Method apply(@Nullable CommandHandlerMethod eventHandlerMethod) {
+                if (eventHandlerMethod == null) {
+                    return null;
+                }
+                return eventHandlerMethod.getMethod();
+            }
+        });
+    }
+
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
     }

@@ -31,6 +31,7 @@ import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.internal.AggregateCommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
@@ -42,8 +43,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER_PREDICATE;
+import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
-import static org.spine3.server.internal.CommandHandlerMethod.isCommandHandlerPredicate;
 import static org.spine3.util.Identifiers.idToAny;
 
 /**
@@ -107,7 +109,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, isCommandHandlerPredicate);
+        return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER_PREDICATE);
     }
 
     /**
@@ -181,7 +183,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
+        final CommandHandlerMethod commandHandler = new AggregateCommandHandler(this, method);
         final List<? extends Message> result = commandHandler.invoke(command, context);
         return result;
     }
@@ -353,10 +355,10 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
         void register(Class<? extends Aggregate> clazz) {
-            commandHandlers.register(clazz, isCommandHandlerPredicate);
+            commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER_PREDICATE);
             checkModifiers(commandHandlers.get(clazz).values());
 
-            eventAppliers.register(clazz, EventApplier.isEventApplierPredicate);
+            eventAppliers.register(clazz, IS_EVENT_APPLIER_PREDICATE);
             EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 

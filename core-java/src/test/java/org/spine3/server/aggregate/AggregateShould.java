@@ -54,7 +54,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
+import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER_PREDICATE;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
@@ -213,7 +213,7 @@ public class AggregateShould {
     @Test
     public void return_message_classes_which_are_handled_by_aggregate_case_event_classes() {
 
-        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(ProjectAggregate.class, isEventApplierPredicate);
+        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(ProjectAggregate.class, IS_EVENT_APPLIER_PREDICATE);
         assertContainsAllProjectEvents(classes);
     }
 
