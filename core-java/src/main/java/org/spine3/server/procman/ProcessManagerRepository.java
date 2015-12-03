@@ -101,13 +101,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      *
      * @param message a command/event which the process manager handles
      * @return a process manager ID
-     * @see ProcessManagerMessage#getProcessManagerId(Message)
+     * @see ProcessManagerId#from(Message)
      */
     protected I getId(Message message) {
         // We cast to this type because assume that all commands/events for the manager refer to IDs of the same type <I>.
         // If this assumption fails, we would get ClassCastException.
         @SuppressWarnings("unchecked")
-        final I result = (I) ProcessManagerMessage.getProcessManagerId(message).value();
+        final I result = (I) ProcessManagerId.from(message).value();
         return result;
     }
 
