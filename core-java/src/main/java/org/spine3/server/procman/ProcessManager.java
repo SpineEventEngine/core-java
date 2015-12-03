@@ -44,7 +44,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER_PREDICATE;
 import static org.spine3.internal.EventHandlerMethod.checkModifiers;
-import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER_PREDICATE;
+import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -222,7 +222,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, IS_PM_COMMAND_HANDLER_PREDICATE);
+        return Classes.getHandledMessageClasses(pmClass, IS_PM_COMMAND_HANDLER);
     }
 
     /**
@@ -257,7 +257,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
         void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, IS_PM_COMMAND_HANDLER_PREDICATE);
+            commandHandlers.register(clazz, IS_PM_COMMAND_HANDLER);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, IS_EVENT_HANDLER_PREDICATE);

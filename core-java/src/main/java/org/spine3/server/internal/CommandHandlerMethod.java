@@ -49,8 +49,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
-import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER_PREDICATE;
+import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
+import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * The wrapper for a command handler method.
@@ -179,9 +179,9 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     private static Predicate<Method> getHandlerMethodPredicate(Object object) {
         //noinspection IfMayBeConditional
         if (object instanceof Aggregate || object instanceof AggregateRepository) {
-            return IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
+            return IS_AGGREGATE_COMMAND_HANDLER;
         } else {
-            return IS_PM_COMMAND_HANDLER_PREDICATE;
+            return IS_PM_COMMAND_HANDLER;
         }
     }
 

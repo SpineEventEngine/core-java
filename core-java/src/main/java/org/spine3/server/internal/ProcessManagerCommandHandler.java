@@ -38,7 +38,7 @@ import static java.util.Collections.emptyList;
 @SuppressWarnings("UtilityClass")
 public class ProcessManagerCommandHandler extends CommandHandlerMethod {
 
-    public static final Predicate<Method> IS_PM_COMMAND_HANDLER_PREDICATE = new Predicate<Method>() {
+    public static final Predicate<Method> IS_PM_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);

@@ -44,7 +44,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER_PREDICATE;
-import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER_PREDICATE;
+import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 import static org.spine3.util.Identifiers.idToAny;
 
@@ -109,7 +109,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER_PREDICATE);
+        return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
     }
 
     /**
@@ -355,7 +355,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
         private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
         void register(Class<? extends Aggregate> clazz) {
-            commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER_PREDICATE);
+            commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
             checkModifiers(commandHandlers.get(clazz).values());
 
             eventAppliers.register(clazz, IS_EVENT_APPLIER_PREDICATE);
