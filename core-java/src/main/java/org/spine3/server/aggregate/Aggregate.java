@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER_PREDICATE;
+import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 import static org.spine3.util.Identifiers.idToAny;
@@ -358,7 +358,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
             commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
             checkModifiers(commandHandlers.get(clazz).values());
 
-            eventAppliers.register(clazz, IS_EVENT_APPLIER_PREDICATE);
+            eventAppliers.register(clazz, IS_EVENT_APPLIER);
             EventApplier.checkModifiers(eventAppliers.get(clazz));
         }
 

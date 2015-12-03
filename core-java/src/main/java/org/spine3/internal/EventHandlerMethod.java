@@ -50,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
 
-    public static final Predicate<Method> IS_EVENT_HANDLER_PREDICATE = new Predicate<Method>() {
+    public static final Predicate<Method> IS_EVENT_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -108,7 +108,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> result = ImmutableMap.builder();
 
         // Scan for declared event handler methods.
-        final MethodMap handlers = new MethodMap(target.getClass(), IS_EVENT_HANDLER_PREDICATE);
+        final MethodMap handlers = new MethodMap(target.getClass(), IS_EVENT_HANDLER);
 
         checkModifiers(handlers.values());
 
