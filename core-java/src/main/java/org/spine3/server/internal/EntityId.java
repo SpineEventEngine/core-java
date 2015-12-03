@@ -53,14 +53,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Litus
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // OK in this case
-public abstract class AbstractEntityId<I> {
+public abstract class EntityId<I> {
 
     /**
      * The value of the id.
      */
     private final I value;
 
-    protected AbstractEntityId(I value) {
+    protected EntityId(I value) {
         this.value = checkNotNull(value);
     }
 

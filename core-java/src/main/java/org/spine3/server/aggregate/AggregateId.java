@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.internal.AbstractEntityId;
+import org.spine3.server.internal.EntityId;
 
 /**
  * Value object for aggregate IDs.
@@ -31,7 +31,7 @@ import org.spine3.server.internal.AbstractEntityId;
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
  */
-public final class AggregateId<I> extends AbstractEntityId<I> {
+public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * The standard name for properties holding an ID of an aggregate.

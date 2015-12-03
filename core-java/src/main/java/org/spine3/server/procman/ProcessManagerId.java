@@ -20,7 +20,7 @@
 
 package org.spine3.server.procman;
 
-import org.spine3.server.internal.AbstractEntityId;
+import org.spine3.server.internal.EntityId;
 
 /**
  * A value object for process manager IDs.
@@ -28,7 +28,7 @@ import org.spine3.server.internal.AbstractEntityId;
  * @param <I> the type of process manager IDs
  * @author Alexander Litus
  */
-public class ProcessManagerId<I> extends AbstractEntityId<I> {
+public class ProcessManagerId<I> extends EntityId<I> {
 
     /**
      * The standard name for properties holding an ID of a process manager.
