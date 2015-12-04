@@ -195,40 +195,6 @@ public class EngineShould {
         return newArrayList(createProject, addTask, startProject);
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
-    }
-
-    private static class TestEntityRepository extends EntityRepository<String, TestEntity, Project> {
-    }
-
-    public static class TestEntity extends Entity<String, Project> {
-        public TestEntity(String id) {
-            super(id);
-        }
-
-        @Nonnull
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
-    }
-
-    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler {
-
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-        }
-
-        @Subscribe
-        public void on(TaskAdded event, EventContext context) {
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event, EventContext context) {
-        }
-    }
-
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_StorageFactory() {
         //noinspection ConstantConditions
@@ -300,5 +266,39 @@ public class EngineShould {
                 .setEventBus(EventBus.newInstance());
         final Engine engine = builder.build();
         assertNotNull(engine.getEventStore());
+    }
+
+    private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
+    }
+
+    private static class TestEntityRepository extends EntityRepository<String, TestEntity, Project> {
+    }
+
+    public static class TestEntity extends Entity<String, Project> {
+        public TestEntity(String id) {
+            super(id);
+        }
+
+        @Nonnull
+        @Override
+        protected Project getDefaultState() {
+            return Project.getDefaultInstance();
+        }
+    }
+
+    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
+    private static class EmptyHandler {
+
+        @Subscribe
+        public void on(ProjectCreated event, EventContext context) {
+        }
+
+        @Subscribe
+        public void on(TaskAdded event, EventContext context) {
+        }
+
+        @Subscribe
+        public void on(ProjectStarted event, EventContext context) {
+        }
     }
 }
