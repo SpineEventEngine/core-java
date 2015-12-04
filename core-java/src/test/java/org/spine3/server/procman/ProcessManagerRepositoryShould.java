@@ -136,27 +136,27 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void return_command_handlers() {
-        final Multimap<Method, Class<? extends Message>> handlersMap = repository.getCommandHandlers();
+    public void return_command_and_event_handlers() {
+        final Multimap<Method, Class<? extends Message>> result = repository.getHandlers();
 
-        assertEquals(1,  handlersMap.keySet().size());
-        assertEquals(3,  handlersMap.values().size());
-        assertTrue(handlersMap.containsValue(CreateProject.class));
-        assertTrue(handlersMap.containsValue(AddTask.class));
-        assertTrue(handlersMap.containsValue(StartProject.class));
+        assertEquals(2,  result.keySet().size());
+        assertEquals(6,  result.values().size());
+        assertContainsCommandClasses(result);
+        assertContainsEventClasses(result);
     }
 
-    @Test
-    public void return_event_handlers() {
-        final Multimap<Method, Class<? extends Message>> handlersMap = repository.getEventHandlers();
-
-        assertEquals(1,  handlersMap.keySet().size());
-        assertEquals(3,  handlersMap.values().size());
-        assertTrue(handlersMap.containsValue(ProjectCreated.class));
-        assertTrue(handlersMap.containsValue(TaskAdded.class));
-        assertTrue(handlersMap.containsValue(ProjectStarted.class));
+    private static void assertContainsEventClasses(Multimap<Method, Class<? extends Message>> result) {
+        assertTrue(result.containsValue(ProjectCreated.class));
+        assertTrue(result.containsValue(TaskAdded.class));
+        assertTrue(result.containsValue(ProjectStarted.class));
     }
-    
+
+    private static void assertContainsCommandClasses(Multimap<Method, Class<? extends Message>> result) {
+        assertTrue(result.containsValue(CreateProject.class));
+        assertTrue(result.containsValue(AddTask.class));
+        assertTrue(result.containsValue(StartProject.class));
+    }
+
     @Test
     public void return_id_from_command_message() {
         final ProjectId actual = repository.getId(createProject(ID));

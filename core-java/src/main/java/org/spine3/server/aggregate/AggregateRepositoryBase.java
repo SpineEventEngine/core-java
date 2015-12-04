@@ -79,12 +79,14 @@ public abstract class AggregateRepositoryBase<I extends Message,
         super();
     }
 
+    @Override
     @SuppressWarnings("RefusedBequest") // We override to check our type of storage.
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"}) final
         AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
     }
 
+    @Override
     public int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
@@ -101,20 +103,19 @@ public abstract class AggregateRepositoryBase<I extends Message,
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return a multimap from command handlers to command classes they handle.
+     */
     @Override
-    public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
+    public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends Aggregate> aggregateClass = getEntityClass();
         final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
         final Method dispatch = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(dispatch, aggregateCommands)
                 .build();
-    }
-
-    @Override
-    public Multimap<Method, Class<? extends Message>> getEventHandlers() {
-        // Return an empty map by default.
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder().build();
     }
 
     /**

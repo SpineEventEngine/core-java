@@ -112,12 +112,26 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     }
 
     /**
-     * Returns a map from methods to command classes they handle (in the Process Manager class).
+     * {@inheritDoc}
+     *
+     * @return a multimap from command/event handlers to command/event classes they handle (in the Process Manager class).
+     */
+    @Override
+    public Multimap<Method, Class<? extends Message>> getHandlers() {
+        final Multimap<Method, Class<? extends Message>> commandHandlers = getCommandHandlers();
+        final Multimap<Method, Class<? extends Message>> eventHandlers = getEventHandlers();
+        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
+                .putAll(commandHandlers)
+                .putAll(eventHandlers)
+                .build();
+    }
+
+    /**
+     * Returns a map from methods to command classes they handle.
      *
      * @see ProcessManager#getHandledCommandClasses(Class)
      */
-    @Override
-    public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
+    private Multimap<Method, Class<? extends Message>> getCommandHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
         final Method handler = commandDispatcherAsMethod();
@@ -127,12 +141,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     }
 
     /**
-     * Returns a map from methods to event classes they handle (in the Process Manager class).
+     * Returns a map from methods to event classes they handle.
      *
      * @see ProcessManager#getHandledEventClasses(Class)
      */
-    @Override
-    public Multimap<Method, Class<? extends Message>> getEventHandlers() {
+    private Multimap<Method, Class<? extends Message>> getEventHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
         final Method handler = eventHandlerAsMethod();

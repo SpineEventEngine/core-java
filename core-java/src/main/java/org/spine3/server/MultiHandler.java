@@ -34,12 +34,7 @@ import java.lang.reflect.Method;
 public interface MultiHandler {
 
     /**
-     * Returns a map from methods to command classes they handle.
+     * Returns a map from methods to message classes they handle.
      */
-    Multimap<Method, Class<? extends Message>> getCommandHandlers();
-
-    /**
-     * Returns a map from methods to event classes they handle.
-     */
-    Multimap<Method, Class<? extends Message>> getEventHandlers();
+    Multimap<Method, Class<? extends Message>> getHandlers();
 }

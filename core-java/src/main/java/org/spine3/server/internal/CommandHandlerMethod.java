@@ -40,7 +40,6 @@ import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -75,8 +74,9 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         super(target, method);
     }
 
-    protected static boolean isAnnotatedCorrectly(AnnotatedElement element) {
-        final boolean isAnnotated = element.isAnnotationPresent(Assign.class);
+    @SuppressWarnings("TypeMayBeWeakened") // accept methods only
+    protected static boolean isAnnotatedCorrectly(Method method) {
+        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
         return isAnnotated;
     }
 
@@ -190,15 +190,15 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> getMultiHandlers(MultiHandler obj) {
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getCommandHandlers();
-
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
-            final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-            builder.putAll(createMap(obj, method, classes));
+            // check if the method accepts a command context (and is not an event handler)
+            if (acceptsCorrectParams(method)) {
+                final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
+                builder.putAll(createMap(obj, method, classes));
+            }
         }
-
         return builder.build();
     }
 

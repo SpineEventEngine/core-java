@@ -58,6 +58,11 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         }
     };
 
+    private static final int MESSAGE_PARAM_INDEX = 0;
+    private static final int EVENT_CONTEXT_PARAM_INDEX = 1;
+
+    private static final int EVENT_HANDLER_PARAM_COUNT = 2;
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -79,22 +84,32 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      */
     @CheckReturnValue
     public static boolean isEventHandler(Method method) {
+        if (!isAnnotatedCorrectly(method)) {
+            return false;
+        }
+        if (!acceptsCorrectParams(method)) {
+            return false;
+        }
+        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+        return returnsNothing;
+    }
 
-        final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
-
+    private static boolean acceptsCorrectParams(Method method) {
         final Class<?>[] parameterTypes = method.getParameterTypes();
 
-        //noinspection LocalVariableNamingConvention
-        final boolean acceptsMessageAndEventContext =
-                parameterTypes.length == 2
-                        && Message.class.isAssignableFrom(parameterTypes[0])
-                        && EventContext.class.equals(parameterTypes[1]);
+        if (parameterTypes.length != EVENT_HANDLER_PARAM_COUNT) {
+            return false;
+        }
+        final boolean acceptsCorrectParams =
+                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
+                EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
+        return acceptsCorrectParams;
+    }
 
-        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-
-        return isAnnotated
-                && acceptsMessageAndEventContext
-                && returnsNothing;
+    @SuppressWarnings("TypeMayBeWeakened") // accept methods only
+    private static boolean isAnnotatedCorrectly(Method method) {
+        final boolean result = method.isAnnotationPresent(Subscribe.class);
+        return result;
     }
 
     /**
@@ -109,7 +124,6 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
         // Scan for declared event handler methods.
         final MethodMap handlers = new MethodMap(target.getClass(), IS_EVENT_HANDLER);
-
         checkModifiers(handlers.values());
 
         for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
@@ -117,30 +131,27 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
             result.put(eventClass, handler);
         }
-
         // If the passed object is MultiHandler add its methods too.
         if (target instanceof MultiHandler) {
             final MultiHandler multiHandler = (MultiHandler) target;
-            final Map<EventClass, EventHandlerMethod> map = createMap(multiHandler);
-
-            checkModifiers(toMethods(map.values()));
-
-            result.putAll(map);
+            final Map<EventClass, EventHandlerMethod> multiHandlersMap = createMap(multiHandler);
+            checkModifiers(toMethods(multiHandlersMap.values()));
+            result.putAll(multiHandlersMap);
         }
-
         return result.build();
     }
 
     private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getEventHandlers();
-
+        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         // Add entries exposed by the object as MultiHandler.
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
         for (Method method : methodsToClasses.keySet()) {
-            final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-            builder.putAll(createMap(obj, method, classes));
+            // check if the method accepts an event context (and is not a command handler)
+            if (acceptsCorrectParams(method)) {
+                final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
+                builder.putAll(createMap(obj, method, classes));
+            }
         }
-
         return builder.build();
     }
 

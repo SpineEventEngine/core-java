@@ -43,20 +43,19 @@ import static com.google.common.base.Throwables.propagate;
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements MultiHandler {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return a multimap from event handlers to event classes they handle.
+     */
     @Override
-    public Multimap<Method, Class<? extends Message>> getEventHandlers() {
+    public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends Projection> projectionClass = getEntityClass();
         final Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
         final Method forward = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
                 .build();
-    }
-
-    @Override
-    public Multimap<Method, Class<? extends Message>> getCommandHandlers() {
-        // Return an empty map by default.
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder().build();
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
