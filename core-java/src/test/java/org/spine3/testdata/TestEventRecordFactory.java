@@ -31,6 +31,7 @@ import org.spine3.test.project.event.TaskAdded;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.util.Users.newUserId;
 
 /**
@@ -96,7 +97,7 @@ public class TestEventRecordFactory {
      */
     public static EventRecord projectCreated(ProjectId projectId, EventContext eventContext) {
 
-        final ProjectCreated event = ProjectCreated.newBuilder().setProjectId(projectId).build();
+        final ProjectCreated event = projectCreatedEvent(projectId);
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
         return builder.build();
     }
@@ -106,7 +107,7 @@ public class TestEventRecordFactory {
      */
     public static EventRecord taskAdded(ProjectId projectId, EventContext eventContext) {
 
-        final TaskAdded event = TaskAdded.newBuilder().setProjectId(projectId).build();
+        final TaskAdded event = taskAddedEvent(projectId);
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
         return builder.build();
     }
@@ -116,7 +117,7 @@ public class TestEventRecordFactory {
      */
     public static EventRecord projectStarted(ProjectId projectId, EventContext eventContext) {
 
-        final ProjectStarted event = ProjectStarted.newBuilder().setProjectId(projectId).build();
+        final ProjectStarted event = projectStartedEvent(projectId);
         final EventRecord.Builder builder = EventRecord.newBuilder().setContext(eventContext).setEvent(toAny(event));
         return builder.build();
     }

@@ -58,7 +58,7 @@ public class UtilitiesShould {
         // testutil package
         checkPrivateConstructor(TestAggregateIdFactory.class);
         checkPrivateConstructor(TestAggregateStorageRecordFactory.class);
-        checkPrivateConstructor(TestCommandRequestFactory.class);
+        checkPrivateConstructor(TestCommandFactory.class);
         checkPrivateConstructor(TestContextFactory.class);
         checkPrivateConstructor(TestEventRecordFactory.class);
         checkPrivateConstructor(TestEventStoreRecordFactory.class);

@@ -19,6 +19,7 @@
  */
 package org.spine3.sample;
 
+import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
@@ -29,6 +30,7 @@ import org.spine3.sample.order.command.AddOrderLine;
 import org.spine3.sample.order.command.CreateOrder;
 import org.spine3.sample.order.command.PayForOrder;
 import org.spine3.time.ZoneOffset;
+import org.spine3.util.Commands;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
@@ -41,23 +43,14 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
-
-        final CreateOrder createOrder = CreateOrder.newBuilder()
+        final CreateOrder command = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-
-        final CommandContext context = getCommandContext(userId);
-
-        final CommandRequest result = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(createOrder))
-                .setContext(context)
-                .build();
-
-        return result;
+        final CommandRequest request = newCommandRequest(userId, command);
+        return request;
     }
 
     public static CommandRequest addOrderLine(UserId userId, OrderId orderId) {
-
         final double price = 51.33;
         final Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
@@ -65,52 +58,45 @@ class Requests {
                 .setTitle("Domain Driven Design.")
                 .setPrice(price)
                 .build();
-
         final int quantity = 1;
         final double totalPrice = book.getPrice() * quantity;
-
         final OrderLine orderLine = OrderLine.newBuilder()
                 .setProductId(Messages.toAny(book.getBookId()))
                 .setQuantity(quantity)
                 .setTotal(totalPrice)
                 .build();
-
-        final AddOrderLine cmd = AddOrderLine.newBuilder()
+        final AddOrderLine command = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-
-        final CommandRequest result = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(cmd))
-                .setContext(getCommandContext(userId)).build();
+        final CommandRequest result = newCommandRequest(userId, command);
         return result;
     }
 
     public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
-
         final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
-
-        final PayForOrder cmd = PayForOrder.newBuilder()
+        final PayForOrder command = PayForOrder.newBuilder()
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-
-        final CommandRequest result = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(cmd))
-                .setContext(getCommandContext(userId))
-                .build();
+        final CommandRequest result = newCommandRequest(userId, command);
         return result;
     }
 
-    public static CommandContext getCommandContext(UserId userId) {
+    public static CommandRequest newCommandRequest(UserId userId, Message command) {
+        final CommandContext context = getCommandContext(userId);
+        final CommandRequest request = Commands.newCommandRequest(command, context);
+        return request;
+    }
 
+    public static CommandContext getCommandContext(UserId userId) {
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .build();
-        return CommandContext.newBuilder()
+        final CommandContext.Builder context = CommandContext.newBuilder()
                 .setCommandId(commandId)
-                .setZoneOffset(ZoneOffset.getDefaultInstance())
-                .build();
+                .setZoneOffset(ZoneOffset.getDefaultInstance());
+        return context.build();
     }
 
     private Requests() {

@@ -20,7 +20,6 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -36,7 +35,6 @@ import org.spine3.server.storage.EventStoreRecord;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -168,13 +166,6 @@ public class Events {
      */
     public static List<EventRecord> toEventRecordsList(List<EventStoreRecord> records) {
         return Lists.transform(records, TO_EVENT_RECORD);
-    }
-
-    /**
-     * Converts EventStoreRecords to EventRecords.
-     */
-    public static Iterator<EventRecord> toEventRecordsIterator(Iterable<EventStoreRecord> records) {
-        return Iterators.transform(records.iterator(), TO_EVENT_RECORD);
     }
 
     public static EventStoreRecord toEventStoreRecord(EventRecordOrBuilder record) {

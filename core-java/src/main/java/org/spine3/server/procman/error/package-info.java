@@ -18,14 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides classes and interfaces for backend part of the system.
- *
- * <p>Some of the classes in this package are also generated from Protobuf.
- * Those classes represent general data structures for working with backend data in
- * a multi-language system.
- */
 @ParametersAreNonnullByDefault
-package org.spine3.server;
+package org.spine3.server.procman.error;
 
 import javax.annotation.ParametersAreNonnullByDefault;

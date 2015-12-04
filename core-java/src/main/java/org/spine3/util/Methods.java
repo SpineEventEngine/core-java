@@ -54,8 +54,8 @@ public class Methods {
 
     /**
      * Returns the class of the first parameter of the passed handler method object.
-     * <p>
-     * It is expected that the first parameter of the passed method is always of
+     *
+     * <p>It is expected that the first parameter of the passed method is always of
      * a class implementing {@link Message}.
      *
      * @param handler the method object to take first parameter type from

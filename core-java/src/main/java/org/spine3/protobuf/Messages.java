@@ -114,8 +114,8 @@ public class Messages {
 
     /**
      * Returns message {@link Class} for the given Protobuf message type.
-     * <p>
-     * This method is temporary until full support of {@link Any} is provided.
+     *
+     * <p>This method is temporary until full support of {@link Any} is provided.
      *
      * @param messageType full type name defined in the proto files
      * @return message class

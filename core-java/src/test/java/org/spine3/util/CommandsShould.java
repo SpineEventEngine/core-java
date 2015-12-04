@@ -36,7 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.spine3.testdata.TestCommandRequestFactory.createProject;
+import static org.spine3.testdata.TestCommandFactory.createProject;
 import static org.spine3.util.Commands.generateId;
 import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
 import static org.spine3.util.Identifiers.timestampToString;

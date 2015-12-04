@@ -67,8 +67,8 @@ public abstract class MessageHandlerMethod<T, C> {
      * @param method subscriber method
      */
     protected MessageHandlerMethod(T target, Method method) {
-        checkNotNull(target, "target cannot be null.");
-        checkNotNull(method, "method cannot be null.");
+        checkNotNull(target, "target");
+        checkNotNull(method, "method");
 
         this.target = target;
         this.method = method;

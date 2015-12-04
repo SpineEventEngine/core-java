@@ -127,7 +127,7 @@ public abstract class EventStorageShould {
 
     protected static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
         if (expected.size() != actual.size()) {
-            fail("Expected records count: " + expected.size() + " is not equal to actual records count: " + actual.size());
+            fail("Expected record count: " + expected.size() + " is not equal to actual record count: " + actual.size());
         }
         for (int i = 0; i < expected.size(); i++) {
             assertEventRecordsAreEqual(expected.get(i), actual.get(i));

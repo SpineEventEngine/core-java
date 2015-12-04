@@ -26,8 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
 
-import javax.annotation.Nonnull;
-
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -156,7 +154,6 @@ public class EntityShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return DEFAULT_STATE;

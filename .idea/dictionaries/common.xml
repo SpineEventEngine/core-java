@@ -1,18 +1,24 @@
 <component name="ProjectDictionaryState">
   <dictionary name="common">
     <words>
+      <w>afghani</w>
       <w>arraybuffer</w>
+      <w>aspx</w>
       <w>bytebuffer</w>
       <w>closeables</w>
+      <w>cqrs</w>
       <w>dataset</w>
       <w>datastore</w>
       <w>datastores</w>
       <w>deserialized</w>
+      <w>dirham</w>
       <w>escaper</w>
       <w>flushables</w>
       <w>googleapis</w>
       <w>grpc</w>
       <w>handshaker</w>
+      <w>hohpe</w>
+      <w>lempira</w>
       <w>liskov</w>
       <w>melnik</w>
       <w>mergeable</w>
@@ -23,6 +29,8 @@
       <w>onmessage</w>
       <w>onopen</w>
       <w>parameterizing</w>
+      <w>processmanager</w>
+      <w>procman</w>
       <w>proto's</w>
       <w>protos</w>
       <w>stderr</w>
@@ -30,6 +38,7 @@
       <w>threeten</w>
       <w>unregisters</w>
       <w>websocket</w>
+      <w>workflows</w>
       <w>yevsyukov</w>
     </words>
   </dictionary>

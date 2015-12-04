@@ -39,9 +39,9 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestCommandFactory;
 import org.spine3.util.Classes;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -54,11 +54,14 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.EventApplier.isEventApplierPredicate;
+import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestCommandFactory.createProject;
+import static org.spine3.testdata.TestCommandFactory.startProject;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventRecordFactory.*;
 import static org.spine3.util.Commands.createContext;
 import static org.spine3.util.Tests.currentTimeSeconds;
@@ -72,9 +75,9 @@ public class AggregateShould {
 
     private final ProjectId projectId = createProjectId("testProjectId");
     private final ProjectAggregate aggregate = new ProjectAggregate(projectId);
-    private final CreateProject createProject = CreateProject.newBuilder().setProjectId(projectId).build();
-    private final AddTask addTask = AddTask.newBuilder().setProjectId(projectId).build();
-    private final StartProject startProject = StartProject.newBuilder().setProjectId(projectId).build();
+    private final CreateProject createProject = createProject(projectId);
+    private final AddTask addTask = TestCommandFactory.addTask(projectId);
+    private final StartProject startProject = startProject(projectId);
     private CommandContext commandContext;
     private EventContext eventContext;
 
@@ -210,7 +213,7 @@ public class AggregateShould {
     @Test
     public void return_message_classes_which_are_handled_by_aggregate_case_event_classes() {
 
-        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(ProjectAggregate.class, isEventApplierPredicate);
+        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(ProjectAggregate.class, IS_EVENT_APPLIER);
         assertContainsAllProjectEvents(classes);
     }
 
@@ -419,7 +422,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -428,19 +430,19 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return projectCreatedEvent(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return TaskAdded.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return taskAddedEvent(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = ProjectStarted.newBuilder().setProjectId(cmd.getProjectId()).build();
+            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -487,7 +489,6 @@ public class AggregateShould {
             super(id);
         }
 
-        @Nonnull
         @Override
         protected Project getDefaultState() {
             return getDefaultInstance();
@@ -497,7 +498,7 @@ public class AggregateShould {
         @SuppressWarnings("UnusedDeclaration")
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return ProjectCreated.newBuilder().setProjectId(cmd.getProjectId()).build();
+            return projectCreatedEvent(cmd.getProjectId());
         }
     }
 
@@ -505,7 +506,6 @@ public class AggregateShould {
         protected TestAggregateWithIdString(String id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -515,7 +515,6 @@ public class AggregateShould {
         protected TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -525,7 +524,6 @@ public class AggregateShould {
         protected TestAggregateWithIdLong(Long id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }
@@ -535,7 +533,6 @@ public class AggregateShould {
         protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
-        @Nonnull
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
         }

@@ -52,7 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommandRequestFactory.*;
+import static org.spine3.testdata.TestCommandFactory.*;
 
 /**
  * @author Alexander Litus

@@ -79,12 +79,14 @@ public abstract class AggregateRepositoryBase<I extends Message,
         super();
     }
 
+    @Override
     @SuppressWarnings("RefusedBequest") // We override to check our type of storage.
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"}) final
         AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
     }
 
+    @Override
     public int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
@@ -101,6 +103,11 @@ public abstract class AggregateRepositoryBase<I extends Message,
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return a multimap from command handlers to command classes they handle.
+     */
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends Aggregate> aggregateClass = getEntityClass();
@@ -204,6 +211,6 @@ public abstract class AggregateRepositoryBase<I extends Message,
     // To double check this we need to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateCommand.getAggregateId(command).value();
+        return (I) AggregateId.getAggregateId(command).value();
     }
 }

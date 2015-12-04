@@ -25,8 +25,6 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.Entity;
 
-import javax.annotation.Nonnull;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -98,7 +96,6 @@ public abstract class EntityStorageShould {
         protected TestEntity(String id) {
             super(id);
         }
-        @Nonnull
         @Override
         protected StringValue getDefaultState() {
             return StringValue.getDefaultInstance();

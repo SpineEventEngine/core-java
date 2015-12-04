@@ -45,7 +45,7 @@ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
 
     private static final int EVENT_PARAM_INDEX = 0;
 
-    static final Predicate<Method> isEventApplierPredicate = new Predicate<Method>() {
+    static final Predicate<Method> IS_EVENT_APPLIER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);

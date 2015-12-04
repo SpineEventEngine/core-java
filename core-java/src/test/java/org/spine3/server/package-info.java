@@ -19,12 +19,9 @@
  */
 
 /**
- * This package provides classes and interfaces for backend part of the system.
- *
- * <p>Some of the classes in this package are also generated from Protobuf.
- * Those classes represent general data structures for working with backend data in
- * a multi-language system.
+ * Package containing abstract AggregateRoot class.
  */
+
 @ParametersAreNonnullByDefault
 package org.spine3.server;
 

@@ -39,10 +39,15 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "AbstractClassNeverImplemented"})
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements MultiHandler {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return a multimap from event handlers to event classes they handle.
+     */
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends Projection> projectionClass = getEntityClass();
@@ -56,8 +61,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @SuppressWarnings("TypeMayBeWeakened")
     protected I getEntityId(Message event, EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
-        @SuppressWarnings("unchecked") final I id = (I)aggregateId;
-
+        @SuppressWarnings("unchecked")
+        final I id = (I)aggregateId;
         return id;
     }
 

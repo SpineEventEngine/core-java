@@ -66,11 +66,6 @@ public class Identifiers {
      */
     public static final String ID_PROPERTY_SUFFIX = "id";
 
-    /**
-     * Aggregate ID must be the first field of aggregate commands.
-     */
-    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
-
     private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
     private static final Pattern PATTERN_COLON = Pattern.compile(":");
     private static final Pattern PATTERN_T = Pattern.compile("T");
@@ -173,8 +168,8 @@ public class Identifiers {
 
     /**
      * Wraps the passed ID value into an instance of {@link com.google.protobuf.Any}.
-     * <p>
-     * The passed value must be of one of the supported types listed below.
+     *
+     * <p>The passed value must be of one of the supported types listed below.
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
@@ -212,8 +207,8 @@ public class Identifiers {
 
     /**
      * Extracts ID object from the passed {@link com.google.protobuf.Any} instance.
-     * <p>
-     * Returned type depends on the type of the message wrapped into {@code Any}.
+     *
+     * <p>Returned type depends on the type of the message wrapped into {@code Any}.
      *
      * @param idInAny the ID value wrapped into {@code Any}
      * @return <ul>

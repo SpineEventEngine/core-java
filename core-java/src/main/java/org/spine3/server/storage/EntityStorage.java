@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 public abstract class EntityStorage<I, M extends Message> {
 
     /**
-     * Reads message from the storage by the ID.
+     * Reads a message from the storage by the ID.
      *
      * @param id the ID of the message to load
      * @return a message instance or {@code null} if there is no message with such ID
@@ -44,7 +44,7 @@ public abstract class EntityStorage<I, M extends Message> {
     public abstract M read(I id);
 
     /**
-     * Writes message into the storage. Rewrites it if the message with such ID already exists.
+     * Writes a message into the storage. Rewrites it if the message with such ID already exists.
      *
      * @param id ID of the message
      * @param message the message to save

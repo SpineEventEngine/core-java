@@ -20,37 +20,22 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.protobuf.MessageFields;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.Identifiers;
+import org.spine3.server.aggregate.error.MissingAggregateIdException;
+import org.spine3.server.internal.EntityId;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * Value object for aggregate IDs.
  *
- * <p>An aggregate ID value can be of one of the following types:
- *   <ul>
- *      <li>String</li>
- *      <li>Long</li>
- *      <li>Integer</li>
- *      <li>A class implementing {@link Message}</li>
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes</li>
- *      <li>ISBN</li>
- *      <li>Phone number</li>
- *      <li>email address as a couple of local-part and domain</li>
- *   </ul>
- *
+ * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
  */
-public final class AggregateId<I> {
+public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * The standard name for properties holding an ID of an aggregate.
@@ -58,17 +43,17 @@ public final class AggregateId<I> {
     public static final String PROPERTY_NAME = "aggregateId";
 
     /**
-     * The standard name for a parameter containing an aggregte ID.
+     * The standard name for a parameter containing an aggregate ID.
      */
     public static final String PARAM_NAME = PROPERTY_NAME;
 
     /**
-     * The value of the id.
+     * Aggregate ID must be the first field of aggregate commands.
      */
-    private final I value;
+    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
 
     private AggregateId(I value) {
-        this.value = checkNotNull(value);
+        super(value);
     }
 
     /**
@@ -89,34 +74,23 @@ public final class AggregateId<I> {
     }
 
     /**
-     * Returns the short name of the type of underlying value.
+     * Obtains an aggregate id from the passed command instance.
      *
-     * @return
-     *  <ul>
-     *      <li>Short Protobuf type name if the value is {@link Message}</li>
-     *      <li>Simple class name of the value, otherwise</li>
-     *  </ul>
+     * <p>The id value must be the first field of the proto file. Its name must end with "id".
+     *
+     * @param command the command to get id from
+     * @return value of the id
      */
-    public String getShortTypeName() {
-        if (this.value instanceof Message) {
-            //noinspection TypeMayBeWeakened
-            final Message message = (Message)this.value;
-            final Descriptors.Descriptor descriptor = message.getDescriptorForType();
-            final String result = descriptor.getName();
-            return result;
-        } else {
-            final String result = value.getClass().getSimpleName();
-            return result;
+    public static AggregateId getAggregateId(Message command) {
+        final String fieldName = MessageFields.getFieldName(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+        if (!fieldName.endsWith(ID_PROPERTY_SUFFIX)) {
+            throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
         }
-    }
-
-    @Override
-    public String toString() {
-        final String result = Identifiers.idToString(value());
-        return result;
-    }
-
-    public I value() {
-        return this.value;
+        try {
+            final Message value = (Message) MessageFields.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
+            return of(value);
+        } catch (RuntimeException e) {
+            throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);
+        }
     }
 }
