@@ -119,10 +119,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        //noinspection DuplicateStringLiteralInspection
         checkNotNull(command, "command");
-        checkNotNull(context, "command context");
+        checkNotNull(context, "context");
 
         init();
         final Class<? extends Message> commandClass = command.getClass();
@@ -159,8 +159,9 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
     protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+        //noinspection DuplicateStringLiteralInspection
+        checkNotNull(context, "context");
         checkNotNull(event, "event");
-        checkNotNull(context, "event context");
 
         init();
         final Class<? extends Message> eventClass = event.getClass();
