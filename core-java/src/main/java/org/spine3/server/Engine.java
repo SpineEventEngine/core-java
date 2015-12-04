@@ -19,6 +19,7 @@
  */
 package org.spine3.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -34,10 +35,10 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
@@ -50,81 +51,28 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class Engine {
 
-    private EventBus eventBus;
+    private final StorageFactory storageFactory;
+    private final CommandDispatcher commandDispatcher;
+    private final EventBus eventBus;
+    private final CommandStore commandStore;
+    private final EventStore eventStore;
 
-    private StorageFactory storageFactory;
-    private CommandStore commandStore;
-
-    private EventStore eventStore;
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
-    private Engine() {
-        //TODO:2015-11-10:alexander.yevsyukov: Do we do it this way?
+    private Engine(Builder builder) {
+        this.storageFactory = builder.storageFactory;
+        this.commandDispatcher = builder.commandDispatcher;
+        this.eventBus = builder.eventBus;
+        this.commandStore = builder.commandStore;
+        this.eventStore = builder.eventStore;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
-     * Obtains instance of the engine.
-     *
-     * @return {@code Engine} instance
-     * @throws IllegalStateException if the engine wasn't started before calling this method
-     * @see #start(StorageFactory, Executor)
-     */
-    @CheckReturnValue
-    public static Engine getInstance() {
-        final Engine engine = instance();
-        engine.checkStarted();
-        return engine;
-    }
-
-    private void doStart(StorageFactory storageFactory, Executor eventHandlerExecutor) {
-        this.storageFactory = storageFactory;
-
-        //TODO:2015-11-10:alexander.yevsyukov: Have eventBus as a parameter passed to the engine or created by the engine depending on the environment we run in.
-
-        this.eventBus = EventBus.newInstance(eventHandlerExecutor);
-        this.commandStore = new CommandStore(storageFactory.createCommandStorage());
-        this.eventStore = new EventStore(storageFactory.createEventStorage());
-    }
-
-    private void checkNotStarted() {
-        if (isStarted()) {
-            throw new IllegalStateException("Engine already started. Call stop() before re-start.");
-        }
-    }
-
-    private void checkStarted() {
-        if (!isStarted()) {
-            throw new IllegalStateException("Engine is not started. Call Engine.start(StorageFactory).");
-        }
-    }
-
-    /**
-     * Starts the engine with the passed storage factory instance.
-     * <p>
-     * There can be only one started instance of {@code Engine} per application. Calling this method
-     * without invoking {@link #stop()} will cause {@code IllegalStateException}
-     *
-     * @param storageFactory the factory to be used for creating application data storages
-     * @param eventHandlerExecutor the executor for invoking event handlers
-     * @throws IllegalStateException if the method is called more than once without calling {@link #stop()} in between
-     */
-    public static void start(StorageFactory storageFactory, Executor eventHandlerExecutor) {
-        log().info("Starting on storage factory: " + storageFactory.getClass());
-        final Engine engine = instance();
-        engine.checkNotStarted();
-        engine.doStart(storageFactory, eventHandlerExecutor);
-    }
-
-    /**
-     * @return {@code true} if the engine is started, {@code false} otherwise
-     */
-    @CheckReturnValue
-    public boolean isStarted() {
-        return storageFactory != null;
-    }
-
-    /**
-     * Stops the engine.
+     * Stops the engine performing all necessary clean-ups.
      * <p>
      * This method shuts down all registered repositories. Each registered repository is:
      * <ul>
@@ -135,12 +83,6 @@ public final class Engine {
      */
     public void stop() {
         shutDownRepositories();
-
-        this.eventBus = null;
-        this.storageFactory = null;
-        this.commandStore = null;
-        this.eventStore = null;
-
         log().info("Engine stopped.");
     }
 
@@ -197,35 +139,42 @@ public final class Engine {
     }
 
     /**
-     * Processed the incoming command requests.
-     * <p>
-     * This method is the entry point of a command in to a backend of an application.
-     * <p>
-     * The engine must be started.
+     * Processed the incoming command request.
+     *
+     * <p>This method is the entry point of a command in to a backend of an application.
      *
      * @param request incoming command request to handle
      * @return the result of command handling
-     * @see #start(StorageFactory, Executor)
      */
     @CheckReturnValue
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
-        checkStarted();
 
         store(request);
 
-        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchroniously
+        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchronously
         final CommandResult result = dispatch(request);
-        storeAndPost(result.getEventRecordList());
+        storeAndPostEvents(result.getEventRecordList());
 
         return result;
     }
 
-    private void store(CommandRequest request) {
-        commandStore.store(request);
+    @VisibleForTesting
+    EventStore getEventStore() {
+        return eventStore;
     }
 
-    private CommandResult dispatch(CommandRequestOrBuilder request) {
+    @VisibleForTesting
+    CommandStore getCommandStore() {
+        return commandStore;
+    }
+
+    private void store(CommandRequest request) {
+        getCommandStore().store(request);
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private CommandResult dispatch(CommandRequest request) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
             final Message command = Messages.fromAny(request.getCommand());
@@ -241,14 +190,16 @@ public final class Engine {
         }
     }
 
-    private void storeAndPost(Iterable<EventRecord> records) {
+    private void storeAndPostEvents(Iterable<EventRecord> records) {
+        final EventStore eventStore = getEventStore();
         for (EventRecord record : records) {
             eventStore.store(record);
             post(record);
         }
     }
 
-    private void post(EventRecordOrBuilder eventRecord) {
+    @SuppressWarnings("TypeMayBeWeakened") // We do not intend to post EventRecordBuilder instances into the bus.
+    private void post(EventRecord eventRecord) {
         final EventBus eventBus = getEventBus();
         final Message event = Events.getEvent(eventRecord);
         final EventContext context = eventRecord.getContext();
@@ -261,11 +212,10 @@ public final class Engine {
      * Convenience method for obtaining instance of {@link CommandDispatcher}.
      *
      * @return instance of {@code CommandDispatcher} used in the application
-     * @see CommandDispatcher#getInstance()
      */
     @CheckReturnValue
     public CommandDispatcher getCommandDispatcher() {
-        return CommandDispatcher.getInstance();
+        return this.commandDispatcher;
     }
 
     /**
@@ -278,14 +228,84 @@ public final class Engine {
         return this.eventBus;
     }
 
-    private static Engine instance() {
-        return Singleton.INSTANCE.value;
-    }
+    /**
+     * A builder for producing {@code Engine} instances.
+     *
+     * <p>Normally, there should be one instance {@code Engine} per application.
+     */
+    public static class Builder {
 
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Engine value = new Engine();
+        private StorageFactory storageFactory;
+        private CommandDispatcher commandDispatcher;
+        private EventBus eventBus;
+        @Nullable
+        private CommandStore commandStore;
+        @Nullable
+        private EventStore eventStore;
+
+        public Builder setStorageFactory(StorageFactory storageFactory) {
+            this.storageFactory = checkNotNull(storageFactory);
+            return this;
+        }
+
+        public StorageFactory getStorageFactory() {
+            return storageFactory;
+        }
+
+        public Builder setCommandDispatcher(CommandDispatcher commandDispatcher) {
+            this.commandDispatcher = checkNotNull(commandDispatcher);
+            return this;
+        }
+
+        public CommandDispatcher getCommandDispatcher() {
+            return commandDispatcher;
+        }
+
+        public Builder setEventBus(EventBus eventBus) {
+            this.eventBus = checkNotNull(eventBus);
+            return this;
+        }
+
+        public EventBus getEventBus() {
+            return eventBus;
+        }
+
+        public Builder setCommandStore(@Nullable CommandStore commandStore) {
+            this.commandStore = commandStore;
+            return this;
+        }
+
+        @Nullable
+        public CommandStore getCommandStore() {
+            return commandStore;
+        }
+
+        public Builder setEventStore(@Nullable EventStore eventStore) {
+            this.eventStore = eventStore;
+            return this;
+        }
+
+        @Nullable
+        public EventStore getEventStore() {
+            return eventStore;
+        }
+
+        public Engine build() {
+            checkNotNull(storageFactory, "storageFactory");
+            checkNotNull(commandDispatcher, "commandDispatcher");
+            checkNotNull(eventBus, "eventBus");
+
+            if (commandStore == null) {
+                commandStore = new CommandStore(storageFactory.createCommandStorage());
+            }
+
+            if (eventStore == null) {
+                eventStore = new EventStore(storageFactory.createEventStorage());
+            }
+
+            final Engine result = new Engine(this);
+            return result;
+        }
     }
 
     private enum LogSingleton {
