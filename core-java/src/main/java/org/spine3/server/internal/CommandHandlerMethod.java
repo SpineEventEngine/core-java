@@ -29,12 +29,11 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.CommandClass;
+import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.MultiHandler;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.util.MethodMap;
 import org.spine3.util.Methods;
 
@@ -44,12 +43,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
-import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * The wrapper for a command handler method.
@@ -57,6 +55,7 @@ import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMM
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods")
+@Internal
 public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     private static final int MESSAGE_PARAM_INDEX = 0;
@@ -113,8 +112,6 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      *
      * @param handlingResult the command handler method return value. Could be a {@link Message} or a list of messages.
      * @return the list of events as messages
-     * @see AggregateCommandHandler#isAggregateCommandHandler(Method)
-     * @see ProcessManagerCommandHandler#isProcessManagerCommandHandler(Method)
      */
     protected <R> List<? extends Message> commandHandlingResultToEvents(R handlingResult) {
         final Class<?> resultClass = handlingResult.getClass();
@@ -138,58 +135,47 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      */
     @CheckReturnValue
     public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
+        if (!(object instanceof CommandHandlingObject)) {
+            // If the passed object is not of one of the types that can hold command handler methods,
+            // return an empty map.
+            // We do not throw exception because this method is used for checking of presence of command handling methods.
+            return Collections.emptyMap();
+        }
+
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getRegularHandlers(object);
+        final CommandHandlingObject commandHandler = (CommandHandlingObject) object;
+        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(commandHandler);
         result.putAll(regularHandlers);
 
         if (object instanceof MultiHandler) {
             final MultiHandler multiHandler = (MultiHandler) object;
-            final Map<CommandClass, CommandHandlerMethod> multiHandlers = getMultiHandlers(multiHandler);
+            final Map<CommandClass, CommandHandlerMethod> multiHandlers = getHandlersFromMultiHandler(multiHandler);
             checkModifiers(toMethods(multiHandlers.values()));
             result.putAll(multiHandlers);
         }
         return result.build();
     }
 
-    private static Map<CommandClass, CommandHandlerMethod> getRegularHandlers(Object object) {
+    private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandlingObject object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Predicate<Method> isHandlerPredicate = getHandlerMethodPredicate(object);
+        final Predicate<Method> isHandlerPredicate = object.getHandlerMethodPredicate();
         final MethodMap handlers = new MethodMap(object.getClass(), isHandlerPredicate);
         checkModifiers(handlers.values());
         for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
-            final CommandHandlerMethod handler = getCommandHandler(object, entry.getValue());
+            final CommandHandlerMethod handler = object.createMethod(entry.getValue());
             result.put(commandClass, handler);
         }
         return result.build();
-    }
-
-    // TODO:2015-12-03:alexander.litus: avoid instanceof checks
-    private static CommandHandlerMethod getCommandHandler(Object object, Method value) {
-        //noinspection IfMayBeConditional
-        if (object instanceof Aggregate || object instanceof AggregateRepository) {
-            return new AggregateCommandHandler(object, value);
-        } else {
-            return new ProcessManagerCommandHandler(object, value);
-        }
-    }
-
-    private static Predicate<Method> getHandlerMethodPredicate(Object object) {
-        //noinspection IfMayBeConditional
-        if (object instanceof Aggregate || object instanceof AggregateRepository) {
-            return IS_AGGREGATE_COMMAND_HANDLER;
-        } else {
-            return IS_PM_COMMAND_HANDLER;
-        }
     }
 
     /**
      * Creates a command handler map from the passed instance of {@link MultiHandler}.
      */
     @CheckReturnValue
-    private static Map<CommandClass, CommandHandlerMethod> getMultiHandlers(MultiHandler obj) {
+    private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
@@ -211,13 +197,13 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      * @param classes the classes of messages handled by the method
      * @return immutable map of command handlers
      */
-    private static Map<CommandClass, CommandHandlerMethod> createMap(Object target,
+    private static Map<CommandClass, CommandHandlerMethod> createMap(CommandHandlingObject target,
                                                                      Method method,
                                                                      Iterable<Class<? extends Message>> classes) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
         for (Class<? extends Message> messageClass : classes) {
             final CommandClass key = CommandClass.of(messageClass);
-            final CommandHandlerMethod value = getCommandHandler(target, method);
+            final CommandHandlerMethod value = target.createMethod(method);
             builder.put(key, value);
         }
         return builder.build();

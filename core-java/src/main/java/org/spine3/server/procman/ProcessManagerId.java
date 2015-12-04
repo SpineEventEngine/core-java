@@ -22,7 +22,7 @@ package org.spine3.server.procman;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.MessageFields;
-import org.spine3.server.internal.EntityId;
+import org.spine3.server.EntityId;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 
 import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;

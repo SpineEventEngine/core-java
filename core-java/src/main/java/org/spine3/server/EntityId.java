@@ -18,34 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.server.Entity;
 import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A base for {@link Entity} ID value object.
- *
- * <p>An entity ID value can be of one of the following types:
- *   <ul>
- *      <li>String</li>
- *      <li>Long</li>
- *      <li>Integer</li>
- *      <li>A class implementing {@link Message}</li>
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes</li>
- *      <li>ISBN</li>
- *      <li>Phone number</li>
- *      <li>email address as a couple of local-part and domain</li>
- *   </ul>
  *
  * @param <I> the type of entity IDs
  *
@@ -69,8 +51,8 @@ public abstract class EntityId<I> {
      *
      * @return
      *  <ul>
-     *      <li>Short Protobuf type name if the value is {@link Message}</li>
-     *      <li>Simple class name of the value, otherwise</li>
+     *      <li>Short Protobuf type name if the value is {@link Message}.</li>
+     *      <li>Simple class name of the value, otherwise.</li>
      *  </ul>
      */
     public String getShortTypeName() {

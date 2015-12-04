@@ -18,13 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.server.aggregate;
+
+import java.lang.reflect.Method;
+
 /**
- * Classes and interfaces in this package are for internal use of the framework.
+ * @author Alexander Yevsyukov
  */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.internal;
+class AggregateRepositoryDispatchMethod extends AggregateCommandHandler {
 
-import org.spine3.Internal;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * {@inheritDoc}
+     */
+    AggregateRepositoryDispatchMethod(Object target, Method method) {
+        super(target, method);
+    }
+}

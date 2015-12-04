@@ -19,12 +19,15 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.RepositoryBase;
+import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 
@@ -127,6 +130,18 @@ public abstract class AggregateRepositoryBase<I extends Message,
         } catch (NoSuchMethodException e) {
             throw propagate(e);
         }
+    }
+
+    @Internal
+    @Override
+    public CommandHandlerMethod createMethod(Method method) {
+        return new AggregateRepositoryDispatchMethod(this, method);
+    }
+
+    @Internal
+    @Override
+    public Predicate<Method> getHandlerMethodPredicate() {
+        return AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
     }
 
     /**

@@ -20,14 +20,17 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -152,6 +155,18 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, eventClasses)
                 .build();
+    }
+
+    @Internal
+    @Override
+    public CommandHandlerMethod createMethod(Method method) {
+        return new ProcessManagerCommandHandler(this, method);
+    }
+
+    @Internal
+    @Override
+    public Predicate<Method> getHandlerMethodPredicate() {
+        return ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**

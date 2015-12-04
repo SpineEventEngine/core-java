@@ -21,15 +21,17 @@
 package org.spine3.server.procman;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.ProcessManagerCommandHandler;
+import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
@@ -44,7 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 import static org.spine3.internal.EventHandlerMethod.checkModifiers;
-import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
+import static org.spine3.server.procman.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -70,7 +72,7 @@ import static org.spine3.server.internal.ProcessManagerCommandHandler.IS_PM_COMM
  * @param <M> the type of the process manager state
  * @author Alexander Litus
  */
-public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
+public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
 
     /**
      * Keeps initialization state of the process manager.
@@ -244,6 +246,18 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
         return new IllegalStateException(String.format("Missing event handler for event class %s in the process manager class %s",
                 eventClass, this.getClass()));
+    }
+
+    @Internal
+    @Override
+    public CommandHandlerMethod createMethod(Method method) {
+        return new ProcessManagerCommandHandler(this, method);
+    }
+
+    @Internal
+    @Override
+    public Predicate<Method> getHandlerMethodPredicate() {
+        return ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**

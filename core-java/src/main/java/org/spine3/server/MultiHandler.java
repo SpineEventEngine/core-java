@@ -22,6 +22,7 @@ package org.spine3.server;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.spine3.server.internal.CommandHandlingObject;
 
 import java.lang.reflect.Method;
 
@@ -31,7 +32,7 @@ import java.lang.reflect.Method;
  *
  * @author Alexander Yevsyukov
  */
-public interface MultiHandler {
+public interface MultiHandler extends CommandHandlingObject {
 
     /**
      * Returns a map from methods to message classes they handle.

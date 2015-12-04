@@ -18,10 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -30,13 +32,14 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The wrapper for a command handler method of an Aggregate Root.
+ * The wrapper for a command handler method of an Aggregate.
  *
  * @author Alexander Litus
  */
-public class AggregateCommandHandler extends CommandHandlerMethod {
+@Internal
+class AggregateCommandHandler extends CommandHandlerMethod {
 
-    public static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new Predicate<Method>() {
+    static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -50,7 +53,7 @@ public class AggregateCommandHandler extends CommandHandlerMethod {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public AggregateCommandHandler(Object target, Method method) {
+    AggregateCommandHandler(Object target, Method method) {
         super(target, method);
     }
 
@@ -60,7 +63,7 @@ public class AggregateCommandHandler extends CommandHandlerMethod {
      * @param method a method to check
      * @return {@code true} if the method is a command handler, {@code false} otherwise
      */
-    public static boolean isAggregateCommandHandler(Method method) {
+    static boolean isAggregateCommandHandler(Method method) {
         if (!isAnnotatedCorrectly(method)){
             return false;
         }
