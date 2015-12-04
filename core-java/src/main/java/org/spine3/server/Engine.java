@@ -139,7 +139,7 @@ public final class Engine {
     }
 
     /**
-     * Processed the incoming command request.
+     * Processes the incoming command request.
      *
      * <p>This method is the entry point of a command in to a backend of an application.
      *
