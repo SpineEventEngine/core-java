@@ -22,13 +22,14 @@ package org.spine3.sample;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
+import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
+import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 
@@ -49,6 +50,7 @@ import static org.spine3.util.Users.newUserId;
 public class Application {
 
     private final StorageFactory storageFactory;
+    private final Engine engine;
     private final EventLogger eventLogger = new EventLogger();
 
     /**
@@ -57,6 +59,11 @@ public class Application {
      */
     public Application(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
+        this.engine = Engine.newBuilder()
+                .setStorageFactory(storageFactory)
+                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setEventBus(EventBus.newInstance())
+                .build();
     }
 
     /**
@@ -83,7 +90,7 @@ public class Application {
 
             // Process requests
             for (CommandRequest request : requests) {
-                Engine.getInstance().process(request);
+                engine.process(request);
             }
 
             log().info("All the requests were handled.");
@@ -100,15 +107,10 @@ public class Application {
         // Set up the storage
         storageFactory.setUp();
 
-        // Start the engine.
-        // Real applications are going to use an executor that allows for parallel execution of event handlers.
-        Engine.start(storageFactory, MoreExecutors.directExecutor());
-
         // Register repository with the engine. This will register it in the CommandDispatcher too.
-        final Engine engine = Engine.getInstance();
         engine.register(new OrderRepository());
 
-        // Register event handlers
+        // Register event handlers.
         engine.getEventBus().register(eventLogger);
 
         //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
@@ -124,7 +126,6 @@ public class Application {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        final Engine engine = Engine.getInstance();
         engine.getEventBus().unregister(eventLogger);
 
         // Stop the engine
@@ -172,6 +173,10 @@ public class Application {
          * To run the sample on the file system storage, use the following line instead of one above.
          */
         // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 
     private static class OrderIdToStringConverter implements Function<OrderId, String> {
