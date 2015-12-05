@@ -39,7 +39,7 @@ public abstract class CommandStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {
-        checkNotNull(aggregateId, AggregateId.PARAM_NAME);
+        checkNotNull(aggregateId, "aggregateId");
         checkNotNull(request, "request");
 
         final Any command = request.getCommand();

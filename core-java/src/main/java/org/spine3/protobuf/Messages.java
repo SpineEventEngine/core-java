@@ -23,6 +23,8 @@ import com.google.protobuf.*;
 import com.google.protobuf.util.JsonFormat;
 import org.spine3.ClassName;
 import org.spine3.TypeName;
+import org.spine3.protobuf.error.MissingDescriptorException;
+import org.spine3.protobuf.error.UnknownTypeInAnyException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,6 +43,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     private Messages() {}
@@ -85,7 +88,6 @@ public class Messages {
      * @throws UnknownTypeInAnyException if there is no Java class in the classpath for the enclosed type
      */
     public static <T extends Message> T fromAny(Any any) {
-
         checkNotNull(any);
 
         if (any.is(Any.class)) {

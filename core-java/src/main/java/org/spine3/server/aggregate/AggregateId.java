@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.MessageFields;
+import org.spine3.protobuf.MessageField;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
@@ -36,21 +36,6 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
  * @author Alexander Yevsyukov
  */
 public final class AggregateId<I> extends EntityId<I> {
-
-    /**
-     * The standard name for properties holding an ID of an aggregate.
-     */
-    public static final String PROPERTY_NAME = "aggregateId";
-
-    /**
-     * The standard name for a parameter containing an aggregate ID.
-     */
-    public static final String PARAM_NAME = PROPERTY_NAME;
-
-    /**
-     * Aggregate ID must be the first field of aggregate commands.
-     */
-    public static final int AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS = 0;
 
     private AggregateId(I value) {
         super(value);
@@ -76,21 +61,34 @@ public final class AggregateId<I> extends EntityId<I> {
     /**
      * Obtains an aggregate id from the passed command instance.
      *
-     * <p>The id value must be the first field of the proto file. Its name must end with "id".
+     * <p>The id value must be the first field of the proto message. Its name must end with "id".
      *
      * @param command the command to get id from
      * @return value of the id
      */
     public static AggregateId getAggregateId(Message command) {
-        final String fieldName = MessageFields.getFieldName(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
-        if (!fieldName.endsWith(ID_PROPERTY_SUFFIX)) {
-            throw new MissingAggregateIdException(command.getClass().getName(), fieldName);
-        }
-        try {
-            final Message value = (Message) MessageFields.getFieldValue(command, AGGREGATE_ID_FIELD_INDEX_IN_COMMANDS);
-            return of(value);
-        } catch (RuntimeException e) {
-            throw new MissingAggregateIdException(command, MessageFields.toAccessorMethodName(fieldName), e);
-        }
+        final Object value = FIELD.getValue(command);
+        return of(value);
     }
+
+    /**
+     * Accessor object for aggregate ID fields in commands.
+     *
+     * <p>An aggregate ID must be the first field declared in a message and its
+     * name must end with {@code "id"} suffix.
+     */
+    private static final MessageField FIELD = new MessageField(0) {
+
+        @Override
+        protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
+            return new MissingAggregateIdException(message.getClass().getName(), fieldName);
+        }
+
+        @Override
+        protected boolean isFieldAvailable(Message message) {
+            final String fieldName = MessageField.getFieldName(message, getIndex());
+            final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
+            return result;
+        }
+    };
 }
