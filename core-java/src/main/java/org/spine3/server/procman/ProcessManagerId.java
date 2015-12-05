@@ -48,7 +48,7 @@ public class ProcessManagerId<I> extends EntityId<I> {
     /**
      * The process manager ID must be the first field in events/commands.
      */
-    public static final int PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES = 0;
+    public static final int PROCESS_MANAGER_ID_FIELD_INDEX = 0;
 
     private ProcessManagerId(I value) {
         super(value);
@@ -73,12 +73,12 @@ public class ProcessManagerId<I> extends EntityId<I> {
      * @return value of the id
      */
     public static ProcessManagerId from(Message message) {
-        final String fieldName = MessageFields.getFieldName(message, PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES);
+        final String fieldName = MessageFields.getFieldName(message, PROCESS_MANAGER_ID_FIELD_INDEX);
         if (!fieldName.endsWith(ID_PROPERTY_SUFFIX)) {
             throw new MissingProcessManagerIdException(message.getClass().getName(), fieldName);
         }
         try {
-            final Message value = (Message) MessageFields.getFieldValue(message, PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES);
+            final Message value = (Message) MessageFields.getFieldValue(message, PROCESS_MANAGER_ID_FIELD_INDEX);
             return new ProcessManagerId<>(value);
         } catch (RuntimeException e) {
             throw new MissingProcessManagerIdException(message, MessageFields.toAccessorMethodName(fieldName), e);
