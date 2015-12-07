@@ -17,53 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.server;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.eventbus.EventBus;
+import org.spine3.server.projection.ProjectionRepository;
 
 import java.util.Iterator;
 
 /**
- * Stores and loads the events.
+ * A common interface for objects that need to process events since a point of time in the past
+ * before it gets connected to {@link EventBus}.
  *
- * @author Mikhail Mikhaylov
+ * <p>A typical scenario is connecting a new {@link ProjectionRepository}, which needs to run through
+ * all the events since the beginning of history of a system to create projection instances.
+ *
+ * @author Alexander Yevsyukov
  */
-public class EventStore {
-
-    private final EventStorage storage;
-
-    public EventStore(EventStorage storage) {
-        this.storage = storage;
-    }
+public interface EventConsumer {
 
     /**
-     * Stores the event record.
+     * Returns timestamp of the last consumed event or default {@link Timestamp} instance if no events
+     * were consumed before.
      *
-     * @param record event record to store
+     * @return timestamp or default timestamp
      */
-    public void store(EventRecord record) {
-        storage.store(record);
-    }
+    Timestamp getLastEventTimestamp();
 
     /**
-     * Returns an iterator through all the events in the history sorted by timestamp.
+     * Consumes passed events.
      *
-     * @return iterator instance
+     * @param missingEvents events to consume
      */
-    public Iterator<EventRecord> allEvents() {
-        return storage.allEvents();
-    }
-
-    /**
-     * Returns an interator over all event records since the passed time.
-     *
-     * @param timestamp a point in time from which the iterator would go
-     * @return iterator instance
-     */
-    public Iterator<EventRecord> eventsSince(Timestamp timestamp) {
-        //TODO:2015-12-06:alexander.yevsyukov: implement
-        return null;
-    }
+    void consume(Iterator<EventRecord> missingEvents);
 }

@@ -52,7 +52,6 @@ public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
-    //TODO:2015-09-09:mikhail.mikhaylov: Find a way to read it from gradle properties.
     /**
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
