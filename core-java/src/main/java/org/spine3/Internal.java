@@ -18,13 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3;
+
+import java.lang.annotation.*;
+
 /**
- * Classes and interfaces in this package are for internal use of the framework.
+ * Annotates a program element which is internal to Spine, not part of the public API, and should not
+ * be used outside of the Spine codebase.
+ *
+ * @author Alexander Yevsyukov
  */
 @Internal
-@ParametersAreNonnullByDefault
-package org.spine3.internal;
+@Retention(RetentionPolicy.SOURCE)
+@Target({
+        ElementType.ANNOTATION_TYPE,
+        ElementType.CONSTRUCTOR,
+        ElementType.FIELD,
+        ElementType.METHOD,
+        ElementType.PACKAGE,
+        ElementType.TYPE})
+@Documented
+public @interface Internal {
+}
 
-import org.spine3.Internal;
-
-import javax.annotation.ParametersAreNonnullByDefault;

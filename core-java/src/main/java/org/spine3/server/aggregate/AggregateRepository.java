@@ -25,6 +25,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.Repository;
+import org.spine3.server.internal.CommandHandlingObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -38,7 +39,7 @@ import java.util.List;
  * @param <A> aggregate type
  * @author Alexander Yevsyukov
  */
-public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>, MultiHandler {
+public interface AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>, MultiHandler, CommandHandlingObject {
 
     /**
      * Loads or creates an aggregate with the passed ID.

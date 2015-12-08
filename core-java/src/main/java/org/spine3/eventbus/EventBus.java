@@ -216,14 +216,18 @@ public class EventBus {
                 try {
                     final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
                     if (!currentSubscribers.contains(handler)) {
-                        throw new IllegalArgumentException(
-                                "Missing event handler for the annotated method. Is " + handler.getFullName() + " registered?");
+                        throw handlerMethodWasNotRegistered(handler);
                     }
                     currentSubscribers.remove(handler);
                 } finally {
                     lockOnHandlersByClass.writeLock().unlock();
                 }
             }
+        }
+
+        private static IllegalArgumentException handlerMethodWasNotRegistered(EventHandlerMethod handler) {
+            return new IllegalArgumentException(
+                    "Cannot un-subscribe the event handler, which was not subscribed before:" + handler.getFullName());
         }
 
         private Collection<EventHandlerMethod> getHandlers(EventClass c) {

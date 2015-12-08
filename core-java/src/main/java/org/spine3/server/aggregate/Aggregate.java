@@ -20,6 +20,7 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -27,12 +28,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
-import org.spine3.server.internal.AggregateCommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
@@ -43,21 +45,21 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
-import static org.spine3.server.internal.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 import static org.spine3.util.Identifiers.idToAny;
 
 /**
  * Abstract base for aggregates.
  *
- * @param <I> the type for IDs of this class of aggregates. For supported types see {@link AggregateId}
+ * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link Entity}
  * @param <M> the type of the state held by the aggregate
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
+public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -110,6 +112,17 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
         return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
+    }
+
+    @Internal
+    @Override
+    public CommandHandlerMethod createMethod(Method method) {
+        return new AggregateCommandHandler(this, method);
+    }
+
+    @Override
+    public Predicate<Method> getHandlerMethodPredicate() {
+        return IS_AGGREGATE_COMMAND_HANDLER;
     }
 
     /**
@@ -175,7 +188,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      */
     private List<? extends Message> generateEvents(Message command, CommandContext context)
             throws InvocationTargetException {
+        //noinspection DuplicateStringLiteralInspection
         checkNotNull(command, "command");
+        //noinspection DuplicateStringLiteralInspection
         checkNotNull(context, "context");
 
         final Class<? extends Message> commandClass = command.getClass();

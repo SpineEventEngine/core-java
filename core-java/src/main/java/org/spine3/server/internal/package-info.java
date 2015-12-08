@@ -21,6 +21,10 @@
 /**
  * Classes and interfaces in this package are for internal use of the framework.
  */
-@ParametersAreNonnullByDefault package org.spine3.server.internal;
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.server.internal;
+
+import org.spine3.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

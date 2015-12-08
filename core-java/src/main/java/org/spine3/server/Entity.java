@@ -30,10 +30,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * A server-side wrapper for message objects with identity stored by a repository.
+ * A server-side wrapper for objects with identity.
  *
- * @param <I> the type of object IDs
- * @param <M> the type of object states.
+ * <p>An entity ID value can be of one of the following types:
+ *   <ul>
+ *      <li>String</li>
+ *      <li>Long</li>
+ *      <li>Integer</li>
+ *      <li>A class implementing {@link Message}</li>
+ *   </ul>
+ *
+ * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ * if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *   <ul>
+ *      <li>EAN value used in bar codes</li>
+ *      <li>ISBN</li>
+ *      <li>Phone number</li>
+ *      <li>email address as a couple of local-part and domain</li>
+ *   </ul>
+ *
+ * @param <I> the type of the entity ID
+ * @param <M> the type of the entity state
  */
 public abstract class Entity<I, M extends Message> {
 

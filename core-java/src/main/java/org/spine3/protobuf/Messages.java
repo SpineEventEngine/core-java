@@ -41,6 +41,7 @@ import static com.google.common.base.Throwables.propagate;
 @SuppressWarnings("UtilityClass")
 public class Messages {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
     private Messages() {}

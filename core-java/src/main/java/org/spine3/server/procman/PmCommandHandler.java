@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.procman;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -35,10 +36,9 @@ import static java.util.Collections.emptyList;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
-public class ProcessManagerCommandHandler extends CommandHandlerMethod {
+class PmCommandHandler extends CommandHandlerMethod {
 
-    public static final Predicate<Method> IS_PM_COMMAND_HANDLER = new Predicate<Method>() {
+    static final Predicate<Method> IS_PM_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
             checkNotNull(method);
@@ -52,7 +52,7 @@ public class ProcessManagerCommandHandler extends CommandHandlerMethod {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    public ProcessManagerCommandHandler(Object target, Method method) {
+    PmCommandHandler(Object target, Method method) {
         super(target, method);
     }
 
@@ -62,7 +62,7 @@ public class ProcessManagerCommandHandler extends CommandHandlerMethod {
      * @param method a method to check
      * @return {@code true} if the method is a command handler, {@code false} otherwise
      */
-    public static boolean isProcessManagerCommandHandler(Method method) {
+    static boolean isProcessManagerCommandHandler(Method method) {
         if (!isAnnotatedCorrectly(method)){
             return false;
         }

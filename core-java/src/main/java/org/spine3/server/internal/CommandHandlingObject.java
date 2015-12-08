@@ -18,13 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Classes and interfaces in this package are for internal use of the framework.
- */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.internal;
+package org.spine3.server.internal;
 
+import com.google.common.base.Predicate;
 import org.spine3.Internal;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.reflect.Method;
+
+/**
+ * An internal interface for classes that can declare command handling methods.
+ *
+ * @author Alexander Yevsyukov
+ */
+@Internal
+public interface CommandHandlingObject {
+
+    /**
+     * Creates a method wrapper, which holds reference to this object and the passed method.
+     */
+    CommandHandlerMethod createMethod(Method method);
+
+    /**
+     * Returns the predicate for filtering command handling methods.
+     */
+    Predicate<Method> getHandlerMethodPredicate();
+}

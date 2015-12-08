@@ -30,6 +30,7 @@ import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.util.Events;
@@ -113,7 +114,10 @@ public final class Engine {
 
         repositories.add(repository);
 
-        getCommandDispatcher().register(repository);
+        if (repository instanceof CommandHandlingObject) {
+            getCommandDispatcher().register((CommandHandlingObject) repository);
+        }
+
         getEventBus().register(repository);
     }
 
@@ -133,7 +137,10 @@ public final class Engine {
     }
 
     private void unregister(Repository<?, ?> repository) {
-        getCommandDispatcher().unregister(repository);
+        if (repository instanceof CommandHandlingObject) {
+            getCommandDispatcher().unregister((CommandHandlingObject)repository);
+        }
+
         getEventBus().unregister(repository);
         repository.assignStorage(null);
     }
@@ -152,7 +159,6 @@ public final class Engine {
 
         store(request);
 
-        //TODO:2015-11-13:alexander.yevsyukov: We need to do this asynchronously
         final CommandResult result = dispatch(request);
         storeAndPostEvents(result.getEventRecordList());
 
@@ -185,7 +191,6 @@ public final class Engine {
             final CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
-            //TODO:2015-06-15:mikhail.melnik: handle errors
             throw propagate(e);
         }
     }
