@@ -29,6 +29,7 @@ import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.EntityId;
 import org.spine3.server.internal.ProcessManagerCommandHandler;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
@@ -91,6 +92,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     private MethodMap eventHandlers;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected ProcessManager(I id) {
         super(id);
     }

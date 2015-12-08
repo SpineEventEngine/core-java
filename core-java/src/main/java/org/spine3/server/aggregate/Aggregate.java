@@ -33,6 +33,7 @@ import org.spine3.server.Entity;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.AggregateCommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.EntityId;
 import org.spine3.util.Classes;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
@@ -95,6 +96,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> {
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
      */
     protected Aggregate(I id) {
         super(id);

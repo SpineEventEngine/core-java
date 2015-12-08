@@ -22,18 +22,22 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.server.internal.EntityId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.server.internal.EntityId.checkType;
 
 /**
  * A server-side wrapper for message objects with identity stored by a repository.
  *
  * @param <I> the type of object IDs
  * @param <M> the type of object states.
+ * @see EntityId
+ * @author Alexander Yevsyikov
  */
 public abstract class Entity<I, M extends Message> {
 
@@ -45,7 +49,15 @@ public abstract class Entity<I, M extends Message> {
 
     private int version;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected Entity(I id) {
+        checkType(id);
         this.id = id;
     }
 

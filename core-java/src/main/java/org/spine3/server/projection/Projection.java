@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
+import org.spine3.server.internal.EntityId;
 import org.spine3.util.Classes;
 import org.spine3.util.MethodMap;
 
@@ -51,6 +52,13 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
     private MethodMap handlers;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected Projection(I id) {
         super(id);
     }

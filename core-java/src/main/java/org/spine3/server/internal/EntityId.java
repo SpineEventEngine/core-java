@@ -20,6 +20,7 @@
 
 package org.spine3.server.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
@@ -60,8 +61,33 @@ public abstract class EntityId<I> {
      */
     private final I value;
 
+    private static final ImmutableSet<Class<?>> SUPPORTED_TYPES = ImmutableSet.<Class<?>>builder()
+            .add(String.class)
+            .add(Long.class)
+            .add(Integer.class)
+            .add(Message.class)
+            .build();
+
     protected EntityId(I value) {
-        this.value = checkNotNull(value);
+        checkNotNull(value);
+        checkType(value);
+        this.value = value;
+    }
+
+    /**
+     * Ensures that the type of the {@code entityId} is supported.
+     *
+     * @param entityId the ID of the entity to check
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     */
+    public static <I> void checkType(I entityId) {
+        final Class<?> idClass = entityId.getClass();
+        if (SUPPORTED_TYPES.contains(idClass)) {
+            return;
+        }
+        if (!Message.class.isAssignableFrom(idClass)){
+            throw new IllegalArgumentException("Unsupported entity ID type: " + idClass.getName());
+        }
     }
 
     /**
