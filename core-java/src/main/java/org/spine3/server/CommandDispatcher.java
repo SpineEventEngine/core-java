@@ -115,16 +115,8 @@ public class CommandDispatcher {
 
         private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
 
-        private static void checkClass(Object object) {
-            if (!(object instanceof CommandHandlingObject)) {
-                throw new IllegalArgumentException("A handler registered with CommandDispatcher " +
-                        "must be either AggregateRepository or ProcessManagerRepository. Passed: " + object.getClass().getName());
-            }
-        }
-
         void register(CommandHandlingObject object) {
             checkNotNull(object);
-            checkClass(object);
 
             final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
             registerMap(handlers);
@@ -132,7 +124,6 @@ public class CommandDispatcher {
 
         void unregister(CommandHandlingObject object) {
             checkNotNull(object);
-            checkClass(object);
 
             final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
             unregisterMap(subscribers);
