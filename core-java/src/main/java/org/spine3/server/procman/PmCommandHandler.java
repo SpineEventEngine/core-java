@@ -22,7 +22,6 @@ package org.spine3.server.procman;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nullable;
@@ -37,8 +36,7 @@ import static java.util.Collections.emptyList;
  *
  * @author Alexander Litus
  */
-@Internal
-class ProcessManagerCommandHandler extends CommandHandlerMethod {
+class PmCommandHandler extends CommandHandlerMethod {
 
     static final Predicate<Method> IS_PM_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
@@ -54,7 +52,7 @@ class ProcessManagerCommandHandler extends CommandHandlerMethod {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    ProcessManagerCommandHandler(Object target, Method method) {
+    PmCommandHandler(Object target, Method method) {
         super(target, method);
     }
 

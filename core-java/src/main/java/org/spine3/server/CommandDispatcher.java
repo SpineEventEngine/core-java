@@ -28,6 +28,7 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.CommandHandlingObject;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -56,22 +57,38 @@ public class CommandDispatcher {
     }
 
     /**
-     * Registers the passed object of many commands in the dispatcher.
+     * Registers the passed object as a handler of commands.
      *
-     * @param object a {@code non-null} object
+     * <p>The passed object must be one of the following:
+     * <ul>
+     *     <li>An object of the class derived from {@link org.spine3.server.aggregate.AggregateRepository}.</li>
+     *     <li>An object of the class derived from {@link org.spine3.server.procman.ProcessManagerRepository}.</li>
+     * </ul>
+     *
+     * @param object a {@code non-null} object of the required type
+     * @throws IllegalArgumentException if the object is not of required class
      */
     public void register(Object object) {
         checkNotNull(object);
-        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
-        //TODO:2015-11-10:alexander.yevsyukov: Do we throw IllegalArgumentException if non handlers are discovered?
+        checkClass(object);
+
+        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan((CommandHandlingObject)object);
         registerMap(handlers);
     }
 
     public void unregister(Object object) {
         checkNotNull(object);
-        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
-        //TODO:2015-11-10:alexander.yevsyukov: Do we throw IllegalArgumentException if non handlers are discovered?
+        checkClass(object);
+
+        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan((CommandHandlingObject)object);
         unregisterMap(subscribers);
+    }
+
+    private static void checkClass(Object object) {
+        if (!(object instanceof CommandHandlingObject)) {
+            throw new IllegalArgumentException("A handler registered with CommandDispatcher " +
+                    "must be either AggregateRepository or ProcessManagerRepository. Passed: " + object.getClass().getName());
+        }
     }
 
     /**

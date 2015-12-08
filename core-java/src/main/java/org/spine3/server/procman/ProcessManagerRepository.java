@@ -160,13 +160,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
-        return new ProcessManagerCommandHandler(this, method);
+        return new PmRepositoryDispatchMethod(this, method);
     }
 
     @Internal
     @Override
     public Predicate<Method> getHandlerMethodPredicate() {
-        return ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
+        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**

@@ -36,16 +36,6 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 public class ProcessManagerId<I> extends EntityId<I> {
 
     /**
-     * The standard name for properties holding an ID of a process manager.
-     */
-    public static final String PROPERTY_NAME = "processManagerId";
-
-    /**
-     * The standard name for a parameter containing a process manager ID.
-     */
-    public static final String PARAM_NAME = PROPERTY_NAME;
-
-    /**
      * The process manager ID must be the first field in events/commands.
      */
     public static final int PROCESS_MANAGER_ID_FIELD_INDEX = 0;

@@ -166,7 +166,6 @@ public class EngineShould {
      */
     private void registerAll() {
         engine.register(new ProjectAggregateRepository());
-        engine.register(new TestEntityRepository());
         engine.getEventBus().register(handler);
         handlersRegistered = true;
     }
@@ -269,9 +268,6 @@ public class EngineShould {
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
-    }
-
-    private static class TestEntityRepository extends EntityRepository<String, TestEntity, Project> {
     }
 
     public static class TestEntity extends Entity<String, Project> {
