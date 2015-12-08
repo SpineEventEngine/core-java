@@ -49,7 +49,6 @@ public class EntityShould {
 
     @Test
     public void have_non_null_fields_by_default() {
-
         assertEquals(entity.getState(), entity.getDefaultState());
         assertEquals(entity.whenModified(), Timestamp.getDefaultInstance());
         assertEquals(0, entity.getVersion());
@@ -62,7 +61,6 @@ public class EntityShould {
 
     @Test
     public void store_state() {
-
         final Project state = Project.newBuilder().setStatus("status").build();
         final Timestamp whenLastModified = getCurrentTime();
         final int version = 3;
@@ -76,7 +74,6 @@ public class EntityShould {
 
     @Test
     public void validate_state_when_set_it() {
-
         entity.setState(state, 0, TimeUtil.getCurrentTime());
         assertTrue(entity.isValidateMethodCalled);
     }
@@ -93,9 +90,14 @@ public class EntityShould {
         entity.setState(state, 0, null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    @SuppressWarnings({"ResultOfObjectAllocationIgnored", "NewExceptionWithoutArguments"})
+    public void throw_exception_if_try_to_create_entity_with_id_of_unsupported_type() {
+        new EntityWithUnsupportedId(new Exception());
+    }
+
     @Test
     public void set_default_state() {
-
         entity.setDefault();
         final long expectedTimeSec = currentTimeSeconds();
 
@@ -105,16 +107,18 @@ public class EntityShould {
     }
 
     @Test
-    public void increment_version_by_one() {
-
+    public void have_zero_version_by_default() {
         assertEquals(0, entity.getVersion());
+    }
+
+    @Test
+    public void increment_version_by_one() {
         final int version = entity.incrementVersion();
         assertEquals(1, version);
     }
 
     @Test
     public void record_modification_time_when_incrementing_version() {
-
         entity.incrementVersion();
         final long expectedTimeSec = currentTimeSeconds();
 
@@ -123,7 +127,6 @@ public class EntityShould {
 
     @Test
     public void update_state() {
-
         final Project newState = Project.newBuilder().setStatus("new_state").build();
         entity.incrementState(newState);
         assertEquals(newState, entity.getState());
@@ -131,14 +134,12 @@ public class EntityShould {
 
     @Test
     public void increment_version_when_updating_state() {
-
         entity.incrementState(state);
         assertEquals(1, entity.getVersion());
     }
 
     @Test
     public void record_modification_time_when_updating_state() {
-
         entity.incrementState(state);
         final long expectedTimeSec = currentTimeSeconds();
 
@@ -165,4 +166,17 @@ public class EntityShould {
             isValidateMethodCalled = true;
         }
     }
+
+    public static class EntityWithUnsupportedId extends Entity<Exception, Project> {
+
+        public EntityWithUnsupportedId(Exception id) {
+            super(id);
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return Project.getDefaultInstance();
+        }
+    }
 }
+

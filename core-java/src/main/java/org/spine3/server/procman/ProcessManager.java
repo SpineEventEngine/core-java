@@ -93,6 +93,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     private MethodMap eventHandlers;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected ProcessManager(I id) {
         super(id);
     }
