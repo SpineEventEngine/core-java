@@ -34,6 +34,8 @@ import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
@@ -154,6 +156,11 @@ public class EngineShould {
     @Test
     public void register_ProcessManagerRepository() {
         engine.register(new ProjectPmRepo());
+    }
+
+    @Test
+    public void register_ProjectionRepository() {
+        engine.register(new ProjectReportRepository());
     }
 
     @Test
@@ -294,7 +301,8 @@ public class EngineShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") // Constructor must be public to be called from a repository. It's a part of PM public API.
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
+        // Constructor must be public to be called from a repository. It's a part of PM public API.
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
@@ -306,5 +314,22 @@ public class EngineShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+    }
+
+    private static class ProjectReport extends Projection<ProjectId, Empty> {
+
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
+        // Public constructor is a part of projection public API. It's called by a repository.
+        public ProjectReport(ProjectId id) {
+            super(id);
+        }
+
+        @Override
+        protected Empty getDefaultState() {
+            return Empty.getDefaultInstance();
+        }
+    }
+
+    private static class ProjectReportRepository extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
     }
 }

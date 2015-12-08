@@ -98,7 +98,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @see Projection#handle(Message, EventContext)
      */
     @SuppressWarnings("unused") // This method is used by reflection
-    protected void dispatch(Message event, EventContext context) {
+    public void dispatch(Message event, EventContext context) {
         final I id = getEntityId(event, context);
         final P p = load(id);
         p.handle(event, context);

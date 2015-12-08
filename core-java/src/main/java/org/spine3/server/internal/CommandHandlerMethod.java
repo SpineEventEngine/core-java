@@ -174,17 +174,21 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     }
 
     /**
-     * Creates a command handler map from the passed instance of {@link MultiHandler}.
+     * Creates a command handler map from the passed instance of {@link MultiHandler} (which is also
+     * a {@link CommandHandlingObject}).
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
+
+        final CommandHandlingObject commandHandler = (CommandHandlingObject)obj;
+
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
             // check if the method accepts a command context (and is not an event handler)
             if (acceptsCorrectParams(method)) {
                 final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-                builder.putAll(createMap(obj, method, classes));
+                builder.putAll(createMap(commandHandler, method, classes));
             }
         }
         return builder.build();
