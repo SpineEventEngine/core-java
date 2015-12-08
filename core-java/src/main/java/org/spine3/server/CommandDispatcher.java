@@ -45,8 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher {
 
-    //TODO:2015-11-10:alexander.yevsyukov: Extract Registry class
-    private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
+    private final Registry registry = new Registry();
 
     /**
      * @return singleton instance of {@code CommandDispatcher}
@@ -69,66 +68,11 @@ public class CommandDispatcher {
      * @throws IllegalArgumentException if the object is not of required class
      */
     void register(CommandHandlingObject object) {
-        checkNotNull(object);
-        checkClass(object);
-
-        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
-        registerMap(handlers);
+        registry.register(object);
     }
 
     void unregister(CommandHandlingObject object) {
-        checkNotNull(object);
-        checkClass(object);
-
-        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
-        unregisterMap(subscribers);
-    }
-
-    private static void checkClass(Object object) {
-        if (!(object instanceof CommandHandlingObject)) {
-            throw new IllegalArgumentException("A handler registered with CommandDispatcher " +
-                    "must be either AggregateRepository or ProcessManagerRepository. Passed: " + object.getClass().getName());
-        }
-    }
-
-    /**
-     * Registers the passed handlers with the dispatcher.
-     *
-     * @param handlers map from command classes to corresponding handlers
-     */
-    private void registerMap(Map<CommandClass, CommandHandlerMethod> handlers) {
-        checkDuplicates(handlers);
-        putAll(handlers);
-    }
-
-    private void unregisterMap(Map<CommandClass, CommandHandlerMethod> handlers) {
-        for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
-            final CommandClass commandClass = entry.getKey();
-            if (handlerRegistered(commandClass)) {
-                final CommandHandlerMethod registered = getHandler(commandClass);
-                final CommandHandlerMethod passed = entry.getValue();
-                if (registered.equals(passed)) {
-                    removeFor(commandClass);
-                }
-            }
-        }
-    }
-
-    private void removeFor(CommandClass commandClass) {
-        handlersByClass.remove(commandClass);
-    }
-
-    private void checkDuplicates(Map<CommandClass, CommandHandlerMethod> handlers) {
-        for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
-            final CommandClass commandClass = entry.getKey();
-
-            if (handlerRegistered(commandClass)) {
-                final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
-                throw new CommandHandlerAlreadyRegisteredException(commandClass,
-                        alreadyRegistered.getFullName(),
-                        entry.getValue().getFullName());
-            }
-        }
+        registry.unregister(object);
     }
 
     /**
@@ -157,20 +101,97 @@ public class CommandDispatcher {
         return result;
     }
 
-    private void putAll(Map<CommandClass, CommandHandlerMethod> subscribers) {
-        handlersByClass.putAll(subscribers);
-    }
-
-    @CheckReturnValue
-    public CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlersByClass.get(cls);
-    }
-
-    @CheckReturnValue
     private boolean handlerRegistered(CommandClass cls) {
-        return handlersByClass.containsKey(cls);
+        final boolean result = registry.handlerRegistered(cls);
+        return result;
     }
 
+    @CheckReturnValue
+    private CommandHandlerMethod getHandler(CommandClass cls) {
+        return registry.getHandler(cls);
+    }
+
+    private static class Registry {
+
+        private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
+
+        private static void checkClass(Object object) {
+            if (!(object instanceof CommandHandlingObject)) {
+                throw new IllegalArgumentException("A handler registered with CommandDispatcher " +
+                        "must be either AggregateRepository or ProcessManagerRepository. Passed: " + object.getClass().getName());
+            }
+        }
+
+        void register(CommandHandlingObject object) {
+            checkNotNull(object);
+            checkClass(object);
+
+            final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+            registerMap(handlers);
+        }
+
+        void unregister(CommandHandlingObject object) {
+            checkNotNull(object);
+            checkClass(object);
+
+            final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
+            unregisterMap(subscribers);
+        }
+
+        /**
+         * Registers the passed handlers with the dispatcher.
+         *
+         * @param handlers map from command classes to corresponding handlers
+         */
+        private void registerMap(Map<CommandClass, CommandHandlerMethod> handlers) {
+            checkDuplicates(handlers);
+            putAll(handlers);
+        }
+
+        private void unregisterMap(Map<CommandClass, CommandHandlerMethod> handlers) {
+            for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
+                final CommandClass commandClass = entry.getKey();
+                if (handlerRegistered(commandClass)) {
+                    final CommandHandlerMethod registered = getHandler(commandClass);
+                    final CommandHandlerMethod passed = entry.getValue();
+                    if (registered.equals(passed)) {
+                        removeFor(commandClass);
+                    }
+                }
+            }
+        }
+
+        private void removeFor(CommandClass commandClass) {
+            handlersByClass.remove(commandClass);
+        }
+
+        private void checkDuplicates(Map<CommandClass, CommandHandlerMethod> handlers) {
+            for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
+                final CommandClass commandClass = entry.getKey();
+
+                if (handlerRegistered(commandClass)) {
+                    final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
+                    throw new CommandHandlerAlreadyRegisteredException(commandClass,
+                            alreadyRegistered.getFullName(),
+                            entry.getValue().getFullName());
+                }
+            }
+        }
+
+        @CheckReturnValue
+        private boolean handlerRegistered(CommandClass cls) {
+            return handlersByClass.containsKey(cls);
+        }
+
+        @CheckReturnValue
+        private CommandHandlerMethod getHandler(CommandClass cls) {
+            return handlersByClass.get(cls);
+        }
+
+        private void putAll(Map<CommandClass, CommandHandlerMethod> subscribers) {
+            handlersByClass.putAll(subscribers);
+        }
+    }
 
     private enum Singleton {
         INSTANCE;
