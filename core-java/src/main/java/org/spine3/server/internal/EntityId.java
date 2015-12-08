@@ -20,6 +20,7 @@
 
 package org.spine3.server.internal;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
@@ -86,7 +87,7 @@ public abstract class EntityId<I> {
             return;
         }
         if (!Message.class.isAssignableFrom(idClass)){
-            throw new IllegalArgumentException("Unsupported entity ID type: " + idClass.getName());
+            throw unsupportedIdType(idClass);
         }
     }
 
@@ -120,5 +121,12 @@ public abstract class EntityId<I> {
 
     public I value() {
         return this.value;
+    }
+
+    private static IllegalArgumentException unsupportedIdType(Class<?> idClass) {
+        final String supportedTypesString = Joiner.on(", ").join(SUPPORTED_TYPES);
+        final String message = "Expected one of the following ID types: " + supportedTypesString +
+                "; found: " + idClass.getName();
+        throw new IllegalArgumentException(message);
     }
 }
