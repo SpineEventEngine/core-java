@@ -22,7 +22,7 @@ package org.spine3.server.procman;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.MessageFields;
-import org.spine3.server.internal.EntityId;
+import org.spine3.server.EntityId;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 
 import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
@@ -36,19 +36,9 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 public class ProcessManagerId<I> extends EntityId<I> {
 
     /**
-     * The standard name for properties holding an ID of a process manager.
-     */
-    public static final String PROPERTY_NAME = "processManagerId";
-
-    /**
-     * The standard name for a parameter containing a process manager ID.
-     */
-    public static final String PARAM_NAME = PROPERTY_NAME;
-
-    /**
      * The process manager ID must be the first field in events/commands.
      */
-    public static final int PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES = 0;
+    public static final int PROCESS_MANAGER_ID_FIELD_INDEX = 0;
 
     private ProcessManagerId(I value) {
         super(value);
@@ -73,12 +63,12 @@ public class ProcessManagerId<I> extends EntityId<I> {
      * @return value of the id
      */
     public static ProcessManagerId from(Message message) {
-        final String fieldName = MessageFields.getFieldName(message, PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES);
+        final String fieldName = MessageFields.getFieldName(message, PROCESS_MANAGER_ID_FIELD_INDEX);
         if (!fieldName.endsWith(ID_PROPERTY_SUFFIX)) {
             throw new MissingProcessManagerIdException(message.getClass().getName(), fieldName);
         }
         try {
-            final Message value = (Message) MessageFields.getFieldValue(message, PROCESS_MANAGER_ID_FIELD_INDEX_IN_MESSAGES);
+            final Message value = (Message) MessageFields.getFieldValue(message, PROCESS_MANAGER_ID_FIELD_INDEX);
             return new ProcessManagerId<>(value);
         } catch (RuntimeException e) {
             throw new MissingProcessManagerIdException(message, MessageFields.toAccessorMethodName(fieldName), e);

@@ -18,13 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.server.procman;
+
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.server.internal.CommandHandlerMethod;
+
+import java.lang.reflect.Method;
+
 /**
- * Classes and interfaces in this package are for internal use of the framework.
+ * A wrapper for {@link ProcessManagerRepository#dispatchCommand(Message, CommandContext)}.
+ *
+ * <p>This specific type of {@code CommandHandlerMethod} is needed for distinguishing the dispatching
+ * method of a repository for actual handling methods.
+ *
+ * @author Alexander Yevsyukov
  */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.internal;
-
-import org.spine3.Internal;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+class PmRepositoryDispatchMethod extends CommandHandlerMethod {
+    /**
+     * Creates a new instance to wrap {@code method} on {@code target}.
+     *
+     * @param target object to which the method applies
+     * @param method subscriber method
+     */
+    protected PmRepositoryDispatchMethod(Object target, Method method) {
+        super(target, method);
+    }
+}

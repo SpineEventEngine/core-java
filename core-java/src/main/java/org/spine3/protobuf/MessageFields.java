@@ -46,11 +46,15 @@ public class MessageFields {
      * The prefix of generated getter methods for fields.
      */
     private static final String GETTER_METHOD_PREFIX = "get";
+
     /**
      * By convention underscore is used for separating words in field names of Protobuf messages.
      */
     private static final char PROPERTY_NAME_SEPARATOR = '_';
 
+    /**
+     * A map from fields defined as couples of {@code [Java class, field index]} to corresponding getter methods.
+     */
     private static final Map<AccessorMethodKey, Method> methodsMap = Maps.newHashMap();
 
     private MessageFields() {

@@ -113,6 +113,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     /**
      * {@inheritDoc}
      */
+    @Override
     public E create(I id) {
         try {
             final E result = entityConstructor.newInstance(id);

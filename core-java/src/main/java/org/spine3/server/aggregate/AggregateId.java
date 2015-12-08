@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.MessageFields;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
-import org.spine3.server.internal.EntityId;
 
 import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
 

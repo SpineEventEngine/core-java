@@ -20,14 +20,18 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
+import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.CommandHandlingObject;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +51,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements MultiHandler {
+        extends EntityRepository<I, PM, M> implements MultiHandler, CommandHandlingObject {
 
     /**
      * The name of the method used for dispatching commands to process managers.
@@ -152,6 +156,18 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, eventClasses)
                 .build();
+    }
+
+    @Internal
+    @Override
+    public CommandHandlerMethod createMethod(Method method) {
+        return new PmRepositoryDispatchMethod(this, method);
+    }
+
+    @Internal
+    @Override
+    public Predicate<Method> getHandlerMethodPredicate() {
+        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**
