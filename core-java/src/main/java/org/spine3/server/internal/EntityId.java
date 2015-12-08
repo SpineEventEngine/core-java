@@ -20,8 +20,10 @@
 
 package org.spine3.server.internal;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
@@ -124,9 +126,20 @@ public abstract class EntityId<I> {
     }
 
     private static IllegalArgumentException unsupportedIdType(Class<?> idClass) {
-        final String supportedTypesString = Joiner.on(", ").join(SUPPORTED_TYPES);
-        final String message = "Expected one of the following ID types: " + supportedTypesString +
+        final String message = "Expected one of the following ID types: " + supportedTypesToString() +
                 "; found: " + idClass.getName();
         throw new IllegalArgumentException(message);
+    }
+
+    private static String supportedTypesToString() {
+        final Iterable<String> classStrings = Iterables.transform(SUPPORTED_TYPES, new Function<Class<?>, String>() {
+            @Override
+            @SuppressWarnings("NullableProblems") // OK in this case
+            public String apply(Class<?> clazz) {
+                return clazz.getSimpleName();
+            }
+        });
+        final String result = Joiner.on(", ").join(classStrings);
+        return result;
     }
 }
