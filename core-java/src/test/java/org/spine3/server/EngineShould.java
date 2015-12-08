@@ -21,6 +21,7 @@
 package org.spine3.server;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +32,8 @@ import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
@@ -84,6 +87,39 @@ public class EngineShould {
         engine.stop();
     }
 
+    /**
+     * Registers all test repositories, handlers etc.
+     */
+    private void registerAll() {
+        engine.register(new ProjectAggregateRepository());
+        engine.getEventBus().register(handler);
+        handlersRegistered = true;
+    }
+
+    private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
+
+        final List<CommandResult> results = newLinkedList();
+        for (CommandRequest request : requests) {
+            final CommandResult result = engine.process(request);
+            results.add(result);
+        }
+        return results;
+    }
+
+    private List<CommandRequest> generateRequests() {
+
+        final Duration delta = seconds(10);
+        final Timestamp time1 = getCurrentTime();
+        final Timestamp time2 = add(time1, delta);
+        final Timestamp time3 = add(time2, delta);
+
+        final CommandRequest createProject = createProject(userId, projectId, time1);
+        final CommandRequest addTask = addTask(userId, projectId, time2);
+        final CommandRequest startProject = startProject(userId, projectId, time3);
+
+        return newArrayList(createProject, addTask, startProject);
+    }
+
     @Test
     public void return_instance_if_started() {
         assertNotNull(engine);
@@ -111,8 +147,13 @@ public class EngineShould {
     }
 
     @Test
-    public void register_test_repositories_and_handlers() {
-        registerAll();
+    public void register_AggregateRepository() {
+        engine.register(new ProjectAggregateRepository());
+    }
+
+    @Test
+    public void register_ProcessManagerRepository() {
+        engine.register(new ProjectPmRepo());
     }
 
     @Test
@@ -157,39 +198,6 @@ public class EngineShould {
         assertEquals(projectId, actualProjectId);
         assertEquals(userId, actualCommandId.getActor());
         assertEquals(expectedTime, actualCommandId.getTimestamp());
-    }
-
-    /**
-     * Registers all test repositories, handlers etc.
-     */
-    private void registerAll() {
-        engine.register(new ProjectAggregateRepository());
-        engine.getEventBus().register(handler);
-        handlersRegistered = true;
-    }
-
-    private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
-
-        final List<CommandResult> results = newLinkedList();
-        for (CommandRequest request : requests) {
-            final CommandResult result = engine.process(request);
-            results.add(result);
-        }
-        return results;
-    }
-
-    private List<CommandRequest> generateRequests() {
-
-        final Duration delta = seconds(10);
-        final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, delta);
-        final Timestamp time3 = add(time2, delta);
-
-        final CommandRequest createProject = createProject(userId, projectId, time1);
-        final CommandRequest addTask = addTask(userId, projectId, time2);
-        final CommandRequest startProject = startProject(userId, projectId, time3);
-
-        return newArrayList(createProject, addTask, startProject);
     }
 
     @Test(expected = NullPointerException.class)
@@ -282,5 +290,21 @@ public class EngineShould {
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
         }
+    }
+
+    private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
+
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // Constructor must be public to be called from a repository. It's a part of PM public API.
+        public ProjectProcessManager(ProjectId id) {
+            super(id);
+        }
+
+        @Override
+        protected Empty getDefaultState() {
+            return Empty.getDefaultInstance();
+        }
+    }
+
+    private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
     }
 }
