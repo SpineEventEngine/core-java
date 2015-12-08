@@ -35,6 +35,11 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
  */
 public class ProcessManagerId<I> extends EntityId<I> {
 
+    /**
+     * The process manager ID must be the first field in events/commands.
+     */
+    public static final int PROCESS_MANAGER_ID_FIELD_INDEX = 0;
+
     private ProcessManagerId(I value) {
         super(value);
     }

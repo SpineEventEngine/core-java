@@ -18,23 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.procman;
 
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import java.lang.reflect.Method;
 
 /**
- * Unlike regular handlers objects that have one method per message class, {@code MultiHandler}
- * exposes methods that handle multiple message classes.
+ * A wrapper for {@link ProcessManagerRepository#dispatchCommand(Message, CommandContext)}.
+ *
+ * <p>This specific type of {@code CommandHandlerMethod} is needed for distinguishing the dispatching
+ * method of a repository for actual handling methods.
  *
  * @author Alexander Yevsyukov
  */
-public interface MultiHandler {
-
+class PmRepositoryDispatchMethod extends CommandHandlerMethod {
     /**
-     * Returns a map from methods to message classes they handle.
+     * Creates a new instance to wrap {@code method} on {@code target}.
+     *
+     * @param target object to which the method applies
+     * @param method subscriber method
      */
-    Multimap<Method, Class<? extends Message>> getHandlers();
+    protected PmRepositoryDispatchMethod(Object target, Method method) {
+        super(target, method);
+    }
 }

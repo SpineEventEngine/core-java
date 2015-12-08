@@ -43,7 +43,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -58,9 +57,19 @@ import static java.util.Collections.singletonList;
 @Internal
 public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
+    /**
+     * A command must be the first parameter of a handling method.
+     */
     private static final int MESSAGE_PARAM_INDEX = 0;
+
+    /**
+     * A {@code CommandContext} must be the second parameter of the handling method.
+     */
     private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
+    /**
+     * A command handling method accepts two parameters.
+     */
     private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
 
     /**
@@ -133,19 +142,12 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      * @param object the object that keeps command handler methods
      * @return immutable map
      */
+    @Internal
     @CheckReturnValue
-    public static Map<CommandClass, CommandHandlerMethod> scan(Object object) {
-        if (!(object instanceof CommandHandlingObject)) {
-            // If the passed object is not of one of the types that can hold command handler methods,
-            // return an empty map.
-            // We do not throw exception because this method is used for checking of presence of command handling methods.
-            return Collections.emptyMap();
-        }
-
+    public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandlingObject object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final CommandHandlingObject commandHandler = (CommandHandlingObject) object;
-        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(commandHandler);
+        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(object);
         result.putAll(regularHandlers);
 
         if (object instanceof MultiHandler) {
@@ -172,17 +174,21 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     }
 
     /**
-     * Creates a command handler map from the passed instance of {@link MultiHandler}.
+     * Creates a command handler map from the passed instance of {@link MultiHandler} (which is also
+     * a {@link CommandHandlingObject}).
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
+
+        final CommandHandlingObject commandHandler = (CommandHandlingObject)obj;
+
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
             // check if the method accepts a command context (and is not an event handler)
             if (acceptsCorrectParams(method)) {
                 final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-                builder.putAll(createMap(obj, method, classes));
+                builder.putAll(createMap(commandHandler, method, classes));
             }
         }
         return builder.build();

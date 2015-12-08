@@ -46,7 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 import static org.spine3.internal.EventHandlerMethod.checkModifiers;
-import static org.spine3.server.procman.ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
+import static org.spine3.server.procman.PmCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -93,6 +93,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     private MethodMap eventHandlers;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected ProcessManager(I id) {
         super(id);
     }
@@ -132,7 +139,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new ProcessManagerCommandHandler(this, method);
+        final CommandHandlerMethod commandHandler = new PmCommandHandler(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
         return eventRecords;
@@ -251,13 +258,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
-        return new ProcessManagerCommandHandler(this, method);
+        return new PmCommandHandler(this, method);
     }
 
     @Internal
     @Override
     public Predicate<Method> getHandlerMethodPredicate() {
-        return ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
+        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**
