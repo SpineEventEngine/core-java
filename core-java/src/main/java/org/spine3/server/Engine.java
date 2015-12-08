@@ -115,7 +115,7 @@ public final class Engine {
         repositories.add(repository);
 
         if (repository instanceof CommandHandlingObject) {
-            getCommandDispatcher().register(repository);
+            getCommandDispatcher().register((CommandHandlingObject) repository);
         }
 
         getEventBus().register(repository);
@@ -138,7 +138,7 @@ public final class Engine {
 
     private void unregister(Repository<?, ?> repository) {
         if (repository instanceof CommandHandlingObject) {
-            getCommandDispatcher().unregister(repository);
+            getCommandDispatcher().unregister((CommandHandlingObject)repository);
         }
 
         getEventBus().unregister(repository);

@@ -68,19 +68,19 @@ public class CommandDispatcher {
      * @param object a {@code non-null} object of the required type
      * @throws IllegalArgumentException if the object is not of required class
      */
-    public void register(Object object) {
+    void register(CommandHandlingObject object) {
         checkNotNull(object);
         checkClass(object);
 
-        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan((CommandHandlingObject)object);
+        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
         registerMap(handlers);
     }
 
-    public void unregister(Object object) {
+    void unregister(CommandHandlingObject object) {
         checkNotNull(object);
         checkClass(object);
 
-        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan((CommandHandlingObject)object);
+        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
         unregisterMap(subscribers);
     }
 
