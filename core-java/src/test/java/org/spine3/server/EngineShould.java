@@ -33,7 +33,6 @@ import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
@@ -41,7 +40,6 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.util.Users;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -268,18 +266,6 @@ public class EngineShould {
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
-    }
-
-    public static class TestEntity extends Entity<String, Project> {
-        public TestEntity(String id) {
-            super(id);
-        }
-
-        @Nonnull
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
