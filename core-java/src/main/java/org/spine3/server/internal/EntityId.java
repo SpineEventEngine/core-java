@@ -23,13 +23,13 @@ package org.spine3.server.internal;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * A base for {@link Entity} ID value object.
@@ -132,7 +132,7 @@ public abstract class EntityId<I> {
     }
 
     private static String supportedTypesToString() {
-        final Iterable<String> classStrings = Iterables.transform(SUPPORTED_TYPES, new Function<Class<?>, String>() {
+        final Iterable<String> classStrings = transform(SUPPORTED_TYPES, new Function<Class<?>, String>() {
             @Override
             @SuppressWarnings("NullableProblems") // OK in this case
             public String apply(Class<?> clazz) {
