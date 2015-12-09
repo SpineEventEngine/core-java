@@ -50,7 +50,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class Engine {
+public final class BoundedContext {
 
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
@@ -60,7 +60,7 @@ public final class Engine {
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
-    private Engine(Builder builder) {
+    private BoundedContext(Builder builder) {
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
@@ -73,7 +73,7 @@ public final class Engine {
     }
 
     /**
-     * Stops the engine performing all necessary clean-ups.
+     * Stops the BoundedContext performing all necessary clean-ups.
      * <p>
      * This method shuts down all registered repositories. Each registered repository is:
      * <ul>
@@ -84,7 +84,7 @@ public final class Engine {
      */
     public void stop() {
         shutDownRepositories();
-        log().info("Engine stopped.");
+        log().info("Stopped.");
     }
 
     private void shutDownRepositories() {
@@ -95,15 +95,15 @@ public final class Engine {
     }
 
     /**
-     * Registers the passed repository with the Engine.
-     * <p>
-     * The Engine creates and assigns a storage depending on the type of the passed repository.
-     * <p>
-     * For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
-     * created and assigned.
-     * <p>
-     * For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
+     * Registers the passed repository with the BoundedContext.
+     *
+     * <p>The context creates and assigns a storage depending on the type of the passed repository.
+     *
+     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
+     *
+     * <p>For other types of repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * created and assigned.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
@@ -295,7 +295,7 @@ public final class Engine {
             return eventStore;
         }
 
-        public Engine build() {
+        public BoundedContext build() {
             checkNotNull(storageFactory, "storageFactory");
             checkNotNull(commandDispatcher, "commandDispatcher");
             checkNotNull(eventBus, "eventBus");
@@ -308,7 +308,7 @@ public final class Engine {
                 eventStore = new EventStore(storageFactory.createEventStorage());
             }
 
-            final Engine result = new Engine(this);
+            final BoundedContext result = new BoundedContext(this);
             return result;
         }
     }
@@ -316,7 +316,7 @@ public final class Engine {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Engine.class);
+        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
     }
 
     private static Logger log() {

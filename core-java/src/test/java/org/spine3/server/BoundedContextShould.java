@@ -61,7 +61,7 @@ import static org.spine3.testdata.TestCommandFactory.*;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
-public class EngineShould {
+public class BoundedContextShould {
 
     private final UserId userId = Users.newUserId("test_user");
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
@@ -69,12 +69,12 @@ public class EngineShould {
 
     private boolean handlersRegistered = false;
 
-    private Engine engine;
+    private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();
-        engine = Engine.newBuilder()
+        boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(sf)
                 .setCommandDispatcher(CommandDispatcher.getInstance())
                 .setEventBus(EventBus.newInstance())
@@ -84,17 +84,17 @@ public class EngineShould {
     @After
     public void tearDown() {
         if (handlersRegistered) {
-            engine.getEventBus().unregister(handler);
+            boundedContext.getEventBus().unregister(handler);
         }
-        engine.stop();
+        boundedContext.stop();
     }
 
     /**
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-        engine.register(new ProjectAggregateRepository());
-        engine.getEventBus().register(handler);
+        boundedContext.register(new ProjectAggregateRepository());
+        boundedContext.getEventBus().register(handler);
         handlersRegistered = true;
     }
 
@@ -102,7 +102,7 @@ public class EngineShould {
 
         final List<CommandResult> results = newLinkedList();
         for (CommandRequest request : requests) {
-            final CommandResult result = engine.process(request);
+            final CommandResult result = boundedContext.process(request);
             results.add(result);
         }
         return results;
@@ -124,43 +124,43 @@ public class EngineShould {
 
     @Test
     public void return_instance_if_started() {
-        assertNotNull(engine);
+        assertNotNull(boundedContext);
     }
 
     @Test
     public void return_EventBus() {
-        assertNotNull(engine.getEventBus());
+        assertNotNull(boundedContext.getEventBus());
     }
 
     @Test
     public void return_CommandDispatcher() {
-        assertNotNull(engine.getCommandDispatcher());
+        assertNotNull(boundedContext.getCommandDispatcher());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_call_process_with_null_parameter() {
         // noinspection ConstantConditions
-        engine.process(null);
+        boundedContext.process(null);
     }
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-        engine.process(createProject());
+        boundedContext.process(createProject());
     }
 
     @Test
     public void register_AggregateRepository() {
-        engine.register(new ProjectAggregateRepository());
+        boundedContext.register(new ProjectAggregateRepository());
     }
 
     @Test
     public void register_ProcessManagerRepository() {
-        engine.register(new ProjectPmRepo());
+        boundedContext.register(new ProjectPmRepo());
     }
 
     @Test
     public void register_ProjectionRepository() {
-        engine.register(new ProjectReportRepository());
+        boundedContext.register(new ProjectReportRepository());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class EngineShould {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = engine.process(request);
+        final CommandResult result = boundedContext.process(request);
 
         assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
     }
@@ -210,74 +210,74 @@ public class EngineShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_StorageFactory() {
         //noinspection ConstantConditions
-        Engine.newBuilder().setStorageFactory(null);
+        BoundedContext.newBuilder().setStorageFactory(null);
     }
 
     @Test
     public void return_StorageFactory_from_builder() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();
-        final Engine.Builder builder = Engine.newBuilder().setStorageFactory(sf);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setStorageFactory(sf);
         assertEquals(sf, builder.getStorageFactory());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
         //noinspection ConstantConditions
-        Engine.newBuilder().setCommandDispatcher(null);
+        BoundedContext.newBuilder().setCommandDispatcher(null);
     }
 
     @Test
     public void return_CommandDispatcher_from_builder() {
         final CommandDispatcher cd = CommandDispatcher.getInstance();
-        final Engine.Builder builder = Engine.newBuilder().setCommandDispatcher(cd);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(cd);
         assertEquals(cd, builder.getCommandDispatcher());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
         //noinspection ConstantConditions
-        Engine.newBuilder().setEventBus(null);
+        BoundedContext.newBuilder().setEventBus(null);
     }
 
     @Test
     public void return_EventBus_from_builder() {
         final EventBus bus = EventBus.newInstance();
-        final Engine.Builder builder = Engine.newBuilder().setEventBus(bus);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(bus);
         assertEquals(bus, builder.getEventBus());
     }
 
     @Test
     public void return_CommandStore_from_builder() {
         final CommandStore cs = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
-        final Engine.Builder builder = Engine.newBuilder().setCommandStore(cs);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandStore(cs);
         assertEquals(cs, builder.getCommandStore());
     }
 
     @Test
     public void create_CommandStore_if_not_set_in_builder() {
-        final Engine.Builder builder = Engine.newBuilder()
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
                 .setCommandDispatcher(CommandDispatcher.getInstance())
                 .setEventBus(EventBus.newInstance());
-        final Engine engine = builder.build();
-        assertNotNull(engine.getCommandStore());
+        final BoundedContext boundedContext = builder.build();
+        assertNotNull(boundedContext.getCommandStore());
     }
 
     @Test
     public void return_EventStore_from_builder() {
         final EventStore es = new EventStore(InMemoryStorageFactory.getInstance().createEventStorage());
-        final Engine.Builder builder = Engine.newBuilder().setEventStore(es);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventStore(es);
         assertEquals(es, builder.getEventStore());
     }
 
     @Test
     public void create_EventStore_if_not_set_in_builder() {
-        final Engine.Builder builder = Engine.newBuilder()
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
                 .setCommandDispatcher(CommandDispatcher.getInstance())
                 .setEventBus(EventBus.newInstance());
-        final Engine engine = builder.build();
-        assertNotNull(engine.getEventStore());
+        final BoundedContext boundedContext = builder.build();
+        assertNotNull(boundedContext.getEventStore());
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
