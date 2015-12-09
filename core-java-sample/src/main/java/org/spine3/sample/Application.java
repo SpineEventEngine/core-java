@@ -119,7 +119,7 @@ public class Application {
     }
 
     /**
-     * Tear down storages, unregister event handlers and stop the bounded context.
+     * Tear down storages, unregister event handlers and close the bounded context.
      */
     public void tearDown() {
 

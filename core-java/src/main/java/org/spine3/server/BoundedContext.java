@@ -88,7 +88,7 @@ public final class BoundedContext implements AutoCloseable {
     @Override
     public void close() {
         shutDownRepositories();
-        log().info(nameForLogging() + " stopped.");
+        log().info(nameForLogging() + " closed.");
     }
 
     private String nameForLogging() {
