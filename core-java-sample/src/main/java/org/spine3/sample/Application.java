@@ -100,14 +100,14 @@ public class Application {
     }
 
     /**
-     * Sets up the storage, starts the engine, registers repositories, handlers etc.
+     * Sets up the storage, initializes the bounded contexts, registers repositories, handlers etc.
      */
     public void setUp() {
 
         // Set up the storage
         storageFactory.setUp();
 
-        // Register repository with the engine. This will register it in the CommandDispatcher too.
+        // Register repository with the bounded context. This will register it in the CommandDispatcher too.
         boundedContext.register(new OrderRepository());
 
         // Register event handlers.
@@ -119,7 +119,7 @@ public class Application {
     }
 
     /**
-     * Tear down storages, unregister event handlers and stop the engine.
+     * Tear down storages, unregister event handlers and stop the bounded context.
      */
     public void tearDown() {
 
@@ -128,8 +128,8 @@ public class Application {
         // Unregister event handlers
         boundedContext.getEventBus().unregister(eventLogger);
 
-        // Stop the engine
-        boundedContext.stop();
+        // Close the bounded context.
+        boundedContext.close();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.

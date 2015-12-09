@@ -43,7 +43,7 @@ public interface Repository<I, E extends Entity<I, ?>> {
      * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
      *
      * <p>{@link BoundedContext} will call this method with {@code null} argument to request performing all necessary
-     * clean-up operations before the the engine stops.
+     * clean-up operations before the context is closed.
      *
      * <p>Another storage can be assigned after this method is called with {@code null} parameter.
      *
