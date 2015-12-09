@@ -31,6 +31,7 @@ import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStoreRecordOrBuilder;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -47,7 +48,7 @@ import static org.spine3.util.Identifiers.*;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
+@SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
 public class Events {
 
     private Events() {
@@ -93,10 +94,18 @@ public class Events {
      * @param eventId ID of the event
      * @return timestamp of event ID generation
      */
-    public static Timestamp getTimestamp(EventIdOrBuilder eventId) {
+    public static Timestamp getTimestamp(EventId eventId) {
         final Timestamp commandTimestamp = eventId.getCommandId().getTimestamp();
         final Duration delta = TimeUtil.createDurationFromNanos(eventId.getDeltaNanos());
         final Timestamp result = TimeUtil.add(commandTimestamp, delta);
+        return result;
+    }
+
+    /**
+     * Calculates the timestamp of the event from the passed record.
+     */
+    public static Timestamp getTimestamp(EventRecord record) {
+        final Timestamp result = getTimestamp(record.getContext().getEventId());
         return result;
     }
 
@@ -157,8 +166,12 @@ public class Events {
     /**
      * Converts EventStoreRecord to EventRecord.
      */
-    public static EventRecord toEventRecord(EventStoreRecord storeRecord) {
-        return TO_EVENT_RECORD.apply(storeRecord);
+    public static EventRecord toEventRecord(EventStoreRecordOrBuilder record) {
+        final EventRecord.Builder builder = EventRecord.newBuilder()
+                .setEvent(record.getEvent())
+                .setContext(record.getContext());
+
+        return builder.build();
     }
 
     /**
@@ -193,10 +206,8 @@ public class Events {
             if (input == null) {
                 return EventRecord.getDefaultInstance();
             }
-            final EventRecord.Builder builder = EventRecord.newBuilder()
-                    .setEvent(input.getEvent())
-                    .setContext(input.getContext());
-            return builder.build();
+            final EventRecord result = toEventRecord(input);
+            return result;
         }
     };
 

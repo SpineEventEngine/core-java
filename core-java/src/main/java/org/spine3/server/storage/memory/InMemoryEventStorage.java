@@ -20,62 +20,102 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Function;
-import org.spine3.base.EventId;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterators;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.PriorityQueue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.util.Events.idToString;
 
 /**
  * In-memory implementation of {@link EventStorage}.
  *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 class InMemoryEventStorage extends EventStorage {
 
-    private final Map<String, EventStoreRecord> storage = newHashMap();
+    @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
+    private final PriorityQueue<EventRecord> storage = new PriorityQueue<>(100, new EventRecordComparator());
+
+    /**
+     * Compares event records by timestamp of events.
+     */
+    private static class EventRecordComparator implements Comparator<EventRecord>, Serializable {
+        @Override
+        public int compare(EventRecord o1, EventRecord o2) {
+            final Timestamp timestamp = Events.getTimestamp(o1);
+            final Timestamp anotherTimestamp = Events.getTimestamp(o2);
+            final int result = Timestamps.compare(timestamp, anotherTimestamp);
+            return result;
+        }
+
+        private static final long serialVersionUID = 0L;
+    }
+
+    /**
+     * The predicate to filter event records after some point in time.
+     */
+    private static class IsAfter implements Predicate<EventRecord> {
+
+        private final Timestamp timestamp;
+
+        private IsAfter(Timestamp timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public boolean apply(@Nullable EventRecord record) {
+            if (record == null) {
+                return false;
+            }
+
+            final Timestamp ts = Events.getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
+            return result;
+        }
+    };
 
     @Override
     public Iterator<EventRecord> allEvents() {
-
-        final Collection<EventRecord> result = transform(storage.values(), TO_EVENT_RECORD);
-        Events.sort(newArrayList(result));
-        final Iterator<EventRecord> iterator = result.iterator();
-        return iterator;
+        final Iterator<EventRecord> result = Iterators.unmodifiableIterator(storage.iterator());
+        return result;
     }
 
-    @Nullable
-    // 2015.09.24:alexander.litus: this method may be needed later in API
-    // @Override
-    protected EventStoreRecord read(EventId eventId) {
+    @Override
+    public Iterator<EventRecord> since(Timestamp timestamp) {
+        final Predicate<EventRecord> isAfter = new IsAfter(timestamp);
 
-        final String id = idToString(eventId);
-        final EventStoreRecord record = storage.get(id);
-        return record;
+        final Iterator<EventRecord> result = FluentIterable.from(storage)
+                .filter(isAfter)
+                .iterator();
+
+        return result;
     }
 
     @Override
     protected void write(EventStoreRecord record) {
         checkNotNull(record);
         checkNotNull(record.getEventId());
-        storage.put(record.getEventId(), record);
+
+        final EventRecord eventRec = Events.toEventRecord(record);
+        storage.add(eventRec);
     }
 
     @Override
-    protected void releaseResources() {
-        // NOP
+    public void close() {
+        clear();
     }
 
     /**
@@ -85,16 +125,4 @@ class InMemoryEventStorage extends EventStorage {
         storage.clear();
     }
 
-    private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
-        @SuppressWarnings("NullableProblems") // record cannot be null because it is checked when saving to storage
-        @Override
-        public EventRecord apply(EventStoreRecord record) {
-
-            final EventRecord.Builder builder = EventRecord.newBuilder()
-                    .setEvent(record.getEvent())
-                    .setContext(record.getContext());
-
-            return builder.build();
-        }
-    };
 }

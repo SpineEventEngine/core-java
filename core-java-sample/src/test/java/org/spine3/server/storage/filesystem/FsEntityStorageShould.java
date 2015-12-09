@@ -42,7 +42,7 @@ public class FsEntityStorageShould extends EntityStorageShould {
     }
 
     @After
-    public void tearDownTest() {
-        FACTORY.tearDown();
+    public void tearDownTest() throws Exception {
+        FACTORY.close();
     }
 }

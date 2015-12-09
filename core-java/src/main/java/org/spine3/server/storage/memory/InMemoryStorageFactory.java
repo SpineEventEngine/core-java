@@ -59,12 +59,12 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public void setUp() {
+    public void init() {
         // NOP
     }
 
     @Override
-    public void tearDown() {
+    public void close() {
         // NOP
     }
 

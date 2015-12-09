@@ -30,7 +30,7 @@ import org.spine3.server.aggregate.Aggregate;
  *
  * @author Alexander Yevsyukov
  */
-public interface StorageFactory {
+public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link CommandStorage} instance.
@@ -55,12 +55,8 @@ public interface StorageFactory {
     <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass);
 
     /**
-     * Sets up storages if needed.
+     * Sets up the factory, if needed, after its construction.
      */
-    void setUp();
+    void init();
 
-    /**
-     * Perform operations required after storages usage (e.g. release resources, clear file system etc) if needed.
-     */
-    void tearDown();
 }

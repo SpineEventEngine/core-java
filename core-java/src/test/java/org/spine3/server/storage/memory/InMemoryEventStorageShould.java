@@ -21,12 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
-import org.junit.Test;
-import org.spine3.base.EventId;
 import org.spine3.server.storage.EventStorageShould;
-import org.spine3.server.storage.EventStoreRecord;
-
-import static org.junit.Assert.assertNull;
 
 /**
  * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -47,18 +42,5 @@ public class InMemoryEventStorageShould extends EventStorageShould {
         STORAGE.clear();
     }
 
-    @Test
-    public void return_null_if_read_one_record_from_empty_storage() {
 
-        final EventStoreRecord record = STORAGE.read(EventId.getDefaultInstance());
-        assertNull(record);
-    }
-
-    @Test
-    @SuppressWarnings("ConstantConditions")
-    public void return_null_if_read_one_record_by_null_id() {
-
-        final EventStoreRecord record = STORAGE.read(null);
-        assertNull(record);
-    }
 }

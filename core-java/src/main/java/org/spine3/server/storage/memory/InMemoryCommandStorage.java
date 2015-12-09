@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,5 +45,10 @@ class InMemoryCommandStorage extends CommandStorage {
         }
 
         storage.put(id, record);
+    }
+
+    @Override
+    public void close() throws IOException {
+        // NOP
     }
 }

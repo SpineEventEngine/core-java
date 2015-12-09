@@ -59,4 +59,9 @@ class FsCommandStorage extends CommandStorage {
         checkNotNull(record);
         writeMessage(commandStoreFile, record);
     }
+
+    @Override
+    public void close() throws IOException {
+        //NOP
+    }
 }

@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
@@ -69,6 +70,12 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
+    public Iterator<EventRecord> since(Timestamp timestamp) {
+        //TODO:2015-12-09:alexander.yevsyukov: Implement
+        return null;
+    }
+
+    @Override
     protected void write(EventStoreRecord record) {
 
         checkNotNull(record);
@@ -76,14 +83,14 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
-    protected void releaseResources() {
+    public void close() {
         for (EventRecordFileIterator i : iterators) {
-            i.releaseResources();
+            i.close();
         }
     }
 
 
-    private static class EventRecordFileIterator implements Iterator<EventRecord> {
+    private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {
 
         private final File file;
         private FileInputStream fileInputStream;
@@ -121,7 +128,7 @@ class FsEventStorage extends EventStorage {
             final EventRecord result = toEventRecord(storeRecord);
 
             if (!hasNext()) {
-                releaseResources();
+                close();
             }
 
             checkNotNull(result, "event record from the file");
@@ -149,7 +156,8 @@ class FsEventStorage extends EventStorage {
             return bufferedInputStream;
         }
 
-        private void releaseResources() {
+        @Override
+        public void close() {
             if (!areResourcesReleased) {
                 closeSilently(fileInputStream, bufferedInputStream);
                 areResourcesReleased = true;

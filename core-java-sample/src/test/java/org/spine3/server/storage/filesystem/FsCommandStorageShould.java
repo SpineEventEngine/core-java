@@ -45,8 +45,8 @@ public class FsCommandStorageShould {
 
 
     @After
-    public void tearDownTest() {
-        FACTORY.tearDown();
+    public void tearDownTest() throws Exception {
+        FACTORY.close();
     }
 
     @Test(expected = NullPointerException.class)

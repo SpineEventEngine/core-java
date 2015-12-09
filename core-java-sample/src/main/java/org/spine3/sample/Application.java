@@ -47,7 +47,7 @@ import static org.spine3.util.Users.newUserId;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class Application {
+public class Application implements AutoCloseable {
 
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
@@ -73,30 +73,30 @@ public class Application {
     public static void main(String[] args) {
 
         final StorageFactory factory = getStorageFactory();
-        final Application app = new Application(factory);
 
-        app.execute();
+        try (final Application app = new Application(factory) ){
+            app.execute();
+        } catch (Exception e) {
+            log().error("", e);
+        }
+
     }
 
     /**
      * Executes the sample: generates some command requests and then the {@link BoundedContext} processes them.
      */
     public void execute() {
-        try {
-            setUp();
+        setUp();
 
-            // Generate test requests
-            final List<CommandRequest> requests = generateRequests();
+        // Generate test requests
+        final List<CommandRequest> requests = generateRequests();
 
-            // Process requests
-            for (CommandRequest request : requests) {
-                boundedContext.process(request);
-            }
-
-            log().info("All the requests were handled.");
-        } finally {
-            tearDown();
+        // Process requests
+        for (CommandRequest request : requests) {
+            boundedContext.process(request);
         }
+
+        log().info("All the requests were handled.");
     }
 
     /**
@@ -105,7 +105,7 @@ public class Application {
     public void setUp() {
 
         // Set up the storage
-        storageFactory.setUp();
+        storageFactory.init();
 
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
         boundedContext.register(new OrderRepository());
@@ -121,9 +121,10 @@ public class Application {
     /**
      * Tear down storages, unregister event handlers and close the bounded context.
      */
-    public void tearDown() {
-
-        storageFactory.tearDown();
+    @Override
+    public void close() throws Exception {
+        //TODO:2015-12-09:alexander.yevsyukov: BoundedContext should close storage factory and close EventBus on its own.
+        storageFactory.close();
 
         // Unregister event handlers
         boundedContext.getEventBus().unregister(eventLogger);
@@ -131,9 +132,6 @@ public class Application {
         // Close the bounded context.
         boundedContext.close();
     }
-
-    //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
-    // See Amazon screens for correct naming of domain things.
 
     /**
      * Creates several dozens of requests.

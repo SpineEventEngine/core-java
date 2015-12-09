@@ -28,6 +28,8 @@ import org.spine3.base.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.util.Commands;
 
+import java.io.Closeable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -35,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandStorage {
+public abstract class CommandStorage implements Closeable {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {

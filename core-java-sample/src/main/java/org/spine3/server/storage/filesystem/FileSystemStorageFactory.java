@@ -101,15 +101,15 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     @Override
-    public void setUp() {
+    public void init() {
         // NOP
     }
 
     @Override
-    public void tearDown() {
+    public void close() {
 
         for (FsEventStorage storage : eventStorages) {
-            storage.releaseResources();
+            storage.close();
         }
 
         deleteIfExists(Paths.get(rootDirectoryPath));

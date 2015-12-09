@@ -37,12 +37,9 @@ public class ApplicationShould {
     }
 
     @Test
-    public void execute_on_file_system_storage() {
-        try {
-            final Application app = new Application(FS_STORAGE_FACTORY);
+    public void execute_on_file_system_storage() throws Exception {
+        try (final Application app = new Application(FS_STORAGE_FACTORY))  {
             app.execute();
-        } finally {
-            FS_STORAGE_FACTORY.tearDown();
         }
     }
 }
