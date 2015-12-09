@@ -50,7 +50,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext {
+public final class BoundedContext implements AutoCloseable {
 
     private final String name;
 
@@ -76,7 +76,7 @@ public final class BoundedContext {
     }
 
     /**
-     * Stops the BoundedContext performing all necessary clean-ups.
+     * Closes the BoundedContext performing all necessary clean-ups.
      * <p>
      * This method shuts down all registered repositories. Each registered repository is:
      * <ul>
@@ -85,9 +85,10 @@ public final class BoundedContext {
      * <li>detached from storage</li>
      * </ul>
      */
-    public void stop() {
+    @Override
+    public void close() {
         shutDownRepositories();
-        log().info(nameForLogging() + " stopped.");
+        log().info(nameForLogging() + " closed.");
     }
 
     private String nameForLogging() {
@@ -248,9 +249,10 @@ public final class BoundedContext {
     }
 
     /**
-     * A builder for producing {@code Engine} instances.
+     * A builder for producing {@code BoundedContext} instances.
      *
-     * <p>Normally, there should be one instance {@code Engine} per application.
+     * <p>An application can have more than one bounded context. To distinguish
+     * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
     public static class Builder {
 

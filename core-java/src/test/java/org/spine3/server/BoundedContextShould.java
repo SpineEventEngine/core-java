@@ -86,7 +86,7 @@ public class BoundedContextShould {
         if (handlersRegistered) {
             boundedContext.getEventBus().unregister(handler);
         }
-        boundedContext.stop();
+        boundedContext.close();
     }
 
     /**
