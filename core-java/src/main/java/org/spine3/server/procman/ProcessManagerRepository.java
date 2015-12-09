@@ -31,6 +31,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.CommandHandlingObject;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +51,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements MultiHandler {
+        extends EntityRepository<I, PM, M> implements MultiHandler, CommandHandlingObject {
 
     /**
      * The name of the method used for dispatching commands to process managers.
@@ -160,13 +161,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
-        return new ProcessManagerCommandHandler(this, method);
+        return new PmRepositoryDispatchMethod(this, method);
     }
 
     @Internal
     @Override
     public Predicate<Method> getHandlerMethodPredicate() {
-        return ProcessManagerCommandHandler.IS_PM_COMMAND_HANDLER;
+        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
     }
 
     /**

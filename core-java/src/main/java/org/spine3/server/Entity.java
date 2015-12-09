@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.server.EntityId.checkType;
 
 /**
  * A server-side wrapper for objects with identity.
@@ -51,6 +52,8 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  *
  * @param <I> the type of the entity ID
  * @param <M> the type of the entity state
+ * @see EntityId
+ * @author Alexander Yevsyikov
  */
 public abstract class Entity<I, M extends Message> {
 
@@ -62,7 +65,15 @@ public abstract class Entity<I, M extends Message> {
 
     private int version;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param id the ID for the new instance
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @see EntityId
+     */
     protected Entity(I id) {
+        checkType(id);
         this.id = id;
     }
 

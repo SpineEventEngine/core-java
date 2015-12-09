@@ -20,11 +20,15 @@
 
 package org.spine3.server;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.util.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * A base for {@link Entity} ID value object.
@@ -42,8 +46,33 @@ public abstract class EntityId<I> {
      */
     private final I value;
 
+    private static final ImmutableSet<Class<?>> SUPPORTED_TYPES = ImmutableSet.<Class<?>>builder()
+            .add(String.class)
+            .add(Long.class)
+            .add(Integer.class)
+            .add(Message.class)
+            .build();
+
     protected EntityId(I value) {
-        this.value = checkNotNull(value);
+        checkNotNull(value);
+        checkType(value);
+        this.value = value;
+    }
+
+    /**
+     * Ensures that the type of the {@code entityId} is supported.
+     *
+     * @param entityId the ID of the entity to check
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     */
+    public static <I> void checkType(I entityId) {
+        final Class<?> idClass = entityId.getClass();
+        if (SUPPORTED_TYPES.contains(idClass)) {
+            return;
+        }
+        if (!Message.class.isAssignableFrom(idClass)){
+            throw unsupportedIdType(idClass);
+        }
     }
 
     /**
@@ -76,5 +105,23 @@ public abstract class EntityId<I> {
 
     public I value() {
         return this.value;
+    }
+
+    private static IllegalArgumentException unsupportedIdType(Class<?> idClass) {
+        final String message = "Expected one of the following ID types: " + supportedTypesToString() +
+                "; found: " + idClass.getName();
+        throw new IllegalArgumentException(message);
+    }
+
+    private static String supportedTypesToString() {
+        final Iterable<String> classStrings = transform(SUPPORTED_TYPES, new Function<Class<?>, String>() {
+            @Override
+            @SuppressWarnings("NullableProblems") // OK in this case
+            public String apply(Class<?> clazz) {
+                return clazz.getSimpleName();
+            }
+        });
+        final String result = Joiner.on(", ").join(classStrings);
+        return result;
     }
 }
