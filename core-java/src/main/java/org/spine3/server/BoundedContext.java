@@ -50,7 +50,9 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class Engine {
+public final class BoundedContext {
+
+    private final String name;
 
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
@@ -60,7 +62,8 @@ public final class Engine {
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
-    private Engine(Builder builder) {
+    private BoundedContext(Builder builder) {
+        this.name = builder.name;
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
@@ -73,7 +76,7 @@ public final class Engine {
     }
 
     /**
-     * Stops the engine performing all necessary clean-ups.
+     * Stops the BoundedContext performing all necessary clean-ups.
      * <p>
      * This method shuts down all registered repositories. Each registered repository is:
      * <ul>
@@ -84,7 +87,18 @@ public final class Engine {
      */
     public void stop() {
         shutDownRepositories();
-        log().info("Engine stopped.");
+        log().info(nameForLogging() + " stopped.");
+    }
+
+    private String nameForLogging() {
+        return getClass().getSimpleName() + ' ' + getName();
+    }
+
+    /**
+     * @return the name of this {@code BoundedContext}
+     */
+    public String getName() {
+        return name;
     }
 
     private void shutDownRepositories() {
@@ -95,15 +109,15 @@ public final class Engine {
     }
 
     /**
-     * Registers the passed repository with the Engine.
-     * <p>
-     * The Engine creates and assigns a storage depending on the type of the passed repository.
-     * <p>
-     * For regular repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
-     * created and assigned.
-     * <p>
-     * For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
+     * Registers the passed repository with the BoundedContext.
+     *
+     * <p>The context creates and assigns a storage depending on the type of the passed repository.
+     *
+     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
+     *
+     * <p>For other types of repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * created and assigned.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
@@ -240,6 +254,8 @@ public final class Engine {
      */
     public static class Builder {
 
+        public static final String DEFAULT_NAME = "Main";
+        private String name;
         private StorageFactory storageFactory;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
@@ -247,6 +263,15 @@ public final class Engine {
         private CommandStore commandStore;
         @Nullable
         private EventStore eventStore;
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public String getName() {
+            return name;
+        }
 
         public Builder setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
@@ -295,7 +320,11 @@ public final class Engine {
             return eventStore;
         }
 
-        public Engine build() {
+        public BoundedContext build() {
+            if (this.name == null) {
+                this.name = DEFAULT_NAME;
+            }
+
             checkNotNull(storageFactory, "storageFactory");
             checkNotNull(commandDispatcher, "commandDispatcher");
             checkNotNull(eventBus, "eventBus");
@@ -308,7 +337,9 @@ public final class Engine {
                 eventStore = new EventStore(storageFactory.createEventStorage());
             }
 
-            final Engine result = new Engine(this);
+            final BoundedContext result = new BoundedContext(this);
+
+            log().info(result.nameForLogging() + " created.");
             return result;
         }
     }
@@ -316,7 +347,7 @@ public final class Engine {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Engine.class);
+        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
     }
 
     private static Logger log() {

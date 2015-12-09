@@ -29,8 +29,8 @@ import org.spine3.base.UserId;
 import org.spine3.eventbus.EventBus;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
-import org.spine3.server.Engine;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nullable;
@@ -50,7 +50,7 @@ import static org.spine3.util.Users.newUserId;
 public class Application {
 
     private final StorageFactory storageFactory;
-    private final Engine engine;
+    private final BoundedContext boundedContext;
     private final EventLogger eventLogger = new EventLogger();
 
     /**
@@ -59,7 +59,7 @@ public class Application {
      */
     public Application(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
-        this.engine = Engine.newBuilder()
+        this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
                 .setCommandDispatcher(CommandDispatcher.getInstance())
                 .setEventBus(EventBus.newInstance())
@@ -79,7 +79,7 @@ public class Application {
     }
 
     /**
-     * Executes the sample: generates some command requests and then the {@link Engine} processes them.
+     * Executes the sample: generates some command requests and then the {@link BoundedContext} processes them.
      */
     public void execute() {
         try {
@@ -90,7 +90,7 @@ public class Application {
 
             // Process requests
             for (CommandRequest request : requests) {
-                engine.process(request);
+                boundedContext.process(request);
             }
 
             log().info("All the requests were handled.");
@@ -108,10 +108,10 @@ public class Application {
         storageFactory.setUp();
 
         // Register repository with the engine. This will register it in the CommandDispatcher too.
-        engine.register(new OrderRepository());
+        boundedContext.register(new OrderRepository());
 
         // Register event handlers.
-        engine.getEventBus().register(eventLogger);
+        boundedContext.getEventBus().register(eventLogger);
 
         //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters
@@ -126,10 +126,10 @@ public class Application {
         storageFactory.tearDown();
 
         // Unregister event handlers
-        engine.getEventBus().unregister(eventLogger);
+        boundedContext.getEventBus().unregister(eventLogger);
 
         // Stop the engine
-        engine.stop();
+        boundedContext.stop();
     }
 
     //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
@@ -175,8 +175,8 @@ public class Application {
         // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
     }
 
-    public Engine getEngine() {
-        return engine;
+    public BoundedContext getBoundedContext() {
+        return boundedContext;
     }
 
     private static class OrderIdToStringConverter implements Function<OrderId, String> {

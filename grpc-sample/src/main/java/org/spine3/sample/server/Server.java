@@ -28,7 +28,7 @@ import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
 import org.spine3.sample.Application;
-import org.spine3.server.Engine;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class Server {
     public Server(int serverPort, StorageFactory storageFactory) {
 
         this.application = new Application(storageFactory);
-        this.server = buildServer(this.application.getEngine(), serverPort);
+        this.server = buildServer(this.application.getBoundedContext(), serverPort);
     }
 
     /**
@@ -122,16 +122,16 @@ public class Server {
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
 
-        private final Engine engine;
+        private final BoundedContext boundedContext;
 
-        private CommandServiceImpl(Engine engine) {
-            this.engine = engine;
+        private CommandServiceImpl(BoundedContext boundedContext) {
+            this.boundedContext = boundedContext;
         }
 
         @Override
         public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
 
-            final CommandResult reply = engine.process(req);
+            final CommandResult reply = boundedContext.process(req);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
@@ -143,10 +143,10 @@ public class Server {
         }
     }
 
-    private static io.grpc.Server buildServer(Engine engine, int serverPort) {
+    private static io.grpc.Server buildServer(BoundedContext boundedContext, int serverPort) {
 
         final ServerBuilder builder = ServerBuilder.forPort(serverPort);
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl(engine));
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl(boundedContext));
         builder.addService(service);
         return builder.build();
     }

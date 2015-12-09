@@ -39,10 +39,10 @@ public interface Repository<I, E extends Entity<I, ?>> {
      *
      * <p>The type of the storage depends on and should be checked by the implementations.
      *
-     * <p>This method should be normally called once during registration of the repository with {@link Engine}.
+     * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
      * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
      *
-     * <p>{@link Engine} will call this method with {@code null} argument to request performing all necessary
+     * <p>{@link BoundedContext} will call this method with {@code null} argument to request performing all necessary
      * clean-up operations before the the engine stops.
      *
      * <p>Another storage can be assigned after this method is called with {@code null} parameter.
