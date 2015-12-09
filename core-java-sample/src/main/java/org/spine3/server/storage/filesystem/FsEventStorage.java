@@ -20,10 +20,12 @@
 
 package org.spine3.server.storage.filesystem;
 
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.util.Events;
 
 import java.io.*;
 import java.util.Iterator;
@@ -63,7 +65,6 @@ class FsEventStorage extends EventStorage {
 
     @Override
     public Iterator<EventRecord> allEvents() {
-
         final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
         iterators.add(iterator);
         return iterator;
@@ -71,8 +72,8 @@ class FsEventStorage extends EventStorage {
 
     @Override
     public Iterator<EventRecord> since(Timestamp timestamp) {
-        //TODO:2015-12-09:alexander.yevsyukov: Implement
-        return null;
+        final Iterator<EventRecord> result = Iterators.filter(allEvents(), new Events.IsAfter(timestamp));
+        return result;
     }
 
     @Override

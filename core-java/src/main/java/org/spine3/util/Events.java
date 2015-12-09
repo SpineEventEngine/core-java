@@ -20,6 +20,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -133,6 +134,29 @@ public class Events {
     }
 
     /**
+     * The predicate to filter event records after some point in time.
+     */
+    public static class IsAfter implements Predicate<EventRecord> {
+
+        private final Timestamp timestamp;
+
+        public IsAfter(Timestamp timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public boolean apply(@Nullable EventRecord record) {
+            if (record == null) {
+                return false;
+            }
+
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
+            return result;
+        }
+    }
+
+    /**
      * Converts {@code EventId} into Json string.
      *
      * @param id the id to convert
@@ -210,7 +234,6 @@ public class Events {
             return result;
         }
     };
-
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Override
@@ -240,5 +263,6 @@ public class Events {
 
             return builder.toString();
         }
+
     }
 }

@@ -30,7 +30,6 @@ import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -64,29 +63,6 @@ class InMemoryEventStorage extends EventStorage {
         private static final long serialVersionUID = 0L;
     }
 
-    /**
-     * The predicate to filter event records after some point in time.
-     */
-    private static class IsAfter implements Predicate<EventRecord> {
-
-        private final Timestamp timestamp;
-
-        private IsAfter(Timestamp timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public boolean apply(@Nullable EventRecord record) {
-            if (record == null) {
-                return false;
-            }
-
-            final Timestamp ts = Events.getTimestamp(record);
-            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
-            return result;
-        }
-    };
-
     @Override
     public Iterator<EventRecord> allEvents() {
         final Iterator<EventRecord> result = Iterators.unmodifiableIterator(storage.iterator());
@@ -95,7 +71,7 @@ class InMemoryEventStorage extends EventStorage {
 
     @Override
     public Iterator<EventRecord> since(Timestamp timestamp) {
-        final Predicate<EventRecord> isAfter = new IsAfter(timestamp);
+        final Predicate<EventRecord> isAfter = new Events.IsAfter(timestamp);
 
         final Iterator<EventRecord> result = FluentIterable.from(storage)
                 .filter(isAfter)
