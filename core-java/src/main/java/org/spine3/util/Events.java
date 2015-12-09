@@ -110,27 +110,25 @@ public class Events {
         return result;
     }
 
-    public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEventRecord(eventRecords)
-                .addAllError(errors)
-                .build();
-    }
+    /**
+     * Compares two event records by their timestamps.
+     */
+    public static final Comparator<EventRecord> EVENT_RECORD_COMPARATOR = new Comparator<EventRecord>() {
+        @Override
+        public int compare(EventRecord o1, EventRecord o2) {
+            final Timestamp timestamp1 = getTimestamp(o1);
+            final Timestamp timestamp2 = getTimestamp(o2);
+            return Timestamps.compare(timestamp1, timestamp2);
+        }
+    };
 
     /**
-     * Sorts the given event record list by the event timestamp value.
+     * Sorts the given event record list by the event timestamps.
      *
      * @param eventRecords the event record list to sort
      */
     public static void sort(List<EventRecord> eventRecords) {
-        Collections.sort(eventRecords, new Comparator<EventRecord>() {
-            @Override
-            public int compare(EventRecord o1, EventRecord o2) {
-                final Timestamp timestamp1 = getTimestamp(o1.getContext().getEventId());
-                final Timestamp timestamp2 = getTimestamp(o2.getContext().getEventId());
-                return Timestamps.compare(timestamp1, timestamp2);
-            }
-        });
+        Collections.sort(eventRecords, EVENT_RECORD_COMPARATOR);
     }
 
     /**
@@ -154,8 +152,8 @@ public class Events {
             final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
             return result;
         }
-    }
 
+    }
     /**
      * Converts {@code EventId} into Json string.
      *
@@ -196,6 +194,13 @@ public class Events {
                 .setContext(record.getContext());
 
         return builder.build();
+    }
+
+    public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+        return CommandResult.newBuilder()
+                .addAllEventRecord(eventRecords)
+                .addAllError(errors)
+                .build();
     }
 
     /**
