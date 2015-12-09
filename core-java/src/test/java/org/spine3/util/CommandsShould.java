@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.MessageFields;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,13 +64,6 @@ public class CommandsShould {
     @Test(expected = NullPointerException.class)
     public void fail_on_null_parameter() {
         generateId(null);
-    }
-
-    @Test
-    public void convert_field_name_to_method_name() {
-        assertEquals("getUserId", MessageFields.toAccessorMethodName("user_id"));
-        assertEquals("getId", MessageFields.toAccessorMethodName("id"));
-        assertEquals("getAggregateRootId", MessageFields.toAccessorMethodName("aggregate_root_id"));
     }
 
     @Test
