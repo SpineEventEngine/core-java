@@ -52,6 +52,8 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class BoundedContext {
 
+    private final String name;
+
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
     private final EventBus eventBus;
@@ -61,6 +63,7 @@ public final class BoundedContext {
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private BoundedContext(Builder builder) {
+        this.name = builder.name;
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
@@ -84,7 +87,18 @@ public final class BoundedContext {
      */
     public void stop() {
         shutDownRepositories();
-        log().info("Stopped.");
+        log().info(nameForLogging() + " stopped.");
+    }
+
+    private String nameForLogging() {
+        return getClass().getSimpleName() + ' ' + getName();
+    }
+
+    /**
+     * @return the name of this {@code BoundedContext}
+     */
+    public String getName() {
+        return name;
     }
 
     private void shutDownRepositories() {
@@ -240,6 +254,8 @@ public final class BoundedContext {
      */
     public static class Builder {
 
+        public static final String DEFAULT_NAME = "Main";
+        private String name;
         private StorageFactory storageFactory;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
@@ -247,6 +263,15 @@ public final class BoundedContext {
         private CommandStore commandStore;
         @Nullable
         private EventStore eventStore;
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public String getName() {
+            return name;
+        }
 
         public Builder setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
@@ -296,6 +321,10 @@ public final class BoundedContext {
         }
 
         public BoundedContext build() {
+            if (this.name == null) {
+                this.name = DEFAULT_NAME;
+            }
+
             checkNotNull(storageFactory, "storageFactory");
             checkNotNull(commandDispatcher, "commandDispatcher");
             checkNotNull(eventBus, "eventBus");
@@ -309,6 +338,8 @@ public final class BoundedContext {
             }
 
             final BoundedContext result = new BoundedContext(this);
+
+            log().info(result.nameForLogging() + " created.");
             return result;
         }
     }
