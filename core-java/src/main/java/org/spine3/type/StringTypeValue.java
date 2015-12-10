@@ -29,7 +29,7 @@ import java.util.Objects;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class StringTypeValue {
+abstract class StringTypeValue {
     // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
 
     private final String value;
