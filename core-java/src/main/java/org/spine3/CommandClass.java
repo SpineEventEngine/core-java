@@ -30,9 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandClass extends ClassTypeValue {
+public final class CommandClass extends ClassTypeValue {
 
-    protected CommandClass(Class<? extends Message> value) {
+    private CommandClass(Class<? extends Message> value) {
         super(value);
     }
 
