@@ -24,13 +24,15 @@ import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 
+import java.io.Closeable;
+
 /**
  * A factory for creating storages used by repositories, {@link org.spine3.server.CommandStore}, and
  * {@link org.spine3.server.EventStore}.
  *
  * @author Alexander Yevsyukov
  */
-public interface StorageFactory extends AutoCloseable {
+public interface StorageFactory extends Closeable {
 
     /**
      * Creates a new {@link CommandStorage} instance.

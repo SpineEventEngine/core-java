@@ -37,6 +37,7 @@ import org.spine3.util.Events;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
@@ -77,17 +78,34 @@ public final class BoundedContext implements AutoCloseable {
 
     /**
      * Closes the BoundedContext performing all necessary clean-ups.
-     * <p>
-     * This method shuts down all registered repositories. Each registered repository is:
-     * <ul>
-     * <li>un-registered from {@link CommandDispatcher}</li>
-     * <li>un-registered from {@link EventBus}</li>
-     * <li>detached from storage</li>
-     * </ul>
+     *
+     * <p>This method performs the following:
+     * <ol>
+     * <li>Closes associated {@link StorageFactory}.</li>
+     * <li>Closes {@link CommandDispatcher}.</li>
+     * <li>Closes {@link EventBus}.</li>
+     * <li>Closes {@link CommandStore}.</li>
+     * <li>Closses {@link EventStore}.</li>
+     * <li>Shuts down all registered repositories. Each registered repository is:
+     *      <ul>
+     *      <li>un-registered from {@link CommandDispatcher}</li>
+     *      <li>un-registered from {@link EventBus}</li>
+     *      <li>detached from its storage</li>
+     *      </ul>
+     * </li>
+     * </ol>
+     * @throws IOException caused by closing one of the components
      */
     @Override
-    public void close() {
+    public void close() throws IOException {
+        storageFactory.close();
+        commandDispatcher.close();
+        eventBus.close();
+        commandStore.close();
+        eventStore.close();
+
         shutDownRepositories();
+
         log().info(nameForLogging() + " closed.");
     }
 
@@ -153,7 +171,7 @@ public final class BoundedContext implements AutoCloseable {
 
     private void unregister(Repository<?, ?> repository) {
         if (repository instanceof CommandHandlingObject) {
-            getCommandDispatcher().unregister((CommandHandlingObject)repository);
+            getCommandDispatcher().unregister((CommandHandlingObject) repository);
         }
 
         getEventBus().unregister(repository);
@@ -261,9 +279,7 @@ public final class BoundedContext implements AutoCloseable {
         private StorageFactory storageFactory;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
-        @Nullable
         private CommandStore commandStore;
-        @Nullable
         private EventStore eventStore;
 
         public Builder setName(String name) {
