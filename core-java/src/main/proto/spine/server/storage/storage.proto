@@ -28,7 +28,7 @@ option java_package = "org.spine3.server.storage";
 
 import public "spine/server/aggregate/snapshot.proto";
 import public "spine/base/command.proto";
-
+import public "spine/base/event.proto";
 
 // A record in the storage of events and snapshots of an aggregate type.
 //

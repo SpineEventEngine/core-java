@@ -28,6 +28,7 @@ option java_package = "org.spine3.base";
 
 import public "google/protobuf/timestamp.proto";
 import public "google/protobuf/any.proto";
+
 import public "spine/base/user_id.proto";
 import public "spine/time/time.proto";
 
@@ -44,56 +45,9 @@ message CommandId {
 message CommandContext {
     // The id of the command.
     CommandId command_id = 1;
+
     // The zone offset from which the command is made.
     time.ZoneOffset zone_offset = 2;
 }
 
-//TODO:2015-12-09:alexander.yevsyukov: Move CommandRequest, CommandResponse and the service into a command_service.proto
-// Command execution request.
-message CommandRequest {
-    // Any instance of the Protobuf message can be sent as a command.
-    google.protobuf.Any command = 1;
 
-    // The context of the command.
-    CommandContext context = 2;
-}
-
-//TODO:2015-12-09:alexander.yevsyukov: Move EventId, EventContext, into event.proto.
-// An identifier of an event.
-message EventId {
-    // ID of the command which originated the event.
-    CommandId command_id = 1;
-
-    // The duration between the moment of generation of CommandId and creation of this EventId.
-    int64 delta_nanos = 2;
-}
-
-// Meta-information for an event.
-message EventContext {
-    // The id of the event.
-    EventId event_id = 1;
-
-    // The id of the aggregate the event was applied to.
-    google.protobuf.Any aggregate_id = 2;
-
-    // The version of the aggregate after the event was applied.
-    int32 version = 3;
-
-    // This field may be used for additional attributes that were not known at the time of
-    // defining the corresponding event type.
-    repeated google.protobuf.Any attributes = 4;
-}
-
-//TODO:2015-12-09:alexander.yevsyukov: Move EventRecord into event_service.proto
-message EventRecord {
-    // Event data.
-    google.protobuf.Any event = 1;
-
-    // The context of the event.
-    EventContext context = 2;
-}
-
-message CommandResult {
-    repeated EventRecord eventRecord = 1;
-    repeated google.protobuf.Any error = 2;
-}

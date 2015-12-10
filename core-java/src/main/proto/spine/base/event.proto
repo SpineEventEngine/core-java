@@ -23,15 +23,41 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
+option java_outer_classname = "EventProto";
 option java_package = "org.spine3.base";
 
-import "spine/base/command.proto";
+import public "spine/base/command.proto";
 
-import "spine/base/command_service_new.proto";
-import "spine/base/command_result.proto";
+// An identifier of an event.
+message EventId {
+    // ID of the command which originated the event.
+    CommandId command_id = 1;
 
-service CommandService {
-    rpc Handle (CommandRequest) returns (CommandResult);
-    rpc HandleStream (stream CommandRequest) returns (stream CommandResult);
+    // The duration between the moment of generation of CommandId and creation of this EventId.
+    int64 delta_nanos = 2;
+}
+
+// Meta-information for an event.
+message EventContext {
+    // The id of the event.
+    EventId event_id = 1;
+
+    // The id of the aggregate the event was applied to.
+    google.protobuf.Any aggregate_id = 2;
+
+    // The version of the aggregate after the event was applied.
+    int32 version = 3;
+
+    // This field may be used for additional attributes that were not known at the time of
+    // defining the corresponding event type.
+    repeated google.protobuf.Any attributes = 4;
+}
+
+// A couple of an event and its context information.
+message EventRecord {
+    // Event data.
+    google.protobuf.Any event = 1;
+
+    // The context of the event.
+    EventContext context = 2;
 }
