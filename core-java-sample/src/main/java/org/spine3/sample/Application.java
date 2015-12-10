@@ -21,7 +21,6 @@
 package org.spine3.sample;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
@@ -37,6 +36,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 import static org.spine3.util.Users.newUserId;
@@ -71,15 +72,13 @@ public class Application implements AutoCloseable {
      * To change the storage implementation, change {@link #getStorageFactory()} method implementation.
      */
     public static void main(String[] args) {
-
         final StorageFactory factory = getStorageFactory();
 
-        try (final Application app = new Application(factory) ){
+        try (final Application app = new Application(factory)) {
             app.execute();
         } catch (Exception e) {
             log().error("", e);
         }
-
     }
 
     /**
@@ -103,7 +102,6 @@ public class Application implements AutoCloseable {
      * Sets up the storage, initializes the bounded contexts, registers repositories, handlers etc.
      */
     public void setUp() {
-
         // Set up the storage
         storageFactory.init();
 
@@ -137,23 +135,19 @@ public class Application implements AutoCloseable {
      * Creates several dozens of requests.
      */
     public static List<CommandRequest> generateRequests() {
-
-        final List<CommandRequest> result = Lists.newArrayList();
+        final List<CommandRequest> result = newArrayList();
 
         for (int i = 0; i < 10; i++) {
-
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
             final UserId userId = newUserId("user_" + i);
 
-            final CommandRequest createOrder = Requests.createOrder(userId, orderId);
-            final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            final CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
-
+            final CommandRequest createOrder = createOrder(userId, orderId);
             result.add(createOrder);
+            final CommandRequest addOrderLine = addOrderLine(userId, orderId);
             result.add(addOrderLine);
+            final CommandRequest payForOrder = payForOrder(userId, orderId);
             result.add(payForOrder);
         }
-
         return result;
     }
 
@@ -164,7 +158,6 @@ public class Application implements AutoCloseable {
      * @return the {@link StorageFactory} implementation.
      */
     public static StorageFactory getStorageFactory() {
-
         return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
 
         /**
@@ -181,17 +174,13 @@ public class Application implements AutoCloseable {
 
         @Override
         public String apply(@Nullable OrderId orderId) {
-
             if (orderId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             final String value = orderId.getValue();
-
             if (isNullOrEmpty(value) || value.trim().isEmpty()) {
                 return NULL_ID_OR_FIELD;
             }
-
             return value;
         }
     }
