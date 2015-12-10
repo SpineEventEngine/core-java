@@ -21,7 +21,6 @@
 package org.spine3.sample;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandRequest;
@@ -37,6 +36,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 import static org.spine3.util.Users.newUserId;
@@ -47,7 +48,7 @@ import static org.spine3.util.Users.newUserId;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class Application {
+public class Application implements AutoCloseable {
 
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
@@ -71,41 +72,38 @@ public class Application {
      * To change the storage implementation, change {@link #getStorageFactory()} method implementation.
      */
     public static void main(String[] args) {
-
         final StorageFactory factory = getStorageFactory();
-        final Application app = new Application(factory);
 
-        app.execute();
+        try (final Application app = new Application(factory)) {
+            app.execute();
+        } catch (Exception e) {
+            log().error("", e);
+        }
     }
 
     /**
      * Executes the sample: generates some command requests and then the {@link BoundedContext} processes them.
      */
     public void execute() {
-        try {
-            setUp();
+        setUp();
 
-            // Generate test requests
-            final List<CommandRequest> requests = generateRequests();
+        // Generate test requests
+        final List<CommandRequest> requests = generateRequests();
 
-            // Process requests
-            for (CommandRequest request : requests) {
-                boundedContext.process(request);
-            }
-
-            log().info("All the requests were handled.");
-        } finally {
-            tearDown();
+        // Process requests
+        for (CommandRequest request : requests) {
+            boundedContext.process(request);
         }
+
+        log().info("All the requests were handled.");
     }
 
     /**
      * Sets up the storage, initializes the bounded contexts, registers repositories, handlers etc.
      */
     public void setUp() {
-
         // Set up the storage
-        storageFactory.setUp();
+        storageFactory.init();
 
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
         boundedContext.register(new OrderRepository());
@@ -121,9 +119,10 @@ public class Application {
     /**
      * Tear down storages, unregister event handlers and close the bounded context.
      */
-    public void tearDown() {
-
-        storageFactory.tearDown();
+    @Override
+    public void close() throws Exception {
+        //TODO:2015-12-09:alexander.yevsyukov: BoundedContext should close storage factory and close EventBus on its own.
+        storageFactory.close();
 
         // Unregister event handlers
         boundedContext.getEventBus().unregister(eventLogger);
@@ -132,30 +131,23 @@ public class Application {
         boundedContext.close();
     }
 
-    //TODO:2015-09-23:alexander.yevsyukov: Rename and extend sample data to better reflect the problem domain.
-    // See Amazon screens for correct naming of domain things.
-
     /**
      * Creates several dozens of requests.
      */
     public static List<CommandRequest> generateRequests() {
-
-        final List<CommandRequest> result = Lists.newArrayList();
+        final List<CommandRequest> result = newArrayList();
 
         for (int i = 0; i < 10; i++) {
-
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
             final UserId userId = newUserId("user_" + i);
 
-            final CommandRequest createOrder = Requests.createOrder(userId, orderId);
-            final CommandRequest addOrderLine = Requests.addOrderLine(userId, orderId);
-            final CommandRequest payForOrder = Requests.payForOrder(userId, orderId);
-
+            final CommandRequest createOrder = createOrder(userId, orderId);
             result.add(createOrder);
+            final CommandRequest addOrderLine = addOrderLine(userId, orderId);
             result.add(addOrderLine);
+            final CommandRequest payForOrder = payForOrder(userId, orderId);
             result.add(payForOrder);
         }
-
         return result;
     }
 
@@ -166,7 +158,6 @@ public class Application {
      * @return the {@link StorageFactory} implementation.
      */
     public static StorageFactory getStorageFactory() {
-
         return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
 
         /**
@@ -183,17 +174,13 @@ public class Application {
 
         @Override
         public String apply(@Nullable OrderId orderId) {
-
             if (orderId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             final String value = orderId.getValue();
-
             if (isNullOrEmpty(value) || value.trim().isEmpty()) {
                 return NULL_ID_OR_FIELD;
             }
-
             return value;
         }
     }

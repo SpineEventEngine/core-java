@@ -19,20 +19,28 @@
  */
 package org.spine3.server;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * Stores and loads the events.
+ * A store of all events in a bounded context.
  *
  * @author Mikhail Mikhaylov
  */
-public class EventStore {
+public class EventStore implements Closeable {
 
     private final EventStorage storage;
 
+    /**
+     * Creates a new instance running on the passed storage.
+     *
+     * @param storage the underlying storage for the store.
+     */
     public EventStore(EventStorage storage) {
         this.storage = storage;
     }
@@ -47,11 +55,31 @@ public class EventStore {
     }
 
     /**
-     * Returns iterator through all the events in the history sorted by timestamp.
+     * Returns an iterator through all the events in the history sorted by timestamp.
      *
      * @return iterator instance
      */
     public Iterator<EventRecord> allEvents() {
         return storage.allEvents();
+    }
+
+    /**
+     * Returns an iterator over all event records since the passed time.
+     *
+     * @param timestamp a point in time from which the iterator would go
+     * @return iterator instance
+     */
+    public Iterator<EventRecord> eventsSince(Timestamp timestamp) {
+        return storage.since(timestamp);
+    }
+
+    /**
+     * Closes the underlying storage.
+     *
+     * @throws IOException if the attempt to close the storage throws an exception
+     */
+    @Override
+    public void close() throws IOException {
+        storage.close();
     }
 }

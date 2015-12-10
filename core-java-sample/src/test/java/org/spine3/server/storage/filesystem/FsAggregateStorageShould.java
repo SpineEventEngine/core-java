@@ -44,8 +44,8 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
     }
 
     @After
-    public void tearDownTest() {
-        FACTORY.tearDown();
+    public void tearDownTest() throws Exception {
+        FACTORY.close();
     }
 
     public static class AggregateForStorageTests extends Aggregate<ProjectId, Project> {

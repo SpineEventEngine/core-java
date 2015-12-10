@@ -84,7 +84,6 @@ public class Server {
      * @throws IOException if unable to bind.
      */
     public void start() throws IOException {
-
         application.setUp();
         server.start();
     }
@@ -93,8 +92,11 @@ public class Server {
      * Stops the server.
      */
     public void stop() {
-
-        application.tearDown();
+        try {
+            application.close();
+        } catch (Exception e) {
+            log().error("Error closing application", e);
+        }
         server.shutdown();
     }
 

@@ -48,7 +48,7 @@
         <value />
       </option>
       <option name="ignoreTestCases" value="true" />
-      <option name="ignoreLibraryOverrides" value="false" />
+      <option name="ignoreLibraryOverrides" value="true" />
     </inspection_tool>
     <inspection_tool class="BadExceptionThrown" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="exceptionsString" value="" />

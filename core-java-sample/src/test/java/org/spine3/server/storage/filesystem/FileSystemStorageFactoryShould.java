@@ -40,8 +40,8 @@ public class FileSystemStorageFactoryShould {
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
 
     @After
-    public void tearDownTest() {
-        FACTORY.tearDown();
+    public void tearDownTest() throws Exception {
+        FACTORY.close();
     }
 
     @Test

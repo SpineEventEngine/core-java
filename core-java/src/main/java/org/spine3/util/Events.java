@@ -20,6 +20,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -31,6 +32,7 @@ import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStoreRecordOrBuilder;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -47,7 +49,7 @@ import static org.spine3.util.Identifiers.*;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
+@SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
 public class Events {
 
     private Events() {
@@ -93,36 +95,65 @@ public class Events {
      * @param eventId ID of the event
      * @return timestamp of event ID generation
      */
-    public static Timestamp getTimestamp(EventIdOrBuilder eventId) {
+    public static Timestamp getTimestamp(EventId eventId) {
         final Timestamp commandTimestamp = eventId.getCommandId().getTimestamp();
         final Duration delta = TimeUtil.createDurationFromNanos(eventId.getDeltaNanos());
         final Timestamp result = TimeUtil.add(commandTimestamp, delta);
         return result;
     }
 
-    public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEventRecord(eventRecords)
-                .addAllError(errors)
-                .build();
+    /**
+     * Calculates the timestamp of the event from the passed record.
+     */
+    public static Timestamp getTimestamp(EventRecord record) {
+        final Timestamp result = getTimestamp(record.getContext().getEventId());
+        return result;
     }
 
     /**
-     * Sorts the given event record list by the event timestamp value.
+     * Compares two event records by their timestamps.
+     */
+    public static final Comparator<EventRecord> EVENT_RECORD_COMPARATOR = new Comparator<EventRecord>() {
+        @Override
+        public int compare(EventRecord o1, EventRecord o2) {
+            final Timestamp timestamp1 = getTimestamp(o1);
+            final Timestamp timestamp2 = getTimestamp(o2);
+            return Timestamps.compare(timestamp1, timestamp2);
+        }
+    };
+
+    /**
+     * Sorts the given event record list by the event timestamps.
      *
      * @param eventRecords the event record list to sort
      */
     public static void sort(List<EventRecord> eventRecords) {
-        Collections.sort(eventRecords, new Comparator<EventRecord>() {
-            @Override
-            public int compare(EventRecord o1, EventRecord o2) {
-                final Timestamp timestamp1 = getTimestamp(o1.getContext().getEventId());
-                final Timestamp timestamp2 = getTimestamp(o2.getContext().getEventId());
-                return Timestamps.compare(timestamp1, timestamp2);
-            }
-        });
+        Collections.sort(eventRecords, EVENT_RECORD_COMPARATOR);
     }
 
+    /**
+     * The predicate to filter event records after some point in time.
+     */
+    public static class IsAfter implements Predicate<EventRecord> {
+
+        private final Timestamp timestamp;
+
+        public IsAfter(Timestamp timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public boolean apply(@Nullable EventRecord record) {
+            if (record == null) {
+                return false;
+            }
+
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
+            return result;
+        }
+
+    }
     /**
      * Converts {@code EventId} into Json string.
      *
@@ -157,8 +188,19 @@ public class Events {
     /**
      * Converts EventStoreRecord to EventRecord.
      */
-    public static EventRecord toEventRecord(EventStoreRecord storeRecord) {
-        return TO_EVENT_RECORD.apply(storeRecord);
+    public static EventRecord toEventRecord(EventStoreRecordOrBuilder record) {
+        final EventRecord.Builder builder = EventRecord.newBuilder()
+                .setEvent(record.getEvent())
+                .setContext(record.getContext());
+
+        return builder.build();
+    }
+
+    public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+        return CommandResult.newBuilder()
+                .addAllEventRecord(eventRecords)
+                .addAllError(errors)
+                .build();
     }
 
     /**
@@ -193,13 +235,10 @@ public class Events {
             if (input == null) {
                 return EventRecord.getDefaultInstance();
             }
-            final EventRecord.Builder builder = EventRecord.newBuilder()
-                    .setEvent(input.getEvent())
-                    .setContext(input.getContext());
-            return builder.build();
+            final EventRecord result = toEventRecord(input);
+            return result;
         }
     };
-
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Override
@@ -229,5 +268,6 @@ public class Events {
 
             return builder.toString();
         }
+
     }
 }

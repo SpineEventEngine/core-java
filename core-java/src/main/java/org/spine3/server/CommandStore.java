@@ -27,12 +27,15 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 /**
  * Stores and loads commands.
  *
  * @author Mikhail Mikhaylov
  */
-public class CommandStore {
+public class CommandStore implements Closeable {
 
     private final CommandStorage storage;
 
@@ -52,4 +55,8 @@ public class CommandStore {
         storage.store(aggregateId, request);
     }
 
+    @Override
+    public void close() throws IOException {
+        storage.close();
+    }
 }

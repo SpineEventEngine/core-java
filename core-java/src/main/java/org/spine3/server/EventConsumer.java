@@ -18,29 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server;
 
-import org.junit.After;
-import org.spine3.server.storage.EventStorageShould;
+import com.google.protobuf.Timestamp;
+import org.spine3.base.EventRecord;
+import org.spine3.eventbus.EventBus;
+import org.spine3.server.projection.ProjectionRepository;
+
+import java.util.Iterator;
 
 /**
- * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ * A common interface for objects that need to process events since a point of time in the past
+ * before it gets connected to {@link EventBus}.
  *
- * @author Alexander Litus
+ * <p>A typical scenario is connecting a new {@link ProjectionRepository}, which needs to run through
+ * all the events since the beginning of history of a system to create projection instances.
+ *
+ * @author Alexander Yevsyukov
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class InMemoryEventStorageShould extends EventStorageShould {
+public interface EventConsumer {
 
-    private static final InMemoryEventStorage STORAGE = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
+    /**
+     * Returns timestamp of the last consumed event or default {@link Timestamp} instance if no events
+     * were consumed before.
+     *
+     * @return timestamp or default timestamp
+     */
+    Timestamp getLastEventTimestamp();
 
-    public InMemoryEventStorageShould() {
-        super(STORAGE);
-    }
-
-    @After
-    public void tearDownTest() {
-        STORAGE.clear();
-    }
-
-
+    /**
+     * Consumes passed events.
+     *
+     * @param missingEvents events to consume
+     */
+    void consume(Iterator<EventRecord> missingEvents);
 }

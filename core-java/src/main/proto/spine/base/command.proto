@@ -48,6 +48,7 @@ message CommandContext {
     time.ZoneOffset zone_offset = 2;
 }
 
+//TODO:2015-12-09:alexander.yevsyukov: Move CommandRequest, CommandResponse and the service into a command_service.proto
 // Command execution request.
 message CommandRequest {
     // Any instance of the Protobuf message can be sent as a command.
@@ -57,9 +58,10 @@ message CommandRequest {
     CommandContext context = 2;
 }
 
+//TODO:2015-12-09:alexander.yevsyukov: Move EventId, EventContext, into event.proto.
 // An identifier of an event.
 message EventId {
-    // The command originated the event.
+    // ID of the command which originated the event.
     CommandId command_id = 1;
 
     // The duration between the moment of generation of CommandId and creation of this EventId.
@@ -82,6 +84,7 @@ message EventContext {
     repeated google.protobuf.Any attributes = 4;
 }
 
+//TODO:2015-12-09:alexander.yevsyukov: Move EventRecord into event_service.proto
 message EventRecord {
     // Event data.
     google.protobuf.Any event = 1;

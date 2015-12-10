@@ -20,9 +20,12 @@
 
 package org.spine3.server.storage.filesystem;
 
+import com.google.common.collect.Iterators;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.util.Events;
 
 import java.io.*;
 import java.util.Iterator;
@@ -62,10 +65,15 @@ class FsEventStorage extends EventStorage {
 
     @Override
     public Iterator<EventRecord> allEvents() {
-
         final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
         iterators.add(iterator);
         return iterator;
+    }
+
+    @Override
+    public Iterator<EventRecord> since(Timestamp timestamp) {
+        final Iterator<EventRecord> result = Iterators.filter(allEvents(), new Events.IsAfter(timestamp));
+        return result;
     }
 
     @Override
@@ -76,14 +84,14 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
-    protected void releaseResources() {
+    public void close() {
         for (EventRecordFileIterator i : iterators) {
-            i.releaseResources();
+            i.close();
         }
     }
 
 
-    private static class EventRecordFileIterator implements Iterator<EventRecord> {
+    private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {
 
         private final File file;
         private FileInputStream fileInputStream;
@@ -121,7 +129,7 @@ class FsEventStorage extends EventStorage {
             final EventRecord result = toEventRecord(storeRecord);
 
             if (!hasNext()) {
-                releaseResources();
+                close();
             }
 
             checkNotNull(result, "event record from the file");
@@ -149,7 +157,8 @@ class FsEventStorage extends EventStorage {
             return bufferedInputStream;
         }
 
-        private void releaseResources() {
+        @Override
+        public void close() {
             if (!areResourcesReleased) {
                 closeSilently(fileInputStream, bufferedInputStream);
                 areResourcesReleased = true;
