@@ -21,6 +21,8 @@
 package org.spine3.util;
 
 import org.junit.Test;
+import org.spine3.io.IoUtil;
+import org.spine3.io.file.FileNameEscaper;
 import org.spine3.testdata.*;
 
 import java.lang.reflect.Constructor;

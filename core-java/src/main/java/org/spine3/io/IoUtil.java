@@ -18,15 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.io;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -109,89 +110,6 @@ public class IoUtil {
         }
         flushSilently(streams);
         closeSilently(streams);
-    }
-
-    /**
-     * Checks if the file exists.
-     *
-     * @param file file to check
-     * @param fileDescription the description for error message
-     * @throws IllegalStateException if there is no such file
-     */
-    public static void checkFileExists(File file, String fileDescription) {
-        if (!file.exists()) {
-            final FileNotFoundException fileNotFound = new FileNotFoundException(fileDescription + ": " + file.getAbsolutePath());
-            throw propagate(fileNotFound);
-        }
-    }
-
-    /**
-     * Tries to open {@code FileInputStream} from file.
-     *
-     * @throws RuntimeException if there is no such file
-     */
-    public static FileInputStream open(File file) {
-
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            propagate(e);
-        }
-        return fileInputStream;
-    }
-
-    /**
-     * Creates a file with the given path if it does not exist or returns the existed one.
-     * @return the created or existed file
-     * @throws java.io.IOException - If an I/O error occurred
-     */
-    @SuppressWarnings("ResultOfMethodCallIgnored") // the result is redundant in this case
-    public static File createIfDoesNotExist(String path) throws IOException {
-
-        final File file = new File(path);
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-        }
-        return file;
-    }
-
-    /**
-     * Deletes a non-directory file using {@link Files#deleteIfExists(Path)}.
-     *
-     * <p>If it is the path to the directory, deletes all the files in it recursively and then deletes this directory.
-     *
-     * @param path the path to the file to delete.
-     * @throws RuntimeException if an I/O error occurs.
-     */
-    public static void deleteIfExists(Path path) {
-        try {
-            if (path.toFile().isDirectory()) {
-                Files.walkFileTree(path, newFilesEliminator());
-            } else {
-                Files.deleteIfExists(path);
-            }
-        } catch (IOException e) {
-            propagate(e);
-        }
-    }
-
-    private static FileVisitor<Path> newFilesEliminator() {
-        return new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-                super.visitFile(file, attributes);
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-            @Override
-            public FileVisitResult postVisitDirectory(Path path, IOException exception) throws IOException {
-                super.postVisitDirectory(path, exception);
-                Files.delete(path);
-                return FileVisitResult.CONTINUE;
-            }
-        };
     }
 
     private static Logger log() {
