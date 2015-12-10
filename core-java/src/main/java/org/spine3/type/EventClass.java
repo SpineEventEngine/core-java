@@ -18,42 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.type;
 
 import com.google.protobuf.Message;
-import org.spine3.util.ClassTypeValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object for class type references.
+ * A value object holding a class of events.
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandClass extends ClassTypeValue {
+public final class EventClass extends ClassTypeValue {
 
-    private CommandClass(Class<? extends Message> value) {
+    private EventClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
-     * Creates a new instance for the passed class value.
-     *
-     * @param value class reference
+     * Creates a new instance of the event class.
+     * @param value a value to hold
      * @return new instance
      */
-    public static CommandClass of(Class<? extends Message> value) {
-        return new CommandClass(checkNotNull(value));
+    public static EventClass of(Class<? extends Message> value) {
+        return new EventClass(checkNotNull(value));
     }
 
     /**
-     * Creates a new instance for the class of the passed command.
-     *
-     * @param command a command for which to get the class
+     * Creates a new instance of the event class by passed event instance.
+     * @param event an event instance
      * @return new instance
      */
-    public static CommandClass of(Message command) {
-        return of(checkNotNull(command).getClass());
+    public static EventClass of(Message event) {
+        return of(checkNotNull(event).getClass());
     }
-
 }

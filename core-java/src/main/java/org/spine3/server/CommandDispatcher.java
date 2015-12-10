@@ -21,7 +21,6 @@ package org.spine3.server;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.MessageHandlerMethod;
@@ -29,6 +28,7 @@ import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

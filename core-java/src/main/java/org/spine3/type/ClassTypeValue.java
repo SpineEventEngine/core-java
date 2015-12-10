@@ -18,49 +18,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.type;
+
+import com.google.protobuf.Message;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * Abstract base for string value objects.
+ * A base class for value objects storing class references.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class StringTypeValue {
-    // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
+// NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
+public abstract class ClassTypeValue {
 
-    private final String value;
+    private final Class<? extends Message> value;
 
-    protected StringTypeValue(String value) {
+    protected ClassTypeValue(Class<? extends Message> value) {
         this.value = value;
     }
 
-    protected String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
+    /**
+     * @return value of the object
+     */
+    public Class<? extends Message> value() {
         return this.value;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(this.value);
+    public String toString() {
+        return String.valueOf(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
+
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final StringTypeValue other = (StringTypeValue) obj;
-        return Objects.equals(this.value(), other.value());
+        final ClassTypeValue other = (ClassTypeValue) obj;
+        return Objects.equals(this.value, other.value);
     }
 }

@@ -26,9 +26,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
+import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;

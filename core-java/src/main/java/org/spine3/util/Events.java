@@ -27,12 +27,12 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.TypeName;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.server.storage.EventStoreRecordOrBuilder;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

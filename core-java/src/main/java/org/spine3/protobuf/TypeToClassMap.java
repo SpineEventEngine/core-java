@@ -25,9 +25,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.ClassName;
-import org.spine3.TypeName;
 import org.spine3.protobuf.error.UnknownTypeInAnyException;
+import org.spine3.type.ClassName;
+import org.spine3.type.TypeName;
 import org.spine3.util.IoUtil;
 
 import java.io.IOException;

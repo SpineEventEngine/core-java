@@ -18,54 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.type;
 
-import org.spine3.util.StringTypeValue;
+import com.google.protobuf.Message;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a fully-qualified Java class name.
+ * A value object for class type references.
  *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-public final class ClassName extends StringTypeValue {
+public final class CommandClass extends ClassTypeValue {
 
-    private ClassName(String value) {
-        super(checkNotNull(value));
-    }
-
-    private ClassName(Class clazz) {
-        this(clazz.getName());
+    private CommandClass(Class<? extends Message> value) {
+        super(value);
     }
 
     /**
-     * Creates a new instance with the name of the passed class.
-     * @param clazz the class to get name from
+     * Creates a new instance for the passed class value.
+     *
+     * @param value class reference
      * @return new instance
      */
-    public static ClassName of(Class clazz) {
-        return new ClassName(checkNotNull(clazz));
+    public static CommandClass of(Class<? extends Message> value) {
+        return new CommandClass(checkNotNull(value));
     }
 
     /**
-     * Creates a new instance with the passed class name value.
-     * @param className a fully-qualified Java class name
-     * @return new
+     * Creates a new instance for the class of the passed command.
+     *
+     * @param command a command for which to get the class
+     * @return new instance
      */
-    public static ClassName of(String className) {
-        checkNotNull(className);
-        checkArgument(className.length() > 0, "Class name cannot me empty");
-        return new ClassName(className);
+    public static CommandClass of(Message command) {
+        return of(checkNotNull(command).getClass());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String value() {
-        // Open access to other packages.
-        return super.value();
-    }
 }

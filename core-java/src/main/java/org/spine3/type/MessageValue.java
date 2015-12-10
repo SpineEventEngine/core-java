@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.type;
 
 import com.google.protobuf.Message;
 
@@ -26,30 +26,25 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * A base class for value objects storing class references.
+ * An abstract base value objects holding a Protobuf message.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
-// NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
-public abstract class ClassTypeValue {
+@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
+public abstract class MessageValue {
 
-    private final Class<? extends Message> value;
+    private final Message value;
 
-    protected ClassTypeValue(Class<? extends Message> value) {
+    protected MessageValue(@Nullable Message value) {
         this.value = value;
     }
 
     /**
-     * @return value of the object
+     * @return stored {@code Message} object
      */
-    public Class<? extends Message> value() {
-        return this.value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
+    @Nullable
+    protected Message value() {
+        return value;
     }
 
     /**
@@ -68,11 +63,11 @@ public abstract class ClassTypeValue {
         if (this == obj) {
             return true;
         }
-
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final ClassTypeValue other = (ClassTypeValue) obj;
+        final MessageValue other = (MessageValue) obj;
         return Objects.equals(this.value, other.value);
     }
 }
+

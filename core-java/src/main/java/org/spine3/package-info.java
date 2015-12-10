@@ -18,14 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Package containing abstract AggregateRoot class.
- */
-
 @ParametersAreNonnullByDefault
 package org.spine3;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
-
-//TODO:2015-06-11:alexander.yevsyukov: Describe this package and basic architecture.

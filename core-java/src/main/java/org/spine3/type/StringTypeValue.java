@@ -18,46 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
-
-import com.google.protobuf.Message;
+package org.spine3.type;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * An abstract base value objects holding a Protobuf message.
+ * Abstract base for string value objects.
  *
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class MessageValue {
+public abstract class StringTypeValue {
+    // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
 
-    private final Message value;
+    private final String value;
 
-    protected MessageValue(@Nullable Message value) {
+    protected StringTypeValue(String value) {
         this.value = value;
     }
 
-    /**
-     * @return stored {@code Message} object
-     */
-    @Nullable
-    protected Message value() {
+    protected String value() {
         return value;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int hashCode() {
-        return Objects.hash(value);
+    public String toString() {
+        return this.value;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.value);
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) {
@@ -66,8 +60,7 @@ public abstract class MessageValue {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final MessageValue other = (MessageValue) obj;
-        return Objects.equals(this.value, other.value);
+        final StringTypeValue other = (StringTypeValue) obj;
+        return Objects.equals(this.value(), other.value());
     }
 }
-
