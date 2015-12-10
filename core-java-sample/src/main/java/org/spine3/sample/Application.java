@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
@@ -76,8 +77,6 @@ public class Application implements AutoCloseable {
 
         try (final Application app = new Application(factory)) {
             app.execute();
-        } catch (Exception e) {
-            log().error("", e);
         }
     }
 
@@ -120,9 +119,13 @@ public class Application implements AutoCloseable {
      * Tear down storages, unregister event handlers and close the bounded context.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         //TODO:2015-12-09:alexander.yevsyukov: BoundedContext should close storage factory and close EventBus on its own.
-        storageFactory.close();
+        try {
+            storageFactory.close();
+        } catch (Exception e) {
+            propagate(e);
+        }
 
         // Unregister event handlers
         boundedContext.getEventBus().unregister(eventLogger);
