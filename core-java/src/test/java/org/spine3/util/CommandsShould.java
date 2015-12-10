@@ -23,8 +23,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
-import org.spine3.base.CommandRequest;
 import org.spine3.base.UserId;
+import org.spine3.client.CommandRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;

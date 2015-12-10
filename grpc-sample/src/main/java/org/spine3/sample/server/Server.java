@@ -24,9 +24,9 @@ import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandRequest;
 import org.spine3.base.CommandResult;
 import org.spine3.base.CommandServiceGrpc;
+import org.spine3.client.CommandRequest;
 import org.spine3.sample.Application;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
@@ -121,6 +121,7 @@ public class Server {
             }
         }));
     }
+
 
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
 

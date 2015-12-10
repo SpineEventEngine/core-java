@@ -28,7 +28,7 @@ option java_package = "org.spine3.base";
 
 import "spine/base/command.proto";
 
-import "spine/base/command_service_new.proto";
+import "spine/client/command_service_new.proto";
 import "spine/base/command_result.proto";
 
 service CommandService {
