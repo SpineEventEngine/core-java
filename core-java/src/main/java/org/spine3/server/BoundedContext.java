@@ -78,8 +78,8 @@ public final class BoundedContext implements AutoCloseable {
 
     /**
      * Closes the BoundedContext performing all necessary clean-ups.
-     * <p/>
-     * This method performs the following:
+     *
+     * <p>This method performs the following:
      * <ol>
      * <li>Closes associated {@link StorageFactory}.</li>
      * <li>Closes {@link CommandDispatcher}.</li>
@@ -129,12 +129,12 @@ public final class BoundedContext implements AutoCloseable {
 
     /**
      * Registers the passed repository with the BoundedContext.
-     * <p/>
+     *
      * <p>The context creates and assigns a storage depending on the type of the passed repository.
-     * <p/>
+     *
      * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
-     * <p/>
+     *
      * <p>For other types of repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
      * created and assigned.
      *
@@ -180,7 +180,7 @@ public final class BoundedContext implements AutoCloseable {
 
     /**
      * Processes the incoming command request.
-     * <p/>
+     *
      * <p>This method is the entry point of a command in to a backend of an application.
      *
      * @param request incoming command request to handle
@@ -268,7 +268,7 @@ public final class BoundedContext implements AutoCloseable {
 
     /**
      * A builder for producing {@code BoundedContext} instances.
-     * <p/>
+     *
      * <p>An application can have more than one bounded context. To distinguish
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
