@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class CommandDispatcher {
+public class CommandDispatcher implements AutoCloseable {
 
     private final Registry registry = new Registry();
 
@@ -109,6 +109,11 @@ public class CommandDispatcher {
     @CheckReturnValue
     private CommandHandlerMethod getHandler(CommandClass cls) {
         return registry.getHandler(cls);
+    }
+
+    @Override
+    public void close() {
+        registry.unregisterAll();
     }
 
     private static class Registry {
@@ -181,6 +186,12 @@ public class CommandDispatcher {
 
         private void putAll(Map<CommandClass, CommandHandlerMethod> subscribers) {
             handlersByClass.putAll(subscribers);
+        }
+
+        private void unregisterAll() {
+            for (CommandClass commandClass : handlersByClass.keySet()) {
+                removeFor(commandClass);
+            }
         }
     }
 

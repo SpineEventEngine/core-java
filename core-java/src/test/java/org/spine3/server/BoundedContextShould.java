@@ -45,6 +45,7 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.util.Users;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -82,7 +83,7 @@ public class BoundedContextShould {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
         if (handlersRegistered) {
             boundedContext.getEventBus().unregister(handler);
         }

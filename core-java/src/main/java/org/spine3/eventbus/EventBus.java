@@ -66,7 +66,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
  */
-public class EventBus {
+public class EventBus implements AutoCloseable {
 
     /**
      * The registry of handler methods.
@@ -189,7 +189,15 @@ public class EventBus {
         log().error("Exception invoking method: " + handler.getFullName(), e);
     }
 
+    @Override
+    public void close() {
+        registry.unsubscribeAll();
+    }
 
+    /**
+     * A wrapper over a map from {@code EventClass} to one or more {@code EventHandlerMethod}
+     * that handle events of this class.
+     */
     private static class Registry {
 
         private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
@@ -212,17 +220,26 @@ public class EventBus {
                 final EventClass c = entry.getKey();
                 final EventHandlerMethod handler = entry.getValue();
 
-                lockOnHandlersByClass.writeLock().lock();
-                try {
-                    final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
-                    if (!currentSubscribers.contains(handler)) {
-                        throw handlerMethodWasNotRegistered(handler);
-                    }
-                    currentSubscribers.remove(handler);
-                } finally {
-                    lockOnHandlersByClass.writeLock().unlock();
-                }
+                unsubscribe(c, handler);
             }
+        }
+
+        private void unsubscribe(EventClass c, EventHandlerMethod handler) {
+            lockOnHandlersByClass.writeLock().lock();
+            try {
+                final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
+                if (!currentSubscribers.contains(handler)) {
+                    throw handlerMethodWasNotRegistered(handler);
+                }
+                currentSubscribers.remove(handler);
+            } finally {
+                lockOnHandlersByClass.writeLock().unlock();
+            }
+        }
+
+        private void unsubscribeAll() {
+            handlersByClass.clear();
+            log().info("All subscribers cleared.");
         }
 
         private static IllegalArgumentException handlerMethodWasNotRegistered(EventHandlerMethod handler) {

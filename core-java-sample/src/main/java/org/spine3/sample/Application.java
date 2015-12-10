@@ -33,6 +33,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -76,7 +77,7 @@ public class Application implements AutoCloseable {
 
         try (final Application app = new Application(factory)) {
             app.execute();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log().error("", e);
         }
     }
@@ -120,14 +121,7 @@ public class Application implements AutoCloseable {
      * Tear down storages, unregister event handlers and close the bounded context.
      */
     @Override
-    public void close() throws Exception {
-        //TODO:2015-12-09:alexander.yevsyukov: BoundedContext should close storage factory and close EventBus on its own.
-        storageFactory.close();
-
-        // Unregister event handlers
-        boundedContext.getEventBus().unregister(eventLogger);
-
-        // Close the bounded context.
+    public void close() throws IOException {
         boundedContext.close();
     }
 
