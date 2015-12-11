@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Utility class working with I/O: streams, files etc.
+ * Utility class working with I/O: streams etc.
  *
  * @author Alexander Litus
  */

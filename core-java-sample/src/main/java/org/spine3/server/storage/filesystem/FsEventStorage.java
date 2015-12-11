@@ -23,7 +23,6 @@ package org.spine3.server.storage.filesystem;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.io.file.FileUtil;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
@@ -36,6 +35,7 @@ import java.util.NoSuchElementException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.io.IoUtil.closeSilently;
+import static org.spine3.io.file.FileUtil.*;
 import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 import static org.spine3.util.Events.toEventRecord;
 
@@ -61,7 +61,7 @@ class FsEventStorage extends EventStorage {
     }
 
     private FsEventStorage(String rootDirectoryPath) throws IOException {
-        this.eventStorageFile = FileUtil.createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
+        this.eventStorageFile = createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
     }
 
     @Override
@@ -123,7 +123,7 @@ class FsEventStorage extends EventStorage {
         @Override
         public EventRecord next() {
 
-            FileUtil.checkFileExists(file, "event storage");
+            checkFileExists(file, "event storage");
             checkHasNextBytes();
 
             final EventStoreRecord storeRecord = parseEventRecord();
@@ -151,7 +151,7 @@ class FsEventStorage extends EventStorage {
         private InputStream getInputStream() {
 
             if (bufferedInputStream == null || fileInputStream == null) {
-                fileInputStream = FileUtil.open(file);
+                fileInputStream = open(file);
                 bufferedInputStream = new BufferedInputStream(fileInputStream);
             }
 
