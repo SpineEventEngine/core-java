@@ -19,7 +19,8 @@
  */
 
 /**
- * Classes and interfaces in this package are for internal use of the framework.
+ * The content of this package and its subpackages are for internal use of the framework
+ * and are considered annotated with {@link org.spine3.Internal}.
  */
 @Internal
 @ParametersAreNonnullByDefault
