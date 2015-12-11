@@ -94,7 +94,7 @@ public class Server {
     public void stop() {
         try {
             application.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log().error("Error closing application", e);
         }
         server.shutdown();
@@ -122,7 +122,6 @@ public class Server {
         }));
     }
 
-
     private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
 
         private final BoundedContext boundedContext;
@@ -137,12 +136,6 @@ public class Server {
             final CommandResult reply = boundedContext.process(req);
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
-        }
-
-        @Override
-        public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
-            //TODO:2015-06-25:mikhail.melnik: implement
-            return null;
         }
     }
 

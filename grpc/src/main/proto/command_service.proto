@@ -33,5 +33,4 @@ import "spine/base/command_result.proto";
 
 service CommandService {
     rpc Handle (CommandRequest) returns (CommandResult);
-    rpc HandleStream (stream CommandRequest) returns (stream CommandResult);
 }
