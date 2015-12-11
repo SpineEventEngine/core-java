@@ -22,7 +22,6 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.io.file.FileUtil;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityStorage;
 
@@ -35,6 +34,7 @@ import java.nio.file.Paths;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.io.IoUtil.closeSilently;
+import static org.spine3.io.file.FileUtil.*;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 
@@ -84,7 +84,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
 
-        FileUtil.deleteIfExists(Paths.get(filePath));
+        deleteIfExists(Paths.get(filePath));
         final File file = tryCreateIfDoesNotExist(filePath);
 
         final Any any = toAny(message);
@@ -98,9 +98,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * @return the message parsed from the file or {@code null}
      */
     private static Message readMessage(File file) {
-        FileUtil.checkFileExists(file, "entity storage");
+        checkFileExists(file, "entity storage");
 
-        final InputStream fileInputStream = FileUtil.open(file);
+        final InputStream fileInputStream = open(file);
         final InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
         Any any = Any.getDefaultInstance();
         try {
@@ -120,7 +120,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     private static File tryCreateIfDoesNotExist(String filePath) {
         try {
-            return FileUtil.createIfDoesNotExist(filePath);
+            return createIfDoesNotExist(filePath);
         } catch (IOException e) {
             throw propagate(e);
         }
