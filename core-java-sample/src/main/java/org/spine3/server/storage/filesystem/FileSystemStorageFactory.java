@@ -34,10 +34,10 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.spine3.io.file.FileUtil.deleteIfExists;
 import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
 import static org.spine3.util.Classes.getGenericParameterType;
-import static org.spine3.util.IoUtil.deleteIfExists;
 
 /**
  * A factory for storages based on the file system.

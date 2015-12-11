@@ -19,35 +19,38 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.server.storage;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "EventStoreProto";
+option java_package = "org.spine3.server.storage";
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
+import public "spine/base/event.proto";
 
-import public "spine/base/user_id.proto";
-import public "spine/time/time.proto";
+// This type defines the way events are stored in EventStore.
+// Some of the fields are defined as string representation of corresponding message types
+// so that these fields are available for querying.
+message EventStoreRecord {
+    // A moment of time when the event occurred.
+    google.protobuf.Timestamp timestamp = 1;
 
-// The command identifier is a composite key, which gives information about the context of the command creation.
-message CommandId {
-    // The user who issued the command.
-    UserId actor = 1;
+    // A short name of Protobuf type of the event.
+    string event_type = 2;
 
-    // Date/time at which the command was created.
-    google.protobuf.Timestamp timestamp = 2;
+    // String representation of ID of the aggregate, which generated the event.
+    //
+    // This field is empty, if the event is not from an aggregate.
+    string aggregate_id = 3;
+
+    // String representation of EventId.
+    string event_id = 4;
+
+    reserved 5 to 19;
+
+    // Event instance.
+    google.protobuf.Any event = 20;
+
+    // Event context.
+    spine.base.EventContext context = 21;
 }
-
-// Meta-information about the client environment, which generated a command.
-message CommandContext {
-    // The id of the command.
-    CommandId command_id = 1;
-
-    // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 2;
-}
-
-

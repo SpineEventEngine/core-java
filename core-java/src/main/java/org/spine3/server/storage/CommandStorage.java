@@ -21,11 +21,11 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import org.spine3.TypeName;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.CommandRequest;
+import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.type.TypeName;
 import org.spine3.util.Commands;
 
 import java.io.Closeable;

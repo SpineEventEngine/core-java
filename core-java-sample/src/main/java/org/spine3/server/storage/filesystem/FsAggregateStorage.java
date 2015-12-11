@@ -29,9 +29,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.io.IoUtil.closeSilently;
+import static org.spine3.io.IoUtil.tryToFlush;
 import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
-import static org.spine3.util.IoUtil.closeSilently;
-import static org.spine3.util.IoUtil.tryToFlush;
 
 /**
  * A storage of aggregate root events and snapshots based on the file system.

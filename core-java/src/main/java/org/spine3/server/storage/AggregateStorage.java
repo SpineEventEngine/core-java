@@ -21,11 +21,11 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import org.spine3.TypeName;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
+import org.spine3.type.TypeName;
 import org.spine3.util.Events;
 import org.spine3.util.Identifiers;
 

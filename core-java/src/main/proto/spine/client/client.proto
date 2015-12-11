@@ -23,31 +23,36 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "ClientProto";
+option java_package = "org.spine3.client";
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
-
-import public "spine/base/user_id.proto";
-import public "spine/time/time.proto";
-
-// The command identifier is a composite key, which gives information about the context of the command creation.
-message CommandId {
-    // The user who issued the command.
-    UserId actor = 1;
-
-    // Date/time at which the command was created.
-    google.protobuf.Timestamp timestamp = 2;
+// Version of the code executed on the client.
+message CodeVersion {
+    int32 major = 1;
+    int32 minor = 2;
+    int32 patch_level = 3;
+    int32 build_number = 4;
 }
 
-// Meta-information about the client environment, which generated a command.
-message CommandContext {
-    // The id of the command.
-    CommandId command_id = 1;
+// Meta-information about the client computer device and client code.
+message Client {
 
-    // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 2;
+    enum Type {
+        BROWSER = 0;
+        BROWSER_MOBILE = 1;
+        IOS_IPHONE = 2;
+        IOS_IPAD = 3;
+        ANDROID_PHONE = 4;
+        ANDROID_TABLET = 5;
+        SERVER = 6;
+    }
+
+    message OsInfo {
+        string name = 1;
+        CodeVersion version = 2;
+    }
+
+    Type type = 1;
+    CodeVersion version = 2;
+    OsInfo os_info = 3;
 }
-
-

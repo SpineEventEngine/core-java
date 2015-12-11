@@ -1,0 +1,63 @@
+//
+// Copyright 2015, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.storage;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "CommandStoreProto";
+option java_package = "org.spine3.server.storage";
+
+import public "spine/base/command.proto";
+
+// This type defines the way commands are stored in CommandStore.
+// Some of the fields are defined as string representation of corresponding message types
+// so that these fields are available for querying.
+message CommandStoreRecord {
+    // A moment of time when the command was created.
+    google.protobuf.Timestamp timestamp = 1;
+
+    // A short name of Protobuf command type.
+    string command_type = 2;
+
+    // String representation of CommandId.
+    string command_id = 3;
+
+    // A short Protobuf type name of the aggregate the command is for.
+    //
+    // If the command is not for an aggregate, this field is empty.
+    // We store the type of aggregate ID, not the type of the aggregate itself,
+    // because it is not available at the level of commands.
+    string aggregate_id_type = 4;
+
+    // String representation of the ID of the aggregate for which the command is for.
+    //
+    // This field is empty if the command is not for an aggregate.
+    string aggregate_id = 5;
+
+    reserved 6 to 19;
+
+    // The command instance.
+    google.protobuf.Any command = 20;
+
+    // The context of the command.
+    spine.base.CommandContext context = 21;
+}

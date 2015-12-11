@@ -23,31 +23,16 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandProto";
+option java_outer_classname = "CommandResultProto";
 option java_package = "org.spine3.base";
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
+import public "spine/base/event.proto";
 
-import public "spine/base/user_id.proto";
-import public "spine/time/time.proto";
-
-// The command identifier is a composite key, which gives information about the context of the command creation.
-message CommandId {
-    // The user who issued the command.
-    UserId actor = 1;
-
-    // Date/time at which the command was created.
-    google.protobuf.Timestamp timestamp = 2;
+// A result of executing a command.
+//
+// TODO:2015-12-10:alexander.yevsyukov: This type is deprecated.
+// Keep it until BoundedContext is modified to handle commands asynchronously.
+message CommandResult {
+    repeated EventRecord eventRecord = 1;
+    repeated google.protobuf.Any error = 2;
 }
-
-// Meta-information about the client environment, which generated a command.
-message CommandContext {
-    // The id of the command.
-    CommandId command_id = 1;
-
-    // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 2;
-}
-
-

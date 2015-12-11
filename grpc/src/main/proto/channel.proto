@@ -27,7 +27,7 @@ option java_outer_classname = "ChannelProto";
 option java_package = "org.spine3.base";
 
 import "spine/base/user_id.proto";
-import "spine/base/client.proto";
+import "spine/client/client.proto";
 
 // The request to create a channel for the passed user.
 message ChannelRequest {

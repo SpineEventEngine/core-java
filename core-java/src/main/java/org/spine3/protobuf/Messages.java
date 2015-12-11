@@ -21,10 +21,10 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.*;
 import com.google.protobuf.util.JsonFormat;
-import org.spine3.ClassName;
-import org.spine3.TypeName;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeInAnyException;
+import org.spine3.type.ClassName;
+import org.spine3.type.TypeName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

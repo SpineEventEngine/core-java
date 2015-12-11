@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.type;
 
 import com.google.protobuf.Message;
 
@@ -26,13 +26,13 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
- * A base class for value objects storing class references.
+ * A base class for value objects storing references to message classes.
  *
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
 // NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
-public abstract class ClassTypeValue {
+abstract class ClassTypeValue {
 
     private final Class<? extends Message> value;
 

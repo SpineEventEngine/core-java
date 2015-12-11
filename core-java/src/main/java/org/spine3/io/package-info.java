@@ -18,7 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package contains classes and interfaces related to I/O operations
+ * of the framework.
+ */
 @ParametersAreNonnullByDefault
-package org.spine3;
+package org.spine3.io;
 
 import javax.annotation.ParametersAreNonnullByDefault;

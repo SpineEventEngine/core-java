@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
+package org.spine3.type;
 
 import com.google.protobuf.*;
-import org.spine3.util.StringTypeValue;
 
 import java.util.regex.Pattern;
 

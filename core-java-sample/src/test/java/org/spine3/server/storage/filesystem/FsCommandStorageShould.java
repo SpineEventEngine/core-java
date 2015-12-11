@@ -22,10 +22,12 @@ package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
 import org.junit.Test;
-import org.spine3.base.CommandRequest;
+import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
+
+import java.io.IOException;
 
 import static org.spine3.testdata.TestCommandFactory.createProject;
 
@@ -45,7 +47,7 @@ public class FsCommandStorageShould {
 
 
     @After
-    public void tearDownTest() throws Exception {
+    public void tearDownTest() throws IOException {
         FACTORY.close();
     }
 

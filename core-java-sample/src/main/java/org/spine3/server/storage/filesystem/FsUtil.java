@@ -22,7 +22,7 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
-import org.spine3.util.FileNameEscaper;
+import org.spine3.io.file.FileNameEscaper;
 import org.spine3.util.Identifiers;
 
 import java.io.*;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType.STRING;
 import static java.nio.file.Files.copy;
-import static org.spine3.util.IoUtil.flushAndCloseSilently;
+import static org.spine3.io.IoUtil.flushAndCloseSilently;
 
 /**
  * A utility class which contains common util methods used by file system storages.

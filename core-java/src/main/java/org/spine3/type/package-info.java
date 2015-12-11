@@ -18,39 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3;
-
-import com.google.protobuf.Message;
-import org.spine3.util.ClassTypeValue;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * A value object holding a class of events.
- *
- * @author Alexander Yevsyukov
+ * This package provides basic types for value objects used in the framework.
  */
-public final class EventClass extends ClassTypeValue {
+@ParametersAreNonnullByDefault
+package org.spine3.type;
 
-    private EventClass(Class<? extends Message> value) {
-        super(value);
-    }
-
-    /**
-     * Creates a new instance of the event class.
-     * @param value a value to hold
-     * @return new instance
-     */
-    public static EventClass of(Class<? extends Message> value) {
-        return new EventClass(checkNotNull(value));
-    }
-
-    /**
-     * Creates a new instance of the event class by passed event instance.
-     * @param event an event instance
-     * @return new instance
-     */
-    public static EventClass of(Message event) {
-        return of(checkNotNull(event).getClass());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

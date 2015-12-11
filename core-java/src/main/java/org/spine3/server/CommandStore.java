@@ -22,7 +22,7 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandRequest;
+import org.spine3.client.CommandRequest;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;

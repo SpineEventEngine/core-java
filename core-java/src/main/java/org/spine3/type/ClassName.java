@@ -18,56 +18,52 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.type;
 
-import com.google.protobuf.Message;
-
-import javax.annotation.Nullable;
-import java.util.Objects;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An abstract base value objects holding a Protobuf message.
+ * A value object holding a fully-qualified Java class name.
  *
- * @author Alexander Yevsyukov
+ * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-public abstract class MessageValue {
+public final class ClassName extends StringTypeValue {
 
-    private final Message value;
+    private ClassName(String value) {
+        super(checkNotNull(value));
+    }
 
-    protected MessageValue(@Nullable Message value) {
-        this.value = value;
+    private ClassName(Class clazz) {
+        this(clazz.getName());
     }
 
     /**
-     * @return stored {@code Message} object
+     * Creates a new instance with the name of the passed class.
+     * @param clazz the class to get name from
+     * @return new instance
      */
-    @Nullable
-    protected Message value() {
-        return value;
+    public static ClassName of(Class clazz) {
+        return new ClassName(checkNotNull(clazz));
+    }
+
+    /**
+     * Creates a new instance with the passed class name value.
+     * @param className a fully-qualified Java class name
+     * @return new
+     */
+    public static ClassName of(String className) {
+        checkNotNull(className);
+        checkArgument(className.length() > 0, "Class name cannot me empty");
+        return new ClassName(className);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final MessageValue other = (MessageValue) obj;
-        return Objects.equals(this.value, other.value);
+    public String value() {
+        // Open access to other packages.
+        return super.value();
     }
 }
-

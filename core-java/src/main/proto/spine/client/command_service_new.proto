@@ -23,31 +23,34 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "CommandServiceProtoNew";
+option java_package = "org.spine3.client";
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
+import public "google/protobuf/empty.proto";
+import public "spine/base/command.proto";
 
-import public "spine/base/user_id.proto";
-import public "spine/time/time.proto";
+// Command execution request.
+message CommandRequest {
+    // Any instance of the Protobuf message can be sent as a command.
+    google.protobuf.Any command = 1;
 
-// The command identifier is a composite key, which gives information about the context of the command creation.
-message CommandId {
-    // The user who issued the command.
-    UserId actor = 1;
-
-    // Date/time at which the command was created.
-    google.protobuf.Timestamp timestamp = 2;
+    // The context of the command.
+    CommandContext context = 2;
 }
 
-// Meta-information about the client environment, which generated a command.
-message CommandContext {
-    // The id of the command.
-    CommandId command_id = 1;
+// The result of passing CommandRequest to the service.
+message CommandResponse {
+    oneof value {
+        // The command was accepted to execution.
+        google.protobuf.Empty ok = 1;
 
-    // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 2;
+        // The message of the error occurred upon receiving the request.
+        string error = 2;
+    }
 }
 
-
+//TODO:2015-12-10:alexander.yevsyukov: Uncomment this block when grpc/src/main/proto/command_service.proto is addressed.
+// A service for sending commands from clients.
+// service CommandService {
+//    rpc Handle(CommandRequest) returns (CommandResponse);
+// }
