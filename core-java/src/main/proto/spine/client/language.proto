@@ -23,52 +23,11 @@ package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ClientProto";
+option java_outer_classname = "LanguageProto";
 option java_package = "org.spine3.client";
 
-// Version of the code executed on the client.
-message CodeVersion {
-    int32 major = 1;
-    int32 minor = 2;
-    int32 patch_level = 3;
-    int32 build_number = 4;
-}
+enum Language {
+    UNDEFINED = 0;
 
-// Operating System information.
-message OsInfo {
-    string name = 1;
-
-    CodeVersion version = 2;
-}
-
-
-// Meta-information about the client computer device and client code.
-message Client {
-
-    enum Type {
-        // Reserved value.
-        UNKNOWN = 0;
-
-        BROWSER = 1;
-
-        BROWSER_MOBILE = 2;
-
-        IOS_IPHONE = 3;
-
-        IOS_IPAD = 4;
-
-        ANDROID_PHONE = 5;
-
-        ANDROID_TABLET = 6;
-
-        reserved 7 to 99;
-
-        SERVICE = 100;
-    }
-
-    Type type = 1;
-
-    CodeVersion version = 2;
-
-    OsInfo os_info = 3;
+    //TODO:2015-12-16:alexander.yevsyukov: Implement
 }
