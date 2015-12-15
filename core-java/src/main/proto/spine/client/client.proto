@@ -34,25 +34,41 @@ message CodeVersion {
     int32 build_number = 4;
 }
 
+// Operating System information.
+message OsInfo {
+    string name = 1;
+
+    CodeVersion version = 2;
+}
+
+
 // Meta-information about the client computer device and client code.
 message Client {
 
     enum Type {
-        BROWSER = 0;
-        BROWSER_MOBILE = 1;
-        IOS_IPHONE = 2;
-        IOS_IPAD = 3;
-        ANDROID_PHONE = 4;
-        ANDROID_TABLET = 5;
-        SERVER = 6;
-    }
+        // Reserved value.
+        UNKNOWN = 0;
 
-    message OsInfo {
-        string name = 1;
-        CodeVersion version = 2;
+        BROWSER = 1;
+
+        BROWSER_MOBILE = 2;
+
+        IOS_IPHONE = 3;
+
+        IOS_IPAD = 4;
+
+        ANDROID_PHONE = 5;
+
+        ANDROID_TABLET = 6;
+
+        reserved 7 to 99;
+
+        SERVICE = 100;
     }
 
     Type type = 1;
+
     CodeVersion version = 2;
+
     OsInfo os_info = 3;
 }
