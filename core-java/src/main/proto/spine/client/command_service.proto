@@ -24,7 +24,7 @@ package spine.base;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "CommandServiceProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.client";
 
 import "spine/base/command.proto";
 
