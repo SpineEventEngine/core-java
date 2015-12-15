@@ -42,6 +42,8 @@ message CommandRequest {
 message CommandResponse {
     oneof value {
         // The command was accepted to execution.
+        //
+        // Results of the command execution (if any) would be delivered via event stream.
         google.protobuf.Empty ok = 1;
 
         // The message of the error occurred upon receiving the request.
@@ -50,7 +52,7 @@ message CommandResponse {
 
     // Information on an error reported by the server on attempt to handle CommandRequest.
     message Error {
-
+        // Possible error kinds.
         enum Code {
             // Reserved value.
             UNKNOWN = 0;
