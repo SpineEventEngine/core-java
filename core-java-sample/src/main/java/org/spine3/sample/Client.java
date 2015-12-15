@@ -50,6 +50,9 @@ public class Client {
     private final ManagedChannel channel;
     private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
 
+    //TODO:2015-12-15:alexander.yevsyukov: Why do we pass String instead of URL?
+    //TODO:2015-12-15:alexander.yevsyukov: Isn't Client a part of client-side API framework customers would use?
+
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
@@ -65,16 +68,12 @@ public class Client {
      * Sends requests to the server.
      */
     public static void main(String[] args) throws InterruptedException {
-
         // Access a service running on the local machine
         final Client client = new Client(LOCALHOST, SERVER_PORT);
 
         final List<CommandRequest> requests = Application.generateRequests();
-
         try {
-
             for (CommandRequest request : requests) {
-
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
                 final CommandResult result = client.send(request);
                 log().info("Result: " + toText(result));
