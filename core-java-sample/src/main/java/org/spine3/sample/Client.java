@@ -25,14 +25,19 @@ import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandResult;
+import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandServiceGrpc;
+import org.spine3.sample.order.OrderId;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.protobuf.Messages.toText;
+import static org.spine3.sample.Requests.*;
 import static org.spine3.sample.server.Server.SERVER_PORT;
+import static org.spine3.util.Users.newUserId;
 
 /**
  * Sample gRPC client implementation.
@@ -71,7 +76,7 @@ public class Client {
         // Access a service running on the local machine
         final Client client = new Client(LOCALHOST, SERVER_PORT);
 
-        final List<CommandRequest> requests = Application.generateRequests();
+        final List<CommandRequest> requests = generateRequests();
         try {
             for (CommandRequest request : requests) {
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
@@ -81,6 +86,26 @@ public class Client {
         } finally {
             client.shutdown();
         }
+    }
+
+    /**
+     * Creates several dozens of requests.
+     */
+    public static List<CommandRequest> generateRequests() {
+        final List<CommandRequest> result = newArrayList();
+
+        for (int i = 0; i < 10; i++) {
+            final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
+            final UserId userId = newUserId("user_" + i);
+
+            final CommandRequest createOrder = createOrder(userId, orderId);
+            result.add(createOrder);
+            final CommandRequest addOrderLine = addOrderLine(userId, orderId);
+            result.add(addOrderLine);
+            final CommandRequest payForOrder = payForOrder(userId, orderId);
+            result.add(payForOrder);
+        }
+        return result;
     }
 
     /**

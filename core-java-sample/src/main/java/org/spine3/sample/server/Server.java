@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandResult;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandServiceGrpc;
-import org.spine3.sample.Application;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
 
