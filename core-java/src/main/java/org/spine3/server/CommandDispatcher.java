@@ -20,9 +20,11 @@
 package org.spine3.server;
 
 import com.google.common.collect.Maps;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.client.CommandResponse;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
@@ -45,7 +47,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandDispatcher implements AutoCloseable {
 
-    private final Registry registry = new Registry();
+    /**
+     * The response returned on successful acceptance of a command for processing.
+     */
+    private static final CommandResponse RESPONSE_OK = CommandResponse.newBuilder()
+            .setOk(Empty.getDefaultInstance())
+            .build();
+
+    private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     /**
      * @return singleton instance of {@code CommandDispatcher}
@@ -68,11 +77,11 @@ public class CommandDispatcher implements AutoCloseable {
      * @throws IllegalArgumentException if the object is not of required class
      */
     void register(CommandHandlingObject object) {
-        registry.register(object);
+        handlerRegistry.register(object);
     }
 
     void unregister(CommandHandlingObject object) {
-        registry.unregister(object);
+        handlerRegistry.unregister(object);
     }
 
     /**
@@ -102,21 +111,52 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     private boolean handlerRegistered(CommandClass cls) {
-        final boolean result = registry.handlerRegistered(cls);
+        final boolean result = handlerRegistry.handlerRegistered(cls);
         return result;
     }
 
     @CheckReturnValue
     private CommandHandlerMethod getHandler(CommandClass cls) {
-        return registry.getHandler(cls);
+        return handlerRegistry.getHandler(cls);
     }
 
     @Override
     public void close() {
-        registry.unregisterAll();
+        handlerRegistry.unregisterAll();
     }
 
-    private static class Registry {
+    public CommandResponse validate(Message command) {
+        if (handlerRegistry.hasHandlerFor(command)) {
+            return unsupportedCommand(command);
+        }
+
+        //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
+        // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
+        // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
+
+        return responseOk();
+    }
+
+    private static CommandResponse responseOk() {
+        return RESPONSE_OK;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static CommandResponse unsupportedCommand(Message command) {
+        final CommandResponse response = CommandResponse.newBuilder()
+                .setError(CommandResponse.Error.newBuilder().setCode(
+                        CommandResponse.Error.Code.UNSUPPORTED_COMMAND)
+                        .setMessage("Command " + command.getDescriptorForType().getFullName() + " is not supported."))
+
+                .build();
+        return response;
+    }
+
+    /**
+     * The {@code Registry} contains handlers for all command classes processed by the {@code BoundedContext}
+     * to which this {@code CommandDispatcher} belongs.
+     */
+    private static class HandlerRegistry {
 
         private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
 
@@ -192,6 +232,11 @@ public class CommandDispatcher implements AutoCloseable {
             for (CommandClass commandClass : handlersByClass.keySet()) {
                 removeFor(commandClass);
             }
+        }
+
+        private boolean hasHandlerFor(Message command) {
+            final CommandHandlerMethod method = getHandler(CommandClass.of(command));
+            return method != null;
         }
     }
 

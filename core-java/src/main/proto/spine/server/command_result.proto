@@ -19,20 +19,23 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.server;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "CommandResultProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.server";
 
 import public "spine/base/event.proto";
 
 // A result of executing a command.
-//
-// TODO:2015-12-10:alexander.yevsyukov: This type is deprecated.
-// Keep it until BoundedContext is modified to handle commands asynchronously.
 message CommandResult {
-    repeated EventRecord eventRecord = 1;
+
+    // Events generated as the result of the command.
+    //
+    // Note that `CommandId` can be obtained from `EventId.command_id`.
+    repeated spine.base.EventRecord eventRecord = 1;
+
+    // Errors that may occur during the command execution.
     repeated google.protobuf.Any error = 2;
 }

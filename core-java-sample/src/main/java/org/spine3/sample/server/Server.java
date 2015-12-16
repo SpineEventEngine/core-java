@@ -21,13 +21,9 @@ package org.spine3.sample.server;
 
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
-import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandResult;
-import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandServiceGrpc;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
@@ -103,7 +99,6 @@ public class Server {
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-
         server.awaitTermination();
     }
 
@@ -121,27 +116,9 @@ public class Server {
         }));
     }
 
-    private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
-
-        private final BoundedContext boundedContext;
-
-        private CommandServiceImpl(BoundedContext boundedContext) {
-            this.boundedContext = boundedContext;
-        }
-
-        @Override
-        public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
-
-            final CommandResult reply = boundedContext.process(req);
-            responseObserver.onNext(reply);
-            responseObserver.onCompleted();
-        }
-    }
-
-    private static io.grpc.Server buildServer(BoundedContext boundedContext, int serverPort) {
-
+    private static io.grpc.Server buildServer(CommandServiceGrpc.CommandService boundedContext, int serverPort) {
         final ServerBuilder builder = ServerBuilder.forPort(serverPort);
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl(boundedContext));
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(boundedContext);
         builder.addService(service);
         return builder.build();
     }

@@ -23,13 +23,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandResult;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.CommandResponse;
+import org.spine3.client.CommandServiceGrpc;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -55,7 +57,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext implements AutoCloseable {
+public final class BoundedContext implements CommandServiceGrpc.CommandService, AutoCloseable {
 
     private final String name;
 
@@ -78,6 +80,13 @@ public final class BoundedContext implements AutoCloseable {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    private static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+        return CommandResult.newBuilder()
+                .addAllEventRecord(eventRecords)
+                .addAllError(errors)
+                .build();
     }
 
     /**
@@ -182,6 +191,35 @@ public final class BoundedContext implements AutoCloseable {
         repository.assignStorage(null);
     }
 
+    @Override
+    public void handle(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+        final CommandResponse reply = validate(request);
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+
+        handle(request);
+    }
+
+    /**
+     * Validates the incoming command.
+     *
+     * @param command the command to validate
+     * @return {@link CommandResponse} with {@code ok} value if the command is valid, or
+     *          with {@link CommandResponse.Error} value otherwise
+     */
+    public CommandResponse validate(Message command) {
+        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final CommandResponse result = dispatcher.validate(command);
+        return result;
+    }
+
+    private void handle(CommandRequest request) {
+        //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
+        process(request);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Return results to the client through ClientService
+    }
+
     /**
      * Processes the incoming command request.
      *
@@ -190,7 +228,6 @@ public final class BoundedContext implements AutoCloseable {
      * @param request incoming command request to handle
      * @return the result of command handling
      */
-    @CheckReturnValue
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
 
@@ -225,7 +262,7 @@ public final class BoundedContext implements AutoCloseable {
 
             final List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
 
-            final CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
+            final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
             throw propagate(e);
