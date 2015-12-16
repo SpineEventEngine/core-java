@@ -26,6 +26,8 @@ option java_multiple_files = true;
 option java_outer_classname = "ClientProto";
 option java_package = "org.spine3.client";
 
+import public "spine/base/event.proto";
+
 // Version of the code executed on the client.
 message CodeVersion {
     int32 major = 1;
@@ -36,15 +38,30 @@ message CodeVersion {
 
 // Operating System information.
 message OsInfo {
+    // The name of the operating system.
     string name = 1;
 
+    // The version of the OS.
     CodeVersion version = 2;
 }
 
+// The identifier of a client at the server.
+//
+// The server knows to which client send information by this ID.
+// The value of the client ID can be anything, which makes sense to the
+// design of the application. It can be login information, UUID, a user-selected
+// screen name, a cookie, etc.
+message ClientId {
+    string value = 1;
+}
 
 // Meta-information about the client computer device and client code.
 message Client {
 
+    // The ID of the client.
+    ClientId id = 1;
+
+    // Enumeration of possible types of the computing devices running the code of the application.
     enum Type {
         // Reserved value.
         UNKNOWN = 0;
@@ -53,22 +70,67 @@ message Client {
 
         BROWSER_MOBILE = 2;
 
-        IOS_IPHONE = 3;
+        // reserved 3 to 19;
 
-        IOS_IPAD = 4;
+        PHONE_ANDROID = 20;
 
-        ANDROID_PHONE = 5;
+        PHONE_IOS = 21;
 
-        ANDROID_TABLET = 6;
+        PHONE_WINDOWS = 22;
 
-        reserved 7 to 99;
+        // reserved 23 to 39;
+
+        TABLET_ANDROID = 40;
+
+        TABLET_IOS = 41;
+
+        TABLET_WINDOWS = 42;
+
+        // reserved 43 to 49;
+
+        WATCH_ANDROID = 50;
+
+        WATCH_APPLE = 51;
+
+        // reserved 52 to 99;
 
         SERVICE = 100;
     }
 
-    Type type = 1;
+    // The type of the computing device executing the code.
+    Type type = 2;
 
-    CodeVersion version = 2;
+    // The version of the application.
+    CodeVersion version = 3;
 
-    OsInfo os_info = 3;
+    // Operating system running the code of the application.
+    OsInfo os_info = 4;
 }
+
+// The service handling client connections to the server-side of the application.
+service ClientService {
+    // Connects the client to the server.
+    rpc Connect(Client) returns (Connection);
+
+    // Opens the event stream from the server.
+    rpc Open(Connection) returns (stream spine.base.EventRecord);
+}
+
+// Connection wraps implementation details of the client-server connection.
+message Connection {
+    oneof type {
+        Channel channel = 1;
+    }
+}
+
+// Channel information required for working with Channel API.
+//
+// See https://cloud.google.com/appengine/docs/java/channel/
+message Channel {
+    // The token for the client created by the server.
+    //
+    // Tokens expire after two hours and should also be treated as secret
+    // (e.g. avoid using tokens in URLs).
+    string token = 1;
+}
+
