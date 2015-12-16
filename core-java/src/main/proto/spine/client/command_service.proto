@@ -31,6 +31,7 @@ import "spine/base/command.proto";
 import "spine/client/command_service_new.proto";
 import "spine/base/command_result.proto";
 
+//TODO:2015-12-16:alexander.yevsyukov: Replace this service with CommandServiceNew
 service CommandService {
     rpc Handle (CommandRequest) returns (CommandResult);
 }

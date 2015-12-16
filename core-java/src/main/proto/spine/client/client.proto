@@ -55,56 +55,57 @@ message ClientId {
     string value = 1;
 }
 
+// Enumeration of possible types of the computing devices running the code of the application.
+enum DeviceType {
+    // Reserved value.
+    UNKNOWN = 0;
+
+    BROWSER = 1;
+
+    BROWSER_MOBILE = 2;
+
+    // reserved 3 to 19;
+
+    PHONE_ANDROID = 20;
+
+    PHONE_IOS = 21;
+
+    PHONE_WINDOWS = 22;
+
+    // reserved 23 to 39;
+
+    TABLET_ANDROID = 40;
+
+    TABLET_IOS = 41;
+
+    TABLET_WINDOWS = 42;
+
+    // reserved 43 to 49;
+
+    WATCH_ANDROID = 50;
+
+    WATCH_APPLE = 51;
+
+    // reserved 52 to 99;
+
+    // This value is for server-side code.
+    SERVICE = 100;
+}
+
 // Meta-information about the client computer device and client code.
 message Client {
 
     // The ID of the client.
     ClientId id = 1;
 
-    // Enumeration of possible types of the computing devices running the code of the application.
-    enum Type {
-        // Reserved value.
-        UNKNOWN = 0;
-
-        BROWSER = 1;
-
-        BROWSER_MOBILE = 2;
-
-        // reserved 3 to 19;
-
-        PHONE_ANDROID = 20;
-
-        PHONE_IOS = 21;
-
-        PHONE_WINDOWS = 22;
-
-        // reserved 23 to 39;
-
-        TABLET_ANDROID = 40;
-
-        TABLET_IOS = 41;
-
-        TABLET_WINDOWS = 42;
-
-        // reserved 43 to 49;
-
-        WATCH_ANDROID = 50;
-
-        WATCH_APPLE = 51;
-
-        // reserved 52 to 99;
-
-        SERVICE = 100;
-    }
-
-    // The type of the computing device executing the code.
-    Type type = 2;
+    // The type of the computing device executing the code on the client side.
+    DeviceType device = 2;
 
     // The version of the application.
     CodeVersion version = 3;
 
     // Operating system running the code of the application.
-    OsInfo os_info = 4;
+    OsInfo os = 4;
 }
 
 // The service handling client connections to the server-side of the application.
@@ -125,6 +126,7 @@ message Connection {
 
 // Channel information required for working with Channel API.
 //
+// There can be only one client per channel.
 // See https://cloud.google.com/appengine/docs/java/channel/
 message Channel {
     // The token for the client created by the server.
