@@ -59,7 +59,6 @@ import static org.spine3.util.Identifiers.idToAny;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
 
     /**
@@ -132,22 +131,22 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * in the {@link Registry} if it is not registered yet.
      */
     private void init() {
-
-        if (!this.initialized) {
-
-            final Registry registry = Registry.getInstance();
-            final Class<? extends Aggregate> thisClass = getClass();
-
-            // Register this aggregate root class if it wasn't.
-            if (!registry.contains(thisClass)) {
-                registry.register(thisClass);
-            }
-
-            commandHandlers = registry.getCommandHandlers(thisClass);
-            eventAppliers = registry.getEventAppliers(thisClass);
-
-            this.initialized = true;
+        if (this.initialized) {
+            return;
         }
+
+        final Registry registry = Registry.getInstance();
+        final Class<? extends Aggregate> thisClass = getClass();
+
+        // Register this aggregate root class if it wasn't.
+        if (!registry.contains(thisClass)) {
+            registry.register(thisClass);
+        }
+
+        commandHandlers = registry.getCommandHandlers(thisClass);
+        eventAppliers = registry.getEventAppliers(thisClass);
+
+        this.initialized = true;
     }
 
     private void invokeApplier(Message event) throws InvocationTargetException {
@@ -309,22 +308,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
-
         final EventId eventId = Events.createId(commandId, whenModified);
-
-        final EventContext.Builder builder = EventContext.newBuilder()
+        final EventContext.Builder result = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
-
-        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
-
-        return builder.build();
+        addEventContextAttributes(result, commandId, event, currentState, currentVersion);
+        return result.build();
     }
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p/>
+     *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context
