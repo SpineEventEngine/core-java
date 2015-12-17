@@ -78,15 +78,13 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
         this.eventStore = builder.eventStore;
     }
 
+    /**
+     * Creates a new builder for {@code BoundedContext}.
+     *
+     * @return new builder instance
+     */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    private static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEventRecord(eventRecords)
-                .addAllError(errors)
-                .build();
     }
 
     /**
@@ -234,7 +232,12 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
         store(request);
 
         final CommandResult result = dispatch(request);
-        storeAndPostEvents(result.getEventRecordList());
+        final List<EventRecord> eventRecords = result.getEventRecordList();
+
+        storeEvents(eventRecords);
+        postEvents(eventRecords);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Notify clients.
 
         return result;
     }
@@ -269,23 +272,35 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
         }
     }
 
-    private void storeAndPostEvents(Iterable<EventRecord> records) {
+    private static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+        return CommandResult.newBuilder()
+                .addAllEventRecord(eventRecords)
+                .addAllError(errors)
+                .build();
+    }
+
+    /**
+     * Stores passed events in {@link EventStore}.
+     */
+    private void storeEvents(Iterable<EventRecord> records) {
         final EventStore eventStore = getEventStore();
         for (EventRecord record : records) {
             eventStore.store(record);
-            post(record);
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We do not intend to post EventRecordBuilder instances into the bus.
-    private void post(EventRecord eventRecord) {
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
+    private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
-        final Message event = Events.getEvent(eventRecord);
-        final EventContext context = eventRecord.getContext();
+        for (EventRecord record : records) {
+            final Message event = Events.getEvent(record);
+            final EventContext context = record.getContext();
 
-        eventBus.post(event, context);
+            eventBus.post(event, context);
+        }
     }
-
 
     /**
      * Convenience method for obtaining instance of {@link CommandDispatcher}.
@@ -314,14 +329,17 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
     public static class Builder {
-
+        /**
+         * The default name of {@code BoundedContext}.
+         */
         public static final String DEFAULT_NAME = "Main";
+
         private String name;
         private StorageFactory storageFactory;
-        private CommandDispatcher commandDispatcher;
-        private EventBus eventBus;
         private CommandStore commandStore;
         private EventStore eventStore;
+        private CommandDispatcher commandDispatcher;
+        private EventBus eventBus;
 
         public Builder setName(String name) {
             this.name = name;

@@ -93,7 +93,7 @@ enum DeviceType {
 }
 
 // Meta-information about the client computer device and client code.
-message Client {
+message ClientRequest {
 
     // The ID of the client.
     ClientId id = 1;
@@ -108,33 +108,24 @@ message Client {
     OsInfo os = 4;
 }
 
-// The service handling client connections to the server-side of the application.
-service ClientService {
+// The service handling delivery of event to connected client applications.
+service EventService {
 
-    // Connects the client to the server.
-    rpc Connect(Client) returns (Connection);
+    // Connects the client to the service.
+    rpc Connect(ClientRequest) returns (Connection);
 
     // Opens the event stream from the server.
     rpc Open(Connection) returns (stream spine.base.EventRecord);
 }
 
-// Connection wraps implementation details of the client-server connection.
+// `Connection` wraps implementation details of the client-server connection.
 message Connection {
-
-    // Specification of events that the client wants to receive from the server.
-    EventFilter event_filter = 1;
-
     // Data required for establishing and maintaining connection.
     //
     // Depends on implementation protocol.
     oneof type {
-        Channel channel = 2;
+        Channel channel = 1;
     }
-}
-
-// Specification of events the client is interested in.
-message EventFilter {
-    //TODO:2015-12-16:alexander.yevsyukov: Define
 }
 
 // Channel data required for working with Channel API.

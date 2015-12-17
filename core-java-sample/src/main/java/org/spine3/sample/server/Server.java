@@ -24,9 +24,15 @@ import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.CommandServiceGrpc;
+import org.spine3.client.EventServiceGrpc;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.EventService;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
+
+import static org.spine3.sample.ConnectionConstants.COMMAND_SERVICE_PORT;
+import static org.spine3.sample.ConnectionConstants.EVENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.
@@ -36,22 +42,45 @@ import java.io.IOException;
  */
 public class Server {
 
-    /**
-     * The default port on which the server runs.
-     */
-    public static final int SERVER_PORT = 50051;
-
-    private final io.grpc.Server server;
     private final Application application;
 
+    private final BoundedContext boundedContext;
+    private final EventService eventService;
+    private final io.grpc.Server commandServer;
+    private final io.grpc.Server eventServer;
+
     /**
-     * @param serverPort the port on which the server should run.
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
-    public Server(int serverPort, StorageFactory storageFactory) {
-
+    public Server(StorageFactory storageFactory) {
         this.application = new Application(storageFactory);
-        this.server = buildServer(this.application.getBoundedContext(), serverPort);
+
+        this.boundedContext = this.application.getBoundedContext();
+        this.eventService = new EventService();
+
+        this.commandServer = buildCommandServer(boundedContext, COMMAND_SERVICE_PORT);
+        this.eventServer = buildEventServer(EVENT_SERVICE_PORT);
+    }
+
+    private static io.grpc.Server buildCommandServer(CommandServiceGrpc.CommandService boundedContext, int port) {
+        final ServerServiceDefinition service = CommandServiceGrpc.bindService(boundedContext);
+        final ServerBuilder builder = ServerBuilder.forPort(port);
+        builder.addService(service);
+        return builder.build();
+    }
+
+    private static io.grpc.Server buildEventServer(int port) {
+        final EventServiceGrpc.EventService eventService = createEventService();
+        final ServerServiceDefinition service = EventServiceGrpc.bindService(eventService);
+        final ServerBuilder server = ServerBuilder.forPort(port)
+                .addService(service);
+
+        return server.build();
+    }
+
+    private static EventServiceGrpc.EventService createEventService() {
+
+        return new EventService().getGrpcImpl();
     }
 
     /**
@@ -63,11 +92,11 @@ public class Server {
 
         final StorageFactory storageFactory = Application.getStorageFactory();
 
-        final Server server = new Server(SERVER_PORT, storageFactory);
+        final Server server = new Server(storageFactory);
 
         server.start();
 
-        log().info("Server started, listening on the port " + SERVER_PORT);
+        log().info("Server started, listening to commands on the port " + COMMAND_SERVICE_PORT);
 
         addShutdownHook(server);
 
@@ -80,7 +109,7 @@ public class Server {
      */
     public void start() throws IOException {
         application.setUp();
-        server.start();
+        commandServer.start();
     }
 
     /**
@@ -92,14 +121,16 @@ public class Server {
         } catch (IOException e) {
             log().error("Error closing application", e);
         }
-        server.shutdown();
+        commandServer.shutdown();
+        eventServer.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-        server.awaitTermination();
+        commandServer.awaitTermination();
+        eventServer.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {
@@ -109,18 +140,11 @@ public class Server {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                System.err.println("Shutting down the gRPC server since JVM is shutting down...");
+                System.err.println("Shutting down the CommandService server since JVM is shutting down...");
                 server.stop();
                 System.err.println("Server shut down.");
             }
         }));
-    }
-
-    private static io.grpc.Server buildServer(CommandServiceGrpc.CommandService boundedContext, int serverPort) {
-        final ServerBuilder builder = ServerBuilder.forPort(serverPort);
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(boundedContext);
-        builder.addService(service);
-        return builder.build();
     }
 
     private static Logger log() {

@@ -24,23 +24,26 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
-import org.spine3.client.CommandRequest;
-import org.spine3.client.CommandResponse;
-import org.spine3.client.CommandServiceGrpc;
+import org.spine3.client.*;
+import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.OrderId;
+import org.spine3.util.Identifiers;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.protobuf.Messages.toText;
+import static org.spine3.sample.ConnectionConstants.COMMAND_SERVICE_PORT;
+import static org.spine3.sample.ConnectionConstants.EVENT_SERVICE_PORT;
 import static org.spine3.sample.Requests.*;
-import static org.spine3.sample.server.Server.SERVER_PORT;
 import static org.spine3.util.Users.newUserId;
 
 /**
- * Sample gRPC client implementation.
+ * Sample of a client implementation.
  *
  * @author Mikhail Melnik
  * @author Mikhail Mikhaylov
@@ -49,24 +52,54 @@ import static org.spine3.util.Users.newUserId;
 public class Client {
 
     private static final String LOCALHOST = "localhost";
+    private static final String COMMAND_SERVICE_HOST = LOCALHOST;
+    private static final String CLIENT_SERVICE_HOST = LOCALHOST;
+
     private static final String RPC_FAILED = "RPC failed";
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
-    private final ManagedChannel channel;
-    private final CommandServiceGrpc.CommandServiceBlockingStub blockingStub;
+    private final ManagedChannel commandChannel;
+    private final CommandServiceGrpc.CommandServiceBlockingClient commandClient;
 
-    //TODO:2015-12-15:alexander.yevsyukov: Why do we pass String instead of URL?
-    //TODO:2015-12-15:alexander.yevsyukov: Isn't Client a part of client-side API framework customers would use?
+    private final ManagedChannel clientChannel;
+    private final EventServiceGrpc.EventServiceBlockingClient eventClient;
+
+    private Connection connection;
 
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
-    public Client(String host, int port) {
-        channel = ManagedChannelBuilder
-                .forAddress(host, port)
+    public Client() {
+        commandChannel = ManagedChannelBuilder
+                .forAddress(COMMAND_SERVICE_HOST, COMMAND_SERVICE_PORT)
                 .usePlaintext(true)
                 .build();
-        blockingStub = CommandServiceGrpc.newBlockingStub(channel);
+        commandClient = CommandServiceGrpc.newBlockingStub(commandChannel);
+
+
+        clientChannel = ManagedChannelBuilder
+                .forAddress(CLIENT_SERVICE_HOST, EVENT_SERVICE_PORT)
+                .usePlaintext(true)
+                .build();
+
+        eventClient = EventServiceGrpc.newBlockingStub(clientChannel);
+
+        final ClientRequest request = ClientRequest.newBuilder()
+                .setId(ClientId.newBuilder()
+                    .setValue(Identifiers.newUuid()))
+
+                .setDevice(DeviceType.SERVICE)
+
+                .setVersion(CodeVersion.newBuilder()
+                        .setMajor(0)
+                        .setMinor(2)
+                        .setPatchLevel(0))
+
+                .setOs(OsInfo.getDefaultInstance())
+                    //TODO:2015-12-16:alexander.yevsyukov: Create utility method for builing OS info from Java API.
+                .build();
+
+        connection = eventClient.connect(request);
     }
 
     /**
@@ -74,7 +107,7 @@ public class Client {
      */
     public static void main(String[] args) throws InterruptedException {
         // Access a service running on the local machine
-        final Client client = new Client(LOCALHOST, SERVER_PORT);
+        final Client client = new Client();
 
         final List<CommandRequest> requests = generateRequests();
         try {
@@ -82,16 +115,17 @@ public class Client {
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
                 final CommandResponse result = client.send(request);
                 log().info("Result: " + toText(result));
-
-                //TODO:2015-12-16:alexander.yevsyukov: Get results from the server.
             }
+
+            client.readEvents();
+
         } finally {
             client.shutdown();
         }
     }
 
     /**
-     * Creates several dozens of requests.
+     * Creates several test requests.
      */
     public static List<CommandRequest> generateRequests() {
         final List<CommandRequest> result = newArrayList();
@@ -114,22 +148,33 @@ public class Client {
      * Shutdown the connection channel.
      * @throws InterruptedException if waiting is interrupted.
      */
-    public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
+    private void shutdown() throws InterruptedException {
+        commandChannel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
+        clientChannel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
     /**
      * Sends a request to the server.
      */
-    public CommandResponse send(CommandRequest request) {
-
+    private CommandResponse send(CommandRequest request) {
         CommandResponse result = null;
         try {
-            result = blockingStub.handle(request);
+            result = commandClient.handle(request);
         } catch (RuntimeException e) {
             log().warn(RPC_FAILED, e);
         }
         return result;
+    }
+
+    private void readEvents() {
+        final Iterator<EventRecord> events = eventClient.open(connection);
+
+        while (events.hasNext()) {
+            final EventRecord record = events.next();
+            final String eventText = Messages.toText(record.getEvent());
+            log().info(eventText);
+        }
+
     }
 
     private enum LogSingleton {
