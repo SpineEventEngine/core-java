@@ -41,11 +41,16 @@ import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.filter;
 import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
@@ -59,6 +64,7 @@ import static org.spine3.util.Identifiers.idToAny;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
 
     /**
@@ -219,22 +225,31 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         }
     }
 
+    /**
+     * Applies events to an aggregate unless they are state-neutral.
+     *
+     * <p>Event applier should call {@link #incrementState(Message)},
+     * which will advance the version and record the time of the modification.
+     * <p>It may turn that the event is state-neutral and there is no need to modify the state of the aggregate.
+     *
+     * @param events the events to apply
+     * @param commandId the ID of the command which caused the events
+     * @throws InvocationTargetException if an exception occurs during event applying
+     * @see #getStateNeutralEventClasses()
+     */
     private void apply(Iterable<? extends Message> events, CommandId commandId) throws InvocationTargetException {
-        for (Message event : events) {
-            /**
-             * Event applier should call {@link #incrementState(Message)}.
-             * It will advance version and record time of the modification.
-             *
-             * <p>It may turn that the event does not modify the state of the aggregate.
-             */
-            apply(event);
+        //noinspection LocalVariableNamingConvention
+        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
+        for (Message event : events) {
+            final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+            if (!isStateNeutral) {
+                apply(event);
+            }
             final int currentVersion = getVersion();
             final M state = getState();
             final EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
-
             final EventRecord eventRecord = Events.createEventRecord(event, eventContext);
-
             putUncommitted(eventRecord);
         }
     }
@@ -254,12 +269,21 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             restore((Snapshot) event);
             return;
         }
-
         invokeApplier(event);
     }
 
-    private void putUncommitted(EventRecord record) {
-        uncommittedEvents.add(record);
+    /**
+     * Returns a set of classes of state-neutral events.
+     *
+     * <p>An event is state-neutral if there is no need to modify a state of an aggregate on this event.
+     * It is not required to create applier methods for these events.
+     *
+     * <p>Returns an empty set by default. Override this method to return immutable set constant if it is needed.
+     *
+     * @return a set of classes of state-neutral events
+     */
+    protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
+        return Collections.emptySet();
     }
 
     /**
@@ -273,18 +297,56 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
 
+    private void putUncommitted(EventRecord record) {
+        uncommittedEvents.add(record);
+    }
+
     /**
-     * @return immutable view of records for uncommitted events
+     * Returns all uncommitted events (including state-neutral).
+     *
+     * @return immutable view of records for all uncommitted events
+     * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
-    public List<EventRecord> getUncommittedEvents() {
+    public List<EventRecord> getAllUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
     /**
-     * Returns and clears the events that were uncommitted before the call of this method.
+     * Returns uncommitted events (excluding state-neutral).
      *
-     * @return the list of event records
+     * @return immutable view of records for applicable uncommitted events
+     * @see #getStateNeutralEventClasses()
+     */
+    public Collection<EventRecord> getApplicableUncommittedEvents() {
+        //noinspection LocalVariableNamingConvention
+        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
+        final Predicate<EventRecord> isNotStateNeutral = isNotStateNeutralPredicate(stateNeutralEventClasses);
+        final Collection<EventRecord> result = filter(uncommittedEvents, isNotStateNeutral);
+        return result;
+    }
+
+    @SuppressWarnings("MethodParameterNamingConvention") // to be precise
+    private static Predicate<EventRecord> isNotStateNeutralPredicate(
+            final Collection<Class<? extends Message>> stateNeutralEventClasses) {
+        return new Predicate<EventRecord>() {
+            @Override
+            public boolean apply(@Nullable EventRecord record) {
+                if (record == null) {
+                    return false;
+                }
+                final Any eventAsAny = record.getEvent();
+                final Message event = Messages.fromAny(eventAsAny);
+                final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+                return !isStateNeutral;
+            }
+        };
+    }
+
+    /**
+     * Returns and clears all the events that were uncommitted before the call of this method.
+     *
+     * @return the list of event records (including state-neutral)
      */
     public List<EventRecord> commitEvents() {
         final List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);

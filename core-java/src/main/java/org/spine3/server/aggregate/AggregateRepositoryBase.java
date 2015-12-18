@@ -34,6 +34,7 @@ import org.spine3.server.storage.AggregateStorage;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -182,7 +183,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     @Override
     public void store(A aggregateRoot) {
-        final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
+        final Collection<EventRecord> uncommittedEvents = aggregateRoot.getApplicableUncommittedEvents();
         final int snapshotTrigger = getSnapshotTrigger();
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
@@ -214,7 +215,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
 
         aggregateRoot.dispatch(command, context);
 
-        final List<EventRecord> eventRecords = aggregateRoot.getUncommittedEvents();
+        final List<EventRecord> eventRecords = aggregateRoot.getAllUncommittedEvents();
 
         store(aggregateRoot);
         return eventRecords;
