@@ -228,10 +228,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     /**
      * Applies events to an aggregate unless they are state-neutral.
      *
-     * <p>Event applier should call {@link #incrementState(Message)},
-     * which will advance the version and record the time of the modification.
-     * <p>It may turn that the event is state-neutral and there is no need to modify the state of the aggregate.
-     *
      * @param events the events to apply
      * @param commandId the ID of the command which caused the events
      * @throws InvocationTargetException if an exception occurs during event applying
@@ -318,17 +314,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
-    public List<EventRecord> getAllUncommittedEvents() {
+    public List<EventRecord> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
     /**
      * Returns uncommitted events (excluding state-neutral).
      *
-     * @return immutable view of records for applicable uncommitted events
+     * @return an immutable view of records for applicable uncommitted events
      * @see #getStateNeutralEventClasses()
      */
-    protected Collection<EventRecord> getApplicableUncommittedEvents() {
+    @SuppressWarnings("InstanceMethodNamingConvention")
+    protected Collection<EventRecord> getStateChangingUncommittedEvents() {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
         final Predicate<EventRecord> isNotStateNeutral = isNotStateNeutralPredicate(stateNeutralEventClasses);

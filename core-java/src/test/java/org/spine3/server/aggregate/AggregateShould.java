@@ -297,7 +297,7 @@ public class AggregateShould {
     @Test
     public void not_return_any_uncommitted_event_records_by_default() {
 
-        final List<EventRecord> events = aggregate.getAllUncommittedEvents();
+        final List<EventRecord> events = aggregate.getUncommittedEvents();
         assertTrue(events.isEmpty());
     }
 
@@ -305,19 +305,19 @@ public class AggregateShould {
     public void return_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
-        final List<EventRecord> events = aggregate.getAllUncommittedEvents();
+        final List<EventRecord> events = aggregate.getUncommittedEvents();
 
         assertContains(eventRecordsToClasses(events),
                 ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
-    public void return_only_applicable_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
+    public void return_only_state_changing_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
         final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
 
         aggregate.dispatchCommands(createProject, addTask);
 
-        final Collection<EventRecord> events = aggregate.getApplicableUncommittedEvents();
+        final Collection<EventRecord> events = aggregate.getStateChangingUncommittedEvents();
         assertContains(eventRecordsToClasses(events), ProjectCreated.class);
     }
 

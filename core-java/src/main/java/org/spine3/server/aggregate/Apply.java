@@ -20,6 +20,8 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,6 +35,12 @@ import java.lang.annotation.Target;
  * <p>Event applier methods are not supposed to be called from outside of the
  * declaring class. As such they should be declared {@code private}.
  *
+ * <p>Event applier should call {@link Aggregate#incrementState(Message)},
+ * which will advance the version and record the time of the modification.
+ *
+ * <p>It may turn that the event is state-neutral and we do not modify the state of the aggregate when it occurs.
+ *
+ * @see Aggregate#getStateNeutralEventClasses()
  * @author Alexander Yevsyukov
  */
 @Retention(RetentionPolicy.RUNTIME)
