@@ -525,6 +525,9 @@ public class AggregateShould {
      */
     public static class TestAggregateWithStateNeutralEvents extends Aggregate<ProjectId, Project> {
 
+        private static final ImmutableSet<Class<? extends Message>> STATE_NEUTRAL_EVENT_CLASSES =
+                ImmutableSet.<Class<? extends Message>>of(TaskAdded.class);
+
         private boolean isTaskAddedCommandHandled = false;
 
         public TestAggregateWithStateNeutralEvents(ProjectId id) {
@@ -557,9 +560,7 @@ public class AggregateShould {
         @Override
         @SuppressWarnings("RefusedBequest") // the method from superclass returns nothing
         protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
-            final ImmutableSet<Class<? extends Message>> result =
-                    ImmutableSet.<Class<? extends Message>>of(TaskAdded.class);
-            return result;
+            return STATE_NEUTRAL_EVENT_CLASSES;
         }
 
         public void dispatchCommands(Message... commands) throws InvocationTargetException {
