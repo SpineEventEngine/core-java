@@ -41,11 +41,16 @@ import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.filter;
 import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
@@ -132,22 +137,22 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * in the {@link Registry} if it is not registered yet.
      */
     private void init() {
-
-        if (!this.initialized) {
-
-            final Registry registry = Registry.getInstance();
-            final Class<? extends Aggregate> thisClass = getClass();
-
-            // Register this aggregate root class if it wasn't.
-            if (!registry.contains(thisClass)) {
-                registry.register(thisClass);
-            }
-
-            commandHandlers = registry.getCommandHandlers(thisClass);
-            eventAppliers = registry.getEventAppliers(thisClass);
-
-            this.initialized = true;
+        if (this.initialized) {
+            return;
         }
+
+        final Registry registry = Registry.getInstance();
+        final Class<? extends Aggregate> thisClass = getClass();
+
+        // Register this aggregate root class if it wasn't.
+        if (!registry.contains(thisClass)) {
+            registry.register(thisClass);
+        }
+
+        commandHandlers = registry.getCommandHandlers(thisClass);
+        eventAppliers = registry.getEventAppliers(thisClass);
+
+        this.initialized = true;
     }
 
     private void invokeApplier(Message event) throws InvocationTargetException {
@@ -220,22 +225,27 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         }
     }
 
+    /**
+     * Applies events to an aggregate unless they are state-neutral.
+     *
+     * @param events the events to apply
+     * @param commandId the ID of the command which caused the events
+     * @throws InvocationTargetException if an exception occurs during event applying
+     * @see #getStateNeutralEventClasses()
+     */
     private void apply(Iterable<? extends Message> events, CommandId commandId) throws InvocationTargetException {
-        for (Message event : events) {
-            /**
-             * Event applier should call {@link #incrementState(Message)}.
-             * It will advance version and record time of the modification.
-             *
-             * <p>It may turn that the event does not modify the state of the aggregate.
-             */
-            apply(event);
+        //noinspection LocalVariableNamingConvention
+        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
+        for (Message event : events) {
+            final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+            if (!isStateNeutral) {
+                apply(event);
+            }
             final int currentVersion = getVersion();
             final M state = getState();
             final EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
-
             final EventRecord eventRecord = Events.createEventRecord(event, eventContext);
-
             putUncommitted(eventRecord);
         }
     }
@@ -255,12 +265,31 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             restore((Snapshot) event);
             return;
         }
-
         invokeApplier(event);
     }
 
-    private void putUncommitted(EventRecord record) {
-        uncommittedEvents.add(record);
+    /**
+     * Returns a set of classes of state-neutral events (an empty set by default).
+     *
+     * <p>An event is state-neutral if we do not modify the aggregate state when this event occurs.
+     *
+     * <p>Instead of creating empty applier methods for such events,
+     * override this method returning immutable set of event classes, e.g.:
+     *
+     * <pre>
+     * private static final ImmutableSet&lt;Class&lt;? extends Message&gt;&gt; STATE_NEUTRAL_EVENT_CLASSES =
+     *         ImmutableSet.&lt;Class&lt;? extends Message&gt;&gt;of(StateNeutralEvent.class);
+     *
+     * &#64;Override
+     * protected Set&lt;Class&lt;? extends Message&gt;&gt; getStateNeutralEventClasses() {
+     *     return STATE_NEUTRAL_EVENT_CLASSES;
+     * }
+     * </pre>
+     *
+     * @return a set of classes of state-neutral events
+     */
+    protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
+        return Collections.emptySet();
     }
 
     /**
@@ -274,8 +303,15 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
 
+    private void putUncommitted(EventRecord record) {
+        uncommittedEvents.add(record);
+    }
+
     /**
-     * @return immutable view of records for uncommitted events
+     * Returns all uncommitted events (including state-neutral).
+     *
+     * @return immutable view of records for all uncommitted events
+     * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
     public List<EventRecord> getUncommittedEvents() {
@@ -283,7 +319,39 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns and clears the events that were uncommitted before the call of this method.
+     * Returns uncommitted events (excluding state-neutral).
+     *
+     * @return an immutable view of records for applicable uncommitted events
+     * @see #getStateNeutralEventClasses()
+     */
+    @SuppressWarnings("InstanceMethodNamingConvention")
+    protected Collection<EventRecord> getStateChangingUncommittedEvents() {
+        //noinspection LocalVariableNamingConvention
+        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
+        final Predicate<EventRecord> isNotStateNeutral = isNotStateNeutralPredicate(stateNeutralEventClasses);
+        final Collection<EventRecord> result = filter(uncommittedEvents, isNotStateNeutral);
+        return result;
+    }
+
+    @SuppressWarnings("MethodParameterNamingConvention") // to be precise
+    private static Predicate<EventRecord> isNotStateNeutralPredicate(
+            final Collection<Class<? extends Message>> stateNeutralEventClasses) {
+        return new Predicate<EventRecord>() {
+            @Override
+            public boolean apply(@Nullable EventRecord record) {
+                if (record == null) {
+                    return false;
+                }
+                final Any eventAsAny = record.getEvent();
+                final Message event = Messages.fromAny(eventAsAny);
+                final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+                return !isStateNeutral;
+            }
+        };
+    }
+
+    /**
+     * Returns and clears all the events that were uncommitted before the call of this method.
      *
      * @return the list of event records
      */
@@ -309,22 +377,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
-
         final EventId eventId = Events.createId(commandId, whenModified);
-
-        final EventContext.Builder builder = EventContext.newBuilder()
+        final EventContext.Builder result = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
-
-        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
-
-        return builder.build();
+        addEventContextAttributes(result, commandId, event, currentState, currentVersion);
+        return result.build();
     }
 
     /**
      * Adds custom attributes to an event context builder during the creation of the event context.
-     * <p/>
+     *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
      * @param builder        a builder for the event context

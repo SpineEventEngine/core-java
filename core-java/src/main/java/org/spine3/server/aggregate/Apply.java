@@ -20,18 +20,29 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method of an aggregate root as an event applier.
+ * Marks a method of an aggregate as one that modifies the state of the aggregate with data from the passed event.
+
+ * <p>As we apply the event to the aggregate state, we call such method <i>Event Applier</i>.
+
+ * <p>Event appliers are not supposed to be called from the outside of the declaring aggregate class.
+ * As such they should be declared {@code private}.
  *
  * <p>The type of the event will be indicated by the first (and only) parameter.
  *
- * <p>Event applier methods are not supposed to be called from outside of the
- * declaring class. As such they should be declared {@code private}.
+ * <p>Event applier should call {@link Aggregate#incrementState(Message)},
+ * which will advance the version and record the time of the modification.
+ *
+ * <p>It may turn that the event is state-neutral.
+ * An event is state-neutral if we do not modify the aggregate state when this event occurs.
+ * Please see {@link Aggregate#getStateNeutralEventClasses()} for more details and a sample.
  *
  * @author Alexander Yevsyukov
  */
