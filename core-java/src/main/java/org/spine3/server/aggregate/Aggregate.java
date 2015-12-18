@@ -273,12 +273,22 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns a set of classes of state-neutral events.
+     * Returns a set of classes of state-neutral events (an empty set by default).
      *
-     * <p>An event is state-neutral if there is no need to modify a state of an aggregate on this event.
-     * It is not required to create applier methods for these events.
+     * <p>An event is state-neutral if we do not modify the aggregate state when this event occurs.
      *
-     * <p>Returns an empty set by default. Override this method to return immutable set constant if it is needed.
+     * <p>Instead of creating empty applier methods for such events,
+     * override this method returning immutable set of event classes, e.g.:
+     *
+     * <pre>
+     * private static final ImmutableSet&lt;Class&lt;? extends Message&gt;&gt; STATE_NEUTRAL_EVENT_CLASSES =
+     *         ImmutableSet.&lt;Class&lt;? extends Message&gt;&gt;of(StateNeutralEvent.class);
+     *
+     * &#64;Override
+     * protected Set&lt;Class&lt;? extends Message&gt;&gt; getStateNeutralEventClasses() {
+     *     return STATE_NEUTRAL_EVENT_CLASSES;
+     * }
+     * </pre>
      *
      * @return a set of classes of state-neutral events
      */
@@ -318,7 +328,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @return immutable view of records for applicable uncommitted events
      * @see #getStateNeutralEventClasses()
      */
-    public Collection<EventRecord> getApplicableUncommittedEvents() {
+    protected Collection<EventRecord> getApplicableUncommittedEvents() {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
         final Predicate<EventRecord> isNotStateNeutral = isNotStateNeutralPredicate(stateNeutralEventClasses);
@@ -346,7 +356,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     /**
      * Returns and clears all the events that were uncommitted before the call of this method.
      *
-     * @return the list of event records (including state-neutral)
+     * @return the list of event records
      */
     public List<EventRecord> commitEvents() {
         final List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
