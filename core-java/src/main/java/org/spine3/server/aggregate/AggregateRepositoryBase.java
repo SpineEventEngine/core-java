@@ -145,7 +145,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
     }
 
     /**
-     * Loads the an aggregate by given id.
+     * Loads the aggregate by given id.
      *
      * @param id id of the aggregate to load
      * @return the loaded object
