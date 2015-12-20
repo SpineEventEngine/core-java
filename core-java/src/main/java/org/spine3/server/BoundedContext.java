@@ -203,7 +203,7 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
      *
      * @param command the command to validate
      * @return {@link CommandResponse} with {@code ok} value if the command is valid, or
-     *          with {@link CommandResponse.Error} value otherwise
+     *          with {@link org.spine3.base.Error} value otherwise
      */
     public CommandResponse validate(Message command) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
