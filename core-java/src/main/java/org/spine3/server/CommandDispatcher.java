@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Error;
 import org.spine3.base.EventRecord;
 import org.spine3.client.CommandResponse;
 import org.spine3.internal.MessageHandlerMethod;
@@ -31,6 +32,7 @@ import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.type.CommandClass;
+import org.spine3.util.Values;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -143,10 +145,12 @@ public class CommandDispatcher implements AutoCloseable {
 
     @SuppressWarnings("TypeMayBeWeakened")
     private static CommandResponse unsupportedCommand(Message command) {
+        final String commandType = command.getDescriptorForType().getFullName();
         final CommandResponse response = CommandResponse.newBuilder()
-                .setError(CommandResponse.Error.newBuilder().setCode(
-                        CommandResponse.Error.Code.UNSUPPORTED_COMMAND)
-                        .setMessage("Command " + command.getDescriptorForType().getFullName() + " is not supported."))
+                .setError(Error.newBuilder()
+                            .setCode(CommandResponse.ErrorCode.UNSUPPORTED_COMMAND.getNumber())
+                            .setData(Values.newStringValueAsAny(commandType))
+                        .setMessage("Command " + commandType + " is not supported."))
 
                 .build();
         return response;
