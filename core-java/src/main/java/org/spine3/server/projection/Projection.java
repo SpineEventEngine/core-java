@@ -38,11 +38,11 @@ import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 /**
  * A projection holds a structural representation of data extracted from a stream of events.
  *
- * <p/>The process of projecting the event stream into data we collect is performed
+ * <p>The process of projecting the event stream into data we collect is performed
  * by event handlers for the events of interest. These event handlers are implemented
  * in the classes extending this abstract class.
  *
- * <p/>Event handlers are invoked by a {@link ProjectionRepository} that manages instances
+ * <p>Event handlers are invoked by a {@link ProjectionRepository} that manages instances
  * of a projection class.
  *
  * @param <I> the type of the projection IDs

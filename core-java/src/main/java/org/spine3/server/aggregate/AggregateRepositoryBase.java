@@ -145,7 +145,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
     }
 
     /**
-     * Loads the an aggregate by given id.
+     * Loads the aggregate by given id.
      *
      * @param id id of the aggregate to load
      * @return the loaded object
@@ -182,7 +182,7 @@ public abstract class AggregateRepositoryBase<I extends Message,
      */
     @Override
     public void store(A aggregateRoot) {
-        final List<EventRecord> uncommittedEvents = aggregateRoot.getUncommittedEvents();
+        final Iterable<EventRecord> uncommittedEvents = aggregateRoot.getStateChangingUncommittedEvents();
         final int snapshotTrigger = getSnapshotTrigger();
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
