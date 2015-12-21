@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.client.*;
+import org.spine3.client.grpc.CommandServiceGrpc;
 import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.OrderId;
 import org.spine3.util.Identifiers;
@@ -64,7 +65,7 @@ public class Client {
     private final ManagedChannel clientChannel;
     private final EventServiceGrpc.EventServiceBlockingClient eventClient;
 
-    private Connection connection;
+    private final Connection connection;
 
     /**
      * Construct the client connecting to server at {@code host:port}.

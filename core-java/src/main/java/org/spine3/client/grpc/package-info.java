@@ -18,26 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
-
-import org.spine3.client.EventServiceGrpc.EventService;
-import org.spine3.client.grpc.CommandServiceGrpc.CommandService;
-
 /**
- * Constant values shared between client and server.
+ * This package contains gRPC-based implementation of client-server communication.
  *
- * @author Alexander Yevsyukov
+ * <p>This package is not a part of public API of the framework.
  */
-public interface ConnectionConstants {
 
-    //TODO:2015-12-21:alexander.yevsyukov: Have only one service for client and one port.
-    /**
-     * The port on which the server of {@link CommandService} runs.
-     */
-    int COMMAND_SERVICE_PORT = 50051;
+@Internal
+package org.spine3.client.grpc;
 
-    /**
-     * The port on which the server of {@link EventService} runs.
-     */
-    int EVENT_SERVICE_PORT = 50052;
-}
+import org.spine3.Internal;

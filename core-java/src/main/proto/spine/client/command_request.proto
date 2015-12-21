@@ -23,16 +23,16 @@ package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
+option java_outer_classname = "CommandRequestProto";
+option java_package = "org.spine3.client";
 
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal` to hide implementation details
-// from the public API of the framework.
-option java_package = "org.spine3.client.grpc";
+import public "spine/base/command.proto";
 
-import public "spine/client/command_request.proto";
-import public "spine/client/command_response.proto";
+// Command execution request.
+message CommandRequest {
+    // Any instance of the Protobuf message can be sent as a command.
+    google.protobuf.Any command = 1;
 
-// A service for sending commands from clients.
- service CommandService {
-    rpc Handle(CommandRequest) returns (CommandResponse);
- }
+    // The context of the command.
+    spine.base.CommandContext context = 2;
+}
