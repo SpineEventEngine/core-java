@@ -197,7 +197,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
     }
 
     @Override
-    public void handle(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+    public void post(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
         final CommandResponse reply = validate(request);
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
@@ -206,7 +206,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
     }
 
     @Override
-    public void open(Connection request, StreamObserver<EventRecord> responseObserver) {
+    public void getEvents(Connection request, StreamObserver<EventRecord> responseObserver) {
         //TODO:2015-12-21:alexander.yevsyukov: Implement
     }
 

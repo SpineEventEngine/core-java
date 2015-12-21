@@ -52,7 +52,6 @@ import static org.spine3.util.Users.newUserId;
 public class Client {
 
     private static final String LOCALHOST = "localhost";
-    private static final String COMMAND_SERVICE_HOST = LOCALHOST;
     private static final String CLIENT_SERVICE_HOST = LOCALHOST;
 
     private static final String RPC_FAILED = "RPC failed";
@@ -67,7 +66,7 @@ public class Client {
      */
     public Client() {
         channel = ManagedChannelBuilder
-                .forAddress(COMMAND_SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
+                .forAddress(CLIENT_SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
                 .usePlaintext(true)
                 .build();
         client = ClientServiceGrpc.newBlockingStub(channel);
@@ -147,7 +146,7 @@ public class Client {
     private CommandResponse send(CommandRequest request) {
         CommandResponse result = null;
         try {
-            result = client.handle(request);
+            result = client.post(request);
         } catch (RuntimeException e) {
             log().warn(RPC_FAILED, e);
         }
@@ -155,7 +154,7 @@ public class Client {
     }
 
     private void readEvents() {
-        final Iterator<EventRecord> events = client.open(connection);
+        final Iterator<EventRecord> events = client.getEvents(connection);
 
         while (events.hasNext()) {
             final EventRecord record = events.next();
