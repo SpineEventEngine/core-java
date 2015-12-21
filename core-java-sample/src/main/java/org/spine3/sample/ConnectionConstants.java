@@ -20,9 +20,6 @@
 
 package org.spine3.sample;
 
-import org.spine3.client.EventServiceGrpc.EventService;
-import org.spine3.client.grpc.CommandServiceGrpc.CommandService;
-
 /**
  * Constant values shared between client and server.
  *
@@ -30,14 +27,9 @@ import org.spine3.client.grpc.CommandServiceGrpc.CommandService;
  */
 public interface ConnectionConstants {
 
-    //TODO:2015-12-21:alexander.yevsyukov: Have only one service for client and one port.
     /**
-     * The port on which the server of {@link CommandService} runs.
+     * The port on which the server of {@link org.spine3.client.grpc.ClientServiceGrpc.ClientService} runs.
      */
-    int COMMAND_SERVICE_PORT = 50051;
+    int DEFAULT_CLIENT_SERVICE_PORT = 50051;
 
-    /**
-     * The port on which the server of {@link EventService} runs.
-     */
-    int EVENT_SERVICE_PORT = 50052;
 }

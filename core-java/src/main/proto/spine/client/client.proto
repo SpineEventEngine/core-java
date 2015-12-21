@@ -108,16 +108,6 @@ message ClientRequest {
     OsInfo os = 4;
 }
 
-// The service handling delivery of event to connected client applications.
-service EventService {
-
-    // Connects the client to the service.
-    rpc Connect(ClientRequest) returns (Connection);
-
-    // Opens the event stream from the server.
-    rpc Open(Connection) returns (stream spine.base.EventRecord);
-}
-
 // `Connection` wraps implementation details of the client-server connection.
 message Connection {
     // Data required for establishing and maintaining connection.

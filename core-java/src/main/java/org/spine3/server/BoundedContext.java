@@ -29,9 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.client.ClientRequest;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandResponse;
-import org.spine3.client.grpc.CommandServiceGrpc;
+import org.spine3.client.Connection;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -57,7 +59,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext implements CommandServiceGrpc.CommandService, AutoCloseable {
+public final class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     private final String name;
 
@@ -190,12 +192,22 @@ public final class BoundedContext implements CommandServiceGrpc.CommandService, 
     }
 
     @Override
+    public void connect(ClientRequest request, StreamObserver<Connection> responseObserver) {
+        //TODO:2015-12-21:alexander.yevsyukov: Implement
+    }
+
+    @Override
     public void handle(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
         final CommandResponse reply = validate(request);
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
 
         handle(request);
+    }
+
+    @Override
+    public void open(Connection request, StreamObserver<EventRecord> responseObserver) {
+        //TODO:2015-12-21:alexander.yevsyukov: Implement
     }
 
     /**

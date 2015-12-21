@@ -23,16 +23,13 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.client.EventServiceGrpc;
-import org.spine3.client.grpc.CommandServiceGrpc;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.EventService;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
 
-import static org.spine3.sample.ConnectionConstants.COMMAND_SERVICE_PORT;
-import static org.spine3.sample.ConnectionConstants.EVENT_SERVICE_PORT;
+import static org.spine3.sample.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.
@@ -45,9 +42,7 @@ public class Server {
     private final Application application;
 
     private final BoundedContext boundedContext;
-    private final EventService eventService;
-    private final io.grpc.Server commandServer;
-    private final io.grpc.Server eventServer;
+    private final io.grpc.Server clientServer;
 
     /**
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
@@ -56,31 +51,14 @@ public class Server {
         this.application = new Application(storageFactory);
 
         this.boundedContext = this.application.getBoundedContext();
-        this.eventService = new EventService();
-
-        this.commandServer = buildCommandServer(boundedContext, COMMAND_SERVICE_PORT);
-        this.eventServer = buildEventServer(EVENT_SERVICE_PORT);
+        this.clientServer = buildClientServer(boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
     }
 
-    private static io.grpc.Server buildCommandServer(CommandServiceGrpc.CommandService boundedContext, int port) {
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(boundedContext);
+    private static io.grpc.Server buildClientServer(ClientServiceGrpc.ClientService boundedContext, int port) {
+        final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
         final ServerBuilder builder = ServerBuilder.forPort(port);
         builder.addService(service);
         return builder.build();
-    }
-
-    private static io.grpc.Server buildEventServer(int port) {
-        final EventServiceGrpc.EventService eventService = createEventService();
-        final ServerServiceDefinition service = EventServiceGrpc.bindService(eventService);
-        final ServerBuilder server = ServerBuilder.forPort(port)
-                .addService(service);
-
-        return server.build();
-    }
-
-    private static EventServiceGrpc.EventService createEventService() {
-
-        return new EventService().getGrpcImpl();
     }
 
     /**
@@ -96,7 +74,7 @@ public class Server {
 
         server.start();
 
-        log().info("Server started, listening to commands on the port " + COMMAND_SERVICE_PORT);
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
 
         addShutdownHook(server);
 
@@ -109,7 +87,7 @@ public class Server {
      */
     public void start() throws IOException {
         application.setUp();
-        commandServer.start();
+        clientServer.start();
     }
 
     /**
@@ -121,16 +99,14 @@ public class Server {
         } catch (IOException e) {
             log().error("Error closing application", e);
         }
-        commandServer.shutdown();
-        eventServer.shutdown();
+        clientServer.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-        commandServer.awaitTermination();
-        eventServer.awaitTermination();
+        clientServer.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {

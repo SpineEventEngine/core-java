@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.client.*;
-import org.spine3.client.grpc.CommandServiceGrpc;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.protobuf.Messages;
 import org.spine3.sample.order.OrderId;
 import org.spine3.util.Identifiers;
@@ -38,8 +38,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.protobuf.Messages.toText;
-import static org.spine3.sample.ConnectionConstants.COMMAND_SERVICE_PORT;
-import static org.spine3.sample.ConnectionConstants.EVENT_SERVICE_PORT;
+import static org.spine3.sample.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Users.newUserId;
 
@@ -59,31 +58,20 @@ public class Client {
     private static final String RPC_FAILED = "RPC failed";
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
-    private final ManagedChannel commandChannel;
-    private final CommandServiceGrpc.CommandServiceBlockingClient commandClient;
-
-    private final ManagedChannel clientChannel;
-    private final EventServiceGrpc.EventServiceBlockingClient eventClient;
-
+    private final ManagedChannel channel;
+    private final ClientServiceGrpc.ClientServiceBlockingClient client;
     private final Connection connection;
 
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
     public Client() {
-        commandChannel = ManagedChannelBuilder
-                .forAddress(COMMAND_SERVICE_HOST, COMMAND_SERVICE_PORT)
+        channel = ManagedChannelBuilder
+                .forAddress(COMMAND_SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
                 .usePlaintext(true)
                 .build();
-        commandClient = CommandServiceGrpc.newBlockingStub(commandChannel);
+        client = ClientServiceGrpc.newBlockingStub(channel);
 
-
-        clientChannel = ManagedChannelBuilder
-                .forAddress(CLIENT_SERVICE_HOST, EVENT_SERVICE_PORT)
-                .usePlaintext(true)
-                .build();
-
-        eventClient = EventServiceGrpc.newBlockingStub(clientChannel);
 
         final ClientRequest request = ClientRequest.newBuilder()
                 .setId(ClientId.newBuilder()
@@ -100,7 +88,7 @@ public class Client {
                     //TODO:2015-12-16:alexander.yevsyukov: Create utility method for builing OS info from Java API.
                 .build();
 
-        connection = eventClient.connect(request);
+        connection = client.connect(request);
     }
 
     /**
@@ -150,8 +138,7 @@ public class Client {
      * @throws InterruptedException if waiting is interrupted.
      */
     private void shutdown() throws InterruptedException {
-        commandChannel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
-        clientChannel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
+        channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
     /**
@@ -160,7 +147,7 @@ public class Client {
     private CommandResponse send(CommandRequest request) {
         CommandResponse result = null;
         try {
-            result = commandClient.handle(request);
+            result = client.handle(request);
         } catch (RuntimeException e) {
             log().warn(RPC_FAILED, e);
         }
@@ -168,7 +155,7 @@ public class Client {
     }
 
     private void readEvents() {
-        final Iterator<EventRecord> events = eventClient.open(connection);
+        final Iterator<EventRecord> events = client.open(connection);
 
         while (events.hasNext()) {
             final EventRecord record = events.next();

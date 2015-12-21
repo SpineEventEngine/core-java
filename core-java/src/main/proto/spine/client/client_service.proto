@@ -23,16 +23,24 @@ package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
+option java_outer_classname = "ClientServiceProto";
 
 // We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal` to hide implementation details
 // from the public API of the framework.
 option java_package = "org.spine3.client.grpc";
 
+import public "spine/client/client.proto";
 import public "spine/client/command_request.proto";
 import public "spine/client/command_response.proto";
 
 // A service for sending commands from clients.
- service CommandService {
+ service ClientService {
+    // Connects the client to the service.
+    rpc Connect(ClientRequest) returns (Connection);
+
+    // Request to handle a command.
     rpc Handle(CommandRequest) returns (CommandResponse);
+
+    // Opens the event stream from the server.
+    rpc Open(Connection) returns (stream spine.base.EventRecord);
  }
