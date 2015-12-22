@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
+package org.spine3.sample.server;
 
 import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.eventbus.EventBus;
+import org.spine3.sample.Client;
 import org.spine3.sample.order.OrderId;
 import org.spine3.sample.order.OrderRepository;
 import org.spine3.server.BoundedContext;
@@ -37,11 +37,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
-import static org.spine3.util.Users.newUserId;
 
 /**
  * A sample application showing basic usage of the framework.
@@ -89,7 +86,7 @@ public class Application implements AutoCloseable {
         setUp();
 
         // Generate test requests
-        final List<CommandRequest> requests = generateRequests();
+        final List<CommandRequest> requests = Client.generateRequests();
 
         // Process requests
         for (CommandRequest request : requests) {
@@ -123,26 +120,6 @@ public class Application implements AutoCloseable {
     @Override
     public void close() throws IOException {
         boundedContext.close();
-    }
-
-    /**
-     * Creates several dozens of requests.
-     */
-    public static List<CommandRequest> generateRequests() {
-        final List<CommandRequest> result = newArrayList();
-
-        for (int i = 0; i < 10; i++) {
-            final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
-            final UserId userId = newUserId("user_" + i);
-
-            final CommandRequest createOrder = createOrder(userId, orderId);
-            result.add(createOrder);
-            final CommandRequest addOrderLine = addOrderLine(userId, orderId);
-            result.add(addOrderLine);
-            final CommandRequest payForOrder = payForOrder(userId, orderId);
-            result.add(payForOrder);
-        }
-        return result;
     }
 
     /**

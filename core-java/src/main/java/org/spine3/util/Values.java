@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.util;
+
+import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Value;
+
 /**
- * The content of this package and its subpackages are for internal use of the framework
- * and are considered annotated with {@link org.spine3.Internal}.
+ * Utility class for working with {@link Value}s.
+ *
+ * @author Alexander Yevsyukov
  */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.server.internal;
+@SuppressWarnings("UtilityClass")
+public class Values {
 
-import org.spine3.Internal;
+    private Values() {}
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Creates a new instance of {@link StringValue} and wraps it into {@link Any}.
+     */
+    public static Any newStringValueAsAny(String value) {
+        return Any.pack(StringValue.newBuilder().setValue(value).build());
+    }
+}

@@ -18,30 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
+/**
+ * This package contains gRPC-based implementation of client-server communication.
+ *
+ * <p>This package is not a part of public API of the framework.
+ */
 
-import org.junit.Test;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+@Internal
+package org.spine3.client.grpc;
 
-import java.io.IOException;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class ApplicationShould {
-
-    private static final StorageFactory FS_STORAGE_FACTORY = FileSystemStorageFactory.newInstance(ApplicationShould.class);
-
-    @Test
-    public void execute_on_in_memory_storage() {
-        final Application app = new Application(InMemoryStorageFactory.getInstance());
-        app.execute();
-    }
-
-    @Test
-    public void execute_on_file_system_storage() throws IOException {
-        try (final Application app = new Application(FS_STORAGE_FACTORY))  {
-            app.execute();
-        }
-    }
-}
+import org.spine3.Internal;

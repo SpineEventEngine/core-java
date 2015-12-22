@@ -19,19 +19,15 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "LanguageProto";
+option java_package = "org.spine3.client";
 
-import "spine/base/command.proto";
+enum Language {
+    UNDEFINED = 0;
 
-import "spine/client/command_service_new.proto";
-import "spine/base/command_result.proto";
-
-service CommandService {
-    rpc Handle (CommandRequest) returns (CommandResult);
-    rpc HandleStream (stream CommandRequest) returns (stream CommandResult);
+    //TODO:2015-12-16:alexander.yevsyukov: Implement
 }

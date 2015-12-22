@@ -21,17 +21,15 @@ package org.spine3.sample.server;
 
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
-import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandResult;
-import org.spine3.base.CommandServiceGrpc;
-import org.spine3.client.CommandRequest;
-import org.spine3.sample.Application;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
+
+import static org.spine3.sample.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.
@@ -41,22 +39,26 @@ import java.io.IOException;
  */
 public class Server {
 
-    /**
-     * The default port on which the server runs.
-     */
-    public static final int SERVER_PORT = 50051;
-
-    private final io.grpc.Server server;
     private final Application application;
 
+    private final BoundedContext boundedContext;
+    private final io.grpc.Server clientServer;
+
     /**
-     * @param serverPort the port on which the server should run.
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
-    public Server(int serverPort, StorageFactory storageFactory) {
-
+    public Server(StorageFactory storageFactory) {
         this.application = new Application(storageFactory);
-        this.server = buildServer(this.application.getBoundedContext(), serverPort);
+
+        this.boundedContext = this.application.getBoundedContext();
+        this.clientServer = buildClientServer(boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
+    }
+
+    private static io.grpc.Server buildClientServer(ClientServiceGrpc.ClientService boundedContext, int port) {
+        final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
+        final ServerBuilder builder = ServerBuilder.forPort(port);
+        builder.addService(service);
+        return builder.build();
     }
 
     /**
@@ -68,11 +70,11 @@ public class Server {
 
         final StorageFactory storageFactory = Application.getStorageFactory();
 
-        final Server server = new Server(SERVER_PORT, storageFactory);
+        final Server server = new Server(storageFactory);
 
         server.start();
 
-        log().info("Server started, listening on the port " + SERVER_PORT);
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
 
         addShutdownHook(server);
 
@@ -85,7 +87,7 @@ public class Server {
      */
     public void start() throws IOException {
         application.setUp();
-        server.start();
+        clientServer.start();
     }
 
     /**
@@ -94,18 +96,17 @@ public class Server {
     public void stop() {
         try {
             application.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log().error("Error closing application", e);
         }
-        server.shutdown();
+        clientServer.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-
-        server.awaitTermination();
+        clientServer.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {
@@ -115,43 +116,11 @@ public class Server {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                System.err.println("Shutting down the gRPC server since JVM is shutting down...");
+                System.err.println("Shutting down the CommandService server since JVM is shutting down...");
                 server.stop();
                 System.err.println("Server shut down.");
             }
         }));
-    }
-
-
-    private static class CommandServiceImpl implements CommandServiceGrpc.CommandService {
-
-        private final BoundedContext boundedContext;
-
-        private CommandServiceImpl(BoundedContext boundedContext) {
-            this.boundedContext = boundedContext;
-        }
-
-        @Override
-        public void handle(CommandRequest req, StreamObserver<CommandResult> responseObserver) {
-
-            final CommandResult reply = boundedContext.process(req);
-            responseObserver.onNext(reply);
-            responseObserver.onCompleted();
-        }
-
-        @Override
-        public StreamObserver<CommandRequest> handleStream(StreamObserver<CommandResult> responseObserver) {
-            //TODO:2015-06-25:mikhail.melnik: implement
-            return null;
-        }
-    }
-
-    private static io.grpc.Server buildServer(BoundedContext boundedContext, int serverPort) {
-
-        final ServerBuilder builder = ServerBuilder.forPort(serverPort);
-        final ServerServiceDefinition service = CommandServiceGrpc.bindService(new CommandServiceImpl(boundedContext));
-        builder.addService(service);
-        return builder.build();
     }
 
     private static Logger log() {

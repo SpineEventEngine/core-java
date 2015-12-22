@@ -19,17 +19,41 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ChannelServiceProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "CommandResponseProto";
+option java_package = "org.spine3.client";
 
-import "channel.proto";
+import public "google/protobuf/empty.proto";
+import public "spine/base/error.proto";
 
-service ChannelService {
-    rpc Connect (ChannelRequest) returns (ChannelResponse);
-    //TODO:2015-04-28:alexander.yevsyukov: Do we need to have Renew() method?
+// The result of passing CommandRequest to the service.
+message CommandResponse {
+    oneof value {
+        // The command was accepted to execution.
+        //
+        // Results of the command execution (if any) would be delivered via event stream.
+        google.protobuf.Empty ok = 1;
+
+        // The error occurred upon receiving the request.
+        //
+        // The nature of the error is defined by one of the values defined in `ErrorCode` enum stored
+        // in the `Error.code` field.
+        spine.base.Error error = 2;
+    }
+
+    // Possible error cases.
+    enum ErrorCode {
+        // Reserved value.
+        UNKNOWN = 0;
+
+        // The command type is not supported by the server.
+        UNSUPPORTED_COMMAND = 1;
+
+        // The command is supported but not all fields are complete.
+        INCOMPLETE_COMMAND = 2;
+    }
 }
 

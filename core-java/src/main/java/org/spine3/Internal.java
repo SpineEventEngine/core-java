@@ -23,8 +23,12 @@ package org.spine3;
 import java.lang.annotation.*;
 
 /**
- * Annotates a program element which is internal to Spine, not part of the public API, and should not
- * be used outside of the Spine codebase.
+ * Annotates a program element (class, method, package etc.) which is internal to Spine,
+ * not part of the public API, and should not be used by users of the framework.
+ *
+ * <p>If you plan to implement an extension of the framework, which is going to be
+ * wired into the framework, you may use the internal parts. Please consult with the Spine
+ * team, as the internal APIs do not have the same stability API guarantee as public ones.
  *
  * @author Alexander Yevsyukov
  */

@@ -196,13 +196,6 @@ public class Events {
         return builder.build();
     }
 
-    public static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEventRecord(eventRecords)
-                .addAllError(errors)
-                .build();
-    }
-
     /**
      * Converts EventStoreRecords to EventRecords.
      */

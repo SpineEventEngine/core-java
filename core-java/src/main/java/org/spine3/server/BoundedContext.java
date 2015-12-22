@@ -23,13 +23,17 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandResult;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.client.ClientRequest;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.CommandResponse;
+import org.spine3.client.Connection;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -55,7 +59,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext implements AutoCloseable {
+public final class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     private final String name;
 
@@ -76,6 +80,11 @@ public final class BoundedContext implements AutoCloseable {
         this.eventStore = builder.eventStore;
     }
 
+    /**
+     * Creates a new builder for {@code BoundedContext}.
+     *
+     * @return new builder instance
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -182,6 +191,45 @@ public final class BoundedContext implements AutoCloseable {
         repository.assignStorage(null);
     }
 
+    @Override
+    public void connect(ClientRequest request, StreamObserver<Connection> responseObserver) {
+        //TODO:2015-12-21:alexander.yevsyukov: Implement
+    }
+
+    @Override
+    public void post(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+        final CommandResponse reply = validate(request);
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+
+        handle(request);
+    }
+
+    @Override
+    public void getEvents(Connection request, StreamObserver<EventRecord> responseObserver) {
+        //TODO:2015-12-21:alexander.yevsyukov: Implement
+    }
+
+    /**
+     * Validates the incoming command.
+     *
+     * @param command the command to validate
+     * @return {@link CommandResponse} with {@code ok} value if the command is valid, or
+     *          with {@link org.spine3.base.Error} value otherwise
+     */
+    public CommandResponse validate(Message command) {
+        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final CommandResponse result = dispatcher.validate(command);
+        return result;
+    }
+
+    private void handle(CommandRequest request) {
+        //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
+        process(request);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Return results to the client through ClientService
+    }
+
     /**
      * Processes the incoming command request.
      *
@@ -190,14 +238,18 @@ public final class BoundedContext implements AutoCloseable {
      * @param request incoming command request to handle
      * @return the result of command handling
      */
-    @CheckReturnValue
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
 
         store(request);
 
         final CommandResult result = dispatch(request);
-        storeAndPostEvents(result.getEventRecordList());
+        final List<EventRecord> eventRecords = result.getEventRecordList();
+
+        storeEvents(eventRecords);
+        postEvents(eventRecords);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Notify clients.
 
         return result;
     }
@@ -225,30 +277,42 @@ public final class BoundedContext implements AutoCloseable {
 
             final List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
 
-            final CommandResult result = Events.toCommandResult(eventRecords, Collections.<Any>emptyList());
+            final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
         } catch (InvocationTargetException | RuntimeException e) {
             throw propagate(e);
         }
     }
 
-    private void storeAndPostEvents(Iterable<EventRecord> records) {
+    private static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+        return CommandResult.newBuilder()
+                .addAllEventRecord(eventRecords)
+                .addAllError(errors)
+                .build();
+    }
+
+    /**
+     * Stores passed events in {@link EventStore}.
+     */
+    private void storeEvents(Iterable<EventRecord> records) {
         final EventStore eventStore = getEventStore();
         for (EventRecord record : records) {
             eventStore.store(record);
-            post(record);
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We do not intend to post EventRecordBuilder instances into the bus.
-    private void post(EventRecord eventRecord) {
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
+    private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
-        final Message event = Events.getEvent(eventRecord);
-        final EventContext context = eventRecord.getContext();
+        for (EventRecord record : records) {
+            final Message event = Events.getEvent(record);
+            final EventContext context = record.getContext();
 
-        eventBus.post(event, context);
+            eventBus.post(event, context);
+        }
     }
-
 
     /**
      * Convenience method for obtaining instance of {@link CommandDispatcher}.
@@ -277,14 +341,17 @@ public final class BoundedContext implements AutoCloseable {
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
     public static class Builder {
-
+        /**
+         * The default name of {@code BoundedContext}.
+         */
         public static final String DEFAULT_NAME = "Main";
+
         private String name;
         private StorageFactory storageFactory;
-        private CommandDispatcher commandDispatcher;
-        private EventBus eventBus;
         private CommandStore commandStore;
         private EventStore eventStore;
+        private CommandDispatcher commandDispatcher;
+        private EventBus eventBus;
 
         public Builder setName(String name) {
             this.name = name;

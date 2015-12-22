@@ -19,24 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ChannelProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "ClientServiceProto";
 
-import "spine/base/user_id.proto";
-import "spine/client/client.proto";
+// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
+// to hide implementation details from the public API of the framework.
+option java_package = "org.spine3.client.grpc";
 
-// The request to create a channel for the passed user.
-message ChannelRequest {
-    UserId user_id = 1;
-    Client client = 2;
-}
+import public "spine/client/client.proto";
+import public "spine/client/command_request.proto";
+import public "spine/client/command_response.proto";
 
-message ChannelResponse {
-    string channel_id = 1;
-}
+// A service for sending commands from clients.
+ service ClientService {
+    // Connects the client to the service.
+    rpc Connect(ClientRequest) returns (Connection);
 
-//TODO:2015-04-28:alexander.yevsyukov: Review channel API and see what data we need here.
+    // Request to handle a command.
+    rpc Post(CommandRequest) returns (CommandResponse);
+
+    // Opens the stream with events new to this client.
+    rpc GetEvents(Connection) returns (stream spine.base.EventRecord);
+ }

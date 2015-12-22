@@ -19,12 +19,14 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.client;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ClientProto";
 option java_package = "org.spine3.client";
+
+import public "spine/base/event.proto";
 
 // Version of the code executed on the client.
 message CodeVersion {
@@ -34,25 +36,98 @@ message CodeVersion {
     int32 build_number = 4;
 }
 
-// Meta-information about the client computer device and client code.
-message Client {
+// Operating System information.
+message OsInfo {
+    // The name of the operating system.
+    string name = 1;
 
-    enum Type {
-        BROWSER = 0;
-        BROWSER_MOBILE = 1;
-        IOS_IPHONE = 2;
-        IOS_IPAD = 3;
-        ANDROID_PHONE = 4;
-        ANDROID_TABLET = 5;
-        SERVER = 6;
-    }
-
-    message OsInfo {
-        string name = 1;
-        CodeVersion version = 2;
-    }
-
-    Type type = 1;
+    // The version of the OS.
     CodeVersion version = 2;
-    OsInfo os_info = 3;
 }
+
+// The identifier of a client at the server.
+//
+// The server knows to which client send information by this ID.
+// The value of the client ID can be anything, which makes sense to the
+// design of the application. It can be login information, UUID, a user-selected
+// screen name, a cookie, etc.
+message ClientId {
+    string value = 1;
+}
+
+// Enumeration of possible types of the computing devices running the code of the application.
+enum DeviceType {
+    // Reserved value.
+    UNKNOWN = 0;
+
+    BROWSER = 1;
+
+    BROWSER_MOBILE = 2;
+
+    // reserved 3 to 19;
+
+    PHONE_ANDROID = 20;
+
+    PHONE_IOS = 21;
+
+    PHONE_WINDOWS = 22;
+
+    // reserved 23 to 39;
+
+    TABLET_ANDROID = 40;
+
+    TABLET_IOS = 41;
+
+    TABLET_WINDOWS = 42;
+
+    // reserved 43 to 49;
+
+    WATCH_ANDROID = 50;
+
+    WATCH_APPLE = 51;
+
+    // reserved 52 to 99;
+
+    // This value is for server-side code.
+    SERVICE = 100;
+}
+
+// Meta-information about the client computer device and client code.
+message ClientRequest {
+
+    // The ID of the client.
+    ClientId id = 1;
+
+    // The type of the computing device executing the code on the client side.
+    DeviceType device = 2;
+
+    // The version of the application.
+    CodeVersion version = 3;
+
+    // Operating system running the code of the application.
+    OsInfo os = 4;
+}
+
+// `Connection` wraps implementation details of the client-server connection.
+message Connection {
+    // Data required for establishing and maintaining connection.
+    //
+    // Depends on implementation protocol.
+    oneof type {
+        Channel channel = 1;
+    }
+}
+
+// Channel data required for working with Channel API.
+//
+// There can be only one client per channel.
+// See https://cloud.google.com/appengine/docs/java/channel/
+message Channel {
+
+    // The token for the client created by the server.
+    //
+    // Tokens expire after two hours and should also be treated as secret
+    // (e.g. avoid using tokens in URLs).
+    string token = 1;
+}
+

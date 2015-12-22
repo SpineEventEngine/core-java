@@ -7,7 +7,39 @@ buildscript {
     }
 }
 
+dependencies {
+    compile group: 'io.grpc', name: 'grpc-all', version: '0.9.0'
+}
+
 apply plugin: 'org.spine3.tools.protolookup';
+
+sourceSets {
+    main {
+        proto {
+            srcDirs += ["${project(":core-java").projectDir}/src/main/proto"]
+        }
+        java {
+            srcDir "$projectDir/generated/main/grpc"
+        }
+    }
+}
+
+protobuf {
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:0.9.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { final task ->
+            task.plugins {
+                grpc {
+//                    option 'nano=true'
+                }
+            }
+        }
+    }
+}
 
 // required for usage of test classes from other modules
 configurations {
