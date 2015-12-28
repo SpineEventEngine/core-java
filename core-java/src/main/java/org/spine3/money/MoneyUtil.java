@@ -18,10 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
-
-import org.spine3.money.Currency;
-import org.spine3.money.Money;
+package org.spine3.money;
 
 /**
  * The utility class containing convenience methods for {@code Money} messages creation.
