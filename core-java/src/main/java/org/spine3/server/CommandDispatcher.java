@@ -128,7 +128,7 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     public CommandResponse validate(Message command) {
-        if (handlerRegistry.hasHandlerFor(command)) {
+        if (!handlerRegistry.hasHandlerFor(command)) {
             return unsupportedCommand(command);
         }
 
