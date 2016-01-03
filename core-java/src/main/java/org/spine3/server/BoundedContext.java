@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Error;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.client.ClientRequest;
@@ -41,7 +42,10 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.util.Commands;
 import org.spine3.util.Events;
+import org.spine3.util.Identifiers;
+import org.spine3.util.Values;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -61,7 +65,16 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
+    /**
+     * The name of the bounded context, which is used to distinguish the context in an application with
+     * several bounded contexts.
+     */
     private final String name;
+
+    /**
+     * If `true` the bounded context serves many organizations.
+     */
+    private final boolean multitenant;
 
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
@@ -73,6 +86,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
 
     private BoundedContext(Builder builder) {
         this.name = builder.name;
+        this.multitenant = builder.multitenant;
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
@@ -131,6 +145,13 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return {@code true} if the bounded context serves many organizations
+     */
+    public boolean isMultitenant() {
+        return multitenant;
     }
 
     private void shutDownRepositories() {
@@ -198,11 +219,39 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
 
     @Override
     public void post(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
-        final CommandResponse reply = validate(request);
+        final Message command = Messages.fromAny(request.getCommand());
+        final CommandContext commandContext = request.getContext();
+
+        CommandResponse reply = null;
+
+        // Ensure `namespace` is defined in a multitenant app.
+        if (isMultitenant() && !commandContext.hasNamespace()) {
+            reply = unknownNamespace(command, request.getContext());
+        }
+
+        if (reply == null) {
+            reply = validate(request.getCommand());
+        }
+
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
 
-        handle(request);
+        if (Commands.isOk(reply)) {
+            handle(request);
+        }
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static CommandResponse unknownNamespace(Message command, CommandContext context) {
+        final String commandType = command.getDescriptorForType().getFullName();
+        final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType, Identifiers.idToString(context.getCommandId()));
+        final CommandResponse response = CommandResponse.newBuilder()
+                .setError(Error.newBuilder()
+                        .setCode(CommandResponse.ErrorCode.NAMESPACE_UNKNOWN.getNumber())
+                        .setData(Values.newStringValueAsAny(commandType))
+                        .setMessage(errMsg))
+                .build();
+        return response;
     }
 
     @Override
@@ -352,6 +401,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
         private EventStore eventStore;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
+        private boolean multitenant;
 
         public Builder setName(String name) {
             this.name = name;
@@ -360,6 +410,15 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
 
         public String getName() {
             return name;
+        }
+
+        public Builder setMultitenant(boolean value) {
+            this.multitenant = value;
+            return this;
+        }
+
+        public boolean isMultitenant() {
+            return this.multitenant;
         }
 
         public Builder setStorageFactory(StorageFactory storageFactory) {

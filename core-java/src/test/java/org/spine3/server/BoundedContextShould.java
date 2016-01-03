@@ -20,15 +20,18 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.*;
+import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.*;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventRecord;
+import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandRequestOrBuilder;
+import org.spine3.client.CommandResponse;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
@@ -281,6 +284,48 @@ public class BoundedContextShould {
                 .setEventBus(EventBus.newInstance());
         final BoundedContext boundedContext = builder.build();
         assertNotNull(boundedContext.getEventStore());
+    }
+
+    private static class ResponseObserver implements StreamObserver<CommandResponse> {
+
+        private CommandResponse response;
+
+        @Override
+        public void onNext(CommandResponse commandResponse) {
+            this.response = commandResponse;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+
+        public CommandResponse getResponse() {
+            return response;
+        }
+    }
+
+    @Test
+    public void verify_namespace_attribute_if_multitenant() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setEventBus(EventBus.newInstance())
+                .setMultitenant(true)
+                .build();
+
+        final ResponseObserver observer = new ResponseObserver();
+
+        final CommandRequest request = CommandRequest.newBuilder()
+                // Pass empty command so that we have something valid to unpack in the context.
+                .setCommand(Any.pack(StringValue.getDefaultInstance()))
+                .build();
+        bc.post(request, observer);
+
+        assertEquals(CommandResponse.ErrorCode.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
