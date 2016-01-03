@@ -63,7 +63,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
+public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -150,6 +150,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
     /**
      * @return {@code true} if the bounded context serves many organizations
      */
+    @CheckReturnValue
     public boolean isMultitenant() {
         return multitenant;
     }
@@ -230,7 +231,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
         }
 
         if (reply == null) {
-            reply = validate(request.getCommand());
+            reply = validate(command);
         }
 
         responseObserver.onNext(reply);
@@ -266,7 +267,7 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
      * @return {@link CommandResponse} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    public CommandResponse validate(Message command) {
+    protected CommandResponse validate(Message command) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
         final CommandResponse result = dispatcher.validate(command);
         return result;
@@ -304,12 +305,12 @@ public final class BoundedContext implements ClientServiceGrpc.ClientService, Au
     }
 
     @VisibleForTesting
-    EventStore getEventStore() {
+    protected EventStore getEventStore() {
         return eventStore;
     }
 
     @VisibleForTesting
-    CommandStore getCommandStore() {
+    protected CommandStore getCommandStore() {
         return commandStore;
     }
 
