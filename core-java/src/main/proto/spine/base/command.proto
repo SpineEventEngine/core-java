@@ -31,10 +31,11 @@ import public "google/protobuf/any.proto";
 
 import public "spine/base/user_id.proto";
 import public "spine/time/time.proto";
+import public "spine/base/namespace.proto";
 
 // The command identifier is a composite key, which gives information about the context of the command creation.
 message CommandId {
-    // The user who issued the command.
+    // The user who created the command.
     UserId actor = 1;
 
     // Date/time at which the command was created.
@@ -48,6 +49,9 @@ message CommandContext {
 
     // The zone offset from which the command is made.
     time.ZoneOffset zone_offset = 2;
+
+    // The `namespace` attribute must be defined for commands in multitenant applications.
+    Namespace namespace = 3;
 }
 
 

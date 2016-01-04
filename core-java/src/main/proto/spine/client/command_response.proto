@@ -54,6 +54,9 @@ message CommandResponse {
 
         // The command is supported but not all fields are complete.
         INCOMPLETE_COMMAND = 2;
+
+        // The command context does not have `namespace` attribute defined in a multitenant application.
+        NAMESPACE_UNKNOWN = 3;
     }
 }
 

@@ -1,5 +1,5 @@
 //
-// Copyright 2015, TeamDev Ltd. All rights reserved.
+// Copyright 2016, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -23,13 +23,20 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "DomainProto";
+option java_outer_classname = "NamespaceProto";
 option java_package = "org.spine3.base";
 
-// An Internet domain name.
-message DomainName {
-    // The value of the domain name.
-    //
-    // It is the responsibility of the application to provide a correct value for this field.
-    string value = 1;
+import public "spine/base/domain.proto";
+
+// A namespace defines a boundary for organization's data.
+//
+// In a multi-tenant application a `CommandContext` must have `namespace` attribute defined.
+message Namespace {
+    oneof kind {
+        // The namespace for the organization is defined by its Internet domain name.
+        DomainName domain = 1;
+
+        // Application-specific value.
+        string value = 2;
+    }
 }
