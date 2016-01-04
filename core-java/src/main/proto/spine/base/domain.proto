@@ -28,8 +28,8 @@ option java_package = "org.spine3.base";
 
 // An Internet domain name.
 message DomainName {
-  // The value of the domain name.
-  //
-  // It is the responsibility of the application to provide a correct value for this field.
-  string value = 1;
+    // The value of the domain name.
+    //
+    // It is the responsibility of the application to provide a correct value for this field.
+    string value = 1;
 }
