@@ -112,7 +112,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * <li>Closes {@link CommandDispatcher}.</li>
      * <li>Closes {@link EventBus}.</li>
      * <li>Closes {@link CommandStore}.</li>
-     * <li>Closses {@link EventStore}.</li>
+     * <li>Closes {@link EventStore}.</li>
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
      *      <li>un-registered from {@link CommandDispatcher}</li>

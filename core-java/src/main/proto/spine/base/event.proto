@@ -48,9 +48,8 @@ message EventContext {
     // The version of the aggregate after the event was applied.
     int32 version = 3;
 
-    // This field may be used for additional attributes that were not known at the time of
-    // defining the corresponding event type.
-    repeated google.protobuf.Any attributes = 4;
+    // Additional attributes that were not known at the time of defining the corresponding event type.
+    map<string, google.protobuf.Any> attributes = 4;
 }
 
 // A couple of an event and its context information.
