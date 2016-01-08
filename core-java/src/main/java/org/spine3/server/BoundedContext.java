@@ -210,6 +210,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     @Override
     public void connect(ClientRequest request, StreamObserver<Connection> responseObserver) {
         //TODO:2015-12-21:alexander.yevsyukov: Implement
+
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -239,6 +241,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     @Override
     public void getEvents(Connection request, StreamObserver<EventRecord> responseObserver) {
         //TODO:2015-12-21:alexander.yevsyukov: Implement
+
+        responseObserver.onCompleted();
     }
 
     /**

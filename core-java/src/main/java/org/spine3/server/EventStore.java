@@ -22,12 +22,16 @@ package org.spine3.server;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.EventStreamObserver;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.grpc.EventStoreGrpc;
@@ -168,7 +172,10 @@ public abstract class EventStore implements Closeable {
         @Override
         public void append(EventRecord request, StreamObserver<Response> responseObserver) {
             try {
+                log().info("Appending " + Messages.toJson(request));
+
                 eventStore.append(request);
+                responseObserver.onNext(Responses.RESPONSE_OK);
                 responseObserver.onCompleted();
             } catch (RuntimeException e) {
                 responseObserver.onError(e);
@@ -194,6 +201,7 @@ public abstract class EventStore implements Closeable {
 
             @Override
             public void onError(Throwable t) {
+                log().error("Error encountered ", t);
                 streamObserver.onError(t);
             }
 
@@ -205,11 +213,13 @@ public abstract class EventStore implements Closeable {
 
         @Override
         public void subscribeSince(Timestamp request, StreamObserver<EventRecord> responseObserver) {
+            log().info("Subscribe since timestamp: {}", TimeUtil.toString(request));
             eventStore.subscribe(request, new Adapter(responseObserver));
         }
 
         @Override
         public void subscribe(Empty request, StreamObserver<EventRecord> responseObserver) {
+            log().info("Subscribe from now.");
             eventStore.subscribe(new Adapter(responseObserver));
         }
     }
@@ -221,6 +231,17 @@ public abstract class EventStore implements Closeable {
         final ServerBuilder builder = ServerBuilder.forPort(port)
                 .addService(service);
         return builder.build();
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventStore.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

@@ -59,7 +59,7 @@ public class Client {
 
     private final ManagedChannel channel;
     private final ClientServiceGrpc.ClientServiceBlockingClient client;
-    private final Connection connection;
+//    private final Connection connection;
 
     /**
      * Construct the client connecting to server at {@code host:port}.
@@ -87,7 +87,7 @@ public class Client {
                     //TODO:2015-12-16:alexander.yevsyukov: Create utility method for builing OS info from Java API.
                 .build();
 
-        connection = client.connect(request);
+//        connection = client.connect(request);
     }
 
     /**
@@ -101,7 +101,7 @@ public class Client {
         try {
             for (CommandRequest request : requests) {
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
-                final Response result = client.send(request);
+                final Response result = client.post(request);
                 log().info("Result: " + toText(result));
             }
 
@@ -143,7 +143,7 @@ public class Client {
     /**
      * Sends a request to the server.
      */
-    private Response send(CommandRequest request) {
+    private Response post(CommandRequest request) {
         Response result = null;
         try {
             result = client.post(request);
@@ -154,7 +154,7 @@ public class Client {
     }
 
     private void readEvents() {
-        final Iterator<EventRecord> events = client.getEvents(connection);
+        final Iterator<EventRecord> events = client.getEvents(Connection.getDefaultInstance());
 
         while (events.hasNext()) {
             final EventRecord record = events.next();
