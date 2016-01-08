@@ -1,5 +1,5 @@
 //
-// Copyright 2015, TeamDev Ltd. All rights reserved.
+// Copyright 2016, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -19,44 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "CommandResponseProto";
-option java_package = "org.spine3.client";
+option java_outer_classname = "ResponseProto";
+option java_package = "org.spine3.base";
 
 import public "google/protobuf/empty.proto";
 import public "spine/base/error.proto";
+import public "spine/base/business_failure.proto";
 
-// The result of passing CommandRequest to the service.
-message CommandResponse {
-    oneof value {
-        // The command was accepted to execution.
-        //
-        // Results of the command execution (if any) would be delivered via event stream.
+// The result of a call returned by a service.
+//
+// A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
+// The client may expect results (returned via a separate call to read-side or via event stream)
+// only upon receiving the `ok` status.
+message Response {
+    oneof status {
+        // The request was accepted to execution.
         google.protobuf.Empty ok = 1;
 
-        // The error occurred upon receiving the request.
-        //
-        // The nature of the error is defined by one of the values defined in `ErrorCode` enum stored
-        // in the `Error.code` field.
+        // The technical error occurred upon receiving the request and no further processing would occur.
         spine.base.Error error = 2;
-    }
 
-    // Possible error cases.
-    enum ErrorCode {
-        // Reserved value.
-        UNKNOWN = 0;
-
-        // The command type is not supported by the server.
-        UNSUPPORTED_COMMAND = 1;
-
-        // The command is supported but not all fields are complete.
-        INCOMPLETE_COMMAND = 2;
-
-        // The command context does not have `namespace` attribute defined in a multitenant application.
-        NAMESPACE_UNKNOWN = 3;
+        // It is not possible to satisfy the request because of the business failure.
+        spine.base.BusinessFailure business_failure = 3;
     }
 }
-

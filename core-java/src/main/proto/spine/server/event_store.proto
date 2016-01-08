@@ -1,5 +1,5 @@
 //
-// Copyright 2015, TeamDev Ltd. All rights reserved.
+// Copyright 2016, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -19,36 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.server;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ErrorProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "EventStoreProto";
+option java_package = "org.spine3.server";
 
-import public "google/protobuf/struct.proto";
+import public "spine/base/event.proto";
+import public "spine/base/response.proto";
 
-// Information on a technical error occurred in the system.
-//
-// See `spine.base.BusinessFailure` for definition of business failure type.
-//
-message Error {
-    // The kind of the error, which depends on the environment in which the error occurred.
-    oneof kind {
-        // An integer code resulting from OS call or native code call.
-        int32 code = 1;
-        // A type can be defined as a class name from Java or C# code.
-        string type = 2;
-    }
+// A list of event records.
+message EventRecords {
+    repeated spine.base.EventRecord record = 1;
+}
 
-    reserved 3 to 9; // for other possible kinds.
+// `EventStore` service allows to store events and read them via steams.
+service EventStore {
+    // Request to append event records to the stream.
+    rpc Append(EventRecords) returns (spine.base.Response);
 
-    // A developer-readable diagnostics message on the error.
-    string message = 10;
+    // Subscribes the client to receive events happened after the passed timestamp.
+    //
+    // Passing the default instance of `Timestamp` will return *all* events.
+    rpc SubscribeSince(google.protobuf.Timestamp) returns (stream spine.base.EventRecord);
 
-    // Additional information on the error.
-    map<string, google.protobuf.Value> attributes = 11;
-
-    // A stacktrace of an exception (if available).
-    string stacktrace = 12;
+    // Subscribes the client to receive events occurred after this call.
+    rpc Subscribe(google.protobuf.Empty) returns (stream spine.base.EventRecord);
 }

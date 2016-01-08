@@ -23,30 +23,33 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ErrorProto";
+option java_outer_classname = "BusinessFailureProto";
 option java_package = "org.spine3.base";
 
 import public "google/protobuf/struct.proto";
 
-// Information on a technical error occurred in the system.
+// A business failure represents a condition in business, which does not allow to satisfy a request.
 //
-// See `spine.base.BusinessFailure` for definition of business failure type.
+// Examples: unsuccessful credit card validation, insufficient items in stock, incomplete order data.
 //
-message Error {
-    // The kind of the error, which depends on the environment in which the error occurred.
+// See `spine.base.Error` for definition of a technical error.
+//
+message BusinessFailure {
     oneof kind {
-        // An integer code resulting from OS call or native code call.
+        // An integer failure code.
         int32 code = 1;
-        // A type can be defined as a class name from Java or C# code.
+
+        // A failure type from a high-level programming language.
         string type = 2;
     }
 
     reserved 3 to 9; // for other possible kinds.
 
-    // A developer-readable diagnostics message on the error.
+    // A developer-readable diagnostics message of the failure.
+    // This message is not translated to the language of the end user.
     string message = 10;
 
-    // Additional information on the error.
+    // Additional information on the failure.
     map<string, google.protobuf.Value> attributes = 11;
 
     // A stacktrace of an exception (if available).

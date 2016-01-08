@@ -28,7 +28,9 @@ option java_package = "org.spine3.server.storage";
 
 import public "spine/base/event.proto";
 
-// This type defines the way events are stored in EventStore.
+//TODO:2016-01-08:alexander.yevsyukov: Rename to EventStorageRecord.
+
+// This type defines the way events are stored in event storage.
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message EventStoreRecord {

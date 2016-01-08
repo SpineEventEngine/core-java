@@ -28,7 +28,9 @@ option java_package = "org.spine3.server.storage";
 
 import public "spine/base/command.proto";
 
-// This type defines the way commands are stored in CommandStore.
+//TODO:2016-01-08:alexander.yevsyukov: Rename to CommandStorageRecord.
+
+// This type defines the way commands are stored in command storage.
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message CommandStoreRecord {

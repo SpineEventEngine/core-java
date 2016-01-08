@@ -25,13 +25,9 @@ import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
+import org.spine3.base.*;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandRequestOrBuilder;
-import org.spine3.client.CommandResponse;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
@@ -286,12 +282,12 @@ public class BoundedContextShould {
         assertNotNull(boundedContext.getEventStore());
     }
 
-    private static class ResponseObserver implements StreamObserver<CommandResponse> {
+    private static class ResponseObserver implements StreamObserver<Response> {
 
-        private CommandResponse response;
+        private Response response;
 
         @Override
-        public void onNext(CommandResponse commandResponse) {
+        public void onNext(Response commandResponse) {
             this.response = commandResponse;
         }
 
@@ -303,7 +299,7 @@ public class BoundedContextShould {
         public void onCompleted() {
         }
 
-        public CommandResponse getResponse() {
+        public Response getResponse() {
             return response;
         }
     }
@@ -325,7 +321,7 @@ public class BoundedContextShould {
                 .build();
         bc.post(request, observer);
 
-        assertEquals(CommandResponse.ErrorCode.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {

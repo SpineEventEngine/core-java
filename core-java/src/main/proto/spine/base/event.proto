@@ -48,7 +48,8 @@ message EventContext {
     // The version of the aggregate after the event was applied.
     int32 version = 3;
 
-    // Additional attributes that were not known at the time of defining the corresponding event type.
+    // Service attributes that the system wants to store in addition to the domain attributes
+    // defined in the event type.
     map<string, google.protobuf.Any> attributes = 4;
 }
 

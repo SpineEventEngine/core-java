@@ -54,4 +54,17 @@ message CommandContext {
     Namespace namespace = 3;
 }
 
+// Enumeration of possible failures when validating a command.
+enum CommandValidationError {
+    // Reserved value.
+    UNKNOWN = 0;
 
+    // The command type is not supported by the server.
+    UNSUPPORTED_COMMAND = 1;
+
+    // The command is supported but not all required fields are populated.
+    INCOMPLETE_COMMAND = 2;
+
+    // The command context does not have `namespace` attribute defined in a multitenant application.
+    NAMESPACE_UNKNOWN = 3;
+}

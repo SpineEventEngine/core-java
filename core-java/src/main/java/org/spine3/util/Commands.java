@@ -30,7 +30,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandRequestOrBuilder;
-import org.spine3.client.CommandResponse;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
@@ -54,12 +53,12 @@ import static org.spine3.util.Users.newUserId;
 @SuppressWarnings("UtilityClass")
 public class Commands {
 
-    static {
-        IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
-    }
-
     private Commands() {
         // Prevent instantiation.
+    }
+
+    static {
+        IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
     }
 
     /**
@@ -105,14 +104,6 @@ public class Commands {
                 .setCommandId(commandId)
                 .setZoneOffset(offset);
         return result.build();
-    }
-
-    /**
-     * @return {@code true} if the passed response represents `Ok` status.
-     */
-    public static boolean isOk(CommandResponse response) {
-        final boolean result = response.getValueCase() != CommandResponse.ValueCase.ERROR;
-        return result;
     }
 
     @SuppressWarnings("StringBufferWithoutInitialCapacity")

@@ -25,6 +25,7 @@ import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
+import org.spine3.base.Response;
 import org.spine3.base.UserId;
 import org.spine3.client.*;
 import org.spine3.client.grpc.ClientServiceGrpc;
@@ -101,7 +102,7 @@ public class Client {
         try {
             for (CommandRequest request : requests) {
                 log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
-                final CommandResponse result = client.send(request);
+                final Response result = client.send(request);
                 log().info("Result: " + toText(result));
             }
 
@@ -143,8 +144,8 @@ public class Client {
     /**
      * Sends a request to the server.
      */
-    private CommandResponse send(CommandRequest request) {
-        CommandResponse result = null;
+    private Response send(CommandRequest request) {
+        Response result = null;
         try {
             result = client.post(request);
         } catch (RuntimeException e) {

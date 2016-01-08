@@ -20,19 +20,14 @@
 package org.spine3.server;
 
 import com.google.common.collect.Maps;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Error;
-import org.spine3.base.EventRecord;
-import org.spine3.client.CommandResponse;
+import org.spine3.base.*;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.type.CommandClass;
-import org.spine3.util.Values;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -48,13 +43,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mikhail Melnik
  */
 public class CommandDispatcher implements AutoCloseable {
-
-    /**
-     * The response returned on successful acceptance of a command for processing.
-     */
-    private static final CommandResponse RESPONSE_OK = CommandResponse.newBuilder()
-            .setOk(Empty.getDefaultInstance())
-            .build();
 
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
@@ -127,9 +115,9 @@ public class CommandDispatcher implements AutoCloseable {
         handlerRegistry.unregisterAll();
     }
 
-    public CommandResponse validate(Message command) {
+    public Response validate(Message command) {
         if (!handlerRegistry.hasHandlerFor(command)) {
-            return unsupportedCommand(command);
+            return CommandValidation.unsupportedCommand(command);
         }
 
         //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
@@ -139,21 +127,8 @@ public class CommandDispatcher implements AutoCloseable {
         return responseOk();
     }
 
-    private static CommandResponse responseOk() {
-        return RESPONSE_OK;
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static CommandResponse unsupportedCommand(Message command) {
-        final String commandType = command.getDescriptorForType().getFullName();
-        final CommandResponse response = CommandResponse.newBuilder()
-                .setError(Error.newBuilder()
-                            .setCode(CommandResponse.ErrorCode.UNSUPPORTED_COMMAND.getNumber())
-                            .setData(Values.newStringValueAsAny(commandType))
-                        .setMessage("Command " + commandType + " is not supported."))
-
-                .build();
-        return response;
+    private static Response responseOk() {
+        return Responses.RESPONSE_OK;
     }
 
     /**
