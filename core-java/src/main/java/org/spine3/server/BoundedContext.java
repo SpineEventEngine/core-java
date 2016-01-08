@@ -280,6 +280,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         //TODO:2015-12-16:alexander.yevsyukov: Return results to the client through ClientService
     }
 
+    //TODO:2016-01-08:alexander.yevsyukov: Hide this method in favor of a call from client via gRPC.
     /**
      * Processes the incoming command request.
      *

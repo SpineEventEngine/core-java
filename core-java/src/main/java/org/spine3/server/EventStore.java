@@ -64,7 +64,7 @@ public class EventStore implements Closeable {
     }
 
     /**
-     * Returns an iterator over all event records since the passed time.
+     * Returns an iterator over all event records since the passed point in time.
      *
      * @param timestamp a point in time from which the iterator would go
      * @return iterator instance

@@ -43,7 +43,7 @@ message EventStoreRecord {
     // This field is empty, if the event is not from an aggregate.
     string aggregate_id = 3;
 
-    // String representation of EventId.
+    // String representation of `EventId`.
     string event_id = 4;
 
     reserved 5 to 19;
