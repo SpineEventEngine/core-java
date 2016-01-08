@@ -17,17 +17,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.server;
+package org.spine3.examples.aggregate.server;
 
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
+import org.spine3.examples.aggregate.event.OrderCreated;
+import org.spine3.examples.aggregate.event.OrderLineAdded;
+import org.spine3.examples.aggregate.event.OrderPaid;
 import org.spine3.protobuf.Messages;
-import org.spine3.sample.order.event.OrderCreated;
-import org.spine3.sample.order.event.OrderLineAdded;
-import org.spine3.sample.order.event.OrderPaid;
 import org.spine3.util.Identifiers;
 
 /**

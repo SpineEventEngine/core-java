@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
+package org.spine3.examples.aggregate;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -30,7 +30,6 @@ import org.spine3.base.UserId;
 import org.spine3.client.*;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.protobuf.Messages;
-import org.spine3.sample.order.OrderId;
 import org.spine3.util.Identifiers;
 
 import java.util.Iterator;
@@ -38,9 +37,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static org.spine3.examples.aggregate.Requests.*;
 import static org.spine3.protobuf.Messages.toText;
-import static org.spine3.sample.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
-import static org.spine3.sample.Requests.*;
 import static org.spine3.util.Users.newUserId;
 
 /**

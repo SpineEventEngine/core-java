@@ -17,8 +17,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.examples.aggregate.server;
 
-@ParametersAreNonnullByDefault
-package org.spine3.sample.order;
+import org.spine3.examples.aggregate.OrderId;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * @author Mikhail Melnik
+ */
+public class OrderRepository extends AggregateRepositoryBase<OrderId, OrderAggregate> {
+
+}

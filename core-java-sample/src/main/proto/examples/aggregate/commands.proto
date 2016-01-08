@@ -19,18 +19,29 @@
 //
 syntax = "proto3";
 
-package spine.sample.order;
+package spine.examples.aggregate;
 
-option java_package="org.spine3.sample.order";
+option java_package="org.spine3.examples.aggregate.command";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
-message Book {
-    BookId book_id = 1;
-    string title = 2;
-    string author = 3;
-    double price = 4;
+import "examples/aggregate/order.proto";
+
+message CreateOrder {
+    OrderId order_id = 1;
 }
 
-message BookId {
-    string ISBN = 1;
+message AddOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message RemoveOrderLine {
+    OrderId order_id = 1;
+    OrderLine order_line = 2;
+}
+
+message PayForOrder {
+    OrderId order_id = 1;
+    BillingInfo billing_info = 2;
 }

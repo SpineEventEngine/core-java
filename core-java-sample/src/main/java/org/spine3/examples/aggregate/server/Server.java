@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.server;
+package org.spine3.examples.aggregate.server;
 
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
@@ -29,7 +29,7 @@ import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
 
-import static org.spine3.sample.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.

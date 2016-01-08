@@ -18,18 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample;
+@ParametersAreNonnullByDefault
+package org.spine3.examples.aggregate;
 
-/**
- * Constant values shared between client and server.
- *
- * @author Alexander Yevsyukov
- */
-public interface ConnectionConstants {
-
-    /**
-     * The port on which the server of {@link org.spine3.client.grpc.ClientServiceGrpc.ClientService} runs.
-     */
-    int DEFAULT_CLIENT_SERVICE_PORT = 50051;
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

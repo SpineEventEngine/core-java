@@ -17,13 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
 
-import org.spine3.server.aggregate.AggregateRepositoryBase;
+package org.spine3.examples.aggregate.server;
 
-/**
- * @author Mikhail Melnik
- */
-public class OrderRepository extends AggregateRepositoryBase<OrderId, OrderAggregate> {
+import org.junit.Test;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
+import java.io.IOException;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ApplicationShould {
+
+    private static final StorageFactory FS_STORAGE_FACTORY = FileSystemStorageFactory.newInstance(ApplicationShould.class);
+
+    @Test
+    public void execute_on_in_memory_storage() {
+        final Application app = new Application(InMemoryStorageFactory.getInstance());
+        app.execute();
+    }
+
+    @Test
+    public void execute_on_file_system_storage() throws IOException {
+        try (final Application app = new Application(FS_STORAGE_FACTORY))  {
+            app.execute();
+        }
+    }
 }

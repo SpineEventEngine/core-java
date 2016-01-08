@@ -18,16 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.sample.server;
+package org.spine3.examples.aggregate.server;
 
 import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.CommandRequest;
 import org.spine3.eventbus.EventBus;
-import org.spine3.sample.Client;
-import org.spine3.sample.order.OrderId;
-import org.spine3.sample.order.OrderRepository;
+import org.spine3.examples.aggregate.Client;
+import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.storage.StorageFactory;

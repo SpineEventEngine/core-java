@@ -17,15 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.sample.order;
+package org.spine3.examples.aggregate.server;
 
 import org.spine3.base.CommandContext;
-import org.spine3.sample.order.command.AddOrderLine;
-import org.spine3.sample.order.command.CreateOrder;
-import org.spine3.sample.order.command.PayForOrder;
-import org.spine3.sample.order.event.OrderCreated;
-import org.spine3.sample.order.event.OrderLineAdded;
-import org.spine3.sample.order.event.OrderPaid;
+import org.spine3.examples.aggregate.Order;
+import org.spine3.examples.aggregate.OrderId;
+import org.spine3.examples.aggregate.OrderLine;
+import org.spine3.examples.aggregate.command.AddOrderLine;
+import org.spine3.examples.aggregate.command.CreateOrder;
+import org.spine3.examples.aggregate.command.PayForOrder;
+import org.spine3.examples.aggregate.event.OrderCreated;
+import org.spine3.examples.aggregate.event.OrderLineAdded;
+import org.spine3.examples.aggregate.event.OrderPaid;
 import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;

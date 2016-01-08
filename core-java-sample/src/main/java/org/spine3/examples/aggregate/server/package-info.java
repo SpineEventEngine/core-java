@@ -19,6 +19,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.sample.server;
+package org.spine3.examples.aggregate.server;
 
 import javax.annotation.ParametersAreNonnullByDefault;
