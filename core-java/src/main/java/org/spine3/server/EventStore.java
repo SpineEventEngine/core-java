@@ -19,13 +19,20 @@
  */
 package org.spine3.server;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerServiceDefinition;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.base.Response;
 import org.spine3.client.EventStreamObserver;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.server.storage.EventStorage;
+import org.spine3.util.Events;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -42,7 +49,7 @@ import java.util.concurrent.Executor;
 public abstract class EventStore implements Closeable {
 
     private final Collection<EventStreamObserver> observers = new CopyOnWriteArrayList<>();
-    private final Executor catchUpExecutor;
+    private final Executor subscriptionExecutor;
 
     /**
      * Creates a new instance running on the passed storage.
@@ -54,8 +61,8 @@ public abstract class EventStore implements Closeable {
         return new LocalImpl(catchUpExecutor, storage);
     }
 
-    protected EventStore(Executor catchUpExecutor) {
-        this.catchUpExecutor = catchUpExecutor;
+    protected EventStore(Executor subscriptionExecutor) {
+        this.subscriptionExecutor = subscriptionExecutor;
     }
 
     protected abstract void store(EventRecord record);
@@ -76,7 +83,7 @@ public abstract class EventStore implements Closeable {
     public void subscribe(Timestamp timestamp, final EventStreamObserver observer) {
         final Iterator<EventRecord> eventRecords = since(timestamp);
 
-        catchUpExecutor.execute(new Runnable() {
+        subscriptionExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 while (eventRecords.hasNext()) {
@@ -149,4 +156,71 @@ public abstract class EventStore implements Closeable {
         }
 
     }
+
+    private static class GrpcService implements EventStoreGrpc.EventStore {
+
+        private final LocalImpl eventStore;
+
+        private GrpcService(LocalImpl eventStore) {
+            this.eventStore = eventStore;
+        }
+
+        @Override
+        public void append(EventRecord request, StreamObserver<Response> responseObserver) {
+            try {
+                eventStore.append(request);
+                responseObserver.onCompleted();
+            } catch (RuntimeException e) {
+                responseObserver.onError(e);
+            }
+        }
+
+        /**
+         * Adapts {@code StreamObserver<EventRecord>} instance to {@code EventStreamObserver}.
+         */
+        private static class Adapter implements EventStreamObserver {
+
+            private final StreamObserver<EventRecord> streamObserver;
+
+            private Adapter(StreamObserver<EventRecord> streamObserver) {
+                this.streamObserver = streamObserver;
+            }
+
+            @Override
+            public void onNext(Message event, EventContext ctx) {
+                final EventRecord record = Events.createEventRecord(event, ctx);
+                streamObserver.onNext(record);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                streamObserver.onError(t);
+            }
+
+            @Override
+            public void onCompleted() {
+                streamObserver.onCompleted();
+            }
+        }
+
+        @Override
+        public void subscribeSince(Timestamp request, StreamObserver<EventRecord> responseObserver) {
+            eventStore.subscribe(request, new Adapter(responseObserver));
+        }
+
+        @Override
+        public void subscribe(Empty request, StreamObserver<EventRecord> responseObserver) {
+            eventStore.subscribe(new Adapter(responseObserver));
+        }
+    }
+
+    public static io.grpc.Server createServer(Executor subscriptionExecutor, EventStorage storage, int port) {
+        final GrpcService grpcService = new GrpcService(new LocalImpl(subscriptionExecutor, storage));
+        final ServerServiceDefinition service = EventStoreGrpc.bindService(grpcService);
+
+        final ServerBuilder builder = ServerBuilder.forPort(port)
+                .addService(service);
+        return builder.build();
+    }
+
 }
