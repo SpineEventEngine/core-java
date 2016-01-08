@@ -24,7 +24,7 @@ package spine.server;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EventStoreProto";
-option java_package = "org.spine3.server";
+option java_package = "org.spine3.server.grpc";
 
 import public "spine/base/event.proto";
 import public "spine/base/response.proto";
@@ -34,7 +34,7 @@ message EventRecords {
     repeated spine.base.EventRecord record = 1;
 }
 
-// `EventStore` service allows to store events and read them via steams.
+// `EventStore` service allows to store events and read them via streams.
 service EventStore {
     // Request to append event records to the stream.
     rpc Append(EventRecords) returns (spine.base.Response);

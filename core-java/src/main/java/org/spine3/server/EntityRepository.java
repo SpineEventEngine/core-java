@@ -86,6 +86,7 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
      * @param storage the instance of storage to check
      * @throws ClassCastException if the object is not of the required class
      */
+    @Override
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"})
         final EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
