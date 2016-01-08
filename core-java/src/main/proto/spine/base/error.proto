@@ -33,15 +33,15 @@ import public "google/protobuf/struct.proto";
 // See `spine.base.BusinessFailure` for definition of business failure type.
 //
 message Error {
-    // The kind of the error, which depends on the environment in which the error occurred.
-    oneof kind {
-        // An integer code resulting from OS call or native code call.
-        int32 code = 1;
-        // A type can be defined as a class name from Java or C# code.
-        string type = 2;
-    }
+    // The type of the error.
+    //
+    // It can be an exception from Java, C# (or another language) or a Proto enum name.
+    string type = 1;
 
-    reserved 3 to 9; // for other possible kinds.
+    // An integer code resulting from a native code call, or a number from a Proto enum value.
+    int32 code = 2;
+
+    reserved 3 to 9;
 
     // A developer-readable diagnostics message on the error.
     string message = 10;

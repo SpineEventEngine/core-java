@@ -35,14 +35,15 @@ import java.util.Map;
 @SuppressWarnings("UtilityClass")
 public class CommandValidation {
 
+    private CommandValidation() {
+    }
+
     /**
      * Attribute names for command-related business failures.
      */
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
-    }
 
-    private CommandValidation() {
     }
 
     /**
@@ -52,11 +53,11 @@ public class CommandValidation {
         final String commandType = command.getDescriptorForType().getFullName();
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
-                        .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
-                        .putAllAttributes(commandTypeAttribute(commandType))
-                        .setMessage("Command " + commandType + " is not supported."))
-
-                .build();
+                    .setType(CommandValidationError.getDescriptor().getFullName())
+                    .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
+                    .putAllAttributes(commandTypeAttribute(commandType))
+                    .setMessage("Command " + commandType + " is not supported."))
+                    .build();
         return response;
     }
 
@@ -69,11 +70,11 @@ public class CommandValidation {
         final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType, Identifiers.idToString(context.getCommandId()));
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
-                                .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
-                                .setMessage(errMsg)
-                                .putAllAttributes(commandTypeAttribute(commandType)
-                                ))
-                .build();
+                    .setType(CommandValidationError.getDescriptor().getFullName())
+                    .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
+                    .setMessage(errMsg)
+                    .putAllAttributes(commandTypeAttribute(commandType)))
+                    .build();
         return response;
     }
 

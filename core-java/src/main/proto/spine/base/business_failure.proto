@@ -35,15 +35,13 @@ import public "google/protobuf/struct.proto";
 // See `spine.base.Error` for definition of a technical error.
 //
 message BusinessFailure {
-    oneof kind {
-        // An integer failure code.
-        int32 code = 1;
+    // A failure type.
+    string type = 1;
 
-        // A failure type from a high-level programming language.
-        string type = 2;
-    }
+    // An integer failure code.
+    int32 code = 2;
 
-    reserved 3 to 9; // for other possible kinds.
+    reserved 3 to 9;
 
     // A developer-readable diagnostics message of the failure.
     // This message is not translated to the language of the end user.
