@@ -19,67 +19,134 @@
  */
 package org.spine3.server;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.client.EventStreamObserver;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EventStorage;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * A store of all events in a bounded context.
  *
  * @author Mikhail Mikhaylov
  */
-public class EventStore implements Closeable {
+public abstract class EventStore implements Closeable {
 
-    private final EventStorage storage;
+    private final Collection<EventStreamObserver> observers = new CopyOnWriteArrayList<>();
+    private final Executor catchUpExecutor;
 
     /**
      * Creates a new instance running on the passed storage.
      *
+     * @param catchUpExecutor the executor for iterating through the history of events for a new subscriber
      * @param storage the underlying storage for the store.
      */
-    public EventStore(EventStorage storage) {
-        this.storage = storage;
+    public static EventStore create(Executor catchUpExecutor, EventStorage storage) {
+        return new LocalImpl(catchUpExecutor, storage);
     }
 
-    /**
-     * Stores the event record.
-     *
-     * @param record event record to store
-     */
-    public void store(EventRecord record) {
-        storage.store(record);
+    protected EventStore(Executor catchUpExecutor) {
+        this.catchUpExecutor = catchUpExecutor;
     }
 
-    /**
-     * Returns an iterator through all the events in the history sorted by timestamp.
-     *
-     * @return iterator instance
-     */
-    public Iterator<EventRecord> allEvents() {
-        return storage.allEvents();
+    protected abstract void store(EventRecord record);
+
+    protected abstract Iterator<EventRecord> since(Timestamp timestamp);
+
+    public void append(EventRecord record) {
+        store(record);
+        notifySubscribers(record);
     }
 
-    /**
-     * Returns an iterator over all event records since the passed point in time.
-     *
-     * @param timestamp a point in time from which the iterator would go
-     * @return iterator instance
-     */
-    public Iterator<EventRecord> eventsSince(Timestamp timestamp) {
-        return storage.since(timestamp);
+    private void notifySubscribers(EventRecord record) {
+        for (EventStreamObserver observer : observers) {
+            notify(observer, record);
+        }
     }
 
-    /**
-     * Closes the underlying storage.
-     *
-     * @throws IOException if the attempt to close the storage throws an exception
-     */
+    public void subscribe(Timestamp timestamp, final EventStreamObserver observer) {
+        final Iterator<EventRecord> eventRecords = since(timestamp);
+
+        catchUpExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                while (eventRecords.hasNext()) {
+                    final EventRecord record = eventRecords.next();
+                    EventStore.notify(observer, record);
+                }
+                addSubscriber(observer);
+            }
+        });
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static void notify(EventStreamObserver observer, EventRecord record) {
+        final Message event = Messages.fromAny(record.getEvent());
+        final EventContext context = record.getContext();
+        observer.onNext(event, context);
+    }
+
+    public void subscribe(EventStreamObserver observer) {
+        addSubscriber(observer);
+    }
+
+    private void addSubscriber(EventStreamObserver observer) {
+        observers.add(observer);
+    }
+
     @Override
     public void close() throws IOException {
-        storage.close();
+        for (EventStreamObserver observer : observers) {
+            observer.onCompleted();
+        }
+    }
+
+    /**
+     * A locally running implementation.
+     */
+    private static class LocalImpl extends EventStore {
+
+        private final EventStorage storage;
+
+        /**
+         * Creates a new instance running on the passed storage.
+         *
+         * @param storage the underlying storage for the store.
+         */
+        private LocalImpl(Executor catchUpExecutor, EventStorage storage) {
+            super(catchUpExecutor);
+            this.storage = storage;
+        }
+
+        @Override
+        protected void store(EventRecord record) {
+            storage.store(record);
+        }
+
+        @Override
+        protected Iterator<EventRecord> since(Timestamp timestamp) {
+            return storage.since(timestamp);
+        }
+
+        /**
+         * Closes the underlying storage.
+         *
+         * @throws IOException if the attempt to close the storage throws an exception
+         */
+        @Override
+        public void close() throws IOException {
+            super.close();
+            storage.close();
+        }
+
     }
 }

@@ -21,6 +21,7 @@ package org.spine3.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -328,7 +329,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void storeEvents(Iterable<EventRecord> records) {
         final EventStore eventStore = getEventStore();
         for (EventRecord record : records) {
-            eventStore.store(record);
+            eventStore.append(record);
         }
     }
 
@@ -464,7 +465,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             }
 
             if (eventStore == null) {
-                eventStore = new EventStore(storageFactory.createEventStorage());
+                eventStore = EventStore.create(
+                        MoreExecutors.directExecutor(),
+                        storageFactory.createEventStorage());
             }
 
             final BoundedContext result = new BoundedContext(this);

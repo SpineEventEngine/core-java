@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.*;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -267,7 +268,9 @@ public class BoundedContextShould {
 
     @Test
     public void return_EventStore_from_builder() {
-        final EventStore es = new EventStore(InMemoryStorageFactory.getInstance().createEventStorage());
+        final EventStore es = EventStore.create(
+                MoreExecutors.directExecutor(),
+                InMemoryStorageFactory.getInstance().createEventStorage());
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventStore(es);
         assertEquals(es, builder.getEventStore());
     }
