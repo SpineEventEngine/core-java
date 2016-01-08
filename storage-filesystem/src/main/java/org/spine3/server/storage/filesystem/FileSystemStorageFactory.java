@@ -22,9 +22,12 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.io.file.FileUtil;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
+import org.spine3.util.Classes;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,10 +37,7 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.io.file.FileUtil.deleteIfExists;
-import static org.spine3.protobuf.Messages.getClassDescriptor;
 import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
-import static org.spine3.util.Classes.getGenericParameterType;
 
 /**
  * A factory for storages based on the file system.
@@ -86,8 +86,8 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass) {
         final Class<Message> messageClazz =
-                getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
-        final GenericDescriptor msgClassDescriptor = getClassDescriptor(messageClazz);
+                Classes.getGenericParameterType(aggregateClass, AGGREGATE_MESSAGE_PARAMETER_INDEX);
+        final GenericDescriptor msgClassDescriptor = Messages.getClassDescriptor(messageClazz);
         final String msgDescriptorName = msgClassDescriptor.getName();
         return FsAggregateStorage.newInstance(rootDirectoryPath, msgDescriptorName);
     }
@@ -112,7 +112,7 @@ public class FileSystemStorageFactory implements StorageFactory {
             storage.close();
         }
 
-        deleteIfExists(Paths.get(rootDirectoryPath));
+        FileUtil.deleteIfExists(Paths.get(rootDirectoryPath));
     }
 
     private static String buildRootDirectoryPath(Class executorClass) {
@@ -130,7 +130,7 @@ public class FileSystemStorageFactory implements StorageFactory {
             final String prefix = "";
             final Path tempDirToRemove = Files.createTempDirectory(prefix);
             final Path result = tempDirToRemove.getParent();
-            deleteIfExists(tempDirToRemove);
+            FileUtil.deleteIfExists(tempDirToRemove);
             return result;
         } catch (IOException e) {
             throw propagate(e);

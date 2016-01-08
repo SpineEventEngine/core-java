@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
+import org.spine3.io.IoUtil;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
@@ -29,8 +30,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.io.IoUtil.closeSilently;
-import static org.spine3.io.IoUtil.tryToFlush;
 import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 
 /**
@@ -111,8 +110,8 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
             propagate(e);
         }
 
-        tryToFlush(dos);
-        closeSilently(fos, dos);
+        IoUtil.tryToFlush(dos);
+        IoUtil.closeSilently(fos, dos);
     }
 
     @SuppressWarnings("TypeMayBeWeakened")

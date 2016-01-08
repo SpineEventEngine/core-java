@@ -23,6 +23,8 @@ package org.spine3.server.storage.filesystem;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.io.IoUtil;
+import org.spine3.io.file.FileUtil;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
@@ -34,10 +36,7 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.io.IoUtil.closeSilently;
-import static org.spine3.io.file.FileUtil.*;
 import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
-import static org.spine3.util.Events.toEventRecord;
 
 /**
  * An event storage based on the file system.
@@ -61,7 +60,7 @@ class FsEventStorage extends EventStorage {
     }
 
     private FsEventStorage(String rootDirectoryPath) throws IOException {
-        this.eventStorageFile = createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
+        this.eventStorageFile = FileUtil.createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
     }
 
     @Override
@@ -123,11 +122,11 @@ class FsEventStorage extends EventStorage {
         @Override
         public EventRecord next() {
 
-            checkFileExists(file, "event storage");
+            FileUtil.checkFileExists(file, "event storage");
             checkHasNextBytes();
 
             final EventStoreRecord storeRecord = parseEventRecord();
-            final EventRecord result = toEventRecord(storeRecord);
+            final EventRecord result = Events.toEventRecord(storeRecord);
 
             if (!hasNext()) {
                 close();
@@ -151,7 +150,7 @@ class FsEventStorage extends EventStorage {
         private InputStream getInputStream() {
 
             if (bufferedInputStream == null || fileInputStream == null) {
-                fileInputStream = open(file);
+                fileInputStream = FileUtil.open(file);
                 bufferedInputStream = new BufferedInputStream(fileInputStream);
             }
 
@@ -161,7 +160,7 @@ class FsEventStorage extends EventStorage {
         @Override
         public void close() {
             if (!areResourcesReleased) {
-                closeSilently(fileInputStream, bufferedInputStream);
+                IoUtil.closeSilently(fileInputStream, bufferedInputStream);
                 areResourcesReleased = true;
             }
         }

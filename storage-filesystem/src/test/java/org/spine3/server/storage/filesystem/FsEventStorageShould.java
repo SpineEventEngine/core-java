@@ -26,14 +26,14 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.testdata.TestEventStoreRecordFactory;
+import org.spine3.util.Events;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.testdata.TestEventStoreRecordFactory.projectCreated;
-import static org.spine3.util.Events.toEventRecord;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -66,8 +66,8 @@ public class FsEventStorageShould extends EventStorageShould {
     @Test(expected = NoSuchElementException.class)
     public void throw_exception_if_iteration_has_no_more_elements() {
 
-        final EventStoreRecord recordToStore = projectCreated();
-        final EventRecord expected = toEventRecord(recordToStore);
+        final EventStoreRecord recordToStore = TestEventStoreRecordFactory.projectCreated();
+        final EventRecord expected = Events.toEventRecord(recordToStore);
         STORAGE.write(recordToStore);
 
         final Iterator<EventRecord> iterator = STORAGE.allEvents();
@@ -76,7 +76,7 @@ public class FsEventStorageShould extends EventStorageShould {
 
         final EventRecord actual = iterator.next();
 
-        assertEventRecordsAreEqual(expected, actual);
+        EventStorageShould.assertEventRecordsAreEqual(expected, actual);
         assertFalse(iterator.hasNext());
 
         iterator.next();

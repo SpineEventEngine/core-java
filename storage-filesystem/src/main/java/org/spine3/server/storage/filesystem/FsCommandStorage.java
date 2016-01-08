@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.filesystem;
 
+import org.spine3.io.file.FileUtil;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStoreRecord;
 
@@ -27,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.io.file.FileUtil.createIfDoesNotExist;
 import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 
 /**
@@ -50,7 +50,7 @@ class FsCommandStorage extends CommandStorage {
     }
 
     private FsCommandStorage(String rootDirectoryPath) throws IOException {
-        commandStoreFile = createIfDoesNotExist(rootDirectoryPath + COMMAND_STORE_FILE_NAME);
+        commandStoreFile = FileUtil.createIfDoesNotExist(rootDirectoryPath + COMMAND_STORE_FILE_NAME);
     }
 
     @Override

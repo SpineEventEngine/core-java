@@ -26,10 +26,9 @@ import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
+import org.spine3.testdata.TestCommandFactory;
 
 import java.io.IOException;
-
-import static org.spine3.testdata.TestCommandFactory.createProject;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
@@ -59,7 +58,7 @@ public class FsCommandStorageShould {
 
     @Test
     public void save_command() {
-        final CommandRequest commandRequest = createProject();
+        final CommandRequest commandRequest = TestCommandFactory.createProject();
         STORAGE.store(AggregateId.of(ID), commandRequest);
     }
 }

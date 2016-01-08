@@ -2,6 +2,8 @@ rootProject.name = 'spine'
 
 include ':core-java'
 include ':core-java-sample'
+include ':storage-filesystem'
 
 project(':core-java').projectDir = "$rootDir/core-java" as File
 project(':core-java-sample').projectDir = "$rootDir/core-java-sample" as File
+project(':storage-filesystem').projectDir = "$rootDir/storage-filesystem" as File
