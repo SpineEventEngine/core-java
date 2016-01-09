@@ -22,25 +22,40 @@ package org.spine3.examples.eventstore;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.EventStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
+import java.io.IOException;
+
 /**
+ * The server for running {@link EventStore} as a gRPC service.
+ *
  * @author Alexander Yevsyukov
+ * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
  */
 public class EventStoreServer {
 
-    /* The port on which the server should run */
-    private static final int port = 50051;
-    private Server server;
+    private final Server server;
+    private final int port;
 
-    private void start() throws InterruptedException {
-        server = EventStore.createServer(
-                       MoreExecutors.directExecutor(),
-                       InMemoryStorageFactory.getInstance().createEventStorage(),
-                       port);
+    private EventStoreServer(int port) {
+        final ServerServiceDefinition service = EventStore.newServiceBuilder()
+                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setEventStorage(InMemoryStorageFactory.getInstance().createEventStorage())
+                .build();
+
+        this.server = ServerBuilder.forPort(port)
+                .addService(service)
+                .build();
+        this.port = port;
+    }
+
+    private void start() throws IOException {
+        server.start();
         log().info("EventStore server started. Listening on port: " + port);
         addShutdownHook();
     }
@@ -73,8 +88,8 @@ public class EventStoreServer {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        final EventStoreServer server = new EventStoreServer();
+    public static void main(String[] args) throws IOException, InterruptedException {
+        final EventStoreServer server = new EventStoreServer(Constants.PORT);
         server.start();
         server.blockUntilShutdown();
     }

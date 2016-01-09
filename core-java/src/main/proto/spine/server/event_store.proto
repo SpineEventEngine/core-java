@@ -31,7 +31,7 @@ import public "spine/base/response.proto";
 
 // `EventStore` service allows to store events and read them via streams.
 service EventStore {
-    // Request to append event records to the stream.
+    // Request to append event records to the storage.
     rpc Append(spine.base.EventRecord) returns (spine.base.Response);
 
     // Subscribes the client to receive events happened after the passed timestamp.

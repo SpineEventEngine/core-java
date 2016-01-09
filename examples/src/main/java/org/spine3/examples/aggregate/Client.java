@@ -51,8 +51,7 @@ import static org.spine3.util.Users.newUserId;
  */
 public class Client {
 
-    private static final String LOCALHOST = "localhost";
-    private static final String CLIENT_SERVICE_HOST = LOCALHOST;
+    private static final String SERVICE_HOST = "localhost";
 
     private static final String RPC_FAILED = "RPC failed";
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
@@ -66,7 +65,7 @@ public class Client {
      */
     public Client() {
         channel = ManagedChannelBuilder
-                .forAddress(CLIENT_SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
+                .forAddress(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
                 .usePlaintext(true)
                 .build();
         client = ClientServiceGrpc.newBlockingStub(channel);

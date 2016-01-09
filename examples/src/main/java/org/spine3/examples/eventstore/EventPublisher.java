@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.grpc.EventStoreGrpc;
+import org.spine3.util.Commands;
 import org.spine3.util.Events;
+import org.spine3.util.Users;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +39,10 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Yevsyukov
  */
 public class EventPublisher {
+
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static final String EVENT_STORE_SERVICE_HOST = "localhost";
+    private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
     private final ManagedChannel channel;
     private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
@@ -49,7 +55,7 @@ public class EventPublisher {
     }
 
     public void shutdown() throws InterruptedException {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+        channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, TimeUnit.SECONDS);
     }
 
     public void publish(EventRecord record) {
@@ -57,15 +63,21 @@ public class EventPublisher {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        final EventPublisher publisher = new EventPublisher("localhost", 50051);
+        final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, Constants.PORT);
 
         try {
             EventRecord record = Events.createEventRecord(StringValue.newBuilder().setValue("String 123").build(),
-                                                EventContext.getDefaultInstance());
+                                                EventContext.newBuilder()
+                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
+                                                        .setVersion(1)
+                                                        .build());
             publisher.publish(record);
 
             record = Events.createEventRecord(UInt32Value.newBuilder().setValue(100).build(),
-                                                EventContext.getDefaultInstance());
+                                                EventContext.newBuilder()
+                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
+                                                        .setVersion(10)
+                                                        .build());
             publisher.publish(record);
 
         } finally {
