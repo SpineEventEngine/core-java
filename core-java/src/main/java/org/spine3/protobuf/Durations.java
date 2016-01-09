@@ -17,7 +17,7 @@ import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 
 /**
- * Utility class for working with durations.
+ * Utility class for working with durations in addition to those available from {@link TimeUtil}.
  * 
  * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
  * <pre>
@@ -25,6 +25,7 @@ import static org.spine3.util.Math.safeMultiply;
  * </pre>
  *
  * @author Alexander Yevsyukov
+ * @see TimeUtil
  */
 @SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
 public class Durations {

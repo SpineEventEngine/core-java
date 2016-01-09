@@ -30,16 +30,17 @@ import java.util.Comparator;
 import java.util.Date;
 
 /**
- * Utility class for working with timestamps.
+ * Utilities class for working with timestamps in addition to those available from {@link TimeUtil}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
+ * @see TimeUtil
  */
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
 
     private static final long NANOS_PER_MILLISECOND = 1_000_000;
-    public static final long MILLISECONDS_PER_SECOND = 1000;
+    private static final long MILLISECONDS_PER_SECOND = 1000;
     private static final long MICROS_PER_SECOND = 1000000;
     private static final int SECONDS_PER_MINUTE = 60;
 

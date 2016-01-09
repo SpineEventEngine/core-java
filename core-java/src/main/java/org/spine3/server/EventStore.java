@@ -20,22 +20,14 @@
 package org.spine3.server;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.client.EventStreamObserver;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.util.Events;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -53,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class EventStore implements Closeable {
 
-    private final Collection<EventStreamObserver> observers = new CopyOnWriteArrayList<>();
+    private final Collection<StreamObserver<EventRecord>> observers = new CopyOnWriteArrayList<>();
     private final Executor streamExecutor;
 
     /**
@@ -66,17 +58,37 @@ public abstract class EventStore implements Closeable {
         return new LocalImpl(streamExecutor, storage);
     }
 
+    /**
+     * Creates new {@link ServiceBuilder} for building {@code EventStore} instance
+     * that will be exposed as a gRPC service.
+     */
+    public static ServiceBuilder newServiceBuilder() {
+        return new ServiceBuilder();
+    }
+
+    /**
+     * Constructs an instance with the passed executor for steam of history
+     * for subscribers.
+     *
+     * @param streamExecutor the executor for updating new subscribers
+     * @see #subscribe(Timestamp, StreamObserver)
+     */
     protected EventStore(Executor streamExecutor) {
         this.streamExecutor = streamExecutor;
     }
 
+    /**
+     * Appends the passed event record to the history of events.
+     *
+     * @param record the record to append
+     */
     public void append(EventRecord record) {
         store(record);
         notifySubscribers(record);
     }
 
     /**
-     * Implement this method for storing passed record.
+     * Implement this method for storing the passed event record.
      *
      * @param record the event record to store.
      */
@@ -91,12 +103,6 @@ public abstract class EventStore implements Closeable {
      */
     protected abstract Iterator<EventRecord> since(Timestamp timestamp);
 
-    private void notifySubscribers(EventRecord record) {
-        for (EventStreamObserver observer : observers) {
-            notify(observer, record);
-        }
-    }
-
     /**
      * Subscribes the passed observer to receive the stream of events since the passed timestamp.
      *
@@ -109,7 +115,7 @@ public abstract class EventStore implements Closeable {
      * @param timestamp the point in time since which include events into the stream
      * @param observer the observer for the requested event stream
      */
-    public void subscribe(final Timestamp timestamp, final EventStreamObserver observer) {
+    public void subscribe(final Timestamp timestamp, final StreamObserver<EventRecord> observer) {
         streamExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -130,31 +136,41 @@ public abstract class EventStore implements Closeable {
      *
      * @param observer the observer for the stream of new events
      */
-    public void subscribe(EventStreamObserver observer) {
+    public void subscribe(StreamObserver<EventRecord> observer) {
         addSubscriber(observer);
     }
 
-    //TODO:2016-01-09:alexander.yevsyukov: Remove EventStreamObserver in favor of standard gRPC StreamObserver<EventRecord>
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static void notify(EventStreamObserver observer, EventRecord record) {
-        final Message event = Messages.fromAny(record.getEvent());
-        final EventContext context = record.getContext();
-        observer.onNext(event, context);
+    /**
+     * Notifies registered subscribers on the new event.
+     */
+    private void notifySubscribers(EventRecord record) {
+        for (StreamObserver<EventRecord> observer : observers) {
+            notify(observer, record);
+        }
     }
 
-    private void addSubscriber(EventStreamObserver observer) {
+    private static void notify(StreamObserver<EventRecord> observer, EventRecord record) {
+        observer.onNext(record);
+    }
+
+    private void addSubscriber(StreamObserver<EventRecord> observer) {
         observers.add(observer);
     }
 
+    /**
+     * Closes the event store notifying all the subscribers with {@link StreamObserver#onCompleted()}.
+     *
+     * @throws IOException
+     */
     @Override
     public void close() throws IOException {
-        for (EventStreamObserver observer : observers) {
+        for (StreamObserver<EventRecord> observer : observers) {
             observer.onCompleted();
         }
     }
 
     /**
-     * A locally running implementation.
+     * A locally running {@code EventStore} implementation.
      */
     private static class LocalImpl extends EventStore {
 
@@ -181,7 +197,7 @@ public abstract class EventStore implements Closeable {
         }
 
         /**
-         * Closes the underlying storage.
+         * Notifies all the subscribers and closes the underlying storage.
          *
          * @throws IOException if the attempt to close the storage throws an exception
          */
@@ -190,9 +206,11 @@ public abstract class EventStore implements Closeable {
             super.close();
             storage.close();
         }
-
     }
 
+    /**
+     * gRPC service over the locally running implementation.
+     */
     private static class GrpcService implements EventStoreGrpc.EventStore {
 
         private final LocalImpl eventStore;
@@ -212,53 +230,15 @@ public abstract class EventStore implements Closeable {
             }
         }
 
-        /**
-         * Adapts {@code StreamObserver<EventRecord>} instance to {@code EventStreamObserver}.
-         */
-        private static class Adapter implements EventStreamObserver {
-
-            private final StreamObserver<EventRecord> streamObserver;
-
-            private Adapter(StreamObserver<EventRecord> streamObserver) {
-                this.streamObserver = streamObserver;
-            }
-
-            @Override
-            public void onNext(Message event, EventContext ctx) {
-                final EventRecord record = Events.createEventRecord(event, ctx);
-                streamObserver.onNext(record);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                log().error("Error encountered ", t);
-                streamObserver.onError(t);
-            }
-
-            @Override
-            public void onCompleted() {
-                streamObserver.onCompleted();
-            }
-        }
-
         @Override
         public void subscribeSince(Timestamp request, StreamObserver<EventRecord> responseObserver) {
-            log().info("Subscribe since timestamp: {}", TimeUtil.toString(request));
-            eventStore.subscribe(request, new Adapter(responseObserver));
+            eventStore.subscribe(request, responseObserver);
         }
 
         @Override
         public void subscribe(Empty request, StreamObserver<EventRecord> responseObserver) {
-            log().info("Subscribe from now.");
-            eventStore.subscribe(new Adapter(responseObserver));
+            eventStore.subscribe(responseObserver);
         }
-    }
-
-    /**
-     * Creates new {@link ServiceBuilder} instance.
-     */
-    public static ServiceBuilder newServiceBuilder() {
-        return new ServiceBuilder();
     }
 
     /**
@@ -298,13 +278,4 @@ public abstract class EventStore implements Closeable {
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventStore.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
 }
