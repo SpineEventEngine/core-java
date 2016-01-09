@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.createDurationFromMillis;
 import static com.google.protobuf.util.TimeUtil.toMillis;
+import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 
@@ -31,10 +32,6 @@ import static org.spine3.util.Math.safeMultiply;
 public class Durations {
 
     public static final com.google.protobuf.Duration ZERO = createDurationFromMillis(0L);
-
-    private static final int MILLIS_PER_SECOND = 1000;
-    private static final int SECONDS_PER_MINUTE = 60;
-    private static final int MINUTES_PER_HOUR = 60;
 
     private Durations() {}
 

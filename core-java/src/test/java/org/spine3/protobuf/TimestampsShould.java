@@ -27,7 +27,8 @@ import java.util.Date;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Timestamps.*;
+import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps.convertToDate;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
@@ -38,7 +39,7 @@ public class TimestampsShould {
         final Timestamp expectedTime = getCurrentTime();
 
         final Date actualDate = convertToDate(expectedTime);
-        final long actualSeconds = actualDate.getTime() / MILLISECONDS_PER_SECOND;
+        final long actualSeconds = actualDate.getTime() / (long) MILLIS_PER_SECOND;
 
         assertEquals(expectedTime.getSeconds(), actualSeconds);
     }
