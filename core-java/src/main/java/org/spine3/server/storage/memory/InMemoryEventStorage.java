@@ -28,7 +28,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.util.Events;
 
 import java.io.Serializable;
@@ -87,7 +87,7 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
+    protected void write(EventStorageRecord record) {
         checkNotNull(record);
         checkNotNull(record.getEventId());
 

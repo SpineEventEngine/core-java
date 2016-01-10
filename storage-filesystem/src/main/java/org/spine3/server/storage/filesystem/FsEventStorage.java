@@ -27,7 +27,7 @@ import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.util.Events;
 
 import java.io.*;
@@ -83,7 +83,7 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
+    protected void write(EventStorageRecord record) {
         checkNotNull(record);
         writeMessage(eventStorageFile, record);
     }
@@ -130,7 +130,7 @@ class FsEventStorage extends EventStorage {
             FileUtil.checkFileExists(file, "event storage");
             checkHasNextBytes();
 
-            final EventStoreRecord storeRecord = parseEventRecord();
+            final EventStorageRecord storeRecord = parseEventRecord();
             final EventRecord result = Events.toEventRecord(storeRecord);
 
             if (!hasNext()) {
@@ -142,10 +142,10 @@ class FsEventStorage extends EventStorage {
             return result;
         }
 
-        private EventStoreRecord parseEventRecord() {
-            final EventStoreRecord event;
+        private EventStorageRecord parseEventRecord() {
+            final EventStorageRecord event;
             try {
-                event = EventStoreRecord.parseDelimitedFrom(getInputStream());
+                event = EventStorageRecord.parseDelimitedFrom(getInputStream());
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read event record from file: " + file.getAbsolutePath(), e);
             }

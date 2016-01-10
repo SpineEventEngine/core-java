@@ -26,7 +26,7 @@ import org.spine3.server.EventStreamQuery;
 import java.io.Closeable;
 import java.util.Iterator;
 
-import static org.spine3.util.Events.toEventStoreRecord;
+import static org.spine3.util.Events.toEventStorageRecord;
 
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
@@ -37,7 +37,7 @@ public abstract class EventStorage implements Closeable {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {
-        final EventStoreRecord storeRecord = toEventStoreRecord(record);
+        final EventStorageRecord storeRecord = toEventStorageRecord(record);
         write(storeRecord);
     }
 
@@ -55,7 +55,7 @@ public abstract class EventStorage implements Closeable {
      * @param record the record to write
      * @throws java.lang.NullPointerException if record is null
      */
-    protected abstract void write(EventStoreRecord record);
+    protected abstract void write(EventStorageRecord record);
 
     /**
      * @deprecated Use {@link #iterator(EventStreamQuery)} instead

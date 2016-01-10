@@ -23,10 +23,10 @@ package org.spine3.server.storage.filesystem;
 import org.junit.After;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
+import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.EventStorageShould;
-import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.testdata.TestEventStoreRecordFactory;
+import org.spine3.testdata.TestEventStorageRecordFactory;
 import org.spine3.util.Events;
 
 import java.util.Iterator;
@@ -66,7 +66,7 @@ public class FsEventStorageShould extends EventStorageShould {
     @Test(expected = NoSuchElementException.class)
     public void throw_exception_if_iteration_has_no_more_elements() {
 
-        final EventStoreRecord recordToStore = TestEventStoreRecordFactory.projectCreated();
+        final EventStorageRecord recordToStore = TestEventStorageRecordFactory.projectCreated();
         final EventRecord expected = Events.toEventRecord(recordToStore);
         STORAGE.write(recordToStore);
 

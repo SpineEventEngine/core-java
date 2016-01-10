@@ -61,14 +61,14 @@ message AggregateStorageRecord {
 
 // Event data for an aggregate returned by a storage managing the aggregate.
 message AggregateEvents {
-     // If present, Snapshot will be used for restoring aggregate state before playing other events.
-     spine.server.aggregate.Snapshot snapshot = 1;
+    // If present, Snapshot will be used for restoring aggregate state before playing other events.
+    spine.server.aggregate.Snapshot snapshot = 1;
 
-     // Event records for the aggregate.
-     //
-     // If `snapshot` field is present, event records represent a 'tail' of event history of the aggregate.
-     // Otherwise, records are full history of the aggregate.
-     repeated spine.base.EventRecord event_record = 2;
+    // Event records for the aggregate.
+    //
+    // If `snapshot` field is present, event records represent a 'tail' of event history of the aggregate.
+    // Otherwise, records are full history of the aggregate.
+    repeated spine.base.EventRecord event_record = 2;
 }
 
 

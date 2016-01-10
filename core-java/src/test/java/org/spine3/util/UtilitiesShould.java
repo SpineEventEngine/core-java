@@ -63,7 +63,7 @@ public class UtilitiesShould {
         checkPrivateConstructor(TestCommandFactory.class);
         checkPrivateConstructor(TestContextFactory.class);
         checkPrivateConstructor(TestEventRecordFactory.class);
-        checkPrivateConstructor(TestEventStoreRecordFactory.class);
+        checkPrivateConstructor(TestEventStorageRecordFactory.class);
     }
 
     protected static void checkPrivateConstructor(Class<?> clazz) {

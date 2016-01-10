@@ -30,7 +30,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.testdata.TestEventStoreRecordFactory.*;
+import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 import static org.spine3.util.Events.toEventRecord;
 import static org.spine3.util.Events.toEventRecordsList;
 
@@ -68,7 +68,7 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_read_one_event() {
 
-        final EventStoreRecord recordToStore = projectCreated();
+        final EventStorageRecord recordToStore = projectCreated();
         final EventRecord expected = toEventRecord(recordToStore);
 
         storage.write(recordToStore);
@@ -91,7 +91,7 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_read_several_events() {
 
-        final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
+        final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
         final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
 
         writeAll(recordsToStore);
@@ -102,7 +102,7 @@ public abstract class EventStorageShould {
     @Test
     public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
 
-        final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
+        final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
         final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
 
         writeAll(recordsToStore);
@@ -112,8 +112,8 @@ public abstract class EventStorageShould {
         assertStorageContains(expectedRecords);
     }
 
-    private void writeAll(Iterable<EventStoreRecord> records) {
-        for (EventStoreRecord r : records) {
+    private void writeAll(Iterable<EventStorageRecord> records) {
+        for (EventStorageRecord r : records) {
             storage.write(r);
         }
     }
@@ -139,7 +139,7 @@ public abstract class EventStorageShould {
         assertEquals(expected.getContext(), actual.getContext());
     }
 
-    private static List<EventStoreRecord> createEventStoreRecords() {
+    private static List<EventStorageRecord> createEventStorageRecords() {
         return newArrayList(projectCreated(), projectStarted(), taskAdded());
     }
 }

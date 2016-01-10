@@ -30,8 +30,8 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.EventStoreRecord;
-import org.spine3.server.storage.EventStoreRecordOrBuilder;
+import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.storage.EventStorageRecordOrBuilder;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -186,9 +186,9 @@ public class Events {
     }
 
     /**
-     * Converts EventStoreRecord to EventRecord.
+     * Converts EventStorageRecord to EventRecord.
      */
-    public static EventRecord toEventRecord(EventStoreRecordOrBuilder record) {
+    public static EventRecord toEventRecord(EventStorageRecordOrBuilder record) {
         final EventRecord.Builder builder = EventRecord.newBuilder()
                 .setEvent(record.getEvent())
                 .setContext(record.getContext());
@@ -197,13 +197,13 @@ public class Events {
     }
 
     /**
-     * Converts EventStoreRecords to EventRecords.
+     * Converts EventStorageRecords to EventRecords.
      */
-    public static List<EventRecord> toEventRecordsList(List<EventStoreRecord> records) {
+    public static List<EventRecord> toEventRecordsList(List<EventStorageRecord> records) {
         return Lists.transform(records, TO_EVENT_RECORD);
     }
 
-    public static EventStoreRecord toEventStoreRecord(EventRecordOrBuilder record) {
+    public static EventStorageRecord toEventStorageRecord(EventRecordOrBuilder record) {
 
         final Any event = record.getEvent();
         final EventContext context = record.getContext();
@@ -211,7 +211,7 @@ public class Events {
         final EventId eventId = context.getEventId();
         final String eventIdStr = idToString(eventId);
 
-        final EventStoreRecord.Builder builder = EventStoreRecord.newBuilder()
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(getTimestamp(eventId))
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
@@ -222,9 +222,9 @@ public class Events {
         return builder.build();
     }
 
-    private static final Function<EventStoreRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStoreRecord, EventRecord>() {
+    private static final Function<EventStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStorageRecord, EventRecord>() {
         @Override
-        public EventRecord apply(@Nullable EventStoreRecord input) {
+        public EventRecord apply(@Nullable EventStorageRecord input) {
             if (input == null) {
                 return EventRecord.getDefaultInstance();
             }

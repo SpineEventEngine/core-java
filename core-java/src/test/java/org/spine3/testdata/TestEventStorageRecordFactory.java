@@ -20,41 +20,41 @@
 
 package org.spine3.testdata;
 
-import org.spine3.server.storage.EventStoreRecord;
+import org.spine3.server.storage.EventStorageRecord;
 
 import static org.spine3.testdata.TestEventFactory.*;
 
 /**
- * Contains EventStoreRecords for tests.
+ * Contains EventStorageRecords for tests.
  *
  * @author Alexander Litus
  */
 @SuppressWarnings("UtilityClass")
-public class TestEventStoreRecordFactory {
+public class TestEventStorageRecordFactory {
 
-    private static final EventStoreRecord PROJECT_CREATED_RECORD = EventStoreRecord.newBuilder()
+    private static final EventStorageRecord PROJECT_CREATED_RECORD = EventStorageRecord.newBuilder()
             .setEvent(projectCreatedEventAny())
             .setEventId("project_created").build();
 
-    private static final EventStoreRecord TASK_ADDED_RECORD = EventStoreRecord.newBuilder()
+    private static final EventStorageRecord TASK_ADDED_RECORD = EventStorageRecord.newBuilder()
             .setEvent(taskAddedEventAny())
             .setEventId("task_added").build();
 
-    private static final EventStoreRecord PROJECT_STARTED_RECORD = EventStoreRecord.newBuilder()
+    private static final EventStorageRecord PROJECT_STARTED_RECORD = EventStorageRecord.newBuilder()
             .setEvent(projectStartedEventAny())
             .setEventId("project_started").build();
 
-    private TestEventStoreRecordFactory() {}
+    private TestEventStorageRecordFactory() {}
 
-    public static EventStoreRecord projectCreated() {
+    public static EventStorageRecord projectCreated() {
         return PROJECT_CREATED_RECORD;
     }
 
-    public static EventStoreRecord taskAdded() {
+    public static EventStorageRecord taskAdded() {
         return TASK_ADDED_RECORD;
     }
 
-    public static EventStoreRecord projectStarted() {
+    public static EventStorageRecord projectStarted() {
         return PROJECT_STARTED_RECORD;
     }
 }
