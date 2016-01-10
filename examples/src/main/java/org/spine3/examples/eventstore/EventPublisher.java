@@ -21,6 +21,7 @@
 package org.spine3.examples.eventstore;
 
 import com.google.protobuf.StringValue;
+import com.google.protobuf.TextFormat;
 import com.google.protobuf.UInt32Value;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.util.Commands;
 import org.spine3.util.Events;
@@ -62,7 +62,7 @@ public class EventPublisher {
 
     public void publish(EventRecord record) {
         blockingClient.append(record);
-        log().debug("Event published: {}", Messages.toJson(record));
+        log().trace("Event published: {}", TextFormat.shortDebugString(record));
     }
 
     public static void main(String[] args) throws InterruptedException {

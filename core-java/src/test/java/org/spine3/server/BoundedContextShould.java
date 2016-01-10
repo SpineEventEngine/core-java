@@ -270,7 +270,8 @@ public class BoundedContextShould {
     public void return_EventStore_from_builder() {
         final EventStore es = EventStore.create(
                 MoreExecutors.directExecutor(),
-                InMemoryStorageFactory.getInstance().createEventStorage());
+                InMemoryStorageFactory.getInstance().createEventStorage(),
+                EventStore.log());
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventStore(es);
         assertEquals(es, builder.getEventStore());
     }

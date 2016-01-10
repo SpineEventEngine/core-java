@@ -20,15 +20,20 @@
 package org.spine3.server;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.TextFormat;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.server.storage.EventStorage;
 
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -47,6 +52,8 @@ public abstract class EventStore implements Closeable {
 
     private final Collection<StreamObserver<EventRecord>> observers = new CopyOnWriteArrayList<>();
     private final Executor streamExecutor;
+    @Nullable
+    private final Logger logger;
 
     /**
      * Creates a new instance running on the passed storage.
@@ -54,8 +61,8 @@ public abstract class EventStore implements Closeable {
      * @param streamExecutor the executor for iterating through the history of events for a new subscriber
      * @param storage the underlying storage for events.
      */
-    public static EventStore create(Executor streamExecutor, EventStorage storage) {
-        return new LocalImpl(streamExecutor, storage);
+    public static EventStore create(Executor streamExecutor, EventStorage storage, @Nullable Logger logger) {
+        return new LocalImpl(streamExecutor, storage, logger);
     }
 
     /**
@@ -71,10 +78,12 @@ public abstract class EventStore implements Closeable {
      * for subscribers.
      *
      * @param streamExecutor the executor for updating new subscribers
+     * @param logger debug logger instance
      * @see #subscribe(Timestamp, StreamObserver)
      */
-    protected EventStore(Executor streamExecutor) {
+    protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
         this.streamExecutor = streamExecutor;
+        this.logger = logger;
     }
 
     /**
@@ -84,6 +93,7 @@ public abstract class EventStore implements Closeable {
      */
     public void append(EventRecord record) {
         store(record);
+        logStored(record);
         notifySubscribers(record);
     }
 
@@ -116,15 +126,17 @@ public abstract class EventStore implements Closeable {
      * @param observer the observer for the requested event stream
      */
     public void subscribe(final Timestamp timestamp, final StreamObserver<EventRecord> observer) {
+        logSubscribingStart(timestamp, observer);
+
         streamExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 final Iterator<EventRecord> eventRecords = since(timestamp);
-
                 while (eventRecords.hasNext()) {
                     final EventRecord record = eventRecords.next();
                     EventStore.notify(observer, record);
                 }
+                logCatchUpComplete(observer);
                 addSubscriber(observer);
             }
         });
@@ -155,6 +167,7 @@ public abstract class EventStore implements Closeable {
 
     private void addSubscriber(StreamObserver<EventRecord> observer) {
         observers.add(observer);
+        logSubscription(observer);
     }
 
     /**
@@ -181,8 +194,8 @@ public abstract class EventStore implements Closeable {
          *
          * @param storage the underlying storage for the store.
          */
-        private LocalImpl(Executor catchUpExecutor, EventStorage storage) {
-            super(catchUpExecutor);
+        private LocalImpl(Executor catchUpExecutor, EventStorage storage, @Nullable Logger logger) {
+            super(catchUpExecutor, logger);
             this.storage = storage;
         }
 
@@ -239,6 +252,7 @@ public abstract class EventStore implements Closeable {
         public void subscribe(Empty request, StreamObserver<EventRecord> responseObserver) {
             eventStore.subscribe(responseObserver);
         }
+
     }
 
     /**
@@ -247,9 +261,11 @@ public abstract class EventStore implements Closeable {
      * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
      */
     public static class ServiceBuilder {
+
         private Executor streamExecutor;
         private EventStorage eventStorage;
-
+        @Nullable
+        private Logger logger;
         public ServiceBuilder setStreamExecutor(Executor executor) {
             this.streamExecutor = checkNotNull(executor);
             return this;
@@ -268,14 +284,77 @@ public abstract class EventStore implements Closeable {
             return eventStorage;
         }
 
+        public ServiceBuilder setLogger(@Nullable Logger logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        @Nullable
+        public Logger getLogger() {
+            return logger;
+        }
+
         public ServerServiceDefinition build() {
             checkNotNull(streamExecutor, "streamExecutor must be set");
             checkNotNull(eventStorage, "eventStorage must be set");
-            final LocalImpl eventStore = new LocalImpl(streamExecutor, eventStorage);
+            final LocalImpl eventStore = new LocalImpl(streamExecutor, eventStorage, logger);
             final EventStoreGrpc.EventStore grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = EventStoreGrpc.bindService(grpcService);
             return result;
         }
+
+    }
+    @SuppressWarnings("TypeMayBeWeakened")
+    private void logStored(EventRecord request) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        }
+    }
+
+    private void logSubscribingStart(Timestamp timestamp, StreamObserver<EventRecord> observer) {
+        if (logger == null) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            final String time = TimeUtil.toString(timestamp);
+            logger.info("Subscribing {} for events since {}", observer, time);
+        }
+    }
+
+    private void logCatchUpComplete(StreamObserver<EventRecord> observer) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Observer {} got all catch-up events.", observer);
+        }
+    }
+
+    private void logSubscription(StreamObserver<EventRecord> observer) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Subscribed {}", observer);
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventStore.class);
+    }
+
+    /**
+     * Default logger of {EventStore} class.
+     */
+    public static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

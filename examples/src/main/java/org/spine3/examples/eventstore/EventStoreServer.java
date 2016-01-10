@@ -46,6 +46,7 @@ public class EventStoreServer {
         final ServerServiceDefinition service = EventStore.newServiceBuilder()
                 .setStreamExecutor(MoreExecutors.directExecutor())
                 .setEventStorage(InMemoryStorageFactory.getInstance().createEventStorage())
+                .setLogger(log())
                 .build();
 
         this.server = ServerBuilder.forPort(port)
@@ -58,6 +59,7 @@ public class EventStoreServer {
         server.start();
         log().info("EventStore server started. Listening on port: " + port);
         addShutdownHook();
+        log().trace("Shutdown hook added.");
     }
 
     private void addShutdownHook() {
@@ -96,7 +98,6 @@ public class EventStoreServer {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(EventStoreServer.class);
     }
