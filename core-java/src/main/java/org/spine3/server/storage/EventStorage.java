@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.server.EventStreamQuery;
 
 import java.io.Closeable;
 import java.util.Iterator;
@@ -42,19 +42,12 @@ public abstract class EventStorage implements Closeable {
     }
 
     /**
-     * Returns iterator through all the event records in the storage sorted by timestamp.
+     * Returns iterator through event records matching the passed query.
      *
+     * @param query a filtering query
      * @return iterator instance
      */
-    public abstract Iterator<EventRecord> allEvents();
-
-    /**
-     * Returns iterator through event records since the passed moment of time.
-     *
-     * @param timestamp a moment from which return event records
-     * @return iterator of event records since the passed time
-     */
-    public abstract Iterator<EventRecord> since(Timestamp timestamp);
+    public abstract Iterator<EventRecord> iterator(EventStreamQuery query);
 
     /**
      * Writes record into the storage.
@@ -64,4 +57,11 @@ public abstract class EventStorage implements Closeable {
      */
     protected abstract void write(EventStoreRecord record);
 
+    /**
+     * @deprecated Use {@link #iterator(EventStreamQuery)} instead
+     */
+    @Deprecated
+    public Iterator<EventRecord> allEvents() {
+        return iterator(EventStreamQuery.getDefaultInstance());
+    }
 }

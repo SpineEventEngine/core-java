@@ -72,12 +72,10 @@ public abstract class EventStore implements Closeable {
     }
 
     /**
-     * Constructs an instance with the passed executor for steam of history
-     * for subscribers.
+     * Constructs an instance with the passed executor for returning streams.
      *
      * @param streamExecutor the executor for updating new subscribers
      * @param logger debug logger instance
-     * @see #subscribe(Timestamp, StreamObserver)
      */
     protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
         this.streamExecutor = streamExecutor;
@@ -102,38 +100,32 @@ public abstract class EventStore implements Closeable {
     protected abstract void store(EventRecord record);
 
     /**
-     * Creates iterator for traversing through the history of messages
-     * since the passed timestamp.
+     * Creates iterator for traversing through the history of event records
+     * matching the passed query.
      *
-     * @param timestamp the point in time from which events should be viewed
+     * @param query the query filtering the history
      * @return iterator instance
      */
-    protected abstract Iterator<EventRecord> since(Timestamp timestamp);
+    protected abstract Iterator<EventRecord> iterator(EventStreamQuery query);
 
     /**
-     * Subscribes the passed observer to receive the stream of events since the passed timestamp.
+     * Creates the steam with event records matching the passed query.
      *
-     * <p>The observer will receive new events as the added to the {@code EventStore} after
-     * receiving the requested history of events.
-     *
-     * <p>The operation is performed by the stream executor passed during construction
-     * of this {@code EventStore}.
-     *
-     * @param timestamp the point in time since which include events into the stream
-     * @param observer the observer for the requested event stream
+     * @param request the query with filtering parameters for the event history
+     * @param responseObserver observer for the resulting stream
      */
-    public void subscribe(final Timestamp timestamp, final StreamObserver<EventRecord> observer) {
-        logSubscribingStart(timestamp, observer);
+    public void read(final EventStreamQuery request, final StreamObserver<EventRecord> responseObserver) {
+        logReadingStart(request, responseObserver);
 
         streamExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                final Iterator<EventRecord> eventRecords = since(timestamp);
+                final Iterator<EventRecord> eventRecords = iterator(request);
                 while (eventRecords.hasNext()) {
                     final EventRecord record = eventRecords.next();
-                    EventStore.notify(observer, record);
+                    EventStore.notify(responseObserver, record);
                 }
-                logCatchUpComplete(observer);
+                logCatchUpComplete(responseObserver);
             }
         });
     }
@@ -165,8 +157,8 @@ public abstract class EventStore implements Closeable {
         }
 
         @Override
-        protected Iterator<EventRecord> since(Timestamp timestamp) {
-            return storage.since(timestamp);
+        protected Iterator<EventRecord> iterator(EventStreamQuery query) {
+            return storage.iterator(query);
         }
 
         /**
@@ -203,8 +195,8 @@ public abstract class EventStore implements Closeable {
         }
 
         @Override
-        public void subscribeSince(Timestamp request, StreamObserver<EventRecord> responseObserver) {
-            eventStore.subscribe(request, responseObserver);
+        public void read(EventStreamQuery request, StreamObserver<EventRecord> responseObserver) {
+            eventStore.read(request, responseObserver);
         }
     }
 
@@ -280,6 +272,17 @@ public abstract class EventStore implements Closeable {
         if (logger.isInfoEnabled()) {
             final String time = TimeUtil.toString(timestamp);
             logger.info("Subscribing {} for events since {}", observer, time);
+        }
+    }
+
+    private void logReadingStart(EventStreamQuery request, StreamObserver<EventRecord> responseObserver) {
+        if (logger == null) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            final String requestData = TextFormat.shortDebugString(request);
+            logger.info("Creating stream on request: {} for observer: {}", requestData, responseObserver);
         }
     }
 

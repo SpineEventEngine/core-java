@@ -26,6 +26,7 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
@@ -63,13 +64,11 @@ class InMemoryEventStorage extends EventStorage {
         private static final long serialVersionUID = 0L;
     }
 
-    @Override
     public Iterator<EventRecord> allEvents() {
         final Iterator<EventRecord> result = Iterators.unmodifiableIterator(storage.iterator());
         return result;
     }
 
-    @Override
     public Iterator<EventRecord> since(Timestamp timestamp) {
         final Predicate<EventRecord> isAfter = new Events.IsAfter(timestamp);
 
@@ -78,6 +77,13 @@ class InMemoryEventStorage extends EventStorage {
                 .iterator();
 
         return result;
+    }
+
+    @Override
+    public Iterator<EventRecord> iterator(EventStreamQuery query) {
+        //TODO:2016-01-10:alexander.yevsyukov: Implement
+
+        return null;
     }
 
     @Override

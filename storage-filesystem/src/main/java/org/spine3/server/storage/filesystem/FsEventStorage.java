@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
+import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStoreRecord;
 import org.spine3.util.Events;
@@ -63,22 +64,26 @@ class FsEventStorage extends EventStorage {
         this.eventStorageFile = FileUtil.createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
     }
 
-    @Override
     public Iterator<EventRecord> allEvents() {
         final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
         iterators.add(iterator);
         return iterator;
     }
 
-    @Override
     public Iterator<EventRecord> since(Timestamp timestamp) {
         final Iterator<EventRecord> result = Iterators.filter(allEvents(), new Events.IsAfter(timestamp));
         return result;
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
+    public Iterator<EventRecord> iterator(EventStreamQuery query) {
+        //TODO:2016-01-10:alexander.yevsyukov: Implement
 
+        return null;
+    }
+
+    @Override
+    protected void write(EventStoreRecord record) {
         checkNotNull(record);
         writeMessage(eventStorageFile, record);
     }

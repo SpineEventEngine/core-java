@@ -19,23 +19,25 @@
 //
 syntax = "proto3";
 
-package spine.server;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EventStoreProto";
-option java_package = "org.spine3.server.grpc";
+option java_outer_classname = "EventRecordFilterProto";
+option java_package = "org.spine3.base";
 
 import public "spine/base/event.proto";
-import public "spine/base/response.proto";
+import public "spine/base/field_filter.proto";
 
-import public "spine/server/event_stream_query.proto";
+// Filters `EventRecord`s by the type of the event, event field values, and by `EventContext` field values.
+message EventRecordFilter {
+    // The full Proto type name of the event.
+    string event_type_name = 1;
 
-// `EventStore` service allows to store events and read them via streams.
-service EventStore {
-    // Request to append event records to the storage.
-    rpc Append(spine.base.EventRecord) returns (spine.base.Response);
+    // Accepted event field values.
+    repeated FieldFilter event_field_filter = 2;
 
-    // Provides event records matching the query as a stream.
-    rpc Read(EventStreamQuery) returns (stream spine.base.EventRecord);
+    // Accepted `EventContext` field values.
+    repeated FieldFilter context_field_filter = 3;
 }
+

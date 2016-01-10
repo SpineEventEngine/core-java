@@ -19,23 +19,21 @@
 //
 syntax = "proto3";
 
-package spine.server;
+package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EventStoreProto";
-option java_package = "org.spine3.server.grpc";
+option java_outer_classname = "FieldFilterProto";
+option java_package = "org.spine3.base";
 
-import public "spine/base/event.proto";
-import public "spine/base/response.proto";
+import public "google/protobuf/field_mask.proto";
+import public "google/protobuf/any.proto";
 
-import public "spine/server/event_stream_query.proto";
+// `FieldFilter` specifies accepted values for a field.
+message FieldFilter {
+    // The field specification.
+    google.protobuf.FieldMask field = 1;
 
-// `EventStore` service allows to store events and read them via streams.
-service EventStore {
-    // Request to append event records to the storage.
-    rpc Append(spine.base.EventRecord) returns (spine.base.Response);
-
-    // Provides event records matching the query as a stream.
-    rpc Read(EventStreamQuery) returns (stream spine.base.EventRecord);
+    // Values accepted by the filter.
+    repeated google.protobuf.Any value = 2;
 }

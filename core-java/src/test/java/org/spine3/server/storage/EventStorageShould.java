@@ -76,7 +76,7 @@ public abstract class EventStorageShould {
         assertStorageContains(expected);
     }
 
-    private void assertStorageContains(EventRecordOrBuilder expected) {
+    private void assertStorageContains(EventRecord expected) {
 
         final Iterator<EventRecord> iterator = storage.allEvents();
 
