@@ -38,7 +38,4 @@ service EventStore {
     //
     // Passing the default instance of `Timestamp` will return *all* events.
     rpc SubscribeSince(google.protobuf.Timestamp) returns (stream spine.base.EventRecord);
-
-    // Subscribes the client to receive events occurred after this call.
-    rpc Subscribe(google.protobuf.Empty) returns (stream spine.base.EventRecord);
 }

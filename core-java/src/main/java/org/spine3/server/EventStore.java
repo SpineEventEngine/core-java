@@ -19,7 +19,6 @@
  */
 package org.spine3.server;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
@@ -36,9 +35,7 @@ import org.spine3.server.storage.EventStorage;
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,14 +43,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A store of all events in a bounded context.
  *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
 public abstract class EventStore implements Closeable {
 
-    private final Collection<StreamObserver<EventRecord>> observers = new CopyOnWriteArrayList<>();
     private final Executor streamExecutor;
     @Nullable
     private final Logger logger;
+
+    //TODO:2016-01-10:alexander.yevsyukov: Turn into newBuilder() for consistency of API.
 
     /**
      * Creates a new instance running on the passed storage.
@@ -94,7 +92,6 @@ public abstract class EventStore implements Closeable {
     public void append(EventRecord record) {
         store(record);
         logStored(record);
-        notifySubscribers(record);
     }
 
     /**
@@ -137,49 +134,12 @@ public abstract class EventStore implements Closeable {
                     EventStore.notify(observer, record);
                 }
                 logCatchUpComplete(observer);
-                addSubscriber(observer);
             }
         });
     }
 
-    /**
-     * Subscribes the passed observer to receive all new events added to the {@code EventStore}
-     * <i>after</i> this call.
-     *
-     * @param observer the observer for the stream of new events
-     */
-    public void subscribe(StreamObserver<EventRecord> observer) {
-        addSubscriber(observer);
-    }
-
-    /**
-     * Notifies registered subscribers on the new event.
-     */
-    private void notifySubscribers(EventRecord record) {
-        for (StreamObserver<EventRecord> observer : observers) {
-            notify(observer, record);
-        }
-    }
-
     private static void notify(StreamObserver<EventRecord> observer, EventRecord record) {
         observer.onNext(record);
-    }
-
-    private void addSubscriber(StreamObserver<EventRecord> observer) {
-        observers.add(observer);
-        logSubscription(observer);
-    }
-
-    /**
-     * Closes the event store notifying all the subscribers with {@link StreamObserver#onCompleted()}.
-     *
-     * @throws IOException
-     */
-    @Override
-    public void close() throws IOException {
-        for (StreamObserver<EventRecord> observer : observers) {
-            observer.onCompleted();
-        }
     }
 
     /**
@@ -216,7 +176,6 @@ public abstract class EventStore implements Closeable {
          */
         @Override
         public void close() throws IOException {
-            super.close();
             storage.close();
         }
     }
@@ -247,12 +206,6 @@ public abstract class EventStore implements Closeable {
         public void subscribeSince(Timestamp request, StreamObserver<EventRecord> responseObserver) {
             eventStore.subscribe(request, responseObserver);
         }
-
-        @Override
-        public void subscribe(Empty request, StreamObserver<EventRecord> responseObserver) {
-            eventStore.subscribe(responseObserver);
-        }
-
     }
 
     /**
@@ -304,6 +257,11 @@ public abstract class EventStore implements Closeable {
         }
 
     }
+
+    //
+    // Logging methods
+    //------------------------------------------
+
     @SuppressWarnings("TypeMayBeWeakened")
     private void logStored(EventRecord request) {
         if (logger == null) {
@@ -334,15 +292,6 @@ public abstract class EventStore implements Closeable {
         }
     }
 
-    private void logSubscription(StreamObserver<EventRecord> observer) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Subscribed {}", observer);
-        }
-    }
-
     private enum LogSingleton {
         INSTANCE;
 
@@ -351,7 +300,7 @@ public abstract class EventStore implements Closeable {
     }
 
     /**
-     * Default logger of {EventStore} class.
+     * @return default logger of {EventStore} class.
      */
     public static Logger log() {
         return LogSingleton.INSTANCE.value;
