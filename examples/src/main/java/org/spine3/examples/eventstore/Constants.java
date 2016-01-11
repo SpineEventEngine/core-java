@@ -28,4 +28,8 @@ package org.spine3.examples.eventstore;
 public interface Constants {
 
     int PORT = 50051;
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    String EVENT_STORE_SERVICE_HOST = "localhost";
+    String CHANNEL_SHUT_DOWN = "Channel shut down.";
+    int SHUTDOWN_TIMEOUT_SEC = 5;
 }

@@ -20,7 +20,6 @@
 
 package org.spine3.examples.eventstore;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
@@ -30,6 +29,7 @@ import org.spine3.server.EventStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 /**
  * The server for running {@link EventStore} as a gRPC service.
@@ -44,7 +44,7 @@ public class EventStoreServer {
 
     private EventStoreServer(int port) {
         final ServerServiceDefinition service = EventStore.newServiceBuilder()
-                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setStreamExecutor(Executors.newFixedThreadPool(5))
                 .setStorage(InMemoryStorageFactory.getInstance().createEventStorage())
                 .setLogger(log())
                 .build();

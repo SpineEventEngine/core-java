@@ -20,38 +20,51 @@
 
 package org.spine3.examples.eventstore;
 
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.UInt32Value;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.EventStreamQuery;
 import org.spine3.server.grpc.EventStoreGrpc;
-import org.spine3.util.Commands;
 import org.spine3.util.EventRecords;
-import org.spine3.util.Events;
-import org.spine3.util.Users;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import static org.spine3.examples.eventstore.Constants.*;
 
 /**
+ * A simple client connecting to {@code EventStore} for reading events.
+ *
+ * <p>Start this class after starting {@link EventPublisher}.
+ *
  * @author Alexander Yevsyukov
  */
-public class EventPublisher {
+public class EventReader {
 
     private final ManagedChannel channel;
     private final EventStoreGrpc.EventStoreBlockingClient blockingClient;
 
-    public EventPublisher(String host, int port) {
+    public EventReader(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext(true)
                 .build();
         this.blockingClient = EventStoreGrpc.newBlockingStub(channel);
+    }
+
+    public void readEvents() {
+        final Iterator<EventRecord> iterator = blockingClient.read(EventStreamQuery.getDefaultInstance());
+        while (iterator.hasNext()) {
+            final EventRecord next = iterator.next();
+            final Message event = EventRecords.getEvent(next);
+            final EventContext context = next.getContext();
+            log().info("Event: {}", TextFormat.shortDebugString(event));
+            log().info("Context: {}", TextFormat.shortDebugString(context));
+        }
     }
 
     public void shutdown() throws InterruptedException {
@@ -59,33 +72,12 @@ public class EventPublisher {
         log().info(CHANNEL_SHUT_DOWN);
     }
 
-    public void publish(EventRecord record) {
-        blockingClient.append(record);
-        log().trace("Event published: {}", TextFormat.shortDebugString(record));
-    }
-
     public static void main(String[] args) throws InterruptedException {
-        final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, PORT);
-
+        final EventReader reader = new EventReader(EVENT_STORE_SERVICE_HOST, PORT);
         try {
-            //TODO:2016-01-11:alexander.yevsyukov: Produce better event records from Project/Task domain.
-
-            EventRecord record = EventRecords.createEventRecord(StringValue.newBuilder().setValue("String 123").build(),
-                                                EventContext.newBuilder()
-                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
-                                                        .setVersion(1)
-                                                        .build());
-            publisher.publish(record);
-
-            record = EventRecords.createEventRecord(UInt32Value.newBuilder().setValue(100).build(),
-                                                EventContext.newBuilder()
-                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
-                                                        .setVersion(10)
-                                                        .build());
-            publisher.publish(record);
-
+            reader.readEvents();
         } finally {
-            publisher.shutdown();
+            reader.shutdown();
         }
     }
 
@@ -93,11 +85,10 @@ public class EventPublisher {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventPublisher.class);
+        private final Logger value = LoggerFactory.getLogger(EventReader.class);
     }
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

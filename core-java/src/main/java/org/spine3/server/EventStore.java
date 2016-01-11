@@ -120,6 +120,7 @@ public abstract class EventStore implements Closeable {
                     final EventRecord record = eventRecords.next();
                     responseObserver.onNext(record);
                 }
+                responseObserver.onCompleted();
                 logCatchUpComplete(responseObserver);
             }
         });
