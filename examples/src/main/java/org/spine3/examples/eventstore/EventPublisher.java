@@ -31,6 +31,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.util.Commands;
+import org.spine3.util.EventRecords;
 import org.spine3.util.Events;
 import org.spine3.util.Users;
 
@@ -69,14 +70,14 @@ public class EventPublisher {
         final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, Constants.PORT);
 
         try {
-            EventRecord record = Events.createEventRecord(StringValue.newBuilder().setValue("String 123").build(),
+            EventRecord record = EventRecords.createEventRecord(StringValue.newBuilder().setValue("String 123").build(),
                                                 EventContext.newBuilder()
                                                         .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
                                                         .setVersion(1)
                                                         .build());
             publisher.publish(record);
 
-            record = Events.createEventRecord(UInt32Value.newBuilder().setValue(100).build(),
+            record = EventRecords.createEventRecord(UInt32Value.newBuilder().setValue(100).build(),
                                                 EventContext.newBuilder()
                                                         .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
                                                         .setVersion(10)

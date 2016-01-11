@@ -39,7 +39,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.util.Events;
+import org.spine3.util.EventRecords;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -343,7 +343,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            final Message event = Events.getEvent(record);
+            final Message event = EventRecords.getEvent(record);
             final EventContext context = record.getContext();
 
             eventBus.post(event, context);

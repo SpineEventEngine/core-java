@@ -26,7 +26,7 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
-import org.spine3.util.Events;
+import org.spine3.util.EventRecords;
 import org.spine3.util.Identifiers;
 
 import java.util.Deque;
@@ -102,7 +102,7 @@ public abstract class AggregateStorage<I> {
         final String typeName = TypeName.ofEnclosed(event).nameOnly();
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setTimestamp(Events.getTimestamp(eventId))
+                .setTimestamp(EventRecords.getTimestamp(eventId))
                 .setAggregateId(aggregateId)
                 .setEventType(typeName)
                 .setEventId(eventIdStr)

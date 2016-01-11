@@ -37,6 +37,7 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.util.Classes;
+import org.spine3.util.EventRecords;
 import org.spine3.util.Events;
 import org.spine3.util.MethodMap;
 
@@ -245,7 +246,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             final int currentVersion = getVersion();
             final M state = getState();
             final EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
-            final EventRecord eventRecord = Events.createEventRecord(event, eventContext);
+            final EventRecord eventRecord = EventRecords.createEventRecord(event, eventContext);
             putUncommitted(eventRecord);
         }
     }

@@ -28,12 +28,12 @@ option java_package = "org.spine3.base";
 
 import public "spine/base/command.proto";
 
-// An identifier of an event.
+// Event identifier.
 message EventId {
     // ID of the command which originated the event.
     CommandId command_id = 1;
 
-    // The duration between the moment of generation of CommandId and creation of this EventId.
+    // The duration between the moment of generation of `CommandId` and creation of this `EventId`.
     int64 delta_nanos = 2;
 }
 

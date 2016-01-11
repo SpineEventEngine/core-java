@@ -29,7 +29,8 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.util.Events;
+import org.spine3.server.storage.StorageUtil;
+import org.spine3.util.EventRecords;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -55,8 +56,8 @@ class InMemoryEventStorage extends EventStorage {
     private static class EventRecordComparator implements Comparator<EventRecord>, Serializable {
         @Override
         public int compare(EventRecord o1, EventRecord o2) {
-            final Timestamp timestamp = Events.getTimestamp(o1);
-            final Timestamp anotherTimestamp = Events.getTimestamp(o2);
+            final Timestamp timestamp = EventRecords.getTimestamp(o1);
+            final Timestamp anotherTimestamp = EventRecords.getTimestamp(o2);
             final int result = Timestamps.compare(timestamp, anotherTimestamp);
             return result;
         }
@@ -69,21 +70,13 @@ class InMemoryEventStorage extends EventStorage {
         return result;
     }
 
-    public Iterator<EventRecord> since(Timestamp timestamp) {
-        final Predicate<EventRecord> isAfter = new Events.IsAfter(timestamp);
-
-        final Iterator<EventRecord> result = FluentIterable.from(storage)
-                .filter(isAfter)
-                .iterator();
-
-        return result;
-    }
-
     @Override
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
-        //TODO:2016-01-10:alexander.yevsyukov: Implement
-
-        return null;
+        final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
+        final Iterator<EventRecord> result = FluentIterable.from(storage)
+                .filter(matchesQuery)
+                .iterator();
+        return Iterators.unmodifiableIterator(result);
     }
 
     @Override
@@ -91,7 +84,7 @@ class InMemoryEventStorage extends EventStorage {
         checkNotNull(record);
         checkNotNull(record.getEventId());
 
-        final EventRecord eventRec = Events.toEventRecord(record);
+        final EventRecord eventRec = StorageUtil.toEventRecord(record);
         storage.add(eventRec);
     }
 

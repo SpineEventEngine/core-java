@@ -30,9 +30,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
+import static org.spine3.server.storage.StorageUtil.toEventRecord;
+import static org.spine3.server.storage.StorageUtil.toEventRecordsList;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
-import static org.spine3.util.Events.toEventRecord;
-import static org.spine3.util.Events.toEventRecordsList;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
 public abstract class EventStorageShould {

@@ -21,14 +21,13 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.util.Events;
+import org.spine3.server.storage.StorageUtil;
 
 import java.io.*;
 import java.util.Iterator;
@@ -70,16 +69,12 @@ class FsEventStorage extends EventStorage {
         return iterator;
     }
 
-    public Iterator<EventRecord> since(Timestamp timestamp) {
-        final Iterator<EventRecord> result = Iterators.filter(allEvents(), new Events.IsAfter(timestamp));
-        return result;
-    }
-
     @Override
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
-        //TODO:2016-01-10:alexander.yevsyukov: Implement
-
-        return null;
+        final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
+        iterators.add(iterator);
+        final Iterator<EventRecord> result = Iterators.filter(iterator, new MatchesStreamQuery(query));
+        return result;
     }
 
     @Override
@@ -95,7 +90,6 @@ class FsEventStorage extends EventStorage {
         }
     }
 
-
     private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {
 
         private final File file;
@@ -109,7 +103,6 @@ class FsEventStorage extends EventStorage {
 
         @Override
         public boolean hasNext() {
-
             if (!file.exists() || areResourcesReleased) {
                 return false;
             }
@@ -126,12 +119,11 @@ class FsEventStorage extends EventStorage {
 
         @Override
         public EventRecord next() {
-
             FileUtil.checkFileExists(file, "event storage");
             checkHasNextBytes();
 
             final EventStorageRecord storeRecord = parseEventRecord();
-            final EventRecord result = Events.toEventRecord(storeRecord);
+            final EventRecord result = StorageUtil.toEventRecord(storeRecord);
 
             if (!hasNext()) {
                 close();
@@ -153,7 +145,6 @@ class FsEventStorage extends EventStorage {
         }
 
         private InputStream getInputStream() {
-
             if (bufferedInputStream == null || fileInputStream == null) {
                 fileInputStream = FileUtil.open(file);
                 bufferedInputStream = new BufferedInputStream(fileInputStream);

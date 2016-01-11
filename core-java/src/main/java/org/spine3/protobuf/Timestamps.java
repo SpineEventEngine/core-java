@@ -104,7 +104,6 @@ public class Timestamps {
         private static final long serialVersionUID = 0;
     }
 
-    private Timestamps() {
-    }
-
+    // @formatter:off
+    private Timestamps() {}
 }

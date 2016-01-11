@@ -20,13 +20,19 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.base.EventRecordFilter;
 import org.spine3.server.EventStreamQuery;
 
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.Iterator;
 
-import static org.spine3.util.Events.toEventStorageRecord;
+import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
+import static org.spine3.util.EventRecords.*;
 
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
@@ -63,5 +69,49 @@ public abstract class EventStorage implements Closeable {
     @Deprecated
     public Iterator<EventRecord> allEvents() {
         return iterator(EventStreamQuery.getDefaultInstance());
+    }
+
+    public static class MatchesStreamQuery implements Predicate<EventRecord> {
+
+        private final EventStreamQuery query;
+        private final Predicate<EventRecord> timePredicate;
+
+        @SuppressWarnings("MethodWithMoreThanThreeNegations")
+        public MatchesStreamQuery(EventStreamQuery query) {
+            this.query = query;
+
+            final Timestamp defaultTimestamp = Timestamp.getDefaultInstance();
+            final Timestamp after = query.getAfter();
+            final Timestamp before = query.getBefore();
+
+            final boolean afterSpecified = !after.equals(defaultTimestamp);
+            final boolean beforeSpecified = !before.equals(defaultTimestamp);
+
+            //noinspection IfStatementWithTooManyBranches
+            if (afterSpecified && !beforeSpecified) {
+                this.timePredicate = new IsAfter(after);
+            } else if (!afterSpecified && beforeSpecified) {
+                this.timePredicate = new IsBefore(before);
+            } else if (afterSpecified /* && beforeSpecified is true here too */){
+                this.timePredicate = new IsBetween(after, before);
+            } else { // No timestamps specified.
+                this.timePredicate = Predicates.alwaysTrue();
+            }
+        }
+
+        @Override
+        public boolean apply(@Nullable EventRecord input) {
+            if (!timePredicate.apply(input)) {
+                return false;
+            }
+
+            for (EventRecordFilter filter : query.getFilterList()) {
+                final Predicate<EventRecord> filterPredicate = new MatchesFilter(filter);
+                if (!filterPredicate.apply(input)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
