@@ -55,7 +55,7 @@ public class EventStoreServiceBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_non_set_streamExecutor() {
-        builder.setEventStorage(newEventStorage())
+        builder.setStorage(newEventStorage())
                .build();
     }
 
@@ -74,14 +74,14 @@ public class EventStoreServiceBuilderShould {
     @Test
     public void return_set_eventStorage() {
         final EventStorage storage = newEventStorage();
-        assertEquals(storage, builder.setEventStorage(storage).getEventStorage());
+        assertEquals(storage, builder.setStorage(storage).getEventStorage());
     }
 
     @Test
     public void build_service_definition() {
         assertNotNull(builder
                         .setStreamExecutor(newExecutor())
-                        .setEventStorage(newEventStorage())
+                        .setStorage(newEventStorage())
                         .build());
     }
 

@@ -469,10 +469,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             }
 
             if (eventStore == null) {
-                eventStore = EventStore.create(
-                        MoreExecutors.directExecutor(),
-                        storageFactory.createEventStorage(),
-                        EventStore.log());
+                eventStore = EventStore.newBuilder()
+                        .setStreamExecutor(MoreExecutors.directExecutor())
+                        .setStorage(storageFactory.createEventStorage())
+                        .setLogger(EventStore.log())
+                        .build();
             }
 
             final BoundedContext result = new BoundedContext(this);

@@ -20,8 +20,6 @@
 package org.spine3.server;
 
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -51,16 +49,13 @@ public abstract class EventStore implements Closeable {
     @Nullable
     private final Logger logger;
 
-    //TODO:2016-01-10:alexander.yevsyukov: Turn into newBuilder() for consistency of API.
-
     /**
-     * Creates a new instance running on the passed storage.
+     * Creates a builder for locally running {@code EventStore}.
      *
-     * @param streamExecutor the executor for iterating through the history of events for a new subscriber
-     * @param storage the underlying storage for events.
+     * @return new builder
      */
-    public static EventStore create(Executor streamExecutor, EventStorage storage, @Nullable Logger logger) {
-        return new LocalImpl(streamExecutor, storage, logger);
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -123,15 +118,93 @@ public abstract class EventStore implements Closeable {
                 final Iterator<EventRecord> eventRecords = iterator(request);
                 while (eventRecords.hasNext()) {
                     final EventRecord record = eventRecords.next();
-                    EventStore.notify(responseObserver, record);
+                    responseObserver.onNext(record);
                 }
                 logCatchUpComplete(responseObserver);
             }
         });
     }
 
-    private static void notify(StreamObserver<EventRecord> observer, EventRecord record) {
-        observer.onNext(record);
+    /**
+     * Abstract builder base for building
+     * @param <T> the type of the builder product
+     */
+    private abstract static class AbstractBuilder<T> {
+
+        private Executor streamExecutor;
+        private EventStorage eventStorage;
+        @Nullable
+        private Logger logger;
+
+        public abstract T build();
+
+        /**
+         * This method must be called in {@link #build()} implementations to
+         * verify that all required parameters are set.
+         */
+        protected void checkState() {
+            checkNotNull(getStreamExecutor(), "streamExecutor must be set");
+            checkNotNull(getEventStorage(), "eventStorage must be set");
+        }
+
+        protected AbstractBuilder setStreamExecutor(Executor executor) {
+            this.streamExecutor = checkNotNull(executor);
+            return this;
+        }
+
+        public Executor getStreamExecutor() {
+            return streamExecutor;
+        }
+
+        protected AbstractBuilder setStorage(EventStorage eventStorage) {
+            this.eventStorage = checkNotNull(eventStorage);
+            return this;
+        }
+
+        public EventStorage getEventStorage() {
+            return eventStorage;
+        }
+
+        protected AbstractBuilder setLogger(@Nullable Logger logger) {
+            this.logger = logger;
+            return this;
+        }
+
+        @Nullable
+        public Logger getLogger() {
+            return logger;
+        }
+    }
+
+    /**
+     * Builder for creating new local {@code EventStore} instance.
+     */
+    public static class Builder extends AbstractBuilder<EventStore> {
+
+        @Override
+        public EventStore build() {
+            checkState();
+            final LocalImpl result = new LocalImpl(getStreamExecutor(), getEventStorage(), getLogger());
+            return result;
+        }
+
+        @Override
+        public Builder setStreamExecutor(Executor executor) {
+            super.setStreamExecutor(executor);
+            return this;
+        }
+
+        @Override
+        public Builder setStorage(EventStorage eventStorage) {
+            super.setStorage(eventStorage);
+            return this;
+        }
+
+        @Override
+        public Builder setLogger(@Nullable Logger logger) {
+            super.setLogger(logger);
+            return this;
+        }
     }
 
     /**
@@ -141,11 +214,6 @@ public abstract class EventStore implements Closeable {
 
         private final EventStorage storage;
 
-        /**
-         * Creates a new instance running on the passed storage.
-         *
-         * @param storage the underlying storage for the store.
-         */
         private LocalImpl(Executor catchUpExecutor, EventStorage storage, @Nullable Logger logger) {
             super(catchUpExecutor, logger);
             this.storage = storage;
@@ -169,6 +237,41 @@ public abstract class EventStore implements Closeable {
         @Override
         public void close() throws IOException {
             storage.close();
+        }
+    }
+
+    /**
+     * The builder of {@code EventStore} instance exposed as gRPC service.
+     *
+     * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
+     */
+    public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
+
+        @Override
+        public ServerServiceDefinition build() {
+            checkState();
+            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(), getEventStorage(), getLogger());
+            final EventStoreGrpc.EventStore grpcService = new GrpcService(eventStore);
+            final ServerServiceDefinition result = EventStoreGrpc.bindService(grpcService);
+            return result;
+        }
+
+        @Override
+        public ServiceBuilder setStreamExecutor(Executor executor) {
+            super.setStreamExecutor(executor);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder setStorage(EventStorage eventStorage) {
+            super.setStorage(eventStorage);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder setLogger(@Nullable Logger logger) {
+            super.setLogger(logger);
+            return this;
         }
     }
 
@@ -200,56 +303,6 @@ public abstract class EventStore implements Closeable {
         }
     }
 
-    /**
-     * The builder of {@code EventStore} instance exposed as gRPC service.
-     *
-     * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
-     */
-    public static class ServiceBuilder {
-
-        private Executor streamExecutor;
-        private EventStorage eventStorage;
-        @Nullable
-        private Logger logger;
-        public ServiceBuilder setStreamExecutor(Executor executor) {
-            this.streamExecutor = checkNotNull(executor);
-            return this;
-        }
-
-        public Executor getStreamExecutor() {
-            return streamExecutor;
-        }
-
-        public ServiceBuilder setEventStorage(EventStorage eventStorage) {
-            this.eventStorage = checkNotNull(eventStorage);
-            return this;
-        }
-
-        public EventStorage getEventStorage() {
-            return eventStorage;
-        }
-
-        public ServiceBuilder setLogger(@Nullable Logger logger) {
-            this.logger = logger;
-            return this;
-        }
-
-        @Nullable
-        public Logger getLogger() {
-            return logger;
-        }
-
-        public ServerServiceDefinition build() {
-            checkNotNull(streamExecutor, "streamExecutor must be set");
-            checkNotNull(eventStorage, "eventStorage must be set");
-            final LocalImpl eventStore = new LocalImpl(streamExecutor, eventStorage, logger);
-            final EventStoreGrpc.EventStore grpcService = new GrpcService(eventStore);
-            final ServerServiceDefinition result = EventStoreGrpc.bindService(grpcService);
-            return result;
-        }
-
-    }
-
     //
     // Logging methods
     //------------------------------------------
@@ -261,17 +314,6 @@ public abstract class EventStore implements Closeable {
         }
         if (logger.isTraceEnabled()) {
             logger.trace("Stored: {}", TextFormat.shortDebugString(request));
-        }
-    }
-
-    private void logSubscribingStart(Timestamp timestamp, StreamObserver<EventRecord> observer) {
-        if (logger == null) {
-            return;
-        }
-
-        if (logger.isInfoEnabled()) {
-            final String time = TimeUtil.toString(timestamp);
-            logger.info("Subscribing {} for events since {}", observer, time);
         }
     }
 

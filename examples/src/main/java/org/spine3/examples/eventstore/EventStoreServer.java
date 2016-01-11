@@ -45,7 +45,7 @@ public class EventStoreServer {
     private EventStoreServer(int port) {
         final ServerServiceDefinition service = EventStore.newServiceBuilder()
                 .setStreamExecutor(MoreExecutors.directExecutor())
-                .setEventStorage(InMemoryStorageFactory.getInstance().createEventStorage())
+                .setStorage(InMemoryStorageFactory.getInstance().createEventStorage())
                 .setLogger(log())
                 .build();
 
