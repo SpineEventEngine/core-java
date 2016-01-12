@@ -19,29 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.examples.aggregate;
+package spine.examples.eventstore;
 
-option java_package="org.spine3.examples.aggregate.command";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.examples.eventstore";
 option java_multiple_files = true;
 
-import "examples/aggregate/order.proto";
-
-message CreateOrder {
-    OrderId order_id = 1;
+message ProjectId {
+    string code = 1;
 }
 
-message AddOrderLine {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
+message TaskId {
+    uint32 number = 1;
 }
 
-message RemoveOrderLine {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
+message Project {
+    ProjectId id = 1;
+    string name = 2;
+    string description = 3;
 }
 
-message PayForOrder {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
+message Task {
+    TaskId id = 1;
+    ProjectId project_id = 2;
+    string name = 3;
+    string description = 4;
 }

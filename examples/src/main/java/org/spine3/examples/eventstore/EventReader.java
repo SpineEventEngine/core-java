@@ -30,6 +30,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.grpc.EventStoreGrpc;
+import org.spine3.type.TypeName;
 import org.spine3.util.EventRecords;
 
 import java.util.Iterator;
@@ -62,7 +63,7 @@ public class EventReader {
             final EventRecord next = iterator.next();
             final Message event = EventRecords.getEvent(next);
             final EventContext context = next.getContext();
-            log().info("Event: {}", TextFormat.shortDebugString(event));
+            log().info("Event: {} ({})", TypeName.of(event), TextFormat.shortDebugString(event));
             log().info("Context: {}", TextFormat.shortDebugString(context));
         }
     }

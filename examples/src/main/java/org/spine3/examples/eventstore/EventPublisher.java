@@ -20,24 +20,23 @@
 
 package org.spine3.examples.eventstore;
 
-import com.google.protobuf.StringValue;
+import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.UInt32Value;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.grpc.EventStoreGrpc;
-import org.spine3.util.Commands;
 import org.spine3.util.EventRecords;
-import org.spine3.util.Events;
-import org.spine3.util.Users;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static org.spine3.examples.eventstore.Constants.*;
+import static org.spine3.examples.eventstore.SampleData.*;
 
 /**
  * @author Alexander Yevsyukov
@@ -68,22 +67,18 @@ public class EventPublisher {
         final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, PORT);
 
         try {
-            //TODO:2016-01-11:alexander.yevsyukov: Produce better event records from Project/Task domain.
+            for (GeneratedMessage event : events) {
+                // Simulate event id generation
+                final int id = ThreadLocalRandom.current().nextInt(0, userIds.size());
+                final EventId eventId = newEventId(userIds.get(id));
 
-            EventRecord record = EventRecords.createEventRecord(StringValue.newBuilder().setValue("String 123").build(),
-                                                EventContext.newBuilder()
-                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
-                                                        .setVersion(1)
-                                                        .build());
-            publisher.publish(record);
+                // Simulate `EventContext` creation. Normally version, and aggregate ID will be set by
+                // the framework code when new instance of `EventContext` is generated.
+                final EventContext context = EventContext.newBuilder().setEventId(eventId).build();
 
-            record = EventRecords.createEventRecord(UInt32Value.newBuilder().setValue(100).build(),
-                                                EventContext.newBuilder()
-                                                        .setEventId(Events.generateId(Commands.generateId(Users.newUserId(EventPublisher.class.getSimpleName()))))
-                                                        .setVersion(10)
-                                                        .build());
-            publisher.publish(record);
-
+                final EventRecord record = EventRecords.createEventRecord(event, context);
+                publisher.publish(record);
+            }
         } finally {
             publisher.shutdown();
         }
