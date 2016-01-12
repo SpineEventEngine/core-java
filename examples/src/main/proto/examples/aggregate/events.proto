@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.examples.aggregate.event;
+package spine.examples.aggregate;
 
 option java_package="org.spine3.examples.aggregate.event";
 option java_outer_classname = "EventsProto";
