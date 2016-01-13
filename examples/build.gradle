@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath "org.spine3.tools:proto-lookup-plugin:1.0"
+        classpath "org.spine3.tools:proto-lookup-plugin:1.1"
     }
 }
 
