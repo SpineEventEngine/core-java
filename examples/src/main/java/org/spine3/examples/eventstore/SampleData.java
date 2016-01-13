@@ -26,6 +26,8 @@ import org.spine3.base.EventId;
 import org.spine3.base.UserId;
 import org.spine3.util.Commands;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import static org.spine3.util.Users.newUserId;
 
 /**
@@ -34,6 +36,8 @@ import static org.spine3.util.Users.newUserId;
 
 @SuppressWarnings("UtilityClass")
 public class SampleData {
+
+    static final ImmutableList<GeneratedMessage> events = generateEvents();
 
     static final ImmutableList<UserId> userIds = ImmutableList.of(
             newUserId("diane.riley@spine3.org"),
@@ -45,42 +49,69 @@ public class SampleData {
             newUserId("a.reid@spine3.org")
     );
 
-    private static ProjectId newProjectId(String value) {
-        return ProjectId.newBuilder().setCode(value).build();
-    }
-
     private static Project newProject(String projectId, String name, String description) {
         return Project.newBuilder()
-                .setId(newProjectId(projectId))
+                .setId(projectId(projectId))
                 .setName(name)
                 .setDescription(description)
                 .build();
     }
 
-    private static Task newTask(int taskId, ProjectId projectId, String name, String description) {
+    private static ProjectId projectId(String value) {
+        return ProjectId.newBuilder().setCode(value).build();
+    }
+
+    private static class TaskIdFactory {
+        private int lastValue = 1;
+
+        TaskId generate() {
+            ++lastValue;
+            final TaskId result = TaskId.newBuilder().setNumber(lastValue).build();
+            return result;
+        }
+
+        private static final TaskIdFactory INSTANCE = new TaskIdFactory();
+    }
+
+    private static TaskId generate() {
+        return TaskIdFactory.INSTANCE.generate();
+    }
+
+    static EventId generate(UserId actor) {
+        return org.spine3.util.Events.generateId(Commands.generateId(actor));
+    }
+
+    private static Task newTask(ProjectId projectId, String name, String description) {
         return Task.newBuilder()
-                .setId(TaskId.newBuilder().setNumber(taskId).build())
+                .setId(generate())
                 .setProjectId(projectId)
                 .setName(name)
                 .setDescription(description)
                 .build();
     }
 
-    private static final ProjectId p1 = newProjectId("p1");
+    private static final ProjectId ALPHA = projectId("alpha");
 
-    static final ImmutableList<GeneratedMessage> events = ImmutableList.of(
+    static UserId randomSelectUser() {
+        final int id = ThreadLocalRandom.current().nextInt(0, userIds.size());
+        return userIds.get(id);
+    }
 
-            //TODO:2016-01-12:alexander.yevsyukov: Write more events here.
+    private static ImmutableList<GeneratedMessage> generateEvents() {
+        final Task task1 = newTask(ALPHA, "Annotate internal API", "Use @Internal annotation.");
+        final TaskId taskId1 = task1.getId();
 
-            ProjectCreated.newBuilder().setProject(newProject(p1.getCode(), "Set Up", "Initial configuration")).build(),
-            TaskCreated.newBuilder().setTask(newTask(1, p1, "Task 1", "Task 1 description")).build(),
-            TaskAssigned.newBuilder()
-                    .setTaskId(TaskId.newBuilder().setNumber(1).build())
-                    .setAssignee(userIds.get(1)).build()
-    );
-
-    static EventId newEventId(UserId actor) {
-        return org.spine3.util.Events.generateId(Commands.generateId(actor));
+        return ImmutableList.of(
+                ProjectCreated.newBuilder().setProject(newProject(ALPHA.getCode(), "Alpha", "Initial public release.")).build(),
+                TaskCreated.newBuilder().setTask(task1).build(),
+                TaskAssigned.newBuilder()
+                        .setTaskId(taskId1)
+                        .setAssignee(randomSelectUser()).build(),
+                TaskCreated.newBuilder().setTask(newTask(ALPHA, "Check code coverage", "")).build(),
+                TaskCreated.newBuilder().setTask(newTask(ALPHA, "Verify JavaDocs", "")).build(),
+                TaskDone.newBuilder().setTaskId(taskId1).build(),
+                TaskCreated.newBuilder().setTask(newTask(ALPHA, "Blog post", "Announce the release at the blog.")).build()
+        );
     }
 
     //@formatter:off
