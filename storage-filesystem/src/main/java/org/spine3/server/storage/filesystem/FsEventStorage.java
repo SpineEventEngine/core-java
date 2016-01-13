@@ -63,12 +63,6 @@ class FsEventStorage extends EventStorage {
         this.eventStorageFile = FileUtil.createIfDoesNotExist(rootDirectoryPath + EVENT_STORE_FILE_NAME);
     }
 
-    public Iterator<EventRecord> allEvents() {
-        final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
-        iterators.add(iterator);
-        return iterator;
-    }
-
     @Override
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
         final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
