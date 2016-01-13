@@ -70,6 +70,9 @@ public class StorageUtil {
         }
     };
 
+    /**
+     * Creates storage record for the passed {@link EventRecord}.
+     */
     public static EventStorageRecord toEventStorageRecord(EventRecord record) {
         final Any event = record.getEvent();
         final EventContext context = record.getContext();
@@ -88,5 +91,6 @@ public class StorageUtil {
         return builder.build();
     }
 
+    //@formatter:off
     private StorageUtil() {}
 }
