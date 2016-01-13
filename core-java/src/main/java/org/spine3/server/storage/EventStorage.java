@@ -76,7 +76,7 @@ public abstract class EventStorage implements Closeable {
         private final EventStreamQuery query;
         private final Predicate<EventRecord> timePredicate;
 
-        @SuppressWarnings("MethodWithMoreThanThreeNegations")
+        @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
         public MatchesStreamQuery(EventStreamQuery query) {
             this.query = query;
 
