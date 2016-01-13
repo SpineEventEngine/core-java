@@ -41,6 +41,4 @@ public class InMemoryEventStorageShould extends EventStorageShould {
     public void tearDownTest() {
         STORAGE.clear();
     }
-
-
 }
