@@ -99,5 +99,4 @@ class InMemoryEventStorage extends EventStorage {
     protected void clear() {
         storage.clear();
     }
-
 }
