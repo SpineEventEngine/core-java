@@ -65,11 +65,6 @@ class InMemoryEventStorage extends EventStorage {
         private static final long serialVersionUID = 0L;
     }
 
-    public Iterator<EventRecord> allEvents() {
-        final Iterator<EventRecord> result = Iterators.unmodifiableIterator(storage.iterator());
-        return result;
-    }
-
     @Override
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
         final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
