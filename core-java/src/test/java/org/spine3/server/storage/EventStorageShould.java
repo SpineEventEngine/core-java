@@ -59,6 +59,7 @@ public abstract class EventStorageShould {
     @Test
     public void store_and_read_one_event() {
         final EventRecord expected = TestEventRecordFactory.projectCreated();
+
         storage.store(expected);
 
         assertStorageContainsOnly(expected);
@@ -72,17 +73,6 @@ public abstract class EventStorageShould {
         storage.write(recordToStore);
 
         assertStorageContainsOnly(expected);
-    }
-
-    private void assertStorageContainsOnly(EventRecord expected) {
-        final Iterator<EventRecord> iterator = findAll();
-
-        assertTrue(iterator.hasNext());
-
-        final EventRecord actual = iterator.next();
-
-        assertEquals(expected, actual);
-        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -113,19 +103,21 @@ public abstract class EventStorageShould {
         }
     }
 
+    private void assertStorageContainsOnly(EventRecord expected) {
+        final Iterator<EventRecord> iterator = findAll();
+
+        assertTrue(iterator.hasNext());
+
+        final EventRecord actual = iterator.next();
+
+        assertEquals(expected, actual);
+        assertFalse(iterator.hasNext());
+    }
+
     private void assertStorageContainsOnly(List<EventRecord> expectedRecords) {
         final Iterator<EventRecord> iterator = findAll();
         final List<EventRecord> actualRecords = newArrayList(iterator);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecords);
-    }
-
-    protected static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
-        if (expected.size() != actual.size()) {
-            fail("Expected record count: " + expected.size() + " is not equal to actual record count: " + actual.size());
-        }
-        for (int i = 0; i < expected.size(); i++) {
-            assertEquals(expected.get(i), actual.get(i));
-        }
+        assertEquals(expectedRecords, actualRecords);
     }
 
     private static List<EventStorageRecord> createEventStorageRecords() {
