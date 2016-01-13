@@ -27,6 +27,7 @@ import org.spine3.io.file.FileUtil;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.storage.StorageUtil;
 
 import java.io.*;
 import java.util.Iterator;
@@ -35,7 +36,6 @@ import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
 
 /**
@@ -67,8 +67,7 @@ class FsEventStorage extends EventStorage {
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
         final EventRecordFileIterator iterator = new EventRecordFileIterator(eventStorageFile);
         iterators.add(iterator);
-        final Iterator<EventStorageRecord> filtered = Iterators.filter(iterator, new MatchesStreamQuery(query));
-        final Iterator<EventRecord> result = toEventRecordsIterator(filtered);
+        final Iterator<EventRecord> result = Iterators.filter(iterator, new MatchesStreamQuery(query));
         return result;
     }
 
@@ -85,7 +84,7 @@ class FsEventStorage extends EventStorage {
         }
     }
 
-    private static class EventRecordFileIterator implements Iterator<EventStorageRecord>, Closeable {
+    private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {
 
         private final File file;
         private FileInputStream fileInputStream;
@@ -113,19 +112,20 @@ class FsEventStorage extends EventStorage {
         }
 
         @Override
-        public EventStorageRecord next() {
+        public EventRecord next() {
             FileUtil.checkFileExists(file, "event storage");
             checkHasNextBytes();
 
-            final EventStorageRecord record = parseEventRecord();
+            final EventStorageRecord storeRecord = parseEventRecord();
+            final EventRecord result = StorageUtil.toEventRecord(storeRecord);
 
             if (!hasNext()) {
                 close();
             }
 
-            checkNotNull(record, "event record from the file");
+            checkNotNull(result, "event record from the file");
 
-            return record;
+            return result;
         }
 
         private EventStorageRecord parseEventRecord() {

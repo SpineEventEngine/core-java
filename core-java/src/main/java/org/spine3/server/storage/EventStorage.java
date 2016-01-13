@@ -24,7 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.base.EventStorageRecordFilter;
+import org.spine3.base.EventRecordFilter;
 import org.spine3.server.EventStreamQuery;
 
 import javax.annotation.Nullable;
@@ -63,10 +63,10 @@ public abstract class EventStorage implements Closeable {
      */
     protected abstract void write(EventStorageRecord record);
 
-    public static class MatchesStreamQuery implements Predicate<EventStorageRecord> {
+    public static class MatchesStreamQuery implements Predicate<EventRecord> {
 
         private final EventStreamQuery query;
-        private final Predicate<EventStorageRecord> timePredicate;
+        private final Predicate<EventRecord> timePredicate;
 
         @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
         public MatchesStreamQuery(EventStreamQuery query) {
@@ -91,13 +91,13 @@ public abstract class EventStorage implements Closeable {
         }
 
         @Override
-        public boolean apply(@Nullable EventStorageRecord input) {
+        public boolean apply(@Nullable EventRecord input) {
             if (!timePredicate.apply(input)) {
                 return false;
             }
 
-            for (EventStorageRecordFilter filter : query.getFilterList()) {
-                final Predicate<EventStorageRecord> filterPredicate = new MatchesFilter(filter);
+            for (EventRecordFilter filter : query.getFilterList()) {
+                final Predicate<EventRecord> filterPredicate = new MatchesFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;
                 }
