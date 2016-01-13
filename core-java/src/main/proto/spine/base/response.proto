@@ -1,0 +1,49 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.base;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "ResponseProto";
+option java_package = "org.spine3.base";
+
+import public "google/protobuf/empty.proto";
+import public "spine/base/error.proto";
+import public "spine/base/business_failure.proto";
+
+// The result of a call returned by a service.
+//
+// A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
+// The client may expect results (returned via a separate call to read-side or via event stream)
+// only upon receiving the `ok` status.
+message Response {
+    oneof status {
+        // The request was accepted to execution.
+        google.protobuf.Empty ok = 1;
+
+        // The technical error occurred upon receiving the request and no further processing would occur.
+        spine.base.Error error = 2;
+
+        // It is not possible to satisfy the request because of the business failure.
+        spine.base.BusinessFailure business_failure = 3;
+    }
+}

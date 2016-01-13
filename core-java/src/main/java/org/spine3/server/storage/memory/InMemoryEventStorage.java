@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,11 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.EventStoreRecord;
-import org.spine3.util.Events;
+import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.storage.StorageUtil;
+import org.spine3.util.EventRecords;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -54,8 +56,8 @@ class InMemoryEventStorage extends EventStorage {
     private static class EventRecordComparator implements Comparator<EventRecord>, Serializable {
         @Override
         public int compare(EventRecord o1, EventRecord o2) {
-            final Timestamp timestamp = Events.getTimestamp(o1);
-            final Timestamp anotherTimestamp = Events.getTimestamp(o2);
+            final Timestamp timestamp = EventRecords.getTimestamp(o1);
+            final Timestamp anotherTimestamp = EventRecords.getTimestamp(o2);
             final int result = Timestamps.compare(timestamp, anotherTimestamp);
             return result;
         }
@@ -64,28 +66,20 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    public Iterator<EventRecord> allEvents() {
-        final Iterator<EventRecord> result = Iterators.unmodifiableIterator(storage.iterator());
-        return result;
-    }
-
-    @Override
-    public Iterator<EventRecord> since(Timestamp timestamp) {
-        final Predicate<EventRecord> isAfter = new Events.IsAfter(timestamp);
-
+    public Iterator<EventRecord> iterator(EventStreamQuery query) {
+        final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
         final Iterator<EventRecord> result = FluentIterable.from(storage)
-                .filter(isAfter)
+                .filter(matchesQuery)
                 .iterator();
-
-        return result;
+        return Iterators.unmodifiableIterator(result);
     }
 
     @Override
-    protected void write(EventStoreRecord record) {
+    protected void write(EventStorageRecord record) {
         checkNotNull(record);
         checkNotNull(record.getEventId());
 
-        final EventRecord eventRec = Events.toEventRecord(record);
+        final EventRecord eventRec = StorageUtil.toEventRecord(record);
         storage.add(eventRec);
     }
 
@@ -100,5 +94,4 @@ class InMemoryEventStorage extends EventStorage {
     protected void clear() {
         storage.clear();
     }
-
 }

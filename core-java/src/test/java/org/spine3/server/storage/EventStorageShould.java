@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,7 @@ package org.spine3.server.storage;
 
 import org.junit.Test;
 import org.spine3.base.EventRecord;
-import org.spine3.base.EventRecordOrBuilder;
+import org.spine3.server.EventStreamQuery;
 import org.spine3.testdata.TestEventRecordFactory;
 
 import java.util.Iterator;
@@ -30,9 +30,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.spine3.testdata.TestEventStoreRecordFactory.*;
-import static org.spine3.util.Events.toEventRecord;
-import static org.spine3.util.Events.toEventRecordsList;
+import static org.spine3.server.storage.StorageUtil.toEventRecord;
+import static org.spine3.server.storage.StorageUtil.toEventRecordsList;
+import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
 public abstract class EventStorageShould {
@@ -45,8 +45,8 @@ public abstract class EventStorageShould {
 
     @Test
     public void return_iterator_over_empty_collection_if_read_records_from_empty_storage() {
+        final Iterator<EventRecord> iterator = findAll();
 
-        final Iterator<EventRecord> iterator = storage.allEvents();
         assertFalse(iterator.hasNext());
     }
 
@@ -58,88 +58,74 @@ public abstract class EventStorageShould {
 
     @Test
     public void store_and_read_one_event() {
-
         final EventRecord expected = TestEventRecordFactory.projectCreated();
+
         storage.store(expected);
 
-        assertStorageContains(expected);
+        assertStorageContainsOnly(expected);
     }
 
     @Test
     public void write_and_read_one_event() {
-
-        final EventStoreRecord recordToStore = projectCreated();
+        final EventStorageRecord recordToStore = projectCreated();
         final EventRecord expected = toEventRecord(recordToStore);
 
         storage.write(recordToStore);
 
-        assertStorageContains(expected);
+        assertStorageContainsOnly(expected);
     }
 
-    private void assertStorageContains(EventRecordOrBuilder expected) {
+    @Test
+    public void write_and_read_several_events() {
+        final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
+        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
 
-        final Iterator<EventRecord> iterator = storage.allEvents();
+        writeAll(recordsToStore);
+
+        assertStorageContainsOnly(expectedRecords);
+    }
+
+    @Test
+    public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
+        final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
+        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
+
+        writeAll(recordsToStore);
+
+        assertStorageContainsOnly(expectedRecords);
+        assertStorageContainsOnly(expectedRecords);
+        assertStorageContainsOnly(expectedRecords);
+    }
+
+    private void writeAll(Iterable<EventStorageRecord> records) {
+        for (EventStorageRecord r : records) {
+            storage.write(r);
+        }
+    }
+
+    private void assertStorageContainsOnly(EventRecord expected) {
+        final Iterator<EventRecord> iterator = findAll();
 
         assertTrue(iterator.hasNext());
 
         final EventRecord actual = iterator.next();
 
-        assertEventRecordsAreEqual(expected, actual);
+        assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
     }
 
-    @Test
-    public void write_and_read_several_events() {
-
-        final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
-
-        writeAll(recordsToStore);
-
-        assertStorageContains(expectedRecords);
-    }
-
-    @Test
-    public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
-
-        final List<EventStoreRecord> recordsToStore = createEventStoreRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
-
-        writeAll(recordsToStore);
-
-        assertStorageContains(expectedRecords);
-        assertStorageContains(expectedRecords);
-        assertStorageContains(expectedRecords);
-    }
-
-    private void writeAll(Iterable<EventStoreRecord> records) {
-        for (EventStoreRecord r : records) {
-            storage.write(r);
-        }
-    }
-
-    private void assertStorageContains(List<EventRecord> expectedRecords) {
-
-        final Iterator<EventRecord> iterator = storage.allEvents();
+    private void assertStorageContainsOnly(List<EventRecord> expectedRecords) {
+        final Iterator<EventRecord> iterator = findAll();
         final List<EventRecord> actualRecords = newArrayList(iterator);
-        assertEventRecordListsAreEqual(expectedRecords, actualRecords);
+        assertEquals(expectedRecords, actualRecords);
     }
 
-    protected static void assertEventRecordListsAreEqual(List<EventRecord> expected, List<EventRecord> actual) {
-        if (expected.size() != actual.size()) {
-            fail("Expected record count: " + expected.size() + " is not equal to actual record count: " + actual.size());
-        }
-        for (int i = 0; i < expected.size(); i++) {
-            assertEventRecordsAreEqual(expected.get(i), actual.get(i));
-        }
-    }
-
-    protected static void assertEventRecordsAreEqual(EventRecordOrBuilder expected, EventRecordOrBuilder actual) {
-        assertEquals(expected.getEvent(), actual.getEvent());
-        assertEquals(expected.getContext(), actual.getContext());
-    }
-
-    private static List<EventStoreRecord> createEventStoreRecords() {
+    private static List<EventStorageRecord> createEventStorageRecords() {
         return newArrayList(projectCreated(), projectStarted(), taskAdded());
+    }
+
+    protected Iterator<EventRecord> findAll() {
+        final Iterator<EventRecord> result = storage.iterator(EventStreamQuery.getDefaultInstance());
+        return result;
     }
 }

@@ -1,0 +1,65 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.examples.aggregate;
+
+option java_package="org.spine3.examples.aggregate";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+message Order {
+    OrderId order_id = 1;
+
+    repeated OrderLine order_line = 2;
+
+    double total = 3;
+
+    enum Status {
+        NEW = 0;
+        IN_PROGRESS = 1;
+        BILLED = 2;
+        PAID = 3;
+    }
+
+    Status status = 4;
+
+    BillingInfo BillingInfo = 5;
+}
+
+message OrderId {
+    string value = 1;
+}
+
+message OrderLine {
+
+    google.protobuf.Any product_id = 2;
+
+    int32 quantity = 3;
+
+    double total = 4;
+}
+
+// This is an example so the BillingInfo
+// is just a stub for the Spine sample.
+message BillingInfo {
+    string info = 1;
+}

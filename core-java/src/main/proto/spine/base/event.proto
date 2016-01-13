@@ -1,5 +1,5 @@
 //
-// Copyright 2015, TeamDev Ltd. All rights reserved.
+// Copyright 2016, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -28,12 +28,12 @@ option java_package = "org.spine3.base";
 
 import public "spine/base/command.proto";
 
-// An identifier of an event.
+// Event identifier.
 message EventId {
     // ID of the command which originated the event.
     CommandId command_id = 1;
 
-    // The duration between the moment of generation of CommandId and creation of this EventId.
+    // The duration between the moment of generation of `CommandId` and creation of this `EventId`.
     int64 delta_nanos = 2;
 }
 
@@ -48,9 +48,9 @@ message EventContext {
     // The version of the aggregate after the event was applied.
     int32 version = 3;
 
-    // This field may be used for additional attributes that were not known at the time of
-    // defining the corresponding event type.
-    repeated google.protobuf.Any attributes = 4;
+    // Service attributes that the system wants to store in addition to the domain attributes
+    // defined in the event type.
+    map<string, google.protobuf.Any> attributes = 4;
 }
 
 // A couple of an event and its context information.

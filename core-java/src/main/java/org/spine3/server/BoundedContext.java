@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,18 +21,15 @@ package org.spine3.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Error;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.*;
 import org.spine3.client.ClientRequest;
 import org.spine3.client.CommandRequest;
-import org.spine3.client.CommandResponse;
 import org.spine3.client.Connection;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.eventbus.EventBus;
@@ -42,10 +39,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.util.Commands;
-import org.spine3.util.Events;
-import org.spine3.util.Identifiers;
-import org.spine3.util.Values;
+import org.spine3.util.EventRecords;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -112,7 +106,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * <li>Closes {@link CommandDispatcher}.</li>
      * <li>Closes {@link EventBus}.</li>
      * <li>Closes {@link CommandStore}.</li>
-     * <li>Closses {@link EventStore}.</li>
+     * <li>Closes {@link EventStore}.</li>
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
      *      <li>un-registered from {@link CommandDispatcher}</li>
@@ -216,18 +210,20 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     @Override
     public void connect(ClientRequest request, StreamObserver<Connection> responseObserver) {
         //TODO:2015-12-21:alexander.yevsyukov: Implement
+
+        responseObserver.onCompleted();
     }
 
     @Override
-    public void post(CommandRequest request, StreamObserver<CommandResponse> responseObserver) {
+    public void post(CommandRequest request, StreamObserver<Response> responseObserver) {
         final Message command = Messages.fromAny(request.getCommand());
         final CommandContext commandContext = request.getContext();
 
-        CommandResponse reply = null;
+        Response reply = null;
 
         // Ensure `namespace` is defined in a multitenant app.
         if (isMultitenant() && !commandContext.hasNamespace()) {
-            reply = unknownNamespace(command, request.getContext());
+            reply = CommandValidation.unknownNamespace(command, request.getContext());
         }
 
         if (reply == null) {
@@ -237,39 +233,28 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
 
-        if (Commands.isOk(reply)) {
+        if (Responses.isOk(reply)) {
             handle(request);
         }
-    }
-
-    @SuppressWarnings("TypeMayBeWeakened")
-    private static CommandResponse unknownNamespace(Message command, CommandContext context) {
-        final String commandType = command.getDescriptorForType().getFullName();
-        final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType, Identifiers.idToString(context.getCommandId()));
-        final CommandResponse response = CommandResponse.newBuilder()
-                .setError(Error.newBuilder()
-                        .setCode(CommandResponse.ErrorCode.NAMESPACE_UNKNOWN.getNumber())
-                        .setData(Values.newStringValueAsAny(commandType))
-                        .setMessage(errMsg))
-                .build();
-        return response;
     }
 
     @Override
     public void getEvents(Connection request, StreamObserver<EventRecord> responseObserver) {
         //TODO:2015-12-21:alexander.yevsyukov: Implement
+
+        responseObserver.onCompleted();
     }
 
     /**
      * Validates the incoming command.
      *
      * @param command the command to validate
-     * @return {@link CommandResponse} with {@code ok} value if the command is valid, or
+     * @return {@link Response} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    protected CommandResponse validate(Message command) {
+    protected Response validate(Message command) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
-        final CommandResponse result = dispatcher.validate(command);
+        final Response result = dispatcher.validate(command);
         return result;
     }
 
@@ -280,6 +265,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         //TODO:2015-12-16:alexander.yevsyukov: Return results to the client through ClientService
     }
 
+    //TODO:2016-01-08:alexander.yevsyukov: Hide this method in favor of a call from client via gRPC.
     /**
      * Processes the incoming command request.
      *
@@ -347,7 +333,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void storeEvents(Iterable<EventRecord> records) {
         final EventStore eventStore = getEventStore();
         for (EventRecord record : records) {
-            eventStore.store(record);
+            eventStore.append(record);
         }
     }
 
@@ -357,7 +343,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            final Message event = Events.getEvent(record);
+            final Message event = EventRecords.getEvent(record);
             final EventContext context = record.getContext();
 
             eventBus.post(event, context);
@@ -483,7 +469,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             }
 
             if (eventStore == null) {
-                eventStore = new EventStore(storageFactory.createEventStorage());
+                eventStore = EventStore.newBuilder()
+                        .setStreamExecutor(MoreExecutors.directExecutor())
+                        .setStorage(storageFactory.createEventStorage())
+                        .setLogger(EventStore.log())
+                        .build();
             }
 
             final BoundedContext result = new BoundedContext(this);

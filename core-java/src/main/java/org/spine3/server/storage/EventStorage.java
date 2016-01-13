@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,13 +20,19 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
+import org.spine3.base.EventRecordFilter;
+import org.spine3.server.EventStreamQuery;
 
+import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.util.Iterator;
 
-import static org.spine3.util.Events.toEventStoreRecord;
+import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
+import static org.spine3.util.EventRecords.*;
 
 /**
  * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
@@ -37,24 +43,17 @@ public abstract class EventStorage implements Closeable {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {
-        final EventStoreRecord storeRecord = toEventStoreRecord(record);
+        final EventStorageRecord storeRecord = toEventStorageRecord(record);
         write(storeRecord);
     }
 
     /**
-     * Returns iterator through all the event records in the storage sorted by timestamp.
+     * Returns iterator through event records matching the passed query.
      *
+     * @param query a filtering query
      * @return iterator instance
      */
-    public abstract Iterator<EventRecord> allEvents();
-
-    /**
-     * Returns iterator through event records since the passed moment of time.
-     *
-     * @param timestamp a moment from which return event records
-     * @return iterator of event records since the passed time
-     */
-    public abstract Iterator<EventRecord> since(Timestamp timestamp);
+    public abstract Iterator<EventRecord> iterator(EventStreamQuery query);
 
     /**
      * Writes record into the storage.
@@ -62,6 +61,48 @@ public abstract class EventStorage implements Closeable {
      * @param record the record to write
      * @throws java.lang.NullPointerException if record is null
      */
-    protected abstract void write(EventStoreRecord record);
+    protected abstract void write(EventStorageRecord record);
 
+    public static class MatchesStreamQuery implements Predicate<EventRecord> {
+
+        private final EventStreamQuery query;
+        private final Predicate<EventRecord> timePredicate;
+
+        @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
+        public MatchesStreamQuery(EventStreamQuery query) {
+            this.query = query;
+
+            final Timestamp after = query.getAfter();
+            final Timestamp before = query.getBefore();
+
+            final boolean afterSpecified = query.hasAfter();
+            final boolean beforeSpecified = query.hasBefore();
+
+            //noinspection IfStatementWithTooManyBranches
+            if (afterSpecified && !beforeSpecified) {
+                this.timePredicate = new IsAfter(after);
+            } else if (!afterSpecified && beforeSpecified) {
+                this.timePredicate = new IsBefore(before);
+            } else if (afterSpecified /* && beforeSpecified is true here too */){
+                this.timePredicate = new IsBetween(after, before);
+            } else { // No timestamps specified.
+                this.timePredicate = Predicates.alwaysTrue();
+            }
+        }
+
+        @Override
+        public boolean apply(@Nullable EventRecord input) {
+            if (!timePredicate.apply(input)) {
+                return false;
+            }
+
+            for (EventRecordFilter filter : query.getFilterList()) {
+                final Predicate<EventRecord> filterPredicate = new MatchesFilter(filter);
+                if (!filterPredicate.apply(input)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }

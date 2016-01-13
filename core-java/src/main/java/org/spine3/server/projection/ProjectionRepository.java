@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -103,6 +103,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final P p = load(id);
         p.handle(event, context);
         store(p);
+
+        //TODO:2016-01-08:alexander.yevsyukov: Store the timestamp of this event. We will need this value
+        // when reconnecting to the EventStore for catching up.
     }
 
     /**

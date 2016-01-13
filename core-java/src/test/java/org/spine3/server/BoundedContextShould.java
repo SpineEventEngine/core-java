@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,18 +20,15 @@
 
 package org.spine3.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.*;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
+import org.spine3.base.*;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.CommandRequestOrBuilder;
-import org.spine3.client.CommandResponse;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
@@ -271,7 +268,11 @@ public class BoundedContextShould {
 
     @Test
     public void return_EventStore_from_builder() {
-        final EventStore es = new EventStore(InMemoryStorageFactory.getInstance().createEventStorage());
+        final EventStore es = EventStore.newBuilder()
+                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setStorage(InMemoryStorageFactory.getInstance().createEventStorage())
+                .setLogger(EventStore.log())
+                .build();
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventStore(es);
         assertEquals(es, builder.getEventStore());
     }
@@ -286,12 +287,12 @@ public class BoundedContextShould {
         assertNotNull(boundedContext.getEventStore());
     }
 
-    private static class ResponseObserver implements StreamObserver<CommandResponse> {
+    private static class ResponseObserver implements StreamObserver<Response> {
 
-        private CommandResponse response;
+        private Response response;
 
         @Override
-        public void onNext(CommandResponse commandResponse) {
+        public void onNext(Response commandResponse) {
             this.response = commandResponse;
         }
 
@@ -303,7 +304,7 @@ public class BoundedContextShould {
         public void onCompleted() {
         }
 
-        public CommandResponse getResponse() {
+        public Response getResponse() {
             return response;
         }
     }
@@ -325,7 +326,7 @@ public class BoundedContextShould {
                 .build();
         bc.post(request, observer);
 
-        assertEquals(CommandResponse.ErrorCode.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
     private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {

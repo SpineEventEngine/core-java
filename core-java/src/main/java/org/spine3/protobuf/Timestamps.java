@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, TeamDev Ltd. All rights reserved.
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,18 +30,21 @@ import java.util.Comparator;
 import java.util.Date;
 
 /**
- * Utility class for working with timestamps.
+ * Utilities class for working with timestamps in addition to those available from {@link TimeUtil}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
+ * @see TimeUtil
  */
 @SuppressWarnings("UtilityClass")
 public class Timestamps {
 
-    private static final long NANOS_PER_MILLISECOND = 1_000_000;
-    public static final long MILLISECONDS_PER_SECOND = 1000;
-    private static final long MICROS_PER_SECOND = 1000000;
-    private static final int SECONDS_PER_MINUTE = 60;
+    public static final long NANOS_PER_MILLISECOND = 1_000_000;
+    public static final long MICROS_PER_SECOND = 1_000_000;
+    public static final int MILLIS_PER_SECOND = 1000;
+
+    public static final int SECONDS_PER_MINUTE = 60;
+    public static final int MINUTES_PER_HOUR = 60;
 
     /**
      * @return timestamp of the moment a minute ago from now.
@@ -86,9 +89,8 @@ public class Timestamps {
      * Converts Timestamp to Date to the nearest millisecond.
      */
     public static Date convertToDate(TimestampOrBuilder timestamp) {
-
         final long millisecsFromNanos = timestamp.getNanos() / NANOS_PER_MILLISECOND;
-        final long millisecsFromSeconds = timestamp.getSeconds() * MILLISECONDS_PER_SECOND;
+        final long millisecsFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
         return date;
     }
@@ -102,7 +104,6 @@ public class Timestamps {
         private static final long serialVersionUID = 0;
     }
 
-    private Timestamps() {
-    }
-
+    // @formatter:off
+    private Timestamps() {}
 }
