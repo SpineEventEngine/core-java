@@ -80,12 +80,11 @@ public abstract class EventStorage implements Closeable {
         public MatchesStreamQuery(EventStreamQuery query) {
             this.query = query;
 
-            final Timestamp defaultTimestamp = Timestamp.getDefaultInstance();
             final Timestamp after = query.getAfter();
             final Timestamp before = query.getBefore();
 
-            final boolean afterSpecified = !after.equals(defaultTimestamp);
-            final boolean beforeSpecified = !before.equals(defaultTimestamp);
+            final boolean afterSpecified = query.hasAfter();
+            final boolean beforeSpecified = query.hasBefore();
 
             //noinspection IfStatementWithTooManyBranches
             if (afterSpecified && !beforeSpecified) {
