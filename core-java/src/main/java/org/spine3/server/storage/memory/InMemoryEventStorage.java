@@ -21,13 +21,16 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.server.storage.StorageUtil;
+import org.spine3.util.EventRecords;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -35,7 +38,6 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 
 /**
  * In-memory implementation of {@link EventStorage}.
@@ -46,17 +48,17 @@ import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 class InMemoryEventStorage extends EventStorage {
 
     @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
-    private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(100, new EventRecordComparator());
+    private final PriorityQueue<EventRecord> storage = new PriorityQueue<>(100, new EventRecordComparator());
 
     /**
      * Compares event records by timestamp of events.
      */
-    private static class EventRecordComparator implements Comparator<EventStorageRecord>, Serializable {
+    private static class EventRecordComparator implements Comparator<EventRecord>, Serializable {
         @Override
-        public int compare(EventStorageRecord record1, EventStorageRecord record2) {
-            final Timestamp time1 = record1.getTimestamp();
-            final Timestamp time2 = record2.getTimestamp();
-            final int result = Timestamps.compare(time1, time2);
+        public int compare(EventRecord o1, EventRecord o2) {
+            final Timestamp timestamp = EventRecords.getTimestamp(o1);
+            final Timestamp anotherTimestamp = EventRecords.getTimestamp(o2);
+            final int result = Timestamps.compare(timestamp, anotherTimestamp);
             return result;
         }
 
@@ -65,17 +67,20 @@ class InMemoryEventStorage extends EventStorage {
 
     @Override
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
-        final Predicate<EventStorageRecord> matchesQuery = new MatchesStreamQuery(query);
-        final Iterable<EventStorageRecord> filtered = Iterables.filter(storage, matchesQuery);
-        final Iterator<EventRecord> result = toEventRecordsIterator(filtered.iterator());
-        return result;
+        final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
+        final Iterator<EventRecord> result = FluentIterable.from(storage)
+                .filter(matchesQuery)
+                .iterator();
+        return Iterators.unmodifiableIterator(result);
     }
 
     @Override
     protected void write(EventStorageRecord record) {
         checkNotNull(record);
         checkNotNull(record.getEventId());
-        storage.add(record);
+
+        final EventRecord eventRec = StorageUtil.toEventRecord(record);
+        storage.add(eventRec);
     }
 
     @Override

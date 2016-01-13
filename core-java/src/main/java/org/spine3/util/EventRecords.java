@@ -29,10 +29,9 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.base.EventStorageRecordFilter;
+import org.spine3.base.EventRecordFilter;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -110,7 +109,7 @@ public class EventRecords {
     /**
      * The predicate to filter event records after some point in time.
      */
-    public static class IsAfter implements Predicate<EventStorageRecord> {
+    public static class IsAfter implements Predicate<EventRecord> {
 
         private final Timestamp timestamp;
 
@@ -119,12 +118,12 @@ public class EventRecords {
         }
 
         @Override
-        public boolean apply(@Nullable EventStorageRecord record) {
+        public boolean apply(@Nullable EventRecord record) {
             if (record == null) {
                 return false;
             }
-            final Timestamp time = record.getTimestamp();
-            final boolean result = Timestamps.compare(time, this.timestamp) > 0;
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
             return result;
         }
     }
@@ -132,7 +131,7 @@ public class EventRecords {
     /**
      * The predicate to filter event records before some point in time.
      */
-    public static class IsBefore implements Predicate<EventStorageRecord> {
+    public static class IsBefore implements Predicate<EventRecord> {
 
         private final Timestamp timestamp;
 
@@ -141,12 +140,13 @@ public class EventRecords {
         }
 
         @Override
-        public boolean apply(@Nullable EventStorageRecord record) {
+        public boolean apply(@Nullable EventRecord record) {
             if (record == null) {
                 return false;
             }
-            final Timestamp time = record.getTimestamp();
-            final boolean result = Timestamps.compare(time, this.timestamp) < 0;
+
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) < 0;
             return result;
         }
     }
@@ -154,7 +154,7 @@ public class EventRecords {
     /**
      * The predicate to filter event records within a given time range.
      */
-    public static class IsBetween implements Predicate<EventStorageRecord> {
+    public static class IsBetween implements Predicate<EventRecord> {
 
         private final Timestamp start;
         private final Timestamp finish;
@@ -168,36 +168,37 @@ public class EventRecords {
         }
 
         @Override
-        public boolean apply(@Nullable EventStorageRecord record) {
+        public boolean apply(@Nullable EventRecord record) {
             if (record == null) {
                 return false;
             }
-            final Timestamp time = record.getTimestamp();
-            final boolean result = isBetween(time, start, finish);
+
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = isBetween(ts, start, finish);
             return result;
         }
     }
 
     /**
-     * The predicate for filtering event records by {@link EventStorageRecordFilter}.
+     * The predicate for filtering event records by {@link EventRecordFilter}.
      */
-    public static class MatchesFilter implements Predicate<EventStorageRecord> {
+    public static class MatchesFilter implements Predicate<EventRecord> {
 
-        private final EventStorageRecordFilter filter;
+        private final EventRecordFilter filter;
         private final TypeName eventType;
 
-        public MatchesFilter(EventStorageRecordFilter filter) {
+        public MatchesFilter(EventRecordFilter filter) {
             this.filter = filter;
             this.eventType = TypeName.of(filter.getEventType());
         }
 
         @Override
-        public boolean apply(@Nullable EventStorageRecord record) {
+        public boolean apply(@Nullable EventRecord record) {
             if (record == null) {
                 return false;
             }
 
-            final Message event = record.getEvent();
+            final Message event = getEvent(record);
 
             if (!eventType.equals(TypeName.of(event))) {
                 return false;
