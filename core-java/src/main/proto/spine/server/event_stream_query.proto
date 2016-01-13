@@ -46,6 +46,3 @@ message EventStreamQuery {
     // Specification of `EventRecord`s to be included into resulting stream.
     repeated spine.base.EventRecordFilter filter = 3;
 }
-
-
-
