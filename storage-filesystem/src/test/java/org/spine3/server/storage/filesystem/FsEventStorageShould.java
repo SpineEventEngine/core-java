@@ -26,14 +26,14 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.StorageUtil;
 import org.spine3.testdata.TestEventStorageRecordFactory;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.spine3.server.storage.StorageUtil.toEventRecord;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.EventStorage} tests.
@@ -52,31 +52,30 @@ public class FsEventStorageShould extends EventStorageShould {
     }
 
     @After
-    public void tearDownTest() throws Exception {
+    public void tearDownTest() throws IOException {
         FACTORY.close();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void throw_exception_if_try_to_remove_element_via_iterator() {
+        final Iterator<EventRecord> iterator = findAll();
 
-        final Iterator<EventRecord> iterator = STORAGE.allEvents();
         iterator.remove();
     }
 
     @Test(expected = NoSuchElementException.class)
     public void throw_exception_if_iteration_has_no_more_elements() {
-
         final EventStorageRecord recordToStore = TestEventStorageRecordFactory.projectCreated();
-        final EventRecord expected = StorageUtil.toEventRecord(recordToStore);
-        STORAGE.write(recordToStore);
+        final EventRecord expected = toEventRecord(recordToStore);
 
-        final Iterator<EventRecord> iterator = STORAGE.allEvents();
+        STORAGE.write(recordToStore);
+        final Iterator<EventRecord> iterator = findAll();
 
         assertTrue(iterator.hasNext());
 
         final EventRecord actual = iterator.next();
 
-        EventStorageShould.assertEventRecordsAreEqual(expected, actual);
+        assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
 
         iterator.next();

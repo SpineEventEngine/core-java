@@ -63,14 +63,6 @@ public abstract class EventStorage implements Closeable {
      */
     protected abstract void write(EventStorageRecord record);
 
-    /**
-     * @deprecated Use {@link #iterator(EventStreamQuery)} instead
-     */
-    @Deprecated
-    public Iterator<EventRecord> allEvents() {
-        return iterator(EventStreamQuery.getDefaultInstance());
-    }
-
     public static class MatchesStreamQuery implements Predicate<EventRecord> {
 
         private final EventStreamQuery query;
