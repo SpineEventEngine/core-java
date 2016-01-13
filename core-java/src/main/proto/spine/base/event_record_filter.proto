@@ -23,16 +23,16 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EventRecordFilterProto";
+option java_outer_classname = "EventStorageRecordFilterProto";
 option java_package = "org.spine3.base";
 
 import public "spine/base/event.proto";
 import public "spine/base/field_filter.proto";
 
-// Filters `EventRecord`s by the type of the event, event field values, and by `EventContext` field values.
+// Filters `EventStorageRecord`s by the type of the event, event field values, and by `EventContext` field values.
 //
 // The time of the event is filtered by `before` and `after` attributes of `EventStreamQuery`.
-message EventRecordFilter {
+message EventStorageRecordFilter {
     // The full Proto type name of the event.
     string event_type = 1;
 
