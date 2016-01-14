@@ -134,5 +134,6 @@ public abstract class AggregateStorage<I> {
     /**
      * Releases storage resources (closes I/O streams etc) if needed.
      */
+    // TODO:2016-01-14:alexander.litus: find out why it is unused. Consider implementing AutoCloseable.
     protected abstract void releaseResources();
 }
