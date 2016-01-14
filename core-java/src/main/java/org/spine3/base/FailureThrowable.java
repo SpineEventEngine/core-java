@@ -35,7 +35,7 @@ import com.google.protobuf.util.TimeUtil;
 public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;
-
+    // We accept GeneratedMessage (instead of Message) because generated messages implement Serializable.
     private final GeneratedMessage failure;
     private final Timestamp timestamp;
 
