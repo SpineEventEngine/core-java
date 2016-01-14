@@ -20,35 +20,81 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
+import org.spine3.base.EntityRecord;
 
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An entity storage keeps messages with identity.
  *
  * @param <I> the type of entity IDs
- * @param <M> the type of entity state messages written in the storage
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I, M extends Message> {
+public abstract class EntityStorage<I> {
 
     /**
-     * Reads a message from the storage by the ID.
+     * Loads an entity record from the storage by an ID.
      *
-     * @param id the ID of the message to load
-     * @return a message instance or {@code null} if there is no message with such ID
+     * @param id the ID of the entity record to load
+     * @return an entity record instance or {@code null} if there is no record with such an ID
      */
     @Nullable
-    public abstract M read(I id);
+    public EntityRecord load(I id) {
+        final EntityStorageRecord record = read(id);
+        if (record == null) {
+            return null;
+        }
+        final EntityRecord result = toEntityRecord(record);
+        return result;
+    }
 
     /**
-     * Writes a message into the storage. Rewrites it if the message with such ID already exists.
+     * Loads an entity storage record from the storage by an ID.
      *
-     * @param id ID of the message
-     * @param message the message to save
-     * @throws java.lang.NullPointerException if id or message is null
+     * @param id the ID of the entity record to load
+     * @return an entity record instance or {@code null} if there is no record with such an ID
      */
-    public abstract void write(I id, M message);
+    @Nullable
+    protected abstract EntityStorageRecord read(I id);
+
+    /**
+     * Saves a {@code record} into the storage. Rewrites it if a  {@code record} with such an ID already exists.
+     *
+     * @param record a record to save
+     * @throws NullPointerException if the {@code record} is null
+     */
+    public void store(EntityRecord record) {
+        checkNotNull(record);
+        final EntityStorageRecord storageRecord = toEntityStorageRecord(record);
+        write(storageRecord);
+    }
+
+    /**
+     * Writes a record into the storage. Rewrites it if the record with such an entity ID already exists.
+     *
+     * @param record a record to save
+     * @throws NullPointerException if the {@code record} is null
+     */
+    protected abstract void write(EntityStorageRecord record);
+
+    private static EntityRecord toEntityRecord(EntityStorageRecord record) {
+        final EntityRecord.Builder builder = EntityRecord.newBuilder()
+                .setEntityState(record.getEntityState())
+                .setEntityId(record.getEntityId())
+                .setWhenModified(record.getWhenModified())
+                .setVersion(record.getVersion());
+        return builder.build();
+    }
+
+    private static EntityStorageRecord toEntityStorageRecord(EntityRecord record) {
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setEntityState(record.getEntityState())
+                .setEntityId(record.getEntityId())
+                .setWhenModified(record.getWhenModified())
+                .setVersion(record.getVersion());
+        return builder.build();
+    }
 }

@@ -26,23 +26,22 @@ import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 
+import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
 
 /**
  * An entity storage based on the file system.
  *
  * @author Alexander Litus
  */
-class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class FsEntityStorage<I, M extends Message> extends EntityStorage<I> {
 
     private static final String ENTITY_STORE_DIR_NAME = "/entity-store/";
 
@@ -52,7 +51,8 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * Creates a new storage instance.
      * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
      */
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance(String rootDirectoryPath) {
+    protected static <I> EntityStorage<I> newInstance(
+            String rootDirectoryPath) {
         return new FsEntityStorage<>(rootDirectoryPath);
     }
 
@@ -60,8 +60,8 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         this.entityStorageRootPath = rootDirectoryPath + ENTITY_STORE_DIR_NAME;
     }
 
-    @Override
-    public M read(I id) {
+    // TODO:2016-01-14:alexander.litus: remove
+    /*public M readOld(I id) {
         final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
         final File file = tryCreateIfDoesNotExist(filePath);
@@ -72,11 +72,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
         final M result = (M) message;
         return result;
-    }
+    }*/
 
-    @Override
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    public void write(I id, M message) {
+    /*public void writeOld(I id, M message) {
         checkNotNull(id, "id");
         checkNotNull(message, "message");
 
@@ -88,6 +86,18 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
         final Any any = Messages.toAny(message);
         FsUtil.writeMessage(file, any);
+    }*/
+
+    @Nullable
+    @Override
+    protected EntityStorageRecord read(I id) {
+        // TODO:2016-01-14:alexander.litus: impl
+        return null;
+    }
+
+    @Override
+    protected void write(EntityStorageRecord record) {
+        // TODO:2016-01-14:alexander.litus: impl
     }
 
     /**

@@ -20,38 +20,43 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Message;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Memory-based implementation of {@link EntityStorage}.
  *
  * @author Alexander Litus
  */
-class InMemoryEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
-    private final Map<I, M> storage = newHashMap();
+    private final Map<String, EntityStorageRecord> storage = newHashMap();
 
-    protected static <I, M extends Message> InMemoryEntityStorage<I, M> newInstance() {
+    protected static <I> InMemoryEntityStorage<I> newInstance() {
         return new InMemoryEntityStorage<>();
     }
 
+    @Nullable
     @Override
-    public M read(I id) {
-        final M message = storage.get(id);
-        return message;
+    protected EntityStorageRecord read(I id) {
+        final String idString = idToString(id);
+        final EntityStorageRecord record = storage.get(idString);
+        return record;
     }
 
     @Override
-    public void write(I id, M message) {
-        checkNotNull(id, "id");
-        checkNotNull(message, "message");
-        storage.put(id, message);
+    protected void write(EntityStorageRecord record) {
+        checkArgument(record.hasEntityState(), "entity state");
+
+        final String id = record.getEntityId();
+        storage.put(id, record);
     }
 
     /**

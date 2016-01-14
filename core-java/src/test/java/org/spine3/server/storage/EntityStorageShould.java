@@ -23,82 +23,108 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.server.Entity;
+import org.spine3.base.EntityRecord;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.util.Identifiers.newUuid;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
-        "ConstructorNotProtectedInAbstractClass", "DuplicateStringLiteralInspection", "ConstantConditions"})
+        "ConstructorNotProtectedInAbstractClass"})
 public abstract class EntityStorageShould {
 
-    private final EntityStorage<String, StringValue> storage;
+    private static final int DEFAULT_ENTITY_VERSION = 5;
 
-    public EntityStorageShould(EntityStorage<String, StringValue> storage) {
+    private final EntityStorage<String> storage;
+
+    public EntityStorageShould(EntityStorage<String> storage) {
         this.storage = storage;
     }
 
     @Test
     public void return_null_if_read_one_record_from_empty_storage() {
-        final Message message = storage.read("nothing");
+        final Message message = storage.load("nothing");
         assertNull(message);
     }
 
     @Test
+    @SuppressWarnings("ConstantConditions")
     public void return_null_if_read_one_record_by_null_id() {
-        final Message message = storage.read(null);
+        final Message message = storage.load(null);
         assertNull(message);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        storage.write(null, newValue("testValue"));
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_write_without_id() {
+        storage.write(EntityStorageRecord.getDefaultInstance());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_message() {
-        storage.write("nothing", null);
+    public void throw_exception_if_write_null_record() {
+        storage.write(null);
     }
 
     @Test
-    public void save_and_read_message() {
-        testSaveAndReadMessage("testId", "testValue");
+    public void write_and_read_message() {
+        testWriteAndReadMessage("testId", "testValue");
     }
 
     @Test
-    public void save_and_read_several_messages_with_different_ids() {
-        testSaveAndReadMessage("id-1", "value-1");
-        testSaveAndReadMessage("id-2", "value-2");
-        testSaveAndReadMessage("id-3", "value-3");
+    public void store_and_load_message() {
+        final String id = newUuid();
+        final EntityRecord expected = newEntityRecord(id);
+        storage.store(expected);
+
+        final EntityRecord actual = storage.load(id);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void write_and_read_several_messages_with_different_ids() {
+        testWriteAndReadMessage("id-1", "value-1");
+        testWriteAndReadMessage("id-2", "value-2");
+        testWriteAndReadMessage("id-3", "value-3");
     }
 
     @Test
     public void rewrite_message_if_write_with_same_id() {
         final String id = "test-id-rewrite";
-        testSaveAndReadMessage(id, "value-1");
-        testSaveAndReadMessage(id, "value-2");
+        testWriteAndReadMessage(id, "primary-value");
+        testWriteAndReadMessage(id, "new-value");
     }
 
-    private void testSaveAndReadMessage(String id, String value) {
-        final StringValue expected = newValue(value);
+    private void testWriteAndReadMessage(String id, String value) {
+        final EntityStorageRecord expected = newEntityStorageRecord(id, value);
+        storage.write(expected);
 
-        storage.write(id, expected);
-        final StringValue actual = storage.read(id);
+        final EntityStorageRecord actual = storage.read(id);
 
         assertEquals(expected, actual);
     }
 
-    private static StringValue newValue(String value) {
-        return StringValue.newBuilder().setValue(value).build();
+    private static EntityRecord newEntityRecord(String id) {
+        final EntityRecord.Builder builder = EntityRecord.newBuilder()
+                .setEntityState(toAny(newStringValue(newUuid())))
+                .setEntityId(id)
+                .setWhenModified(getCurrentTime())
+                .setVersion(DEFAULT_ENTITY_VERSION);
+        return builder.build();
     }
 
-    public static class TestEntity extends Entity<String, StringValue> {
-        protected TestEntity(String id) {
-            super(id);
-        }
-        @Override
-        protected StringValue getDefaultState() {
-            return StringValue.getDefaultInstance();
-        }
+    private static EntityStorageRecord newEntityStorageRecord(String id, String value) {
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setEntityState(toAny(newStringValue(value)))
+                .setEntityId(id)
+                .setWhenModified(getCurrentTime())
+                .setVersion(DEFAULT_ENTITY_VERSION);
+        return builder.build();
+    }
+
+    private static StringValue newStringValue(String value) {
+        return StringValue.newBuilder().setValue(value).build();
     }
 }

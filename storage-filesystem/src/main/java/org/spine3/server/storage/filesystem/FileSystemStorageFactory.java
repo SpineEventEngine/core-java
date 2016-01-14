@@ -96,7 +96,7 @@ public class FileSystemStorageFactory implements StorageFactory {
      * NOTE: the parameter is unused.
      */
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> unused) {
+    public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> unused) {
         return FsEntityStorage.newInstance(rootDirectoryPath);
     }
 
