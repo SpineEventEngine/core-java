@@ -19,31 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.examples.failure;
 
-option java_generate_equals_and_hash = true;
+option java_package="org.spine3.examples.failure.commands";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
-option java_outer_classname = "EventRecordFilterProto";
-option java_package = "org.spine3.base";
+option java_generate_equals_and_hash = true;
 
-import public "spine/base/event.proto";
-import public "spine/base/field_filter.proto";
+import "spine/examples/failure/task.proto";
 
-// Filters `EventRecord`s by the type of the event, event field values, and by `EventContext` field values.
-//
-// The time of the event is filtered by `before` and `after` attributes of `EventStreamQuery`.
-message EventRecordFilter {
-    // The full Proto type name of the event.
-    string event_type = 1;
-
-    // The list of aggregate IDs of interest. Or empty, if include events for all aggregates.
-    repeated google.protobuf.Any aggregate_id = 2;
-
-    //TODO:2016-01-11:alexander.yevsyukov: implement these filters if we need to query on deeper details.
-    // Accepted event field values.
-    // repeated FieldFilter event_field_filter = 3;
-
-    // Accepted `EventContext` field values.
-    // repeated FieldFilter context_field_filter = 4;
+// The command to cancel a task.
+// The task cannot be cancelled, if it's in progress.
+message CancelTask {
+    TaskId id = 1;
 }
-

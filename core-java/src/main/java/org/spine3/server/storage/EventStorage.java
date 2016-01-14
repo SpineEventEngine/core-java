@@ -24,8 +24,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
-import org.spine3.base.EventRecordFilter;
-import org.spine3.server.EventStreamQuery;
+import org.spine3.server.stream.EventRecordFilter;
+import org.spine3.server.stream.EventStore;
+import org.spine3.server.stream.EventStreamQuery;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -35,7 +36,7 @@ import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
 import static org.spine3.util.EventRecords.*;
 
 /**
- * A storage used by {@link org.spine3.server.EventStore} for keeping event data.
+ * A storage used by {@link EventStore} for keeping event data.
  *
  * @author Alexander Yevsyukov
  */

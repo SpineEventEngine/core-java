@@ -39,6 +39,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.stream.EventStore;
 import org.spine3.util.EventRecords;
 
 import javax.annotation.CheckReturnValue;

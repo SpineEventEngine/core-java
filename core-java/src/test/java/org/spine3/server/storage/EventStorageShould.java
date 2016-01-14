@@ -22,7 +22,7 @@ package org.spine3.server.storage;
 
 import org.junit.Test;
 import org.spine3.base.EventRecord;
-import org.spine3.server.EventStreamQuery;
+import org.spine3.server.stream.EventStreamQuery;
 import org.spine3.testdata.TestEventRecordFactory;
 
 import java.util.Iterator;

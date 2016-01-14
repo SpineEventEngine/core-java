@@ -19,37 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.server.stream;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "BusinessFailureProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "EventStreamQueryProto";
+option java_package = "org.spine3.server.stream";
 
-import public "google/protobuf/struct.proto";
+import public "google/protobuf/timestamp.proto";
 
-// A business failure represents a condition in business, which does not allow to satisfy a request.
-//
-// Examples: unsuccessful credit card validation, insufficient items in stock, incomplete order data.
-//
-// See `spine.base.Error` for definition of a technical error.
-//
-message BusinessFailure {
-    // A failure type.
-    string type = 1;
+import public "spine/server/stream/event_record_filter.proto";
 
-    // An integer failure code.
-    int32 code = 2;
+// The query specifies event to return from the event store.
+message EventStreamQuery {
+    // Include events with timestamp after this value.
+    //
+    // If this parameter is not specified, all events since the start of
+    // the history will be included.
+    google.protobuf.Timestamp after = 1;
 
-    reserved 3 to 9;
+    // Include events with the timestamp before this value.
+    //
+    // If this parameter is not specified, all events till the end of
+    // the history will be included.
+    google.protobuf.Timestamp before = 2;
 
-    // A developer-readable diagnostics message of the failure.
-    // This message is not translated to the language of the end user.
-    string message = 10;
-
-    // Additional information on the failure.
-    map<string, google.protobuf.Value> attributes = 11;
-
-    // A stacktrace of an exception (if available).
-    string stacktrace = 12;
+    // Specification of `EventRecord`s to be included into resulting stream.
+    repeated spine.base.EventRecordFilter filter = 3;
 }

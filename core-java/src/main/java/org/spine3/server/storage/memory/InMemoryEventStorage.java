@@ -26,10 +26,10 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.StorageUtil;
+import org.spine3.server.stream.EventStreamQuery;
 import org.spine3.util.EventRecords;
 
 import java.io.Serializable;

@@ -19,10 +19,10 @@
  */
 
 /**
- * This package provides classes for managing projections.
+ * This package provides classes and interfaces for working with event streams.
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.server.projection;
+package org.spine3.server.stream;
 
 import javax.annotation.ParametersAreNonnullByDefault;

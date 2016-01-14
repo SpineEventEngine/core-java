@@ -18,15 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.examples.failure.failures;
+
+import org.spine3.base.FailureThrowable;
+import org.spine3.examples.failure.TaskId;
+
 /**
- * This package contains gRPC-based implementation of backend services.
- *
- * <p>This package is not a part of public API of the framework.
+ * @author Alexander Yevsyukov
  */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.server.grpc;
+public class CannotCancelTaskInProgress extends FailureThrowable {
 
-import org.spine3.Internal;
+    private static final long serialVersionUID = 0L;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public CannotCancelTaskInProgress(TaskId taskId) {
+        super(Failures.CannotCancelTaskInProgress.newBuilder().setId(taskId).build());
+    }
+
+    @Override
+    public Failures.CannotCancelTaskInProgress getFailure() {
+        return (Failures.CannotCancelTaskInProgress) super.getFailure();
+    }
+}
