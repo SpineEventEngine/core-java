@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.EventStreamQuery;
@@ -29,9 +31,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.server.storage.StorageUtil.toEventRecord;
-import static org.spine3.server.storage.StorageUtil.toEventRecordsList;
+import static org.spine3.server.storage.StorageUtil.toEventRecordList;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
@@ -78,7 +83,7 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_read_several_events() {
         final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
+        final List<EventRecord> expectedRecords = toEventRecordList(recordsToStore);
 
         writeAll(recordsToStore);
 
@@ -86,9 +91,30 @@ public abstract class EventStorageShould {
     }
 
     @Test
+    public void write_and_read_events_which_happened_after_a_point_in_time() {
+        final Duration delta = seconds(10);
+        final Timestamp time1 = getCurrentTime();
+        final EventStorageRecord projectCreated = projectCreated(time1);
+        final Timestamp time2 = add(time1, delta);
+        final EventStorageRecord taskAdded = taskAdded(time2);
+        final Timestamp time3 = add(time2, delta);
+        final EventStorageRecord projectStarted = projectStarted(time3);
+
+        final List<EventStorageRecord> recordsToStore = newArrayList(projectCreated, taskAdded, projectStarted);
+        final List<EventRecord> expectedRecords = toEventRecordList(taskAdded, projectStarted);
+
+        writeAll(recordsToStore);
+
+        final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
+        final Iterator<EventRecord> iterator = storage.iterator(query);
+        final List<EventRecord> actualRecords = newArrayList(iterator);
+        assertEquals(expectedRecords, actualRecords);
+    }
+
+    @Test
     public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
         final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
+        final List<EventRecord> expectedRecords = toEventRecordList(recordsToStore);
 
         writeAll(recordsToStore);
 

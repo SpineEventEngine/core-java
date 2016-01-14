@@ -20,6 +20,7 @@
 
 package org.spine3.testdata;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
@@ -37,10 +38,10 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
+@SuppressWarnings({"UtilityClass"})
 public class TestContextFactory {
 
-    private static final String STUB_PROJECT_ID = "dummy_project_id_123";
+    private static final Any PROJECT_ID = Messages.toAny(createProjectId("dummy_project_id_123"));
 
     private TestContextFactory() {
     }
@@ -70,17 +71,15 @@ public class TestContextFactory {
      * Creates a new {@link EventContext} with default properties.
      */
     public static EventContext createEventContext() {
-
         final Timestamp now = TimeUtil.getCurrentTime();
         final CommandId commandId = CommandId.newBuilder()
                 .setActor(UserId.getDefaultInstance())
                 .setTimestamp(now)
                 .build();
         final EventId eventId = Events.generateId(commandId);
-
         return EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(createProjectId(STUB_PROJECT_ID)))
+                .setAggregateId(PROJECT_ID)
                 .build();
     }
 
@@ -88,14 +87,26 @@ public class TestContextFactory {
      * Creates a new {@link EventContext} with the given userId and aggregateId.
      */
     public static EventContext createEventContext(UserId userId, Message aggregateId) {
-
         final CommandId commandId = Commands.generateId(userId);
         final EventId eventId = Events.generateId(commandId);
-
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setAggregateId(Messages.toAny(aggregateId));
+        return builder.build();
+    }
 
+    /**
+     * Creates a new {@link EventContext} with the given timestamp.
+     */
+    public static EventContext createEventContext(Timestamp timestamp) {
+        final CommandId commandId = CommandId.newBuilder()
+                .setActor(UserId.getDefaultInstance())
+                .setTimestamp(timestamp)
+                .build();
+        final EventId eventId = Events.createId(commandId, timestamp);
+        final EventContext.Builder builder = EventContext.newBuilder()
+                .setEventId(eventId)
+                .setAggregateId(PROJECT_ID);
         return builder.build();
     }
 }

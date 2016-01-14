@@ -25,11 +25,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -73,15 +70,6 @@ public class Events {
                 .setCommandId(checkNotNull(commandId))
                 .setDeltaNanos(delta);
         return builder.build();
-    }
-
-    /**
-     * Sorts the given event record list by the event timestamps.
-     *
-     * @param eventRecords the event record list to sort
-     */
-    public static void sort(List<EventRecord> eventRecords) {
-        Collections.sort(eventRecords, EventRecords.EVENT_RECORD_COMPARATOR);
     }
 
     /**

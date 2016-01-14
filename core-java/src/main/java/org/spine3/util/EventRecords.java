@@ -35,7 +35,6 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -49,18 +48,6 @@ import static org.spine3.protobuf.Timestamps.isBetween;
  */
 @SuppressWarnings("UtilityClass")
 public class EventRecords {
-
-    /**
-     * Compares two event records by their timestamps.
-     */
-    public static final Comparator<EventRecord> EVENT_RECORD_COMPARATOR = new Comparator<EventRecord>() {
-        @Override
-        public int compare(EventRecord o1, EventRecord o2) {
-            final Timestamp timestamp1 = getTimestamp(o1);
-            final Timestamp timestamp2 = getTimestamp(o2);
-            return Timestamps.compare(timestamp1, timestamp2);
-        }
-    };
 
     /**
      * Obtains the timestamp of event ID generation.
