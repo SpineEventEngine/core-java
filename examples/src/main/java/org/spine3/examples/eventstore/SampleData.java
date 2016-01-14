@@ -24,6 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.GeneratedMessage;
 import org.spine3.base.EventId;
 import org.spine3.base.UserId;
+import org.spine3.examples.eventstore.events.ProjectCreated;
+import org.spine3.examples.eventstore.events.TaskAssigned;
+import org.spine3.examples.eventstore.events.TaskCreated;
+import org.spine3.examples.eventstore.events.TaskDone;
 import org.spine3.util.Commands;
 
 import java.util.concurrent.ThreadLocalRandom;
