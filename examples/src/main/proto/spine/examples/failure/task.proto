@@ -19,28 +19,37 @@
 //
 syntax = "proto3";
 
-package spine.examples.eventstore;
+package spine.examples.failure;
 
-option java_package="org.spine3.examples.eventstore";
+option java_package="org.spine3.examples.failure";
 option java_multiple_files = true;
 
-message ProjectId {
-    string code = 1;
-}
+import "spine/base/user_id.proto";
 
 message TaskId {
     uint32 number = 1;
 }
 
-message Project {
-    ProjectId id = 1;
-    string name = 2;
-    string description = 3;
-}
-
 message Task {
     TaskId id = 1;
-    ProjectId project_id = 2;
-    string name = 3;
-    string description = 4;
+    string name = 2;
+    string description = 3;
+
+    enum Status {
+        // Reserved for errors.
+        UNKNOWN = 0;
+        // The task is not assigned.
+        NOT_ASSIGNED = 1;
+        // The task is assigned to a person.
+        ASSIGNED = 2;
+        // The assignee is currently working on the task.
+        IN_PROGRESS = 3;
+        // Some work was done on the task, but it's not complete.
+        STOPPED = 4;
+        // The task is done.
+        DONE = 5;
+    }
+
+    Status status = 4;
+    UserId assignee = 5;
 }

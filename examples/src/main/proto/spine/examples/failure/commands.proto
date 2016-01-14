@@ -19,28 +19,15 @@
 //
 syntax = "proto3";
 
-package spine.examples.eventstore;
+package spine.examples.failure;
 
-option java_package="org.spine3.examples.eventstore";
+option java_package="org.spine3.examples.failure.commands";
 option java_multiple_files = true;
 
-message ProjectId {
-    string code = 1;
-}
+import "spine/examples/failure/task.proto";
 
-message TaskId {
-    uint32 number = 1;
-}
-
-message Project {
-    ProjectId id = 1;
-    string name = 2;
-    string description = 3;
-}
-
-message Task {
+// The command to cancel a task.
+// The task cannot be cancelled, if it's in progress.
+message CancelTask {
     TaskId id = 1;
-    ProjectId project_id = 2;
-    string name = 3;
-    string description = 4;
 }
