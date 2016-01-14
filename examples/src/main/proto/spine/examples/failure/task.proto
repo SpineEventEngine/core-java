@@ -22,7 +22,9 @@ syntax = "proto3";
 package spine.examples.failure;
 
 option java_package="org.spine3.examples.failure";
+option java_outer_classname = "TaskProto";
 option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
 
 import "spine/base/user_id.proto";
 
@@ -51,5 +53,5 @@ message Task {
     }
 
     Status status = 4;
-    UserId assignee = 5;
+    spine.base.UserId assignee = 5;
 }

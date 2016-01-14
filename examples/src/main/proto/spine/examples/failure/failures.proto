@@ -20,11 +20,17 @@ syntax = "proto3";
 
 package spine.examples.failure;
 
-option java_package="org.spine3.examples.failure.commands";
-option java_multiple_files = true;
+option java_package="org.spine3.examples.failure.failures";
+option java_multiple_files = false;
+// Do not specify java_outer_classname option as we're not generating multiple Java classes for failures.
+option java_generate_equals_and_hash = true;
 
 import "spine/examples/failure/task.proto";
 
 message CannotCancelTaskInProgress {
+    TaskId id = 1;
+}
+
+message CannotRemoveTaskInProgress {
     TaskId id = 1;
 }
