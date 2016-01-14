@@ -378,9 +378,10 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
-        final EventId eventId = Events.createId(commandId, whenModified);
+        final EventId eventId = Events.generateId();
         final EventContext.Builder result = EventContext.newBuilder()
                 .setEventId(eventId)
+                .setTimestamp(whenModified)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
         addEventContextAttributes(result, commandId, event, currentState, currentVersion);

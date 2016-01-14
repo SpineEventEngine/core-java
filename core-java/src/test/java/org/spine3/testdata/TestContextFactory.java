@@ -56,12 +56,11 @@ public class TestContextFactory {
      * Creates a new {@link CommandContext} with the given userId and command time.
      */
     public static CommandContext createCommandContext(UserId userId, Timestamp when) {
-        final CommandId commandId = CommandId.newBuilder()
-                .setActor(userId)
-                .setTimestamp(when)
-                .build();
+        final CommandId commandId = Commands.generateId();
         return CommandContext.newBuilder()
                 .setCommandId(commandId)
+                .setActor(userId)
+                .setTimestamp(when)
                 .setZoneOffset(ZoneOffset.getDefaultInstance())
                 .build();
     }
@@ -72,14 +71,13 @@ public class TestContextFactory {
     public static EventContext createEventContext() {
 
         final Timestamp now = TimeUtil.getCurrentTime();
-        final CommandId commandId = CommandId.newBuilder()
-                .setActor(UserId.getDefaultInstance())
-                .setTimestamp(now)
-                .build();
-        final EventId eventId = Events.generateId(commandId);
+        final CommandContext commandContext = createCommandContext(
+                UserId.getDefaultInstance(), now);
+        final EventId eventId = Events.generateId();
 
         return EventContext.newBuilder()
                 .setEventId(eventId)
+                .setCommandContext(commandContext)
                 .setAggregateId(Messages.toAny(createProjectId(STUB_PROJECT_ID)))
                 .build();
     }
@@ -88,9 +86,7 @@ public class TestContextFactory {
      * Creates a new {@link EventContext} with the given userId and aggregateId.
      */
     public static EventContext createEventContext(UserId userId, Message aggregateId) {
-
-        final CommandId commandId = Commands.generateId(userId);
-        final EventId eventId = Events.generateId(commandId);
+        final EventId eventId = Events.generateId();
 
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)

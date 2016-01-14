@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
 import org.spine3.client.CommandRequest;
-import org.spine3.client.CommandRequestOrBuilder;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.AggregateRepositoryBase;
@@ -196,19 +195,19 @@ public class BoundedContextShould {
         }
     }
 
-    private void assertRequestAndResultMatch(CommandRequestOrBuilder request, CommandResultOrBuilder result) {
+    private void assertRequestAndResultMatch(CommandRequest request, CommandResult result) {
 
-        final Timestamp expectedTime = request.getContext().getCommandId().getTimestamp();
+        final Timestamp expectedTime = request.getContext().getTimestamp();
 
         final List<EventRecord> records = result.getEventRecordList();
         assertEquals(1, records.size());
         final EventRecord actualRecord = records.get(0);
         final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
-        final CommandId actualCommandId = actualRecord.getContext().getEventId().getCommandId();
+        final CommandId actualCommandId = actualRecord.getContext().getCommandContext().getCommandId();
 
         assertEquals(projectId, actualProjectId);
-        assertEquals(userId, actualCommandId.getActor());
-        assertEquals(expectedTime, actualCommandId.getTimestamp());
+        assertEquals(userId, actualRecord.getContext().getCommandContext().getActor());
+        assertEquals(expectedTime, actualRecord.getContext().getCommandContext().getTimestamp());
     }
 
     @Test(expected = NullPointerException.class)

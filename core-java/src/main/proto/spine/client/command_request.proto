@@ -21,12 +21,14 @@ syntax = "proto3";
 
 package spine.client;
 
-option java_generate_equals_and_hash = true;
+option java_package = "org.spine3.client";
 option java_multiple_files = true;
 option java_outer_classname = "CommandRequestProto";
-option java_package = "org.spine3.client";
+option java_generate_equals_and_hash = true;
 
-import public "spine/base/command.proto";
+import "google/protobuf/any.proto";
+
+import "spine/base/command.proto";
 
 // Command execution request.
 message CommandRequest {

@@ -28,7 +28,6 @@ import org.spine3.examples.eventstore.events.ProjectCreated;
 import org.spine3.examples.eventstore.events.TaskAssigned;
 import org.spine3.examples.eventstore.events.TaskCreated;
 import org.spine3.examples.eventstore.events.TaskDone;
-import org.spine3.util.Commands;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -82,7 +81,7 @@ public class SampleData {
     }
 
     static EventId generate(UserId actor) {
-        return org.spine3.util.Events.generateId(Commands.generateId(actor));
+        return org.spine3.util.Events.generateId();
     }
 
     private static Task newTask(ProjectId projectId, String name, String description) {

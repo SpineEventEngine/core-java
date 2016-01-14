@@ -28,10 +28,9 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.*;
-import org.spine3.client.ClientRequest;
 import org.spine3.client.CommandRequest;
-import org.spine3.client.Connection;
 import org.spine3.client.grpc.ClientServiceGrpc;
+import org.spine3.client.grpc.Topic;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
@@ -209,13 +208,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     @Override
-    public void connect(ClientRequest request, StreamObserver<Connection> responseObserver) {
-        //TODO:2015-12-21:alexander.yevsyukov: Implement
-
-        responseObserver.onCompleted();
-    }
-
-    @Override
     public void post(CommandRequest request, StreamObserver<Response> responseObserver) {
         final Message command = Messages.fromAny(request.getCommand());
         final CommandContext commandContext = request.getContext();
@@ -240,10 +232,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     @Override
-    public void getEvents(Connection request, StreamObserver<EventRecord> responseObserver) {
-        //TODO:2015-12-21:alexander.yevsyukov: Implement
+    public void subscribe(Topic request, StreamObserver<EventRecord> responseObserver) {
+        //TODO:2016-01-14:alexander.yevsyukov: Implement
+    }
 
-        responseObserver.onCompleted();
+    @Override
+    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
+        //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 
     /**
