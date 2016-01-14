@@ -59,8 +59,8 @@ public class Classes {
             final Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
 
             actualTypeArguments.setAccessible(true);
-            @SuppressWarnings("unchecked") final
-            Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
+            @SuppressWarnings("unchecked")
+            final Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
             actualTypeArguments.setAccessible(false);
 
             return result;

@@ -63,8 +63,8 @@ public class Methods {
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") final /** we always expect first param as {@link Message} */
-                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
+        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
