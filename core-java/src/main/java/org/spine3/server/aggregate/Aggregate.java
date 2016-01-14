@@ -183,7 +183,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         init();
         final List<? extends Message> events = generateEvents(command, context);
         final CommandId commandId = context.getCommandId();
-        apply(events, commandId);
+        apply(events, context);
     }
 
     /**
@@ -230,11 +230,11 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * Applies events to an aggregate unless they are state-neutral.
      *
      * @param events the events to apply
-     * @param commandId the ID of the command which caused the events
+     * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      * @see #getStateNeutralEventClasses()
      */
-    private void apply(Iterable<? extends Message> events, CommandId commandId) throws InvocationTargetException {
+    private void apply(Iterable<? extends Message> events, CommandContext commandContext) throws InvocationTargetException {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
@@ -245,7 +245,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             }
             final int currentVersion = getVersion();
             final M state = getState();
-            final EventContext eventContext = createEventContext(commandId, event, state, whenModified(), currentVersion);
+            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, event);
             final EventRecord eventRecord = EventRecords.createEventRecord(event, eventContext);
             putUncommitted(eventRecord);
         }
@@ -368,23 +368,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>The context may optionally have custom attributes added by
      * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
      *
-     * @param commandId      the ID of the command, which caused the event
-     * @param event          the event for which to create the context
+     *
+     * @param commandContext the context of the command, execution of which produced the event
      * @param currentState   the state of the aggregated after the event was applied
      * @param whenModified   the moment of the aggregate modification for this event
      * @param currentVersion the version of the aggregate after the event was applied
+     * @param event          the event for which to create the context
      * @return new instance of the {@code EventContext}
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
+    protected EventContext createEventContext(CommandContext commandContext, M currentState, Timestamp whenModified, int currentVersion, Message event) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder result = EventContext.newBuilder()
                 .setEventId(eventId)
+                .setCommandContext(commandContext)
                 .setTimestamp(whenModified)
                 .setVersion(currentVersion)
                 .setAggregateId(getIdAsAny());
-        addEventContextAttributes(result, commandId, event, currentState, currentVersion);
+        addEventContextAttributes(result, commandContext.getCommandId(), event, currentState, currentVersion);
         return result.build();
     }
 
@@ -398,7 +400,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @param event          the event message
      * @param currentState   the current state of the aggregate after the event was applied
      * @param currentVersion the version of the aggregate after the event was applied
-     * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
+     * @see #createEventContext(CommandContext, Message, Timestamp, int, Message)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,

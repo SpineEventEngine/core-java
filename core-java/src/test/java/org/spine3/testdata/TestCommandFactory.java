@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.test.project.ProjectId;
@@ -88,10 +89,11 @@ public class TestCommandFactory {
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given command, userId and timestamp.
+     * Creates a new {@link CommandRequest} with the given command, userId and timestamp using default
+     * {@link CommandId} instance.
      */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
-        final CommandContext context = TestContextFactory.createCommandContext(userId, when);
+        final CommandContext context = TestContextFactory.createCommandContext(userId, CommandId.getDefaultInstance(), when);
         final CommandRequest result = Commands.newCommandRequest(command, context);
         return result;
     }

@@ -52,10 +52,6 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 @SuppressWarnings("UtilityClass")
 public class Commands {
 
-    private Commands() {
-        // Prevent instantiation.
-    }
-
     static {
         IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
     }
@@ -165,4 +161,7 @@ public class Commands {
                 .setContext(context);
         return request.build();
     }
+
+    //@formatter:off
+    private Commands() {}
 }
