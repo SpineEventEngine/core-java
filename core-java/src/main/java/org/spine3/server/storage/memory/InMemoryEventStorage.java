@@ -21,7 +21,6 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
@@ -35,6 +34,7 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterators.filter;
 import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 
 /**
@@ -71,7 +71,7 @@ class InMemoryEventStorage extends EventStorage {
     public Iterator<EventRecord> iterator(EventStreamQuery query) {
         final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
         final Iterator<EventRecord> transformed = toEventRecordsIterator(storage.iterator());
-        final Iterator<EventRecord> result = Iterators.filter(transformed, matchesQuery);
+        final Iterator<EventRecord> result = filter(transformed, matchesQuery);
         return result;
     }
 

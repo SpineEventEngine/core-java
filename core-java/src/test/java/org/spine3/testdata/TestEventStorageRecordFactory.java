@@ -64,8 +64,7 @@ public class TestEventStorageRecordFactory {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setEvent(projectCreatedEventAny())
                 .setEventId("project_created_" + when.getSeconds())
-                .setContext(createEventContext(when))
-                .setTimestamp(when);
+                .setContext(createEventContext(when));
         return result.build();
     }
 

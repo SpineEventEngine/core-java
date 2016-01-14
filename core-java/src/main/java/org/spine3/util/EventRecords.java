@@ -187,7 +187,8 @@ public class EventRecords {
 
             final Message event = getEvent(record);
 
-            if (!eventType.equals(TypeName.of(event))) {
+            final TypeName actualType = TypeName.of(event);
+            if (!eventType.equals(actualType)) {
                 return false;
             }
 
