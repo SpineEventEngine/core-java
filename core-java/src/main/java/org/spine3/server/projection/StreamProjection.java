@@ -43,9 +43,9 @@ import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
  * in the classes extending this abstract class.
  *
  * <p>Event handlers are invoked by a {@link StreamProjectionRepository} that manages instances
- * of a projection class.
+ * of a stream projection class.
  *
- * @param <I> the type of the projection IDs
+ * @param <I> the type of the IDs
  * @param <M> the type of the state objects holding projection data
  */
 public abstract class StreamProjection<I, M extends Message> extends Entity<I, M> {
@@ -103,7 +103,7 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
     }
 
     /**
-     * Returns the set of event classes handled by the passed projection class.
+     * Returns the set of event classes handled by the passed {@code StreamProjection} class.
      *
      * @param clazz the class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
@@ -113,7 +113,7 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
     }
 
     private IllegalStateException missingEventHandler(Class<? extends Message> eventClass) {
-        return new IllegalStateException(String.format("Missing event handler for event class %s in the projection class %s",
+        return new IllegalStateException(String.format("Missing event handler for event class %s in the stream projection class %s",
                 eventClass, this.getClass()));
     }
 
