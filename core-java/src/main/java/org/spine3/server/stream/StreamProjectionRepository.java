@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.projection;
+package org.spine3.server.stream;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
