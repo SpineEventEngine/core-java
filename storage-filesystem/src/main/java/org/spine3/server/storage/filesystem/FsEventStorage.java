@@ -24,10 +24,10 @@ import com.google.common.collect.Iterators;
 import org.spine3.base.EventRecord;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
-import org.spine3.server.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.StorageUtil;
+import org.spine3.server.stream.EventStreamQuery;
 
 import java.io.*;
 import java.util.Iterator;

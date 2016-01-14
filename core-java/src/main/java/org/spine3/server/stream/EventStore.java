@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.stream;
 
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.grpc.EventStoreGrpc;
 import org.spine3.server.storage.EventStorage;
+import org.spine3.server.stream.grpc.EventStoreGrpc;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -244,7 +244,7 @@ public abstract class EventStore implements Closeable {
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
-     * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
+     * @see EventStoreGrpc.EventStore
      */
     public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
 

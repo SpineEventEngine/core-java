@@ -38,6 +38,7 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.StreamProjection;
 import org.spine3.server.stream.StreamProjectionRepository;
 import org.spine3.test.project.ProjectId;

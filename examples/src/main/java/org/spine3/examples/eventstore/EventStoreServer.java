@@ -25,8 +25,8 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.EventStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.stream.EventStore;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
  * The server for running {@link EventStore} as a gRPC service.
  *
  * @author Alexander Yevsyukov
- * @see org.spine3.server.grpc.EventStoreGrpc.EventStore
+ * @see org.spine3.server.stream.grpc.EventStoreGrpc.EventStore
  */
 public class EventStoreServer {
 
