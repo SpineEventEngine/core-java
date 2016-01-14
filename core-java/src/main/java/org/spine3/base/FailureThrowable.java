@@ -23,6 +23,8 @@ package org.spine3.base;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 
 /**
  * Abstract base for throwable business failures.
@@ -35,19 +37,32 @@ public abstract class FailureThrowable extends Throwable {
     private static final long serialVersionUID = 0L;
 
     private final GeneratedMessage failure;
+    private final Timestamp timestamp;
 
     protected FailureThrowable(GeneratedMessage failure) {
         this.failure = failure;
+        this.timestamp = TimeUtil.getCurrentTime();
     }
 
     public GeneratedMessage getFailure() {
         return failure;
     }
 
+    /**
+     * @return timestamp of the instance creation
+     */
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Converts this instance into {@link Failure} message.
+     */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
                 .setInstance(Any.pack(this.failure))
-                .setStacktrace(Throwables.getStackTraceAsString(this));
+                .setStacktrace(Throwables.getStackTraceAsString(this))
+                .setTimestamp(this.timestamp);
         return builder.build();
     }
 }

@@ -27,6 +27,7 @@ option java_outer_classname = "BusinessFailureProto";
 option java_package = "org.spine3.base";
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
 // A business failure is a condition in business, which does not allow to
@@ -43,6 +44,9 @@ message Failure {
     // A stacktrace of from the code, which generated the failure instance (if available).
     string stacktrace = 2;
 
+    // The moment when the failure instance (not this message) was created.
+    google.protobuf.Timestamp timestamp = 3;
+
     // Additional information on the failure.
-    map<string, google.protobuf.Value> attributes = 11;
+    map<string, google.protobuf.Value> attributes = 4;
 }
