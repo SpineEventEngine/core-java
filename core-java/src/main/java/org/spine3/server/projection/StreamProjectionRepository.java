@@ -35,12 +35,12 @@ import java.util.Set;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Abstract base for repositories managing {@link Projection}s.
+ * Abstract base for repositories managing {@link StreamProjection}s.
  *
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"unused", "AbstractClassNeverImplemented"})
-public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
+public abstract class StreamProjectionRepository<I, P extends StreamProjection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements MultiHandler {
 
     /**
@@ -50,8 +50,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      */
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
-        final Class<? extends Projection> projectionClass = getEntityClass();
-        final Set<Class<? extends Message>> events = Projection.getEventClasses(projectionClass);
+        final Class<? extends StreamProjection> projectionClass = getEntityClass();
+        final Set<Class<? extends Message>> events = StreamProjection.getEventClasses(projectionClass);
         final Method forward = dispatchAsMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
@@ -86,7 +86,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Dispatches the passed event to a corresponding projection.
+     * Dispatches the passed event to corresponding {@link StreamProjection}.
      *
      * <p>The ID of the projection must be specified as the first property of the passed event.
      *
@@ -95,7 +95,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      *
      * @param event the event to dispatch
      * @param context the context of the event
-     * @see Projection#handle(Message, EventContext)
+     * @see StreamProjection#handle(Message, EventContext)
      */
     @SuppressWarnings("unused") // This method is used by reflection
     public void dispatch(Message event, EventContext context) {

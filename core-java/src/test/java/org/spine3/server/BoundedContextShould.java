@@ -36,8 +36,8 @@ import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
-import org.spine3.server.projection.Projection;
-import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.projection.StreamProjection;
+import org.spine3.server.projection.StreamProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
@@ -365,7 +365,7 @@ public class BoundedContextShould {
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
     }
 
-    private static class ProjectReport extends Projection<ProjectId, Empty> {
+    private static class ProjectReport extends StreamProjection<ProjectId, Empty> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // Public constructor is a part of projection public API. It's called by a repository.
@@ -379,6 +379,6 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReportRepository extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
+    private static class ProjectReportRepository extends StreamProjectionRepository<ProjectId, ProjectReport, Empty> {
     }
 }

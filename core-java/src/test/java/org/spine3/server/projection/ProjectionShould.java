@@ -34,9 +34,9 @@ import static org.junit.Assert.assertTrue;
 public class ProjectionShould {
 
     @SuppressWarnings("TypeMayBeWeakened") // We seek for Message types in event handlers, not MessageOfBuilders.
-    private static class TestProjection extends Projection<Integer, StringValue> {
+    private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
 
-        protected TestProjection(Integer id) {
+        protected TestStreamProjection(Integer id) {
             super(id);
         }
 
@@ -75,11 +75,11 @@ public class ProjectionShould {
         }
     }
 
-    private TestProjection test;
+    private TestStreamProjection test;
 
     @Before
     public void setUp() {
-        test = new TestProjection(1);
+        test = new TestStreamProjection(1);
         test.setDefault();
     }
 
