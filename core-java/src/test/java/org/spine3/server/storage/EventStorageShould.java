@@ -20,24 +20,54 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
+import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.server.stream.EventStreamQuery;
+import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestEventRecordFactory;
+import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
-import static org.spine3.server.storage.StorageUtil.toEventRecord;
-import static org.spine3.server.storage.StorageUtil.toEventRecordsList;
+import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.storage.StorageUtil.*;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
+import static org.spine3.util.Identifiers.newUuid;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class EventStorageShould {
 
     private final EventStorage storage;
+
+    /**
+     * The point in time when the first event happened.
+     */
+    private Timestamp time1;
+    private EventStorageRecord record1;
+
+    /**
+     * The point in time when the second event happened.
+     */
+    @SuppressWarnings("FieldCanBeLocal") // to be consistent
+    private Timestamp time2;
+    private EventStorageRecord record2;
+
+    /**
+     * The point in time when the third event happened.
+     */
+    private Timestamp time3;
+    private EventStorageRecord record3;
 
     protected EventStorageShould(EventStorage storage) {
         this.storage = storage;
@@ -78,7 +108,7 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_read_several_events() {
         final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
+        final List<EventRecord> expectedRecords = toEventRecordList(recordsToStore);
 
         writeAll(recordsToStore);
 
@@ -86,9 +116,93 @@ public abstract class EventStorageShould {
     }
 
     @Test
+    public void write_and_filter_events_by_type() {
+        final EventStorageRecord expectedRecord = EventStorageRecord.newBuilder()
+                .setEvent(toAny(newRandomStringValue())).build();
+        writeAll(expectedRecord, projectStarted(), taskAdded());
+
+        final String typeName = TypeName.of(StringValue.class).value();
+        final EventRecordFilter filter = EventRecordFilter.newBuilder()
+                .setEventType(typeName).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .addFilter(filter).build();
+        final List<EventRecord> expectedRecords = toEventRecordList(expectedRecord);
+
+        final Iterator<EventRecord> actual = storage.iterator(query);
+
+        assertEquals(expectedRecords, newArrayList(actual));
+    }
+
+    @Test
+    public void write_and_filter_events_by_aggregate_id() {
+        final ProjectId id = createProjectId("project-created-" + newUuid());
+        final EventRecord expectedRecord = TestEventRecordFactory.projectCreated(id);
+        writeAll(toEventStorageRecord(expectedRecord), projectStarted(), taskAdded());
+
+        final EventRecordFilter filter = EventRecordFilter.newBuilder()
+                .addAggregateId(toAny(id)).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .addFilter(filter).build();
+
+        final Iterator<EventRecord> actual = storage.iterator(query);
+
+        assertEquals(newArrayList(expectedRecord), newArrayList(actual));
+    }
+
+    @Test
+    public void write_and_find_events_which_happened_after_a_point_in_time() {
+        givenSequentialRecords();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .setAfter(time1).build();
+        final List<EventRecord> expectedRecords = toEventRecordList(record2, record3);
+
+        final Iterator<EventRecord> actual = storage.iterator(query);
+
+        assertEquals(expectedRecords, newArrayList(actual));
+    }
+
+    @Test
+    public void write_and_find_events_which_happened_before_a_point_in_time() {
+        givenSequentialRecords();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .setBefore(time3).build();
+        final List<EventRecord> expectedRecords = toEventRecordList(record1, record2);
+
+        final Iterator<EventRecord> actual = storage.iterator(query);
+
+        assertEquals(expectedRecords, newArrayList(actual));
+    }
+
+    @Test
+    public void write_and_find_events_which_happened_between_two_points_in_time() {
+        givenSequentialRecords();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .setAfter(time1)
+                .setBefore(time3)
+                .build();
+        final List<EventRecord> expectedRecords = toEventRecordList(record2);
+
+        final Iterator<EventRecord> actual = storage.iterator(query);
+
+        assertEquals(expectedRecords, newArrayList(actual));
+    }
+
+    private void givenSequentialRecords() {
+        final Duration delta = seconds(10);
+        time1 = getCurrentTime();
+        record1 = projectCreated(time1);
+        time2 = add(time1, delta);
+        record2 = taskAdded(time2);
+        time3 = add(time2, delta);
+        record3 = projectStarted(time3);
+
+        writeAll(record1, record2, record3);
+    }
+
+    @Test
     public void return_iterator_pointed_to_first_element_if_read_all_events_several_times() {
         final List<EventStorageRecord> recordsToStore = createEventStorageRecords();
-        final List<EventRecord> expectedRecords = toEventRecordsList(recordsToStore);
+        final List<EventRecord> expectedRecords = toEventRecordList(recordsToStore);
 
         writeAll(recordsToStore);
 
@@ -98,6 +212,13 @@ public abstract class EventStorageShould {
     }
 
     private void writeAll(Iterable<EventStorageRecord> records) {
+        for (EventStorageRecord r : records) {
+            storage.write(r);
+        }
+    }
+
+    @SuppressWarnings("OverloadedVarargsMethod")
+    private void writeAll(EventStorageRecord... records) {
         for (EventStorageRecord r : records) {
             storage.write(r);
         }
@@ -127,5 +248,10 @@ public abstract class EventStorageShould {
     protected Iterator<EventRecord> findAll() {
         final Iterator<EventRecord> result = storage.iterator(EventStreamQuery.getDefaultInstance());
         return result;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private static StringValue newRandomStringValue() {
+        return StringValue.newBuilder().setValue(newUuid()).build();
     }
 }

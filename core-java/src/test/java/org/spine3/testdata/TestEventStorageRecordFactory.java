@@ -20,8 +20,10 @@
 
 package org.spine3.testdata;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EventStorageRecord;
 
+import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 
 /**
@@ -56,5 +58,29 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord projectStarted() {
         return PROJECT_STARTED_RECORD;
+    }
+
+    public static EventStorageRecord projectCreated(Timestamp when) {
+        final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                .setEvent(projectCreatedEventAny())
+                .setEventId("project_created_" + when.getSeconds())
+                .setContext(createEventContext(when));
+        return result.build();
+    }
+
+    public static EventStorageRecord taskAdded(Timestamp when) {
+        final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                .setEvent(taskAddedEventAny())
+                .setEventId("task_added_" + when.getSeconds())
+                .setContext(createEventContext(when));
+        return result.build();
+    }
+
+    public static EventStorageRecord projectStarted(Timestamp when) {
+        final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                .setEvent(projectStartedEventAny())
+                .setEventId("project_started_" + when.getSeconds())
+                .setContext(createEventContext(when));
+        return result.build();
     }
 }
