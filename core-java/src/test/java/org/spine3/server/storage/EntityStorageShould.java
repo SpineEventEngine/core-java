@@ -34,8 +34,6 @@ import static org.spine3.util.Identifiers.newUuid;
         "ConstructorNotProtectedInAbstractClass"})
 public abstract class EntityStorageShould {
 
-    private static final int DUMMY_ENTITY_VERSION = 5;
-
     private final EntityStorage<String> storage;
 
     public EntityStorageShould(EntityStorage<String> storage) {
@@ -110,7 +108,7 @@ public abstract class EntityStorageShould {
                 .setState(toAny(newStringValue(newUuid())))
                 .setEntityId(id)
                 .setWhenModified(getCurrentTime())
-                .setVersion(DUMMY_ENTITY_VERSION);
+                .setVersion(5); // set any non-default (non-zero) value
         return builder.build();
     }
 
