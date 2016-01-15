@@ -20,20 +20,16 @@
 package org.spine3.util;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.util.Identifiers.*;
+import static org.spine3.util.Identifiers.IdConverterRegistry;
+import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -49,30 +45,11 @@ public class Events {
     }
 
     /**
-     * Generates new {@link EventId} by the passed {@link CommandId} and current system time.
-     *
-     * @param commandId ID of the command, which originated the event
-     * @return new event ID
+     * Generates a new random UUID-based {@code EventId}.
      */
-    public static EventId generateId(CommandId commandId) {
-        return createId(commandId, getCurrentTime());
-    }
-
-    /**
-     * Creates new {@link EventId} by the passed {@link CommandId} and passed timestamp.
-     *
-     * @param commandId ID of the command, which originated the event
-     * @param timestamp the moment of time the event happened
-     * @return new event ID
-     */
-    public static EventId createId(CommandId commandId, Timestamp timestamp) {
-        final Duration distance = TimeUtil.distance(commandId.getTimestamp(), checkNotNull(timestamp));
-        final long delta = TimeUtil.toNanos(distance);
-
-        final EventId.Builder builder = EventId.newBuilder()
-                .setCommandId(checkNotNull(commandId))
-                .setDeltaNanos(delta);
-        return builder.build();
+    public static EventId generateId() {
+        final String value = UUID.randomUUID().toString();
+        return EventId.newBuilder().setUuid(value).build();
     }
 
     /**
@@ -104,25 +81,7 @@ public class Events {
                 return NULL_ID_OR_FIELD;
             }
 
-            final StringBuilder builder = new StringBuilder();
-
-            final CommandId commandId = eventId.getCommandId();
-
-            String userId = NULL_ID_OR_FIELD;
-
-            if (commandId != null && commandId.getActor() != null) {
-                userId = commandId.getActor().getValue();
-            }
-
-            final String commandTime = (commandId != null) ? timestampToString(commandId.getTimestamp()) : "";
-
-            builder.append(userId)
-                    .append(USER_ID_AND_TIME_DELIMITER)
-                    .append(commandTime)
-                    .append(TIME_DELIMITER)
-                    .append(eventId.getDeltaNanos());
-
-            return builder.toString();
+            return eventId.getUuid();
         }
 
     }

@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStoreRecord;
+import org.spine3.server.storage.CommandStorageRecord;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,10 +31,10 @@ import static com.google.common.collect.Maps.newHashMap;
 
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final Map<String, CommandStoreRecord> storage = newHashMap();
+    private final Map<String, CommandStorageRecord> storage = newHashMap();
 
     @Override
-    protected void write(CommandStoreRecord record) {
+    protected void write(CommandStorageRecord record) {
 
         checkNotNull(record);
 

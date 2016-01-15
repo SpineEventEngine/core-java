@@ -22,13 +22,11 @@ package org.spine3.examples.eventstore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.GeneratedMessage;
-import org.spine3.base.EventId;
 import org.spine3.base.UserId;
 import org.spine3.examples.eventstore.events.ProjectCreated;
 import org.spine3.examples.eventstore.events.TaskAssigned;
 import org.spine3.examples.eventstore.events.TaskCreated;
 import org.spine3.examples.eventstore.events.TaskDone;
-import org.spine3.util.Commands;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -79,10 +77,6 @@ public class SampleData {
 
     private static TaskId generate() {
         return TaskIdFactory.INSTANCE.generate();
-    }
-
-    static EventId generate(UserId actor) {
-        return org.spine3.util.Events.generateId(Commands.generateId(actor));
     }
 
     private static Task newTask(ProjectId projectId, String name, String description) {

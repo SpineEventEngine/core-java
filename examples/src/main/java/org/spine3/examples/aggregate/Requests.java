@@ -21,7 +21,6 @@ package org.spine3.examples.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 import org.spine3.examples.aggregate.command.AddOrderLine;
@@ -30,8 +29,6 @@ import org.spine3.examples.aggregate.command.PayForOrder;
 import org.spine3.protobuf.Messages;
 import org.spine3.time.ZoneOffset;
 import org.spine3.util.Commands;
-
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
  * Utility class for generating sample command requests.
@@ -81,19 +78,18 @@ class Requests {
         return result;
     }
 
+    //TODO:2016-01-14:alexander.yevsyukov: Use real utility method.
     public static CommandRequest newCommandRequest(UserId userId, Message command) {
-        final CommandContext context = getCommandContext(userId);
+        final CommandContext context = createCommandContext(userId);
         final CommandRequest request = Commands.newCommandRequest(command, context);
         return request;
     }
 
-    public static CommandContext getCommandContext(UserId userId) {
-        final CommandId commandId = CommandId.newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .build();
+    //TODO:2016-01-14:alexander.yevsyukov: Use real method, which obtains TimeZone.
+    public static CommandContext createCommandContext(UserId userId) {
         final CommandContext.Builder context = CommandContext.newBuilder()
-                .setCommandId(commandId)
+                .setCommandId(Commands.generateId())
+                .setActor(userId)
                 .setZoneOffset(ZoneOffset.getDefaultInstance());
         return context.build();
     }

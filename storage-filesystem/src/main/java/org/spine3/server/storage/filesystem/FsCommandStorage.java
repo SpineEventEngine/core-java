@@ -22,7 +22,7 @@ package org.spine3.server.storage.filesystem;
 
 import org.spine3.io.file.FileUtil;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStoreRecord;
+import org.spine3.server.storage.CommandStorageRecord;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +54,7 @@ class FsCommandStorage extends CommandStorage {
     }
 
     @Override
-    protected void write(CommandStoreRecord record) {
+    protected void write(CommandStorageRecord record) {
 
         checkNotNull(record);
         writeMessage(commandStoreFile, record);
