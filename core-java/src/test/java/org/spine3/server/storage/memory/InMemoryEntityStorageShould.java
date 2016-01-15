@@ -30,8 +30,7 @@ import org.spine3.server.storage.EntityStorageShould;
  */
 public class InMemoryEntityStorageShould extends EntityStorageShould {
 
-    private static final InMemoryEntityStorage<String> STORAGE =
-            InMemoryEntityStorage.newInstance();
+    private static final InMemoryEntityStorage<String> STORAGE = InMemoryEntityStorage.newInstance();
 
     public InMemoryEntityStorageShould() {
         super(STORAGE);

@@ -31,13 +31,12 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.EntityStorage.*;
 import static org.spine3.util.Identifiers.newUuid;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
-        "ConstructorNotProtectedInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class EntityStorageShould {
 
     private final EntityStorage<String> storage;
 
-    public EntityStorageShould(EntityStorage<String> storage) {
+    protected EntityStorageShould(EntityStorage<String> storage) {
         this.storage = storage;
     }
 

@@ -44,14 +44,14 @@ import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequen
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ConstructorNotProtectedInAbstractClass", "AbstractClassWithoutAbstractMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class AggregateStorageShould {
 
     private final ProjectId aggregateId = createProjectId("dummyAggregateId");
 
     private final AggregateStorage<ProjectId> storage;
 
-    public AggregateStorageShould(AggregateStorage<ProjectId> storage) {
+    protected AggregateStorageShould(AggregateStorage<ProjectId> storage) {
         this.storage = storage;
     }
 
