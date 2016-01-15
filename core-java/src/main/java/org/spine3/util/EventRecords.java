@@ -29,9 +29,9 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
-import org.spine3.base.EventRecordFilter;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;

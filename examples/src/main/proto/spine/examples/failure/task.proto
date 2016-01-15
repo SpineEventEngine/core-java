@@ -19,31 +19,39 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.examples.failure;
 
-option java_generate_equals_and_hash = true;
+option java_package="org.spine3.examples.failure";
+option java_outer_classname = "TaskProto";
 option java_multiple_files = true;
-option java_outer_classname = "ResponseProto";
-option java_package = "org.spine3.base";
+option java_generate_equals_and_hash = true;
 
-import public "google/protobuf/empty.proto";
-import public "spine/base/error.proto";
-import public "spine/base/failure.proto";
+import "spine/base/user_id.proto";
 
-// The result of a call returned by a service.
-//
-// A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
-// The client may expect results (returned via a separate call to read-side or via event stream)
-// only upon receiving the `ok` status.
-message Response {
-    oneof status {
-        // The request was accepted to execution.
-        google.protobuf.Empty ok = 1;
+message TaskId {
+    uint32 number = 1;
+}
 
-        // The technical error occurred upon receiving the request and no further processing would occur.
-        spine.base.Error error = 2;
+message Task {
+    TaskId id = 1;
+    string name = 2;
+    string description = 3;
 
-        // It is not possible to satisfy the request because of the business failure.
-        spine.base.Failure failure = 3;
+    enum Status {
+        // Reserved for errors.
+        UNKNOWN = 0;
+        // The task is not assigned.
+        NOT_ASSIGNED = 1;
+        // The task is assigned to a person.
+        ASSIGNED = 2;
+        // The assignee is currently working on the task.
+        IN_PROGRESS = 3;
+        // Some work was done on the task, but it's not complete.
+        STOPPED = 4;
+        // The task is done.
+        DONE = 5;
     }
+
+    Status status = 4;
+    spine.base.UserId assignee = 5;
 }

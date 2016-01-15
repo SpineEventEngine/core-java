@@ -23,12 +23,13 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.stream.EventStore;
 
 import java.io.Closeable;
 
 /**
  * A factory for creating storages used by repositories, {@link org.spine3.server.CommandStore}, and
- * {@link org.spine3.server.EventStore}.
+ * {@link EventStore}.
  *
  * @author Alexander Yevsyukov
  */

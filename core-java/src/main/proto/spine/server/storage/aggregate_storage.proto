@@ -21,10 +21,10 @@ syntax = "proto3";
 
 package spine.server.storage;
 
-option java_generate_equals_and_hash = true;
-option java_multiple_files = true;
-option java_outer_classname = "AggregateStorageProto";
 option java_package = "org.spine3.server.storage";
+option java_outer_classname = "AggregateStorageProto";
+option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
 
 import public "spine/server/aggregate/snapshot.proto";
 import public "spine/base/event.proto";
