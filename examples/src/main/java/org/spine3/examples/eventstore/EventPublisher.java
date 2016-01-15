@@ -31,11 +31,12 @@ import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.stream.grpc.EventStoreGrpc;
 import org.spine3.util.EventRecords;
+import org.spine3.util.Events;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.spine3.examples.eventstore.Constants.*;
-import static org.spine3.examples.eventstore.SampleData.*;
+import static org.spine3.examples.eventstore.SampleData.events;
 
 /**
  * @author Alexander Yevsyukov
@@ -68,7 +69,7 @@ public class EventPublisher {
         try {
             for (GeneratedMessage event : events) {
                 // Simulate event id generation.
-                final EventId eventId = generate(randomSelectUser());
+                final EventId eventId = Events.generateId();
 
                 // Simulate `EventContext` creation. Normally version, and aggregate ID will be set by
                 // the framework code when new instance of `EventContext` is generated.

@@ -21,37 +21,38 @@ syntax = "proto3";
 
 package spine.base;
 
-option java_generate_equals_and_hash = true;
-option java_multiple_files = true;
-option java_outer_classname = "CommandProto";
 option java_package = "org.spine3.base";
+option java_outer_classname = "CommandProto";
+option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
-import public "spine/base/user_id.proto";
-import public "spine/time/time.proto";
-import public "spine/base/namespace.proto";
+import "spine/base/user_id.proto";
+import "spine/time/time.proto";
+import "spine/base/namespace.proto";
 
-// The command identifier is a composite key, which gives information about the context of the command creation.
+// Command identifier.
 message CommandId {
-    // The user who created the command.
-    UserId actor = 1;
-
-    // Date/time at which the command was created.
-    google.protobuf.Timestamp timestamp = 2;
+    string uuid = 1;
 }
 
-// Meta-information about the client environment, which generated a command.
+// Meta-information about the client environment, which generated the command.
 message CommandContext {
     // The id of the command.
     CommandId command_id = 1;
 
+    // The user who created the command.
+    UserId actor = 2;
+
+    // Date/time at which the command was created.
+    google.protobuf.Timestamp timestamp = 3;
+
     // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 2;
+    time.ZoneOffset zone_offset = 4;
 
     // The `namespace` attribute must be defined for commands in multitenant applications.
-    Namespace namespace = 3;
+    Namespace namespace = 5;
 }
 
 // Enumeration of possible failures when validating a command.

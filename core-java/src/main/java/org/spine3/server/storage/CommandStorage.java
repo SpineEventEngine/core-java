@@ -51,8 +51,8 @@ public abstract class CommandStorage implements Closeable {
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
         final String commandIdStr = Commands.idToString(commandId);
-        final CommandStoreRecord.Builder builder = CommandStoreRecord.newBuilder()
-                .setTimestamp(commandId.getTimestamp())
+        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
+                .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)
                 .setAggregateIdType(aggregateId.getShortTypeName())
@@ -66,6 +66,6 @@ public abstract class CommandStorage implements Closeable {
     /*
      * Writes record by its aggregateId
      */
-    protected abstract void write(CommandStoreRecord record);
+    protected abstract void write(CommandStorageRecord record);
 
 }

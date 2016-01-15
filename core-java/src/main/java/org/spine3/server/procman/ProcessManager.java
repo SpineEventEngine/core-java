@@ -30,6 +30,7 @@ import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
+import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.util.Classes;
@@ -198,9 +199,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
-        final EventId eventId = Events.createId(commandId, whenModified);
+        final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
+                .setTimestamp(whenModified)
                 .setVersion(currentVersion);
 
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);

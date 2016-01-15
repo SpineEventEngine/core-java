@@ -22,17 +22,17 @@ package org.spine3.examples.aggregate;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.UserId;
-import org.spine3.client.*;
+import org.spine3.client.CommandRequest;
 import org.spine3.client.grpc.ClientServiceGrpc;
+import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
-import org.spine3.util.Identifiers;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -50,15 +50,34 @@ import static org.spine3.util.Users.newUserId;
  * @author Alexander Litus
  */
 public class Client {
-
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String SERVICE_HOST = "localhost";
 
     private static final String RPC_FAILED = "RPC failed";
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;
 
+    private final Topic topic = Topic.getDefaultInstance();
     private final ManagedChannel channel;
-    private final ClientServiceGrpc.ClientServiceBlockingClient client;
-//    private final Connection connection;
+    private final ClientServiceGrpc.ClientServiceBlockingClient blockingClient;
+    private final ClientServiceGrpc.ClientServiceStub nonBlockingClient;
+
+    private final StreamObserver<EventRecord> observer = new StreamObserver<EventRecord>() {
+        @Override
+        public void onNext(EventRecord record) {
+            final String eventText = Messages.toText(record.getEvent());
+            log().info(eventText);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            log().error("Streaming error occurred", throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+            log().info("Stream completed.");
+        }
+    };
 
     /**
      * Construct the client connecting to server at {@code host:port}.
@@ -68,33 +87,21 @@ public class Client {
                 .forAddress(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
                 .usePlaintext(true)
                 .build();
-        client = ClientServiceGrpc.newBlockingStub(channel);
+        blockingClient = ClientServiceGrpc.newBlockingStub(channel);
 
+        nonBlockingClient = ClientServiceGrpc.newStub(channel);
+    }
 
-        final ClientRequest request = ClientRequest.newBuilder()
-                .setId(ClientId.newBuilder()
-                    .setValue(Identifiers.newUuid()))
-
-                .setDevice(DeviceType.SERVICE)
-
-                .setVersion(CodeVersion.newBuilder()
-                        .setMajor(0)
-                        .setMinor(2)
-                        .setPatchLevel(0))
-
-                .setOs(OsInfo.getDefaultInstance())
-                    //TODO:2015-12-16:alexander.yevsyukov: Create utility method for builing OS info from Java API.
-                .build();
-
-//        connection = client.connect(request);
+    private void subscribe() {
+        nonBlockingClient.subscribe(topic, observer);
     }
 
     /**
      * Sends requests to the server.
      */
     public static void main(String[] args) throws InterruptedException {
-        // Access a service running on the local machine
         final Client client = new Client();
+        client.subscribe();
 
         final List<CommandRequest> requests = generateRequests();
         try {
@@ -103,8 +110,6 @@ public class Client {
                 final Response result = client.post(request);
                 log().info("Result: " + toText(result));
             }
-
-            client.readEvents();
 
         } finally {
             client.shutdown();
@@ -136,6 +141,7 @@ public class Client {
      * @throws InterruptedException if waiting is interrupted.
      */
     private void shutdown() throws InterruptedException {
+        blockingClient.unsubscribe(topic);
         channel.shutdown().awaitTermination(SHUTDOWN_TIMEOUT_SEC, SECONDS);
     }
 
@@ -145,22 +151,11 @@ public class Client {
     private Response post(CommandRequest request) {
         Response result = null;
         try {
-            result = client.post(request);
+            result = blockingClient.post(request);
         } catch (RuntimeException e) {
             log().warn(RPC_FAILED, e);
         }
         return result;
-    }
-
-    private void readEvents() {
-        final Iterator<EventRecord> events = client.getEvents(Connection.getDefaultInstance());
-
-        while (events.hasNext()) {
-            final EventRecord record = events.next();
-            final String eventText = Messages.toText(record.getEvent());
-            log().info(eventText);
-        }
-
     }
 
     private enum LogSingleton {
