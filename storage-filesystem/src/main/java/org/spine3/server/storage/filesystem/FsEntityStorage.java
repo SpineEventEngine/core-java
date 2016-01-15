@@ -90,13 +90,13 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I> {
 
     @Nullable
     @Override
-    protected EntityStorageRecord read(I id) {
+    public EntityStorageRecord read(I id) {
         // TODO:2016-01-14:alexander.litus: impl
         return null;
     }
 
     @Override
-    protected void write(EntityStorageRecord record) {
+    public void write(EntityStorageRecord record) {
         // TODO:2016-01-14:alexander.litus: impl
     }
 

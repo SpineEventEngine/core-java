@@ -22,8 +22,8 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.EntityRecord;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,15 +54,15 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     @Override
     public void store(E entity) {
         final EntityStorage<I> storage = checkStorage();
-        final EntityRecord record = toEntityRecord(entity);
-        storage.store(record);
+        final EntityStorageRecord record = toEntityRecord(entity);
+        storage.write(record);
     }
 
     @Nullable
     @Override
     public E load(I id) {
         final EntityStorage<I> storage = checkStorage();
-        final EntityRecord record = storage.load(id);
+        final EntityStorageRecord record = storage.read(id);
         if (record == null) {
             return null;
         }
@@ -71,18 +71,18 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private E toEntity(I id, EntityRecord record) {
+    private E toEntity(I id, EntityStorageRecord record) {
         final E entity = create(id);
-        final M state = fromAny(record.getEntityState());
+        final M state = fromAny(record.getState());
         entity.setState(state, record.getVersion(), record.getWhenModified());
         return entity;
     }
 
-    private EntityRecord toEntityRecord(E entity) {
+    private EntityStorageRecord toEntityRecord(E entity) {
         final String idString = idToString(entity.getId());
         final Any state = toAny(entity.getState());
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
-                .setEntityState(state)
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setState(state)
                 .setEntityId(idString)
                 .setWhenModified(entity.whenModified())
                 .setVersion(entity.getVersion());

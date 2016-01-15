@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import org.spine3.SPI;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
@@ -37,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 public abstract class CommandStorage implements Closeable {
 
     @SuppressWarnings("TypeMayBeWeakened")

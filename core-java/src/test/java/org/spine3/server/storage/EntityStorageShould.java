@@ -23,7 +23,6 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.base.EntityRecord;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -35,7 +34,7 @@ import static org.spine3.util.Identifiers.newUuid;
         "ConstructorNotProtectedInAbstractClass"})
 public abstract class EntityStorageShould {
 
-    private static final int DEFAULT_ENTITY_VERSION = 5;
+    private static final int DUMMY_ENTITY_VERSION = 5;
 
     private final EntityStorage<String> storage;
 
@@ -45,14 +44,14 @@ public abstract class EntityStorageShould {
 
     @Test
     public void return_null_if_read_one_record_from_empty_storage() {
-        final Message message = storage.load("nothing");
+        final Message message = storage.read("nothing");
         assertNull(message);
     }
 
     @Test
     @SuppressWarnings("ConstantConditions")
     public void return_null_if_read_one_record_by_null_id() {
-        final Message message = storage.load(null);
+        final Message message = storage.read(null);
         assertNull(message);
     }
 
@@ -69,36 +68,13 @@ public abstract class EntityStorageShould {
 
     @Test
     public void write_and_read_message() {
-        testWriteAndReadMessage("testId", "testValue");
+        testWriteAndReadMessage("testId");
     }
 
     @Test
     public void store_and_load_message() {
         final String id = newUuid();
-        final EntityRecord expected = newEntityRecord(id);
-        storage.store(expected);
-
-        final EntityRecord actual = storage.load(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void write_and_read_several_messages_with_different_ids() {
-        testWriteAndReadMessage("id-1", "value-1");
-        testWriteAndReadMessage("id-2", "value-2");
-        testWriteAndReadMessage("id-3", "value-3");
-    }
-
-    @Test
-    public void rewrite_message_if_write_with_same_id() {
-        final String id = "test-id-rewrite";
-        testWriteAndReadMessage(id, "primary-value");
-        testWriteAndReadMessage(id, "new-value");
-    }
-
-    private void testWriteAndReadMessage(String id, String value) {
-        final EntityStorageRecord expected = newEntityStorageRecord(id, value);
+        final EntityStorageRecord expected = newEntityStorageRecord(id);
         storage.write(expected);
 
         final EntityStorageRecord actual = storage.read(id);
@@ -106,24 +82,39 @@ public abstract class EntityStorageShould {
         assertEquals(expected, actual);
     }
 
-    private static EntityRecord newEntityRecord(String id) {
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
-                .setEntityState(toAny(newStringValue(newUuid())))
-                .setEntityId(id)
-                .setWhenModified(getCurrentTime())
-                .setVersion(DEFAULT_ENTITY_VERSION);
-        return builder.build();
+    @Test
+    public void write_and_read_several_messages_with_different_ids() {
+        testWriteAndReadMessage("id-1");
+        testWriteAndReadMessage("id-2");
+        testWriteAndReadMessage("id-3");
     }
 
-    private static EntityStorageRecord newEntityStorageRecord(String id, String value) {
+    @Test
+    public void rewrite_message_if_write_with_same_id() {
+        final String id = "test-id-rewrite";
+        testWriteAndReadMessage(id);
+        testWriteAndReadMessage(id);
+    }
+
+    private void testWriteAndReadMessage(String id) {
+        final EntityStorageRecord expected = newEntityStorageRecord(id);
+        storage.write(expected);
+
+        final EntityStorageRecord actual = storage.read(id);
+
+        assertEquals(expected, actual);
+    }
+
+    private static EntityStorageRecord newEntityStorageRecord(String id) {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setEntityState(toAny(newStringValue(value)))
+                .setState(toAny(newStringValue(newUuid())))
                 .setEntityId(id)
                 .setWhenModified(getCurrentTime())
-                .setVersion(DEFAULT_ENTITY_VERSION);
+                .setVersion(DUMMY_ENTITY_VERSION);
         return builder.build();
     }
 
+    @SuppressWarnings("TypeMayBeWeakened")
     private static StringValue newStringValue(String value) {
         return StringValue.newBuilder().setValue(value).build();
     }

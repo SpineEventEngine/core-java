@@ -42,6 +42,6 @@ message EntityStorageRecord {
 
     reserved 4 to 19;
 
-    // The entity state.
-    google.protobuf.Any entity_state = 20;
+    // The state of the entity.
+    google.protobuf.Any state = 20;
 }

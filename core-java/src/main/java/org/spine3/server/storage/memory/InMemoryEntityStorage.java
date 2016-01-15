@@ -45,15 +45,15 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
     @Nullable
     @Override
-    protected EntityStorageRecord read(I id) {
+    public EntityStorageRecord read(I id) {
         final String idString = idToString(id);
         final EntityStorageRecord record = storage.get(idString);
         return record;
     }
 
     @Override
-    protected void write(EntityStorageRecord record) {
-        checkArgument(record.hasEntityState(), "entity state");
+    public void write(EntityStorageRecord record) {
+        checkArgument(record.hasState(), "entity state");
 
         final String id = record.getEntityId();
         storage.put(id, record);

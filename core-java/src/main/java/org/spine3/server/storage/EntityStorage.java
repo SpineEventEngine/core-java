@@ -20,11 +20,9 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.base.EntityRecord;
+import org.spine3.SPI;
 
 import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An entity storage keeps messages with identity.
@@ -32,24 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
+@SPI
 @SuppressWarnings("ClassMayBeInterface")
 public abstract class EntityStorage<I> {
-
-    /**
-     * Loads an entity record from the storage by an ID.
-     *
-     * @param id the ID of the entity record to load
-     * @return an entity record instance or {@code null} if there is no record with such an ID
-     */
-    @Nullable
-    public EntityRecord load(I id) {
-        final EntityStorageRecord record = read(id);
-        if (record == null) {
-            return null;
-        }
-        final EntityRecord result = toEntityRecord(record);
-        return result;
-    }
 
     /**
      * Loads an entity storage record from the storage by an ID.
@@ -58,43 +41,13 @@ public abstract class EntityStorage<I> {
      * @return an entity record instance or {@code null} if there is no record with such an ID
      */
     @Nullable
-    protected abstract EntityStorageRecord read(I id);
+    public abstract EntityStorageRecord read(I id);
 
     /**
-     * Saves a {@code record} into the storage. Rewrites it if a  {@code record} with such an ID already exists.
+     * Writes a record into the storage. Rewrites it if a record with such an entity ID already exists.
      *
      * @param record a record to save
      * @throws NullPointerException if the {@code record} is null
      */
-    public void store(EntityRecord record) {
-        checkNotNull(record);
-        final EntityStorageRecord storageRecord = toEntityStorageRecord(record);
-        write(storageRecord);
-    }
-
-    /**
-     * Writes a record into the storage. Rewrites it if the record with such an entity ID already exists.
-     *
-     * @param record a record to save
-     * @throws NullPointerException if the {@code record} is null
-     */
-    protected abstract void write(EntityStorageRecord record);
-
-    private static EntityRecord toEntityRecord(EntityStorageRecord record) {
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
-                .setEntityState(record.getEntityState())
-                .setEntityId(record.getEntityId())
-                .setWhenModified(record.getWhenModified())
-                .setVersion(record.getVersion());
-        return builder.build();
-    }
-
-    private static EntityStorageRecord toEntityStorageRecord(EntityRecord record) {
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setEntityState(record.getEntityState())
-                .setEntityId(record.getEntityId())
-                .setWhenModified(record.getWhenModified())
-                .setVersion(record.getVersion());
-        return builder.build();
-    }
+    public abstract void write(EntityStorageRecord record);
 }
