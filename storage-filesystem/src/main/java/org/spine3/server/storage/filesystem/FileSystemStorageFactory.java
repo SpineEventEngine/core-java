@@ -22,7 +22,6 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.io.file.FileUtil;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
@@ -37,6 +36,7 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.spine3.io.file.FileUtil.deleteFileIfExists;
 import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
 
 /**
@@ -112,7 +112,7 @@ public class FileSystemStorageFactory implements StorageFactory {
             storage.close();
         }
 
-        FileUtil.deleteIfExists(Paths.get(rootDirectoryPath));
+        deleteFileIfExists(Paths.get(rootDirectoryPath));
     }
 
     private static String buildRootDirectoryPath(Class executorClass) {
@@ -130,7 +130,7 @@ public class FileSystemStorageFactory implements StorageFactory {
             final String prefix = "";
             final Path tempDirToRemove = Files.createTempDirectory(prefix);
             final Path result = tempDirToRemove.getParent();
-            FileUtil.deleteIfExists(tempDirToRemove);
+            deleteFileIfExists(tempDirToRemove);
             return result;
         } catch (IOException e) {
             throw propagate(e);

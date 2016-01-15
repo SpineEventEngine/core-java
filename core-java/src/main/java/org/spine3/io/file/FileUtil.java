@@ -91,7 +91,7 @@ public class FileUtil {
      * @param path the path to the file to delete.
      * @throws RuntimeException if an I/O error occurs.
      */
-    public static void deleteIfExists(Path path) {
+    public static void deleteFileIfExists(Path path) {
         try {
             if (path.toFile().isDirectory()) {
                 Files.walkFileTree(path, newFilesEliminator());

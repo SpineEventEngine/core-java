@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.storage.filesystem.FsUtil.writeMessage;
+import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
 
 /**
  * A storage for aggregate root events and snapshots based on the file system.
