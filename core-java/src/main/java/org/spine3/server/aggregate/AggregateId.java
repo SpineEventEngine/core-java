@@ -37,6 +37,11 @@ import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
  */
 public final class AggregateId<I> extends EntityId<I> {
 
+    /**
+     * The aggregate ID must be the first field in events/commands.
+     */
+    public static final int ID_FIELD_INDEX = 0;
+
     private AggregateId(I value) {
         super(value);
     }
@@ -77,7 +82,7 @@ public final class AggregateId<I> extends EntityId<I> {
      * <p>An aggregate ID must be the first field declared in a message and its
      * name must end with {@code "id"} suffix.
      */
-    private static final MessageField FIELD = new MessageField(0) {
+    private static final MessageField FIELD = new MessageField(ID_FIELD_INDEX) {
 
         @Override
         protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {

@@ -29,6 +29,8 @@ import org.spine3.test.project.Project;
 
 import javax.annotation.Nonnull;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -40,7 +42,7 @@ public class FileSystemStorageFactoryShould {
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
 
     @After
-    public void tearDownTest() throws Exception {
+    public void tearDownTest() throws IOException {
         FACTORY.close();
     }
 
@@ -49,7 +51,7 @@ public class FileSystemStorageFactoryShould {
 
         final EventStorage eventStorage = FACTORY.createEventStorage();
         final CommandStorage commandStorage = FACTORY.createCommandStorage();
-        final EntityStorage<String, Project> entityStorage = FACTORY.createEntityStorage(TestEntity.class);
+        final EntityStorage<String> entityStorage = FACTORY.createEntityStorage(TestEntity.class);
         final AggregateStorage<String> aggregateRootStorage = FACTORY.createAggregateStorage(TestAggregateWithIdString.class);
 
         assertNotNull(eventStorage);

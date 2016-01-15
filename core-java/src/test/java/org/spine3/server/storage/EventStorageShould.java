@@ -45,7 +45,7 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 import static org.spine3.util.Identifiers.newUuid;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class EventStorageShould {
 
     private final EventStorage storage;
@@ -69,7 +69,7 @@ public abstract class EventStorageShould {
     private Timestamp time3;
     private EventStorageRecord record3;
 
-    public EventStorageShould(EventStorage storage) {
+    protected EventStorageShould(EventStorage storage) {
         this.storage = storage;
     }
 

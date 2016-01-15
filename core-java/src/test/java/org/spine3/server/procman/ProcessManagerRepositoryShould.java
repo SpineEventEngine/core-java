@@ -65,7 +65,8 @@ public class ProcessManagerRepositoryShould {
 
     @Before
     public void setUpTest() {
-        final EntityStorage<ProjectId, Message> storage = InMemoryStorageFactory.getInstance().createEntityStorage(TestProcessManager.class);
+        final EntityStorage<ProjectId> storage =
+                InMemoryStorageFactory.getInstance().createEntityStorage(TestProcessManager.class);
         repository.assignStorage(storage);
     }
 

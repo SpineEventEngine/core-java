@@ -22,27 +22,31 @@ package org.spine3.server.storage.filesystem;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.io.IoUtil;
-import org.spine3.io.file.FileUtil;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 
+import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.storage.filesystem.FsUtil.idToStringWithEscaping;
+import static org.spine3.io.IoUtil.closeSilently;
+import static org.spine3.io.file.FileUtil.*;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.storage.filesystem.FsStorageUtil.*;
+import static org.spine3.server.storage.filesystem.FsStorageUtil.idToStringWithEscaping;
 
 /**
  * An entity storage based on the file system.
  *
  * @author Alexander Litus
  */
-class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
+class FsEntityStorage<I, M extends Message> extends EntityStorage<I> {
 
     private static final String ENTITY_STORE_DIR_NAME = "/entity-store/";
 
@@ -52,7 +56,8 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
      * Creates a new storage instance.
      * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
      */
-    protected static <I, M extends Message> EntityStorage<I, M> newInstance(String rootDirectoryPath) {
+    protected static <I> EntityStorage<I> newInstance(
+            String rootDirectoryPath) {
         return new FsEntityStorage<>(rootDirectoryPath);
     }
 
@@ -60,46 +65,43 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         this.entityStorageRootPath = rootDirectoryPath + ENTITY_STORE_DIR_NAME;
     }
 
+    @Nullable
     @Override
-    public M read(I id) {
+    public EntityStorageRecord read(I id) {
         final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
         final File file = tryCreateIfDoesNotExist(filePath);
-        Message message = null;
+        EntityStorageRecord record = null;
         if (file.exists()) {
-            message = readMessage(file);
+            record = (EntityStorageRecord) readMessage(file);
         }
-        @SuppressWarnings("unchecked") // We ensure type by writing this kind of messages.
-        final M result = (M) message;
-        return result;
+        return record;
     }
 
     @Override
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    public void write(I id, M message) {
-        checkNotNull(id, "id");
-        checkNotNull(message, "message");
+    public void write(EntityStorageRecord record) {
+        checkArgument(record.hasState(), "state of entity");
 
+        final EntityStorageRecord.Id id = record.getId();
         final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
-
-        FileUtil.deleteIfExists(Paths.get(filePath));
+        deleteFileIfExists(Paths.get(filePath));
         final File file = tryCreateIfDoesNotExist(filePath);
-
-        final Any any = Messages.toAny(message);
-        FsUtil.writeMessage(file, any);
+        final Any any = toAny(record);
+        writeMessage(file, any);
     }
 
     /**
-     * Reads {@link com.google.protobuf.Message} from {@link java.io.File}.
+     * Reads a {@link Message} from a {@link File}.
      *
-     * @param file the {@link java.io.File} to read from.
+     * @param file the {@link File} to read from.
      * @return the message parsed from the file or {@code null}
      */
+    @Nullable
     private static Message readMessage(File file) {
-        FileUtil.checkFileExists(file, "entity storage");
+        checkFileExists(file, "entity storage");
 
-        final InputStream fileInputStream = FileUtil.open(file);
+        final InputStream fileInputStream = open(file);
         final InputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
         Any any = Any.getDefaultInstance();
         try {
@@ -107,9 +109,9 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
         } catch (IOException e) {
             throw new RuntimeException("Failed to read message from file: " + file.getAbsolutePath(), e);
         } finally {
-            IoUtil.closeSilently(fileInputStream, bufferedInputStream);
+            closeSilently(fileInputStream, bufferedInputStream);
         }
-        final Message result = (any != null) ? Messages.fromAny(any) : null;
+        final Message result = (any != null) ? fromAny(any) : null;
         return result;
     }
 
@@ -119,7 +121,7 @@ class FsEntityStorage<I, M extends Message> extends EntityStorage<I, M> {
 
     private static File tryCreateIfDoesNotExist(String filePath) {
         try {
-            return FileUtil.createIfDoesNotExist(filePath);
+            return createIfDoesNotExist(filePath);
         } catch (IOException e) {
             throw propagate(e);
         }

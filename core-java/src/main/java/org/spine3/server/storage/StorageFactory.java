@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.stream.EventStore;
@@ -55,11 +54,10 @@ public interface StorageFactory extends Closeable {
     /**
      * Creates a new {@link EntityStorage} instance.
      */
-    <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> entityClass);
+    <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
 
     /**
      * Sets up the factory, if needed, after its construction.
      */
     void init();
-
 }

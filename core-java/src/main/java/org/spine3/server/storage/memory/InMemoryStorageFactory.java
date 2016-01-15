@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.Message;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
@@ -51,10 +50,12 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * NOTE: the parameter is unused.
      */
     @Override
-    public <I, M extends Message> EntityStorage<I, M> createEntityStorage(Class<? extends Entity<I, M>> unused) {
+    public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> unused) {
         return InMemoryEntityStorage.newInstance();
     }
 

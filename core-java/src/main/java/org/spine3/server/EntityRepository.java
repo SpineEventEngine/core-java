@@ -20,14 +20,19 @@
 
 package org.spine3.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.TimeUtil;
+import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EntityStorageRecord;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.storage.EntityStorage.*;
 
 /**
  * The base class for repositories managing entities.
@@ -41,41 +46,57 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
 
     @Nullable
     @Override
-    protected EntityStorage<I, M> getStorage() {
+    protected EntityStorage<I> getStorage() {
         @SuppressWarnings("unchecked") // It is safe to cast as we check the type in checkStorageClass().
-        final EntityStorage<I, M> storage = (EntityStorage<I, M>) super.getStorage();
+        final EntityStorage<I> storage = (EntityStorage<I>) super.getStorage();
         return storage;
     }
 
     @Override
-    public void store(E obj) {
-        final M state = obj.getState();
-        final EntityStorage<I, M> storage = checkStorage();
-        storage.write(obj.getId(), state);
+    public void store(E entity) {
+        final EntityStorage<I> storage = checkStorage();
+        final EntityStorageRecord record = toEntityRecord(entity);
+        storage.write(record);
     }
 
     @Nullable
     @Override
     public E load(I id) {
-        final EntityStorage<I, M> storage = checkStorage();
-
-        final M entityState = storage.read(id);
-        if (entityState != null) {
-            final E result = create(id);
-
-            //TODO:2015-09-28:alexander.yevsyukov: What do we pass for version and timestamp?
-            // Presumably EntityStorage should store these two fields and set it here.
-
-            result.setState(entityState, 0, TimeUtil.getCurrentTime());
-            return result;
+        final EntityStorage<I> storage = checkStorage();
+        final EntityStorageRecord record = storage.read(id);
+        if (record == null) {
+            return null;
         }
-        // No state stored -> no entity.
-        return null;
+        final E entity = toEntity(id, record);
+        return entity;
+    }
+
+    @SuppressWarnings("TypeMayBeWeakened")
+    private E toEntity(I id, EntityStorageRecord record) {
+        final E entity = create(id);
+        final M state = fromAny(record.getState());
+        entity.setState(state, record.getVersion(), record.getWhenModified());
+        return entity;
+    }
+
+    private EntityStorageRecord toEntityRecord(E entity) {
+        final I id = entity.getId();
+        final EntityStorageRecord.Id entityId = toRecordId(id);
+        final M state = entity.getState();
+        final Any stateAny = toAny(state);
+        final Timestamp whenModified = entity.whenModified();
+        final int version = entity.getVersion();
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setState(stateAny)
+                .setId(entityId)
+                .setWhenModified(whenModified)
+                .setVersion(version);
+        return builder.build();
     }
 
     @Nonnull
-    private EntityStorage<I, M> checkStorage() {
-        final EntityStorage<I, M> storage = getStorage();
+    private EntityStorage<I> checkStorage() {
+        final EntityStorage<I> storage = getStorage();
         checkState(storage != null, "Storage not assigned");
         return storage;
     }
@@ -89,7 +110,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     @Override
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"})
-        final EntityStorage<I, M> ignored = (EntityStorage<I, M>) storage;
+        final EntityStorage<I> ignored = (EntityStorage<I>) storage;
     }
-
 }
