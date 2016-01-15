@@ -21,7 +21,6 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.server.storage.StorageFactory;
@@ -33,7 +32,6 @@ import java.io.IOException;
  *
  * @author Alexander Litus
  */
-@Ignore
 public class FsEntityStorageShould extends EntityStorageShould {
 
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FsEntityStorageShould.class);
