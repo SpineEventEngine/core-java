@@ -73,7 +73,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
     private final EventBus eventBus;
-    private final CommandStore commandStore;
     private final EventStore eventStore;
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
@@ -84,7 +83,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
-        this.commandStore = builder.commandStore;
         this.eventStore = builder.eventStore;
     }
 
@@ -122,7 +120,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         storageFactory.close();
         commandDispatcher.close();
         eventBus.close();
-        commandStore.close();
         eventStore.close();
 
         shutDownRepositories();
@@ -271,8 +268,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     public CommandResult process(CommandRequest request) {
         checkNotNull(request);
 
-        store(request);
-
         final CommandResult result = dispatch(request);
         final List<EventRecord> eventRecords = result.getEventRecordList();
 
@@ -289,23 +284,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return eventStore;
     }
 
-    @VisibleForTesting
-    protected CommandStore getCommandStore() {
-        return commandStore;
-    }
-
-    private void store(CommandRequest request) {
-        getCommandStore().store(request);
-    }
-
     @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
-            final Message command = Messages.fromAny(request.getCommand());
-            final CommandContext context = request.getContext();
-
-            final List<EventRecord> eventRecords = dispatcher.dispatch(command, context);
+            final List<EventRecord> eventRecords = dispatcher.storeAndDispatch(request);
 
             final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
@@ -378,7 +361,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         private String name;
         private StorageFactory storageFactory;
-        private CommandStore commandStore;
         private EventStore eventStore;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
@@ -429,16 +411,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             return eventBus;
         }
 
-        public Builder setCommandStore(@Nullable CommandStore commandStore) {
-            this.commandStore = commandStore;
-            return this;
-        }
-
-        @Nullable
-        public CommandStore getCommandStore() {
-            return commandStore;
-        }
-
         public Builder setEventStore(@Nullable EventStore eventStore) {
             this.eventStore = eventStore;
             return this;
@@ -457,10 +429,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             checkNotNull(storageFactory, "storageFactory");
             checkNotNull(commandDispatcher, "commandDispatcher");
             checkNotNull(eventBus, "eventBus");
-
-            if (commandStore == null) {
-                commandStore = new CommandStore(storageFactory.createCommandStorage());
-            }
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()

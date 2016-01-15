@@ -29,7 +29,9 @@ import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
+import org.spine3.server.CommandStore;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -59,9 +61,13 @@ public class Application implements AutoCloseable {
         this.storageFactory = storageFactory;
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setCommandDispatcher(createCommandDispatcher())
                 .setEventBus(EventBus.newInstance())
                 .build();
+    }
+
+    private static CommandDispatcher createCommandDispatcher() {
+        return CommandDispatcher.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
     }
 
     /**

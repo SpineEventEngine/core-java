@@ -22,7 +22,9 @@ package org.spine3.server;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.base.*;
+import org.spine3.client.CommandRequest;
 import org.spine3.internal.MessageHandlerMethod;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -30,6 +32,7 @@ import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +49,15 @@ public class CommandDispatcher implements AutoCloseable {
 
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
-    /**
-     * @return singleton instance of {@code CommandDispatcher}
-     */
+    private final CommandStore commandStore;
+
     @CheckReturnValue
-    public static CommandDispatcher getInstance() {
-        return Singleton.INSTANCE.value;
+    public static CommandDispatcher create(CommandStore store) {
+        return new CommandDispatcher(store);
+    }
+
+    protected CommandDispatcher(CommandStore commandStore) {
+        this.commandStore = commandStore;
     }
 
     /**
@@ -75,20 +81,22 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     /**
-     * Directs a command to the corresponding handler.
+     * Directs a command request to the corresponding handler.
      *
-     * @param command the command to be processed
-     * @param context the context of the command
+     * @param request the command request to be processed
      * @return a list of the event records as the result of handling the command
      * @throws InvocationTargetException   if an exception occurs during command handling
      * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
      */
     @CheckReturnValue
-    List<EventRecord> dispatch(Message command, CommandContext context)
+    List<EventRecord> storeAndDispatch(CommandRequest request)
             throws InvocationTargetException {
+        checkNotNull(request);
 
-        checkNotNull(command);
-        checkNotNull(context);
+        store(request);
+
+        final Message command = Messages.fromAny(request.getCommand());
+        final CommandContext context = request.getContext();
 
         final CommandClass commandClass = CommandClass.of(command);
         if (!handlerRegistered(commandClass)) {
@@ -98,6 +106,10 @@ public class CommandDispatcher implements AutoCloseable {
         final CommandHandlerMethod method = getHandler(commandClass);
         final List<EventRecord> result = method.invoke(command, context);
         return result;
+    }
+
+    private void store(CommandRequest request) {
+        commandStore.store(request);
     }
 
     private boolean handlerRegistered(CommandClass cls) {
@@ -111,8 +123,9 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         handlerRegistry.unregisterAll();
+        commandStore.close();
     }
 
     public Response validate(Message command) {
@@ -217,13 +230,6 @@ public class CommandDispatcher implements AutoCloseable {
             final CommandHandlerMethod method = getHandler(CommandClass.of(command));
             return method != null;
         }
-    }
-
-    private enum Singleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final CommandDispatcher value = new CommandDispatcher();
     }
 
 }

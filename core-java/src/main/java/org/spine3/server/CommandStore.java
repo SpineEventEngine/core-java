@@ -52,8 +52,11 @@ public class CommandStore implements Closeable {
         final Any any = request.getCommand();
         final Message command = Messages.fromAny(any);
         final AggregateId aggregateId = AggregateId.getAggregateId(command);
+        //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
         storage.store(aggregateId, request);
     }
+
+    //TODO:2016-01-15:alexander.yevsyukov: Support writing processing status into the storage.
 
     @Override
     public void close() throws IOException {

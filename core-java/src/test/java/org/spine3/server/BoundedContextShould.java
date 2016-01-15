@@ -70,6 +70,8 @@ public class BoundedContextShould {
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
     private final EmptyHandler handler = new EmptyHandler();
 
+    private CommandDispatcher commandDispatcher;
+
     private boolean handlersRegistered = false;
 
     private BoundedContext boundedContext;
@@ -77,9 +79,12 @@ public class BoundedContextShould {
     @Before
     public void setUp() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();
+        commandDispatcher = CommandDispatcher.create(
+                new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+
         boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(sf)
-                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setCommandDispatcher(commandDispatcher)
                 .setEventBus(EventBus.newInstance())
                 .build();
     }
@@ -231,9 +236,9 @@ public class BoundedContextShould {
 
     @Test
     public void return_CommandDispatcher_from_builder() {
-        final CommandDispatcher cd = CommandDispatcher.getInstance();
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(cd);
-        assertEquals(cd, builder.getCommandDispatcher());
+        final CommandDispatcher expected = commandDispatcher;
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(expected);
+        assertEquals(expected, builder.getCommandDispatcher());
     }
 
     @Test(expected = NullPointerException.class)
@@ -247,23 +252,6 @@ public class BoundedContextShould {
         final EventBus bus = EventBus.newInstance();
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(bus);
         assertEquals(bus, builder.getEventBus());
-    }
-
-    @Test
-    public void return_CommandStore_from_builder() {
-        final CommandStore cs = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandStore(cs);
-        assertEquals(cs, builder.getCommandStore());
-    }
-
-    @Test
-    public void create_CommandStore_if_not_set_in_builder() {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(CommandDispatcher.getInstance())
-                .setEventBus(EventBus.newInstance());
-        final BoundedContext boundedContext = builder.build();
-        assertNotNull(boundedContext.getCommandStore());
     }
 
     @Test
@@ -281,7 +269,7 @@ public class BoundedContextShould {
     public void create_EventStore_if_not_set_in_builder() {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setCommandDispatcher(commandDispatcher)
                 .setEventBus(EventBus.newInstance());
         final BoundedContext boundedContext = builder.build();
         assertNotNull(boundedContext.getEventStore());
@@ -313,7 +301,7 @@ public class BoundedContextShould {
     public void verify_namespace_attribute_if_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(CommandDispatcher.getInstance())
+                .setCommandDispatcher(commandDispatcher)
                 .setEventBus(EventBus.newInstance())
                 .setMultitenant(true)
                 .build();
