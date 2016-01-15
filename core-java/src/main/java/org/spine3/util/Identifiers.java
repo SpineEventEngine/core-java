@@ -47,16 +47,6 @@ import static org.spine3.protobuf.Messages.fromAny;
 public class Identifiers {
 
     /*
-     * Delimiter between user id and time in string representation
-     */
-    public static final char USER_ID_AND_TIME_DELIMITER = '@';
-
-    /*
-     * Delimiter between command time and event time delta in string representation
-     */
-    public static final char TIME_DELIMITER = '+';
-
-    /*
      * Null message or field string representation
      */
     public static final String NULL_ID_OR_FIELD = "NULL";

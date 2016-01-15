@@ -75,21 +75,21 @@ public class TestEventRecordFactory {
      * Creates a new {@link EventRecord} with the given projectId.
      */
     public static EventRecord projectCreated(ProjectId projectId) {
-        return projectCreated(projectId, createEventContext(STUB_USER_ID, projectId));
+        return projectCreated(projectId, createEventContext(projectId));
     }
 
     /**
      * Creates a new {@link EventRecord} with the given projectId.
      */
     public static EventRecord taskAdded(ProjectId projectId) {
-        return taskAdded(projectId, createEventContext(STUB_USER_ID, projectId));
+        return taskAdded(projectId, createEventContext(projectId));
     }
 
     /**
      * Creates a new {@link EventRecord} with the given projectId.
      */
     public static EventRecord projectStarted(ProjectId projectId) {
-        return projectStarted(projectId, createEventContext(STUB_USER_ID, projectId));
+        return projectStarted(projectId, createEventContext(projectId));
     }
 
     /**

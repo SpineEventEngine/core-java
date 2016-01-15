@@ -82,7 +82,7 @@ public class AggregateShould {
 
     private static final UserId USER_ID = newUserId("user_id_test");
     private static final CommandContext COMMAND_CONTEXT = createContext(USER_ID, UTC);
-    private static final EventContext EVENT_CONTEXT = createEventContext(USER_ID, PROJECT_ID);
+    private static final EventContext EVENT_CONTEXT = createEventContext(PROJECT_ID);
 
     @Test
     public void accept_Message_id_to_constructor() {

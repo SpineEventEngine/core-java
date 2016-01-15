@@ -23,23 +23,16 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.CommandId;
-import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.testdata.TestCommandFactory.createProject;
 import static org.spine3.util.Commands.generateId;
-import static org.spine3.util.Identifiers.USER_ID_AND_TIME_DELIMITER;
-import static org.spine3.util.Identifiers.timestampToString;
-import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Mikhail Melnik
@@ -49,21 +42,10 @@ import static org.spine3.util.Users.newUserId;
 public class CommandsShould {
 
     @Test
-    public void generate() {
+    public void generateIds() {
+        final CommandId result = generateId();
 
-        final UserId userId = newUserId("commands-should-test");
-
-        final CommandId result = generateId(userId);
-
-        assertThat(result, allOf(
-                hasProperty("actor", equalTo(userId)),
-                hasProperty("timestamp")));
-    }
-
-    @SuppressWarnings("ConstantConditions"/*ok in this case*/)
-    @Test(expected = NullPointerException.class)
-    public void fail_on_null_parameter() {
-        generateId(null);
+        assertFalse(result.getUuid().isEmpty());
     }
 
     @Test
@@ -92,20 +74,4 @@ public class CommandsShould {
         assertEquals(sortedList, unSortedList);
     }
 
-    @Test
-    public void convert_to_string_command_id_message() {
-
-        final String userIdString = "user123";
-        final Timestamp currentTime = getCurrentTime();
-        final CommandId id = generateId(userIdString, currentTime);
-
-        /* TODO:2015-09-21:alexander.litus: create parse() method that would restore an object from its String representation.
-           Use the restored object for equality check with the original object.
-         */
-        final String expected = userIdString + USER_ID_AND_TIME_DELIMITER + timestampToString(currentTime);
-
-        final String actual = Commands.idToString(id);
-
-        assertEquals(expected, actual);
-    }
 }

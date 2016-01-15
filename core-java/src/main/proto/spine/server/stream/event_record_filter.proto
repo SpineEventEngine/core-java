@@ -21,12 +21,14 @@ syntax = "proto3";
 
 package spine.base;
 
-option java_generate_equals_and_hash = true;
+option java_package = "org.spine3.server.stream";
 option java_multiple_files = true;
 option java_outer_classname = "EventRecordFilterProto";
-option java_package = "org.spine3.server.stream";
+option java_generate_equals_and_hash = true;
 
-import public "spine/base/event.proto";
+import "google/protobuf/any.proto";
+
+import "spine/base/event.proto";
 //import public "spine/base/field_filter.proto";
 
 // Filters `EventRecord`s by the type of the event, event field values, and by `EventContext` field values.

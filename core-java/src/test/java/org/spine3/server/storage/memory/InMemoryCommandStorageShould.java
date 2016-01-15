@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.storage.CommandStoreRecord;
+import org.spine3.server.storage.CommandStorageRecord;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryCommandStorageShould {
@@ -42,6 +42,6 @@ public class InMemoryCommandStorageShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_write_record_with_empty_command_id() {
-        storage.write(CommandStoreRecord.getDefaultInstance());
+        storage.write(CommandStorageRecord.getDefaultInstance());
     }
 }

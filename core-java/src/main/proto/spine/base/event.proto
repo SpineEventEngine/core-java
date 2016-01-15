@@ -21,20 +21,19 @@ syntax = "proto3";
 
 package spine.base;
 
-option java_generate_equals_and_hash = true;
+option java_package = "org.spine3.base";
 option java_multiple_files = true;
 option java_outer_classname = "EventProto";
-option java_package = "org.spine3.base";
+option java_generate_equals_and_hash = true;
 
-import public "spine/base/command.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+import "spine/base/command.proto";
 
 // Event identifier.
 message EventId {
-    // ID of the command which originated the event.
-    CommandId command_id = 1;
-
-    // The duration between the moment of generation of `CommandId` and creation of this `EventId`.
-    int64 delta_nanos = 2;
+    string uuid = 1;
 }
 
 // Meta-information for an event.
@@ -42,15 +41,21 @@ message EventContext {
     // The id of the event.
     EventId event_id = 1;
 
+    // When the event occurred.
+    google.protobuf.Timestamp timestamp = 2;
+
+    // The context of the command, which generated this event.
+    CommandContext command_context = 3;
+
     // The id of the aggregate the event was applied to.
-    google.protobuf.Any aggregate_id = 2;
+    google.protobuf.Any aggregate_id = 4;
 
     // The version of the aggregate after the event was applied.
-    int32 version = 3;
+    int32 version = 5;
 
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event type.
-    map<string, google.protobuf.Any> attributes = 4;
+    map<string, google.protobuf.Any> attributes = 6;
 }
 
 // A couple of an event and its context information.

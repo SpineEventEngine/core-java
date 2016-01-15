@@ -22,12 +22,9 @@ package org.spine3.util;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
@@ -35,6 +32,7 @@ import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -50,26 +48,22 @@ import static org.spine3.protobuf.Timestamps.isBetween;
 public class EventRecords {
 
     /**
-     * Obtains the timestamp of event ID generation.
-     *
-     * <p>The timestamp is calculated as a sum of command ID generation timestamp and
-     * delta returned by {@link EventId#getDeltaNanos()}.
-     *
-     * @param eventId ID of the event
-     * @return timestamp of event ID generation
+     * Compares two event records by their timestamps.
      */
-    public static Timestamp getTimestamp(EventId eventId) {
-        final Timestamp commandTimestamp = eventId.getCommandId().getTimestamp();
-        final Duration delta = TimeUtil.createDurationFromNanos(eventId.getDeltaNanos());
-        final Timestamp result = TimeUtil.add(commandTimestamp, delta);
-        return result;
-    }
+    public static final Comparator<EventRecord> EVENT_RECORD_COMPARATOR = new Comparator<EventRecord>() {
+        @Override
+        public int compare(EventRecord o1, EventRecord o2) {
+            final Timestamp timestamp1 = getTimestamp(o1);
+            final Timestamp timestamp2 = getTimestamp(o2);
+            return Timestamps.compare(timestamp1, timestamp2);
+        }
+    };
 
     /**
-     * Calculates the timestamp of the event from the passed record.
+     * Obtains the timestamp of the event from the passed record.
      */
     public static Timestamp getTimestamp(EventRecord record) {
-        final Timestamp result = getTimestamp(record.getContext().getEventId());
+        final Timestamp result = record.getContext().getTimestamp();
         return result;
     }
 
