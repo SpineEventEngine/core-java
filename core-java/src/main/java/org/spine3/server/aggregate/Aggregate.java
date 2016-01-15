@@ -182,7 +182,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
         init();
         final List<? extends Message> events = generateEvents(command, context);
-        final CommandId commandId = context.getCommandId();
         apply(events, context);
     }
 

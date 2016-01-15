@@ -257,8 +257,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void handle(CommandRequest request) {
         //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
         process(request);
-
-        //TODO:2015-12-16:alexander.yevsyukov: Return results to the client through ClientService
     }
 
     //TODO:2016-01-08:alexander.yevsyukov: Hide this method in favor of a call from client via gRPC.
@@ -281,7 +279,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         storeEvents(eventRecords);
         postEvents(eventRecords);
 
-        //TODO:2015-12-16:alexander.yevsyukov: Notify clients.
+        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
 
         return result;
     }
