@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.spine3.server.storage.EntityStorageShould;
 
@@ -31,7 +30,7 @@ import org.spine3.server.storage.EntityStorageShould;
  */
 public class InMemoryEntityStorageShould extends EntityStorageShould {
 
-    private static final InMemoryEntityStorage<String, StringValue> STORAGE = InMemoryEntityStorage.newInstance();
+    private static final InMemoryEntityStorage<String> STORAGE = InMemoryEntityStorage.newInstance();
 
     public InMemoryEntityStorageShould() {
         super(STORAGE);

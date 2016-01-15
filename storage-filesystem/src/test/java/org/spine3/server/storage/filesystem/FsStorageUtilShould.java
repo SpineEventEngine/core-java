@@ -27,7 +27,7 @@ import org.spine3.test.TestIdWithStringField;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
-public class FsUtilShould {
+public class FsStorageUtilShould {
 
     // quotes escaped
     private static final String QUOT = "&#34;";
@@ -38,7 +38,7 @@ public class FsUtilShould {
     public void convert_id_to_string_and_escape_chars_not_allowed_in_file_name() {
 
         final String charsNotAllowedInFileName = "\\/:*?\"<>|";
-        final String result = FsUtil.idToStringWithEscaping(charsNotAllowedInFileName);
+        final String result = FsStorageUtil.idToStringWithEscaping(charsNotAllowedInFileName);
 
         assertEquals("&#92;&#47;&#58;&#42;&#63;&#34;&#60;&#62;&#124;", result);
     }
@@ -61,7 +61,7 @@ public class FsUtilShould {
                 " int=" + number +
                 " message { id=" + QUOT + nestedString + QUOT + " }";
 
-        final String actual = FsUtil.idToStringWithEscaping(idToConvert);
+        final String actual = FsStorageUtil.idToStringWithEscaping(idToConvert);
 
         assertEquals(expected, actual);
     }

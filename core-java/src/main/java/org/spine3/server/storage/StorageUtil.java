@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import org.spine3.SPI;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
@@ -37,6 +38,7 @@ import java.util.List;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 @SuppressWarnings("UtilityClass")
 public class StorageUtil {
 

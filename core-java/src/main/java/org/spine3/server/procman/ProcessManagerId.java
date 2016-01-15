@@ -38,7 +38,7 @@ public class ProcessManagerId<I> extends EntityId<I> {
     /**
      * The process manager ID must be the first field in events/commands.
      */
-    public static final int PROCESS_MANAGER_ID_FIELD_INDEX = 0;
+    public static final int ID_FIELD_INDEX = 0;
 
     private ProcessManagerId(I value) {
         super(value);
@@ -73,7 +73,7 @@ public class ProcessManagerId<I> extends EntityId<I> {
      * <p>A process manager ID must be the first field defined in a message type.
      * Its name must end with {@code "id"} suffix.
      */
-    private static final MessageField FIELD = new MessageField(0) {
+    private static final MessageField FIELD = new MessageField(ID_FIELD_INDEX) {
         @Override
         protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
             return new MissingProcessManagerIdException(message.getClass().getName(), fieldName);

@@ -31,24 +31,9 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.server.EntityId.checkType;
 
 /**
- * A server-side wrapper for objects with identity.
+ * A server-side wrapper for objects with an identity.
  *
- * <p>An entity ID value can be of one of the following types:
- *   <ul>
- *      <li>String</li>
- *      <li>Long</li>
- *      <li>Integer</li>
- *      <li>A class implementing {@link Message}</li>
- *   </ul>
- *
- * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
- * if you need to have IDs with some structure inside. Examples of such structural IDs are:
- *   <ul>
- *      <li>EAN value used in bar codes</li>
- *      <li>ISBN</li>
- *      <li>Phone number</li>
- *      <li>email address as a couple of local-part and domain</li>
- *   </ul>
+ * <p>See {@link EntityId} for supported ID types.
  *
  * @param <I> the type of the entity ID
  * @param <M> the type of the entity state

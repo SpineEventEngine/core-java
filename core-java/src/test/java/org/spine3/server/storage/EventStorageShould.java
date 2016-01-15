@@ -34,12 +34,12 @@ import static org.spine3.server.storage.StorageUtil.toEventRecord;
 import static org.spine3.server.storage.StorageUtil.toEventRecordsList;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods", "ConstructorNotProtectedInAbstractClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class EventStorageShould {
 
     private final EventStorage storage;
 
-    public EventStorageShould(EventStorage storage) {
+    protected EventStorageShould(EventStorage storage) {
         this.storage = storage;
     }
 
