@@ -28,6 +28,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.storage.EntityStorage.*;
 import static org.spine3.util.Identifiers.newUuid;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods",
@@ -106,7 +107,7 @@ public abstract class EntityStorageShould {
     private static EntityStorageRecord newEntityStorageRecord(String id) {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                 .setState(toAny(newStringValue(newUuid())))
-                .setEntityId(id)
+                .setId(toRecordId(id))
                 .setWhenModified(getCurrentTime())
                 .setVersion(5); // set any non-default (non-zero) value
         return builder.build();

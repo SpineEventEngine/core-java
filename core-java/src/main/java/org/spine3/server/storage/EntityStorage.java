@@ -21,11 +21,16 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
+import org.spine3.server.EntityId;
 
 import javax.annotation.Nullable;
 
+import static org.spine3.util.Identifiers.idToString;
+
 /**
  * An entity storage keeps messages with identity.
+ *
+ * <p>See {@link EntityId} for supported ID types.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
@@ -50,4 +55,24 @@ public abstract class EntityStorage<I> {
      * @throws NullPointerException if the {@code record} is null
      */
     public abstract void write(EntityStorageRecord record);
+
+    /**
+     * Converts an entity ID to a storage record ID with the string ID representation or number ID value.
+     *
+     * @param id an ID to convert
+     * @see EntityId
+     */
+    public static <I> EntityStorageRecord.Id toRecordId(I id) {
+        final EntityStorageRecord.Id.Builder builder = EntityStorageRecord.Id.newBuilder();
+        //noinspection ChainOfInstanceofChecks
+        if (id instanceof Long) {
+            builder.setLongValue((Long) id);
+        } else if (id instanceof Integer) {
+            builder.setIntValue((Integer) id);
+        } else {
+            final String stringId = idToString(id);
+            builder.setStringValue(stringId);
+        }
+        return builder.build();
+    }
 }

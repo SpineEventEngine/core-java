@@ -22,6 +22,7 @@ package org.spine3.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 
@@ -31,7 +32,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.server.storage.EntityStorage.*;
 
 /**
  * The base class for repositories managing entities.
@@ -79,13 +80,17 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
     }
 
     private EntityStorageRecord toEntityRecord(E entity) {
-        final String idString = idToString(entity.getId());
-        final Any state = toAny(entity.getState());
+        final I id = entity.getId();
+        final EntityStorageRecord.Id entityId = toRecordId(id);
+        final M state = entity.getState();
+        final Any stateAny = toAny(state);
+        final Timestamp whenModified = entity.whenModified();
+        final int version = entity.getVersion();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(state)
-                .setEntityId(idString)
-                .setWhenModified(entity.whenModified())
-                .setVersion(entity.getVersion());
+                .setState(stateAny)
+                .setId(entityId)
+                .setWhenModified(whenModified)
+                .setVersion(version);
         return builder.build();
     }
 

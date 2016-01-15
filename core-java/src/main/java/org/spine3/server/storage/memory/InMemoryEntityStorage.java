@@ -28,7 +28,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.util.Identifiers.idToString;
 
 /**
  * Memory-based implementation of {@link EntityStorage}.
@@ -37,7 +36,7 @@ import static org.spine3.util.Identifiers.idToString;
  */
 class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
-    private final Map<String, EntityStorageRecord> storage = newHashMap();
+    private final Map<EntityStorageRecord.Id, EntityStorageRecord> storage = newHashMap();
 
     protected static <I> InMemoryEntityStorage<I> newInstance() {
         return new InMemoryEntityStorage<>();
@@ -46,8 +45,8 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
     @Nullable
     @Override
     public EntityStorageRecord read(I id) {
-        final String idString = idToString(id);
-        final EntityStorageRecord record = storage.get(idString);
+        final EntityStorageRecord.Id recordId = toRecordId(id);
+        final EntityStorageRecord record = storage.get(recordId);
         return record;
     }
 
@@ -55,7 +54,7 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
     public void write(EntityStorageRecord record) {
         checkArgument(record.hasState(), "entity state");
 
-        final String id = record.getEntityId();
+        final EntityStorageRecord.Id id = record.getId();
         storage.put(id, record);
     }
 
