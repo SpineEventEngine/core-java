@@ -21,6 +21,7 @@
 package org.spine3.examples.aggregate.server;
 
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.CommandRequest;
@@ -32,6 +33,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.stream.EventStore;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -59,15 +61,26 @@ public class Application implements AutoCloseable {
      */
     public Application(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
+
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
                 .setCommandDispatcher(createCommandDispatcher())
-                .setEventBus(EventBus.newInstance())
+                .setEventBus(createEventBus(storageFactory))
                 .build();
     }
 
     private static CommandDispatcher createCommandDispatcher() {
         return CommandDispatcher.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+    }
+
+    private static EventBus createEventBus(StorageFactory storageFactory) {
+        final EventStore eventStore = EventStore.newBuilder()
+                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setStorage(storageFactory.createEventStorage())
+                .setLogger(EventStore.log())
+                .build();
+
+        return EventBus.newInstance(eventStore);
     }
 
     /**

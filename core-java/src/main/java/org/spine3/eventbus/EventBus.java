@@ -27,9 +27,15 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventRecord;
 import org.spine3.internal.EventHandlerMethod;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.procman.ProcessManager;
+import org.spine3.server.stream.EventStore;
 import org.spine3.type.EventClass;
+import org.spine3.util.EventRecords;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -50,12 +56,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    <li>Mark the method with {@link Subscribe} annotation;</li>
  * <li>Register with an instance of EventBus using {@link #register(Object)}.</li>
  * </ol>
- * Note: Since Protobuf messages are final classes, a handler method be be just {@link Message}
+ * Note: Since Protobuf messages are final classes, a handler method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events and their contexts are posted to an EventBus using {@link #post(Message, EventContext)} method.
- * The execution of handler methods is performed by an {@link Executor} associated with the instance of
+ * <p>Events are posted to an EventBus using {@link #post(EventRecord)} method. Normally this
+ * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
+ *
+ * <p>The passed {@link EventRecord} is stored in the {@link EventStore} associated with the {@code EventBus}
+ * <strong>before</strong> it is passed to handlers.
+ *
+ * <p>The execution of handler methods is performed by an {@link Executor} associated with the instance of
  * the {@code EventBus}.
  *
  * <p>If a handler method throws an exception (which in general should be avoided), the exception is logged.
@@ -74,37 +85,46 @@ public class EventBus implements AutoCloseable {
     private final Registry registry = new Registry();
 
     /**
+     * The {@code EventStore} to which put events before they get handled.
+     */
+    private final EventStore eventStore;
+
+    /**
      * The executor for invoking handler methods.
      */
     private final Executor executor;
 
     /**
-     * Creates instance with the passed executor for invoking event handlers.
+     * Creates new instance.
      *
+     * @param eventStore the event store to put posted events
      * @param executor the executor for invoking event handlers
      */
-    protected EventBus(Executor executor) {
+    protected EventBus(EventStore eventStore, Executor executor) {
+        this.eventStore = eventStore;
         this.executor = checkNotNull(executor);
     }
 
     /**
      * Creates a new instance configured with the direct executor for invoking handlers.
      *
+     * @param eventStore the {@code EventStore} to put posted events
      * @return new EventBus instance
      */
-    public static EventBus newInstance() {
-        final EventBus result = new EventBus(MoreExecutors.directExecutor());
+    public static EventBus newInstance(EventStore eventStore) {
+        final EventBus result = new EventBus(eventStore, MoreExecutors.directExecutor());
         return result;
     }
 
     /**
      * Creates a new instance with the passed executor for invoking handlers.
      *
+     * @param eventStore the {@code EventStore} to put posted events
      * @param executor the executor for invoking event handlers
      * @return a new EventBus instance
      */
-    public static EventBus newInstance(Executor executor) {
-        final EventBus result = new EventBus(executor);
+    public static EventBus newInstance(EventStore eventStore, Executor executor) {
+        final EventBus result = new EventBus(eventStore, executor);
         return result;
     }
 
@@ -149,13 +169,22 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Posts an event and its context to be processed by registered handlers.
+     * Posts the event and its context passed as the record to be processed by registered handlers.
      *
-     * @param event   the event to be handled
-     * @param context the context of the event
+     * <p>The record is stored in the associated {@link EventStore} <strong>before</strong> any handling occurs.
+     *
+     * @param record the record with the event and its context to be handled
      */
-    public void post(Message event, EventContext context) {
+    public void post(EventRecord record) {
+        store(record);
 
+        final Message event = EventRecords.getEvent(record);
+        final EventContext context = record.getContext();
+
+        invokeHandlers(event, context);
+    }
+
+    private void invokeHandlers(Message event, EventContext context) {
         final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
@@ -166,6 +195,10 @@ public class EventBus implements AutoCloseable {
         for (EventHandlerMethod handler : handlers) {
             invokeHandler(handler, event, context);
         }
+    }
+
+    private void store(EventRecord record) {
+        eventStore.append(record);
     }
 
     private void invokeHandler(final EventHandlerMethod handler, final Message event, final EventContext context) {
@@ -190,8 +223,9 @@ public class EventBus implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         registry.unsubscribeAll();
+        eventStore.close();
     }
 
     /**

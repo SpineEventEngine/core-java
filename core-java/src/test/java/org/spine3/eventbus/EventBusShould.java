@@ -20,7 +20,12 @@
 
 package org.spine3.eventbus;
 
+import com.google.common.util.concurrent.MoreExecutors;
+import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.stream.EventStore;
 
 import java.util.concurrent.Executors;
 
@@ -29,13 +34,25 @@ import static org.junit.Assert.assertNotNull;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
 
+    private EventStore eventStore;
+
+    @Before
+    public void setUp() {
+        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        this.eventStore = EventStore.newBuilder()
+                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setStorage(storageFactory.createEventStorage())
+                .setLogger(EventStore.log())
+                .build();
+    }
+
     @Test
     public void create_direct_executor_instance() {
-        assertNotNull(EventBus.newInstance());
+        assertNotNull(EventBus.newInstance(eventStore));
     }
 
     @Test
     public void create_instance_with_executor() {
-        assertNotNull(EventBus.newInstance(Executors.newSingleThreadExecutor()));
+        assertNotNull(EventBus.newInstance(eventStore, Executors.newSingleThreadExecutor()));
     }
 }

@@ -71,6 +71,7 @@ public class BoundedContextShould {
     private final EmptyHandler handler = new EmptyHandler();
 
     private CommandDispatcher commandDispatcher;
+    private EventBus eventBus;
 
     private boolean handlersRegistered = false;
 
@@ -78,14 +79,19 @@ public class BoundedContextShould {
 
     @Before
     public void setUp() {
-        final StorageFactory sf = InMemoryStorageFactory.getInstance();
+        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandDispatcher = CommandDispatcher.create(
-                new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+                new CommandStore(storageFactory.createCommandStorage()));
+
+        eventBus = EventBus.newInstance(EventStore.newBuilder()
+            .setStreamExecutor(MoreExecutors.directExecutor())
+            .setStorage(storageFactory.createEventStorage())
+            .build());
 
         boundedContext = BoundedContext.newBuilder()
-                .setStorageFactory(sf)
+                .setStorageFactory(storageFactory)
                 .setCommandDispatcher(commandDispatcher)
-                .setEventBus(EventBus.newInstance())
+                .setEventBus(eventBus)
                 .build();
     }
 
@@ -208,7 +214,6 @@ public class BoundedContextShould {
         assertEquals(1, records.size());
         final EventRecord actualRecord = records.get(0);
         final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
-        final CommandId actualCommandId = actualRecord.getContext().getCommandContext().getCommandId();
 
         assertEquals(projectId, actualProjectId);
         assertEquals(userId, actualRecord.getContext().getCommandContext().getActor());
@@ -249,30 +254,9 @@ public class BoundedContextShould {
 
     @Test
     public void return_EventBus_from_builder() {
-        final EventBus bus = EventBus.newInstance();
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(bus);
-        assertEquals(bus, builder.getEventBus());
-    }
-
-    @Test
-    public void return_EventStore_from_builder() {
-        final EventStore es = EventStore.newBuilder()
-                .setStreamExecutor(MoreExecutors.directExecutor())
-                .setStorage(InMemoryStorageFactory.getInstance().createEventStorage())
-                .setLogger(EventStore.log())
-                .build();
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventStore(es);
-        assertEquals(es, builder.getEventStore());
-    }
-
-    @Test
-    public void create_EventStore_if_not_set_in_builder() {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(commandDispatcher)
-                .setEventBus(EventBus.newInstance());
-        final BoundedContext boundedContext = builder.build();
-        assertNotNull(boundedContext.getEventStore());
+        final EventBus expected = eventBus;
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
+        assertEquals(expected, builder.getEventBus());
     }
 
     private static class ResponseObserver implements StreamObserver<Response> {
@@ -302,7 +286,7 @@ public class BoundedContextShould {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
                 .setCommandDispatcher(commandDispatcher)
-                .setEventBus(EventBus.newInstance())
+                .setEventBus(eventBus)
                 .setMultitenant(true)
                 .build();
 

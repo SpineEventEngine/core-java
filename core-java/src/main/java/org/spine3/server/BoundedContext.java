@@ -19,9 +19,7 @@
  */
 package org.spine3.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -39,10 +37,8 @@ import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.stream.EventStore;
-import org.spine3.util.EventRecords;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -73,7 +69,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;
     private final EventBus eventBus;
-    private final EventStore eventStore;
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
@@ -83,7 +78,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         this.storageFactory = builder.storageFactory;
         this.commandDispatcher = builder.commandDispatcher;
         this.eventBus = builder.eventBus;
-        this.eventStore = builder.eventStore;
     }
 
     /**
@@ -120,7 +114,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         storageFactory.close();
         commandDispatcher.close();
         eventBus.close();
-        eventStore.close();
 
         shutDownRepositories();
 
@@ -271,17 +264,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         final CommandResult result = dispatch(request);
         final List<EventRecord> eventRecords = result.getEventRecordList();
 
-        storeEvents(eventRecords);
         postEvents(eventRecords);
 
         //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
 
         return result;
-    }
-
-    @VisibleForTesting
-    protected EventStore getEventStore() {
-        return eventStore;
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
@@ -305,25 +292,12 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     /**
-     * Stores passed events in {@link EventStore}.
-     */
-    private void storeEvents(Iterable<EventRecord> records) {
-        final EventStore eventStore = getEventStore();
-        for (EventRecord record : records) {
-            eventStore.append(record);
-        }
-    }
-
-    /**
      * Posts passed events to {@link EventBus}.
      */
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            final Message event = EventRecords.getEvent(record);
-            final EventContext context = record.getContext();
-
-            eventBus.post(event, context);
+            eventBus.post(record);
         }
     }
 
@@ -361,7 +335,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         private String name;
         private StorageFactory storageFactory;
-        private EventStore eventStore;
         private CommandDispatcher commandDispatcher;
         private EventBus eventBus;
         private boolean multitenant;
@@ -411,16 +384,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             return eventBus;
         }
 
-        public Builder setEventStore(@Nullable EventStore eventStore) {
-            this.eventStore = eventStore;
-            return this;
-        }
-
-        @Nullable
-        public EventStore getEventStore() {
-            return eventStore;
-        }
-
         public BoundedContext build() {
             if (this.name == null) {
                 this.name = DEFAULT_NAME;
@@ -429,14 +392,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             checkNotNull(storageFactory, "storageFactory");
             checkNotNull(commandDispatcher, "commandDispatcher");
             checkNotNull(eventBus, "eventBus");
-
-            if (eventStore == null) {
-                eventStore = EventStore.newBuilder()
-                        .setStreamExecutor(MoreExecutors.directExecutor())
-                        .setStorage(storageFactory.createEventStorage())
-                        .setLogger(EventStore.log())
-                        .build();
-            }
 
             final BoundedContext result = new BoundedContext(this);
 
