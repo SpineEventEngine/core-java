@@ -65,6 +65,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * If `true` the bounded context serves many organizations.
      */
     private final boolean multitenant;
+    //TODO:2016-01-16:alexander.yevsyukov: Set all passed storages multitenant too.
+    // Or require storageFactory be multitenant and create correspondingly configured storages.
 
     private final StorageFactory storageFactory;
     private final CommandDispatcher commandDispatcher;

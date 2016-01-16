@@ -175,6 +175,15 @@ public abstract class EventStore implements Closeable {
         public Logger getLogger() {
             return logger;
         }
+
+        /**
+         * Sets default logger.
+         * @see EventStore#log()
+         */
+        public AbstractBuilder withDefaultLogger() {
+            setLogger(log());
+            return this;
+        }
     }
 
     /**
@@ -204,6 +213,12 @@ public abstract class EventStore implements Closeable {
         @Override
         public Builder setLogger(@Nullable Logger logger) {
             super.setLogger(logger);
+            return this;
+        }
+
+        @Override
+        public AbstractBuilder withDefaultLogger() {
+            super.withDefaultLogger();
             return this;
         }
     }
@@ -272,6 +287,12 @@ public abstract class EventStore implements Closeable {
         @Override
         public ServiceBuilder setLogger(@Nullable Logger logger) {
             super.setLogger(logger);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder withDefaultLogger() {
+            super.withDefaultLogger();
             return this;
         }
     }
