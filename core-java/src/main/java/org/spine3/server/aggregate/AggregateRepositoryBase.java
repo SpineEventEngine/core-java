@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Abstract base for aggregate root repositories.
+ * Abstract base for aggregate repositories.
  *
  * @param <I> the type of the aggregated root id
  * @param <A> the type of the aggregated root
