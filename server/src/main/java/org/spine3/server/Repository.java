@@ -30,11 +30,11 @@ import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
 
 /**
- * Abstract implementation of basic features of repositories.
+ * Abstract base class for repositories.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class RepositoryBase<I, E extends Entity<I, ?>> {
+public abstract class Repository<I, E extends Entity<I, ?>> {
 
     /**
      * The constructor for creating new entity instances.
@@ -43,7 +43,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> {
 
     private Object storage;
 
-    protected RepositoryBase() {
+    protected Repository() {
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
     }

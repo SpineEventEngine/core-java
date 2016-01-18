@@ -28,7 +28,7 @@ import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -70,7 +70,7 @@ public class CommandDispatcher implements AutoCloseable {
      *
      * <p>The passed object must be one of the following:
      * <ul>
-     *     <li>An object of the class derived from {@link AggregateRepositoryBase}.</li>
+     *     <li>An object of the class derived from {@link AggregateRepository}.</li>
      *     <li>An object of the class derived from {@link ProcessManagerRepository}.</li>
      * </ul>
      *

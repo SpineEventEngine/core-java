@@ -27,7 +27,7 @@ import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.MultiHandler;
-import org.spine3.server.RepositoryBase;
+import org.spine3.server.Repository;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateEvents;
@@ -44,16 +44,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Abstract base for aggregate repositories.
+ * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
+ * specified as the generic parameter.
  *
  * @param <I> the type of the aggregated root id
  * @param <A> the type of the aggregated root
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // Repositories will extend this class defining generic types.
-public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
-        extends RepositoryBase<I, A>
+public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
         implements MultiHandler, CommandHandlingObject {
 
     /**
@@ -63,7 +62,7 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
 
     /**
      * The name of the method used for dispatching commands to aggregate roots.
-     *
+     * <p/>
      * <p>This constant is used for obtaining {@code Method} instance via reflection.
      *
      * @see #dispatch(Message, CommandContext)
@@ -76,20 +75,10 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
      */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
-    /**
-     * The counter of event stored since last snapshot.
-     */
-    private int countSinceLastSnapshot;
-
-    protected AggregateRepositoryBase() {
-        super();
-    }
-
     @Override
-    @SuppressWarnings("RefusedBequest") // We override to check our type of storage.
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"}) final
-        AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
+        AggregateStorage<I> ignored = (AggregateStorage<I>) storage;
     }
 
     /**
@@ -167,8 +156,8 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
 
         try {
             final Snapshot snapshot = aggregateEvents.hasSnapshot()
-                        ? aggregateEvents.getSnapshot()
-                        : null;
+                    ? aggregateEvents.getSnapshot()
+                    : null;
             final A result = create(id);
             final List<EventRecord> events = aggregateEvents.getEventRecordList();
 
@@ -193,12 +182,14 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
     public void store(A aggregateRoot) {
         final Iterable<EventRecord> uncommittedEvents = aggregateRoot.getStateChangingUncommittedEvents();
         final int snapshotTrigger = getSnapshotTrigger();
+        int eventCount = 0;
         for (EventRecord event : uncommittedEvents) {
             storeEvent(event);
+            ++eventCount;
 
-            if (countSinceLastSnapshot > snapshotTrigger) {
+            if (eventCount > snapshotTrigger) {
                 createAndStoreSnapshot(aggregateRoot);
-                countSinceLastSnapshot = 0;
+                eventCount = 0;
             }
         }
 
@@ -213,7 +204,6 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
 
     private void storeEvent(EventRecord event) {
         aggregateStorage().store(event);
-        ++countSinceLastSnapshot;
     }
 
     /**
@@ -229,7 +219,7 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
     @CheckReturnValue
-    @SuppressWarnings("unused") // because the method is used by reflection.
+    @SuppressWarnings("unused") // because the method is used by Reflection.
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         final I aggregateId = getAggregateId(command);
         final A aggregateRoot = load(aggregateId);

@@ -20,11 +20,11 @@
 package org.spine3.examples.aggregate.server;
 
 import org.spine3.examples.aggregate.OrderId;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepository;
 
 /**
  * @author Mikhail Melnik
  */
-public class OrderRepository extends AggregateRepositoryBase<OrderId, OrderAggregate> {
+public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
 
 }

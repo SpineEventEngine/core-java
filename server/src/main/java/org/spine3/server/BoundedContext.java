@@ -35,7 +35,7 @@ import org.spine3.client.grpc.Topic;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
@@ -78,7 +78,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private final CommandDispatcher commandDispatcher;
     private final EventBus eventBus;
 
-    private final List<RepositoryBase<?, ?>> repositories = Lists.newLinkedList();
+    private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     private BoundedContext(Builder builder) {
         this.name = builder.name;
@@ -148,7 +148,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     private void shutDownRepositories() {
-        for (RepositoryBase<?, ?> repository : repositories) {
+        for (Repository<?, ?> repository : repositories) {
             unregister(repository);
         }
         repositories.clear();
@@ -159,7 +159,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *
      * <p>The context creates and assigns a storage depending on the type of the passed repository.
      *
-     * <p>For instances of {@link AggregateRepositoryBase} an instance of {@link AggregateStorage} is created
+     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
      *
      * <p>For other types of repositories an instance of {@link EntityStorage} is
@@ -169,7 +169,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
      */
-    public <I, E extends Entity<I, ?>> void register(RepositoryBase<I, E> repository) {
+    public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         assignStorage(repository);
 
         repositories.add(repository);
@@ -181,10 +181,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         getEventBus().register(repository);
     }
 
-    private <I, E extends Entity<I, ?>> void assignStorage(RepositoryBase<I, E> repository) {
+    private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
         final Object storage;
-        final Class<? extends RepositoryBase> repositoryClass = repository.getClass();
-        if (repository instanceof AggregateRepositoryBase) {
+        final Class<? extends Repository> repositoryClass = repository.getClass();
+        if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = RepositoryTypeInfo.getEntityClass(repositoryClass);
 
             storage = storageFactory.createAggregateStorage(aggregateClass);
@@ -196,7 +196,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         repository.assignStorage(storage);
     }
 
-    private void unregister(RepositoryBase<?, ?> repository) {
+    private void unregister(Repository<?, ?> repository) {
         if (repository instanceof CommandHandlingObject) {
             getCommandDispatcher().unregister((CommandHandlingObject) repository);
         }

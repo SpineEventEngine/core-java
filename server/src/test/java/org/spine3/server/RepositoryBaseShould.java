@@ -64,7 +64,7 @@ public class RepositoryBaseShould {
         }
     }
 
-    public static class RepositoryForEntitiesWithProtectedConstructor extends RepositoryBase<ProjectId, EntityWithProtectedConstructor> {
+    public static class RepositoryForEntitiesWithProtectedConstructor extends Repository<ProjectId, EntityWithProtectedConstructor> {
         @Override
         protected void checkStorageClass(Object storage) {
         }
@@ -89,7 +89,7 @@ public class RepositoryBaseShould {
         }
     }
 
-    public static class RepositoryForEntitiesWithPrivateConstructor extends RepositoryBase<ProjectId, EntityWithPrivateConstructor> {
+    public static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
         @Override
         protected void checkStorageClass(Object storage) {
         }
@@ -114,7 +114,7 @@ public class RepositoryBaseShould {
         }
     }
 
-    public static class RepositoryForEntitiesWithoutRequiredConstructor extends RepositoryBase<ProjectId, EntityWithoutRequiredConstructor> {
+    public static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
         @Override
         protected void checkStorageClass(Object storage) {
         }

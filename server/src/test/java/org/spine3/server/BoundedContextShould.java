@@ -31,7 +31,7 @@ import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.AggregateShould;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.procman.ProcessManager;
@@ -301,7 +301,7 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, AggregateShould.ProjectAggregate> {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.

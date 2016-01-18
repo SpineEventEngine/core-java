@@ -42,7 +42,7 @@ import static org.spine3.server.storage.EntityStorage.toRecordId;
  * @param <M> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends RepositoryBase<I, E> {
+public class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
     @Nullable
     @Override
