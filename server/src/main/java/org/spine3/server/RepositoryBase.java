@@ -34,7 +34,7 @@ import static java.lang.reflect.Modifier.isPublic;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repository<I, E> {
+public abstract class RepositoryBase<I, E extends Entity<I, ?>> {
 
     /**
      * The constructor for creating new entity instances.
@@ -78,7 +78,7 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
      */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        return TypeInfo.getIdClass(getClass());
+        return RepositoryTypeInfo.getIdClass(getClass());
     }
 
     /**
@@ -86,8 +86,25 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
      */
     @CheckReturnValue
     protected Class<E> getEntityClass() {
-        return TypeInfo.getEntityClass(getClass());
+        return RepositoryTypeInfo.getEntityClass(getClass());
     }
+
+    /**
+     * Stores the passed object.
+     *
+     * @param obj an instance to store
+     */
+    protected abstract void store(E obj);
+
+    /**
+     * Loads the entity with the passed ID.
+     *
+     * @param id the id of the entity to load
+     * @return the entity or {@code null} if there's no entity with such id
+     */
+    @CheckReturnValue
+    @Nullable
+    protected abstract E load(I id);
 
     /**
      * Checks if the passed storage object is of required type.
@@ -111,9 +128,11 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     }
 
     /**
-     * {@inheritDoc}
+     * Create a new entity instance with its default state.
+     *
+     * @param id the id of the entity
+     * @return new entity instance
      */
-    @Override
     public E create(I id) {
         try {
             final E result = entityConstructor.newInstance(id);
@@ -126,9 +145,23 @@ public abstract class RepositoryBase<I, E extends Entity<I, ?>> implements Repos
     }
 
     /**
-     * {@inheritDoc}
+     * Assigns the storage to the repository.
+     *
+     * <p>The type of the storage depends on and should be checked by the implementations.
+     *
+     * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
+     * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
+     *
+     * <p>{@link BoundedContext} will call this method with {@code null} argument to request performing all necessary
+     * clean-up operations before the context is closed.
+     *
+     * <p>Another storage can be assigned after this method is called with {@code null} parameter.
+     *
+     * @param storage a storage instance or {@code null} if the current storage should be dismissed.
+     *                If there is no storage assigned, passing {@code null} does not have effect
+     * @throws ClassCastException    if the passed storage is not of the required type
+     * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
      */
-    @Override
     public void assignStorage(@Nullable Object storage) {
         if (storage == null) {
             shutDown();

@@ -26,11 +26,14 @@ import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.MultiHandler;
 import org.spine3.server.RepositoryBase;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,8 +52,8 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // Repositories will extend this class defining generic types.
-public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
-        extends RepositoryBase<I, A> implements AggregateRepository<I, A> {
+public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>> extends RepositoryBase<I, A>
+        implements MultiHandler, CommandHandlingObject {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
@@ -88,7 +91,13 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
         AggregateStorage<I> ignored = (AggregateStorage<I>)storage;
     }
 
-    @Override
+    /**
+     * Returns the number of events until a next snapshot is made.
+     *
+     * @return a positive integer value
+     * @see #DEFAULT_SNAPSHOT_TRIGGER
+     */
+    @CheckReturnValue
     public int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
@@ -131,14 +140,14 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
         }
     }
 
-    @Internal
     @Override
+    @Internal
     public CommandHandlerMethod createMethod(Method method) {
         return new AggregateRepositoryDispatchMethod(this, method);
     }
 
-    @Internal
     @Override
+    @Internal
     public Predicate<Method> getHandlerMethodPredicate() {
         return AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
     }
@@ -206,7 +215,20 @@ public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
         ++countSinceLastSnapshot;
     }
 
-    @Override
+    /**
+     * Processes the command by dispatching it to a method of an aggregate.
+     *
+     * <p>For more details on writing aggregate commands read
+     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
+     *
+     * @param command the command to dispatch
+     * @param context context info of the command
+     * @return a list of the event records
+     * @throws InvocationTargetException if an exception occurs during command dispatching
+     * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
+     */
+    @CheckReturnValue
+    @SuppressWarnings("unused") // because the method is used by reflection.
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         final I aggregateId = getAggregateId(command);
         final A aggregateRoot = load(aggregateId);

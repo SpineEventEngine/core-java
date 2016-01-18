@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.internal.EventHandlerMethod;
-import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.AggregateRepositoryBase;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.stream.EventStore;
 import org.spine3.server.util.EventRecords;
@@ -61,7 +61,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <h2>Posting Events</h2>
  * <p>Events are posted to an EventBus using {@link #post(EventRecord)} method. Normally this
- * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
+ * is done by an {@link AggregateRepositoryBase} in the process of handling a command, or by a {@link ProcessManager}.
  *
  * <p>The passed {@link EventRecord} is stored in the {@link EventStore} associated with the {@code EventBus}
  * <strong>before</strong> it is passed to handlers.
