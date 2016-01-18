@@ -45,6 +45,7 @@ public class UtilitiesShould {
     @SuppressWarnings("OverlyCoupledMethod"/*ok in this case*/)
     public void have_private_constructors() {
 
+        //TODO:2016-01-18:alexander.yevsyukov: Refactor to move these checks into corresponding tests.
         // util package
         checkPrivateConstructor(Classes.class);
         checkPrivateConstructor(Commands.class);
@@ -55,7 +56,6 @@ public class UtilitiesShould {
         checkPrivateConstructor(Math.class);
         checkPrivateConstructor(Methods.class);
         checkPrivateConstructor(Tests.class);
-        checkPrivateConstructor(Users.class);
 
         // testutil package
         checkPrivateConstructor(TestAggregateIdFactory.class);

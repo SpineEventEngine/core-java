@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
+import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
@@ -45,7 +46,6 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.util.Users;
 
 import java.io.IOException;
 import java.util.List;
@@ -66,7 +66,7 @@ import static org.spine3.testdata.TestCommandFactory.*;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class BoundedContextShould {
 
-    private final UserId userId = Users.newUserId("test_user");
+    private final UserId userId = ClientUtil.newUserId("test_user");
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
     private final EmptyHandler handler = new EmptyHandler();
 

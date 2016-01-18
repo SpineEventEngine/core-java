@@ -21,25 +21,17 @@ package org.spine3.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.UserId;
 import org.spine3.client.CommandRequest;
-import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.util.Identifiers.IdConverterRegistry;
 import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
@@ -54,31 +46,6 @@ public class Commands {
 
     static {
         IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
-    }
-
-    /**
-     * Creates a new {@link CommandId} based on random UUID.
-     *
-     * @return new command ID
-     */
-    public static CommandId generateId() {
-        final String value = UUID.randomUUID().toString();
-        return CommandId.newBuilder().setUuid(value).build();
-    }
-
-    /**
-     * Creates new command context with the current time
-     * @param userId the actor id
-     * @param offset the timezone offset
-     */
-    public static CommandContext createContext(UserId userId, ZoneOffset offset) {
-        final CommandId commandId = generateId();
-        final CommandContext.Builder result = CommandContext.newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .setCommandId(commandId)
-                .setZoneOffset(offset);
-        return result.build();
     }
 
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
@@ -146,20 +113,6 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Creates a new command request with the given {@code command} converted to {@link Any} and the {@code context}.
-     *
-     * @param command the command to convert to {@link Any} and set to the request
-     * @param context the context to set to the request
-     * @return a new command request
-     */
-    public static CommandRequest newCommandRequest(Message command, CommandContext context) {
-        final CommandRequest.Builder request = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(command))
-                .setContext(context);
-        return request.build();
     }
 
     //@formatter:off

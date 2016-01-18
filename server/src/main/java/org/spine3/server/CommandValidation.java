@@ -18,11 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandValidationError;
+import org.spine3.base.Error;
+import org.spine3.base.Response;
 import org.spine3.util.Identifiers;
 
 import java.util.Map;

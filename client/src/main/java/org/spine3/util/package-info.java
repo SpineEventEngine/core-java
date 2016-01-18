@@ -18,14 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.protobuf;
+/**
+ * This package contains utilities that can be used by for client code, server code,
+ * and business model compiler.
+ */
+@ParametersAreNonnullByDefault
+package org.spine3.util;
 
-import org.spine3.time.ZoneOffset;
-
-@SuppressWarnings("UtilityClass")
-public class ZoneOffsets {
-
-    private ZoneOffsets() {}
-
-    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
-}
+import javax.annotation.ParametersAreNonnullByDefault;

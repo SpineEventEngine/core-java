@@ -17,24 +17,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+
+package org.spine3.client;
 
 import org.junit.Test;
+import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
-
-import java.lang.reflect.InvocationTargetException;
+import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.util.Users.newUserId;
+import static org.junit.Assert.assertFalse;
+import static org.spine3.client.ClientUtil.generateId;
+import static org.spine3.client.ClientUtil.newUserId;
 
-/**
- * @author Mikhail Melnik
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class UsersShould {
+public class ClientUtilShould {
 
     @Test
-    public void create_id_by_string() {
+    public void have_private_constructor() throws Exception {
+        Tests.callPrivateUtilityConstructor(ClientUtil.class);
+    }
+
+    @Test
+    public void generate_command_Ids() {
+        final CommandId result = generateId();
+
+        assertFalse(result.getUuid().isEmpty());
+    }
+
+    @Test
+    public void create_UserId_by_string() {
 
         final String testIdString = "12345";
         final UserId userId = newUserId(testIdString);
@@ -46,14 +58,8 @@ public class UsersShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
-    public void fail_on_null_argument_passed_to_create() {
+    public void do_not_accept_null_UseId_value() {
         newUserId(null);
     }
 
-    @Test
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
-    public void have_private_constructor()
-            throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, InstantiationException {
-        Tests.callPrivateUtilityConstructor(Users.class);
-    }
 }

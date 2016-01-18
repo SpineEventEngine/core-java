@@ -20,8 +20,8 @@
 
 package org.spine3.examples.failure.failures;
 
-import org.spine3.base.FailureThrowable;
 import org.spine3.examples.failure.TaskId;
+import org.spine3.server.FailureThrowable;
 
 /**
  * @author Alexander Yevsyukov

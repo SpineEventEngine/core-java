@@ -627,6 +627,9 @@
     <inspection_tool class="TodoComment" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TooBroadCatch" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TooBroadThrows" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="WARNING" enabled="false">
+        <option name="onlyWarnOnRootExceptions" value="true" />
+      </scope>
       <option name="onlyWarnOnRootExceptions" value="true" />
     </inspection_tool>
     <inspection_tool class="TransientFieldInNonSerializableClass" enabled="true" level="WARNING" enabled_by_default="true" />

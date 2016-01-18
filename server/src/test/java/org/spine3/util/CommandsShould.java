@@ -22,7 +22,6 @@ package org.spine3.util;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
-import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.testdata.TestCommandFactory.createProject;
-import static org.spine3.util.Commands.generateId;
 
 /**
  * @author Mikhail Melnik
@@ -40,13 +38,6 @@ import static org.spine3.util.Commands.generateId;
 @SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
 "DuplicateStringLiteralInspection"/*ok in this case*/})
 public class CommandsShould {
-
-    @Test
-    public void generateIds() {
-        final CommandId result = generateId();
-
-        assertFalse(result.getUuid().isEmpty());
-    }
 
     @Test
     public void sort() {

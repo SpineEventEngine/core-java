@@ -62,8 +62,6 @@ public class Identifiers {
     private static final String EQUAL_SIGN = "=";
 
 
-    private Identifiers() {}
-
     /**
      * Converts the passed ID value into the string representation.
      *
@@ -313,4 +311,7 @@ public class Identifiers {
             return result;
         }
     }
+
+    //@formatter:off
+    private Identifiers() {}
 }

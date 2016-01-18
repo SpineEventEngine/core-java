@@ -26,15 +26,15 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
+import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
-import org.spine3.util.Commands;
 
+import static org.spine3.client.ClientUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.util.Users.newUserId;
 
 /**
  * The utility class for creating the test data related to commands (command messages, CommandRequests etc.).
@@ -94,7 +94,7 @@ public class TestCommandFactory {
      */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, CommandId.getDefaultInstance(), when);
-        final CommandRequest result = Commands.newCommandRequest(command, context);
+        final CommandRequest result = ClientUtil.newCommandRequest(command, context);
         return result;
     }
 

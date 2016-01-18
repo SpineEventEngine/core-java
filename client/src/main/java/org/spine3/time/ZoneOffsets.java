@@ -17,34 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
 
-import org.spine3.base.UserId;
+package org.spine3.time;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * The {@link UserId} utility class.
- *
- * @author Mikhail Melnik
- */
 @SuppressWarnings("UtilityClass")
-public class Users {
+public class ZoneOffsets {
 
-    /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
+    private ZoneOffsets() {}
 
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
-
-    private Users() {
-    }
+    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
 }

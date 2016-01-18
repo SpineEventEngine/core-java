@@ -51,9 +51,10 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
+import static org.spine3.client.ClientUtil.createContext;
+import static org.spine3.client.ClientUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.ZoneOffsets.UTC;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
@@ -63,9 +64,8 @@ import static org.spine3.testdata.TestCommandFactory.startProject;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventRecordFactory.*;
-import static org.spine3.util.Commands.createContext;
+import static org.spine3.time.ZoneOffsets.UTC;
 import static org.spine3.util.Tests.currentTimeSeconds;
-import static org.spine3.util.Users.newUserId;
 
 /**
  * @author Alexander Litus

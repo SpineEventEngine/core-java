@@ -34,7 +34,9 @@ import "spine/client/command_request.proto";
 
 // A topic of interest the client can subscribe and unsubscribe.
 message Topic {
-    //TODO:2016-01-14:alexander.yevsyukov: Define this time.
+    //TODO:2016-01-14:alexander.yevsyukov: Define this type. E.g. there can be some structure, which describes many
+    // points of interest at once. See Pub-sub for possible API inspiration. Chances are it's going to be one of underlying
+    // implementations.
     string value = 1;
 }
 

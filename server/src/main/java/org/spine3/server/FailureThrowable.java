@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.server;
 
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.Failure;
 
 /**
  * Abstract base for throwable business failures.
