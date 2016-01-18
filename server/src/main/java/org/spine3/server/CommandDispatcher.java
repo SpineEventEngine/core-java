@@ -37,7 +37,6 @@ import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +127,7 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         handlerRegistry.unregisterAll();
         commandStore.close();
     }

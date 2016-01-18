@@ -42,7 +42,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> implements AutoCloseable {
+public abstract class AggregateStorage<I> extends AbstractStorage {
 
     public AggregateEvents load(I aggregateId) {
 

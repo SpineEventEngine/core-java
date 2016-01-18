@@ -27,15 +27,14 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
-import java.io.Closeable;
-import java.io.IOException;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Stores and loads commands.
  *
  * @author Mikhail Mikhaylov
  */
-public class CommandStore implements Closeable {
+public class CommandStore implements AutoCloseable {
 
     private final CommandStorage storage;
 
@@ -49,6 +48,8 @@ public class CommandStore implements Closeable {
      * @param request command request to store
      */
     public void store(CommandRequest request) {
+        checkState(storage.isOpen(), "Unable to store to closed storage.");
+
         final Any any = request.getCommand();
         final Message command = Messages.fromAny(any);
         final AggregateId aggregateId = AggregateId.getAggregateId(command);
@@ -59,7 +60,7 @@ public class CommandStore implements Closeable {
     //TODO:2016-01-15:alexander.yevsyukov: Support writing processing status into the storage.
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         storage.close();
     }
 }

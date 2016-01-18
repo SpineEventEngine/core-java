@@ -36,14 +36,14 @@ import static org.spine3.server.util.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 @SPI
-@SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I> implements AutoCloseable {
+public abstract class EntityStorage<I> extends AbstractStorage {
 
     /**
      * Loads an entity storage record from the storage by an ID.
      *
      * @param id the ID of the entity record to load
      * @return an entity record instance or {@code null} if there is no record with such an ID
+     * @throws IllegalStateException if the storage was closed before
      */
     @Nullable
     public abstract EntityStorageRecord read(I id);
@@ -53,6 +53,7 @@ public abstract class EntityStorage<I> implements AutoCloseable {
      *
      * @param record a record to save
      * @throws NullPointerException if the {@code record} is null
+     * @throws IllegalStateException if the storage was closed before
      */
     public abstract void write(EntityStorageRecord record);
 

@@ -29,8 +29,6 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.util.Commands;
 import org.spine3.type.TypeName;
 
-import java.io.Closeable;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -39,12 +37,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class CommandStorage implements Closeable {
+public abstract class CommandStorage extends AbstractStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {
         checkNotNull(aggregateId, "aggregateId");
         checkNotNull(request, "request");
+        checkNotClosed("Cannot store to closed storage");
 
         final Any command = request.getCommand();
         final CommandContext context = request.getContext();
@@ -64,7 +63,7 @@ public abstract class CommandStorage implements Closeable {
     }
 
     /*
-     * Writes record by its aggregateId
+     * Writes record to the storage.
      */
     protected abstract void write(CommandStorageRecord record);
 

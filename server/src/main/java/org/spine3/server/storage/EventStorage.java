@@ -30,7 +30,6 @@ import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.EventStreamQuery;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.util.Iterator;
 
 import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
@@ -42,7 +41,7 @@ import static org.spine3.server.util.EventRecords.*;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class EventStorage implements Closeable {
+public abstract class EventStorage extends AbstractStorage {
 
     @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {

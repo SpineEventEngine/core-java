@@ -31,7 +31,6 @@ import org.spine3.server.storage.EventStorage;
 import org.spine3.server.stream.grpc.EventStoreGrpc;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
@@ -43,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class EventStore implements Closeable {
+public abstract class EventStore implements AutoCloseable {
 
     private final Executor streamExecutor;
     @Nullable
@@ -251,7 +250,7 @@ public abstract class EventStore implements Closeable {
          * @throws IOException if the attempt to close the storage throws an exception
          */
         @Override
-        public void close() throws IOException {
+        public void close() throws Exception {
             storage.close();
         }
     }

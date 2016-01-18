@@ -35,7 +35,6 @@ import org.spine3.server.stream.EventStore;
 import org.spine3.server.util.EventRecords;
 import org.spine3.type.EventClass;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -223,7 +222,7 @@ public class EventBus implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         registry.unsubscribeAll();
         eventStore.close();
     }
