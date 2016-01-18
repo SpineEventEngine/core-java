@@ -25,10 +25,11 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.EntityStorage.toRecordId;
-import static org.spine3.util.Identifiers.newUuid;
+import static org.spine3.server.util.Identifiers.newUuid;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
 public abstract class EntityStorageShould {

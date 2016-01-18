@@ -126,7 +126,7 @@ public class IdentifiersShould {
 
         final Timestamp currentTime = getCurrentTime();
         final TestIdWithTimestampField id = TestIdWithTimestampField.newBuilder().setId(currentTime).build();
-        final String expected = timestampToString(currentTime);
+        final String expected = timestampToIdString(currentTime);
 
         final String actual = idToString(id);
 

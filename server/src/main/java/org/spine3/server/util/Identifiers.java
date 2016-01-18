@@ -231,7 +231,7 @@ public class Identifiers {
      * @param timestamp  the value to convert
      * @return string representation of timestamp
      */
-    public static String timestampToString(Timestamp timestamp) {
+    public static String timestampToIdString(Timestamp timestamp) {
         String result = TimeUtil.toString(timestamp);
         result = PATTERN_COLON.matcher(result).replaceAll("-");
         result = PATTERN_T.matcher(result).replaceAll("_T");
@@ -307,7 +307,7 @@ public class Identifiers {
             if (timestamp == null) {
                 return NULL_ID_OR_FIELD;
             }
-            final String result = timestampToString(timestamp);
+            final String result = timestampToIdString(timestamp);
             return result;
         }
     }

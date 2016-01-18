@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.io.IoUtil.closeSilently;
 import static org.spine3.io.file.FileUtil.*;
@@ -45,7 +46,7 @@ import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
  *
  * @author Alexander Litus
  */
-class FsEntityStorage<I, M extends Message> extends EntityStorage<I> {
+class FsEntityStorage<I> extends EntityStorage<I> {
 
     private static final String ENTITY_STORE_DIR_NAME = "/entity-store/";
 

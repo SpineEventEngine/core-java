@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
+import org.spine3.server.util.Events;
 import org.spine3.time.ZoneOffset;
-import org.spine3.util.Events;
 
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;

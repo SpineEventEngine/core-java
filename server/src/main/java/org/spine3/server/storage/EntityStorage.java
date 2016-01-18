@@ -25,7 +25,7 @@ import org.spine3.server.EntityId;
 
 import javax.annotation.Nullable;
 
-import static org.spine3.util.Identifiers.idToString;
+import static org.spine3.server.util.Identifiers.idToString;
 
 /**
  * An entity storage keeps messages with identity.
