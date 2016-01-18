@@ -151,14 +151,15 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * <p/>
      * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
      * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
-     * <p/>
-     * <p>Another storage can be assigned after this method is called with {@code null} parameter.
      *
-     * @param storage a storage instance
+     * @param storage the storage instance
      * @throws ClassCastException    if the passed storage is not of the required type
      * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
      */
     public void assignStorage(AutoCloseable storage) {
+        // NOTE: This method is not named `setStorage` according to JavaBean conventions to highlight
+        // the fact that conventions for calling it are different.
+
         // Ignore if the same instance of the storage is passed more than one time.
         //noinspection ObjectEquality
         if (storage == this.storage) {
@@ -167,7 +168,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
         if (this.storage != null) {
             throw new IllegalStateException(String.format(
-                    "Repository has already storage assigned: %s. Passed another: %s.", this.storage, storage));
+                    "Repository has already storage assigned: %s. Passed: %s.", this.storage, storage));
         }
 
         checkStorageClass(storage);
