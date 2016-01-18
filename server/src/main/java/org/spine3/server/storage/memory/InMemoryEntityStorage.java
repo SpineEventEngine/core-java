@@ -26,7 +26,6 @@ import org.spine3.server.storage.EntityStorageRecord;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**

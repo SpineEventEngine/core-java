@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.EntityStorage.*;
+import static org.spine3.server.storage.EntityStorage.toRecordId;
 
 /**
  * The base class for repositories managing entities.

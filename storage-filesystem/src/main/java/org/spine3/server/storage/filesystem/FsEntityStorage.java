@@ -32,14 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.io.IoUtil.closeSilently;
 import static org.spine3.io.file.FileUtil.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FsStorageUtil.*;
 import static org.spine3.server.storage.filesystem.FsStorageUtil.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
 
 /**
  * An entity storage based on the file system.
