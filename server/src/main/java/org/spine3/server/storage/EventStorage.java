@@ -33,7 +33,7 @@ import java.io.Closeable;
 import java.util.Iterator;
 
 import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
-import static org.spine3.util.EventRecords.*;
+import static org.spine3.server.util.EventRecords.*;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.

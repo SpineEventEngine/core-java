@@ -17,12 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.util;
+
+import org.junit.Test;
+import org.spine3.base.EventId;
+
+import static org.junit.Assert.assertFalse;
 
 /**
- * Classes and interfaces for base types of the library.
+ * @author Mikhail Melnik
  */
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventsShould {
 
-@ParametersAreNonnullByDefault
-package org.spine3.util;
+    @Test
+    public void generate_event_id() {
+        final EventId result = Events.generateId();
 
-import javax.annotation.ParametersAreNonnullByDefault;
+        assertFalse(result.getUuid().isEmpty());
+    }
+
+}

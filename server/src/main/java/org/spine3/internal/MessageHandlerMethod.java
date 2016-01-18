@@ -20,7 +20,7 @@
 package org.spine3.internal;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Methods;
+import org.spine3.server.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

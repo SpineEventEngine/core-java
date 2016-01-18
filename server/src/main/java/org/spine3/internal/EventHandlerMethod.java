@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.eventbus.Subscribe;
 import org.spine3.server.MultiHandler;
+import org.spine3.server.util.MethodMap;
+import org.spine3.server.util.Methods;
 import org.spine3.type.EventClass;
-import org.spine3.util.MethodMap;
-import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

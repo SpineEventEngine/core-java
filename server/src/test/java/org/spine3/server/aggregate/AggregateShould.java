@@ -30,6 +30,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
 import org.spine3.server.Assign;
+import org.spine3.server.util.Classes;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -39,7 +40,6 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestCommandFactory;
-import org.spine3.util.Classes;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
-import org.spine3.util.Identifiers;
+import org.spine3.server.util.Identifiers;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;

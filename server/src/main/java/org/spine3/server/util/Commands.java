@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+package org.spine3.server.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -32,8 +32,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Identifiers.IdConverterRegistry;
-import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * Utility class for working with commands.
@@ -45,7 +43,7 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 public class Commands {
 
     static {
-        IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
+        Identifiers.IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
     }
 
     @SuppressWarnings("StringBufferWithoutInitialCapacity")
@@ -53,7 +51,7 @@ public class Commands {
         @Override
         public String apply(@Nullable CommandId commandId) {
             if (commandId == null) {
-                return NULL_ID_OR_FIELD;
+                return Identifiers.NULL_ID_OR_FIELD;
             }
 
             return commandId.getUuid();

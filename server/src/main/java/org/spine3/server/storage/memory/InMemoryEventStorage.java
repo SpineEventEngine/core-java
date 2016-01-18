@@ -30,7 +30,7 @@ import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.StorageUtil;
 import org.spine3.server.stream.EventStreamQuery;
-import org.spine3.util.EventRecords;
+import org.spine3.server.util.EventRecords;
 
 import java.io.Serializable;
 import java.util.Comparator;

@@ -25,8 +25,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.util.Commands;
 import org.spine3.type.TypeName;
-import org.spine3.util.Commands;
 
 import java.io.Closeable;
 

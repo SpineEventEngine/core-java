@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.util.MethodMap;
-import org.spine3.util.Methods;
+import org.spine3.server.util.MethodMap;
+import org.spine3.server.util.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

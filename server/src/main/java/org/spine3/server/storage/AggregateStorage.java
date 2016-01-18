@@ -25,8 +25,8 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
+import org.spine3.server.util.Identifiers;
 import org.spine3.type.TypeName;
-import org.spine3.util.Identifiers;
 
 import java.util.Deque;
 import java.util.Iterator;

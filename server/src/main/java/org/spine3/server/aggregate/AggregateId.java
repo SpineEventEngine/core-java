@@ -27,7 +27,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
 
-import static org.spine3.util.Identifiers.ID_PROPERTY_SUFFIX;
+import static org.spine3.server.util.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * Value object for aggregate IDs.

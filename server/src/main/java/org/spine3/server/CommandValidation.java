@@ -27,7 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
-import org.spine3.util.Identifiers;
+import org.spine3.server.util.Identifiers;
 
 import java.util.Map;
 

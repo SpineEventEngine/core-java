@@ -20,7 +20,7 @@
 package org.spine3.server.aggregate.error;
 
 import com.google.protobuf.Message;
-import org.spine3.util.Identifiers;
+import org.spine3.server.util.Identifiers;
 
 /**
  * Exception is thrown if a command, which is intended to be used for an aggregate,

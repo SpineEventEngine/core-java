@@ -19,7 +19,7 @@
  */
 package org.spine3.server;
 
-import org.spine3.util.Classes;
+import org.spine3.server.util.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

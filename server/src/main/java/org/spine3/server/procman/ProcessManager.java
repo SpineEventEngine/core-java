@@ -33,10 +33,10 @@ import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
-import org.spine3.util.Classes;
-import org.spine3.util.EventRecords;
-import org.spine3.util.Events;
-import org.spine3.util.MethodMap;
+import org.spine3.server.util.Classes;
+import org.spine3.server.util.EventRecords;
+import org.spine3.server.util.Events;
+import org.spine3.server.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

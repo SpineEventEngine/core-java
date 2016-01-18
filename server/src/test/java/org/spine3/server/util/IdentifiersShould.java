@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.server.util;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.util.Identifiers.*;
+import static org.spine3.server.util.Identifiers.*;
 
 /**
  * @author Alexander Litus

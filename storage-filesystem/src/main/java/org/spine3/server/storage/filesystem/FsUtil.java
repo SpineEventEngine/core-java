@@ -24,7 +24,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileNameEscaper;
-import org.spine3.util.Identifiers;
+import org.spine3.server.util.Identifiers;
 
 import java.io.*;
 import java.util.Map;

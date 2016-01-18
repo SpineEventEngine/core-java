@@ -33,9 +33,9 @@ import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.MultiHandler;
+import org.spine3.server.util.MethodMap;
+import org.spine3.server.util.Methods;
 import org.spine3.type.CommandClass;
-import org.spine3.util.MethodMap;
-import org.spine3.util.Methods;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

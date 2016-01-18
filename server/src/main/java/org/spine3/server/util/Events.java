@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.util;
+package org.spine3.server.util;
 
 import com.google.common.base.Function;
 import org.spine3.base.EventId;
@@ -27,9 +27,6 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import static org.spine3.util.Identifiers.IdConverterRegistry;
-import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * Utility class for working with {@link EventId} objects.
@@ -41,7 +38,7 @@ import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
 public class Events {
 
     static {
-        IdConverterRegistry.getInstance().register(EventId.class, new EventIdToStringConverter());
+        Identifiers.IdConverterRegistry.getInstance().register(EventId.class, new EventIdToStringConverter());
     }
 
     /**
@@ -78,7 +75,7 @@ public class Events {
         public String apply(@Nullable EventId eventId) {
 
             if (eventId == null) {
-                return NULL_ID_OR_FIELD;
+                return Identifiers.NULL_ID_OR_FIELD;
             }
 
             return eventId.getUuid();

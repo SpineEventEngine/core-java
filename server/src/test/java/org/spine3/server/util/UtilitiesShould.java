@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.server.util;
 
 import org.junit.Test;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileNameEscaper;
 import org.spine3.testdata.*;
+import org.spine3.util.Math;
+import org.spine3.util.Tests;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
