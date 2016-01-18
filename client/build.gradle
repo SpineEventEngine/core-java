@@ -16,7 +16,7 @@ apply plugin: 'org.spine3.tools.protolookup';
 sourceSets {
     main {
         proto {
-            srcDirs += ["${project(":core-java").projectDir}/src/main/proto"]
+            srcDirs += ["${project(":client").projectDir}/src/main/proto"]
         }
         java {
             srcDir "$projectDir/generated/main/grpc"
