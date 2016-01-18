@@ -49,8 +49,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // Repositories will extend this class defining generic types.
-public abstract class AggregateRepositoryBase<I extends Message,
-                                              A extends Aggregate<I, ?>>
+public abstract class AggregateRepositoryBase<I, A extends Aggregate<I, ?>>
         extends RepositoryBase<I, A> implements AggregateRepository<I, A> {
 
     /**

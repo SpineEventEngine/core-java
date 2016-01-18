@@ -51,7 +51,6 @@ public class Methods {
         return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
-
     /**
      * Returns the class of the first parameter of the passed handler method object.
      *
@@ -59,12 +58,12 @@ public class Methods {
      * a class implementing {@link Message}.
      *
      * @param handler the method object to take first parameter type from
-     * @return the {@link Class} of the first method parameter
+     * @return the class of the first method parameter
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") final /** we always expect first param as {@link Message} */
-                Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
+        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -80,9 +79,7 @@ public class Methods {
         final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
         for (Method method : declaringClass.getDeclaredMethods()) {
             if (filter.apply(method)) {
-
                 final Class<? extends Message> messageClass = getFirstParamType(method);
-
                 if (tempMap.containsKey(messageClass)) {
                     final Method alreadyPresent = tempMap.get(messageClass);
                     throw new DuplicateHandlerMethodException(

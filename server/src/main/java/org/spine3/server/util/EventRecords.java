@@ -180,22 +180,21 @@ public class EventRecords {
             }
 
             final Message event = getEvent(record);
-
-            if (!eventType.equals(TypeName.of(event))) {
+            final TypeName actualType = TypeName.of(event);
+            final boolean specifiedEventType = eventType.value().isEmpty();
+            if (!eventType.equals(actualType) && !specifiedEventType) {
                 return false;
             }
 
             final EventContext context = record.getContext();
-
             final Any aggregateId = context.getAggregateId();
             final List<Any> aggregateIdList = filter.getAggregateIdList();
-            if (!aggregateIdList.isEmpty()) {
-                if (!aggregateIdList.contains(aggregateId)) {
-                    return false;
-                }
+            if (aggregateIdList.isEmpty()) {
+                return true;
+            } else {
+                final boolean matches = aggregateIdList.contains(aggregateId);
+                return matches;
             }
-
-            return true;
         }
     }
 

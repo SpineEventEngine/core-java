@@ -20,35 +20,59 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
+import org.spine3.SPI;
+import org.spine3.server.EntityId;
 
 import javax.annotation.Nullable;
+
+import static org.spine3.util.Identifiers.idToString;
 
 /**
  * An entity storage keeps messages with identity.
  *
+ * <p>See {@link EntityId} for supported ID types.
+ *
  * @param <I> the type of entity IDs
- * @param <M> the type of entity state messages written in the storage
  * @author Alexander Yevsyukov
  */
+@SPI
 @SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I, M extends Message> {
+public abstract class EntityStorage<I> {
 
     /**
-     * Reads a message from the storage by the ID.
+     * Loads an entity storage record from the storage by an ID.
      *
-     * @param id the ID of the message to load
-     * @return a message instance or {@code null} if there is no message with such ID
+     * @param id the ID of the entity record to load
+     * @return an entity record instance or {@code null} if there is no record with such an ID
      */
     @Nullable
-    public abstract M read(I id);
+    public abstract EntityStorageRecord read(I id);
 
     /**
-     * Writes a message into the storage. Rewrites it if the message with such ID already exists.
+     * Writes a record into the storage. Rewrites it if a record with such an entity ID already exists.
      *
-     * @param id ID of the message
-     * @param message the message to save
-     * @throws java.lang.NullPointerException if id or message is null
+     * @param record a record to save
+     * @throws NullPointerException if the {@code record} is null
      */
-    public abstract void write(I id, M message);
+    public abstract void write(EntityStorageRecord record);
+
+    /**
+     * Converts an entity ID to a storage record ID with the string ID representation or number ID value.
+     *
+     * @param id an ID to convert
+     * @see EntityId
+     */
+    public static <I> EntityStorageRecord.Id toRecordId(I id) {
+        final EntityStorageRecord.Id.Builder builder = EntityStorageRecord.Id.newBuilder();
+        //noinspection ChainOfInstanceofChecks
+        if (id instanceof Long) {
+            builder.setLongValue((Long) id);
+        } else if (id instanceof Integer) {
+            builder.setIntValue((Integer) id);
+        } else {
+            final String stringId = idToString(id);
+            builder.setStringValue(stringId);
+        }
+        return builder.build();
+    }
 }

@@ -35,6 +35,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.stream.EventStore;
 
@@ -158,7 +159,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
      * and assigned.
      *
-     * <p>For other types of repositories an instance of {@link org.spine3.server.storage.EntityStorage} is
+     * <p>For other types of repositories an instance of {@link EntityStorage} is
      * created and assigned.
      *
      * @param repository the repository to register

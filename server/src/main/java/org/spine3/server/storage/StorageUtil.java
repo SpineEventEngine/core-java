@@ -21,8 +21,11 @@
 package org.spine3.server.storage;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import org.spine3.SPI;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
@@ -30,6 +33,7 @@ import org.spine3.server.util.Events;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -37,6 +41,7 @@ import java.util.List;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 @SuppressWarnings("UtilityClass")
 public class StorageUtil {
 
@@ -47,15 +52,29 @@ public class StorageUtil {
         final EventRecord.Builder builder = EventRecord.newBuilder()
                 .setEvent(record.getEvent())
                 .setContext(record.getContext());
-
         return builder.build();
     }
 
     /**
      * Converts EventStorageRecords to EventRecords.
      */
-    public static List<EventRecord> toEventRecordsList(List<EventStorageRecord> records) {
+    public static List<EventRecord> toEventRecordList(List<EventStorageRecord> records) {
         return Lists.transform(records, TO_EVENT_RECORD);
+    }
+
+    /**
+     * Converts EventStorageRecords to EventRecords.
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    public static List<EventRecord> toEventRecordList(EventStorageRecord... records) {
+        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT_RECORD);
+    }
+
+    /**
+     * Converts EventStorageRecords to EventRecords.
+     */
+    public static Iterator<EventRecord> toEventRecordsIterator(Iterator<EventStorageRecord> records) {
+        return Iterators.transform(records, TO_EVENT_RECORD);
     }
 
     private static final Function<EventStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStorageRecord, EventRecord>() {

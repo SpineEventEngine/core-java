@@ -20,14 +20,15 @@
 
 package org.spine3.testdata;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
-import org.spine3.protobuf.Messages;
-import org.spine3.server.util.Events;
 import org.spine3.time.ZoneOffset;
+import org.spine3.util.Events;
 
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 
@@ -36,10 +37,10 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
+@SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
 public class TestContextFactory {
 
-    private static final String STUB_PROJECT_ID = "dummy_project_id_123";
+    private static final Any AGGREGATE_ID = toAny(createProjectId("dummy_project_id_123"));
 
     private TestContextFactory() {
     }
@@ -68,7 +69,7 @@ public class TestContextFactory {
         return EventContext.newBuilder()
                 .setEventId(eventId)
                 .setCommandContext(commandContext)
-                .setAggregateId(Messages.toAny(createProjectId(STUB_PROJECT_ID)))
+                .setAggregateId(AGGREGATE_ID)
                 .build();
     }
 
@@ -77,11 +78,21 @@ public class TestContextFactory {
      */
     public static EventContext createEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
-
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(Messages.toAny(aggregateId));
+                .setAggregateId(toAny(aggregateId));
+        return builder.build();
+    }
 
+    /**
+     * Creates a new {@link EventContext} with the given timestamp.
+     */
+    public static EventContext createEventContext(Timestamp timestamp) {
+        final EventId eventId = Events.generateId();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                .setEventId(eventId)
+                .setTimestamp(timestamp)
+                .setAggregateId(AGGREGATE_ID);
         return builder.build();
     }
 }

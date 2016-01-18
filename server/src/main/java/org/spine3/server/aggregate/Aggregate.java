@@ -60,7 +60,7 @@ import static org.spine3.server.util.Identifiers.idToAny;
 /**
  * Abstract base for aggregates.
  *
- * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link Entity}
+ * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link EntityId}
  * @param <M> the type of the state held by the aggregate
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov

@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import org.spine3.SPI;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
@@ -40,6 +41,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
  * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
+@SPI
 public abstract class AggregateStorage<I> {
 
     public AggregateEvents load(I aggregateId) {
@@ -95,6 +97,7 @@ public abstract class AggregateStorage<I> {
 
         final EventContext context = record.getContext();
         final Any event = record.getEvent();
+        // TODO:2016-01-15:alexander.litus: store as a number if it is
         final String aggregateId = Identifiers.idToString(context.getAggregateId());
         final EventId eventId = context.getEventId();
         final String eventIdStr = Identifiers.idToString(eventId);
@@ -133,5 +136,6 @@ public abstract class AggregateStorage<I> {
     /**
      * Releases storage resources (closes I/O streams etc) if needed.
      */
+    // TODO:2016-01-14:alexander.litus: find out why it is unused. Consider implementing AutoCloseable.
     protected abstract void releaseResources();
 }

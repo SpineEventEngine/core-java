@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
+import org.spine3.SPI;
 import org.spine3.base.EventRecord;
 import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.server.stream.EventStore;
@@ -40,6 +41,7 @@ import static org.spine3.server.util.EventRecords.*;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 public abstract class EventStorage implements Closeable {
 
     @SuppressWarnings("TypeMayBeWeakened")
