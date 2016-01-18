@@ -38,15 +38,15 @@ import static org.spine3.io.IoUtil.closeSilently;
 import static org.spine3.io.file.FileUtil.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.filesystem.FsStorageUtil.*;
 import static org.spine3.server.storage.filesystem.FsStorageUtil.idToStringWithEscaping;
+import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
 
 /**
  * An entity storage based on the file system.
  *
  * @author Alexander Litus
  */
-class FsEntityStorage<I, M extends Message> extends EntityStorage<I> {
+class FsEntityStorage<I> extends EntityStorage<I> {
 
     private static final String ENTITY_STORE_DIR_NAME = "/entity-store/";
 

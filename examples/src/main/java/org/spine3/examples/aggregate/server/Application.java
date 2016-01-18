@@ -21,6 +21,7 @@
 package org.spine3.examples.aggregate.server;
 
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.CommandRequest;
@@ -29,15 +30,18 @@ import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
+import org.spine3.server.CommandStore;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.stream.EventStore;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.util.Identifiers.IdConverterRegistry;
-import static org.spine3.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.server.util.Identifiers.IdConverterRegistry;
+import static org.spine3.server.util.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * A sample application showing basic usage of the framework.
@@ -57,11 +61,26 @@ public class Application implements AutoCloseable {
      */
     public Application(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
+
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandDispatcher(CommandDispatcher.getInstance())
-                .setEventBus(EventBus.newInstance())
+                .setCommandDispatcher(createCommandDispatcher())
+                .setEventBus(createEventBus(storageFactory))
                 .build();
+    }
+
+    private static CommandDispatcher createCommandDispatcher() {
+        return CommandDispatcher.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+    }
+
+    private static EventBus createEventBus(StorageFactory storageFactory) {
+        final EventStore eventStore = EventStore.newBuilder()
+                .setStreamExecutor(MoreExecutors.directExecutor())
+                .setStorage(storageFactory.createEventStorage())
+                .setLogger(EventStore.log())
+                .build();
+
+        return EventBus.newInstance(eventStore);
     }
 
     /**

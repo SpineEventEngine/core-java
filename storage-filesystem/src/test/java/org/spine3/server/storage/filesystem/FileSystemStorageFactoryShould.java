@@ -28,7 +28,6 @@ import org.spine3.server.storage.*;
 import org.spine3.test.project.Project;
 
 import javax.annotation.Nonnull;
-
 import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;

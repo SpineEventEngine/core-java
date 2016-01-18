@@ -26,7 +26,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.*;
-import org.spine3.util.Classes;
+import org.spine3.server.util.Classes;
 
 import java.io.IOException;
 import java.nio.file.Files;

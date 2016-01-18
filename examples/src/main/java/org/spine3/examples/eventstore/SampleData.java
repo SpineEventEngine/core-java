@@ -30,7 +30,7 @@ import org.spine3.examples.eventstore.events.TaskDone;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.spine3.util.Users.newUserId;
+import static org.spine3.client.ClientUtil.newUserId;
 
 /**
  * @author Alexander Yevsyukov

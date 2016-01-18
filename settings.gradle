@@ -1,9 +1,11 @@
 rootProject.name = 'spine'
 
-include ':core-java'
+include ':client'
+include ':server'
 include ':examples'
 include ':storage-filesystem'
 
-project(':core-java').projectDir = "$rootDir/core-java" as File
+project(':client').projectDir = "$rootDir/client" as File
+project(':server').projectDir = "$rootDir/server" as File
 project(':examples').projectDir = "$rootDir/examples" as File
 project(':storage-filesystem').projectDir = "$rootDir/storage-filesystem" as File
