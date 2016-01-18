@@ -64,4 +64,9 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
     protected void clear() {
         storage.clear();
     }
+
+    @Override
+    public void close() throws Exception {
+        clear();
+    }
 }

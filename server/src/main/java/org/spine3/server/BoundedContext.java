@@ -43,7 +43,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.stream.EventStore;
 
 import javax.annotation.CheckReturnValue;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +56,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
+@SuppressWarnings("ProhibitedExceptionDeclared")
 public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     /**
@@ -115,10 +115,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *      </ul>
      * </li>
      * </ol>
-     * @throws IOException caused by closing one of the components
+     * @throws Exception caused by closing one of the components
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         storageFactory.close();
         commandDispatcher.close();
         eventBus.close();
@@ -147,7 +147,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return multitenant;
     }
 
-    private void shutDownRepositories() {
+    private void shutDownRepositories() throws Exception {
         for (Repository<?, ?> repository : repositories) {
             unregister(repository);
         }
@@ -182,7 +182,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
-        final Object storage;
+        final AutoCloseable storage;
         final Class<? extends Repository> repositoryClass = repository.getClass();
         if (repository instanceof AggregateRepository) {
             final Class<? extends Aggregate<I, ?>> aggregateClass = RepositoryTypeInfo.getEntityClass(repositoryClass);
@@ -196,13 +196,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         repository.assignStorage(storage);
     }
 
-    private void unregister(Repository<?, ?> repository) {
+    private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandHandlingObject) {
             getCommandDispatcher().unregister((CommandHandlingObject) repository);
         }
 
         getEventBus().unregister(repository);
-        repository.assignStorage(null);
+        repository.close();
     }
 
     @Override

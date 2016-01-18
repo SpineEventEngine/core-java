@@ -45,7 +45,14 @@
       </scope>
       <option name="exceptionsString" value="" />
       <option name="exceptions">
-        <value />
+        <value>
+          <item value="java.lang.Throwable" />
+          <item value="java.lang.Error" />
+          <item value="java.lang.RuntimeException" />
+          <item value="java.lang.NullPointerException" />
+          <item value="java.lang.ClassCastException" />
+          <item value="java.lang.ArrayIndexOutOfBoundsException" />
+        </value>
       </option>
       <option name="ignoreTestCases" value="true" />
       <option name="ignoreLibraryOverrides" value="true" />
@@ -631,6 +638,8 @@
         <option name="onlyWarnOnRootExceptions" value="true" />
       </scope>
       <option name="onlyWarnOnRootExceptions" value="true" />
+      <option name="ignoreLibraryOverrides" value="true" />
+      <option name="ignoreThrown" value="true" />
     </inspection_tool>
     <inspection_tool class="TransientFieldInNonSerializableClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TransientFieldNotInitialized" enabled="true" level="WARNING" enabled_by_default="true" />

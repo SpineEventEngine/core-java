@@ -42,7 +42,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> {
+public abstract class AggregateStorage<I> implements AutoCloseable {
 
     public AggregateEvents load(I aggregateId) {
 
@@ -133,9 +133,4 @@ public abstract class AggregateStorage<I> {
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
-    /**
-     * Releases storage resources (closes I/O streams etc) if needed.
-     */
-    // TODO:2016-01-14:alexander.litus: find out why it is unused. Consider implementing AutoCloseable.
-    protected abstract void releaseResources();
 }

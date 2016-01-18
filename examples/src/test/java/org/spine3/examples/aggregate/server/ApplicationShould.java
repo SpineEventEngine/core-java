@@ -25,8 +25,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
-import java.io.IOException;
-
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ApplicationShould {
 
@@ -39,7 +37,7 @@ public class ApplicationShould {
     }
 
     @Test
-    public void execute_on_file_system_storage() throws IOException {
+    public void execute_on_file_system_storage() throws Exception {
         try (final Application app = new Application(FS_STORAGE_FACTORY))  {
             app.execute();
         }

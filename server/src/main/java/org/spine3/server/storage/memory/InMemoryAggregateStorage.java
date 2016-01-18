@@ -69,7 +69,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void releaseResources() {
+    public void close() {
         // NOP
     }
 

@@ -89,7 +89,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void releaseResources() {
+    public void close() {
         // NOP
         // a reading mechanism closes streams as soon as the page is read.
     }

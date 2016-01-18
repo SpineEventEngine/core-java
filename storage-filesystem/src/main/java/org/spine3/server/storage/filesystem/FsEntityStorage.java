@@ -126,4 +126,9 @@ class FsEntityStorage<I> extends EntityStorage<I> {
             throw propagate(e);
         }
     }
+
+    @Override
+    public void close() throws Exception {
+        //TODO:2016-01-18:alexander.yevsyukov: Do we do anything here?
+    }
 }

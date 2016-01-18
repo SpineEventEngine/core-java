@@ -37,7 +37,7 @@ import static org.spine3.server.util.Identifiers.idToString;
  */
 @SPI
 @SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I> {
+public abstract class EntityStorage<I> implements AutoCloseable {
 
     /**
      * Loads an entity storage record from the storage by an ID.

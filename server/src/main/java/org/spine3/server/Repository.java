@@ -34,14 +34,14 @@ import static java.lang.reflect.Modifier.isPublic;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> {
+public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
     /**
      * The constructor for creating new entity instances.
      */
     private final Constructor<E> entityConstructor;
 
-    private Object storage;
+    private AutoCloseable storage;
 
     protected Repository() {
         this.entityConstructor = getEntityConstructor();
@@ -108,7 +108,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> {
 
     /**
      * Checks if the passed storage object is of required type.
-     *
+     * <p/>
      * <p>Implementation should throw {@link ClassCastException} if the class of the passed
      * object does not match that required by the repository.
      *
@@ -119,11 +119,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> {
 
     /**
      * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
-     * @see #assignStorage(Object)
+     * @see #assignStorage(AutoCloseable)
      */
     @CheckReturnValue
     @Nullable
-    protected Object getStorage() {
+    protected AutoCloseable getStorage() {
         return this.storage;
     }
 
@@ -146,43 +146,40 @@ public abstract class Repository<I, E extends Entity<I, ?>> {
 
     /**
      * Assigns the storage to the repository.
-     *
+     * <p/>
      * <p>The type of the storage depends on and should be checked by the implementations.
-     *
+     * <p/>
      * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
      * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
-     *
-     * <p>{@link BoundedContext} will call this method with {@code null} argument to request performing all necessary
-     * clean-up operations before the context is closed.
-     *
+     * <p/>
      * <p>Another storage can be assigned after this method is called with {@code null} parameter.
      *
-     * @param storage a storage instance or {@code null} if the current storage should be dismissed.
-     *                If there is no storage assigned, passing {@code null} does not have effect
+     * @param storage a storage instance
      * @throws ClassCastException    if the passed storage is not of the required type
      * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
      */
-    public void assignStorage(@Nullable Object storage) {
-        if (storage == null) {
-            shutDown();
-            this.storage = null;
-            return;
-        }
-
+    public void assignStorage(AutoCloseable storage) {
         // Ignore if the same instance of the storage is passed more than one time.
         //noinspection ObjectEquality
         if (storage == this.storage) {
             return;
         }
 
+        if (this.storage != null) {
+            throw new IllegalStateException(String.format(
+                    "Repository has already storage assigned: %s. Passed another: %s.", this.storage, storage));
+        }
+
         checkStorageClass(storage);
         this.storage = storage;
     }
 
-    /**
-     * Override this method to perform repository clean-up before the storage is detached.
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass") // Do nothing by default.
-    protected void shutDown() {
+    @Override
+    public void close() throws Exception {
+        if (this.storage != null) {
+            this.storage.close();
+            this.storage = null;
+        }
     }
+
 }
