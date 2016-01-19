@@ -69,29 +69,25 @@ public class BoundedContextShould {
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
     private final EmptyHandler handler = new EmptyHandler();
 
-    private CommandDispatcher commandDispatcher;
-    private EventBus eventBus;
-
-    private boolean handlersRegistered = false;
-
+    private StorageFactory storageFactory;
     private BoundedContext boundedContext;
+    private boolean handlersRegistered = false;
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandDispatcher = CommandDispatcher.create(
-                new CommandStore(storageFactory.createCommandStorage()));
+        storageFactory = InMemoryStorageFactory.getInstance();
+        boundedContext = BoundedContextTestStubs.create(storageFactory);
+    }
 
-        eventBus = EventBus.newInstance(EventStore.newBuilder()
+    private static EventBus newEventBus(StorageFactory storageFactory) {
+        return EventBus.newInstance(EventStore.newBuilder()
             .setStreamExecutor(MoreExecutors.directExecutor())
             .setStorage(storageFactory.createEventStorage())
             .build());
+    }
 
-        boundedContext = BoundedContext.newBuilder()
-                .setStorageFactory(storageFactory)
-                .setCommandDispatcher(commandDispatcher)
-                .setEventBus(eventBus)
-                .build();
+    private static CommandDispatcher newCommandDispatcher(StorageFactory storageFactory) {
+        return CommandDispatcher.create(new CommandStore(storageFactory.createCommandStorage()));
     }
 
     @After
@@ -106,7 +102,7 @@ public class BoundedContextShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-        boundedContext.register(new ProjectAggregateRepository());
+        boundedContext.register(new ProjectAggregateRepository(boundedContext));
         boundedContext.getEventBus().register(handler);
         handlersRegistered = true;
     }
@@ -163,17 +159,17 @@ public class BoundedContextShould {
 
     @Test
     public void register_AggregateRepository() {
-        boundedContext.register(new ProjectAggregateRepository());
+        boundedContext.register(new ProjectAggregateRepository(boundedContext));
     }
 
     @Test
     public void register_ProcessManagerRepository() {
-        boundedContext.register(new ProjectPmRepo());
+        boundedContext.register(new ProjectPmRepo(boundedContext));
     }
 
     @Test
     public void register_ProjectionRepository() {
-        boundedContext.register(new ProjectReportRepository());
+        boundedContext.register(new ProjectReportRepository(boundedContext));
     }
 
     @Test
@@ -240,7 +236,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_CommandDispatcher_from_builder() {
-        final CommandDispatcher expected = commandDispatcher;
+        final CommandDispatcher expected = newCommandDispatcher(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(expected);
         assertEquals(expected, builder.getCommandDispatcher());
     }
@@ -253,7 +249,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_EventBus_from_builder() {
-        final EventBus expected = eventBus;
+        final EventBus expected = newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
@@ -284,8 +280,8 @@ public class BoundedContextShould {
     public void verify_namespace_attribute_if_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(commandDispatcher)
-                .setEventBus(eventBus)
+                .setCommandDispatcher(newCommandDispatcher(storageFactory))
+                .setEventBus(newEventBus(storageFactory))
                 .setMultitenant(true)
                 .build();
 
@@ -301,6 +297,9 @@ public class BoundedContextShould {
     }
 
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, AggregateShould.ProjectAggregate> {
+        private ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
@@ -334,6 +333,9 @@ public class BoundedContextShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+        private ProjectPmRepo(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 
     private static class ProjectReport extends StreamProjection<ProjectId, Empty> {
@@ -351,5 +353,8 @@ public class BoundedContextShould {
     }
 
     private static class ProjectReportRepository extends StreamProjectionRepository<ProjectId, ProjectReport, Empty> {
+        protected ProjectReportRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 }

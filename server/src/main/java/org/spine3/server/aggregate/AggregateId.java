@@ -20,13 +20,16 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.client.CommandRequest;
 import org.spine3.protobuf.MessageField;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.util.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
@@ -71,9 +74,23 @@ public final class AggregateId<I> extends EntityId<I> {
      * @param command the command to get id from
      * @return value of the id
      */
-    public static AggregateId getAggregateId(Message command) {
-        final Object value = FIELD.getValue(command);
+    public static AggregateId fromCommand(Message command) {
+        final Object value = FIELD.getValue(checkNotNull(command));
         return of(value);
+    }
+
+    /**
+     * Obtains an aggregate id from the passed command request.
+     *
+     * <p>The id value must be the first field of the proto message. Its name must end with "id".
+     *
+     * @param request the command request
+     * @return value of the id
+     */
+    public static AggregateId fromRequest(CommandRequest request) {
+        final Any any = request.getCommand();
+        final Message command = Messages.fromAny(any);
+        return fromCommand(command);
     }
 
     /**

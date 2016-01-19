@@ -37,13 +37,27 @@ import static java.lang.reflect.Modifier.isPublic;
 public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
     /**
+     * The {@code BoundedContext} in which this repository works.
+     */
+    private final BoundedContext boundedContext;
+
+    /**
      * The constructor for creating new entity instances.
      */
     private final Constructor<E> entityConstructor;
 
+    /**
+     * The data storage for this repository.
+     */
     private AutoCloseable storage;
 
-    protected Repository() {
+    /**
+     * Creates the repository in the passed {@link BoundedContext}.
+     *
+     * @param boundedContext the {@link BoundedContext} in which this repository works
+     */
+    protected Repository(BoundedContext boundedContext) {
+        this.boundedContext = boundedContext;
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
     }
@@ -71,6 +85,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
         final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
         return propagate(new NoSuchMethodException(message));
+    }
+
+    /**
+     * @return the {@link BoundedContext} in which this repository works
+     */
+    protected BoundedContext getBoundedContext() {
+        return boundedContext;
     }
 
     /**

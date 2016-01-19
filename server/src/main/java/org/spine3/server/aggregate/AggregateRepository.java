@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.Repository;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -74,6 +75,10 @@ public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repositor
      * The number of events to store between snapshots.
      */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
+
+    public AggregateRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
 
     @Override
     protected void checkStorageClass(Object storage) {
@@ -222,13 +227,13 @@ public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repositor
     @SuppressWarnings("unused") // because the method is used by Reflection.
     public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         final I aggregateId = getAggregateId(command);
-        final A aggregateRoot = load(aggregateId);
+        final A aggregate = load(aggregateId);
 
-        aggregateRoot.dispatch(command, context);
+        aggregate.dispatch(command, context);
 
-        final List<EventRecord> eventRecords = aggregateRoot.getUncommittedEvents();
+        final List<EventRecord> eventRecords = aggregate.getUncommittedEvents();
 
-        store(aggregateRoot);
+        store(aggregate);
         return eventRecords;
     }
 
@@ -238,6 +243,6 @@ public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repositor
     // To double check this we need to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateId.getAggregateId(command).value();
+        return (I) AggregateId.fromCommand(command).value();
     }
 }

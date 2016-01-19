@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -32,13 +33,20 @@ import static org.junit.Assert.assertEquals;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class RepositoryBaseShould {
+public class RepositoryShould {
+
+    private BoundedContext boundedContext;
+
+    @Before
+    public void setUp() {
+        this.boundedContext = BoundedContextTestStubs.create();
+    }
 
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
     public void throw_exception_if_entity_constructor_is_protected() {
         try {
-            new RepositoryForEntitiesWithProtectedConstructor();
+            new RepositoryForEntitiesWithProtectedConstructor(boundedContext);
         } catch (RuntimeException e) {
             assertEquals(e.getCause().getClass(), IllegalAccessException.class);
         }
@@ -48,7 +56,7 @@ public class RepositoryBaseShould {
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
     public void throw_exception_if_entity_constructor_is_private() {
         try {
-            new RepositoryForEntitiesWithPrivateConstructor();
+            new RepositoryForEntitiesWithPrivateConstructor(boundedContext);
         } catch (RuntimeException e) {
             assertEquals(e.getCause().getClass(), IllegalAccessException.class);
         }
@@ -58,13 +66,17 @@ public class RepositoryBaseShould {
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // OK in this case
     public void throw_exception_if_entity_has_no_required_constructor() {
         try {
-            new RepositoryForEntitiesWithoutRequiredConstructor();
+            new RepositoryForEntitiesWithoutRequiredConstructor(boundedContext);
         } catch (RuntimeException e) {
             assertEquals(e.getCause().getClass(), NoSuchMethodException.class);
         }
     }
 
     public static class RepositoryForEntitiesWithProtectedConstructor extends Repository<ProjectId, EntityWithProtectedConstructor> {
+        public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
         @Override
         protected void checkStorageClass(Object storage) {
         }
@@ -90,6 +102,10 @@ public class RepositoryBaseShould {
     }
 
     public static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
+        public RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
         @Override
         protected void checkStorageClass(Object storage) {
         }
@@ -115,6 +131,10 @@ public class RepositoryBaseShould {
     }
 
     public static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
+        public RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
         @Override
         protected void checkStorageClass(Object storage) {
         }

@@ -122,7 +122,7 @@ public class Application implements AutoCloseable {
         storageFactory.init();
 
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
-        boundedContext.register(new OrderRepository());
+        boundedContext.register(new OrderRepository(boundedContext));
 
         // Register event handlers.
         boundedContext.getEventBus().register(eventLogger);

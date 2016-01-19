@@ -28,6 +28,7 @@ import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -70,6 +71,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #dispatchEvent(Message, EventContext)
      */
     private static final String EVENT_DISPATCHER_METHOD_NAME = "dispatchEvent";
+
+    /**
+     * {@inheritDoc}
+     */
+    protected ProcessManagerRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
 
     /**
      * Intended to return a process manager ID based on the command and command context.

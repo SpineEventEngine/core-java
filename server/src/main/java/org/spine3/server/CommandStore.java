@@ -20,10 +20,7 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.client.CommandRequest;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
@@ -50,9 +47,7 @@ public class CommandStore implements AutoCloseable {
     public void store(CommandRequest request) {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        final AggregateId aggregateId = AggregateId.getAggregateId(command);
+        final AggregateId aggregateId = AggregateId.fromRequest(request);
         //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
         storage.store(aggregateId, request);
     }

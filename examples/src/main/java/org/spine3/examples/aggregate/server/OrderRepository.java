@@ -20,6 +20,7 @@
 package org.spine3.examples.aggregate.server;
 
 import org.spine3.examples.aggregate.OrderId;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 
 /**
@@ -27,4 +28,7 @@ import org.spine3.server.aggregate.AggregateRepository;
  */
 public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
 
+    public OrderRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
 }

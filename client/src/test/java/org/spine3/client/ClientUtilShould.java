@@ -27,8 +27,8 @@ import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.spine3.client.ClientUtil.generateId;
 import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.CommandRequests.generateId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClientUtilShould {

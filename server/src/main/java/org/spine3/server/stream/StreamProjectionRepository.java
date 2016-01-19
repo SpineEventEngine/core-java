@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.util.Identifiers;
@@ -39,9 +40,12 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"unused", "AbstractClassNeverImplemented"})
 public abstract class StreamProjectionRepository<I, P extends StreamProjection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements MultiHandler {
+
+    protected StreamProjectionRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
 
     /**
      * {@inheritDoc}
@@ -58,7 +62,12 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
                 .build();
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
+    /**
+     * Casts result of {@link EventContext#getAggregateId()} to the type of index of this
+     * storage.
+     *
+     * <p>Override to provide custom logic of ID generation.
+     */
     protected I getEntityId(Message event, EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
         @SuppressWarnings("unchecked")
@@ -105,7 +114,8 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
         store(p);
 
         //TODO:2016-01-08:alexander.yevsyukov: Store the timestamp of this event. We will need this value
-        // when reconnecting to the EventStore for catching up.
+        // when reconnecting to the EventStore for catching up. Presumably this belongs to
+        // EventConsumingRepository, which 'sits' on EventConsumingRepositoryStorage
     }
 
     /**

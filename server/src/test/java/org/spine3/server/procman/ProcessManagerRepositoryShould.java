@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -61,7 +63,8 @@ public class ProcessManagerRepositoryShould {
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
-    private final TestProcessManagerRepository repository = new TestProcessManagerRepository();
+    private final TestProcessManagerRepository repository = new TestProcessManagerRepository(
+            BoundedContextTestStubs.create());
 
     @Before
     public void setUpTest() {
@@ -172,5 +175,8 @@ public class ProcessManagerRepositoryShould {
 
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, ProcessManagerShould.TestProcessManager, Message> {
+        private TestProcessManagerRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 }

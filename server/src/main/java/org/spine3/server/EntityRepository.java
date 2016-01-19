@@ -44,6 +44,13 @@ import static org.spine3.server.storage.EntityStorage.toRecordId;
  */
 public class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
+    /**
+     * {@inheritDoc}
+     */
+    public EntityRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
+
     @Nullable
     @Override
     protected EntityStorage<I> getStorage() {

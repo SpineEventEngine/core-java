@@ -26,8 +26,8 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
-import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.CommandRequests;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -94,7 +94,7 @@ public class TestCommandFactory {
      */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, CommandId.getDefaultInstance(), when);
-        final CommandRequest result = ClientUtil.newCommandRequest(command, context);
+        final CommandRequest result = CommandRequests.newCommandRequest(command, context);
         return result;
     }
 
