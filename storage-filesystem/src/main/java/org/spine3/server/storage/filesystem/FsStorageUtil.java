@@ -38,7 +38,6 @@ import static java.nio.file.Files.copy;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 class FsStorageUtil {
 
     private FsStorageUtil() {

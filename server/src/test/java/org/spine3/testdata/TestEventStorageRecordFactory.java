@@ -31,7 +31,6 @@ import static org.spine3.testdata.TestEventFactory.*;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class TestEventStorageRecordFactory {
 
     private static final EventStorageRecord PROJECT_CREATED_RECORD = EventStorageRecord.newBuilder()

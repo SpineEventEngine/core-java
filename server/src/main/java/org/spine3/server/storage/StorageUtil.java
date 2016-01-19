@@ -42,7 +42,6 @@ import java.util.List;
  * @author Alexander Yevsyukov
  */
 @SPI
-@SuppressWarnings("UtilityClass")
 public class StorageUtil {
 
     /**

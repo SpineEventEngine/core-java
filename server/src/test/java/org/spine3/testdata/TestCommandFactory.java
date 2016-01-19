@@ -41,7 +41,6 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestCommandFactory {
 
     private static final UserId STUB_USER_ID = newUserId("stub_user_id");

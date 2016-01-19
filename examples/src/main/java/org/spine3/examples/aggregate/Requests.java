@@ -35,7 +35,6 @@ import org.spine3.time.ZoneOffset;
  *
  * @author Mikhail Melnik
  */
-@SuppressWarnings("UtilityClass")
 class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {

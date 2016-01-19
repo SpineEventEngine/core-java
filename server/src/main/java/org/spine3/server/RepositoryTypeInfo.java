@@ -29,7 +29,6 @@ import javax.annotation.CheckReturnValue;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class RepositoryTypeInfo {
     /**
      * The index of the declaration of the generic type {@code I} in the {@link Repository} class.

@@ -27,7 +27,6 @@ import org.spine3.test.project.ProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestAggregateIdFactory {
 
     private TestAggregateIdFactory() {

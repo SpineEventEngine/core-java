@@ -39,7 +39,6 @@ import static org.spine3.testdata.TestEventFactory.*;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestEventRecordFactory {
 
     private static final ProjectId STUB_PROJECT_ID = createProjectId("dummy_project_id_456");

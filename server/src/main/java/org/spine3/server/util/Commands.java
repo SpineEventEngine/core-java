@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Commands {
 
     static {

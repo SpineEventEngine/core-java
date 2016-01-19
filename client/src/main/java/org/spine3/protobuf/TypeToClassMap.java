@@ -47,7 +47,6 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';

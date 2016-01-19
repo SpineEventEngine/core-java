@@ -43,7 +43,6 @@ import static org.spine3.protobuf.Messages.fromAny;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class Identifiers {
 
     /*

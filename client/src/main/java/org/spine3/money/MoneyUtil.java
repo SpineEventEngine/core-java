@@ -26,7 +26,6 @@ package org.spine3.money;
  * @see Money
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class MoneyUtil {
 
     private MoneyUtil() {

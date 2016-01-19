@@ -39,7 +39,6 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Classes {
 
     private Classes() {}

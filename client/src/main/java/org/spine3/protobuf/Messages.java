@@ -40,7 +40,6 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Messages {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.

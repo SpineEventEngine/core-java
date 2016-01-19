@@ -25,7 +25,6 @@ package org.spine3.util;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Math {
 
     private Math() {
