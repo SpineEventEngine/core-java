@@ -20,6 +20,8 @@
 
 package org.spine3.server;
 
+import org.spine3.server.util.Classes;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -36,6 +38,10 @@ import static java.lang.reflect.Modifier.isPublic;
  */
 public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
+    /**
+     * The index of the declaration of the generic type {@code E} in the {@link Repository} class.
+     */
+    private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
     /**
      * The {@code BoundedContext} in which this repository works.
      */
@@ -60,6 +66,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         this.boundedContext = boundedContext;
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
+    }
+
+    /**
+     * Returns {@link Class} object representing entity type of the given repository.
+     *
+     * @return the aggregate root {@link Class}
+     */
+    @CheckReturnValue
+    protected static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
+        return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
     }
 
     private Constructor<E> getEntityConstructor() {
@@ -107,7 +123,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @CheckReturnValue
     protected Class<E> getEntityClass() {
-        return RepositoryTypeInfo.getEntityClass(getClass());
+        return getEntityClass(getClass());
     }
 
     /**

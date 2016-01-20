@@ -34,10 +34,6 @@ public class RepositoryTypeInfo {
      * The index of the declaration of the generic type {@code I} in the {@link Repository} class.
      */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
-    /**
-     * The index of the declaration of the generic type {@code E} in the {@link Repository} class.
-     */
-    private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
 
     /**
      * Returns {@link Class} of entity IDs of the passed repository.
@@ -47,16 +43,6 @@ public class RepositoryTypeInfo {
     @CheckReturnValue
     public static <I> Class<I> getIdClass(Class<? extends Repository> clazz) {
         return Classes.getGenericParameterType(clazz, ID_CLASS_GENERIC_INDEX);
-    }
-
-    /**
-     * Returns {@link Class} object representing entity type of the given repository.
-     *
-     * @return the aggregate root {@link Class}
-     */
-    @CheckReturnValue
-    public static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
-        return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
     }
 
     private RepositoryTypeInfo() {

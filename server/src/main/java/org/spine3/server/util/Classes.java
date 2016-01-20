@@ -24,14 +24,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Set;
-
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * Utilities for working with classes.
@@ -39,12 +38,17 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@Internal
 public class Classes {
-
-    private Classes() {}
 
     /**
      * Returns the class of the generic type of the passed class.
+     *
+     * <p>Two restrictions apply to the passed class:
+     * <ol>
+     *     <li>The passed class must have a generic superclass.
+     *     <li>The number of generic parameters in the passed class and its superclass must be the same.
+     * </ol>
      *
      * @param clazz the class to check
      * @param paramNumber the number of the generic parameter
@@ -53,19 +57,13 @@ public class Classes {
      */
     @CheckReturnValue
     public static <T> Class<T> getGenericParameterType(Class<?> clazz, int paramNumber) {
-        try {
-            final Type genericSuperclass = clazz.getGenericSuperclass();
-            final Field actualTypeArguments = genericSuperclass.getClass().getDeclaredField("actualTypeArguments");
+        // We cast here as we assume that the superclasses of the classes we operate with are parametrized too.
+        final ParameterizedType genericSuperclass = (ParameterizedType) clazz.getGenericSuperclass();
 
-            actualTypeArguments.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            final Class<T> result = (Class<T>) ((Type[]) actualTypeArguments.get(genericSuperclass))[paramNumber];
-            actualTypeArguments.setAccessible(false);
-
-            return result;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw propagate(e);
-        }
+        final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
+        @SuppressWarnings("unchecked")
+        final Class<T> result = (Class<T>) typeArguments[paramNumber];
+        return result;
     }
 
     /**
@@ -89,4 +87,6 @@ public class Classes {
         }
         return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
     }
+
+    private Classes() {}
 }

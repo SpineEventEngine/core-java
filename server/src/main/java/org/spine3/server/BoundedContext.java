@@ -181,15 +181,19 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         getEventBus().register(repository);
     }
 
+    //TODO:2016-01-20:alexander.yevsyukov: Avoid this kind of 'automation' as it makes BoundedContext code depend
+    // on possible implementations and storages of repositories.
     private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
         final AutoCloseable storage;
-        final Class<? extends Repository> repositoryClass = repository.getClass();
         if (repository instanceof AggregateRepository) {
-            final Class<? extends Aggregate<I, ?>> aggregateClass = RepositoryTypeInfo.getEntityClass(repositoryClass);
+            final AggregateRepository<I, Aggregate<I, ?>> aggregateRepo = (AggregateRepository<I, Aggregate<I, ?>>)repository;
+            final Class<? extends Aggregate<I, ?>> aggregateClass = aggregateRepo.getEntityClass();
 
             storage = storageFactory.createAggregateStorage(aggregateClass);
         } else {
-            final Class<? extends Entity<I, Message>> entityClass = RepositoryTypeInfo.getEntityClass(repositoryClass);
+            final EntityRepository<I, Entity<I, Message>, Message> entityRepo =
+                    (EntityRepository<I, Entity<I, Message>, Message>)repository;
+            final Class<? extends Entity<I, Message>> entityClass = entityRepo.getEntityClass();
 
             storage = storageFactory.createEntityStorage(entityClass);
         }

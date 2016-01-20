@@ -48,12 +48,23 @@ import static com.google.common.base.Throwables.propagate;
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
  * specified as the generic parameter.
  *
+ * <p>This class is made abstract for preserving type information of aggregate ID and
+ * aggregate classes used by implementations. A simple repository class looks like this:
+ * <pre>
+ * public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
+ *     public OrderRepository(BoundedContext boundedContext) {
+ *         super(boundedContext);
+ *     }
+ * }
+ * </pre>
+ *
  * @param <I> the type of the aggregated root id
  * @param <A> the type of the aggregated root
+ *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
+public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
         implements MultiHandler, CommandHandlingObject {
 
     /**
@@ -76,7 +87,10 @@ public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repositor
      */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
-    public AggregateRepository(BoundedContext boundedContext) {
+    /**
+     * {@inheritDoc}
+     */
+    protected AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -214,8 +228,8 @@ public class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repositor
     /**
      * Processes the command by dispatching it to a method of an aggregate.
      * <p/>
-     * <p>For more details on writing aggregate commands read
-     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
+     * <p>For more details on writing aggregate commands please see
+     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">“Writing Aggregate Commands”</a>.
      *
      * @param command the command to dispatch
      * @param context context info of the command
