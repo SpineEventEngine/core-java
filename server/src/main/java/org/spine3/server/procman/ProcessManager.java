@@ -193,8 +193,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param commandId      the ID of the command, which caused the event
      * @param event          the event for which to create the context
      * @param currentState   the state of the process manager after the event was applied
-     * @param whenModified   the moment of the aggregate modification for this event
-     * @param currentVersion the version of the aggregate after the event was applied
+     * @param whenModified   the moment of the process manager modification for this event
+     * @param currentVersion the version of the process manager after the event was applied
      * @return new instance of the {@code EventContext}
      */
     @CheckReturnValue

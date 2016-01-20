@@ -69,11 +69,11 @@ class PmCommandHandler extends CommandHandlerMethod {
         if (!acceptsCorrectParams(method)) {
             return false;
         }
-        final boolean isReturnTypeCorrect = isReturnTypeCorrect(method);
-        return isReturnTypeCorrect;
+        final boolean result = returnsMessageListOrVoid(method);
+        return result;
     }
 
-    private static boolean isReturnTypeCorrect(Method method) {
+    private static boolean returnsMessageListOrVoid(Method method) {
         final Class<?> returnType = method.getReturnType();
 
         if (Message.class.isAssignableFrom(returnType)) {

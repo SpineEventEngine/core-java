@@ -82,7 +82,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         super(target, method);
     }
 
-        protected static boolean isAnnotatedCorrectly(Method method) {
+    protected static boolean isAnnotatedCorrectly(Method method) {
         final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
         return isAnnotated;
     }
@@ -95,7 +95,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         }
         final boolean acceptsCorrectParams =
                 Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+                        CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
         return acceptsCorrectParams;
     }
 
@@ -180,7 +180,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
 
-        final CommandHandlingObject commandHandler = (CommandHandlingObject)obj;
+        final CommandHandlingObject commandHandler = (CommandHandlingObject) obj;
 
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
@@ -216,7 +216,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
 
     /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
-     *
+     * <p/>
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
