@@ -33,8 +33,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
 
-    @SuppressWarnings("TypeMayBeWeakened") // We seek for Message types in event handlers, not MessageOfBuilders.
-    private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
+        private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
 
         protected TestStreamProjection(Integer id) {
             super(id);

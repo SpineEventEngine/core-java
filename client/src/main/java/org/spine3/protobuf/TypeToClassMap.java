@@ -59,14 +59,15 @@ public class TypeToClassMap {
 
     /**
      * A map from Protobuf type name to Java class name.
-     *
+     * <p/>
      * <p>Example:
      * <p>{@code spine.base.EventId} - {@code org.spine3.base.EventId}
      */
     private static final Map<TypeName, ClassName> NAMES_MAP = buildNamesMap();
 
 
-    private TypeToClassMap() {}
+    private TypeToClassMap() {
+    }
 
     /**
      * Retrieves Protobuf types known to the application.
@@ -99,7 +100,7 @@ public class TypeToClassMap {
 
     /**
      * Attempts to find a {@link ClassName} for the passed inner Protobuf type.
-     *
+     * <p/>
      * <p>For example, com.package.OuterClass.InnerClass class name.
      *
      * @param type {@link TypeName} of the class to find
@@ -148,7 +149,6 @@ public class TypeToClassMap {
      * Every class name ends with {@code Value} (except {@link Duration} class).
      * Other classes from this package are unnecessary.
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
     private static ImmutableMap<TypeName, ClassName> buildProtobufNamesMap() {
 
         return ImmutableMap.<TypeName, ClassName>builder()
@@ -190,7 +190,6 @@ public class TypeToClassMap {
      * Loads all data from property file(s) into memory. The property file should contain proto type urls and
      * appropriate java class names.
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Not in this case
     private static ImmutableSet<Properties> loadAllProperties() {
 
         final Enumeration<URL> resources = getResources();

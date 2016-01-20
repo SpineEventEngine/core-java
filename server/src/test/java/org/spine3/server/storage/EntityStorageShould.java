@@ -112,7 +112,6 @@ public abstract class EntityStorageShould {
         return builder.build();
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private static StringValue newStringValue(String value) {
         return StringValue.newBuilder().setValue(value).build();
     }

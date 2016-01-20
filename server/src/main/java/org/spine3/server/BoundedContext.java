@@ -279,7 +279,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
         try {

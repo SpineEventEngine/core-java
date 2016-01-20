@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class CommandStorage extends AbstractStorage {
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {
         checkNotNull(aggregateId, "aggregateId");
         checkNotNull(request, "request");

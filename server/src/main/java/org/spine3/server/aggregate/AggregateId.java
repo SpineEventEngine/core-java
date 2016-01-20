@@ -59,7 +59,6 @@ public final class AggregateId<I> extends EntityId<I> {
         return new AggregateId<>(value);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // We want already built instances at this level of API.
     public static AggregateId<? extends Message> of(EventContext value) {
         final Message message = Messages.fromAny(value.getAggregateId());
         final AggregateId<Message> result = new AggregateId<>(message);
@@ -68,7 +67,7 @@ public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * Obtains an aggregate id from the passed command instance.
-     *
+     * <p/>
      * <p>The id value must be the first field of the proto message. Its name must end with "id".
      *
      * @param command the command to get id from
@@ -81,7 +80,7 @@ public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * Obtains an aggregate id from the passed command request.
-     *
+     * <p/>
      * <p>The id value must be the first field of the proto message. Its name must end with "id".
      *
      * @param request the command request
@@ -95,7 +94,7 @@ public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * Accessor object for aggregate ID fields in commands.
-     *
+     * <p/>
      * <p>An aggregate ID must be the first field declared in a message and its
      * name must end with {@code "id"} suffix.
      */

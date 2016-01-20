@@ -43,7 +43,6 @@ import static org.spine3.server.util.EventRecords.*;
 @SPI
 public abstract class EventStorage extends AbstractStorage {
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public void store(EventRecord record) {
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
         write(storeRecord);

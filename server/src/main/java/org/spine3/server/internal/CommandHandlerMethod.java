@@ -82,8 +82,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         super(target, method);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // accept methods only
-    protected static boolean isAnnotatedCorrectly(Method method) {
+        protected static boolean isAnnotatedCorrectly(Method method) {
         final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
         return isAnnotated;
     }

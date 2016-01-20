@@ -54,7 +54,6 @@ public class Timestamps {
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {
         if (t1 == null) {
             return t2 == null ? 0 : 1;

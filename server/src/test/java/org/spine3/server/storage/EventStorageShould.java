@@ -250,7 +250,6 @@ public abstract class EventStorageShould {
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private static StringValue newRandomStringValue() {
         return StringValue.newBuilder().setValue(newUuid()).build();
     }

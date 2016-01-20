@@ -328,7 +328,6 @@ public abstract class EventStore implements AutoCloseable {
     // Logging methods
     //------------------------------------------
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private void logStored(EventRecord request) {
         if (logger == null) {
             return;

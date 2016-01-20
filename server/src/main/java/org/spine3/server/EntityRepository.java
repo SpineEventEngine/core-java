@@ -78,7 +78,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return entity;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private E toEntity(I id, EntityStorageRecord record) {
         final E entity = create(id);
         final M state = fromAny(record.getState());

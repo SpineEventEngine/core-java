@@ -111,7 +111,6 @@ public abstract class MessageField {
      */
     protected abstract boolean isFieldAvailable(Message message);
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private Method getAccessor(Message message) {
         final Class<? extends Message> messageClass = message.getClass();
         Method method = accessors.get(messageClass);
@@ -140,7 +139,6 @@ public abstract class MessageField {
      * @param fieldIndex the index of the field
      * @return field descriptor
      */
-    @SuppressWarnings("TypeMayBeWeakened")
     public static Descriptors.FieldDescriptor getFieldDescriptor(Message msg, int fieldIndex) {
         final Descriptors.FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
         return result;
@@ -177,8 +175,7 @@ public abstract class MessageField {
      * @param index a zero-based index of the field
      * @return name of the field
      */
-    @SuppressWarnings("TypeMayBeWeakened") // Enforce type for API clarity.
-    public static String getFieldName(Message msg, int index) {
+        public static String getFieldName(Message msg, int index) {
         final Descriptors.FieldDescriptor fieldDescriptor = getFieldDescriptor(msg, index);
         final String fieldName = fieldDescriptor.getName();
         return fieldName;
