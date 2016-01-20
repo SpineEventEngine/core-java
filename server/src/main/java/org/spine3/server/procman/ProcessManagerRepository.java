@@ -146,7 +146,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private Multimap<Method, Class<? extends Message>> getCommandHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
-        final Method handler = commandDispatcherAsMethod();
+        final Method handler = dispatchCommandMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, commandClasses)
                 .build();
@@ -160,7 +160,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private Multimap<Method, Class<? extends Message>> getEventHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
-        final Method handler = eventHandlerAsMethod();
+        final Method handler = dispatchEventMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(handler, eventClasses)
                 .build();
@@ -238,14 +238,14 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     /**
      * Returns the reference to the method {@link #dispatchCommand(Message, CommandContext)} of this repository.
      */
-    private static Method commandDispatcherAsMethod() {
+    private static Method dispatchCommandMethod() {
         return getDispatcherMethod(COMMAND_DISPATCHER_METHOD_NAME, CommandContext.class);
     }
 
     /**
      * Returns the reference to the method {@link #dispatchEvent(Message, EventContext)} of this repository.
      */
-    private static Method eventHandlerAsMethod() {
+    private static Method dispatchEventMethod() {
         return getDispatcherMethod(EVENT_DISPATCHER_METHOD_NAME, EventContext.class);
     }
 

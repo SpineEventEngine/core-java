@@ -132,7 +132,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends Aggregate> aggregateClass = getEntityClass();
         final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
-        final Method dispatch = dispatchAsMethod();
+        final Method dispatch = dispatchMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(dispatch, aggregateCommands)
                 .build();
@@ -141,7 +141,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     /**
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
-    private Method dispatchAsMethod() {
+    private Method dispatchMethod() {
         try {
             return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
         } catch (NoSuchMethodException e) {
