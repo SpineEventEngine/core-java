@@ -173,6 +173,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param id the id of the entity
      * @return new entity instance
      */
+    @CheckReturnValue
     public E create(I id) {
         try {
             final E result = entityConstructor.newInstance(id);

@@ -31,14 +31,11 @@ import javax.annotation.Nullable;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Alexander Litus
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class RepositoryShould {
 
     private BoundedContext boundedContext;
-    private Repository<?, ?> repository;
+    private Repository<ProjectId, ProjectEntity> repository;
     private EntityStorage<ProjectId> storage;
 
     @Before
@@ -235,5 +232,68 @@ public class RepositoryShould {
         repository.close();
         assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
+    }
+
+    @Test
+    public void ignore_if_the_same_storage_is_passed_twice_or_more() {
+        repository.assignStorage(storage);
+
+        repository.assignStorage(storage);
+        repository.assignStorage(storage);
+        assertEquals(storage, repository.getStorage());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void reject_another_passed_storage() {
+        repository.assignStorage(storage);
+
+        repository.assignStorage(InMemoryStorageFactory.getInstance().createEntityStorage(ProjectEntity.class));
+    }
+
+    @Test
+    public void create_entities() {
+        final ProjectId id = ProjectId.newBuilder().setId("create_entities()").build();
+        final ProjectEntity projectEntity = repository.create(id);
+        assertNotNull(projectEntity);
+        assertEquals(id, projectEntity.getId());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void propagate_exception_if_entity_construction_fails() {
+        final Repository<ProjectId, FailingEntity> repo = new RepoForFailingEntities(boundedContext);
+        repo.create(ProjectId.newBuilder().setId("works?").build());
+    }
+
+    public static class FailingEntity extends Entity<ProjectId, Project> {
+        public FailingEntity(ProjectId id) {
+            super(id);
+            throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return Project.getDefaultInstance();
+        }
+    }
+
+    public static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity> {
+
+        protected RepoForFailingEntities(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
+        @Override
+        protected void store(FailingEntity obj) {
+        }
+
+        @Nullable
+        @Override
+        protected FailingEntity load(ProjectId id) {
+            return null;
+        }
+
+        @Override
+        protected void checkStorageClass(Object storage) {
+        }
     }
 }
