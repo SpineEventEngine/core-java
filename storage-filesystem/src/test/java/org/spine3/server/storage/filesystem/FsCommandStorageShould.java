@@ -28,8 +28,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestCommandFactory;
 
-import java.io.IOException;
-
 /**
  * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
  *
@@ -46,7 +44,7 @@ public class FsCommandStorageShould {
 
 
     @After
-    public void tearDownTest() throws IOException {
+    public void tearDownTest() throws Exception {
         FACTORY.close();
     }
 

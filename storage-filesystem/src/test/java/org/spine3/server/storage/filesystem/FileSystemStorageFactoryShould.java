@@ -28,7 +28,6 @@ import org.spine3.server.storage.*;
 import org.spine3.test.project.Project;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -41,7 +40,7 @@ public class FileSystemStorageFactoryShould {
     private static final StorageFactory FACTORY = FileSystemStorageFactory.newInstance(FileSystemStorageFactoryShould.class);
 
     @After
-    public void tearDownTest() throws IOException {
+    public void tearDownTest() throws Exception {
         FACTORY.close();
     }
 

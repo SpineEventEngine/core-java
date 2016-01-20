@@ -83,8 +83,9 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         clear();
+        super.close();
     }
 
     /**

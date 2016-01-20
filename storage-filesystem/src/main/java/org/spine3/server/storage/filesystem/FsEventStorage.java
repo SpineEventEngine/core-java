@@ -78,10 +78,11 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         for (EventRecordFileIterator i : iterators) {
             i.close();
         }
+        super.close();
     }
 
     private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {

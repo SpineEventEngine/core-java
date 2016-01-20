@@ -141,7 +141,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
     /**
      * Checks if the passed storage object is of required type.
-     * <p/>
+     *
      * <p>Implementation should throw {@link ClassCastException} if the class of the passed
      * object does not match that required by the repository.
      *
@@ -158,6 +158,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     @Nullable
     protected AutoCloseable getStorage() {
         return this.storage;
+    }
+
+    /**
+     * @return true if the storage is assigned, false otherwise
+     */
+    public boolean storageAssigned() {
+        return this.storage != null;
     }
 
     /**
@@ -179,9 +186,9 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
 
     /**
      * Assigns the storage to the repository.
-     * <p/>
+     *
      * <p>The type of the storage depends on and should be checked by the implementations.
-     * <p/>
+     *
      * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
      * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
      *

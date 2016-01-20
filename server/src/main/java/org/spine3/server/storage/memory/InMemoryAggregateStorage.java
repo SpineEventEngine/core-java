@@ -68,11 +68,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         return records.iterator();
     }
 
-    @Override
-    public void close() {
-        // NOP
-    }
-
     /**
      * Clears all data in the storage.
      */

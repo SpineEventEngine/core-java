@@ -57,7 +57,9 @@ public abstract class Entity<I, M extends Message> {
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      * @see EntityId
      */
-    protected Entity(I id) {
+    public Entity(I id) {
+        // We make the constructor public in the abstract class to avoid having protected constructors in derived
+        // classes. We require that entity constructors be public as they are called by repositories.
         checkType(id);
         this.id = id;
     }

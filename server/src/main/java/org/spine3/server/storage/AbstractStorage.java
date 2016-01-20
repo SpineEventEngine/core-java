@@ -28,7 +28,6 @@ import org.spine3.SPI;
  * @author Alexander Yevsyukov
  */
 @SPI
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 public abstract class AbstractStorage implements AutoCloseable {
 
     private boolean open = true;

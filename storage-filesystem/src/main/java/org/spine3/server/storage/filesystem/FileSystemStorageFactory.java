@@ -32,10 +32,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static com.google.common.base.Throwables.propagate;
-import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.io.file.FileUtil.deleteFileIfExists;
 import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIMITER;
 
@@ -49,8 +47,6 @@ import static org.spine3.server.storage.filesystem.FsAggregateStorage.PATH_DELIM
 public class FileSystemStorageFactory implements StorageFactory {
 
     private static final int AGGREGATE_MESSAGE_PARAMETER_INDEX = 1;
-
-    private final List<FsEventStorage> eventStorages = newLinkedList();
 
     /**
      * An absolute path to the root storage directory (without the delimiter at the end)
@@ -79,7 +75,6 @@ public class FileSystemStorageFactory implements StorageFactory {
     @Override
     public EventStorage createEventStorage() {
         final FsEventStorage storage = tryCreateEventStorage();
-        eventStorages.add(storage);
         return storage;
     }
 
@@ -106,13 +101,16 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
+        // Do not close event storages here. They will be closed by corresponding EventBuses
 
-        for (FsEventStorage storage : eventStorages) {
-            storage.close();
-        }
+        // Do not delete the storage. Just 'disconnect'.
+        // Clean up in tests using the below commented out code.
+        // org.spine3.io.file.FileUtil.deleteFileIfExists(getRootDirectoryPath());
+    }
 
-        deleteFileIfExists(Paths.get(rootDirectoryPath));
+    public Path getRootDirectoryPath() {
+        return Paths.get(rootDirectoryPath);
     }
 
     private static String buildRootDirectoryPath(Class executorClass) {
