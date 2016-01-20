@@ -39,16 +39,22 @@ import static java.lang.reflect.Modifier.isPublic;
 public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
     /**
-     * The index of the declaration of the generic type {@code E} in the {@link Repository} class.
+     * The index of the declaration of the generic type {@code I} in this class.
+     */
+    private static final int ID_CLASS_GENERIC_INDEX = 0;
+
+    /**
+     * The index of the declaration of the generic type {@code E} in this class.
      */
     private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
+
     /**
      * The {@code BoundedContext} in which this repository works.
      */
     private final BoundedContext boundedContext;
 
     /**
-     * The constructor for creating new entity instances.
+     * The constructor for creating entity instances.
      */
     private final Constructor<E> entityConstructor;
 
@@ -66,16 +72,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         this.boundedContext = boundedContext;
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
-    }
-
-    /**
-     * Returns {@link Class} object representing entity type of the given repository.
-     *
-     * @return the aggregate root {@link Class}
-     */
-    @CheckReturnValue
-    protected static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
-        return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
     }
 
     private Constructor<E> getEntityConstructor() {
@@ -115,7 +111,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        return RepositoryTypeInfo.getIdClass(getClass());
+        return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
     }
 
     /**
@@ -123,7 +119,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     @CheckReturnValue
     protected Class<E> getEntityClass() {
-        return getEntityClass(getClass());
+        return Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
     }
 
     /**
