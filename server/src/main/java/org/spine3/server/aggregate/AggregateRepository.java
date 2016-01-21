@@ -59,8 +59,8 @@ import static com.google.common.base.Throwables.propagate;
  * }
  * </pre>
  *
- * @param <I> the type of the aggregated root id
- * @param <A> the type of the aggregated root
+ * @param <I> the type of the aggregate IDs
+ * @param <A> the type of the aggregates managed by this repository
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
