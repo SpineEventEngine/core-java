@@ -50,17 +50,16 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
     @Nullable
     public abstract R read(I id);
 
-    //TODO:2016-01-21:alexander.yevsyukov: Pass ID to this method.
-
     /**
      * Writes a record into the storage.
      *
      * <p>Rewrites it if a record with the same ID already exists.
      *
+     * @param id the ID for the record
      * @param record a record to store
      * @throws IllegalStateException if the storage was closed before
      */
-    public abstract void write(R record);
+    public abstract void write(I id, R record);
 
     /**
      * Ensures the storage is not closed.

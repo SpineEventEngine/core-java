@@ -58,7 +58,7 @@ class FsCommandStorage extends CommandStorage {
     }
 
     @Override
-    public void write(CommandStorageRecord record) {
+    public void write(CommandId id, CommandStorageRecord record) {
         checkNotNull(record);
         writeMessage(commandStoreFile, record);
     }

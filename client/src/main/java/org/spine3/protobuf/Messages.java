@@ -201,7 +201,24 @@ public class Messages {
         }
     }
 
-    public static void checkNotDefault(Message object, String developerMessage) {
-        checkState(!object.getDefaultInstanceForType().equals(object), developerMessage);
+    /**
+     * Ensures that the passed object is not in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @param exceptionMessage the message for the excaption to be thrown
+     * @throws IllegalStateException if the object is in its default state
+     */
+    public static void checkNotDefault(Message object, String exceptionMessage) {
+        checkState(!object.getDefaultInstanceForType().equals(object), exceptionMessage);
+    }
+
+    /**
+     * Ensures that the passed object is not in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @throws IllegalStateException if the object is in its default state
+     */
+    public static void checkNotDefault(Message object) {
+        checkNotDefault(object, "The message is in the default state: " + object);
     }
 }

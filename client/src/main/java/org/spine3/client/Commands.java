@@ -33,11 +33,11 @@ import java.util.UUID;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * Utilities for working with {@link CommandRequest}.
+ * Client-side utilities for working with commands.
  *
  * @author Alexander Yevsyukov
  */
-public class CommandRequests {
+public class Commands {
 
     /**
      * Creates a new {@link CommandId} based on random UUID.
@@ -78,5 +78,5 @@ public class CommandRequests {
         return request.build();
     }
 
-    private CommandRequests() {}
+    private Commands() {}
 }

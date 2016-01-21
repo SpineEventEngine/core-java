@@ -236,7 +236,7 @@ public abstract class EventStore implements AutoCloseable {
 
         @Override
         protected void store(EventRecord record) {
-            storage.write(record);
+            storage.write(record.getContext().getEventId(), record);
         }
 
         @Override

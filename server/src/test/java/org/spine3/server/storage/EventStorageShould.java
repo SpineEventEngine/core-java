@@ -91,7 +91,7 @@ public abstract class EventStorageShould {
     public void store_and_read_one_event() {
         final EventRecord expected = TestEventRecordFactory.projectCreated();
 
-        storage.write(expected);
+        storage.write(Events.generateId(), expected);
 
         assertStorageContainsOnly(expected);
     }

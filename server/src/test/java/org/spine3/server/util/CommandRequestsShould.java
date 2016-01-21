@@ -23,6 +23,8 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.client.CommandRequest;
+import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,21 +34,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.testdata.TestCommandFactory.createProject;
 
-/**
- * @author Mikhail Melnik
- */
-@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
-"DuplicateStringLiteralInspection"/*ok in this case*/})
-public class CommandsShould {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class CommandRequestsShould {
 
     @Test
     public void sort() {
 
-        final Timestamp when = TimeUtil.createTimestampFromMillis(System.currentTimeMillis() - 1000);
+        final Timestamp minuteAgo = Timestamps.minuteAgo();
+        final Timestamp thirtySecondsAgo = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(-30));
+        final Timestamp fiveSecondsAgo = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(-5));
 
-        final CommandRequest commandRequest1 = createProject(when);
-        final CommandRequest commandRequest2 = createProject();
-        final CommandRequest commandRequest3 = createProject();
+        final CommandRequest commandRequest1 = createProject(minuteAgo);
+        final CommandRequest commandRequest2 = createProject(thirtySecondsAgo);
+        final CommandRequest commandRequest3 = createProject(fiveSecondsAgo);
 
         final Collection<CommandRequest> sortedList = new ArrayList<>();
         sortedList.add(commandRequest1);
@@ -60,7 +60,7 @@ public class CommandsShould {
 
         assertFalse(sortedList.equals(unSortedList));
 
-        Commands.sort(unSortedList);
+        CommandRequests.sort(unSortedList);
 
         assertEquals(sortedList, unSortedList);
     }

@@ -26,7 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.util.Commands;
+import org.spine3.server.util.CommandIdentifiers;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,7 +48,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final CommandContext context = request.getContext();
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = Commands.idToString(commandId);
+        final String commandIdStr = CommandIdentifiers.idToString(commandId);
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
@@ -58,7 +58,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setCommand(command)
                 .setContext(context);
 
-        write(builder.build());
+        write(commandId, builder.build());
     }
 
 }

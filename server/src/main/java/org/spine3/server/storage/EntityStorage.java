@@ -23,6 +23,10 @@ package org.spine3.server.storage;
 import org.spine3.SPI;
 import org.spine3.server.EntityId;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.util.Identifiers.idToString;
 
 /**
@@ -43,6 +47,7 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
      * @see EntityId
      */
     public static <I> EntityStorageRecord.Id toRecordId(I id) {
+        checkNotNull(id);
         final EntityStorageRecord.Id.Builder builder = EntityStorageRecord.Id.newBuilder();
         //noinspection ChainOfInstanceofChecks
         if (id instanceof Long) {
@@ -55,4 +60,26 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
         }
         return builder.build();
     }
+
+    @Nullable
+    @Override
+    public EntityStorageRecord read(I id) {
+        final EntityStorageRecord record = readInternal(checkNotNull(id));
+        return record;
+    }
+
+    @Override
+    public void write(I id, EntityStorageRecord record) {
+        checkNotNull(id);
+        checkArgument(record.hasState(), "Record does not have state field.");
+        writeInternal(id, record);
+    }
+
+    //
+    // Internal storage methods
+    //---------------------------
+
+    protected abstract EntityStorageRecord readInternal(I id);
+
+    protected abstract void writeInternal(I id, EntityStorageRecord record);
 }

@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.util.Identifiers;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -46,22 +47,16 @@ public abstract class EntityStorageShould {
         assertNull(message);
     }
 
-    @Test
-    @SuppressWarnings("ConstantConditions")
-    public void return_null_if_read_one_record_by_null_id() {
-        final Message message = storage.read(null);
-        assertNull(message);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_write_without_id() {
-        storage.write(EntityStorageRecord.getDefaultInstance());
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_write_with_null_id() {
+        //noinspection ConstantConditions
+        storage.write(null, EntityStorageRecord.getDefaultInstance());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        storage.write(null);
+        storage.write(Identifiers.newUuid(), null);
     }
 
     @Test
@@ -73,7 +68,7 @@ public abstract class EntityStorageShould {
     public void store_and_load_message() {
         final String id = newUuid();
         final EntityStorageRecord expected = newEntityStorageRecord(id);
-        storage.write(expected);
+        storage.write(id, expected);
 
         final EntityStorageRecord actual = storage.read(id);
 
@@ -96,7 +91,7 @@ public abstract class EntityStorageShould {
 
     private void testWriteAndReadMessage(String id) {
         final EntityStorageRecord expected = newEntityStorageRecord(id);
-        storage.write(expected);
+        storage.write(id, expected);
 
         final EntityStorageRecord actual = storage.read(id);
 

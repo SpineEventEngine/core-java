@@ -29,19 +29,21 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.protobuf.Messages.checkNotDefault;
 
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final Map<String, CommandStorageRecord> storage = newHashMap();
+    private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
 
     @Override
-    public void write(CommandStorageRecord record) {
+    public void write(CommandId id, CommandStorageRecord record) {
+        checkNotNull(id);
+        checkNotDefault(id);
         checkNotNull(record);
 
-        final String id =  record.getCommandId();
-
-        if (id.isEmpty() || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Command record id shouldn't be empty or blank.");
+        final String commandId =  record.getCommandId();
+        if (commandId.isEmpty() || commandId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Command id in the record can not be empty or blank.");
         }
 
         storage.put(id, record);
@@ -50,7 +52,7 @@ class InMemoryCommandStorage extends CommandStorage {
     @Nullable
     @Override
     public CommandStorageRecord read(CommandId id) {
-        final CommandStorageRecord result = storage.get(id.getUuid());
+        final CommandStorageRecord result = storage.get(id);
         return result;
     }
 }

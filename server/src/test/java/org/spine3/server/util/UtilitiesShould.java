@@ -50,7 +50,7 @@ public class UtilitiesShould {
         //TODO:2016-01-18:alexander.yevsyukov: Refactor to move these checks into corresponding tests.
         // util package
         checkPrivateConstructor(Classes.class);
-        checkPrivateConstructor(Commands.class);
+        checkPrivateConstructor(CommandRequests.class);
         checkPrivateConstructor(Events.class);
         checkPrivateConstructor(FileNameEscaper.class);
         checkPrivateConstructor(Identifiers.class);

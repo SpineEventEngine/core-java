@@ -80,7 +80,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     @Override
-    public void write(AggregateEvents record) {
+    public void write(I id, AggregateEvents record) {
         final List<EventRecord> list = record.getEventRecordList();
         for (final EventRecord eventRecord : list) {
             write(eventRecord);

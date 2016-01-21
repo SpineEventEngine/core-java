@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
+import org.spine3.client.Commands;
 import org.spine3.server.util.Events;
 import org.spine3.time.ZoneOffset;
 
@@ -63,7 +64,7 @@ public class TestContextFactory {
     public static EventContext createEventContext() {
         final Timestamp now = TimeUtil.getCurrentTime();
         final CommandContext commandContext = createCommandContext(
-                UserId.getDefaultInstance(), CommandId.getDefaultInstance(), now);
+                UserId.getDefaultInstance(), Commands.generateId(), now);
         final EventId eventId = Events.generateId();
 
         return EventContext.newBuilder()

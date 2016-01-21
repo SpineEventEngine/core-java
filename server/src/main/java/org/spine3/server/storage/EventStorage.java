@@ -46,7 +46,7 @@ import static org.spine3.server.util.EventRecords.*;
 public abstract class EventStorage extends AbstractStorage<EventId, EventRecord> {
 
     @Override
-    public void write(EventRecord record) {
+    public void write(EventId id, EventRecord record) {
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
         writeInternal(storeRecord);
     }
@@ -87,6 +87,10 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
     @Nullable
     protected abstract EventStorageRecord readInternal(EventId eventId);
 
+    /**
+     * The predicate for filtering {@code EventRecord} instances by
+     * {@link EventStreamQuery}.
+     */
     public static class MatchesStreamQuery implements Predicate<EventRecord> {
 
         private final EventStreamQuery query;

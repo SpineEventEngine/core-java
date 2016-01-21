@@ -70,7 +70,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     public void store(E entity) {
         final EntityStorage<I> storage = checkStorage();
         final EntityStorageRecord record = toEntityRecord(entity);
-        storage.write(record);
+        storage.write(entity.getId(), record);
     }
 
     @Nullable

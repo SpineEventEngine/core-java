@@ -25,11 +25,11 @@ import org.spine3.base.UserId;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utilities for generating command requests.
+ * Utilities for working with user-related {@code Message} classes.
  *
  * @author Alexander Yevsyukov
  */
-public class ClientUtil {
+public class UserUtil {
 
     /**
      * Creates a new user ID instance by passed string value.
@@ -46,5 +46,5 @@ public class ClientUtil {
     }
 
     //@formatter:off
-    private ClientUtil() {}
+    private UserUtil() {}
 }
