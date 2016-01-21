@@ -31,8 +31,9 @@ import org.spine3.client.CommandRequest;
 import org.spine3.client.UserUtil;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.aggregate.AggregateShould;
+import org.spine3.server.aggregate.Apply;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -41,7 +42,11 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.StreamProjection;
 import org.spine3.server.stream.StreamProjectionRepository;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.command.AddTask;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
@@ -57,7 +62,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.test.project.Project.getDefaultInstance;
+import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommandFactory.*;
+import static org.spine3.testdata.TestEventFactory.*;
 
 /**
  * @author Alexander Litus
@@ -304,9 +312,82 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    //TODO:2016-01-20:alexander.yevsyukov: Have local aggregate class for ProjectAggregate.
-    // Now this test depends on AggregateShould. We cannot change AggreageShould without the risk of breaking this test.
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, AggregateShould.ProjectAggregate> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
+
+        private static final String STATUS_NEW = "STATUS_NEW";
+        private static final String STATUS_STARTED = "STATUS_STARTED";
+
+        private boolean isCreateProjectCommandHandled = false;
+        private boolean isAddTaskCommandHandled = false;
+        private boolean isStartProjectCommandHandled = false;
+
+        private boolean isProjectCreatedEventApplied = false;
+        private boolean isTaskAddedEventApplied = false;
+        private boolean isProjectStartedEventApplied = false;
+
+        public ProjectAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            isCreateProjectCommandHandled = true;
+            return projectCreatedEvent(cmd.getProjectId());
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+            isAddTaskCommandHandled = true;
+            return taskAddedEvent(cmd.getProjectId());
+        }
+
+        @Assign
+        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            isStartProjectCommandHandled = true;
+            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
+            return newArrayList(message);
+        }
+
+        @Apply
+        private void event(ProjectCreated event) {
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .setStatus(STATUS_NEW)
+                    .build();
+
+            incrementState(newState);
+
+            isProjectCreatedEventApplied = true;
+        }
+
+        @Apply
+        private void event(TaskAdded event) {
+            isTaskAddedEventApplied = true;
+        }
+
+        @Apply
+        private void event(ProjectStarted event) {
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .setStatus(STATUS_STARTED)
+                    .build();
+
+            incrementState(newState);
+
+            isProjectStartedEventApplied = true;
+        }
+
+    }
+
+
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
         private ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
