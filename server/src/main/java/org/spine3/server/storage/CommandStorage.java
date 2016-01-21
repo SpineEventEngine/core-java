@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class CommandStorage extends AbstractStorage {
+public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
     public void store(AggregateId aggregateId, CommandRequest request) {
         checkNotNull(aggregateId, "aggregateId");
@@ -60,10 +60,5 @@ public abstract class CommandStorage extends AbstractStorage {
 
         write(builder.build());
     }
-
-    /*
-     * Writes record to the storage.
-     */
-    protected abstract void write(CommandStorageRecord record);
 
 }

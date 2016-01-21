@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.server.stream.EventStreamQuery;
+import org.spine3.server.util.Events;
 import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestEventRecordFactory;
 import org.spine3.type.TypeName;
@@ -83,14 +84,14 @@ public abstract class EventStorageShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
-        storage.write(null);
+        storage.writeInternal(null);
     }
 
     @Test
     public void store_and_read_one_event() {
         final EventRecord expected = TestEventRecordFactory.projectCreated();
 
-        storage.store(expected);
+        storage.write(expected);
 
         assertStorageContainsOnly(expected);
     }
@@ -100,7 +101,7 @@ public abstract class EventStorageShould {
         final EventStorageRecord recordToStore = projectCreated();
         final EventRecord expected = toEventRecord(recordToStore);
 
-        storage.write(recordToStore);
+        storage.writeInternal(recordToStore);
 
         assertStorageContainsOnly(expected);
     }
@@ -118,7 +119,9 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_filter_events_by_type() {
         final EventStorageRecord expectedRecord = EventStorageRecord.newBuilder()
-                .setEvent(toAny(newRandomStringValue())).build();
+                .setEvent(toAny(newRandomStringValue()))
+                .setEventId(Events.generateId().getUuid())
+                .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
 
         final String typeName = TypeName.of(StringValue.class).value();
@@ -213,14 +216,14 @@ public abstract class EventStorageShould {
 
     private void writeAll(Iterable<EventStorageRecord> records) {
         for (EventStorageRecord r : records) {
-            storage.write(r);
+            storage.writeInternal(r);
         }
     }
 
     @SuppressWarnings("OverloadedVarargsMethod")
     private void writeAll(EventStorageRecord... records) {
         for (EventStorageRecord r : records) {
-            storage.write(r);
+            storage.writeInternal(r);
         }
     }
 

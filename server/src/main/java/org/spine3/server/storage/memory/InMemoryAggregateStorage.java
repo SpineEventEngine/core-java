@@ -54,7 +54,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord record) {
+    protected void writeInternal(AggregateStorageRecord record) {
         checkNotNull(record);
         checkNotNull(record.getAggregateId());
         storage.put(record.getAggregateId(), record);

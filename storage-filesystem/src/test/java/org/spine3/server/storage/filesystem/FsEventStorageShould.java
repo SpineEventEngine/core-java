@@ -75,7 +75,7 @@ public class FsEventStorageShould extends EventStorageShould {
         final EventStorageRecord recordToStore = TestEventStorageRecordFactory.projectCreated();
         final EventRecord expected = toEventRecord(recordToStore);
 
-        STORAGE.write(recordToStore);
+        STORAGE.writeInternal(recordToStore);
         final Iterator<EventRecord> iterator = findAll();
 
         assertTrue(iterator.hasNext());

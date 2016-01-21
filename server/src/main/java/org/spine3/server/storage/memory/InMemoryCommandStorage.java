@@ -20,9 +20,11 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.base.CommandId;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,16 +35,22 @@ class InMemoryCommandStorage extends CommandStorage {
     private final Map<String, CommandStorageRecord> storage = newHashMap();
 
     @Override
-    protected void write(CommandStorageRecord record) {
-
+    public void write(CommandStorageRecord record) {
         checkNotNull(record);
 
-        final String id = record.getCommandId();
+        final String id =  record.getCommandId();
 
         if (id.isEmpty() || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Command record id shouldn't be empty or blank.");
         }
 
         storage.put(id, record);
+    }
+
+    @Nullable
+    @Override
+    public CommandStorageRecord read(CommandId id) {
+        final CommandStorageRecord result = storage.get(id.getUuid());
+        return result;
     }
 }

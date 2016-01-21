@@ -200,4 +200,8 @@ public class Messages {
             throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
+
+    public static void checkNotDefault(Message object, String developerMessage) {
+        checkState(!object.getDefaultInstanceForType().equals(object), developerMessage);
+    }
 }

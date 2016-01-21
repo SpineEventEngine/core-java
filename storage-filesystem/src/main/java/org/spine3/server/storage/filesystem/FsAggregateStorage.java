@@ -62,7 +62,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord record) {
+    protected void writeInternal(AggregateStorageRecord record) {
 
         final File aggregateFile = new File(aggregateStorageRootPath + record.getAggregateId());
 

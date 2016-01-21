@@ -23,8 +23,6 @@ package org.spine3.server.storage;
 import org.spine3.SPI;
 import org.spine3.server.EntityId;
 
-import javax.annotation.Nullable;
-
 import static org.spine3.server.util.Identifiers.idToString;
 
 /**
@@ -36,26 +34,7 @@ import static org.spine3.server.util.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class EntityStorage<I> extends AbstractStorage {
-
-    /**
-     * Loads an entity storage record from the storage by an ID.
-     *
-     * @param id the ID of the entity record to load
-     * @return an entity record instance or {@code null} if there is no record with such an ID
-     * @throws IllegalStateException if the storage was closed before
-     */
-    @Nullable
-    public abstract EntityStorageRecord read(I id);
-
-    /**
-     * Writes a record into the storage. Rewrites it if a record with such an entity ID already exists.
-     *
-     * @param record a record to save
-     * @throws NullPointerException if the {@code record} is null
-     * @throws IllegalStateException if the storage was closed before
-     */
-    public abstract void write(EntityStorageRecord record);
+public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
     /**
      * Converts an entity ID to a storage record ID with the string ID representation or number ID value.

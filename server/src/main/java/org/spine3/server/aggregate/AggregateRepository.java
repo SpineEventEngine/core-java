@@ -188,7 +188,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     @Nonnull
     @Override
     public A load(I id) throws IllegalStateException {
-        final AggregateEvents aggregateEvents = aggregateStorage().load(id);
+        final AggregateEvents aggregateEvents = aggregateStorage().read(id);
 
         try {
             final Snapshot snapshot = aggregateEvents.hasSnapshot()
@@ -235,11 +235,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     private void createAndStoreSnapshot(A aggregateRoot) {
         final Snapshot snapshot = aggregateRoot.toSnapshot();
         final I aggregateRootId = aggregateRoot.getId();
-        aggregateStorage().store(aggregateRootId, snapshot);
+        aggregateStorage().write(aggregateRootId, snapshot);
     }
 
     private void storeEvent(EventRecord event) {
-        aggregateStorage().store(event);
+        aggregateStorage().write(event);
     }
 
     /**

@@ -52,10 +52,16 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         super(boundedContext);
     }
 
+    @Override
+    protected AutoCloseable createStorage(StorageFactory factory) {
+        final AutoCloseable result = factory.createEntityStorage(getEntityClass());
+        return result;
+    }
+
     @Nullable
     @Override
     protected EntityStorage<I> getStorage() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we check the type in checkStorageClass().
+        @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
         final EntityStorage<I> storage = (EntityStorage<I>) super.getStorage();
         return storage;
     }
@@ -106,12 +112,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         final EntityStorage<I> storage = getStorage();
         checkState(storage != null, "Storage not assigned");
         return storage;
-    }
-
-    @Override
-    protected AutoCloseable createStorage(StorageFactory factory) {
-        final AutoCloseable result = factory.createEntityStorage(getEntityClass());
-        return result;
     }
 
 }

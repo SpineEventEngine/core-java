@@ -20,18 +20,56 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Message;
 import org.spine3.SPI;
+
+import javax.annotation.Nullable;
 
 /**
  * Abstract base for storages.
  *
+ * <p>A storage can read and write messages of the given type.
+ *
+ * @param <I> the type of IDs of storage records
+ * @param <R> the type of records kept in the storage
+ *
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AbstractStorage implements AutoCloseable {
+public abstract class AbstractStorage<I, R extends Message> implements AutoCloseable {
 
     private boolean open = true;
 
+    /**
+     * Reads a record from the storage by the passed ID.
+     *
+     * @param id the ID of the record to load
+     * @return a record instance or {@code null} if there is no record with this ID
+     * @throws IllegalStateException if the storage was closed before
+     */
+    @Nullable
+    public abstract R read(I id);
+
+    //TODO:2016-01-21:alexander.yevsyukov: Pass ID to this method.
+
+    /**
+     * Writes a record into the storage.
+     *
+     * <p>Rewrites it if a record with the same ID already exists.
+     *
+     * @param record a record to store
+     * @throws IllegalStateException if the storage was closed before
+     */
+    public abstract void write(R record);
+
+    /**
+     * Ensures the storage is not closed.
+     *
+     * <p>If the storage is closed throws {@code IllegalStateException} with the passed message
+     *
+     * @param message exception message
+     * @throws IllegalStateException if the storage is closed
+     */
     protected void checkNotClosed(String message) throws IllegalStateException {
         if (isClosed()) {
             throw new IllegalStateException(message);

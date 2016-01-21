@@ -73,14 +73,14 @@ public abstract class AggregateStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_record() {
         // noinspection ConstantConditions
-        storage.write(null);
+        storage.write((EventRecord)null);
     }
 
     @Test
     public void store_and_read_one_record() {
         final EventRecord expected = projectCreated(aggregateId);
 
-        storage.store(expected);
+        storage.write(expected);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(aggregateId);
         assertTrue(iterator.hasNext());
@@ -93,7 +93,7 @@ public abstract class AggregateStorageShould {
     public void write_and_read_one_record() {
         final AggregateStorageRecord expected = newAggregateStorageRecord(getCurrentTime(), aggregateId);
 
-        storage.write(expected);
+        storage.writeInternal(expected);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(aggregateId);
         assertTrue(iterator.hasNext());
@@ -118,7 +118,7 @@ public abstract class AggregateStorageShould {
     public void store_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
-        storage.store(aggregateId, expected);
+        storage.write(aggregateId, expected);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(aggregateId);
         assertTrue(iterator.hasNext());
@@ -139,8 +139,8 @@ public abstract class AggregateStorageShould {
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        storage.write(newAggregateStorageRecord(time1, aggregateId));
-        storage.store(aggregateId, newSnapshot(time2));
+        storage.writeInternal(newAggregateStorageRecord(time1, aggregateId));
+        storage.write(aggregateId, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
     }
@@ -150,7 +150,7 @@ public abstract class AggregateStorageShould {
 
         writeAll(records);
 
-        final AggregateEvents events = storage.load(aggregateId);
+        final AggregateEvents events = storage.read(aggregateId);
         final List<EventRecord> expectedEventRecords = transform(records, TO_EVENT_RECORD);
         assertEquals(expectedEventRecords, events.getEventRecordList());
     }
@@ -159,13 +159,13 @@ public abstract class AggregateStorageShould {
     public void throw_exception_if_write_record_without_event_record_or_snapshot_and_load_it() {
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder().setAggregateId(aggregateId.getId()).build();
 
-        storage.write(record);
-        storage.load(aggregateId);
+        storage.writeInternal(record);
+        storage.read(aggregateId);
     }
 
     private void writeAll(Iterable<AggregateStorageRecord> records) {
         for (AggregateStorageRecord record : records) {
-            storage.write(record);
+            storage.writeInternal(record);
         }
     }
 
