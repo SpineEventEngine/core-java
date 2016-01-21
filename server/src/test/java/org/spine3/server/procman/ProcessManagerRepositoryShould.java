@@ -32,7 +32,6 @@ import org.spine3.base.EventRecord;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -68,9 +67,7 @@ public class ProcessManagerRepositoryShould {
 
     @Before
     public void setUpTest() {
-        final EntityStorage<ProjectId> storage =
-                InMemoryStorageFactory.getInstance().createEntityStorage(TestProcessManager.class);
-        repository.assignStorage(storage);
+        repository.initStorage(InMemoryStorageFactory.getInstance());
     }
 
     @Test

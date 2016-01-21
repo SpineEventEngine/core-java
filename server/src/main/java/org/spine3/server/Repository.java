@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.util.Classes;
 
 import javax.annotation.CheckReturnValue;
@@ -27,7 +28,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
@@ -145,28 +145,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     protected abstract E load(I id);
 
     /**
-     * Checks if the passed storage object is of required type.
-     *
-     * <p>Implementation should throw {@link ClassCastException} if the class of the passed
-     * object does not match that required by the repository.
-     *
-     * @param storage the instance of storage to check
-     * @throws ClassCastException if the object is not of the required class
-     */
-    protected abstract void checkStorageClass(Object storage);
-
-    /**
-     * Ensures the repository has storage assigned.
-     *
-     * @throws IllegalStateException if the storage is not assigned.
-     */
-    protected void checkStorageAssigned() {
-        checkState(storageAssigned(), "Storage must be assigned to perform load/store operations.");
-    }
-
-    /**
      * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
-     * @see #assignStorage(AutoCloseable)
      */
     @CheckReturnValue
     @Nullable
@@ -200,35 +179,30 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Assigns the storage to the repository.
+     * Initializes the storage using the passed factory.
      *
-     * <p>The type of the storage depends on and should be checked by the implementations.
-     *
-     * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
-     * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
-     *
-     * @param storage the storage instance
-     * @throws ClassCastException    if the passed storage is not of the required type
-     * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
+     * @param factory storage factory
+     * @throws IllegalStateException if the repository already has storage initialized
      */
-    public void assignStorage(AutoCloseable storage) {
-        // NOTE: This method is not named `setStorage` according to JavaBean conventions to highlight
-        // the fact that conventions for calling it are different.
-
-        // Ignore if the same instance of the storage is passed more than one time.
-        //noinspection ObjectEquality
-        if (storage == this.storage) {
-            return;
-        }
-
+    public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
             throw new IllegalStateException(String.format(
-                    "Repository has already storage assigned: %s. Passed: %s.", this.storage, storage));
+                    "Repository %s has already storage %s.", this, this.storage));
         }
 
-        checkStorageClass(storage);
-        this.storage = storage;
+        this.storage = createStorage(factory);
     }
+
+    /**
+     * Creates the storage using the passed factory.
+     *
+     * <p>Implementations are responsible for properly calling the factory
+     * for creating the storage, which is compatible with the repository.
+     *
+     * @param factory the factory to create the storage
+     * @return the created storage instance
+     */
+    protected abstract AutoCloseable createStorage(StorageFactory factory);
 
     @Override
     public void close() throws Exception {

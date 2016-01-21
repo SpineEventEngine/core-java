@@ -103,7 +103,7 @@ public class BoundedContextShould {
      */
     private void registerAll() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.assignStorage(InMemoryStorageFactory.getInstance().createAggregateStorage(repository.getAggregateClass()));
+        repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
         boundedContext.getEventBus().register(handler);
         handlersRegistered = true;
@@ -162,21 +162,21 @@ public class BoundedContextShould {
     @Test
     public void register_AggregateRepository() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.assignStorage(storageFactory.createAggregateStorage(repository.getAggregateClass()));
+        repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
 
     @Test
     public void register_ProcessManagerRepository() {
         final ProjectPmRepo repository = new ProjectPmRepo(boundedContext);
-        repository.assignStorage(storageFactory.createEntityStorage(repository.getEntityClass()));
+        repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
 
     @Test
     public void register_ProjectionRepository() {
         final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
-        repository.assignStorage(storageFactory.createEntityStorage(repository.getEntityClass()));
+        repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
 

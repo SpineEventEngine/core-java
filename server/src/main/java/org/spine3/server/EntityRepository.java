@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,7 +43,7 @@ import static org.spine3.server.storage.EntityStorage.toRecordId;
  * @param <M> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
+public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
     /**
      * {@inheritDoc}
@@ -107,15 +108,10 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return storage;
     }
 
-    /**
-     * Casts the passed object to {@link EntityStorage}.
-     *
-     * @param storage the instance of storage to check
-     * @throws ClassCastException if the object is not of the required class
-     */
     @Override
-    protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"})
-        final EntityStorage<I> ignored = (EntityStorage<I>) storage;
+    protected AutoCloseable createStorage(StorageFactory factory) {
+        final AutoCloseable result = factory.createEntityStorage(getEntityClass());
+        return result;
     }
+
 }

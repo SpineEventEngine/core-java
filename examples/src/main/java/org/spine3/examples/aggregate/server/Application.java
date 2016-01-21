@@ -123,7 +123,7 @@ public class Application implements AutoCloseable {
 
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
         final OrderRepository repository = new OrderRepository(boundedContext);
-        repository.assignStorage(storageFactory.createAggregateStorage(repository.getAggregateClass()));
+        repository.initStorage(storageFactory);
 
         boundedContext.register(repository);
 

@@ -88,12 +88,6 @@ public class AggregateRepositoryShould {
         }
     }
 
-    @Test(expected = ClassCastException.class)
-    public void check_storage_class_on_storage_assignment() {
-        // Pass the storage, which is almost correct.
-        new ProjectAggregateRepository(boundedContext).assignStorage(storageFactory.createEntityStorage(ProjectAggregate.class));
-    }
-
     @Test
     public void return_aggregate_class() {
         assertEquals(ProjectAggregate.class, repository.getAggregateClass());

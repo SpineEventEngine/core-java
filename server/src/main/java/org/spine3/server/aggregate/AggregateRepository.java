@@ -33,6 +33,7 @@ import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -95,9 +96,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     }
 
     @Override
-    protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"}) final
-        AggregateStorage<I> ignored = (AggregateStorage<I>) storage;
+    protected AutoCloseable createStorage(StorageFactory factory) {
+        final AutoCloseable result = factory.createAggregateStorage(getAggregateClass());
+        return result;
     }
 
     /**
@@ -122,13 +123,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
         return this.snapshotTrigger;
     }
 
+    /**
+     * Changes the number of events between making aggregate snapshots to the passed value.
+     *
+     * @param snapshotTrigger a positive number of the snapshot trigger
+     */
     @SuppressWarnings("unused")
     public void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    private AggregateStorage<I> aggregateStorage() {
+    protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;

@@ -23,6 +23,7 @@ package org.spine3.server;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -36,13 +37,13 @@ public class RepositoryShould {
 
     private BoundedContext boundedContext;
     private Repository<ProjectId, ProjectEntity> repository;
-    private EntityStorage<ProjectId> storage;
+    private StorageFactory storageFactory;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContextTestStubs.create();
         repository = new TestRepo(boundedContext);
-        storage = InMemoryStorageFactory.getInstance().createEntityStorage(ProjectEntity.class);
+        storageFactory = InMemoryStorageFactory.getInstance();
     }
 
     //
@@ -74,9 +75,12 @@ public class RepositoryShould {
             super(boundedContext);
         }
 
+        @SuppressWarnings("ReturnOfNull")
         @Override
-        protected void checkStorageClass(Object storage) {
+        protected AutoCloseable createStorage(StorageFactory factory) {
+            return null;
         }
+
         @Override
         public void store(EntityWithPrivateConstructor obj) {
         }
@@ -113,9 +117,12 @@ public class RepositoryShould {
             super(boundedContext);
         }
 
+        @SuppressWarnings("ReturnOfNull")
         @Override
-        protected void checkStorageClass(Object storage) {
+        protected AutoCloseable createStorage(StorageFactory factory) {
+            return null;
         }
+
         @Override
         public void store(EntityWithProtectedConstructor obj) {
         }
@@ -151,9 +158,12 @@ public class RepositoryShould {
             super(boundedContext);
         }
 
+        @SuppressWarnings("ReturnOfNull")
         @Override
-        protected void checkStorageClass(Object storage) {
+        protected AutoCloseable createStorage(StorageFactory factory) {
+            return null;
         }
+
         @Override
         public void store(EntityWithoutRequiredConstructor obj) {
         }
@@ -195,7 +205,9 @@ public class RepositoryShould {
         }
 
         @Override
-        protected void checkStorageClass(Object storage) {}
+        protected AutoCloseable createStorage(StorageFactory factory) {
+            return factory.createEntityStorage(getEntityClass());
+        }
     }
 
     @Test
@@ -210,44 +222,37 @@ public class RepositoryShould {
     }
 
     @Test
-    public void accept_storage() {
-        repository.assignStorage(storage);
-
-        assertEquals(storage, repository.getStorage());
+    public void init_storage_with_factory() {
+        repository.initStorage(storageFactory);
         assertTrue(repository.storageAssigned());
+        assertNotNull(repository.getStorage());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void allow_initializing_storage_only_once() {
+        repository.initStorage(storageFactory);
+        repository.initStorage(storageFactory);
     }
 
     @Test
     public void close_storage_on_close() throws Exception {
-        repository.assignStorage(storage);
+        repository.initStorage(storageFactory);
 
+        final EntityStorage<?> storage = (EntityStorage<?>) repository.getStorage();
         repository.close();
+
+        //noinspection ConstantConditions
         assertTrue(storage.isClosed());
-    }
-
-    @Test
-    public void disconnect_from_storage_on_close() throws Exception {
-        repository.assignStorage(storage);
-
-        repository.close();
-        assertFalse(repository.storageAssigned());
         assertNull(repository.getStorage());
     }
 
     @Test
-    public void ignore_if_the_same_storage_is_passed_twice_or_more() {
-        repository.assignStorage(storage);
+    public void disconnect_from_storage_on_close() throws Exception {
+        repository.initStorage(storageFactory);
 
-        repository.assignStorage(storage);
-        repository.assignStorage(storage);
-        assertEquals(storage, repository.getStorage());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void reject_another_passed_storage() {
-        repository.assignStorage(storage);
-
-        repository.assignStorage(InMemoryStorageFactory.getInstance().createEntityStorage(ProjectEntity.class));
+        repository.close();
+        assertFalse(repository.storageAssigned());
+        assertNull(repository.getStorage());
     }
 
     @Test
@@ -292,8 +297,10 @@ public class RepositoryShould {
             return null;
         }
 
+        @SuppressWarnings("ReturnOfNull")
         @Override
-        protected void checkStorageClass(Object storage) {
+        protected AutoCloseable createStorage(StorageFactory factory) {
+            return null;
         }
-    }
+}
 }
