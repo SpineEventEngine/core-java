@@ -51,9 +51,4 @@ public interface StorageFactory extends AutoCloseable {
      * Creates a new {@link EntityStorage} instance.
      */
     <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
-
-    /**
-     * Sets up the factory, if needed, after its construction.
-     */
-    void init();
 }

@@ -96,11 +96,6 @@ public class FileSystemStorageFactory implements StorageFactory {
     }
 
     @Override
-    public void init() {
-        // NOP
-    }
-
-    @Override
     public void close() throws Exception {
         // Do not close event storages here. They will be closed by corresponding EventBuses
 

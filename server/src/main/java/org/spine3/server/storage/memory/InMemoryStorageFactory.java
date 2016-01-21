@@ -60,11 +60,6 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public void init() {
-        // NOP
-    }
-
-    @Override
     public void close() {
         // NOP
     }

@@ -118,9 +118,6 @@ public class Application implements AutoCloseable {
      * Sets up the storage, initializes the bounded contexts, registers repositories, handlers etc.
      */
     public void setUp() {
-        // Set up the storage
-        storageFactory.init();
-
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
         final OrderRepository repository = new OrderRepository(boundedContext);
         repository.initStorage(storageFactory);
