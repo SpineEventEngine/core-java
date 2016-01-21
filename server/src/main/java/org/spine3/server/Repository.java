@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
@@ -125,12 +126,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * Stores the passed object.
      *
+     * <p>The storage must be assigned before calling this method.
+     *
      * @param obj an instance to store
      */
     protected abstract void store(E obj);
 
     /**
      * Loads the entity with the passed ID.
+     *
+     * <p>The storage must be assigned before calling this method.
      *
      * @param id the id of the entity to load
      * @return the entity or {@code null} if there's no entity with such id
@@ -149,6 +154,15 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @throws ClassCastException if the object is not of the required class
      */
     protected abstract void checkStorageClass(Object storage);
+
+    /**
+     * Ensures the repository has storage assigned.
+     *
+     * @throws IllegalStateException if the storage is not assigned.
+     */
+    protected void checkStorageAssigned() {
+        checkState(storageAssigned(), "Storage must be assigned to perform load/store operations.");
+    }
 
     /**
      * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet

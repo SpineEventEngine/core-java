@@ -102,7 +102,9 @@ public class BoundedContextShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-        boundedContext.register(new ProjectAggregateRepository(boundedContext));
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.assignStorage(InMemoryStorageFactory.getInstance().createAggregateStorage(repository.getAggregateClass()));
+        boundedContext.register(repository);
         boundedContext.getEventBus().register(handler);
         handlersRegistered = true;
     }
@@ -159,17 +161,23 @@ public class BoundedContextShould {
 
     @Test
     public void register_AggregateRepository() {
-        boundedContext.register(new ProjectAggregateRepository(boundedContext));
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.assignStorage(storageFactory.createAggregateStorage(repository.getAggregateClass()));
+        boundedContext.register(repository);
     }
 
     @Test
     public void register_ProcessManagerRepository() {
-        boundedContext.register(new ProjectPmRepo(boundedContext));
+        final ProjectPmRepo repository = new ProjectPmRepo(boundedContext);
+        repository.assignStorage(storageFactory.createEntityStorage(repository.getEntityClass()));
+        boundedContext.register(repository);
     }
 
     @Test
     public void register_ProjectionRepository() {
-        boundedContext.register(new ProjectReportRepository(boundedContext));
+        final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
+        repository.assignStorage(storageFactory.createEntityStorage(repository.getEntityClass()));
+        boundedContext.register(repository);
     }
 
     @Test
@@ -296,6 +304,8 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
+    //TODO:2016-01-20:alexander.yevsyukov: Have local aggregate class for ProjectAggregate.
+    // Now this test depends on AggregateShould. We cannot change AggreageShould without the risk of breaking this test.
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, AggregateShould.ProjectAggregate> {
         private ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
@@ -356,5 +366,10 @@ public class BoundedContextShould {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void check_repository_has_storage_assigned_upon_registration() {
+        boundedContext.register(new ProjectAggregateRepository(boundedContext));
     }
 }

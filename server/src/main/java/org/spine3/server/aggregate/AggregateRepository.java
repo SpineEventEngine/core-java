@@ -90,7 +90,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     /**
      * {@inheritDoc}
      */
-    protected AggregateRepository(BoundedContext boundedContext) {
+    public AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -98,6 +98,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     protected void checkStorageClass(Object storage) {
         @SuppressWarnings({"unused", "unchecked"}) final
         AggregateStorage<I> ignored = (AggregateStorage<I>) storage;
+    }
+
+    /**
+     * Returns the class of aggregates managed by this repository.
+     *
+     * <p>This is convenience method, which redirects to {@link #getEntityClass()}.
+     *
+     * @return the class of the aggregates
+     */
+    public Class<? extends Aggregate<I, ?>> getAggregateClass() {
+        return getEntityClass();
     }
 
     /**

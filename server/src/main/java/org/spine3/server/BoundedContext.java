@@ -34,7 +34,6 @@ import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
@@ -168,9 +167,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
+     * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        assignStorage(repository);
+        checkStorageAssigned(repository);
 
         repositories.add(repository);
 
@@ -181,23 +181,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         getEventBus().register(repository);
     }
 
-    //TODO:2016-01-20:alexander.yevsyukov: Avoid this kind of 'automation' as it makes BoundedContext code depend
-    // on possible implementations and storages of repositories.
-    private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
-        final AutoCloseable storage;
-        if (repository instanceof AggregateRepository) {
-            final AggregateRepository<I, Aggregate<I, ?>> aggregateRepo = (AggregateRepository<I, Aggregate<I, ?>>)repository;
-            final Class<? extends Aggregate<I, ?>> aggregateClass = aggregateRepo.getEntityClass();
-
-            storage = storageFactory.createAggregateStorage(aggregateClass);
-        } else {
-            final EntityRepository<I, Entity<I, Message>, Message> entityRepo =
-                    (EntityRepository<I, Entity<I, Message>, Message>)repository;
-            final Class<? extends Entity<I, Message>> entityClass = entityRepo.getEntityClass();
-
-            storage = storageFactory.createEntityStorage(entityClass);
+    private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
+        if (!repository.storageAssigned()) {
+            throw new IllegalArgumentException("The repository " + repository + " has no assigned storage. " +
+                    "Please call Repository.assignStorage() before registration with BoundedContext.");
         }
-        repository.assignStorage(storage);
     }
 
     private void unregister(Repository<?, ?> repository) throws Exception {
