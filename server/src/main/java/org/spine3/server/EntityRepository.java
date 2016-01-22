@@ -30,7 +30,6 @@ import org.spine3.server.storage.StorageFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.EntityStorage.toRecordId;
@@ -58,17 +57,22 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return result;
     }
 
-    @Nullable
-    @Override
-    protected EntityStorage<I> getStorage() {
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Nonnull
+    protected EntityStorage<I> entityStorage() {
         @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
-        final EntityStorage<I> storage = (EntityStorage<I>) super.getStorage();
-        return storage;
+        final EntityStorage<I> storage = (EntityStorage<I>) getStorage();
+        return checkStorage(storage);
     }
 
     @Override
     public void store(E entity) {
-        final EntityStorage<I> storage = checkStorage();
+        final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = toEntityRecord(entity);
         storage.write(entity.getId(), record);
     }
@@ -76,7 +80,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     @Nullable
     @Override
     public E load(I id) {
-        final EntityStorage<I> storage = checkStorage();
+        final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = storage.read(id);
         if (record == null) {
             return null;
@@ -105,13 +109,6 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
                 .setWhenModified(whenModified)
                 .setVersion(version);
         return builder.build();
-    }
-
-    @Nonnull
-    private EntityStorage<I> checkStorage() {
-        final EntityStorage<I> storage = getStorage();
-        checkState(storage != null, "Storage not assigned");
-        return storage;
     }
 
 }

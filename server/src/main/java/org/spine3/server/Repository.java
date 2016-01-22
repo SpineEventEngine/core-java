@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isPublic;
@@ -51,6 +52,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * The index of the declaration of the generic type {@code E} in this class.
      */
     private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
+    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage not assigned";
 
     /**
      * The {@code BoundedContext} in which this repository works.
@@ -127,6 +129,24 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
+     * Create a new entity instance with its default state.
+     *
+     * @param id the id of the entity
+     * @return new entity instance
+     */
+    @CheckReturnValue
+    public E create(I id) {
+        try {
+            final E result = entityConstructor.newInstance(id);
+            result.setDefault();
+
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw propagate(e);
+        }
+    }
+
+    /**
      * Stores the passed object.
      *
      * <p>The storage must be assigned before calling this method.
@@ -164,21 +184,14 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     }
 
     /**
-     * Create a new entity instance with its default state.
+     * Ensures that the storage is not null.
      *
-     * @param id the id of the entity
-     * @return new entity instance
+     * @return passed value if it's not not null
+     * @throws IllegalStateException if the passed instance is null
      */
-    @CheckReturnValue
-    public E create(I id) {
-        try {
-            final E result = entityConstructor.newInstance(id);
-            result.setDefault();
-
-            return result;
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw propagate(e);
-        }
+    protected static <S extends AutoCloseable> S checkStorage(@Nullable S storage) {
+        checkState(storage != null, ERR_MSG_STORAGE_NOT_ASSIGNED);
+        return storage;
     }
 
     /**
@@ -207,6 +220,13 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      */
     protected abstract AutoCloseable createStorage(StorageFactory factory);
 
+    /**
+     * Closes the repository by closing the underlying storage.
+     *
+     * <p>The reference to the storage becomes null after this call.
+     *
+     * @throws Exception which occurred during closing of the storage
+     */
     @Override
     public void close() throws Exception {
         if (this.storage != null) {

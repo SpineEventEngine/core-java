@@ -137,7 +137,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
-        return result;
+        return checkStorage(result);
     }
 
     /**

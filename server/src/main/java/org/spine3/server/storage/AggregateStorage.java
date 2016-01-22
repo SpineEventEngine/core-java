@@ -29,6 +29,7 @@ import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.util.Identifiers;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nonnull;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
 @SPI
 public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
+    @Nonnull
     @Override
     public AggregateEvents read(I aggregateId) {
         final Deque<EventRecord> history = newLinkedList();
