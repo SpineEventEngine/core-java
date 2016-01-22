@@ -217,6 +217,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     @Override
     public void store(A aggregateRoot) {
         final Iterable<EventRecord> uncommittedEvents = aggregateRoot.getStateChangingUncommittedEvents();
+
+        //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
+        // Now we're storing snapshot in a seria of uncommitted
+        // events, which isn't going to be the case. We need to read the number of events since the last
+        // snapshot of the aggregate instead.
+
         final int snapshotTrigger = getSnapshotTrigger();
         int eventCount = 0;
         for (EventRecord event : uncommittedEvents) {

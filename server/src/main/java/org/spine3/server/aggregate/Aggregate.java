@@ -274,7 +274,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>An event is state-neutral if we do not modify the aggregate state when this event occurs.
      *
      * <p>Instead of creating empty applier methods for such events,
-     * override this method returning immutable set of event classes, e.g.:
+     * override this method returning immutable set of event classes. For example:
      *
      * <pre>
      * private static final ImmutableSet&lt;Class&lt;? extends Message&gt;&gt; STATE_NEUTRAL_EVENT_CLASSES =
@@ -297,7 +297,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param snapshot the snapshot with the state to restore
      */
-    public void restore(SnapshotOrBuilder snapshot) {
+    public void restore(Snapshot snapshot) {
         final M stateToRestore = Messages.fromAny(snapshot.getState());
 
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
@@ -328,13 +328,13 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     protected Collection<EventRecord> getStateChangingUncommittedEvents() {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
-        final Predicate<EventRecord> isNotStateNeutral = isNotStateNeutralPredicate(stateNeutralEventClasses);
-        final Collection<EventRecord> result = filter(uncommittedEvents, isNotStateNeutral);
+        final Predicate<EventRecord> isStateChanging = isStateChangingPredicate(stateNeutralEventClasses);
+        final Collection<EventRecord> result = filter(uncommittedEvents, isStateChanging);
         return result;
     }
 
     @SuppressWarnings("MethodParameterNamingConvention") // to be precise
-    private static Predicate<EventRecord> isNotStateNeutralPredicate(
+    private static Predicate<EventRecord> isStateChangingPredicate(
             final Collection<Class<? extends Message>> stateNeutralEventClasses) {
         return new Predicate<EventRecord>() {
             @Override
