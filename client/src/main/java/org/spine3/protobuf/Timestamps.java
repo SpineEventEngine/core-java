@@ -36,7 +36,6 @@ import java.util.Date;
  * @author Alexander Yevsyukov
  * @see TimeUtil
  */
-@SuppressWarnings("UtilityClass")
 public class Timestamps {
 
     public static final long NANOS_PER_MILLISECOND = 1_000_000;
@@ -55,7 +54,6 @@ public class Timestamps {
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {
         if (t1 == null) {
             return t2 == null ? 0 : 1;

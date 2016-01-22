@@ -26,14 +26,14 @@ import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
-import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.Commands;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
-import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
@@ -41,7 +41,6 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestCommandFactory {
 
     private static final UserId STUB_USER_ID = newUserId("stub_user_id");
@@ -93,8 +92,8 @@ public class TestCommandFactory {
      * {@link CommandId} instance.
      */
     public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
-        final CommandContext context = TestContextFactory.createCommandContext(userId, CommandId.getDefaultInstance(), when);
-        final CommandRequest result = ClientUtil.newCommandRequest(command, context);
+        final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
+        final CommandRequest result = Commands.newCommandRequest(command, context);
         return result;
     }
 

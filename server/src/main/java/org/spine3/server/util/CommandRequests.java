@@ -19,10 +19,8 @@
  */
 package org.spine3.server.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
 import org.spine3.protobuf.Timestamps;
 
@@ -34,41 +32,12 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for working with commands.
+ * Utility class for working with {@link CommandRequest}s.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
-public class Commands {
-
-    static {
-        Identifiers.IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
-    }
-
-    @SuppressWarnings("StringBufferWithoutInitialCapacity")
-    public static class CommandIdToStringConverter implements Function<CommandId, String> {
-        @Override
-        public String apply(@Nullable CommandId commandId) {
-            if (commandId == null) {
-                return Identifiers.NULL_ID_OR_FIELD;
-            }
-
-            return commandId.getUuid();
-        }
-    }
-
-    /**
-     * Creates string representation of the passed command ID.
-     *
-     * @param commandId the ID to convert
-     * @return string value, with the format defined by {@link Identifiers#idToString(Object)}
-     * @see Identifiers#idToString(Object)
-     */
-    public static String idToString(CommandId commandId) {
-        final String result = Identifiers.idToString(commandId);
-        return result;
-    }
+public class CommandRequests {
 
     public static Predicate<CommandRequest> wereAfter(final Timestamp from) {
         return new Predicate<CommandRequest>() {
@@ -113,6 +82,5 @@ public class Commands {
         });
     }
 
-    //@formatter:off
-    private Commands() {}
+    private CommandRequests() {}
 }

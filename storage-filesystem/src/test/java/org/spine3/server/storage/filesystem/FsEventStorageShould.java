@@ -21,6 +21,7 @@
 package org.spine3.server.storage.filesystem;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.storage.EventStorageRecord;
@@ -28,11 +29,11 @@ import org.spine3.server.storage.EventStorageShould;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.testdata.TestEventStorageRecordFactory;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.*;
+import static org.spine3.io.file.FileUtil.deleteFileIfExists;
 import static org.spine3.server.storage.StorageUtil.toEventRecord;
 
 /**
@@ -51,9 +52,15 @@ public class FsEventStorageShould extends EventStorageShould {
         super(STORAGE);
     }
 
+    @AfterClass
+    public static void cleanUp() {
+        deleteFileIfExists(((FileSystemStorageFactory)FACTORY).getRootDirectoryPath());
+    }
+
     @After
-    public void tearDownTest() throws IOException {
+    public void tearDownTest() throws Exception {
         FACTORY.close();
+        deleteFileIfExists(((FileSystemStorageFactory)FACTORY).getRootDirectoryPath());
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -68,7 +75,7 @@ public class FsEventStorageShould extends EventStorageShould {
         final EventStorageRecord recordToStore = TestEventStorageRecordFactory.projectCreated();
         final EventRecord expected = toEventRecord(recordToStore);
 
-        STORAGE.write(recordToStore);
+        STORAGE.writeInternal(recordToStore);
         final Iterator<EventRecord> iterator = findAll();
 
         assertTrue(iterator.hasNext());

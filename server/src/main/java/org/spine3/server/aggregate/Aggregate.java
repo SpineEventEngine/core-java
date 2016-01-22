@@ -106,7 +106,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      * @see EntityId
      */
-    protected Aggregate(I id) {
+    public Aggregate(I id) {
         super(id);
         this.idAsAny = idToAny(id);
     }

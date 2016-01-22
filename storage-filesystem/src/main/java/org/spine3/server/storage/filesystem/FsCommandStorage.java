@@ -20,10 +20,12 @@
 
 package org.spine3.server.storage.filesystem;
 
+import org.spine3.base.CommandId;
 import org.spine3.io.file.FileUtil;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 
@@ -38,10 +40,12 @@ import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
 class FsCommandStorage extends CommandStorage {
 
     private static final String COMMAND_STORE_FILE_NAME = "/command-store";
+
     private final File commandStoreFile;
 
     /**
      * Creates new storage instance.
+     *
      * @param rootDirectoryPath an absolute path to the root storage directory (without the delimiter at the end)
      * @throws IOException - if failed to create command storage file
      */
@@ -54,14 +58,17 @@ class FsCommandStorage extends CommandStorage {
     }
 
     @Override
-    protected void write(CommandStorageRecord record) {
-
+    public void write(CommandId id, CommandStorageRecord record) {
         checkNotNull(record);
         writeMessage(commandStoreFile, record);
     }
 
+    @Nullable
     @Override
-    public void close() throws IOException {
-        //NOP
+    public CommandStorageRecord read(CommandId id) {
+
+        //TODO:2016-01-21:alexander.yevsyukov: Implement.
+
+        return null;
     }
 }

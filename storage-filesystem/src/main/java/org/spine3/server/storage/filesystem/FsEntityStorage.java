@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.io.IoUtil.closeSilently;
 import static org.spine3.io.file.FileUtil.*;
@@ -65,9 +64,8 @@ class FsEntityStorage<I> extends EntityStorage<I> {
         this.entityStorageRootPath = rootDirectoryPath + ENTITY_STORE_DIR_NAME;
     }
 
-    @Nullable
     @Override
-    public EntityStorageRecord read(I id) {
+    protected EntityStorageRecord readInternal(I id) {
         final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
         final File file = tryCreateIfDoesNotExist(filePath);
@@ -79,11 +77,9 @@ class FsEntityStorage<I> extends EntityStorage<I> {
     }
 
     @Override
-    public void write(EntityStorageRecord record) {
-        checkArgument(record.hasState(), "state of entity");
-
-        final EntityStorageRecord.Id id = record.getId();
-        final String idString = idToStringWithEscaping(id);
+    protected void writeInternal(I id, EntityStorageRecord record) {
+        final EntityStorageRecord.Id recordId = record.getId();
+        final String idString = idToStringWithEscaping(recordId);
         final String filePath = createEntityFilePath(idString);
         deleteFileIfExists(Paths.get(filePath));
         final File file = tryCreateIfDoesNotExist(filePath);

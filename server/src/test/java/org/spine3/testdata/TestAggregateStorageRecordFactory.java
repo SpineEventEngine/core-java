@@ -40,7 +40,6 @@ import static org.spine3.protobuf.Durations.seconds;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class TestAggregateStorageRecordFactory {
 
     private TestAggregateStorageRecordFactory() {}

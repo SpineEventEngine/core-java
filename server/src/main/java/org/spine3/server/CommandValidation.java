@@ -36,7 +36,6 @@ import java.util.Map;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class CommandValidation {
 
     private CommandValidation() {

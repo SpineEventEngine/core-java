@@ -40,7 +40,6 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Messages {
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
@@ -200,5 +199,26 @@ public class Messages {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
             throw new MissingDescriptorException(clazz, e.getCause());
         }
+    }
+
+    /**
+     * Ensures that the passed object is not in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @param exceptionMessage the message for the excaption to be thrown
+     * @throws IllegalStateException if the object is in its default state
+     */
+    public static void checkNotDefault(Message object, String exceptionMessage) {
+        checkState(!object.getDefaultInstanceForType().equals(object), exceptionMessage);
+    }
+
+    /**
+     * Ensures that the passed object is not in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @throws IllegalStateException if the object is in its default state
+     */
+    public static void checkNotDefault(Message object) {
+        checkNotDefault(object, "The message is in the default state: " + object);
     }
 }

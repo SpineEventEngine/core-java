@@ -35,7 +35,6 @@ import org.spine3.server.stream.EventStore;
 import org.spine3.server.util.EventRecords;
 import org.spine3.type.EventClass;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -60,7 +59,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * as the first parameter. It must be an exact type of the event that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events are posted to an EventBus using {@link #post(EventRecord)} method. Normally this
+ * <p>Events are posted to an EventBus using {@link #storeAndPost(EventRecord)} method. Normally this
  * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
  *
  * <p>The passed {@link EventRecord} is stored in the {@link EventStore} associated with the {@code EventBus}
@@ -169,13 +168,19 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Posts the event and its context passed as the record to be processed by registered handlers.
-     *
-     * <p>The record is stored in the associated {@link EventStore} <strong>before</strong> any handling occurs.
+     * @return {@link EventStore} associated with the bus.
+     */
+    public EventStore getEventStore() {
+        return eventStore;
+    }
+
+    /**
+     * Stores the passed record in the associated {@link EventStore} and passes
+     * the event and its context to registered handlers.
      *
      * @param record the record with the event and its context to be handled
      */
-    public void post(EventRecord record) {
+    public void storeAndPost(EventRecord record) {
         store(record);
 
         final Message event = EventRecords.getEvent(record);
@@ -223,7 +228,7 @@ public class EventBus implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         registry.unsubscribeAll();
         eventStore.close();
     }

@@ -30,6 +30,8 @@ import org.spine3.test.project.ProjectId;
 
 import javax.annotation.Nonnull;
 
+import static org.spine3.io.file.FileUtil.deleteFileIfExists;
+
 /**
  * @author Mikhail Mikhaylov
  */
@@ -46,6 +48,7 @@ public class FsAggregateStorageShould extends AggregateStorageShould {
     @After
     public void tearDownTest() throws Exception {
         FACTORY.close();
+        deleteFileIfExists(((FileSystemStorageFactory)FACTORY).getRootDirectoryPath());
     }
 
     public static class AggregateForStorageTests extends Aggregate<ProjectId, Project> {

@@ -30,30 +30,14 @@ import org.spine3.time.ZoneOffset;
 
 import java.util.UUID;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
- * Utilities for generating command requests.
+ * Client-side utilities for working with commands.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
-public class ClientUtil {
-
-    /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
-
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
+public class Commands {
 
     /**
      * Creates a new {@link CommandId} based on random UUID.
@@ -94,6 +78,5 @@ public class ClientUtil {
         return request.build();
     }
 
-    //@formatter:off
-    private ClientUtil() {}
+    private Commands() {}
 }

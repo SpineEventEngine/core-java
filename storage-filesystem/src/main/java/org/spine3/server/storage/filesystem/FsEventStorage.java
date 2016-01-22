@@ -21,6 +21,7 @@
 package org.spine3.server.storage.filesystem;
 
 import com.google.common.collect.Iterators;
+import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileUtil;
@@ -29,6 +30,7 @@ import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.storage.StorageUtil;
 import org.spine3.server.stream.EventStreamQuery;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +48,7 @@ import static org.spine3.server.storage.filesystem.FsStorageUtil.writeMessage;
 class FsEventStorage extends EventStorage {
 
     private static final String EVENT_STORE_FILE_NAME = "/event-store";
+
     private final List<EventRecordFileIterator> iterators = newLinkedList();
     private final File eventStorageFile;
 
@@ -72,16 +75,26 @@ class FsEventStorage extends EventStorage {
     }
 
     @Override
-    protected void write(EventStorageRecord record) {
+    protected void writeInternal(EventStorageRecord record) {
         checkNotNull(record);
         writeMessage(eventStorageFile, record);
     }
 
+    @Nullable
     @Override
-    public void close() {
+    protected EventStorageRecord readInternal(EventId eventId) {
+
+        //TODO:2016-01-21:alexander.yevsyukov: Implement
+
+        return null;
+    }
+
+    @Override
+    public void close() throws Exception {
         for (EventRecordFileIterator i : iterators) {
             i.close();
         }
+        super.close();
     }
 
     private static class EventRecordFileIterator implements Iterator<EventRecord>, Closeable {

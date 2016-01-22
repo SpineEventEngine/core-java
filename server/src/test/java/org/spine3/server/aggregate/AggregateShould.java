@@ -29,6 +29,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.UserId;
+import org.spine3.client.Commands;
+import org.spine3.client.UserUtil;
 import org.spine3.server.Assign;
 import org.spine3.server.util.Classes;
 import org.spine3.test.project.Project;
@@ -40,6 +42,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestCommandFactory;
+import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -51,8 +54,8 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
-import static org.spine3.client.ClientUtil.createContext;
-import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.Commands.createContext;
+import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
@@ -414,8 +417,7 @@ public class AggregateShould {
         return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(toAny(snapshot)).build();
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public static class ProjectAggregate extends Aggregate<ProjectId, Project> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "NEW";
         private static final String STATUS_STARTED = "STARTED";
@@ -488,10 +490,13 @@ public class AggregateShould {
         }
 
         public void dispatchCommands(Message... commands) throws InvocationTargetException {
+            final UserId userId = UserUtil.newUserId("aggregate_should@spine3.org");
             for (Message cmd : commands) {
-                dispatch(cmd, COMMAND_CONTEXT);
+                final CommandContext ctx = Commands.createContext(userId, ZoneOffsets.UTC);
+                dispatch(cmd, ctx);
             }
         }
+
     }
 
     /*

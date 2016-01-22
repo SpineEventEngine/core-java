@@ -18,31 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.client;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.spine3.client.Commands;
-import org.spine3.server.storage.CommandStorageRecord;
+import org.spine3.base.UserId;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class InMemoryCommandStorageShould {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    private InMemoryCommandStorage storage;
+/**
+ * Utilities for working with user-related {@code Message} classes.
+ *
+ * @author Alexander Yevsyukov
+ */
+public class UserUtil {
 
-    @Before
-    public void setUp() {
-        storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
+    /**
+     * Creates a new user ID instance by passed string value.
+     *
+     * @param value new user ID value
+     * @return new instance
+     */
+    public static UserId newUserId(String value) {
+        checkNotNull(value);
+
+        return UserId.newBuilder()
+                .setValue(value)
+                .build();
     }
 
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        storage.write(Commands.generateId(), null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_write_record_with_empty_command_id() {
-        storage.write(Commands.generateId(), CommandStorageRecord.getDefaultInstance());
-    }
+    //@formatter:off
+    private UserUtil() {}
 }

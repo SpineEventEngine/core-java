@@ -17,42 +17,116 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.server;
 
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.util.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.propagate;
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isPublic;
 
 /**
- * Base interface for repositories.
+ * Abstract base class for repositories.
  *
- * @param <I> the type of the IDs of entity objects
- * @param <E> the type of the stored object
- * @author Mikhail Melnik
+ * @param <I> the type of IDs of entities managed by the repository
+ * @param <E> the entity type
+ *
  * @author Alexander Yevsyukov
  */
-public interface Repository<I, E extends Entity<I, ?>> {
+public abstract class Repository<I, E extends Entity<I, ?>> implements AutoCloseable {
 
     /**
-     * Assigns the storage to the repository.
-     *
-     * <p>The type of the storage depends on and should be checked by the implementations.
-     *
-     * <p>This method should be normally called once during registration of the repository with {@link BoundedContext}.
-     * An attempt to call this method twice with different parameters will cause {@link IllegalStateException}.
-     *
-     * <p>{@link BoundedContext} will call this method with {@code null} argument to request performing all necessary
-     * clean-up operations before the context is closed.
-     *
-     * <p>Another storage can be assigned after this method is called with {@code null} parameter.
-     *
-     * @param storage a storage instance or {@code null} if the current storage should be dismissed.
-     *                If there is no storage assigned, passing {@code null} does not have effect
-     * @throws ClassCastException    if the passed storage is not of the required type
-     * @throws IllegalStateException on attempt to assign a storage if another storage is already assigned
+     * The index of the declaration of the generic type {@code I} in this class.
      */
-    void assignStorage(@Nullable Object storage);
+    private static final int ID_CLASS_GENERIC_INDEX = 0;
+
+    /**
+     * The index of the declaration of the generic type {@code E} in this class.
+     */
+    private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
+    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage not assigned";
+
+    /**
+     * The {@code BoundedContext} in which this repository works.
+     */
+    private final BoundedContext boundedContext;
+
+    /**
+     * The constructor for creating entity instances.
+     */
+    private final Constructor<E> entityConstructor;
+
+    /**
+     * The data storage for this repository.
+     */
+    private AutoCloseable storage;
+
+    /**
+     * Creates the repository in the passed {@link BoundedContext}.
+     *
+     * @param boundedContext the {@link BoundedContext} in which this repository works
+     */
+    protected Repository(BoundedContext boundedContext) {
+        this.boundedContext = boundedContext;
+        this.entityConstructor = getEntityConstructor();
+        this.entityConstructor.setAccessible(true);
+    }
+
+    private Constructor<E> getEntityConstructor() {
+        final Class<E> entityClass = getEntityClass();
+        final Class<I> idClass = getIdClass();
+        try {
+            final Constructor<E> result = entityClass.getDeclaredConstructor(idClass);
+            checkConstructorAccessModifier(result.getModifiers(), entityClass.getName());
+            return result;
+        } catch (NoSuchMethodException ignored) {
+            throw noSuchConstructorException(entityClass.getName(), idClass.getName());
+        }
+    }
+
+    private static void checkConstructorAccessModifier(int modifiers, String entityClass) {
+        if (!isPublic(modifiers)) {
+            final String constructorModifier = isPrivate(modifiers) ? "private." : "protected.";
+            final String message = "Constructor must be public in the " + entityClass + " class, found: " + constructorModifier;
+            throw propagate(new IllegalAccessException(message));
+        }
+    }
+
+    private static RuntimeException noSuchConstructorException(String entityClass, String idClass) {
+        final String message = entityClass + " class must declare a constructor with a single " + idClass + " ID parameter.";
+        return propagate(new NoSuchMethodException(message));
+    }
+
+    /**
+     * @return the {@link BoundedContext} in which this repository works
+     */
+    protected BoundedContext getBoundedContext() {
+        return boundedContext;
+    }
+
+    /**
+     * @return the class of IDs used by this repository
+     */
+    @CheckReturnValue
+    protected Class<I> getIdClass() {
+        return Classes.getGenericParameterType(getClass(), ID_CLASS_GENERIC_INDEX);
+    }
+
+    /**
+     * @return the class of entities managed by this repository
+     */
+    @CheckReturnValue
+    protected Class<E> getEntityClass() {
+        return Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+    }
 
     /**
      * Create a new entity instance with its default state.
@@ -61,57 +135,104 @@ public interface Repository<I, E extends Entity<I, ?>> {
      * @return new entity instance
      */
     @CheckReturnValue
-    E create(I id);
+    public E create(I id) {
+        try {
+            final E result = entityConstructor.newInstance(id);
+            result.setDefault();
+
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw propagate(e);
+        }
+    }
 
     /**
      * Stores the passed object.
      *
+     * <p>The storage must be assigned before calling this method.
+     *
      * @param obj an instance to store
      */
-    void store(E obj);
+    protected abstract void store(E obj);
 
     /**
      * Loads the entity with the passed ID.
+     *
+     * <p>The storage must be assigned before calling this method.
      *
      * @param id the id of the entity to load
      * @return the entity or {@code null} if there's no entity with such id
      */
     @CheckReturnValue
     @Nullable
-    E load(I id);
+    protected abstract E load(I id);
 
-    @SuppressWarnings("UtilityClass")
-    class TypeInfo {
-        /**
-         * The index of the declaration of the generic type {@code I} in the {@link Repository} interface.
-         */
-        private static final int ID_CLASS_GENERIC_INDEX = 0;
-        /**
-         * The index of the declaration of the generic type {@code E} in the {@link Repository} interface.
-         */
-        private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
+    /**
+     * @return the storage assigned to this repository or {@code null} if the storage is not assigned yet
+     */
+    @CheckReturnValue
+    @Nullable
+    protected AutoCloseable getStorage() {
+        return this.storage;
+    }
 
-        private TypeInfo() {
+    /**
+     * @return true if the storage is assigned, false otherwise
+     */
+    public boolean storageAssigned() {
+        return this.storage != null;
+    }
+
+    /**
+     * Ensures that the storage is not null.
+     *
+     * @return passed value if it's not not null
+     * @throws IllegalStateException if the passed instance is null
+     */
+    protected static <S extends AutoCloseable> S checkStorage(@Nullable S storage) {
+        checkState(storage != null, ERR_MSG_STORAGE_NOT_ASSIGNED);
+        return storage;
+    }
+
+    /**
+     * Initializes the storage using the passed factory.
+     *
+     * @param factory storage factory
+     * @throws IllegalStateException if the repository already has storage initialized
+     */
+    public void initStorage(StorageFactory factory) {
+        if (this.storage != null) {
+            throw new IllegalStateException(String.format(
+                    "Repository %s has already storage %s.", this, this.storage));
         }
 
-        /**
-         * Returns {@link Class} of entity IDs of the passed repository.
-         *
-         * @return the aggregate id {@link Class}
-         */
-        @CheckReturnValue
-        public static <I> Class<I> getIdClass(Class<? extends Repository> clazz) {
-            return Classes.getGenericParameterType(clazz, ID_CLASS_GENERIC_INDEX);
-        }
+        this.storage = createStorage(factory);
+    }
 
-        /**
-         * Returns {@link Class} object representing entity type of the given repository.
-         *
-         * @return the aggregate root {@link Class}
-         */
-        @CheckReturnValue
-        public static <E extends Entity> Class<E> getEntityClass(Class<? extends Repository> clazz) {
-            return Classes.getGenericParameterType(clazz, ENTITY_CLASS_GENERIC_INDEX);
+    /**
+     * Creates the storage using the passed factory.
+     *
+     * <p>Implementations are responsible for properly calling the factory
+     * for creating the storage, which is compatible with the repository.
+     *
+     * @param factory the factory to create the storage
+     * @return the created storage instance
+     */
+    protected abstract AutoCloseable createStorage(StorageFactory factory);
+
+    /**
+     * Closes the repository by closing the underlying storage.
+     *
+     * <p>The reference to the storage becomes null after this call.
+     *
+     * @throws Exception which occurred during closing of the storage
+     */
+    @Override
+    public void close() throws Exception {
+        if (this.storage != null) {
+            this.storage.close();
+            this.storage = null;
         }
     }
+
 }

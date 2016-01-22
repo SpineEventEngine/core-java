@@ -62,7 +62,7 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord record) {
+    protected void writeInternal(AggregateStorageRecord record) {
 
         final File aggregateFile = new File(aggregateStorageRootPath + record.getAggregateId());
 
@@ -88,12 +88,6 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
         return iterator;
     }
 
-    @Override
-    protected void releaseResources() {
-        // NOP
-        // a reading mechanism closes streams as soon as the page is read.
-    }
-
     private static void writeToFile(File file, AggregateStorageRecord r) {
 
         FileOutputStream fos = null;
@@ -114,7 +108,6 @@ class FsAggregateStorage<I> extends AggregateStorage<I> {
         IoUtil.closeSilently(fos, dos);
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private static void writeRecord(DataOutputStream stream, AggregateStorageRecord r) throws IOException {
         final byte[] bytes = r.toByteArray();
         stream.write(bytes);

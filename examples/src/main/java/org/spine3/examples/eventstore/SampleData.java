@@ -30,13 +30,12 @@ import org.spine3.examples.eventstore.events.TaskDone;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.UserUtil.newUserId;
 
 /**
  * @author Alexander Yevsyukov
  */
 
-@SuppressWarnings("UtilityClass")
 public class SampleData {
 
     static final ImmutableList<GeneratedMessage> events = generateEvents();

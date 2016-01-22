@@ -22,8 +22,8 @@ package org.spine3.examples.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.UserId;
-import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.Commands;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
@@ -35,7 +35,6 @@ import org.spine3.time.ZoneOffset;
  *
  * @author Mikhail Melnik
  */
-@SuppressWarnings("UtilityClass")
 class Requests {
 
     public static CommandRequest createOrder(UserId userId, OrderId orderId) {
@@ -81,14 +80,14 @@ class Requests {
     //TODO:2016-01-14:alexander.yevsyukov: Use real utility method.
     public static CommandRequest newCommandRequest(UserId userId, Message command) {
         final CommandContext context = createCommandContext(userId);
-        final CommandRequest request = ClientUtil.newCommandRequest(command, context);
+        final CommandRequest request = Commands.newCommandRequest(command, context);
         return request;
     }
 
     //TODO:2016-01-14:alexander.yevsyukov: Use real method, which obtains TimeZone.
     public static CommandContext createCommandContext(UserId userId) {
         final CommandContext.Builder context = CommandContext.newBuilder()
-                .setCommandId(ClientUtil.generateId())
+                .setCommandId(Commands.generateId())
                 .setActor(userId)
                 .setZoneOffset(ZoneOffset.getDefaultInstance());
         return context.build();

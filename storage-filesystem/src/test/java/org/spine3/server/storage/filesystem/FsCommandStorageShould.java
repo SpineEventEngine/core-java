@@ -23,12 +23,11 @@ package org.spine3.server.storage.filesystem;
 import org.junit.After;
 import org.junit.Test;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.Commands;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestCommandFactory;
-
-import java.io.IOException;
 
 /**
  * File system implementation of {@link org.spine3.server.storage.CommandStorage} tests.
@@ -46,14 +45,14 @@ public class FsCommandStorageShould {
 
 
     @After
-    public void tearDownTest() throws IOException {
+    public void tearDownTest() throws Exception {
         FACTORY.close();
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
         //noinspection ConstantConditions
-        STORAGE.write(null);
+        STORAGE.write(Commands.generateId(), null);
     }
 
     @Test

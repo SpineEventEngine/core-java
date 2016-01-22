@@ -25,8 +25,6 @@ import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 import org.spine3.server.storage.StorageFactory;
 
-import java.io.IOException;
-
 /**
  * File system implementation of {@link EntityStorage} tests.
  *
@@ -44,7 +42,7 @@ public class FsEntityStorageShould extends EntityStorageShould {
     }
 
     @After
-    public void tearDownTest() throws IOException {
+    public void tearDownTest() throws Exception {
         FACTORY.close();
     }
 }

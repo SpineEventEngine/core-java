@@ -21,7 +21,10 @@
 /**
  * This package provides interfaces and base classes for storages.
  */
+@SPI
 @ParametersAreNonnullByDefault
 package org.spine3.server.storage;
+
+import org.spine3.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;

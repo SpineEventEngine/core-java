@@ -34,7 +34,6 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class TestEventFactory {
 
     private static final ProjectId DUMMY_PROJECT_ID = createProjectId("testProjectID");

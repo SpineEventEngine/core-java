@@ -44,7 +44,6 @@ import static org.spine3.protobuf.Timestamps.isBetween;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class EventRecords {
 
     /**

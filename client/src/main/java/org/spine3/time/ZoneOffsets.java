@@ -20,10 +20,16 @@
 
 package org.spine3.time;
 
-@SuppressWarnings("UtilityClass")
+/**
+ * Utilities for working with ZoneOffset objects.
+ *
+ * @see ZoneOffset
+ */
 public class ZoneOffsets {
 
     private ZoneOffsets() {}
 
     public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
+
+    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
 }

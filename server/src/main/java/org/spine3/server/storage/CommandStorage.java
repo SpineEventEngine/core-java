@@ -26,10 +26,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.client.CommandRequest;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.util.Commands;
+import org.spine3.server.util.CommandIdentifiers;
 import org.spine3.type.TypeName;
-
-import java.io.Closeable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,18 +37,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class CommandStorage implements Closeable {
+public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public void store(AggregateId aggregateId, CommandRequest request) {
         checkNotNull(aggregateId, "aggregateId");
         checkNotNull(request, "request");
+        checkNotClosed("Cannot store to closed storage");
 
         final Any command = request.getCommand();
         final CommandContext context = request.getContext();
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = Commands.idToString(commandId);
+        final String commandIdStr = CommandIdentifiers.idToString(commandId);
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
@@ -60,12 +58,7 @@ public abstract class CommandStorage implements Closeable {
                 .setCommand(command)
                 .setContext(context);
 
-        write(builder.build());
+        write(commandId, builder.build());
     }
-
-    /*
-     * Writes record by its aggregateId
-     */
-    protected abstract void write(CommandStorageRecord record);
 
 }

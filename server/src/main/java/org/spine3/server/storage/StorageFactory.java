@@ -24,15 +24,13 @@ import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.stream.EventStore;
 
-import java.io.Closeable;
-
 /**
  * A factory for creating storages used by repositories, {@link org.spine3.server.CommandStore}, and
  * {@link EventStore}.
  *
  * @author Alexander Yevsyukov
  */
-public interface StorageFactory extends Closeable {
+public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link CommandStorage} instance.
@@ -44,8 +42,6 @@ public interface StorageFactory extends Closeable {
      */
     EventStorage createEventStorage();
 
-    //TODO:2015-11-10:alexander.yevsyukov: This parameter is used only for FileSystemStorage. Can we eliminate it then?
-    // Why isn't it used? It doesn't look logical.
     /**
      * Creates a new {@link AggregateStorage} instance.
      */
@@ -55,9 +51,4 @@ public interface StorageFactory extends Closeable {
      * Creates a new {@link EntityStorage} instance.
      */
     <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
-
-    /**
-     * Sets up the factory, if needed, after its construction.
-     */
-    void init();
 }

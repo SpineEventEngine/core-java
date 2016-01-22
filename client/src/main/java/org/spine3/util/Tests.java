@@ -33,7 +33,6 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Tests {
 
     private static final long MSEC_IN_SECOND = 1000L;

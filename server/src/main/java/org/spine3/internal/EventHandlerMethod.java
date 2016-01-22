@@ -75,7 +75,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
     /**
      * Checks if the passed method is an event handlers.
-     *
+     * <p/>
      * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
      * have {@link EventContext} value as the second parameter, and return {@code void}.
      *
@@ -102,11 +102,10 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         }
         final boolean acceptsCorrectParams =
                 Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
-                EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
+                        EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
         return acceptsCorrectParams;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // accept methods only
     private static boolean isAnnotatedCorrectly(Method method) {
         final boolean result = method.isAnnotationPresent(Subscribe.class);
         return result;
@@ -187,7 +186,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
 
     /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
-     *
+     * <p/>
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check

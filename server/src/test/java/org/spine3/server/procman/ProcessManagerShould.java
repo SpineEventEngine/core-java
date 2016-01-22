@@ -144,7 +144,6 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     public static class TestProcessManager extends ProcessManager<ProjectId, Message> {
 
         public TestProcessManager(ProjectId id) {

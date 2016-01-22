@@ -21,19 +21,24 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.EventId;
 import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
 import org.spine3.server.stream.EventStreamQuery;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.filter;
 import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 
@@ -51,6 +56,7 @@ class InMemoryEventStorage extends EventStorage {
     private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
             INITIAL_CAPACITY,
             new EventRecordComparator());
+    private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
 
     /**
      * Compares event records by timestamp of events.
@@ -76,15 +82,25 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    protected void write(EventStorageRecord record) {
+    protected void writeInternal(EventStorageRecord record) {
         checkNotNull(record);
-        checkNotNull(record.getEventId());
+        final String eventId = record.getEventId();
+        checkState(!eventId.isEmpty(), "eventId cannot be empty");
         storage.add(record);
+        index.put(eventId, record);
+    }
+
+    @Nullable
+    @Override
+    protected EventStorageRecord readInternal(EventId eventId) {
+        final EventStorageRecord result = index.get(eventId.getUuid());
+        return result;
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         clear();
+        super.close();
     }
 
     /**
@@ -92,5 +108,6 @@ class InMemoryEventStorage extends EventStorage {
      */
     protected void clear() {
         storage.clear();
+        index.clear();
     }
 }

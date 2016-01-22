@@ -27,7 +27,6 @@ import com.google.protobuf.Empty;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Responses {
 
     private Responses() {

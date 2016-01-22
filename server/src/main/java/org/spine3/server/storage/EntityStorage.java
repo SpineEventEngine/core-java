@@ -25,6 +25,8 @@ import org.spine3.server.EntityId;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.util.Identifiers.idToString;
 
 /**
@@ -36,25 +38,7 @@ import static org.spine3.server.util.Identifiers.idToString;
  * @author Alexander Yevsyukov
  */
 @SPI
-@SuppressWarnings("ClassMayBeInterface")
-public abstract class EntityStorage<I> {
-
-    /**
-     * Loads an entity storage record from the storage by an ID.
-     *
-     * @param id the ID of the entity record to load
-     * @return an entity record instance or {@code null} if there is no record with such an ID
-     */
-    @Nullable
-    public abstract EntityStorageRecord read(I id);
-
-    /**
-     * Writes a record into the storage. Rewrites it if a record with such an entity ID already exists.
-     *
-     * @param record a record to save
-     * @throws NullPointerException if the {@code record} is null
-     */
-    public abstract void write(EntityStorageRecord record);
+public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
     /**
      * Converts an entity ID to a storage record ID with the string ID representation or number ID value.
@@ -63,6 +47,7 @@ public abstract class EntityStorage<I> {
      * @see EntityId
      */
     public static <I> EntityStorageRecord.Id toRecordId(I id) {
+        checkNotNull(id);
         final EntityStorageRecord.Id.Builder builder = EntityStorageRecord.Id.newBuilder();
         //noinspection ChainOfInstanceofChecks
         if (id instanceof Long) {
@@ -75,4 +60,26 @@ public abstract class EntityStorage<I> {
         }
         return builder.build();
     }
+
+    @Nullable
+    @Override
+    public EntityStorageRecord read(I id) {
+        final EntityStorageRecord record = readInternal(checkNotNull(id));
+        return record;
+    }
+
+    @Override
+    public void write(I id, EntityStorageRecord record) {
+        checkNotNull(id);
+        checkArgument(record.hasState(), "Record does not have state field.");
+        writeInternal(id, record);
+    }
+
+    //
+    // Internal storage methods
+    //---------------------------
+
+    protected abstract EntityStorageRecord readInternal(I id);
+
+    protected abstract void writeInternal(I id, EntityStorageRecord record);
 }

@@ -20,35 +20,39 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.base.CommandId;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
-import java.io.IOException;
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.protobuf.Messages.checkNotDefault;
 
 class InMemoryCommandStorage extends CommandStorage {
 
-    private final Map<String, CommandStorageRecord> storage = newHashMap();
+    private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
 
     @Override
-    protected void write(CommandStorageRecord record) {
-
+    public void write(CommandId id, CommandStorageRecord record) {
+        checkNotNull(id);
+        checkNotDefault(id);
         checkNotNull(record);
 
-        final String id = record.getCommandId();
-
-        if (id.isEmpty() || id.trim().isEmpty()) {
-            throw new IllegalArgumentException("Command record id shouldn't be empty or blank.");
+        final String commandId =  record.getCommandId();
+        if (commandId.isEmpty() || commandId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Command id in the record can not be empty or blank.");
         }
 
         storage.put(id, record);
     }
 
+    @Nullable
     @Override
-    public void close() throws IOException {
-        // NOP
+    public CommandStorageRecord read(CommandId id) {
+        final CommandStorageRecord result = storage.get(id);
+        return result;
     }
 }

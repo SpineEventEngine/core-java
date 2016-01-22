@@ -34,7 +34,6 @@ import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
@@ -43,7 +42,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.stream.EventStore;
 
 import javax.annotation.CheckReturnValue;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +55,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
+@SuppressWarnings("ProhibitedExceptionDeclared")
 public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     /**
@@ -115,10 +114,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *      </ul>
      * </li>
      * </ol>
-     * @throws IOException caused by closing one of the components
+     * @throws Exception caused by closing one of the components
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         storageFactory.close();
         commandDispatcher.close();
         eventBus.close();
@@ -147,7 +146,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return multitenant;
     }
 
-    private void shutDownRepositories() {
+    private void shutDownRepositories() throws Exception {
         for (Repository<?, ?> repository : repositories) {
             unregister(repository);
         }
@@ -168,9 +167,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
+     * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        assignStorage(repository);
+        checkStorageAssigned(repository);
 
         repositories.add(repository);
 
@@ -181,28 +181,20 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         getEventBus().register(repository);
     }
 
-    private <I, E extends Entity<I, ?>> void assignStorage(Repository<I, E> repository) {
-        final Object storage;
-        final Class<? extends Repository> repositoryClass = repository.getClass();
-        if (repository instanceof AggregateRepository) {
-            final Class<? extends Aggregate<I, ?>> aggregateClass = Repository.TypeInfo.getEntityClass(repositoryClass);
-
-            storage = storageFactory.createAggregateStorage(aggregateClass);
-        } else {
-            final Class<? extends Entity<I, Message>> entityClass = Repository.TypeInfo.getEntityClass(repositoryClass);
-
-            storage = storageFactory.createEntityStorage(entityClass);
+    private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
+        if (!repository.storageAssigned()) {
+            throw new IllegalArgumentException("The repository " + repository + " has no assigned storage. " +
+                    "Please call Repository.assignStorage() before registration with BoundedContext.");
         }
-        repository.assignStorage(storage);
     }
 
-    private void unregister(Repository<?, ?> repository) {
+    private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandHandlingObject) {
             getCommandDispatcher().unregister((CommandHandlingObject) repository);
         }
 
         getEventBus().unregister(repository);
-        repository.assignStorage(null);
+        repository.close();
     }
 
     @Override
@@ -279,7 +271,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return result;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private CommandResult dispatch(CommandRequest request) {
         final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
@@ -305,7 +296,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            eventBus.post(record);
+            eventBus.storeAndPost(record);
         }
     }
 

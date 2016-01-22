@@ -29,8 +29,10 @@ import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.util.Identifiers;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nonnull;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
@@ -42,10 +44,11 @@ import static com.google.protobuf.TextFormat.shortDebugString;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AggregateStorage<I> {
+public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
-    public AggregateEvents load(I aggregateId) {
-
+    @Nonnull
+    @Override
+    public AggregateEvents read(I aggregateId) {
         final Deque<EventRecord> history = newLinkedList();
         Snapshot snapshot = null;
 
@@ -78,23 +81,29 @@ public abstract class AggregateStorage<I> {
         return builder.build();
     }
 
+    @Override
+    public void write(I id, AggregateEvents record) {
+        final List<EventRecord> list = record.getEventRecordList();
+        for (final EventRecord eventRecord : list) {
+            write(eventRecord);
+        }
+    }
+
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
-    public void store(I aggregateId, Snapshot snapshot) {
-
+    public void write(I aggregateId, Snapshot snapshot) {
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
                 .setAggregateId(Identifiers.idToString(aggregateId))
                 .setEventType(SNAPSHOT_TYPE_NAME)
-                .setEventId("") // No event ID for snapshots
+                .setEventId("") // No event ID for snapshots because it's not a domain event.
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot);
 
-        write(builder.build());
+        writeInternal(builder.build());
     }
 
-    public void store(EventRecord record) {
-
+    public void write(EventRecord record) {
         final EventContext context = record.getContext();
         final Any event = record.getEvent();
         // TODO:2016-01-15:alexander.litus: store as a number if it is
@@ -111,7 +120,7 @@ public abstract class AggregateStorage<I> {
                 .setVersion(context.getVersion())
                 .setEventRecord(record);
 
-        write(builder.build());
+        writeInternal(builder.build());
     }
 
     // Storage implementation API.
@@ -122,7 +131,7 @@ public abstract class AggregateStorage<I> {
      * @param record the record to write
      * @throws java.lang.NullPointerException if record or its aggregateId is null
      */
-    protected abstract void write(AggregateStorageRecord record);
+    protected abstract void writeInternal(AggregateStorageRecord record);
 
     /**
      * Creates iterator of aggregate event history with the reverse traversal.
@@ -133,9 +142,4 @@ public abstract class AggregateStorage<I> {
      */
     protected abstract Iterator<AggregateStorageRecord> historyBackward(I id);
 
-    /**
-     * Releases storage resources (closes I/O streams etc) if needed.
-     */
-    // TODO:2016-01-14:alexander.litus: find out why it is unused. Consider implementing AutoCloseable.
-    protected abstract void releaseResources();
 }

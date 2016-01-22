@@ -24,7 +24,6 @@ import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.grpc.ClientServiceGrpc;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.StorageFactory;
 
 import java.io.IOException;
@@ -41,7 +40,6 @@ public class Server {
 
     private final Application application;
 
-    private final BoundedContext boundedContext;
     private final io.grpc.Server clientServer;
 
     /**
@@ -50,8 +48,7 @@ public class Server {
     public Server(StorageFactory storageFactory) {
         this.application = new Application(storageFactory);
 
-        this.boundedContext = this.application.getBoundedContext();
-        this.clientServer = buildClientServer(boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
+        this.clientServer = buildClientServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     private static io.grpc.Server buildClientServer(ClientServiceGrpc.ClientService boundedContext, int port) {
@@ -93,7 +90,7 @@ public class Server {
     /**
      * Stops the server.
      */
-    public void stop() {
+    public void stop() throws Exception {
         try {
             application.close();
         } catch (IOException e) {
@@ -117,7 +114,12 @@ public class Server {
             @Override
             public void run() {
                 System.err.println("Shutting down the CommandService server since JVM is shutting down...");
-                server.stop();
+                try {
+                    server.stop();
+                } catch (Exception e) {
+                    //noinspection CallToPrintStackTrace
+                    e.printStackTrace(System.err);
+                }
                 System.err.println("Server shut down.");
             }
         }));

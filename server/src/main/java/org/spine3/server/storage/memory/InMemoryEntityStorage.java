@@ -23,10 +23,8 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -36,25 +34,19 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
-    private final Map<EntityStorageRecord.Id, EntityStorageRecord> storage = newHashMap();
+    private final Map<I, EntityStorageRecord> storage = newHashMap();
 
     protected static <I> InMemoryEntityStorage<I> newInstance() {
-        return new InMemoryEntityStorage<>();
-    }
-
-    @Nullable
-    @Override
-    public EntityStorageRecord read(I id) {
-        final EntityStorageRecord.Id recordId = toRecordId(id);
-        final EntityStorageRecord record = storage.get(recordId);
-        return record;
+        return new InMemoryEntityStorage<I>();
     }
 
     @Override
-    public void write(EntityStorageRecord record) {
-        checkArgument(record.hasState(), "entity state");
+    protected EntityStorageRecord readInternal(I id) {
+        return storage.get(id);
+    }
 
-        final EntityStorageRecord.Id id = record.getId();
+    @Override
+    protected void writeInternal(I id, EntityStorageRecord record) {
         storage.put(id, record);
     }
 
@@ -63,5 +55,11 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
      */
     protected void clear() {
         storage.clear();
+    }
+
+    @Override
+    public void close() throws Exception {
+        clear();
+        super.close();
     }
 }

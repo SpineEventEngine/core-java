@@ -34,7 +34,6 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("UtilityClass")
 public class FileUtil {
 
     private FileUtil() {}

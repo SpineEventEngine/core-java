@@ -54,7 +54,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void write(AggregateStorageRecord record) {
+    protected void writeInternal(AggregateStorageRecord record) {
         checkNotNull(record);
         checkNotNull(record.getAggregateId());
         storage.put(record.getAggregateId(), record);
@@ -66,11 +66,6 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         final String idString = idToString(id);
         final Collection<AggregateStorageRecord> records = storage.get(idString);
         return records.iterator();
-    }
-
-    @Override
-    protected void releaseResources() {
-        // NOP
     }
 
     /**

@@ -87,7 +87,7 @@ public class Application implements AutoCloseable {
      * The entry point of the sample.
      * To change the storage implementation, change {@link #getStorageFactory()} method implementation.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         final StorageFactory factory = getStorageFactory();
 
         try (final Application app = new Application(factory)) {
@@ -118,11 +118,11 @@ public class Application implements AutoCloseable {
      * Sets up the storage, initializes the bounded contexts, registers repositories, handlers etc.
      */
     public void setUp() {
-        // Set up the storage
-        storageFactory.init();
-
         // Register repository with the bounded context. This will register it in the CommandDispatcher too.
-        boundedContext.register(new OrderRepository());
+        final OrderRepository repository = new OrderRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        boundedContext.register(repository);
 
         // Register event handlers.
         boundedContext.getEventBus().register(eventLogger);
@@ -136,7 +136,7 @@ public class Application implements AutoCloseable {
      * Tear down storages, unregister event handlers and close the bounded context.
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         boundedContext.close();
     }
 

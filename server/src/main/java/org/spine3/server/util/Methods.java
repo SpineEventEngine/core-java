@@ -35,7 +35,6 @@ import java.util.Map;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class Methods {
 
     private Methods() {}
@@ -46,8 +45,7 @@ public class Methods {
      * @param method a method to get name for
      * @return full method name
      */
-    @SuppressWarnings("TypeMayBeWeakened") // We keep the type to make the API specific.
-    public static String getFullMethodName(Method method) {
+        public static String getFullMethodName(Method method) {
         return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 

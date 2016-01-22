@@ -25,11 +25,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.EntityStorage.toRecordId;
@@ -42,27 +42,45 @@ import static org.spine3.server.storage.EntityStorage.toRecordId;
  * @param <M> the type of entity state messages
  * @author Alexander Yevsyukov
  */
-public class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends RepositoryBase<I, E> {
+public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
-    @Nullable
+    /**
+     * {@inheritDoc}
+     */
+    public EntityRepository(BoundedContext boundedContext) {
+        super(boundedContext);
+    }
+
     @Override
-    protected EntityStorage<I> getStorage() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we check the type in checkStorageClass().
-        final EntityStorage<I> storage = (EntityStorage<I>) super.getStorage();
-        return storage;
+    protected AutoCloseable createStorage(StorageFactory factory) {
+        final AutoCloseable result = factory.createEntityStorage(getEntityClass());
+        return result;
+    }
+
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Nonnull
+    protected EntityStorage<I> entityStorage() {
+        @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
+        final EntityStorage<I> storage = (EntityStorage<I>) getStorage();
+        return checkStorage(storage);
     }
 
     @Override
     public void store(E entity) {
-        final EntityStorage<I> storage = checkStorage();
+        final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = toEntityRecord(entity);
-        storage.write(record);
+        storage.write(entity.getId(), record);
     }
 
     @Nullable
     @Override
     public E load(I id) {
-        final EntityStorage<I> storage = checkStorage();
+        final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = storage.read(id);
         if (record == null) {
             return null;
@@ -71,7 +89,6 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return entity;
     }
 
-    @SuppressWarnings("TypeMayBeWeakened")
     private E toEntity(I id, EntityStorageRecord record) {
         final E entity = create(id);
         final M state = fromAny(record.getState());
@@ -94,22 +111,4 @@ public class EntityRepository<I, E extends Entity<I, M>, M extends Message> exte
         return builder.build();
     }
 
-    @Nonnull
-    private EntityStorage<I> checkStorage() {
-        final EntityStorage<I> storage = getStorage();
-        checkState(storage != null, "Storage not assigned");
-        return storage;
-    }
-
-    /**
-     * Casts the passed object to {@link EntityStorage}.
-     *
-     * @param storage the instance of storage to check
-     * @throws ClassCastException if the object is not of the required class
-     */
-    @Override
-    protected void checkStorageClass(Object storage) {
-        @SuppressWarnings({"unused", "unchecked"})
-        final EntityStorage<I> ignored = (EntityStorage<I>) storage;
-    }
 }

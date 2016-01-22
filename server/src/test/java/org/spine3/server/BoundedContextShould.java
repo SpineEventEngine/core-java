@@ -27,12 +27,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
-import org.spine3.client.ClientUtil;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.UserUtil;
 import org.spine3.eventbus.EventBus;
 import org.spine3.eventbus.Subscribe;
-import org.spine3.server.aggregate.AggregateRepositoryBase;
-import org.spine3.server.aggregate.AggregateShould;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.aggregate.Apply;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -41,13 +42,16 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.StreamProjection;
 import org.spine3.server.stream.StreamProjectionRepository;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.command.AddTask;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -58,7 +62,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.test.project.Project.getDefaultInstance;
+import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommandFactory.*;
+import static org.spine3.testdata.TestEventFactory.*;
 
 /**
  * @author Alexander Litus
@@ -66,37 +73,33 @@ import static org.spine3.testdata.TestCommandFactory.*;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class BoundedContextShould {
 
-    private final UserId userId = ClientUtil.newUserId("test_user");
+    private final UserId userId = UserUtil.newUserId("test_user");
     private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
     private final EmptyHandler handler = new EmptyHandler();
 
-    private CommandDispatcher commandDispatcher;
-    private EventBus eventBus;
-
-    private boolean handlersRegistered = false;
-
+    private StorageFactory storageFactory;
     private BoundedContext boundedContext;
+    private boolean handlersRegistered = false;
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandDispatcher = CommandDispatcher.create(
-                new CommandStore(storageFactory.createCommandStorage()));
+        storageFactory = InMemoryStorageFactory.getInstance();
+        boundedContext = BoundedContextTestStubs.create(storageFactory);
+    }
 
-        eventBus = EventBus.newInstance(EventStore.newBuilder()
+    private static EventBus newEventBus(StorageFactory storageFactory) {
+        return EventBus.newInstance(EventStore.newBuilder()
             .setStreamExecutor(MoreExecutors.directExecutor())
             .setStorage(storageFactory.createEventStorage())
             .build());
+    }
 
-        boundedContext = BoundedContext.newBuilder()
-                .setStorageFactory(storageFactory)
-                .setCommandDispatcher(commandDispatcher)
-                .setEventBus(eventBus)
-                .build();
+    private static CommandDispatcher newCommandDispatcher(StorageFactory storageFactory) {
+        return CommandDispatcher.create(new CommandStore(storageFactory.createCommandStorage()));
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() throws Exception {
         if (handlersRegistered) {
             boundedContext.getEventBus().unregister(handler);
         }
@@ -107,7 +110,9 @@ public class BoundedContextShould {
      * Registers all test repositories, handlers etc.
      */
     private void registerAll() {
-        boundedContext.register(new ProjectAggregateRepository());
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(InMemoryStorageFactory.getInstance());
+        boundedContext.register(repository);
         boundedContext.getEventBus().register(handler);
         handlersRegistered = true;
     }
@@ -164,17 +169,23 @@ public class BoundedContextShould {
 
     @Test
     public void register_AggregateRepository() {
-        boundedContext.register(new ProjectAggregateRepository());
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+        boundedContext.register(repository);
     }
 
     @Test
     public void register_ProcessManagerRepository() {
-        boundedContext.register(new ProjectPmRepo());
+        final ProjectPmRepo repository = new ProjectPmRepo(boundedContext);
+        repository.initStorage(storageFactory);
+        boundedContext.register(repository);
     }
 
     @Test
     public void register_ProjectionRepository() {
-        boundedContext.register(new ProjectReportRepository());
+        final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
+        repository.initStorage(storageFactory);
+        boundedContext.register(repository);
     }
 
     @Test
@@ -241,7 +252,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_CommandDispatcher_from_builder() {
-        final CommandDispatcher expected = commandDispatcher;
+        final CommandDispatcher expected = newCommandDispatcher(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(expected);
         assertEquals(expected, builder.getCommandDispatcher());
     }
@@ -254,7 +265,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_EventBus_from_builder() {
-        final EventBus expected = eventBus;
+        final EventBus expected = newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
@@ -285,8 +296,8 @@ public class BoundedContextShould {
     public void verify_namespace_attribute_if_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(commandDispatcher)
-                .setEventBus(eventBus)
+                .setCommandDispatcher(newCommandDispatcher(storageFactory))
+                .setEventBus(newEventBus(storageFactory))
                 .setMultitenant(true)
                 .build();
 
@@ -301,7 +312,85 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepositoryBase<ProjectId, AggregateShould.ProjectAggregate> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
+
+        private static final String STATUS_NEW = "STATUS_NEW";
+        private static final String STATUS_STARTED = "STATUS_STARTED";
+
+        private boolean isCreateProjectCommandHandled = false;
+        private boolean isAddTaskCommandHandled = false;
+        private boolean isStartProjectCommandHandled = false;
+
+        private boolean isProjectCreatedEventApplied = false;
+        private boolean isTaskAddedEventApplied = false;
+        private boolean isProjectStartedEventApplied = false;
+
+        public ProjectAggregate(ProjectId id) {
+            super(id);
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            isCreateProjectCommandHandled = true;
+            return projectCreatedEvent(cmd.getProjectId());
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+            isAddTaskCommandHandled = true;
+            return taskAddedEvent(cmd.getProjectId());
+        }
+
+        @Assign
+        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            isStartProjectCommandHandled = true;
+            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
+            return newArrayList(message);
+        }
+
+        @Apply
+        private void event(ProjectCreated event) {
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .setStatus(STATUS_NEW)
+                    .build();
+
+            incrementState(newState);
+
+            isProjectCreatedEventApplied = true;
+        }
+
+        @Apply
+        private void event(TaskAdded event) {
+            isTaskAddedEventApplied = true;
+        }
+
+        @Apply
+        private void event(ProjectStarted event) {
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .setStatus(STATUS_STARTED)
+                    .build();
+
+            incrementState(newState);
+
+            isProjectStartedEventApplied = true;
+        }
+
+    }
+
+
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        private ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
@@ -335,6 +424,9 @@ public class BoundedContextShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+        private ProjectPmRepo(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
     }
 
     private static class ProjectReport extends StreamProjection<ProjectId, Empty> {
@@ -352,5 +444,13 @@ public class BoundedContextShould {
     }
 
     private static class ProjectReportRepository extends StreamProjectionRepository<ProjectId, ProjectReport, Empty> {
+        protected ProjectReportRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void check_repository_has_storage_assigned_upon_registration() {
+        boundedContext.register(new ProjectAggregateRepository(boundedContext));
     }
 }

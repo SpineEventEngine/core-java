@@ -27,7 +27,7 @@ import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.UserUtil.newUserId;
 
 /**
  * @author Mikhail Melnik

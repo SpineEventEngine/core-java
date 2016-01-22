@@ -21,18 +21,22 @@ package org.spine3.server;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.base.*;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventRecord;
+import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
+import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +69,8 @@ public class CommandDispatcher implements AutoCloseable {
      *
      * <p>The passed object must be one of the following:
      * <ul>
-     *     <li>An object of the class derived from {@link org.spine3.server.aggregate.AggregateRepository}.</li>
-     *     <li>An object of the class derived from {@link org.spine3.server.procman.ProcessManagerRepository}.</li>
+     *     <li>An object of the class derived from {@link AggregateRepository}.</li>
+     *     <li>An object of the class derived from {@link ProcessManagerRepository}.</li>
      * </ul>
      *
      * @param object a {@code non-null} object of the required type
@@ -123,7 +127,7 @@ public class CommandDispatcher implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws Exception {
         handlerRegistry.unregisterAll();
         commandStore.close();
     }

@@ -27,15 +27,15 @@ import org.spine3.util.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.spine3.client.ClientUtil.generateId;
-import static org.spine3.client.ClientUtil.newUserId;
+import static org.spine3.client.Commands.generateId;
+import static org.spine3.client.UserUtil.newUserId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClientUtilShould {
 
     @Test
     public void have_private_constructor() throws Exception {
-        Tests.callPrivateUtilityConstructor(ClientUtil.class);
+        Tests.callPrivateUtilityConstructor(UserUtil.class);
     }
 
     @Test
