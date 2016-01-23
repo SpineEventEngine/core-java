@@ -49,18 +49,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class CommandDispatcher implements AutoCloseable {
+public class CommandBus implements AutoCloseable {
 
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     private final CommandStore commandStore;
 
     @CheckReturnValue
-    public static CommandDispatcher create(CommandStore store) {
-        return new CommandDispatcher(store);
+    public static CommandBus create(CommandStore store) {
+        return new CommandBus(store);
     }
 
-    protected CommandDispatcher(CommandStore commandStore) {
+    protected CommandBus(CommandStore commandStore) {
         this.commandStore = commandStore;
     }
 

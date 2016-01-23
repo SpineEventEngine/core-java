@@ -39,7 +39,7 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(StorageFactory storageFactory) {
-        final CommandDispatcher commandDispatcher = CommandDispatcher.create(
+        final CommandBus commandBus = CommandBus.create(
                 new CommandStore(storageFactory.createCommandStorage()));
 
         final EventBus eventBus = EventBus.newInstance(EventStore.newBuilder()
@@ -49,7 +49,7 @@ public class BoundedContextTestStubs {
 
         return BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandDispatcher(commandDispatcher)
+                .setCommandBus(commandBus)
                 .setEventBus(eventBus)
                 .build();
     }

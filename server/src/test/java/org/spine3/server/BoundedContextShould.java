@@ -94,8 +94,8 @@ public class BoundedContextShould {
             .build());
     }
 
-    private static CommandDispatcher newCommandDispatcher(StorageFactory storageFactory) {
-        return CommandDispatcher.create(new CommandStore(storageFactory.createCommandStorage()));
+    private static CommandBus newCommandDispatcher(StorageFactory storageFactory) {
+        return CommandBus.create(new CommandStore(storageFactory.createCommandStorage()));
     }
 
     @After
@@ -153,7 +153,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_CommandDispatcher() {
-        assertNotNull(boundedContext.getCommandDispatcher());
+        assertNotNull(boundedContext.getCommandBus());
     }
 
     @Test(expected = NullPointerException.class)
@@ -247,14 +247,14 @@ public class BoundedContextShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
         //noinspection ConstantConditions
-        BoundedContext.newBuilder().setCommandDispatcher(null);
+        BoundedContext.newBuilder().setCommandBus(null);
     }
 
     @Test
     public void return_CommandDispatcher_from_builder() {
-        final CommandDispatcher expected = newCommandDispatcher(storageFactory);
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandDispatcher(expected);
-        assertEquals(expected, builder.getCommandDispatcher());
+        final CommandBus expected = newCommandDispatcher(storageFactory);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
+        assertEquals(expected, builder.getCommandBus());
     }
 
     @Test(expected = NullPointerException.class)
@@ -296,7 +296,7 @@ public class BoundedContextShould {
     public void verify_namespace_attribute_if_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandDispatcher(newCommandDispatcher(storageFactory))
+                .setCommandBus(newCommandDispatcher(storageFactory))
                 .setEventBus(newEventBus(storageFactory))
                 .setMultitenant(true)
                 .build();
