@@ -324,17 +324,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @return an immutable view of records for applicable uncommitted events
      * @see #getStateNeutralEventClasses()
      */
-    @SuppressWarnings("InstanceMethodNamingConvention")
+    @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
     protected Collection<EventRecord> getStateChangingUncommittedEvents() {
-        //noinspection LocalVariableNamingConvention
-        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
-        final Predicate<EventRecord> isStateChanging = isStateChangingPredicate(stateNeutralEventClasses);
+        final Predicate<EventRecord> isStateChanging = isStateChangingEventRecord(getStateNeutralEventClasses());
         final Collection<EventRecord> result = filter(uncommittedEvents, isStateChanging);
         return result;
     }
 
-    @SuppressWarnings("MethodParameterNamingConvention") // to be precise
-    private static Predicate<EventRecord> isStateChangingPredicate(
+    /**
+     * Creates the predicate that filters {@code EventRecord}s which modify the state
+     * of the aggregate.
+     *
+     * <p>The predicate uses passed event classes for the events that do not modify the
+     * state of the aggregate. As such, they are called <strong>State Neutral.</strong>
+     *
+     * @param stateNeutralEventClasses classes of events that do not modify aggregate state
+     * @return new predicate instance
+     */
+    @SuppressWarnings("MethodParameterNamingConvention") // Prefer longer name here for clarity.
+    private static Predicate<EventRecord> isStateChangingEventRecord(
             final Collection<Class<? extends Message>> stateNeutralEventClasses) {
         return new Predicate<EventRecord>() {
             @Override

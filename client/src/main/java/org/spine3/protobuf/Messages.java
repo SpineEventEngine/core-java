@@ -26,6 +26,7 @@ import org.spine3.protobuf.error.UnknownTypeInAnyException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -190,6 +191,7 @@ public class Messages {
         }
     }
 
+    //TODO:2016-01-24:alexander.yevsyukov: Document
     public static Descriptors.GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
@@ -202,14 +204,48 @@ public class Messages {
     }
 
     /**
+     * Verifies if the passed message object is its default state.
+     * @param object the message to inspect
+     *
+     * @return true if the message is in the default state, false otherwise
+     */
+    public static boolean isDefault(Message object) {
+        return object.getDefaultInstanceForType().equals(object);
+    }
+
+    /**
+     * Verifies if the passed message object is not its default state.
+     * @param object the message to inspect
+     *
+     * @return true if the message is not in the default state, false otherwise
+     */
+    public static boolean isNotDefault(Message object) {
+        return !isDefault(object);
+    }
+
+    /**
      * Ensures that the passed object is not in its default state.
      *
      * @param object the {@code Message} instance to check
-     * @param exceptionMessage the message for the excaption to be thrown
+     * @param errorMessage the message for the exception to be thrown;
+     *                     will be converted to a string using {@link String#valueOf(Object)}
      * @throws IllegalStateException if the object is in its default state
      */
-    public static void checkNotDefault(Message object, String exceptionMessage) {
-        checkState(!object.getDefaultInstanceForType().equals(object), exceptionMessage);
+    public static void checkNotDefault(Message object, @Nullable Object errorMessage) {
+        checkState(isNotDefault(object), errorMessage);
+    }
+
+    /**
+     * Ensures that the passed object is not in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @param errorMessageTemplate a template for the exception message should the check fail
+     * @param errorMessageArgs the arguments to be substituted into the message template
+     * @throws IllegalStateException if the object is in its default state
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    public static void checkNotDefault(Message object, String errorMessageTemplate, Object... errorMessageArgs) {
+        checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
     }
 
     /**
@@ -219,6 +255,45 @@ public class Messages {
      * @throws IllegalStateException if the object is in its default state
      */
     public static void checkNotDefault(Message object) {
-        checkNotDefault(object, "The message is in the default state: " + object);
+        checkNotDefault(object, "The message is in the default state: %s", object);
+    }
+
+    /**
+     * Ensures that the passed object is in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @param errorMessage the message for the exception to be thrown;
+     *                     will be converted to a string using {@link String#valueOf(Object)}
+     * @throws IllegalStateException if the object is not in its default state
+     */
+    public static <M extends Message> M checkDefault(M object, @Nullable Object errorMessage) {
+        checkState(isDefault(object), errorMessage);
+        return object;
+    }
+
+    /**
+     * Ensures that the passed object is in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @param errorMessageTemplate a template for the exception message should the check fail
+     * @param errorMessageArgs the arguments to be substituted into the message template
+     * @throws IllegalStateException if the object is not in its default state
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    public static <M extends Message> M checkDefault(M object, String errorMessageTemplate,
+                                                     Object... errorMessageArgs) {
+        checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
+        return object;
+    }
+
+    /**
+     * Ensures that the passed object is in its default state.
+     *
+     * @param object the {@code Message} instance to check
+     * @throws IllegalStateException if the object is not in its default state
+     */
+    public static <M extends Message> M checkDefault(M object) {
+        checkDefault(object, "The message is not in the default state: %s", object);
+        return object;
     }
 }
