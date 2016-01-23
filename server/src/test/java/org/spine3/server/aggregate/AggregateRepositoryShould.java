@@ -39,8 +39,10 @@ import org.spine3.test.project.event.TaskAdded;
 
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Messages.checkDefault;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.testdata.TestEventFactory.projectCreatedEvent;
 import static org.spine3.testdata.TestEventFactory.taskAddedEvent;
@@ -120,6 +122,14 @@ public class AggregateRepositoryShould {
         final Multimap<Method, Class<? extends Message>> handlers = repository.getHandlers();
         assertTrue(handlers.containsValue(CreateProject.class));
         assertTrue(handlers.containsValue(AddTask.class));
+    }
+
+    @Test
+    public void load_or_create_aggregate_by_id() {
+        repository.initStorage(storageFactory);
+        final ProjectAggregate pa = repository.load(ProjectId.newBuilder().setId("load_or_create_aggregate_by_id").build());
+        checkNotNull(pa);
+        checkDefault(pa.getState());
     }
 
     //TODO:2016-01-21:alexander.yevsyukov: Cover more.
