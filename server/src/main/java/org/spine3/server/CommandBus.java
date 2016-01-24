@@ -140,8 +140,8 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * The {@code Registry} contains handlers for all command classes processed by the {@code BoundedContext}
-     * to which this {@code CommandDispatcher} belongs.
+     * The {@code HandlerRegistry} contains handlers methods for all command classes
+     * processed by the {@code BoundedContext} to which this {@code CommandBus} belongs.
      */
     private static class HandlerRegistry {
 

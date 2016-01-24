@@ -69,6 +69,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @return a process manager ID
      * @see #getId(Message)
      */
+    @SuppressWarnings("UnusedParameters") // Overriding implementations may use the `context` parameter.
     protected I getId(Message command, CommandContext context) {
         return getId(command);
     }
@@ -83,6 +84,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @param context context of the event
      * @return a process manager ID
      */
+    @SuppressWarnings("UnusedParameters") // Overriding implementations may use the `context` parameter.
     protected I getId(Message event, EventContext context) {
         return getId(event);
     }
