@@ -28,12 +28,10 @@ import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -66,12 +64,6 @@ public class CommandBus implements AutoCloseable {
 
     /**
      * Registers the passed object as a handler of commands.
-     *
-     * <p>The passed object must be one of the following:
-     * <ul>
-     *     <li>An object of the class derived from {@link AggregateRepository}.</li>
-     *     <li>An object of the class derived from {@link ProcessManagerRepository}.</li>
-     * </ul>
      *
      * @param object a {@code non-null} object of the required type
      * @throws IllegalArgumentException if the object is not of required class
