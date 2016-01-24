@@ -44,6 +44,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,6 @@ import static java.util.Collections.singletonList;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 @Internal
 public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
@@ -83,12 +83,12 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         super(target, method);
     }
 
-    protected static boolean isAnnotatedCorrectly(Method method) {
+    public static boolean isAnnotatedCorrectly(Method method) {
         final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
         return isAnnotated;
     }
 
-    protected static boolean acceptsCorrectParams(Method method) {
+    public static boolean acceptsCorrectParams(Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
         if (!paramCountIsCorrect) {
@@ -98,6 +98,22 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
                 Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
                         CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
         return acceptsCorrectParams;
+    }
+
+    public static boolean returnsMessageListOrVoid(Method method) {
+        final Class<?> returnType = method.getReturnType();
+
+        if (Message.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        if (List.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        //noinspection RedundantIfStatement
+        if (Void.TYPE.equals(returnType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -129,6 +145,8 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
+        } else if (Void.class.equals(resultClass)) {
+            return Collections.emptyList();
         } else {
             // Another type of result is single event (as Message).
             final List<Message> result = singletonList((Message) handlingResult);
@@ -217,7 +235,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
 
     /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
-     * <p/>
+     *
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check

@@ -73,22 +73,6 @@ class PmCommandHandler extends CommandHandlerMethod {
         return result;
     }
 
-    private static boolean returnsMessageListOrVoid(Method method) {
-        final Class<?> returnType = method.getReturnType();
-
-        if (Message.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        if (List.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        //noinspection RedundantIfStatement
-        if (Void.TYPE.equals(returnType)) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * {@inheritDoc}
      *

@@ -182,51 +182,68 @@ public class CommandBusShould {
         assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
     }
 
+    //
+    // Test for not overriding handlers by dispatchers and vice versa
+    //-------------------------------------------------------------------
+
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
-        final CommandHandler createProjectHandler = new CommandHandler() {
 
-            @Assign
-            public void handle(CreateProject command, CommandContext ctx) {
-                // Do nothing.
-            }
-
-            @Override
-            public CommandHandlerMethod createMethod(Method method) {
-                return new CommandHandlerMethod(this, method) {
-                    @Override
-                    public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
-                        return super.invoke(message, context);
-                    }
-                };
-            }
-
-            @Override
-            public Predicate<Method> getHandlerMethodPredicate() {
-                return new Predicate<Method>() {
-                    @Override
-                    public boolean apply(@Nullable Method input) {
-                        return input != null && input.getName().equals("handle");
-                    }
-                };
-            }
-        };
+        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectHandler);
+        commandBus.register(createProjectDispatcher);
+    }
 
-        final CommandDispatcher createProjectDispatcher = new CommandDispatcher() {
-            @Override
-            public Set<CommandClass> getCommandClasses() {
-                return CommandClass.setOf(CreateProject.class);
-            }
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
 
-            @Override
-            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
-                //noinspection ReturnOfNull
-                return null;
-            }
-        };
+        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectDispatcher);
+        commandBus.register(createProjectHandler);
+    }
+
+    private static class CreateProjectHandler implements CommandHandler {
+
+        @Assign
+        public void handle(CreateProject command, CommandContext ctx) {
+            // Do nothing.
+        }
+
+        @Override
+        public CommandHandlerMethod createMethod(Method method) {
+            return new CommandHandlerMethod(this, method) {
+                @Override
+                public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
+                    return super.invoke(message, context);
+                }
+            };
+        }
+
+        @Override
+        public Predicate<Method> getHandlerMethodPredicate() {
+            return new Predicate<Method>() {
+                @Override
+                public boolean apply(@Nullable Method input) {
+                    return input != null && input.getName().equals("handle");
+                }
+            };
+        }
+    }
+
+    private static class CreateProjectDispatcher implements CommandDispatcher {
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return CommandClass.setOf(CreateProject.class);
+        }
+
+        @Override
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+            //noinspection ReturnOfNull
+            return null;
+        }
     }
 }

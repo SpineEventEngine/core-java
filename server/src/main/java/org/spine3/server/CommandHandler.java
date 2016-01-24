@@ -24,7 +24,10 @@ import com.google.common.base.Predicate;
 import org.spine3.Internal;
 import org.spine3.server.internal.CommandHandlerMethod;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+
+import static org.spine3.server.internal.CommandHandlerMethod.*;
 
 /**
  * The interface for classes that can declare command handling methods.
@@ -53,4 +56,20 @@ public interface CommandHandler {
      */
     @Internal
     Predicate<Method> getHandlerMethodPredicate();
+
+    class MethodPredicate implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            //noinspection SimplifiableIfStatement
+            if (method == null) {
+                return false;
+            }
+            return isAnnotatedCorrectly(method)
+                    && acceptsCorrectParams(method)
+                    && returnsMessageListOrVoid(method);
+        }
+    }
+
+    Predicate<Method> METHOD_PREDICATE = new MethodPredicate();
 }

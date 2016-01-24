@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -35,6 +36,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.util.Classes;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -45,6 +47,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.CommandValidation.unsupportedCommand;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -75,27 +78,8 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
      */
     void register(CommandDispatcher dispatcher) {
-        checkNoHandlersRegisteredFor(dispatcher);
+        checkNoHandlersRegisteredForCommandsOf(dispatcher);
         dispatcherRegistry.register(dispatcher);
-    }
-
-    /**
-     * Ensures that no handlers already registered for the command classes of the passed dispatcher.
-     *
-     * @param dispatcher the dispatcher to check
-     * @throws IllegalArgumentException if one or more classes have registered handlers
-     */
-    private void checkNoHandlersRegisteredFor(CommandDispatcher dispatcher) {
-        final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
-        final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
-        for (CommandClass commandClass : commandClasses) {
-            if (handlerRegistered(commandClass)) {
-                alreadyRegistered.add(commandClass);
-            }
-        }
-        checkArgument(alreadyRegistered.isEmpty(),
-                "Unable to register dispatcher %s because command classes (%s) already have registered handlers.",
-                dispatcher, Joiner.on(", ").join(alreadyRegistered));
     }
 
     /**
@@ -117,6 +101,7 @@ public class CommandBus implements AutoCloseable {
      * @throws IllegalArgumentException if the handler does not have command handling methods
      */
     void register(CommandHandler handler) {
+        checkNoDispatchersRegisteredForCommandsOf(handler);
         handlerRegistry.register(handler);
     }
 
@@ -177,6 +162,16 @@ public class CommandBus implements AutoCloseable {
         commandStore.close();
     }
 
+    /**
+     * Verifies if the command can be posted to this {@code CommandBus}.
+     *
+     * <p>The command can be posted if it has either dispatcher or handler registered with
+     * the command bus.
+     *
+     * @param command the command instance to check
+     * @return the result of {@link Responses#ok()} if the command is supported,
+     *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
+     */
     public Response validate(Message command) {
         if (dispatcherRegistry.hasDispatcherFor(command)) {
             return Responses.ok();
@@ -190,7 +185,7 @@ public class CommandBus implements AutoCloseable {
         // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
         // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
 
-        return CommandValidation.unsupportedCommand(command);
+        return unsupportedCommand(command);
     }
 
     /**
@@ -254,6 +249,11 @@ public class CommandBus implements AutoCloseable {
 
         boolean hasDispatcherFor(Message command) {
             final CommandDispatcher dispatcher = dispatchers.get(CommandClass.of(command));
+            return dispatcher != null;
+        }
+
+        boolean hasDispatcherFor(CommandClass commandClass) {
+            final CommandDispatcher dispatcher = dispatchers.get(commandClass);
             return dispatcher != null;
         }
     }
@@ -351,6 +351,67 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
+
+    /**
+     * Ensures that no handlers already registered for the command classes of the passed dispatcher.
+     *
+     * @param dispatcher the dispatcher to check
+     * @throws IllegalArgumentException if one or more classes have registered handlers
+     */
+    @SuppressWarnings("InstanceMethodNamingConvention") // prefer longer name here for clarity.
+    private void checkNoHandlersRegisteredForCommandsOf(CommandDispatcher dispatcher) {
+        final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
+        final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
+        for (CommandClass commandClass : commandClasses) {
+            if (handlerRegistered(commandClass)) {
+                alreadyRegistered.add(commandClass);
+            }
+        }
+
+        checkAlreadyRegistered(alreadyRegistered, dispatcher,
+                "Cannot register dispatcher %s for command class %s which already has registered handler.",
+                "Cannot register dispatcher %s for command classes (%s) which already have registered handlers.");
+    }
+
+    /**
+     * Ensures that there are no dispatchers registered for the commands of the passed handler.
+     *
+     * @param handler the command handler to check
+     * @throws IllegalArgumentException if one ore more command classes already have registered dispatchers
+     */
+    @SuppressWarnings("InstanceMethodNamingConvention") // prefer longer name here for clarity.
+    private void checkNoDispatchersRegisteredForCommandsOf(CommandHandler handler) {
+        final ImmutableSet<Class<? extends Message>> handledMessageClasses = Classes.getHandledMessageClasses(
+                handler.getClass(), CommandHandler.METHOD_PREDICATE);
+
+        final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
+        for (Class<? extends Message> handledMessageClass : handledMessageClasses) {
+            final CommandClass commandClass = CommandClass.of(handledMessageClass);
+            if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
+                alreadyRegistered.add(commandClass);
+            }
+        }
+
+        checkAlreadyRegistered(alreadyRegistered, handler,
+                "Cannot register handler %s for the command class %s which already has registered dispatcher.",
+                "Cannot register handler %s for command classes (%s) which already have registered dispatchers.");
+    }
+
+    /**
+     * Ensures that the passed set of commands is empty.
+     *
+     * @param alreadyRegistered the set of already registered commands or an empty set
+     * @param registeringObject the object which tries to register dispatching or handling
+     * @param singularFormat the message format for the case if the {@code alreadyRegistered} set contains only one element
+     * @param pluralFormat the message format if {@code alreadyRegistered} set has more than one element
+     * @throws IllegalArgumentException if the set is not empty.
+     */
+    private static void checkAlreadyRegistered(Set<CommandClass> alreadyRegistered, Object registeringObject,
+                                               String singularFormat, String pluralFormat) {
+        final String format = alreadyRegistered.size() > 1 ? pluralFormat : singularFormat;
+        checkArgument(alreadyRegistered.isEmpty(), format, registeringObject, Joiner.on(", ").join(alreadyRegistered));
+    }
+
     private enum LogSingleton {
         INSTANCE;
 
@@ -358,6 +419,9 @@ public class CommandBus implements AutoCloseable {
         private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
 
+    /**
+     * The logger instance used by {@code CommandBus}.
+     */
     protected static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
