@@ -27,7 +27,7 @@ import org.spine3.server.internal.CommandHandlerMethod;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper for {@link ProcessManagerRepository#dispatchCommand(Message, CommandContext)}.
+ * A wrapper for {@link ProcessManagerRepository#dispatch(Message, CommandContext)}.
  *
  * <p>This specific type of {@code CommandHandlerMethod} is needed for distinguishing the dispatching
  * method of a repository for actual handling methods.

@@ -31,6 +31,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.FailureThrowable;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
@@ -95,26 +96,26 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void dispatch_command() throws InvocationTargetException {
+    public void dispatch_command() throws InvocationTargetException, FailureThrowable {
         testDispatchCommand(addTask(ID));
     }
 
     @Test
-    public void dispatch_several_commands() throws InvocationTargetException {
+    public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
         testDispatchCommand(createProject(ID));
         testDispatchCommand(addTask(ID));
         testDispatchCommand(startProject(ID));
     }
 
-    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<EventRecord> records = repository.dispatchCommand(command, COMMAND_CONTEXT);
+    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
+        final List<EventRecord> records = repository.dispatch(command, COMMAND_CONTEXT);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(command, manager.getState());
         return records;
     }
 
     @Test
-    public void dispatch_command_and_return_events() throws InvocationTargetException {
+    public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
         final List<EventRecord> records = testDispatchCommand(addTask(ID));
 
         assertEquals(1, records.size());
@@ -125,9 +126,9 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test(expected = MissingProcessManagerIdException.class)
-    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
+    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        repository.dispatchCommand(unknownCommand, COMMAND_CONTEXT);
+        repository.dispatch(unknownCommand, COMMAND_CONTEXT);
     }
 
     @Test(expected = MissingProcessManagerIdException.class)

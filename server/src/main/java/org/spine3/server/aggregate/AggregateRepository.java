@@ -26,9 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.MultiHandler;
-import org.spine3.server.Repository;
+import org.spine3.server.*;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateEvents;
@@ -66,22 +64,12 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
-        implements MultiHandler, CommandHandlingObject {
+        implements CommandDispatcher, MultiHandler, CommandHandlingObject {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
      */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
-
-    /**
-     * The name of the method used for dispatching commands to aggregate roots.
-     * <p/>
-     * <p>This constant is used for obtaining {@code Method} instance via reflection.
-     *
-     * @see #dispatch(Message, CommandContext)
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String DISPATCH_METHOD_NAME = "dispatch";
 
     /**
      * The number of events to store between snapshots.
@@ -159,11 +147,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
      * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
      */
     private Method dispatchMethod() {
-        try {
-            return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-        } catch (NoSuchMethodException e) {
-            throw propagate(e);
-        }
+        return DispatchMethod.of(this);
     }
 
     @Override
@@ -258,11 +242,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
      * @param context context info of the command
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command dispatching
+     * @throws FailureThrowable if a business failure occurred during the command execution by the aggregate
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
+    @Override
     @CheckReturnValue
-    @SuppressWarnings("unused") // because the method is used by Reflection.
-    public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
+    public List<EventRecord> dispatch(Message command, CommandContext context)
+            throws FailureThrowable, IllegalStateException, InvocationTargetException {
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 

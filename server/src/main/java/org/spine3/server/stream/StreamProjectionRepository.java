@@ -56,7 +56,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends StreamProjection> projectionClass = getEntityClass();
         final Set<Class<? extends Message>> events = StreamProjection.getEventClasses(projectionClass);
-        final Method forward = dispatchAsMethod();
+        final Method forward = dispatchMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
                 .build();
@@ -128,7 +128,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String DISPATCH_METHOD_NAME = "dispatch";
 
-    private Method dispatchAsMethod() {
+    private Method dispatchMethod() {
         try {
             return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, EventContext.class);
         } catch (NoSuchMethodException e) {
