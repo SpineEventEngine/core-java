@@ -34,7 +34,6 @@ import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;

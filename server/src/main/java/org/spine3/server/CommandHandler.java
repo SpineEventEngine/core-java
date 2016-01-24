@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server;
 
 import com.google.common.base.Predicate;
 import org.spine3.Internal;
+import org.spine3.server.internal.CommandHandlerMethod;
 
 import java.lang.reflect.Method;
 
@@ -30,24 +31,26 @@ import java.lang.reflect.Method;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 public interface CommandHandler {
 
     //TODO:2016-01-24:alexander.yevsyukov: We cannot keep this interface @Internal because there can be cases
     // when custom logic (which doesn't fall into classes provided by the framework) would be needed.
-    // We can have AbstractCommandHandler implementation, which would implement the below methods OR
-    // we need to move them out of the exposed API.
+    //
     // Having the common interface (event if it would be marker interface) for command handlers is
     // beneficial because it would simplify finding all command handlers in an app.
     // The same applies to event handlers.
+    //
+    // The methods are annotated as @Internal temporarily. We need to move them out of the interface.
 
     /**
      * Creates a method wrapper, which holds reference to this object and the passed method.
      */
+    @Internal
     CommandHandlerMethod createMethod(Method method);
 
     /**
      * Returns the predicate for filtering command handling methods.
      */
+    @Internal
     Predicate<Method> getHandlerMethodPredicate();
 }

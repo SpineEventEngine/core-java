@@ -20,8 +20,6 @@
 
 package org.spine3.server;
 
-import org.spine3.server.internal.CommandHandler;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

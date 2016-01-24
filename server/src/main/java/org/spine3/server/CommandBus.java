@@ -30,7 +30,6 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.type.CommandClass;
 

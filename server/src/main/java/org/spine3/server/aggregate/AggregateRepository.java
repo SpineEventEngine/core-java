@@ -27,7 +27,6 @@ import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.*;
-import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
