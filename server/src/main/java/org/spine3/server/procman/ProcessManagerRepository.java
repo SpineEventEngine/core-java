@@ -20,18 +20,16 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.*;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +47,7 @@ import java.util.Set;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler, CommandHandler {
+        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler {
 
     /**
      * {@inheritDoc}
@@ -104,6 +102,14 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return result;
     }
 
+    @Override
+    public Set<CommandClass> getCommandClasses() {
+        final Class<? extends ProcessManager> pmClass = getEntityClass();
+        final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
+        final Set<CommandClass> result = CommandClass.setOf(commandClasses);
+        return result;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -147,17 +153,18 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
                 .build();
     }
 
-    @Internal
-    @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new PmRepositoryDispatchMethod(this, method);
-    }
-
-    @Internal
-    @Override
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
-    }
+    //TODO:2016-01-24:alexander.yevsyukov: Remove the below block after CommandBus supports CommandDispatcher interface in full.
+//    @Internal
+//    @Override
+//    public CommandHandlerMethod createMethod(Method method) {
+//        return new PmRepositoryDispatchMethod(this, method);
+//    }
+//
+//    @Internal
+//    @Override
+//    public Predicate<Method> getHandlerMethodPredicate() {
+//        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
+//    }
 
     /**
      * Dispatches the command to a corresponding process manager.

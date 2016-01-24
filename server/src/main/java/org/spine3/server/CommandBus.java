@@ -21,6 +21,8 @@ package org.spine3.server;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
@@ -37,6 +39,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -48,29 +51,43 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class CommandBus implements AutoCloseable {
 
+    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     private final CommandStore commandStore;
 
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
-        return new CommandBus(store);
+        return new CommandBus(checkNotNull(store));
     }
 
     protected CommandBus(CommandStore commandStore) {
         this.commandStore = commandStore;
     }
 
+    void register(CommandDispatcher dispatcher) {
+        dispatcherRegistry.register(dispatcher);
+    }
+
+    void unregister(CommandDispatcher dispatcher) {
+        dispatcherRegistry.unregister(dispatcher);
+    }
+
     /**
      * Registers the passed object as a handler of commands.
      *
      * @param object a {@code non-null} object of the required type
-     * @throws IllegalArgumentException if the object is not of required class
+     * @throws IllegalArgumentException if the object does not have command handling methods
      */
     void register(CommandHandler object) {
         handlerRegistry.register(object);
     }
 
+    /**
+     * Unregisters the handler from the command bus.
+     *
+     * @param object the object to unregister
+     */
     void unregister(CommandHandler object) {
         handlerRegistry.unregister(object);
     }
@@ -140,6 +157,46 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
+     * The registry of objects dispatching command request to where they are
+     * processed.
+     */
+    private static class DispatcherRegistry {
+
+        private final Map<CommandClass, CommandDispatcher> dispatchers = Maps.newConcurrentMap();
+
+        void register(CommandDispatcher dispatcher) {
+            checkNotNull(dispatcher);
+            final Set<CommandClass> commandClasses = checkNotEmpty(dispatcher);
+
+            for (CommandClass commandClass : commandClasses) {
+                dispatchers.put(commandClass, dispatcher);
+            }
+        }
+
+        private static Set<CommandClass> checkNotEmpty(CommandDispatcher dispatcher) {
+            final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
+            if (commandClasses.isEmpty()) {
+                throw new IllegalArgumentException("No command classes are forwarded by this dispatcher: " + dispatcher);
+            }
+            return commandClasses;
+        }
+
+        void unregister(CommandDispatcher dispatcher) {
+            checkNotNull(dispatcher);
+            final Set<CommandClass> commandClasses = checkNotEmpty(dispatcher);
+            for (CommandClass commandClass : commandClasses) {
+                final CommandDispatcher registeredDispatcher = dispatchers.get(commandClass);
+                if (dispatcher.equals(registeredDispatcher)) {
+                    dispatchers.remove(commandClass);
+                } else {
+                    log().warn("Another dispatcher (%s) found when trying to unregister %s for command class %s",
+                            registeredDispatcher, dispatcher, commandClass);
+                }
+            }
+        }
+    }
+
+    /**
      * The {@code HandlerRegistry} contains handlers methods for all command classes
      * processed by the {@code BoundedContext} to which this {@code CommandBus} belongs.
      */
@@ -151,6 +208,11 @@ public class CommandBus implements AutoCloseable {
             checkNotNull(object);
 
             final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+
+            if (handlers.isEmpty()) {
+                throw new IllegalArgumentException("No command handler methods found in :" + object);
+            }
+
             registerMap(handlers);
         }
 
@@ -225,6 +287,17 @@ public class CommandBus implements AutoCloseable {
             final CommandHandlerMethod method = getHandler(CommandClass.of(command));
             return method != null;
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
 }

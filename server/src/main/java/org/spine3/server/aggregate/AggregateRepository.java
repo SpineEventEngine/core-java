@@ -31,6 +31,7 @@ import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -99,6 +100,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
         return getEntityClass();
     }
 
+    @Override
+    public Set<CommandClass> getCommandClasses() {
+        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
+        return result;
+    }
+
     /**
      * Returns the number of events until a next snapshot is made.
      *
@@ -134,7 +141,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
      */
     @Override
     public Multimap<Method, Class<? extends Message>> getHandlers() {
-        final Class<? extends Aggregate> aggregateClass = getEntityClass();
+        final Class<? extends Aggregate> aggregateClass = getAggregateClass();
         final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
         final Method dispatch = dispatchMethod();
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()

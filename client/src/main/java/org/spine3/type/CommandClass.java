@@ -20,7 +20,10 @@
 
 package org.spine3.type;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -55,4 +58,14 @@ public final class CommandClass extends ClassTypeValue {
         return of(checkNotNull(command).getClass());
     }
 
+    /**
+     * Creates immutable set of {@code CommandClass} from the passed set.
+     */
+    public static ImmutableSet<CommandClass> setOf(Set<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
+    }
 }
