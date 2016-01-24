@@ -35,7 +35,7 @@ import org.spine3.client.grpc.Topic;
 import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.internal.CommandHandlingObject;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -174,8 +174,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         repositories.add(repository);
 
-        if (repository instanceof CommandHandlingObject) {
-            getCommandBus().register((CommandHandlingObject) repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().register((CommandHandler) repository);
         }
 
         getEventBus().register(repository);
@@ -189,8 +189,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandHandlingObject) {
-            getCommandBus().unregister((CommandHandlingObject) repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().unregister((CommandHandler) repository);
         }
 
         getEventBus().unregister(repository);

@@ -31,8 +31,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.*;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.CommandHandlingObject;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +50,7 @@ import java.util.Set;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler, CommandHandlingObject {
+        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler, CommandHandler {
 
     /**
      * {@inheritDoc}

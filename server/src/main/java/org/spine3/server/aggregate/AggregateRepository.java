@@ -27,8 +27,8 @@ import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.*;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -64,7 +64,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
-        implements CommandDispatcher, MultiHandler, CommandHandlingObject {
+        implements CommandDispatcher, MultiHandler, CommandHandler {
 
     /**
      * Default number of events to be stored before a next snapshot is made.

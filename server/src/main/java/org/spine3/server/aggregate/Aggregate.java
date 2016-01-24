@@ -34,8 +34,8 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.util.Classes;
 import org.spine3.server.util.EventRecords;
 import org.spine3.server.util.Events;
@@ -66,7 +66,7 @@ import static org.spine3.server.util.Identifiers.idToAny;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
+public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
     /**
      * Cached value of the ID in the form of Any instance.

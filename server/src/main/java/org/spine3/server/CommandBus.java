@@ -31,8 +31,8 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.internal.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.type.CommandClass;
 
@@ -76,11 +76,11 @@ public class CommandBus implements AutoCloseable {
      * @param object a {@code non-null} object of the required type
      * @throws IllegalArgumentException if the object is not of required class
      */
-    void register(CommandHandlingObject object) {
+    void register(CommandHandler object) {
         handlerRegistry.register(object);
     }
 
-    void unregister(CommandHandlingObject object) {
+    void unregister(CommandHandler object) {
         handlerRegistry.unregister(object);
     }
 
@@ -156,14 +156,14 @@ public class CommandBus implements AutoCloseable {
 
         private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
 
-        void register(CommandHandlingObject object) {
+        void register(CommandHandler object) {
             checkNotNull(object);
 
             final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
             registerMap(handlers);
         }
 
-        void unregister(CommandHandlingObject object) {
+        void unregister(CommandHandler object) {
             checkNotNull(object);
 
             final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
