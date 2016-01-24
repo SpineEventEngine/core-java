@@ -32,7 +32,6 @@ import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
-import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.CommandHandler;

@@ -29,8 +29,6 @@ import org.junit.Test;
 import org.spine3.base.*;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.UserUtil;
-import org.spine3.eventbus.EventBus;
-import org.spine3.eventbus.Subscribe;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;

@@ -18,7 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@ParametersAreNonnullByDefault
-package org.spine3.eventbus;
+package org.spine3.server;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Marks a method as an event subscriber.
+ *
+ * <p>An event subscriber method must have two parameters. The class of the event will be
+ * indicated by the first parameter.
+ *
+ * <p>The second parameter must be {@link org.spine3.base.EventContext}. If the annotation
+ * is applied to a method with less or more than two parameters, the method will not be
+ * registered for event delivery from {@link EventBus}.
+ *
+ * @author Alexander Yevsyukov
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Subscribe {
+}

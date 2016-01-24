@@ -21,7 +21,6 @@
 package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.eventbus.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
