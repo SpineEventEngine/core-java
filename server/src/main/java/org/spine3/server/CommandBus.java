@@ -158,6 +158,7 @@ public class CommandBus implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
     }
@@ -255,6 +256,10 @@ public class CommandBus implements AutoCloseable {
         boolean hasDispatcherFor(CommandClass commandClass) {
             final CommandDispatcher dispatcher = dispatchers.get(commandClass);
             return dispatcher != null;
+        }
+
+        void unregisterAll() {
+            dispatchers.clear();
         }
     }
 

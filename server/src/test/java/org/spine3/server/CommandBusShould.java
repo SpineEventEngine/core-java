@@ -43,8 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.spine3.server.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommandFactory.*;
 
@@ -52,11 +51,13 @@ import static org.spine3.testdata.TestCommandFactory.*;
 public class CommandBusShould {
 
     private CommandBus commandBus;
+    private CommandStore commandStore;
 
     @Before
     public void setUp() {
         final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final CommandStore commandStore = new CommandStore(storageFactory.createCommandStorage());
+
+        commandStore = new CommandStore(storageFactory.createCommandStorage());
         commandBus = CommandBus.create(commandStore);
     }
 
@@ -176,7 +177,6 @@ public class CommandBusShould {
         commandBus.unregister(dispatcher);
 
         final String projectId = "@Test unregister_dispatcher";
-
         assertTrue(isUnsupportedCommand(commandBus.validate(createProject(projectId))));
         assertTrue(isUnsupportedCommand(commandBus.validate(startProject(projectId))));
         assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
@@ -245,5 +245,50 @@ public class CommandBusShould {
             //noinspection ReturnOfNull
             return null;
         }
+    }
+
+    @Test
+    public void unregister_handler() {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+        commandBus.unregister(handler);
+        final String projectId = "@Test unregister_handler";
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProject(projectId))));
+    }
+
+    @Test
+    public void validate_commands_both_dispatched_and_handled() {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        commandBus.register(handler);
+        commandBus.register(dispatcher);
+
+        final String projectId = "@Test validate_commands_both_dispatched_and_handled";
+        assertEquals(Responses.ok(), commandBus.validate(createProject(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(addTask(projectId)));
+    }
+
+    private static class AddTaskDispatcher implements CommandDispatcher {
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return CommandClass.setOf(AddTask.class);
+        }
+
+        @Override
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+            //noinspection ReturnOfNull
+            return null;
+        }
+    }
+
+    @Test // To improve coverage stats.
+    public void have_log() {
+        assertNotNull(CommandBus.log());
+    }
+
+    @Test
+    public void close_CommandStore_when_closed() throws Exception {
+        commandBus.close();
+        assertTrue(commandStore.isClosed());
     }
 }
