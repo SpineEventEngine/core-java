@@ -249,20 +249,35 @@ public class CommandBus implements AutoCloseable {
             }
         }
 
+        /**
+         * Ensures that all of the commands of the passed dispatcher are not
+         * already registered for dispatched in this command bus.
+         * @return the passed instance if the condition is satisfied
+         * @throws IllegalArgumentException if at least one command class already has registered dispatcher
+         */
         private CommandDispatcher checkNotAlreadyRegistered(CommandDispatcher dispatcher) {
+            final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
             final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
             // Verify if no commands from this dispatcher are registered.
             for (CommandClass commandClass : commandClasses) {
-                final CommandDispatcher registeredDispatcher = dispatchers.get(commandClass);
-                checkArgument(registeredDispatcher == null,
-                        "The command class %s already has dispatcher: %s. Trying to register: %s.",
-                        commandClass, registeredDispatcher, dispatcher);
+                if (dispatchers.get(commandClass) != null) {
+                    alreadyRegistered.add(commandClass);
+                }
             }
+            checkAlreadyRegistered(alreadyRegistered, dispatcher,
+                    "Cannot register dispatcher %s for command class %s which already has registered dispatcher.",
+                    "Cannot register dispatcher %s for command classes (%s) which already have registered dispatchers.");
             return dispatcher;
         }
 
+        /**
+         * Ensures that the dispatcher forwards at least one command.
+         * @return the passed instance if the condition is met
+         * @throws IllegalArgumentException if the dispatcher returns empty set of command classes
+         * @throws NullPointerException if the dispatcher returns null set
+         */
         private static CommandDispatcher checkNotEmpty(CommandDispatcher dispatcher) {
-            final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
+            final Set<CommandClass> commandClasses = checkNotNull(dispatcher.getCommandClasses());
             checkArgument(!commandClasses.isEmpty(),
                           "No command classes are forwarded by this dispatcher: %s", dispatcher);
             return dispatcher;
