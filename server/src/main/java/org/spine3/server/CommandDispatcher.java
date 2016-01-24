@@ -30,22 +30,11 @@ import java.util.List;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * {@code CommandDispatcher} delivers commands to command handlers and returns results
- * of their execution.
+ * {@code CommandDispatcher} delivers commands to handlers and returns results of the command processing.
  *
  * @author Alexander Yevsyukov
  */
 public interface CommandDispatcher {
-
-    /**
-     * The name of the method used for dispatching commands to aggregate roots.
-     * <p/>
-     * <p>This constant is used for obtaining {@code Method} instance via reflection.
-     *
-     * @see #dispatch(Message, CommandContext)
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    String DISPATCH_METHOD_NAME = "dispatch";
 
     /**
      * Dispatches the command for processing and returns the generated events.
@@ -60,10 +49,17 @@ public interface CommandDispatcher {
     List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable;
 
     /**
-     * Utility class for obtaining the reference to the dispatch method of the implementations.
+     * Utility class for obtaining reference to {@link #dispatch(Message, CommandContext)} methods of implementations.
      */
-    @SuppressWarnings("UtilityClass")
     class DispatchMethod {
+
+        /**
+         * The name of the method used for dispatching commands.
+         *
+         * @see #dispatch(Message, CommandContext)
+         */
+        @SuppressWarnings("DuplicateStringLiteralInspection") // EventDispatcher has also such method.
+        private static final String DISPATCH_METHOD_NAME = "dispatch";
 
         /**
          * Obtains the reference to the {@link #dispatch(Message, CommandContext)} method of the implementation
@@ -78,7 +74,6 @@ public interface CommandDispatcher {
             }
         }
 
-        private DispatchMethod() {
-        }
+        private DispatchMethod() {}
     }
 }

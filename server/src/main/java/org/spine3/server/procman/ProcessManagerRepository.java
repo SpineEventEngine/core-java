@@ -24,6 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
@@ -38,8 +40,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Throwables.propagate;
-
 /**
  * The abstract base for repositories for Process Managers.
  *
@@ -50,16 +50,7 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements CommandDispatcher, MultiHandler, CommandHandlingObject {
-
-    /**
-     * The name of the method used for dispatching events to process managers.
-     *
-     * <p>This constant is used for obtaining {@code Method} instance via reflection.
-     *
-     * @see #dispatchEvent(Message, EventContext)
-     */
-    private static final String EVENT_DISPATCHER_METHOD_NAME = "dispatchEvent";
+        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler, CommandHandlingObject {
 
     /**
      * {@inheritDoc}
@@ -135,9 +126,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private Multimap<Method, Class<? extends Message>> getCommandHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
-        final Method handler = DispatchMethod.of(this);
+        final Method dispatcher = CommandDispatcher.DispatchMethod.of(this);
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(handler, commandClasses)
+                .putAll(dispatcher, commandClasses)
                 .build();
     }
 
@@ -149,9 +140,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private Multimap<Method, Class<? extends Message>> getEventHandlers() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
-        final Method handler = dispatchEventMethod();
+        final Method dispatcher = EventDispatcher.DispatchMethod.of(this);
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(handler, eventClasses)
+                .putAll(dispatcher, eventClasses)
                 .build();
     }
 
@@ -199,12 +190,16 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      * @see #getId(Message, EventContext)
      */
-    @SuppressWarnings("unused") // This method is used via reflection
-    public void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
+    @Override
+    public void dispatch(Message event, EventContext context) {
         final I id = getId(event, context);
         final PM manager = load(id);
-        manager.dispatchEvent(event, context);
-        store(manager);
+        try {
+            manager.dispatchEvent(event, context);
+            store(manager);
+        } catch (InvocationTargetException e) {
+            log().error("Error during dispatching event", e);
+        }
     }
 
     /**
@@ -225,19 +220,15 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return result;
     }
 
-    /**
-     * Returns the reference to the method {@link #dispatchEvent(Message, EventContext)} of this repository.
-     */
-    private static Method dispatchEventMethod() {
-        return getDispatcherMethod(EVENT_DISPATCHER_METHOD_NAME, EventContext.class);
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ProcessManagerRepository.class);
     }
 
-    private static Method getDispatcherMethod(String dispatcherMethodName, Class<? extends Message> contextClass) {
-        try {
-            final Method method = ProcessManagerRepository.class.getMethod(dispatcherMethodName, Message.class, contextClass);
-            return method;
-        } catch (NoSuchMethodException e) {
-            throw propagate(e);
-        }
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
+
 }

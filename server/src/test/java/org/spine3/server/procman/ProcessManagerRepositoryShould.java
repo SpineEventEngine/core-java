@@ -90,7 +90,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
-        repository.dispatchEvent(event, EVENT_CONTEXT);
+        repository.dispatch(event, EVENT_CONTEXT);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(event, manager.getState());
     }
@@ -134,7 +134,7 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        repository.dispatchEvent(unknownEvent, EVENT_CONTEXT);
+        repository.dispatch(unknownEvent, EVENT_CONTEXT);
     }
 
     @Test
