@@ -240,15 +240,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
 
     /**
      * Processes the command by dispatching it to a method of an aggregate.
-     * <p/>
-     * <p>For more details on writing aggregate commands please see
-     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">“Writing Aggregate Commands”</a>.
+     *
+     * <p>The aggregate ID is obtained from the passed command.
+     *
+     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
+     * if there is no aggregate with such ID.
      *
      * @param command the command to dispatch
      * @param context context info of the command
      * @return a list of the event records
+     * @throws IllegalStateException if storage for the repository was not initialized
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
     @Override
     @CheckReturnValue
