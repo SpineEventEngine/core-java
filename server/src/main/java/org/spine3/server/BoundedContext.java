@@ -95,7 +95,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     /**
-     * Closes the BoundedContext performing all necessary clean-ups.
+     * Closes the {@code BoundedContext} performing all necessary clean-ups.
      *
      * <p>This method performs the following:
      * <ol>
@@ -195,6 +195,29 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         repository.close();
     }
 
+    /**
+     * Processes the incoming command request.
+     *
+     * <p>This method is the entry point of a command in to a backend of an application.
+     *
+     * @param request incoming command request to handle
+     * @return the result of command handling
+     */
+    public CommandResult post(CommandRequest request) {
+        checkNotNull(request);
+
+        //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
+
+        final CommandResult result = dispatch(request);
+        final List<EventRecord> eventRecords = result.getEventRecordList();
+
+        postEvents(eventRecords);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
+
+        return result;
+    }
+
     @Override
     public void post(CommandRequest request, StreamObserver<Response> responseObserver) {
         final Message command = Messages.fromAny(request.getCommand());
@@ -244,35 +267,12 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
     private void handle(CommandRequest request) {
         //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
-        process(request);
-    }
-
-    //TODO:2016-01-08:alexander.yevsyukov: Hide this method in favor of a call from client via gRPC.
-    /**
-     * Processes the incoming command request.
-     *
-     * <p>This method is the entry point of a command in to a backend of an application.
-     *
-     * @param request incoming command request to handle
-     * @return the result of command handling
-     */
-    public CommandResult process(CommandRequest request) {
-        checkNotNull(request);
-
-        final CommandResult result = dispatch(request);
-        final List<EventRecord> eventRecords = result.getEventRecordList();
-
-        postEvents(eventRecords);
-
-        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
-
-        return result;
+        post(request);
     }
 
     private CommandResult dispatch(CommandRequest request) {
-        final CommandBus dispatcher = getCommandBus();
         try {
-            final List<EventRecord> eventRecords = dispatcher.storeAndDispatch(request);
+            final List<EventRecord> eventRecords = this.commandBus.storeAndDispatch(request);
 
             final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
@@ -386,9 +386,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
                 this.name = DEFAULT_NAME;
             }
 
-            checkNotNull(storageFactory, "storageFactory");
-            checkNotNull(commandBus, "commandDispatcher");
-            checkNotNull(eventBus, "eventBus");
+            checkNotNull(storageFactory, "storageFactory is not set");
+            checkNotNull(commandBus, "commandDispatcher is not set");
+            checkNotNull(eventBus, "eventBus is not set");
 
             final BoundedContext result = new BoundedContext(this);
 

@@ -119,7 +119,7 @@ public class BoundedContextShould {
 
         final List<CommandResult> results = newLinkedList();
         for (CommandRequest request : requests) {
-            final CommandResult result = boundedContext.process(request);
+            final CommandResult result = boundedContext.post(request);
             results.add(result);
         }
         return results;
@@ -140,11 +140,6 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_instance_if_started() {
-        assertNotNull(boundedContext);
-    }
-
-    @Test
     public void return_EventBus() {
         assertNotNull(boundedContext.getEventBus());
     }
@@ -155,14 +150,14 @@ public class BoundedContextShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_call_process_with_null_parameter() {
+    public void throw_NPE_on_null_CommandRequest() {
         // noinspection ConstantConditions
-        boundedContext.process(null);
+        boundedContext.post(null);
     }
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-        boundedContext.process(createProject());
+        boundedContext.post(createProject());
     }
 
     @Test
@@ -191,7 +186,7 @@ public class BoundedContextShould {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = boundedContext.process(request);
+        final CommandResult result = boundedContext.post(request);
 
         assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
     }
@@ -207,7 +202,6 @@ public class BoundedContextShould {
     }
 
     private void assertCommandResultsAreValid(List<CommandRequest> requests, List<CommandResult> results) {
-
         assertEquals(requests.size(), results.size());
 
         for (int i = 0; i < requests.size(); i++) {
@@ -216,7 +210,6 @@ public class BoundedContextShould {
     }
 
     private void assertRequestAndResultMatch(CommandRequest request, CommandResult result) {
-
         final Timestamp expectedTime = request.getContext().getTimestamp();
 
         final List<EventRecord> records = result.getEventRecordList();
@@ -229,44 +222,6 @@ public class BoundedContextShould {
         assertEquals(expectedTime, actualRecord.getContext().getCommandContext().getTimestamp());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_StorageFactory() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setStorageFactory(null);
-    }
-
-    @Test
-    public void return_StorageFactory_from_builder() {
-        final StorageFactory sf = InMemoryStorageFactory.getInstance();
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setStorageFactory(sf);
-        assertEquals(sf, builder.getStorageFactory());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_CommandDispatcher() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setCommandBus(null);
-    }
-
-    @Test
-    public void return_CommandDispatcher_from_builder() {
-        final CommandBus expected = newCommandDispatcher(storageFactory);
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
-        assertEquals(expected, builder.getCommandBus());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_EventBus() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setEventBus(null);
-    }
-
-    @Test
-    public void return_EventBus_from_builder() {
-        final EventBus expected = newEventBus(storageFactory);
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
-        assertEquals(expected, builder.getEventBus());
-    }
 
     private static class ResponseObserver implements StreamObserver<Response> {
 
@@ -310,6 +265,7 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
+    @SuppressWarnings("unused")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "STATUS_NEW";
@@ -381,7 +337,6 @@ public class BoundedContextShould {
 
             isProjectStartedEventApplied = true;
         }
-
     }
 
 

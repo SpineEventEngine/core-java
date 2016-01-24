@@ -108,7 +108,7 @@ public class Application implements AutoCloseable {
 
         // Process requests
         for (CommandRequest request : requests) {
-            boundedContext.process(request);
+            boundedContext.post(request);
         }
 
         log().info("All the requests were handled.");
