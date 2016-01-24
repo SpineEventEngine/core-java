@@ -59,7 +59,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * as the first parameter. It must be an exact type of the event that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events are posted to an EventBus using {@link #storeAndPost(EventRecord)} method. Normally this
+ * <p>Events are posted to an EventBus using {@link #post(EventRecord)} method. Normally this
  * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
  *
  * <p>The passed {@link EventRecord} is stored in the {@link EventStore} associated with the {@code EventBus}
@@ -130,7 +130,7 @@ public class EventBus implements AutoCloseable {
     /**
      * Registers all subscriber methods on {@code object} to receive events.
      *
-     * @param object the event applier object whose subscriber methods should be registered
+     * @param object the event handler object whose subscriber methods should be registered
      */
     public void register(Object object) {
         checkNotNull(object);
@@ -175,12 +175,13 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Stores the passed record in the associated {@link EventStore} and passes
-     * the event and its context to registered handlers.
+     * Posts the event for handling.
+     *
+     * <p>The record is stored in the associated {@link EventStore} before passing it to handlers.
      *
      * @param record the record with the event and its context to be handled
      */
-    public void storeAndPost(EventRecord record) {
+    public void post(EventRecord record) {
         store(record);
 
         final Message event = EventRecords.getEvent(record);

@@ -296,7 +296,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            eventBus.storeAndPost(record);
+            eventBus.post(record);
         }
     }
 

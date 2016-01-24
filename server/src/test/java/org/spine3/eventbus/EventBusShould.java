@@ -55,4 +55,10 @@ public class EventBusShould {
     public void create_instance_with_executor() {
         assertNotNull(EventBus.newInstance(eventStore, Executors.newSingleThreadExecutor()));
     }
+
+    @Test
+    public void return_associated_EventStore() {
+        final EventBus bus = EventBus.newInstance(eventStore);
+        assertNotNull(bus.getEventStore());
+    }
 }
