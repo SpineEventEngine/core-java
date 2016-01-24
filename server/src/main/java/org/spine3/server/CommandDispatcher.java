@@ -52,14 +52,9 @@ public interface CommandDispatcher {
      * @param context context info of the command
      * @return a list of event records generated during the command execution, or
      *         an empty list if no events were generated
-     * @throws Exception if an exception occurs during command execution
-     * @throws FailureThrowable if a business failure occurred during the command execution
      */
-    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable;
+    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception;
     //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
-
-    //TODO:2016-01-24:alexander.yevsyukov: Do not throw FailureThroable because it's a part of business logic.
-    // CommandBus cannot deal with it.
 
     //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 

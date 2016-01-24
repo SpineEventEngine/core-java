@@ -153,19 +153,6 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
                 .build();
     }
 
-    //TODO:2016-01-24:alexander.yevsyukov: Remove the below block after CommandBus supports CommandDispatcher interface in full.
-//    @Internal
-//    @Override
-//    public CommandHandlerMethod createMethod(Method method) {
-//        return new PmRepositoryDispatchMethod(this, method);
-//    }
-//
-//    @Internal
-//    @Override
-//    public Predicate<Method> getHandlerMethodPredicate() {
-//        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
-//    }
-
     /**
      * Dispatches the command to a corresponding process manager.
      *
@@ -178,8 +165,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #getId(Message, CommandContext)
      */
     @Override
-    public List<EventRecord> dispatch(Message command, CommandContext context)
-            throws FailureThrowable, InvocationTargetException {
+    public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         final I id = getId(command, context);
         final PM manager = load(id);
         final List<EventRecord> events = manager.dispatchCommand(command, context);

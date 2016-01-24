@@ -83,7 +83,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -125,7 +125,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -143,7 +143,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
                 //noinspection ReturnOfNull
                 return null;
             }
@@ -167,7 +167,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
                 //noinspection ReturnOfNull
                 return null;
             }
@@ -241,7 +241,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -275,7 +275,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }

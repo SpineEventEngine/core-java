@@ -119,7 +119,7 @@ public class BoundedContextShould {
 
         final List<CommandResult> results = newLinkedList();
         for (CommandRequest request : requests) {
-            final CommandResult result = boundedContext.post(request);
+            final CommandResult result = boundedContext.process(request);
             results.add(result);
         }
         return results;
@@ -152,7 +152,7 @@ public class BoundedContextShould {
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_null_CommandRequest() {
         // noinspection ConstantConditions
-        boundedContext.post(null);
+        boundedContext.process(null);
     }
 
     @Test(expected = UnsupportedCommandException.class)
@@ -186,7 +186,7 @@ public class BoundedContextShould {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = boundedContext.post(request);
+        final CommandResult result = boundedContext.process(request);
 
         assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
     }

@@ -248,13 +248,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
      * @param context context info of the command
      * @return a list of the event records
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws FailureThrowable if a business failure occurred during the command execution by the aggregate
      * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
     @Override
     @CheckReturnValue
     public List<EventRecord> dispatch(Message command, CommandContext context)
-            throws FailureThrowable, IllegalStateException, InvocationTargetException {
+            throws IllegalStateException, InvocationTargetException {
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 

@@ -41,6 +41,7 @@ import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,55 +116,6 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Directs a command request to the corresponding handler.
-     *
-     * @param request the command request to be processed
-     * @return a list of the event records as the result of handling the command
-     * @throws InvocationTargetException   if an exception occurs during command handling
-     * @throws UnsupportedCommandException if there is no handler registered for the class of the passed command
-     */
-    @CheckReturnValue
-    List<EventRecord> storeAndDispatch(CommandRequest request)
-            throws InvocationTargetException {
-        checkNotNull(request);
-
-        store(request);
-
-        final Message command = Messages.fromAny(request.getCommand());
-        final CommandContext context = request.getContext();
-
-        final CommandClass commandClass = CommandClass.of(command);
-        if (!handlerRegistered(commandClass)) {
-            throw new UnsupportedCommandException(command);
-        }
-
-        final CommandHandlerMethod method = getHandler(commandClass);
-        final List<EventRecord> result = method.invoke(command, context);
-        return result;
-    }
-
-    private void store(CommandRequest request) {
-        commandStore.store(request);
-    }
-
-    private boolean handlerRegistered(CommandClass cls) {
-        final boolean result = handlerRegistry.handlerRegistered(cls);
-        return result;
-    }
-
-    @CheckReturnValue
-    private CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlerRegistry.getHandler(cls);
-    }
-
-    @Override
-    public void close() throws Exception {
-        dispatcherRegistry.unregisterAll();
-        handlerRegistry.unregisterAll();
-        commandStore.close();
-    }
-
-    /**
      * Verifies if the command can be posted to this {@code CommandBus}.
      *
      * <p>The command can be posted if it has either dispatcher or handler registered with
@@ -188,6 +140,96 @@ public class CommandBus implements AutoCloseable {
 
         return unsupportedCommand(command);
     }
+
+    /**
+     * Directs a command request to the corresponding handler.
+     *
+     * @param request the command request to be processed
+     * @return a list of the event records as the result of handling the command
+     * @throws UnsupportedCommandException if there is no handler or dispatcher registered for
+     *  the class of the passed command
+     */
+    public List<EventRecord> post(CommandRequest request) {
+
+        //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
+
+        checkNotNull(request);
+
+        store(request);
+
+        final Message command = Messages.fromAny(request.getCommand());
+        final CommandContext context = request.getContext();
+
+        final CommandClass commandClass = CommandClass.of(command);
+
+        if (dispatcherRegistered(commandClass)) {
+            return dispatch(command, context);
+        }
+
+        if (handlerRegistered(commandClass)) {
+            return invokeHandler(command, context);
+        }
+
+        //TODO:2016-01-24:alexander.yevsyukov: Unify exceptions with messages sent in Response.
+        throw new UnsupportedCommandException(command);
+    }
+
+    private List<EventRecord> dispatch(Message command, CommandContext context) {
+        final CommandClass commandClass = CommandClass.of(command);
+        final CommandDispatcher dispatcher = getDispatcher(commandClass);
+        List<EventRecord> result = Collections.emptyList();
+        try {
+            result = dispatcher.dispatch(command, context);
+        } catch (Exception e) {
+            //TODO:2016-01-24:alexander.yevsyukov: Update command status here?
+            log().error("", e);
+        }
+        return result;
+    }
+
+    final List<EventRecord> invokeHandler(Message command, CommandContext context) {
+        final CommandClass commandClass = CommandClass.of(command);
+        final CommandHandlerMethod method = getHandler(commandClass);
+        List<EventRecord> result = Collections.emptyList();
+        try {
+            result = method.invoke(command, context);
+        } catch (InvocationTargetException e) {
+            //TODO:2016-01-24:alexander.yevsyukov: Update command status here?
+            log().error("", e);
+        }
+        return result;
+    }
+
+    private void store(CommandRequest request) {
+        commandStore.store(request);
+    }
+
+    private boolean dispatcherRegistered(CommandClass cls) {
+        final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
+        return result;
+    }
+
+    private boolean handlerRegistered(CommandClass cls) {
+        final boolean result = handlerRegistry.handlerRegistered(cls);
+        return result;
+    }
+
+    private CommandDispatcher getDispatcher(CommandClass commandClass) {
+        return dispatcherRegistry.getDispatcher(commandClass);
+    }
+
+    @CheckReturnValue
+    private CommandHandlerMethod getHandler(CommandClass cls) {
+        return handlerRegistry.getHandler(cls);
+    }
+
+    @Override
+    public void close() throws Exception {
+        dispatcherRegistry.unregisterAll();
+        handlerRegistry.unregisterAll();
+        commandStore.close();
+    }
+
 
     /**
      * The registry of objects dispatching command request to where they are
@@ -260,6 +302,10 @@ public class CommandBus implements AutoCloseable {
 
         void unregisterAll() {
             dispatchers.clear();
+        }
+
+        public CommandDispatcher getDispatcher(CommandClass commandClass) {
+            return dispatchers.get(commandClass);
         }
     }
 
