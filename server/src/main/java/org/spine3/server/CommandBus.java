@@ -19,7 +19,9 @@
  */
 package org.spine3.server;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -65,31 +68,65 @@ public class CommandBus implements AutoCloseable {
         this.commandStore = commandStore;
     }
 
+    /**
+     * Registers the passed command dispatcher.
+     *
+     * @param dispatcher the dispatcher
+     * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
+     */
     void register(CommandDispatcher dispatcher) {
+        checkNoHandlersRegisteredFor(dispatcher);
         dispatcherRegistry.register(dispatcher);
     }
 
+    /**
+     * Ensures that no handlers already registered for the command classes of the passed dispatcher.
+     *
+     * @param dispatcher the dispatcher to check
+     * @throws IllegalArgumentException if one or more classes have registered handlers
+     */
+    private void checkNoHandlersRegisteredFor(CommandDispatcher dispatcher) {
+        final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
+        final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
+        for (CommandClass commandClass : commandClasses) {
+            if (handlerRegistered(commandClass)) {
+                alreadyRegistered.add(commandClass);
+            }
+        }
+        checkArgument(alreadyRegistered.isEmpty(),
+                "Unable to register dispatcher %s because command classes (%s) already have registered handlers.",
+                dispatcher, Joiner.on(", ").join(alreadyRegistered));
+    }
+
+    /**
+     * Unregisters dispatching for command classes by the passed dispatcher.
+     *
+     * <p>If the passed dispatcher deals with commands for which another dispatcher already registered
+     * the dispatch entries for such commands will not be unregistered, and warning will be logged.
+     *
+     * @param dispatcher the dispatcher to unregister
+     */
     void unregister(CommandDispatcher dispatcher) {
         dispatcherRegistry.unregister(dispatcher);
     }
 
     /**
-     * Registers the passed object as a handler of commands.
+     * Registers the passed command handler.
      *
-     * @param object a {@code non-null} object of the required type
-     * @throws IllegalArgumentException if the object does not have command handling methods
+     * @param handler a {@code non-null} handler object
+     * @throws IllegalArgumentException if the handler does not have command handling methods
      */
-    void register(CommandHandler object) {
-        handlerRegistry.register(object);
+    void register(CommandHandler handler) {
+        handlerRegistry.register(handler);
     }
 
     /**
-     * Unregisters the handler from the command bus.
+     * Unregisters the command handler from the command bus.
      *
-     * @param object the object to unregister
+     * @param handler the handler to unregister
      */
-    void unregister(CommandHandler object) {
-        handlerRegistry.unregister(object);
+    void unregister(CommandHandler handler) {
+        handlerRegistry.unregister(handler);
     }
 
     /**
@@ -141,19 +178,19 @@ public class CommandBus implements AutoCloseable {
     }
 
     public Response validate(Message command) {
-        if (!handlerRegistry.hasHandlerFor(command)) {
-            return CommandValidation.unsupportedCommand(command);
+        if (dispatcherRegistry.hasDispatcherFor(command)) {
+            return Responses.ok();
+        }
+
+        if (handlerRegistry.hasHandlerFor(command)) {
+            return Responses.ok();
         }
 
         //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
         // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
         // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
 
-        return responseOk();
-    }
-
-    private static Response responseOk() {
-        return Responses.RESPONSE_OK;
+        return CommandValidation.unsupportedCommand(command);
     }
 
     /**
@@ -166,33 +203,58 @@ public class CommandBus implements AutoCloseable {
 
         void register(CommandDispatcher dispatcher) {
             checkNotNull(dispatcher);
-            final Set<CommandClass> commandClasses = checkNotEmpty(dispatcher);
+            final Set<CommandClass> commandClasses = checkNotAlreadyRegistered(
+                    checkNotEmpty(dispatcher)).getCommandClasses();
 
             for (CommandClass commandClass : commandClasses) {
                 dispatchers.put(commandClass, dispatcher);
             }
         }
 
-        private static Set<CommandClass> checkNotEmpty(CommandDispatcher dispatcher) {
+        private CommandDispatcher checkNotAlreadyRegistered(CommandDispatcher dispatcher) {
             final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
-            if (commandClasses.isEmpty()) {
-                throw new IllegalArgumentException("No command classes are forwarded by this dispatcher: " + dispatcher);
+            // Verify if no commands from this dispatcher are registered.
+            for (CommandClass commandClass : commandClasses) {
+                final CommandDispatcher registeredDispatcher = dispatchers.get(commandClass);
+                checkArgument(registeredDispatcher == null,
+                        "The command class %s already has dispatcher: %s. Trying to register: %s.",
+                        commandClass, registeredDispatcher, dispatcher);
             }
-            return commandClasses;
+            return dispatcher;
+        }
+
+        private static CommandDispatcher checkNotEmpty(CommandDispatcher dispatcher) {
+            final Set<CommandClass> commandClasses = dispatcher.getCommandClasses();
+            checkArgument(!commandClasses.isEmpty(),
+                          "No command classes are forwarded by this dispatcher: %s", dispatcher);
+            return dispatcher;
         }
 
         void unregister(CommandDispatcher dispatcher) {
             checkNotNull(dispatcher);
-            final Set<CommandClass> commandClasses = checkNotEmpty(dispatcher);
+            final Set<CommandClass> commandClasses = checkNotEmpty(dispatcher).getCommandClasses();
             for (CommandClass commandClass : commandClasses) {
                 final CommandDispatcher registeredDispatcher = dispatchers.get(commandClass);
                 if (dispatcher.equals(registeredDispatcher)) {
                     dispatchers.remove(commandClass);
                 } else {
-                    log().warn("Another dispatcher (%s) found when trying to unregister %s for command class %s",
-                            registeredDispatcher, dispatcher, commandClass);
+                    warnUnregisterNotPossible(commandClass, registeredDispatcher, dispatcher);
                 }
             }
+        }
+
+        private static void warnUnregisterNotPossible(CommandClass commandClass,
+                                                      CommandDispatcher registeredDispatcher,
+                                                      CommandDispatcher dispatcher) {
+            log().warn(
+                    "Another dispatcher (%s) found when trying to unregister dispatcher %s for the command class %s." +
+                            "Dispatcher for the command class %s will not be unregistered.",
+                    registeredDispatcher, dispatcher, commandClass);
+        }
+
+        boolean hasDispatcherFor(Message command) {
+            final CommandDispatcher dispatcher = dispatchers.get(CommandClass.of(command));
+            return dispatcher != null;
         }
     }
 
@@ -296,7 +358,7 @@ public class CommandBus implements AutoCloseable {
         private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
 
-    private static Logger log() {
+    protected static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
 

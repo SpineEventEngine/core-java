@@ -68,4 +68,16 @@ public final class CommandClass extends ClassTypeValue {
         }
         return builder.build();
     }
+
+    /**
+     * Creates immutable set of {@code CommandClass} from the passed classes.
+     */
+    @SafeVarargs
+    public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
+        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
+    }
 }

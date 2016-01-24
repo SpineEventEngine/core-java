@@ -27,15 +27,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.base.Responses;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.project.command.AddTask;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.command.StartProject;
 import org.spine3.type.CommandClass;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.server.CommandValidation.isUnsupportedCommand;
+import static org.spine3.testdata.TestCommandFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandBusShould {
@@ -55,6 +66,9 @@ public class CommandBusShould {
         CommandBus.create(null);
     }
 
+    //
+    // Test for empty handler
+    //--------------------------
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
@@ -90,5 +104,129 @@ public class CommandBusShould {
         public Predicate<Method> getHandlerMethodPredicate() {
             return Predicates.alwaysFalse();
         }
+    }
+
+    //
+    // Test for duplicate dispatchers
+    //----------------------------------
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_allow_another_dispatcher_for_already_registered_commands() {
+        commandBus.register(new TwoCommandDispatcher());
+        commandBus.register(new TwoCommandDispatcher());
+    }
+
+    private static class TwoCommandDispatcher implements CommandDispatcher {
+
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return CommandClass.setOf(CreateProject.class, AddTask.class);
+        }
+
+        @Override
+        public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+            //noinspection ReturnOfNull
+            return null;
+        }
+    }
+
+    /**
+     * Test for successful dispatcher registration.
+     */
+    @Test
+    public void register_command_dispatcher() {
+        commandBus.register(new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getCommandClasses() {
+                return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
+            }
+
+            @Override
+            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+                //noinspection ReturnOfNull
+                return null;
+            }
+        });
+
+        final String projectId = "@Test register_command_dispatcher";
+        assertEquals(Responses.ok(), commandBus.validate(createProject(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(startProject(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(addTask(projectId)));
+    }
+
+    /**
+     * Test that unregistering dispatcher makes commands unsupported.
+     */
+    @Test
+    public void turn_commands_unsupported_when_dispatcher_unregistered() {
+        final CommandDispatcher dispatcher = new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getCommandClasses() {
+                return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
+            }
+
+            @Override
+            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+                //noinspection ReturnOfNull
+                return null;
+            }
+        };
+
+        commandBus.register(dispatcher);
+        commandBus.unregister(dispatcher);
+
+        final String projectId = "@Test unregister_dispatcher";
+
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProject(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(startProject(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
+        final CommandHandler createProjectHandler = new CommandHandler() {
+
+            @Assign
+            public void handle(CreateProject command, CommandContext ctx) {
+                // Do nothing.
+            }
+
+            @Override
+            public CommandHandlerMethod createMethod(Method method) {
+                return new CommandHandlerMethod(this, method) {
+                    @Override
+                    public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
+                        return super.invoke(message, context);
+                    }
+                };
+            }
+
+            @Override
+            public Predicate<Method> getHandlerMethodPredicate() {
+                return new Predicate<Method>() {
+                    @Override
+                    public boolean apply(@Nullable Method input) {
+                        return input != null && input.getName().equals("handle");
+                    }
+                };
+            }
+        };
+
+        commandBus.register(createProjectHandler);
+
+        final CommandDispatcher createProjectDispatcher = new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getCommandClasses() {
+                return CommandClass.setOf(CreateProject.class);
+            }
+
+            @Override
+            public List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable {
+                //noinspection ReturnOfNull
+                return null;
+            }
+        };
+
+        commandBus.register(createProjectDispatcher);
     }
 }

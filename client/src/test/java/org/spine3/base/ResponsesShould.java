@@ -20,37 +20,28 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.Empty;
+import org.junit.Test;
+import org.spine3.util.Tests;
 
-/**
- * Utilities for working with {@link org.spine3.base.Response} objects.
- *
- * @author Alexander Yevsyukov
- */
-public class Responses {
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertTrue;
 
-    private Responses() {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ResponsesShould {
+
+    @Test
+    public void have_private_constructor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Responses.class);
     }
 
-    /**
-     * The response returned on successful acceptance of a command for processing.
-     */
-    private static final Response RESPONSE_OK = Response.newBuilder()
-            .setOk(Empty.getDefaultInstance())
-            .build();
-
-    /**
-     * @return the instance of OK {@link Response}
-     */
-    public static Response ok() {
-        return RESPONSE_OK;
+    @Test
+    public void return_ok_response() {
+        checkNotNull(Responses.ok());
     }
 
-    /**
-     * @return {@code true} if the passed response represents `ok` status.
-     */
-    public static boolean isOk(Response response) {
-        final boolean result = response.getStatusCase() == Response.StatusCase.OK;
-        return result;
+    @Test
+    public void recognize_ok_response() {
+        assertTrue(Responses.isOk(Responses.ok()));
     }
+
 }
