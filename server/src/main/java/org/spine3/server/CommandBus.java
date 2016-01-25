@@ -187,7 +187,8 @@ public class CommandBus implements AutoCloseable {
         return result;
     }
 
-    final List<EventRecord> invokeHandler(Message command, CommandContext context) {
+
+    /* package */ final List<EventRecord> invokeHandler(Message command, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandHandlerMethod method = getHandler(commandClass);
         List<EventRecord> result = Collections.emptyList();
@@ -218,7 +219,6 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
-    @CheckReturnValue
     private CommandHandlerMethod getHandler(CommandClass cls) {
         return handlerRegistry.getHandler(cls);
     }
@@ -396,7 +396,6 @@ public class CommandBus implements AutoCloseable {
             return handlersByClass.containsKey(cls);
         }
 
-        @CheckReturnValue
         private CommandHandlerMethod getHandler(CommandClass cls) {
             return handlersByClass.get(cls);
         }

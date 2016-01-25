@@ -27,7 +27,9 @@ import org.spine3.server.storage.CommandStorage;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Stores and loads commands.
+ * Manages commands received by the system.
+ *
+ * //TODO:2016-01-25:alexander.yevsyukov: Add API for updating status and loading.
  *
  * @author Mikhail Mikhaylov
  */
@@ -51,8 +53,6 @@ public class CommandStore implements AutoCloseable {
         //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
         storage.store(aggregateId, request);
     }
-
-    //TODO:2016-01-15:alexander.yevsyukov: Support writing processing status into the storage.
 
     @Override
     public void close() throws Exception {
