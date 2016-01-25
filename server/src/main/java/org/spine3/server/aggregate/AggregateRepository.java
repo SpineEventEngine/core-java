@@ -202,11 +202,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     /**
      * Stores the passed aggregate root and commits its uncommitted events.
      *
-     * @param aggregateRoot an instance to store
+     * @param aggregate an instance to store
      */
     @Override
-    public void store(A aggregateRoot) {
-        final Iterable<EventRecord> uncommittedEvents = aggregateRoot.getStateChangingUncommittedEvents();
+    public void store(A aggregate) {
+        final Iterable<EventRecord> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
 
         //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
         // Now we're storing snapshot in a seria of uncommitted
@@ -220,12 +220,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
             ++eventCount;
 
             if (eventCount > snapshotTrigger) {
-                createAndStoreSnapshot(aggregateRoot);
+                createAndStoreSnapshot(aggregate);
                 eventCount = 0;
             }
         }
 
-        aggregateRoot.commitEvents();
+        aggregate.commitEvents();
     }
 
     private void createAndStoreSnapshot(A aggregateRoot) {

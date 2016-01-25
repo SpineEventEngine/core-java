@@ -55,6 +55,7 @@ public interface CommandDispatcher {
      */
     List<EventRecord> dispatch(Message command, CommandContext context) throws Exception;
     //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
+    //TODO:2016-01-25:alexander.yevsyukov: Dispatch CommandRequest, not the couple of parameters.
 
     //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 
