@@ -29,10 +29,10 @@ import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
+import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.util.Classes;
 import org.spine3.server.util.EventRecords;
 import org.spine3.server.util.Events;
@@ -74,7 +74,7 @@ import static org.spine3.server.procman.PmCommandHandler.IS_PM_COMMAND_HANDLER;
  * @param <M> the type of the process manager state
  * @author Alexander Litus
  */
-public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandlingObject {
+public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
     /**
      * Keeps initialization state of the process manager.

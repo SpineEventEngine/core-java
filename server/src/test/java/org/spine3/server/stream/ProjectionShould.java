@@ -26,7 +26,7 @@ import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
-import org.spine3.eventbus.Subscribe;
+import org.spine3.server.Subscribe;
 
 import static org.junit.Assert.assertTrue;
 

@@ -21,7 +21,6 @@
 package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.eventbus.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
@@ -39,7 +38,7 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(StorageFactory storageFactory) {
-        final CommandDispatcher commandDispatcher = CommandDispatcher.create(
+        final CommandBus commandBus = CommandBus.create(
                 new CommandStore(storageFactory.createCommandStorage()));
 
         final EventBus eventBus = EventBus.newInstance(EventStore.newBuilder()
@@ -49,7 +48,7 @@ public class BoundedContextTestStubs {
 
         return BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandDispatcher(commandDispatcher)
+                .setCommandBus(commandBus)
                 .setEventBus(eventBus)
                 .build();
     }

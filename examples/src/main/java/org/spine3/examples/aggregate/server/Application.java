@@ -25,12 +25,12 @@ import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.CommandRequest;
-import org.spine3.eventbus.EventBus;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandDispatcher;
+import org.spine3.server.CommandBus;
 import org.spine3.server.CommandStore;
+import org.spine3.server.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
@@ -64,13 +64,13 @@ public class Application implements AutoCloseable {
 
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandDispatcher(createCommandDispatcher())
+                .setCommandBus(createCommandDispatcher())
                 .setEventBus(createEventBus(storageFactory))
                 .build();
     }
 
-    private static CommandDispatcher createCommandDispatcher() {
-        return CommandDispatcher.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+    private static CommandBus createCommandDispatcher() {
+        return CommandBus.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
     }
 
     private static EventBus createEventBus(StorageFactory storageFactory) {
@@ -108,7 +108,7 @@ public class Application implements AutoCloseable {
 
         // Process requests
         for (CommandRequest request : requests) {
-            boundedContext.process(request);
+            boundedContext.post(request);
         }
 
         log().info("All the requests were handled.");

@@ -23,6 +23,7 @@ package org.spine3.eventbus;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.stream.EventStore;
@@ -54,5 +55,11 @@ public class EventBusShould {
     @Test
     public void create_instance_with_executor() {
         assertNotNull(EventBus.newInstance(eventStore, Executors.newSingleThreadExecutor()));
+    }
+
+    @Test
+    public void return_associated_EventStore() {
+        final EventBus bus = EventBus.newInstance(eventStore);
+        assertNotNull(bus.getEventStore());
     }
 }

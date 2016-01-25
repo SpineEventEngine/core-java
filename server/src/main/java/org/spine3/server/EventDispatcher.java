@@ -18,30 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.procman;
+package org.spine3.server;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.base.EventContext;
 
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Throwables.propagate;
+
 /**
- * A wrapper for {@link ProcessManagerRepository#dispatch(Message, CommandContext)}.
- *
- * <p>This specific type of {@code CommandHandlerMethod} is needed for distinguishing the dispatching
- * method of a repository for actual handling methods.
+ * {@code EventDispatcher} delivers events to handlers.
  *
  * @author Alexander Yevsyukov
  */
-class PmRepositoryDispatchMethod extends CommandHandlerMethod {
+public interface EventDispatcher {
+
+    void dispatch(Message event, EventContext context);
+
     /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param target object to which the method applies
-     * @param method subscriber method
+     * Utility class for obtaining reference to {@link #dispatch(Message, EventContext)} methods of implementations.
      */
-    protected PmRepositoryDispatchMethod(Object target, Method method) {
-        super(target, method);
+    class DispatchMethod {
+
+        /**
+         * The name of the method used for dispatching events.
+         *
+         * @see #dispatch(Message, EventContext)
+         */
+        @SuppressWarnings("DuplicateStringLiteralInspection") // CommandDispatcher has also such method.
+        private static final String DISPATCH_METHOD_NAME = "dispatch";
+
+        public static Method of(EventDispatcher dispatcher) {
+            try {
+                return dispatcher.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, EventContext.class);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+        }
+
+        private DispatchMethod() {}
     }
 }

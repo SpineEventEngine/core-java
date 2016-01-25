@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
+import org.spine3.server.EventDispatcher;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.util.Identifiers;
 
@@ -33,15 +34,13 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static com.google.common.base.Throwables.propagate;
-
 /**
  * Abstract base for repositories managing {@link StreamProjection}s.
  *
  * @author Alexander Yevsyukov
  */
 public abstract class StreamProjectionRepository<I, P extends StreamProjection<I, M>, M extends Message>
-        extends EntityRepository<I, P, M> implements MultiHandler {
+        extends EntityRepository<I, P, M> implements EventDispatcher, MultiHandler {
 
     protected StreamProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -56,7 +55,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     public Multimap<Method, Class<? extends Message>> getHandlers() {
         final Class<? extends StreamProjection> projectionClass = getEntityClass();
         final Set<Class<? extends Message>> events = StreamProjection.getEventClasses(projectionClass);
-        final Method forward = dispatchAsMethod();
+        final Method forward = DispatchMethod.of(this);
         return ImmutableMultimap.<Method, Class<? extends Message>>builder()
                 .putAll(forward, events)
                 .build();
@@ -68,6 +67,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      *
      * <p>Override to provide custom logic of ID generation.
      */
+    @SuppressWarnings("UnusedParameters") // Overriding methods may want to use this parameter.
     protected I getEntityId(Message event, EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
         @SuppressWarnings("unchecked")
@@ -106,7 +106,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      * @param context the context of the event
      * @see StreamProjection#handle(Message, EventContext)
      */
-    @SuppressWarnings("unused") // This method is used by reflection
+    @Override
     public void dispatch(Message event, EventContext context) {
         final I id = getEntityId(event, context);
         final P p = load(id);
@@ -118,21 +118,4 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
         // EventConsumingRepository, which 'sits' on EventConsumingRepositoryStorage
     }
 
-    /**
-     * The name of the method used for dispatching events to projections.
-     *
-     * <p>This constant is used for obtaining {@code Method} instance via reflection.
-     *
-     * @see #dispatch(Message, EventContext)
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String DISPATCH_METHOD_NAME = "dispatch";
-
-    private Method dispatchAsMethod() {
-        try {
-            return getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, EventContext.class);
-        } catch (NoSuchMethodException e) {
-            throw propagate(e);
-        }
-    }
 }

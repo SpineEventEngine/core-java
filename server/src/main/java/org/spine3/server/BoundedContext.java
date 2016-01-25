@@ -32,10 +32,8 @@ import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
-import org.spine3.eventbus.EventBus;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.internal.CommandHandlingObject;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -74,7 +72,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     // Implementations like namespace support of GCP would wrap over their APIs.
 
     private final StorageFactory storageFactory;
-    private final CommandDispatcher commandDispatcher;
+    private final CommandBus commandBus;
     private final EventBus eventBus;
 
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
@@ -83,7 +81,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = builder.storageFactory;
-        this.commandDispatcher = builder.commandDispatcher;
+        this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
     }
 
@@ -97,18 +95,18 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     /**
-     * Closes the BoundedContext performing all necessary clean-ups.
+     * Closes the {@code BoundedContext} performing all necessary clean-ups.
      *
      * <p>This method performs the following:
      * <ol>
      * <li>Closes associated {@link StorageFactory}.</li>
-     * <li>Closes {@link CommandDispatcher}.</li>
+     * <li>Closes {@link CommandBus}.</li>
      * <li>Closes {@link EventBus}.</li>
      * <li>Closes {@link CommandStore}.</li>
      * <li>Closes {@link EventStore}.</li>
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
-     *      <li>un-registered from {@link CommandDispatcher}</li>
+     *      <li>un-registered from {@link CommandBus}</li>
      *      <li>un-registered from {@link EventBus}</li>
      *      <li>detached from its storage</li>
      *      </ul>
@@ -119,7 +117,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     @Override
     public void close() throws Exception {
         storageFactory.close();
-        commandDispatcher.close();
+        commandBus.close();
         eventBus.close();
 
         shutDownRepositories();
@@ -174,8 +172,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         repositories.add(repository);
 
-        if (repository instanceof CommandHandlingObject) {
-            getCommandDispatcher().register((CommandHandlingObject) repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().register((CommandHandler) repository);
         }
 
         getEventBus().register(repository);
@@ -189,12 +187,35 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandHandlingObject) {
-            getCommandDispatcher().unregister((CommandHandlingObject) repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().unregister((CommandHandler) repository);
         }
 
         getEventBus().unregister(repository);
         repository.close();
+    }
+
+    /**
+     * Processes the incoming command request.
+     *
+     * <p>This method is the entry point of a command in to a backend of an application.
+     *
+     * @param request incoming command request to handle
+     * @return the result of command handling
+     */
+    public CommandResult post(CommandRequest request) {
+        checkNotNull(request);
+
+        //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
+
+        final CommandResult result = dispatch(request);
+        final List<EventRecord> eventRecords = result.getEventRecordList();
+
+        postEvents(eventRecords);
+
+        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
+
+        return result;
     }
 
     @Override
@@ -239,42 +260,19 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *          with {@link org.spine3.base.Error} value otherwise
      */
     protected Response validate(Message command) {
-        final CommandDispatcher dispatcher = getCommandDispatcher();
+        final CommandBus dispatcher = getCommandBus();
         final Response result = dispatcher.validate(command);
         return result;
     }
 
     private void handle(CommandRequest request) {
         //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
-        process(request);
-    }
-
-    //TODO:2016-01-08:alexander.yevsyukov: Hide this method in favor of a call from client via gRPC.
-    /**
-     * Processes the incoming command request.
-     *
-     * <p>This method is the entry point of a command in to a backend of an application.
-     *
-     * @param request incoming command request to handle
-     * @return the result of command handling
-     */
-    public CommandResult process(CommandRequest request) {
-        checkNotNull(request);
-
-        final CommandResult result = dispatch(request);
-        final List<EventRecord> eventRecords = result.getEventRecordList();
-
-        postEvents(eventRecords);
-
-        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
-
-        return result;
+        post(request);
     }
 
     private CommandResult dispatch(CommandRequest request) {
-        final CommandDispatcher dispatcher = getCommandDispatcher();
         try {
-            final List<EventRecord> eventRecords = dispatcher.storeAndDispatch(request);
+            final List<EventRecord> eventRecords = this.commandBus.storeAndDispatch(request);
 
             final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
@@ -296,18 +294,18 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void postEvents(Iterable<EventRecord> records) {
         final EventBus eventBus = getEventBus();
         for (EventRecord record : records) {
-            eventBus.storeAndPost(record);
+            eventBus.post(record);
         }
     }
 
     /**
-     * Convenience method for obtaining instance of {@link CommandDispatcher}.
+     * Convenience method for obtaining instance of {@link CommandBus}.
      *
      * @return instance of {@code CommandDispatcher} used in the application
      */
     @CheckReturnValue
-    public CommandDispatcher getCommandDispatcher() {
-        return this.commandDispatcher;
+    public CommandBus getCommandBus() {
+        return this.commandBus;
     }
 
     /**
@@ -334,7 +332,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         private String name;
         private StorageFactory storageFactory;
-        private CommandDispatcher commandDispatcher;
+        private CommandBus commandBus;
         private EventBus eventBus;
         private boolean multitenant;
 
@@ -365,13 +363,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             return storageFactory;
         }
 
-        public Builder setCommandDispatcher(CommandDispatcher commandDispatcher) {
-            this.commandDispatcher = checkNotNull(commandDispatcher);
+        public Builder setCommandBus(CommandBus commandBus) {
+            this.commandBus = checkNotNull(commandBus);
             return this;
         }
 
-        public CommandDispatcher getCommandDispatcher() {
-            return commandDispatcher;
+        public CommandBus getCommandBus() {
+            return commandBus;
         }
 
         public Builder setEventBus(EventBus eventBus) {
@@ -388,9 +386,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
                 this.name = DEFAULT_NAME;
             }
 
-            checkNotNull(storageFactory, "storageFactory");
-            checkNotNull(commandDispatcher, "commandDispatcher");
-            checkNotNull(eventBus, "eventBus");
+            checkNotNull(storageFactory, "storageFactory is not set");
+            checkNotNull(commandBus, "commandDispatcher is not set");
+            checkNotNull(eventBus, "eventBus is not set");
 
             final BoundedContext result = new BoundedContext(this);
 

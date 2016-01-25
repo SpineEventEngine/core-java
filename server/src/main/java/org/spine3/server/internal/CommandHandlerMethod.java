@@ -32,6 +32,7 @@ import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
+import org.spine3.server.CommandHandler;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.util.MethodMap;
 import org.spine3.server.util.Methods;
@@ -143,7 +144,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      */
     @Internal
     @CheckReturnValue
-    public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandlingObject object) {
+    public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
         final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(object);
@@ -158,7 +159,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         return result.build();
     }
 
-    private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandlingObject object) {
+    private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
         final Predicate<Method> isHandlerPredicate = object.getHandlerMethodPredicate();
@@ -174,13 +175,13 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
 
     /**
      * Creates a command handler map from the passed instance of {@link MultiHandler} (which is also
-     * a {@link CommandHandlingObject}).
+     * a {@link CommandHandler}).
      */
     @CheckReturnValue
     private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
 
-        final CommandHandlingObject commandHandler = (CommandHandlingObject) obj;
+        final CommandHandler commandHandler = (CommandHandler) obj;
 
         final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
         for (Method method : methodsToClasses.keySet()) {
@@ -202,7 +203,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      * @param classes the classes of messages handled by the method
      * @return immutable map of command handlers
      */
-    private static Map<CommandClass, CommandHandlerMethod> createMap(CommandHandlingObject target,
+    private static Map<CommandClass, CommandHandlerMethod> createMap(CommandHandler target,
                                                                      Method method,
                                                                      Iterable<Class<? extends Message>> classes) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
