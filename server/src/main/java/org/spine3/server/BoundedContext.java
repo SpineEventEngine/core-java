@@ -202,7 +202,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         CommandResult result = CommandResult.getDefaultInstance();
         try {
             result = dispatch(request);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log().error("", e);
         }
 

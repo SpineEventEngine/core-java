@@ -36,8 +36,10 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.type.CommandClass;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
@@ -130,6 +132,14 @@ public class AggregateRepositoryShould {
         final ProjectAggregate pa = repository.load(ProjectId.newBuilder().setId("load_or_create_aggregate_by_id").build());
         checkNotNull(pa);
         checkDefault(pa.getState());
+    }
+
+    @Test
+    public void expose_classes_of_commands_of_its_aggregate() {
+        final Set<CommandClass> aggregateCommands = CommandClass.setOf(Aggregate.getCommandClasses(ProjectAggregate.class));
+        final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
+
+        assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
 
     //TODO:2016-01-21:alexander.yevsyukov: Cover more.
