@@ -52,7 +52,6 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-@SuppressWarnings("ProhibitedExceptionDeclared")
 public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     /**
@@ -166,14 +165,28 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <E>        the type of entities or aggregates
      * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
+    @SuppressWarnings({"InstanceofIncompatibleInterface", "CastToIncompatibleInterface", "ChainOfInstanceofChecks"})
+        // reason for suppressing: we intentionally cast the repository to CommandHandler because custom
+        // repositories may implement CommandHandler interface for handling commands that related to
+        // more than one entity in the repository. For example, DeleteAll command would mark as removed (or remove)
+        // all entities in the repository.
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
 
         repositories.add(repository);
 
-        if (repository instanceof CommandHandler) {
-            getCommandBus().register((CommandHandler) repository);
+        final CommandBus commandBus = getCommandBus();
+
+        if (repository instanceof CommandDispatcher) {
+            commandBus.register((CommandDispatcher) repository);
         }
+
+        if (repository instanceof CommandHandler) {
+            commandBus.register((CommandHandler) repository);
+        }
+
+        //TODO:2016-01-25:alexander.yevsyukov: Cast to EventDispatcher and register.
+        // In addition to being event handler the repository can simply dispatch EventRecords.
 
         getEventBus().register(repository);
     }
@@ -186,8 +199,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandHandler) {
-            getCommandBus().unregister((CommandHandler) repository);
+        if (repository instanceof CommandDispatcher) {
+            getCommandBus().unregister((CommandDispatcher) repository);
         }
 
         getEventBus().unregister(repository);

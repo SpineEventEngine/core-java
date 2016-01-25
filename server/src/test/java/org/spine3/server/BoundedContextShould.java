@@ -182,23 +182,11 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void process_one_command_and_return_appropriate_result() {
+    public void post_CommandRequest() {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = boundedContext.process(request);
-
-        assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
-    }
-
-    @Test
-    public void process_several_commands_and_return_appropriate_results() {
-        registerAll();
-        final List<CommandRequest> requests = generateRequests();
-
-        final List<CommandResult> results = processRequests(requests);
-
-        assertCommandResultsAreValid(requests, results);
+        boundedContext.post(request);
     }
 
     private void assertCommandResultsAreValid(List<CommandRequest> requests, List<CommandResult> results) {
@@ -364,8 +352,6 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // Constructor must be public to be called from a repository. It's a part of PM public API.
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
@@ -373,6 +359,18 @@ public class BoundedContextShould {
         @Override
         protected Empty getDefaultState() {
             return Empty.getDefaultInstance();
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method
+        @Assign
+        public void handle(CreateProject command, CommandContext ctx) {
+            // Do nothing, just watch.
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method
+        @Subscribe
+        public void on(ProjectCreated event, EventContext ctx) {
+            // Do nothing, just watch.
         }
     }
 

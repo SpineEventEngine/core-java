@@ -22,8 +22,10 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.type.EventClass;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -34,6 +36,16 @@ import static com.google.common.base.Throwables.propagate;
  */
 public interface EventDispatcher {
 
+    /**
+     * Provides the set of classes of events forwarded by the dispatcher
+     *
+     * @return non-empty set
+     */
+    Set<EventClass> getEventClasses();
+
+    /**
+     * Dispatches the event and its context.
+     */
     void dispatch(Message event, EventContext context);
 
     /**

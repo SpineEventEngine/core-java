@@ -20,8 +20,6 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
@@ -38,7 +36,6 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.type.CommandClass;
 
-import java.lang.reflect.Method;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -117,13 +114,6 @@ public class AggregateRepositoryShould {
         final int newSnapshotTrigger = 1000;
         repository.setSnapshotTrigger(newSnapshotTrigger);
         assertEquals(newSnapshotTrigger, repository.getSnapshotTrigger());
-    }
-
-    @Test
-    public void return_map_of_methods_to_handled_commands() {
-        final Multimap<Method, Class<? extends Message>> handlers = repository.getHandlers();
-        assertTrue(handlers.containsValue(CreateProject.class));
-        assertTrue(handlers.containsValue(AddTask.class));
     }
 
     @Test
