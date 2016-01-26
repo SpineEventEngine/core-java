@@ -85,10 +85,9 @@ public class Application implements AutoCloseable {
 
     /**
      * The entry point of the sample.
-     * To change the storage implementation, change {@link #getStorageFactory()} method implementation.
      */
     public static void main(String[] args) throws Exception {
-        final StorageFactory factory = getStorageFactory();
+        final StorageFactory factory = InMemoryStorageFactory.getInstance();
 
         try (final Application app = new Application(factory)) {
             app.execute();
@@ -138,21 +137,6 @@ public class Application implements AutoCloseable {
     @Override
     public void close() throws Exception {
         boundedContext.close();
-    }
-
-    /**
-     * Retrieves the storage factory instance.
-     * Change this method implementation if needed.
-     *
-     * @return the {@link StorageFactory} implementation.
-     */
-    public static StorageFactory getStorageFactory() {
-        return org.spine3.server.storage.memory.InMemoryStorageFactory.getInstance();
-
-        /**
-         * To run the sample on the file system storage, use the following line instead of one above.
-         */
-        // return org.spine3.server.storage.filesystem.FileSystemStorageFactory.newInstance(Sample.class);
     }
 
     public BoundedContext getBoundedContext() {
