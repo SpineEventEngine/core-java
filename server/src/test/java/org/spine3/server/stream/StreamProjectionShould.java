@@ -31,9 +31,9 @@ import org.spine3.server.Subscribe;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ProjectionShould {
+public class StreamProjectionShould {
 
-        private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
+    private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
 
         protected TestStreamProjection(Integer id) {
             super(id);
