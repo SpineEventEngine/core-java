@@ -32,7 +32,6 @@ import javax.annotation.Nullable;
 
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.EntityStorage.toRecordId;
 
 /**
  * The base class for repositories managing entities.
@@ -97,18 +96,14 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     }
 
     private EntityStorageRecord toEntityRecord(E entity) {
-        final I id = entity.getId();
-        final EntityStorageRecord.Id entityId = toRecordId(id);
         final M state = entity.getState();
         final Any stateAny = toAny(state);
         final Timestamp whenModified = entity.whenModified();
         final int version = entity.getVersion();
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                 .setState(stateAny)
-                .setId(entityId)
                 .setWhenModified(whenModified)
                 .setVersion(version);
         return builder.build();
     }
-
 }

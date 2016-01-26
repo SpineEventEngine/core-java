@@ -29,7 +29,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.storage.EntityStorage.toRecordId;
 import static org.spine3.server.util.Identifiers.newUuid;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
@@ -67,7 +66,7 @@ public abstract class EntityStorageShould {
     @Test
     public void store_and_load_message() {
         final String id = newUuid();
-        final EntityStorageRecord expected = newEntityStorageRecord(id);
+        final EntityStorageRecord expected = newEntityStorageRecord();
         storage.write(id, expected);
 
         final EntityStorageRecord actual = storage.read(id);
@@ -90,7 +89,7 @@ public abstract class EntityStorageShould {
     }
 
     private void testWriteAndReadMessage(String id) {
-        final EntityStorageRecord expected = newEntityStorageRecord(id);
+        final EntityStorageRecord expected = newEntityStorageRecord();
         storage.write(id, expected);
 
         final EntityStorageRecord actual = storage.read(id);
@@ -98,10 +97,9 @@ public abstract class EntityStorageShould {
         assertEquals(expected, actual);
     }
 
-    private static EntityStorageRecord newEntityStorageRecord(String id) {
+    private static EntityStorageRecord newEntityStorageRecord() {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
                 .setState(toAny(newStringValue(newUuid())))
-                .setId(toRecordId(id))
                 .setWhenModified(getCurrentTime())
                 .setVersion(5); // set any non-default (non-zero) value
         return builder.build();
