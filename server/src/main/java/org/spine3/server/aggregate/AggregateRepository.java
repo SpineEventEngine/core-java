@@ -235,7 +235,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
      * Processes the command by dispatching it to a method of an aggregate.
      * <p/>
      * <p>For more details on writing aggregate commands please see
-     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">“Writing Aggregate Commands”</a>.
+     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">"Writing Aggregate Commands"</a>.
      *
      * @param command the command to dispatch
      * @param context context info of the command
