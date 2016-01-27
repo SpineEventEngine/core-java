@@ -115,6 +115,8 @@ public class BoundedContextShould {
         handlersRegistered = true;
     }
 
+    //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
+
     private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
 
         final List<CommandResult> results = newLinkedList();

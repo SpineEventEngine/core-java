@@ -19,8 +19,10 @@
  */
 package org.spine3.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
@@ -38,10 +40,10 @@ import org.spine3.type.EventClass;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -71,7 +73,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>If a handler method throws an exception (which in general should be avoided), the exception is logged.
  * No other processing occurs.
  *
- * <p>If there is no handler for the posted event, the fact is logged, with no further processing.
+ * <p>If there is no handler for the posted event, the fact is logged as warning, with no further processing.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyuov
@@ -79,9 +81,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EventBus implements AutoCloseable {
 
     /**
+     * The registry of event dispatchers.
+     */
+    private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
+
+    /**
      * The registry of handler methods.
      */
-    private final Registry registry = new Registry();
+    private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     /**
      * The {@code EventStore} to which put events before they get handled.
@@ -128,18 +135,68 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Registers all subscriber methods on {@code object} to receive events.
+     * Registers event handler or event dispatcher with the bus.
+     *
+     * <p>In most cases the passed object will be either event handler (the object, which handles the event itself)
+     * or event dispatcher (the object, which redirects handling to other objects). This separation is
+     * not required, but encouraged to keep the event processing logic clear.
+     *
+     * <p>The event handler must expose at least one event subscriber method. If it is not the
+     * case, {@code IllegalArgumentException} will be thrown.
+     *
+     * <p>Event dispatchers must {@link EventDispatcher} interface and may not expose event subscriber methods.
      *
      * @param object the event handler object whose subscriber methods should be registered
+     * @throws IllegalArgumentException if the object does not have event handling methods
      */
     public void register(Object object) {
         checkNotNull(object);
+
+        boolean isDispatcher = false;
+        if (object instanceof EventDispatcher) {
+            registerDispatcher((EventDispatcher) object);
+            isDispatcher = true;
+        }
+
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-        subscribe(handlers);
+        final boolean handlersEmpty = handlers.isEmpty();
+        checkHandlersIfNotDispatcher(object, handlersEmpty, isDispatcher);
+        if (!handlersEmpty) {
+            subscribe(handlers);
+        }
+    }
+
+    private static void checkHandlersIfNotDispatcher(Object object, boolean handlersEmpty, boolean isDispatcher) {
+        checkArgument(!handlersEmpty || isDispatcher, "No event subscriber methods found in %s", object);
+    }
+
+    private void registerDispatcher(EventDispatcher eventDispatcher) {
+        dispatcherRegistry.register(eventDispatcher);
     }
 
     private void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
-        registry.subscribe(handlers);
+        handlerRegistry.subscribe(handlers);
+    }
+
+    @VisibleForTesting
+    /* package */ boolean hasSubscribers(EventClass eventClass) {
+        final boolean result = handlerRegistry.hasSubscribers(eventClass);
+        return result;
+    }
+
+    @VisibleForTesting
+    /* package */ Set<Object> getHandlers(EventClass eventClass) {
+        final Collection<EventHandlerMethod> handlers = handlerRegistry.getSubscribers(eventClass);
+        final ImmutableSet.Builder<Object> result = ImmutableSet.builder();
+        for (EventHandlerMethod handler : handlers) {
+            result.add(handler.getTarget());
+        }
+        return result.build();
+    }
+
+    @VisibleForTesting
+    /* package */ Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+        return dispatcherRegistry.getDispatchers(eventClass);
     }
 
     /**
@@ -150,8 +207,19 @@ public class EventBus implements AutoCloseable {
      */
     public void unregister(Object object) {
         checkNotNull(object);
+
+        boolean isDispatcher = false;
+        if (object instanceof EventDispatcher) {
+            dispatcherRegistry.unregister((EventDispatcher) object);
+            isDispatcher = true;
+        }
+
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-        unsubscribe(handlers);
+        final boolean handlersEmpty = handlers.isEmpty();
+        checkHandlersIfNotDispatcher(object, handlersEmpty, isDispatcher);
+        if (!handlersEmpty) {
+            unsubscribe(handlers);
+        }
     }
 
     /**
@@ -160,11 +228,11 @@ public class EventBus implements AutoCloseable {
      * @param handlers a map of the event handlers to remove
      */
     private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
-        registry.unsubscribe(handlers);
+        handlerRegistry.unsubscribe(handlers);
     }
 
-    private Collection<EventHandlerMethod> getHandlers(EventClass c) {
-        return registry.getHandlers(c);
+    private Collection<EventHandlerMethod> getSubscribers(EventClass c) {
+        return handlerRegistry.getSubscribers(c);
     }
 
     /**
@@ -177,12 +245,14 @@ public class EventBus implements AutoCloseable {
     /**
      * Posts the event for handling.
      *
-     * <p>The record is stored in the associated {@link EventStore} before passing it to handlers.
+     * <p>The record is stored in the associated {@link EventStore} before passing it to dispatchers and handlers.
      *
-     * @param record the record with the event and its context to be handled
+     * @param record the event record to be handled
      */
     public void post(EventRecord record) {
         store(record);
+
+        callDispatchers(record);
 
         final Message event = EventRecords.getEvent(record);
         final EventContext context = record.getContext();
@@ -190,8 +260,18 @@ public class EventBus implements AutoCloseable {
         invokeHandlers(event, context);
     }
 
+    private void callDispatchers(EventRecord record) {
+        final Message event = EventRecords.getEvent(record);
+        final EventContext context = record.getContext();
+        final EventClass eventClass = EventRecords.getEventClass(record);
+        final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
+        for (EventDispatcher dispatcher : dispatchers) {
+            dispatcher.dispatch(event, context);
+        }
+    }
+
     private void invokeHandlers(Message event, EventContext context) {
-        final Collection<EventHandlerMethod> handlers = getHandlers(EventClass.of(event));
+        final Collection<EventHandlerMethod> handlers = getSubscribers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             handleDeadEvent(event);
@@ -230,54 +310,93 @@ public class EventBus implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        registry.unsubscribeAll();
+        dispatcherRegistry.undergisterAll();
+        handlerRegistry.unsubscribeAll();
         eventStore.close();
     }
 
     /**
-     * A wrapper over a map from {@code EventClass} to one or more {@code EventHandlerMethod}
-     * that handle events of this class.
+     * The registry of objects that dispatch event to handlers.
+     *
+     * <p>There can be multiple dispatchers per event class.
      */
-    private static class Registry {
+    private static class DispatcherRegistry {
 
-        private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
-        private final ReadWriteLock lockOnHandlersByClass = new ReentrantReadWriteLock();
+        private final HashMultimap<EventClass, EventDispatcher> dispatchers = HashMultimap.create();
 
-        private void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
-            lockOnHandlersByClass.writeLock().lock();
-            try {
-                for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
-                    handlersByClass.put(entry.getKey(), entry.getValue());
-                }
-            } finally {
-                lockOnHandlersByClass.writeLock().unlock();
+        /* package */ void register(EventDispatcher dispatcher) {
+            checkNotNull(dispatcher);
+            final Set<EventClass> eventClasses = dispatcher.getEventClasses();
+            checkNotEmpty(dispatcher, eventClasses);
+
+            for (EventClass eventClass : eventClasses) {
+                dispatchers.put(eventClass, dispatcher);
             }
         }
 
-        private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
+        /* package */ Set<EventDispatcher> getDispatchers(EventClass eventClass) {
+            final Set<EventDispatcher> result = this.dispatchers.get(eventClass);
+            return result;
+        }
+
+        /* package */ void unregister(EventDispatcher dispatcher) {
+            final Set<EventClass> eventClasses = dispatcher.getEventClasses();
+            checkNotEmpty(dispatcher, eventClasses);
+            for (EventClass eventClass : eventClasses) {
+                dispatchers.remove(eventClass, dispatcher);
+            }
+        }
+
+        /* package */ void undergisterAll() {
+            dispatchers.clear();
+        }
+
+        /**
+         * Ensures that the dispatcher forwards at least one event.
+         *
+         * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
+         * @throws NullPointerException if the dispatcher returns null set
+         */
+        private static void checkNotEmpty(EventDispatcher dispatcher, Set<EventClass> eventClasses) {
+            checkArgument(!eventClasses.isEmpty(),
+                    "No event classes are forwarded by this dispatcher: %s", dispatcher);
+        }
+    }
+
+    /**
+     * The registry of event handling methods by event class.
+     *
+     * <p>There can be multiple handlers per event class.
+     */
+    private static class HandlerRegistry {
+
+        private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
+
+        /* package */ void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
+            for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
+                handlersByClass.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        /* package */ void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
             for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
 
-                final EventClass c = entry.getKey();
+                final EventClass eventClass = entry.getKey();
                 final EventHandlerMethod handler = entry.getValue();
 
-                unsubscribe(c, handler);
+                unsubscribe(eventClass, handler);
             }
         }
 
         private void unsubscribe(EventClass c, EventHandlerMethod handler) {
-            lockOnHandlersByClass.writeLock().lock();
-            try {
-                final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
-                if (!currentSubscribers.contains(handler)) {
-                    throw handlerMethodWasNotRegistered(handler);
-                }
-                currentSubscribers.remove(handler);
-            } finally {
-                lockOnHandlersByClass.writeLock().unlock();
+            final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
+            if (!currentSubscribers.contains(handler)) {
+                throw handlerMethodWasNotRegistered(handler);
             }
+            currentSubscribers.remove(handler);
         }
 
-        private void unsubscribeAll() {
+        /* package */ void unsubscribeAll() {
             handlersByClass.clear();
             log().info("All subscribers cleared.");
         }
@@ -287,8 +406,13 @@ public class EventBus implements AutoCloseable {
                     "Cannot un-subscribe the event handler, which was not subscribed before:" + handler.getFullName());
         }
 
-        private Collection<EventHandlerMethod> getHandlers(EventClass c) {
+        /* package */ Collection<EventHandlerMethod> getSubscribers(EventClass c) {
             return ImmutableList.copyOf(handlersByClass.get(c));
+        }
+
+        /* package */ boolean hasSubscribers(EventClass eventClass) {
+            final Collection<EventHandlerMethod> handlers = getSubscribers(eventClass);
+            return !handlers.isEmpty();
         }
     }
 

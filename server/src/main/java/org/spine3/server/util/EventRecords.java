@@ -29,6 +29,7 @@ import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.stream.EventRecordFilter;
+import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -83,6 +84,15 @@ public class EventRecords {
     public static Message getEvent(EventRecord eventRecord) {
         final Any any = eventRecord.getEvent();
         final Message result = Messages.fromAny(any);
+        return result;
+    }
+
+    /**
+     * Determines the class of the event from the passed event record.
+     */
+    public static EventClass getEventClass(EventRecord eventRecord) {
+        final Message event = getEvent(eventRecord);
+        final EventClass result = EventClass.of(event);
         return result;
     }
 

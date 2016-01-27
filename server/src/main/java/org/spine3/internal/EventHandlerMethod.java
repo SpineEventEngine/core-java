@@ -201,6 +201,14 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override // Promote to public to make it visible to routines inspecting EventBus.
+    public Object getTarget() {
+        return super.getTarget();
+    }
+
     private enum LogSingleton {
         INSTANCE;
 
