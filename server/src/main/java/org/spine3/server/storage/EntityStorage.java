@@ -64,6 +64,8 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     @Nullable
     @Override
     public EntityStorageRecord read(I id) {
+        checkNotClosed();
+
         final EntityStorageRecord record = readInternal(checkNotNull(id));
         return record;
     }
@@ -72,6 +74,8 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     public void write(I id, EntityStorageRecord record) {
         checkNotNull(id);
         checkArgument(record.hasState(), "Record does not have state field.");
+        checkNotClosed();
+
         writeInternal(id, record);
     }
 

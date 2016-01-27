@@ -47,6 +47,8 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
 
     @Override
     public void write(EventId id, EventRecord record) {
+        checkNotClosed();
+
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
         writeInternal(storeRecord);
     }
@@ -54,12 +56,12 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
     @Nullable
     @Override
     public EventRecord read(EventId id) {
-        final EventStorageRecord storeRecord = readInternal(id);
+        checkNotClosed();
 
+        final EventStorageRecord storeRecord = readInternal(id);
         if (storeRecord == null) {
             return null;
         }
-
         final EventRecord result = toEventRecord(storeRecord);
         return result;
     }

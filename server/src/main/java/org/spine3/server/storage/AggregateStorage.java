@@ -49,6 +49,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     @Nonnull
     @Override
     public AggregateEvents read(I aggregateId) {
+        checkNotClosed();
+
         final Deque<EventRecord> history = newLinkedList();
         Snapshot snapshot = null;
 
@@ -83,6 +85,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
     @Override
     public void write(I id, AggregateEvents record) {
+        checkNotClosed();
+
         final List<EventRecord> list = record.getEventRecordList();
         for (final EventRecord eventRecord : list) {
             write(eventRecord);
@@ -92,6 +96,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
     public void write(I aggregateId, Snapshot snapshot) {
+        checkNotClosed();
+
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
                 .setAggregateId(Identifiers.idToString(aggregateId))
@@ -104,6 +110,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     public void write(EventRecord record) {
+        checkNotClosed();
+
         final EventContext context = record.getContext();
         final Any event = record.getEvent();
         // TODO:2016-01-15:alexander.litus: store as a number if it is
