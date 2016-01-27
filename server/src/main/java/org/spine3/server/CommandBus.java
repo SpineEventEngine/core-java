@@ -19,6 +19,7 @@
  */
 package org.spine3.server;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -36,7 +37,6 @@ import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.util.Classes;
-import org.spine3.type.ClassTypeValue;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -49,7 +49,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.CommandValidation.unsupportedCommand;
-import static org.spine3.type.ClassTypeValue.checkNotAlreadyRegistered;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -279,7 +278,7 @@ public class CommandBus implements AutoCloseable {
                     alreadyRegistered.add(commandClass);
                 }
             }
-            ClassTypeValue.checkNotAlreadyRegistered(alreadyRegistered, dispatcher,
+            CommandBus.checkNotAlreadyRegistered(alreadyRegistered, dispatcher,
                     "Cannot register dispatcher %s for the command class %s which already has registered dispatcher.",
                     "Cannot register dispatcher %s for command classes (%s) which already have registered dispatcher(s).");
         }
@@ -464,6 +463,23 @@ public class CommandBus implements AutoCloseable {
         checkNotAlreadyRegistered(alreadyRegistered, handler,
                 "Cannot register handler %s for the command class %s which already has registered dispatcher.",
                 "Cannot register handler %s for command classes (%s) which already have registered dispatcher(s).");
+    }
+
+    /**
+     * Ensures that the passed set of classes is empty.
+     *
+     * <p>This is a convenience method for checking registration of handling dispatching.
+     *
+     * @param alreadyRegistered the set of already registered classes or an empty set
+     * @param registeringObject the object which tries to register dispatching or handling
+     * @param singularFormat the message format for the case if the {@code alreadyRegistered} set contains only one element
+     * @param pluralFormat the message format if {@code alreadyRegistered} set has more than one element
+     * @throws IllegalArgumentException if the set is not empty
+     */
+    private static void checkNotAlreadyRegistered(Set<? extends CommandClass> alreadyRegistered, Object registeringObject,
+                                                  String singularFormat, String pluralFormat) {
+        final String format = alreadyRegistered.size() > 1 ? pluralFormat : singularFormat;
+        checkArgument(alreadyRegistered.isEmpty(), format, registeringObject, Joiner.on(", ").join(alreadyRegistered));
     }
 
     private enum LogSingleton {

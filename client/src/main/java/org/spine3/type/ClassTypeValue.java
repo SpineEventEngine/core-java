@@ -20,14 +20,10 @@
 
 package org.spine3.type;
 
-import com.google.common.base.Joiner;
 import com.google.protobuf.Message;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * A base class for value objects storing references to message classes.
@@ -36,7 +32,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
 // NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
-public abstract class ClassTypeValue {
+abstract class ClassTypeValue {
 
     private final Class<? extends Message> value;
 
@@ -80,20 +76,4 @@ public abstract class ClassTypeValue {
         return Objects.equals(this.value, other.value);
     }
 
-    /**
-     * Ensures that the passed set of classes is empty.
-     *
-     * <p>This is a convenience method for checking registration of handling dispatching.
-     *
-     * @param alreadyRegistered the set of already registered classes or an empty set
-     * @param registeringObject the object which tries to register dispatching or handling
-     * @param singularFormat the message format for the case if the {@code alreadyRegistered} set contains only one element
-     * @param pluralFormat the message format if {@code alreadyRegistered} set has more than one element
-     * @throws IllegalArgumentException if the set is not empty
-     */
-    public static void checkNotAlreadyRegistered(Set<? extends ClassTypeValue> alreadyRegistered, Object registeringObject,
-                                                 String singularFormat, String pluralFormat) {
-        final String format = alreadyRegistered.size() > 1 ? pluralFormat : singularFormat;
-        checkArgument(alreadyRegistered.isEmpty(), format, registeringObject, Joiner.on(", ").join(alreadyRegistered));
-    }
 }
