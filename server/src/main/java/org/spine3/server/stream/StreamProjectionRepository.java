@@ -29,6 +29,7 @@ import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.MultiHandler;
 import org.spine3.server.util.Identifiers;
+import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -44,6 +45,17 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
 
     protected StreamProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<EventClass> getEventClasses() {
+        final Class<? extends StreamProjection> projectionClass = getEntityClass();
+        final Set<Class<? extends Message>> eventClasses = StreamProjection.getEventClasses(projectionClass);
+        final Set<EventClass> result = EventClass.setOf(eventClasses);
+        return result;
     }
 
     /**
@@ -109,9 +121,9 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     @Override
     public void dispatch(Message event, EventContext context) {
         final I id = getEntityId(event, context);
-        final P p = load(id);
-        p.handle(event, context);
-        store(p);
+        final P sp = load(id);
+        sp.handle(event, context);
+        store(sp);
 
         //TODO:2016-01-08:alexander.yevsyukov: Store the timestamp of this event. We will need this value
         // when reconnecting to the EventStore for catching up. Presumably this belongs to

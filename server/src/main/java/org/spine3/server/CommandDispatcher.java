@@ -23,9 +23,11 @@ package org.spine3.server;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.type.CommandClass;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -37,16 +39,25 @@ import static com.google.common.base.Throwables.propagate;
 public interface CommandDispatcher {
 
     /**
+     * Returns the set of command classes this dispatcher can dispatch.
+     *
+     * @return non-empty set of command classes
+     */
+    Set<CommandClass> getCommandClasses();
+
+    /**
      * Dispatches the command for processing and returns the generated events.
      *
      * @param command the command to dispatch
      * @param context context info of the command
      * @return a list of event records generated during the command execution, or
      *         an empty list if no events were generated
-     * @throws Exception if an exception occurs during command execution
-     * @throws FailureThrowable if a business failure occurred during the command execution
      */
-    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable;
+    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception;
+    //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
+    //TODO:2016-01-25:alexander.yevsyukov: Dispatch CommandRequest, not the couple of parameters.
+
+    //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 
     /**
      * Utility class for obtaining reference to {@link #dispatch(Message, CommandContext)} methods of implementations.

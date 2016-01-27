@@ -19,23 +19,20 @@
  */
 package org.spine3.server.aggregate;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.*;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.server.Repository;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
@@ -62,9 +59,9 @@ import static com.google.common.base.Throwables.propagate;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends Repository<I, A>
-        implements CommandDispatcher, MultiHandler, CommandHandler {
-
+public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
+                          extends Repository<I, A>
+                          implements CommandDispatcher {
     /**
      * Default number of events to be stored before a next snapshot is made.
      */
@@ -99,6 +96,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
         return getEntityClass();
     }
 
+    @Override
+    public Set<CommandClass> getCommandClasses() {
+        final Set<CommandClass> result = CommandClass.setOf(Aggregate.getCommandClasses(getAggregateClass()));
+        return result;
+    }
+
     /**
      * Returns the number of events until a next snapshot is made.
      *
@@ -125,40 +128,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return checkStorage(result);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return a multimap from command handlers to command classes they handle.
-     */
-    @Override
-    public Multimap<Method, Class<? extends Message>> getHandlers() {
-        final Class<? extends Aggregate> aggregateClass = getEntityClass();
-        final Set<Class<? extends Message>> aggregateCommands = Aggregate.getCommandClasses(aggregateClass);
-        final Method dispatch = dispatchMethod();
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(dispatch, aggregateCommands)
-                .build();
-    }
-
-    /**
-     * Returns the reference to the method {@link #dispatch(Message, CommandContext)} of this repository.
-     */
-    private Method dispatchMethod() {
-        return DispatchMethod.of(this);
-    }
-
-    @Override
-    @Internal
-    public CommandHandlerMethod createMethod(Method method) {
-        return new AggregateRepositoryDispatchMethod(this, method);
-    }
-
-    @Override
-    @Internal
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
     }
 
     /**
@@ -195,11 +164,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
     /**
      * Stores the passed aggregate root and commits its uncommitted events.
      *
-     * @param aggregateRoot an instance to store
+     * @param aggregate an instance to store
      */
     @Override
-    public void store(A aggregateRoot) {
-        final Iterable<EventRecord> uncommittedEvents = aggregateRoot.getStateChangingUncommittedEvents();
+    public void store(A aggregate) {
+        final Iterable<EventRecord> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
 
         //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
         // Now we're storing snapshot in a seria of uncommitted
@@ -213,12 +182,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
             ++eventCount;
 
             if (eventCount > snapshotTrigger) {
-                createAndStoreSnapshot(aggregateRoot);
+                createAndStoreSnapshot(aggregate);
                 eventCount = 0;
             }
         }
 
-        aggregateRoot.commitEvents();
+        aggregate.commitEvents();
     }
 
     private void createAndStoreSnapshot(A aggregateRoot) {
@@ -233,29 +202,47 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>> extends 
 
     /**
      * Processes the command by dispatching it to a method of an aggregate.
-     * <p/>
-     * <p>For more details on writing aggregate commands please see
-     * <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">“Writing Aggregate Commands”</a>.
+     *
+     * <p>The aggregate ID is obtained from the passed command.
+     *
+     * <p>The repository loads the aggregate by this ID, or creates a new aggregate
+     * if there is no aggregate with such ID.
      *
      * @param command the command to dispatch
      * @param context context info of the command
      * @return a list of the event records
+     * @throws IllegalStateException if storage for the repository was not initialized
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws FailureThrowable if a business failure occurred during the command execution by the aggregate
-     * @see <a href="http://github.com/SpineEventEngine/core/wiki/Writing-Aggregate-Commands">Writing Aggregate Commands</a>
      */
     @Override
     @CheckReturnValue
     public List<EventRecord> dispatch(Message command, CommandContext context)
-            throws FailureThrowable, IllegalStateException, InvocationTargetException {
+            throws IllegalStateException, InvocationTargetException {
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 
-        aggregate.dispatch(command, context);
+        //noinspection OverlyBroadCatchBlock
+        try {
+            aggregate.dispatch(command, context);
+        } catch (Throwable throwable) {
+            //TODO:2016-01-25:alexander.yevsyukov: Store error status into the Command Store.
+            //TODO:2016-01-25:alexander.yevsyukov: How do we tell the client that the command caused the
+            // error or (which is more important) business failure?
+            return null;
+        }
 
         final List<EventRecord> eventRecords = aggregate.getUncommittedEvents();
 
-        store(aggregate);
+        //noinspection OverlyBroadCatchBlock
+        try {
+            store(aggregate);
+        } catch (Exception e) {
+            //TODO:2016-01-25:alexander.yevsyukov: Store error into the Command Store.
+            return null;
+        }
+
+        //TODO:2016-01-25:alexander.yevsyukov: Post events to EventBus.
+
         return eventRecords;
     }
 

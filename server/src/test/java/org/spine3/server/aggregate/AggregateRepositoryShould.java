@@ -20,8 +20,6 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
@@ -36,8 +34,9 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.type.CommandClass;
 
-import java.lang.reflect.Method;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
@@ -118,18 +117,19 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void return_map_of_methods_to_handled_commands() {
-        final Multimap<Method, Class<? extends Message>> handlers = repository.getHandlers();
-        assertTrue(handlers.containsValue(CreateProject.class));
-        assertTrue(handlers.containsValue(AddTask.class));
-    }
-
-    @Test
     public void load_or_create_aggregate_by_id() {
         repository.initStorage(storageFactory);
         final ProjectAggregate pa = repository.load(ProjectId.newBuilder().setId("load_or_create_aggregate_by_id").build());
         checkNotNull(pa);
         checkDefault(pa.getState());
+    }
+
+    @Test
+    public void expose_classes_of_commands_of_its_aggregate() {
+        final Set<CommandClass> aggregateCommands = CommandClass.setOf(Aggregate.getCommandClasses(ProjectAggregate.class));
+        final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
+
+        assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
 
     //TODO:2016-01-21:alexander.yevsyukov: Cover more.

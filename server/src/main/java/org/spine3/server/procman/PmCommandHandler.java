@@ -28,7 +28,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 
 /**
@@ -41,8 +40,7 @@ class PmCommandHandler extends CommandHandlerMethod {
     static final Predicate<Method> IS_PM_COMMAND_HANDLER = new Predicate<Method>() {
         @Override
         public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isProcessManagerCommandHandler(method);
+            return method != null && isProcessManagerCommandHandler(method);
         }
     };
 
@@ -71,22 +69,6 @@ class PmCommandHandler extends CommandHandlerMethod {
         }
         final boolean result = returnsMessageListOrVoid(method);
         return result;
-    }
-
-    private static boolean returnsMessageListOrVoid(Method method) {
-        final Class<?> returnType = method.getReturnType();
-
-        if (Message.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        if (List.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        //noinspection RedundantIfStatement
-        if (Void.TYPE.equals(returnType)) {
-            return true;
-        }
-        return false;
     }
 
     /**

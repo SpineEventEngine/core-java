@@ -64,6 +64,15 @@ public class CommandValidation {
         return response;
     }
 
+    public static boolean isUnsupportedCommand(Response response) {
+        if (response.getStatusCase() == Response.StatusCase.ERROR) {
+            final Error error = response.getError();
+            return error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
+        }
+
+        return false;
+    }
+
     /**
      * Creates a {@code Response} for a command with missing namespace attribute, which is required
      * in a multitenant application.
