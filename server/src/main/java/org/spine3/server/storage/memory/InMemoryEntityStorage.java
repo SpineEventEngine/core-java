@@ -37,7 +37,7 @@ class InMemoryEntityStorage<I> extends EntityStorage<I> {
     private final Map<I, EntityStorageRecord> storage = newHashMap();
 
     protected static <I> InMemoryEntityStorage<I> newInstance() {
-        return new InMemoryEntityStorage<I>();
+        return new InMemoryEntityStorage<>();
     }
 
     @Override
