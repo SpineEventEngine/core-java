@@ -21,6 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
+import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
 import org.spine3.test.project.ProjectId;
 
@@ -29,14 +30,15 @@ import org.spine3.test.project.ProjectId;
  */
 public class InMemoryAggregateStorageShould extends AggregateStorageShould {
 
-    private static final InMemoryAggregateStorage<ProjectId> STORAGE = InMemoryAggregateStorage.newInstance();
+    private final InMemoryAggregateStorage<ProjectId> storage = InMemoryAggregateStorage.newInstance();
 
-    public InMemoryAggregateStorageShould() {
-        super(STORAGE);
+    @Override
+    protected AggregateStorage<ProjectId> getStorage() {
+        return storage;
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.clear();
+        storage.clear();
     }
 }

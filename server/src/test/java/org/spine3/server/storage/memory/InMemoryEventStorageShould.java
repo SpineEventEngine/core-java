@@ -21,6 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageShould;
 
 /**
@@ -31,14 +32,15 @@ import org.spine3.server.storage.EventStorageShould;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryEventStorageShould extends EventStorageShould {
 
-    private static final InMemoryEventStorage STORAGE = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
+    private final InMemoryEventStorage storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
 
-    public InMemoryEventStorageShould() {
-        super(STORAGE);
+    @Override
+    protected EventStorage getStorage() {
+        return storage;
     }
 
     @After
     public void tearDownTest() {
-        STORAGE.clear();
+        storage.clear();
     }
 }
