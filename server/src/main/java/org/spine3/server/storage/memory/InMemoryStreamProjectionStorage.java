@@ -20,46 +20,64 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.protobuf.Timestamp;
+import org.spine3.server.EntityId;
 import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.StreamProjectionStorage;
 
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Memory-based implementation of {@link EntityStorage}.
+ * The in-memory implementation of StreamProjectionStorage.
  *
+ * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
  * @author Alexander Litus
  */
-class InMemoryEntityStorage<I> extends EntityStorage<I> {
+public class InMemoryStreamProjectionStorage<I> extends StreamProjectionStorage<I> {
 
-    private final Map<I, EntityStorageRecord> storage = newHashMap();
+    private final InMemoryEntityStorage<I> entityStorage;
 
-    protected static <I> InMemoryEntityStorage<I> newInstance() {
-        return new InMemoryEntityStorage<>();
+    /**
+     * The time of the last handled event.
+     */
+    private Timestamp timestamp;
+
+    public static <I> InMemoryStreamProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
+        return new InMemoryStreamProjectionStorage<>(entityStorage);
+    }
+
+    private InMemoryStreamProjectionStorage(InMemoryEntityStorage<I> entityStorage) {
+        this.entityStorage = entityStorage;
     }
 
     @Override
-    protected EntityStorageRecord readInternal(I id) {
-        return storage.get(id);
+    public void writeLastHandledEventTime(Timestamp timestamp) {
+        checkNotNull(timestamp);
+        this.timestamp = timestamp;
     }
 
     @Override
-    protected void writeInternal(I id, EntityStorageRecord record) {
-        storage.put(id, record);
+    public Timestamp readLastHandledEventTime() {
+        return timestamp;
+    }
+
+    @Override
+    protected EntityStorage<I> getEntityStorage() {
+        return entityStorage;
     }
 
     /**
      * Clears all data in the storage.
      */
     protected void clear() {
-        storage.clear();
+        timestamp = null;
+        entityStorage.clear();
     }
 
     @Override
     public void close() throws Exception {
         clear();
+        entityStorage.close();
         super.close();
     }
 }

@@ -23,16 +23,17 @@ package org.spine3.server.storage.memory;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.Commands;
+import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryCommandStorageShould {
 
-    private InMemoryCommandStorage storage;
+    private CommandStorage storage;
 
     @Before
     public void setUp() {
-        storage = (InMemoryCommandStorage) InMemoryStorageFactory.getInstance().createCommandStorage();
+        storage = InMemoryStorageFactory.getInstance().createCommandStorage();
     }
 
     @SuppressWarnings("ConstantConditions")

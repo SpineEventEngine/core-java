@@ -21,10 +21,13 @@
 package org.spine3.server.stream;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.EventContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StreamProjectionStorage;
 import org.spine3.server.util.Identifiers;
 import org.spine3.type.EventClass;
 
@@ -41,6 +44,12 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
 
     protected StreamProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
+    }
+
+    @Override
+    @SuppressWarnings("RefusedBequest")
+    protected AutoCloseable createStorage(StorageFactory factory) {
+        return factory.createStreamProjectionStorage();
     }
 
     /**
@@ -80,7 +89,6 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     @Override
     public P load(I id) {
         P result = super.load(id);
-
         if (result == null) {
             result = create(id);
         }
@@ -105,10 +113,21 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
         final P sp = load(id);
         sp.handle(event, context);
         store(sp);
-
-        //TODO:2016-01-08:alexander.yevsyukov: Store the timestamp of this event. We will need this value
-        // when reconnecting to the EventStore for catching up. Presumably this belongs to
-        // EventConsumingRepository, which 'sits' on EventConsumingRepositoryStorage
+        final StreamProjectionStorage<I> storage = streamProjectionStorage();
+        final Timestamp eventTime = context.getTimestamp();
+        storage.writeLastHandledEventTime(eventTime);
     }
 
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Nonnull
+    protected StreamProjectionStorage<I> streamProjectionStorage() {
+        @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
+        final StreamProjectionStorage<I> storage = (StreamProjectionStorage<I>) getStorage();
+        return checkStorage(storage);
+    }
 }

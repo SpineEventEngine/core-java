@@ -21,20 +21,19 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageShould;
+import org.spine3.server.storage.StreamProjectionStorage;
+import org.spine3.server.storage.StreamProjectionStorageShould;
 
 /**
- * In-memory implementation of {@link EntityStorage} tests.
- *
  * @author Alexander Litus
  */
-public class InMemoryEntityStorageShould extends EntityStorageShould {
+public class InMemoryStreamProjectionStorageShould extends StreamProjectionStorageShould {
 
-    private final InMemoryEntityStorage<String> storage = InMemoryEntityStorage.newInstance();
+    private final InMemoryStreamProjectionStorage<String> storage = InMemoryStreamProjectionStorage.newInstance(
+            InMemoryEntityStorage.<String>newInstance());
 
     @Override
-    protected EntityStorage<String> getStorage() {
+    protected StreamProjectionStorage<String> getStorage() {
         return storage;
     }
 

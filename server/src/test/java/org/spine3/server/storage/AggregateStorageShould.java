@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.base.Function;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
@@ -39,21 +40,25 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.server.util.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "AbstractClassWithoutAbstractMethods"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class AggregateStorageShould {
 
-    private final ProjectId aggregateId = createProjectId("dummyAggregateId");
+    private final ProjectId aggregateId = createProjectId(newUuid());
 
-    private final AggregateStorage<ProjectId> storage;
+    private AggregateStorage<ProjectId> storage;
 
-    protected AggregateStorageShould(AggregateStorage<ProjectId> storage) {
-        this.storage = storage;
+    @Before
+    public void setUpTest() {
+        storage = getStorage();
     }
+
+    protected abstract AggregateStorage<ProjectId> getStorage();
 
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {

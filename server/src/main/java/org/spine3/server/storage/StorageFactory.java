@@ -20,13 +20,14 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.server.CommandStore;
 import org.spine3.server.Entity;
+import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.stream.EventStore;
 
 /**
- * A factory for creating storages used by repositories, {@link org.spine3.server.CommandStore}, and
- * {@link EventStore}.
+ * A factory for creating storages used by repositories, {@link CommandStore} and {@link EventStore}.
  *
  * @author Alexander Yevsyukov
  */
@@ -44,11 +45,27 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link AggregateStorage} instance.
+     *
+     * @param <I> the type of aggregate IDs
+     * @param aggregateClass the class of aggregates to store
+     * @see EntityId
      */
     <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass);
 
     /**
      * Creates a new {@link EntityStorage} instance.
+     *
+     * @param <I> the type of entity IDs
+     * @param entityClass the class of entities to store
+     * @see EntityId
      */
     <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
+
+    /**
+     * Creates a new {@link StreamProjectionStorage} instance.
+     *
+     * @param <I> the type of stream projection IDs
+     * @see EntityId
+     */
+    <I> StreamProjectionStorage<I> createStreamProjectionStorage();
 }

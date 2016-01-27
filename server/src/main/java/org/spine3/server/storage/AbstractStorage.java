@@ -64,7 +64,7 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
     /**
      * Ensures the storage is not closed.
      *
-     * <p>If the storage is closed throws {@code IllegalStateException} with the passed message
+     * <p>If the storage is closed throws {@code IllegalStateException} with the passed message.
      *
      * @param message exception message
      * @throws IllegalStateException if the storage is closed
@@ -73,6 +73,17 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
         if (isClosed()) {
             throw new IllegalStateException(message);
         }
+    }
+
+    /**
+     * Ensures the storage is not closed.
+     *
+     * <p>If the storage is closed throws {@code IllegalStateException}.
+     *
+     * @throws IllegalStateException if the storage is closed
+     */
+    protected void checkNotClosed() throws IllegalStateException {
+        checkNotClosed("The storage is closed.");
     }
 
     /**
@@ -98,7 +109,7 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
      */
     @Override
     public void close() throws Exception {
-        checkNotClosed("Already closed.");
+        checkNotClosed();
         this.open = false;
     }
 }
