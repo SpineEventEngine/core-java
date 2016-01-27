@@ -2,3 +2,7 @@ language: java
 
 before_install:
   - chmod +x gradlew
+  - pip install --user codecov
+
+after_success:
+  - codecov
