@@ -20,18 +20,15 @@
 
 package org.spine3.server.stream;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
-import org.spine3.server.MultiHandler;
 import org.spine3.server.util.Identifiers;
+import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 /**
@@ -40,7 +37,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 public abstract class StreamProjectionRepository<I, P extends StreamProjection<I, M>, M extends Message>
-        extends EntityRepository<I, P, M> implements EventDispatcher, MultiHandler {
+        extends EntityRepository<I, P, M> implements EventDispatcher {
 
     protected StreamProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -48,17 +45,13 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
 
     /**
      * {@inheritDoc}
-     *
-     * @return a multimap from event handlers to event classes they handle.
      */
     @Override
-    public Multimap<Method, Class<? extends Message>> getHandlers() {
+    public Set<EventClass> getEventClasses() {
         final Class<? extends StreamProjection> projectionClass = getEntityClass();
-        final Set<Class<? extends Message>> events = StreamProjection.getEventClasses(projectionClass);
-        final Method forward = DispatchMethod.of(this);
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(forward, events)
-                .build();
+        final Set<Class<? extends Message>> eventClasses = StreamProjection.getEventClasses(projectionClass);
+        final Set<EventClass> result = EventClass.setOf(eventClasses);
+        return result;
     }
 
     /**
@@ -109,9 +102,9 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     @Override
     public void dispatch(Message event, EventContext context) {
         final I id = getEntityId(event, context);
-        final P p = load(id);
-        p.handle(event, context);
-        store(p);
+        final P sp = load(id);
+        sp.handle(event, context);
+        store(sp);
 
         //TODO:2016-01-08:alexander.yevsyukov: Store the timestamp of this event. We will need this value
         // when reconnecting to the EventStore for catching up. Presumably this belongs to

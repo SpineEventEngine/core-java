@@ -40,7 +40,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.stream.EventStore;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,7 +52,6 @@ import static com.google.common.base.Throwables.propagate;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-@SuppressWarnings("ProhibitedExceptionDeclared")
 public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
 
     /**
@@ -167,16 +165,29 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <E>        the type of entities or aggregates
      * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
+    @SuppressWarnings({"InstanceofIncompatibleInterface", "CastToIncompatibleInterface", "ChainOfInstanceofChecks"})
+        // reason for suppressing: we intentionally cast the repository to CommandHandler because custom
+        // repositories may implement CommandHandler interface for handling commands that related to
+        // more than one entity in the repository. For example, DeleteAll command would mark as removed (or remove)
+        // all entities in the repository.
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
 
         repositories.add(repository);
 
-        if (repository instanceof CommandHandler) {
-            getCommandBus().register((CommandHandler) repository);
+        final CommandBus commandBus = getCommandBus();
+
+        if (repository instanceof CommandDispatcher) {
+            commandBus.register((CommandDispatcher) repository);
         }
 
-        getEventBus().register(repository);
+        if (repository instanceof CommandHandler) {
+            commandBus.register((CommandHandler) repository);
+        }
+
+        if (repository instanceof EventDispatcher) {
+            getEventBus().register((EventDispatcher)repository);
+        }
     }
 
     private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
@@ -186,29 +197,36 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
+    @SuppressWarnings({"ChainOfInstanceofChecks", "InstanceofIncompatibleInterface", "CastToIncompatibleInterface"})
+        // See comments for register(Repository<?, ?> repository).
     private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandHandler) {
-            getCommandBus().unregister((CommandHandler) repository);
+        if (repository instanceof CommandDispatcher) {
+            getCommandBus().unregister((CommandDispatcher) repository);
         }
 
-        getEventBus().unregister(repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().unregister((CommandHandler)repository);
+        }
+
+        if (repository instanceof EventDispatcher) {
+            getEventBus().unregister((EventDispatcher) repository);
+        }
+
         repository.close();
     }
 
-    /**
-     * Processes the incoming command request.
-     *
-     * <p>This method is the entry point of a command in to a backend of an application.
-     *
-     * @param request incoming command request to handle
-     * @return the result of command handling
-     */
-    public CommandResult post(CommandRequest request) {
+    public CommandResult process(CommandRequest request) {
         checkNotNull(request);
 
         //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
 
-        final CommandResult result = dispatch(request);
+        CommandResult result = CommandResult.getDefaultInstance();
+        try {
+            result = dispatch(request);
+        } catch (RuntimeException e) {
+            log().error("", e);
+        }
+
         final List<EventRecord> eventRecords = result.getEventRecordList();
 
         postEvents(eventRecords);
@@ -216,6 +234,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
 
         return result;
+    }
+
+    public void post(CommandRequest request)  {
+        commandBus.post(request);
     }
 
     @Override
@@ -238,18 +260,8 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         responseObserver.onCompleted();
 
         if (Responses.isOk(reply)) {
-            handle(request);
+            post(request);
         }
-    }
-
-    @Override
-    public void subscribe(Topic request, StreamObserver<EventRecord> responseObserver) {
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
-    }
-
-    @Override
-    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 
     /**
@@ -265,18 +277,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return result;
     }
 
-    private void handle(CommandRequest request) {
-        //TODO:2015-12-16:alexander.yevsyukov: Deal with async. execution of the request.
-        post(request);
-    }
-
     private CommandResult dispatch(CommandRequest request) {
         try {
-            final List<EventRecord> eventRecords = this.commandBus.storeAndDispatch(request);
+            final List<EventRecord> eventRecords = this.commandBus.post(request);
 
             final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
-        } catch (InvocationTargetException | RuntimeException e) {
+        } catch (RuntimeException e) {
             throw propagate(e);
         }
     }
@@ -296,6 +303,16 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         for (EventRecord record : records) {
             eventBus.post(record);
         }
+    }
+
+    @Override
+    public void subscribe(Topic request, StreamObserver<EventRecord> responseObserver) {
+        //TODO:2016-01-14:alexander.yevsyukov: Implement
+    }
+
+    @Override
+    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
+        //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 
     /**

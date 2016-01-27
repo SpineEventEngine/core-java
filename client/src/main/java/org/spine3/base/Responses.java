@@ -35,9 +35,16 @@ public class Responses {
     /**
      * The response returned on successful acceptance of a command for processing.
      */
-    public static final Response RESPONSE_OK = Response.newBuilder()
+    private static final Response RESPONSE_OK = Response.newBuilder()
             .setOk(Empty.getDefaultInstance())
             .build();
+
+    /**
+     * @return the instance of OK {@link Response}
+     */
+    public static Response ok() {
+        return RESPONSE_OK;
+    }
 
     /**
      * @return {@code true} if the passed response represents `ok` status.

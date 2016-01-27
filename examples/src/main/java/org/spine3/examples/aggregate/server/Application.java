@@ -107,7 +107,7 @@ public class Application implements AutoCloseable {
 
         // Process requests
         for (CommandRequest request : requests) {
-            boundedContext.post(request);
+            boundedContext.process(request);
         }
 
         log().info("All the requests were handled.");
@@ -124,7 +124,7 @@ public class Application implements AutoCloseable {
         boundedContext.register(repository);
 
         // Register event handlers.
-        boundedContext.getEventBus().register(eventLogger);
+        boundedContext.getEventBus().subscribe(eventLogger);
 
         //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters

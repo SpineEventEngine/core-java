@@ -20,7 +20,10 @@
 
 package org.spine3.type;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,4 +55,28 @@ public final class EventClass extends ClassTypeValue {
     public static EventClass of(Message event) {
         return of(checkNotNull(event).getClass());
     }
+
+    /**
+     * Creates immutable set of {@code EventClass} from the passed set.
+     */
+    public static ImmutableSet<EventClass> setOf(Set<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
+    }
+
+    /**
+     * Creates immutable set of {@code EventClass} from the passed classes.
+     */
+    @SafeVarargs
+    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
+        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
+        for (Class<? extends Message> cls : classes) {
+            builder.add(of(cls));
+        }
+        return builder.build();
+    }
+
 }

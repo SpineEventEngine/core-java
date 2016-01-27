@@ -105,6 +105,18 @@ public class TestCommandFactory {
     }
 
     /**
+     * Creates {@link CreateProject} command for the passed project ID.
+     */
+    public static CreateProject createProject(String projectId) {
+        return CreateProject.newBuilder()
+                .setProjectId(
+                        ProjectId.newBuilder()
+                                .setId(projectId)
+                                .build())
+                .build();
+    }
+
+    /**
      * Creates a new {@link AddTask} command with the given project ID.
      */
     public static AddTask addTask(ProjectId id) {
@@ -112,9 +124,31 @@ public class TestCommandFactory {
     }
 
     /**
+     * Creates a new {@link AddTask} command with the given project ID.
+     */
+    public static AddTask addTask(String projectId) {
+        return AddTask.newBuilder().setProjectId(
+                ProjectId.newBuilder()
+                        .setId(projectId)
+                        .build())
+                .build();
+    }
+
+    /**
      * Creates a new {@link StartProject} command with the given project ID.
      */
     public static StartProject startProject(ProjectId id) {
         return StartProject.newBuilder().setProjectId(id).build();
+    }
+
+    /**
+     * Creates {@link StartProject} command for the passed project ID.
+     */
+    public static StartProject startProject(String projectId) {
+        return StartProject.newBuilder()
+                .setProjectId(ProjectId.newBuilder()
+                        .setId(projectId)
+                        .build())
+                .build();
     }
 }

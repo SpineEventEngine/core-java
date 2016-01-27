@@ -20,7 +20,6 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -41,10 +40,12 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -67,7 +68,7 @@ public class ProcessManagerRepositoryShould {
             BoundedContextTestStubs.create());
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         repository.initStorage(InMemoryStorageFactory.getInstance());
     }
 
@@ -138,25 +139,20 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void return_command_and_event_handlers() {
-        final Multimap<Method, Class<? extends Message>> result = repository.getHandlers();
-
-        assertEquals(2,  result.keySet().size());
-        assertEquals(6,  result.values().size());
-        assertContainsCommandClasses(result);
-        assertContainsEventClasses(result);
+    public void return_command_classes() {
+        final Set<CommandClass> commandClasses = repository.getCommandClasses();
+        assertTrue(commandClasses.contains(CommandClass.of(CreateProject.class)));
+        assertTrue(commandClasses.contains(CommandClass.of(AddTask.class)));
+        assertTrue(commandClasses.contains(CommandClass.of(StartProject.class)));
     }
 
-    private static void assertContainsEventClasses(Multimap<Method, Class<? extends Message>> result) {
-        assertTrue(result.containsValue(ProjectCreated.class));
-        assertTrue(result.containsValue(TaskAdded.class));
-        assertTrue(result.containsValue(ProjectStarted.class));
-    }
+    @Test
+    public void return_event_classes() {
+        final Set<EventClass> eventClasses = repository.getEventClasses();
+        assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
+        assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
+        assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
 
-    private static void assertContainsCommandClasses(Multimap<Method, Class<? extends Message>> result) {
-        assertTrue(result.containsValue(CreateProject.class));
-        assertTrue(result.containsValue(AddTask.class));
-        assertTrue(result.containsValue(StartProject.class));
     }
 
     @Test

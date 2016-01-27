@@ -20,11 +20,8 @@
 
 package org.spine3.server.internal;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,17 +30,15 @@ import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.MultiHandler;
 import org.spine3.server.util.MethodMap;
 import org.spine3.server.util.Methods;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +49,6 @@ import static java.util.Collections.singletonList;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 @Internal
 public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
@@ -83,12 +77,12 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         super(target, method);
     }
 
-    protected static boolean isAnnotatedCorrectly(Method method) {
+    public static boolean isAnnotatedCorrectly(Method method) {
         final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
         return isAnnotated;
     }
 
-    protected static boolean acceptsCorrectParams(Method method) {
+    public static boolean acceptsCorrectParams(Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
         if (!paramCountIsCorrect) {
@@ -98,6 +92,22 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
                 Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
                         CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
         return acceptsCorrectParams;
+    }
+
+    public static boolean returnsMessageListOrVoid(Method method) {
+        final Class<?> returnType = method.getReturnType();
+
+        if (Message.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        if (List.class.isAssignableFrom(returnType)) {
+            return true;
+        }
+        //noinspection RedundantIfStatement
+        if (Void.TYPE.equals(returnType)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -129,6 +139,8 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
+        } else if (Void.class.equals(resultClass)) {
+            return Collections.emptyList();
         } else {
             // Another type of result is single event (as Message).
             final List<Message> result = singletonList((Message) handlingResult);
@@ -150,12 +162,6 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
         final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(object);
         result.putAll(regularHandlers);
 
-        if (object instanceof MultiHandler) {
-            final MultiHandler multiHandler = (MultiHandler) object;
-            final Map<CommandClass, CommandHandlerMethod> multiHandlers = getHandlersFromMultiHandler(multiHandler);
-            checkModifiers(toMethods(multiHandlers.values()));
-            result.putAll(multiHandlers);
-        }
         return result.build();
     }
 
@@ -174,50 +180,8 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
     }
 
     /**
-     * Creates a command handler map from the passed instance of {@link MultiHandler} (which is also
-     * a {@link CommandHandler}).
-     */
-    @CheckReturnValue
-    private static Map<CommandClass, CommandHandlerMethod> getHandlersFromMultiHandler(MultiHandler obj) {
-        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-
-        final CommandHandler commandHandler = (CommandHandler) obj;
-
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
-        for (Method method : methodsToClasses.keySet()) {
-            // check if the method accepts a command context (and is not an event handler)
-            if (acceptsCorrectParams(method)) {
-                final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-                builder.putAll(createMap(commandHandler, method, classes));
-            }
-        }
-        return builder.build();
-    }
-
-    /**
-     * Creates a command handler map for a single method of an object that handles multiple
-     * message classes.
-     *
-     * @param target  the object on which execute the method
-     * @param method  the method to call
-     * @param classes the classes of messages handled by the method
-     * @return immutable map of command handlers
-     */
-    private static Map<CommandClass, CommandHandlerMethod> createMap(CommandHandler target,
-                                                                     Method method,
-                                                                     Iterable<Class<? extends Message>> classes) {
-        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> builder = ImmutableMap.builder();
-        for (Class<? extends Message> messageClass : classes) {
-            final CommandClass key = CommandClass.of(messageClass);
-            final CommandHandlerMethod value = target.createMethod(method);
-            builder.put(key, value);
-        }
-        return builder.build();
-    }
-
-    /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
-     * <p/>
+     *
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
@@ -230,19 +194,6 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
                         Methods.getFullMethodName(method)));
             }
         }
-    }
-
-    private static Iterable<Method> toMethods(Iterable<CommandHandlerMethod> handlerMethods) {
-        return Iterables.transform(handlerMethods, new Function<CommandHandlerMethod, Method>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public Method apply(@Nullable CommandHandlerMethod eventHandlerMethod) {
-                if (eventHandlerMethod == null) {
-                    return null;
-                }
-                return eventHandlerMethod.getMethod();
-            }
-        });
     }
 
     private enum LogSingleton {

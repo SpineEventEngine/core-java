@@ -99,7 +99,7 @@ public class BoundedContextShould {
     @After
     public void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus().unregister(handler);
+            boundedContext.getEventBus().unsubscribe(handler);
         }
         boundedContext.close();
     }
@@ -111,15 +111,17 @@ public class BoundedContextShould {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
-        boundedContext.getEventBus().register(handler);
+        boundedContext.getEventBus().subscribe(handler);
         handlersRegistered = true;
     }
+
+    //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
 
     private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
 
         final List<CommandResult> results = newLinkedList();
         for (CommandRequest request : requests) {
-            final CommandResult result = boundedContext.post(request);
+            final CommandResult result = boundedContext.process(request);
             results.add(result);
         }
         return results;
@@ -152,7 +154,7 @@ public class BoundedContextShould {
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_null_CommandRequest() {
         // noinspection ConstantConditions
-        boundedContext.post(null);
+        boundedContext.process(null);
     }
 
     @Test(expected = UnsupportedCommandException.class)
@@ -182,23 +184,11 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void process_one_command_and_return_appropriate_result() {
+    public void post_CommandRequest() {
         registerAll();
         final CommandRequest request = createProject(userId, projectId, getCurrentTime());
 
-        final CommandResult result = boundedContext.post(request);
-
-        assertCommandResultsAreValid(newArrayList(request), newArrayList(result));
-    }
-
-    @Test
-    public void process_several_commands_and_return_appropriate_results() {
-        registerAll();
-        final List<CommandRequest> requests = generateRequests();
-
-        final List<CommandResult> results = processRequests(requests);
-
-        assertCommandResultsAreValid(requests, results);
+        boundedContext.post(request);
     }
 
     private void assertCommandResultsAreValid(List<CommandRequest> requests, List<CommandResult> results) {
@@ -347,7 +337,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler {
+    private static class EmptyHandler implements EventHandler {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
@@ -364,8 +354,6 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // Constructor must be public to be called from a repository. It's a part of PM public API.
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
@@ -373,6 +361,18 @@ public class BoundedContextShould {
         @Override
         protected Empty getDefaultState() {
             return Empty.getDefaultInstance();
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method
+        @Assign
+        public void handle(CreateProject command, CommandContext ctx) {
+            // Do nothing, just watch.
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method
+        @Subscribe
+        public void on(ProjectCreated event, EventContext ctx) {
+            // Do nothing, just watch.
         }
     }
 
@@ -393,6 +393,12 @@ public class BoundedContextShould {
         @Override
         protected Empty getDefaultState() {
             return Empty.getDefaultInstance();
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method.
+        @Subscribe
+        public void on(ProjectCreated event, EventContext context) {
+            // Do nothing. We have the method so that there's one event class exposed by the repository.
         }
     }
 

@@ -18,23 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.base;
 
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
+import org.junit.Test;
+import org.spine3.util.Tests;
 
-import java.lang.reflect.Method;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Unlike regular handlers objects that have one method per message class, {@code MultiHandler}
- * exposes methods that handle multiple message classes.
- *
- * @author Alexander Yevsyukov
- */
-public interface MultiHandler {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ResponsesShould {
 
-    /**
-     * Returns a map from methods to message classes they handle.
-     */
-    Multimap<Method, Class<? extends Message>> getHandlers();
+    @Test
+    public void have_private_constructor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Responses.class);
+    }
+
+    @Test
+    public void return_ok_response() {
+        checkNotNull(Responses.ok());
+    }
+
+    @Test
+    public void recognize_ok_response() {
+        assertTrue(Responses.isOk(Responses.ok()));
+    }
+
 }

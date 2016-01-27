@@ -20,27 +20,26 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.server.*;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.server.EntityRepository;
+import org.spine3.server.EventDispatcher;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
 /**
- * The abstract base for repositories for Process Managers.
+ * The abstract base for Process Managers repositories.
  *
  * @param <I> the type of IDs of process managers
  * @param <PM> the type of process managers
@@ -49,8 +48,8 @@ import java.util.Set;
  * @author Alexander Litus
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-        extends EntityRepository<I, PM, M> implements CommandDispatcher, EventDispatcher, MultiHandler, CommandHandler {
-
+                          extends EntityRepository<I, PM, M>
+                          implements CommandDispatcher, EventDispatcher {
     /**
      * {@inheritDoc}
      */
@@ -104,59 +103,20 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return a multimap from command/event handlers to command/event classes they handle (in the Process Manager class).
-     */
     @Override
-    public Multimap<Method, Class<? extends Message>> getHandlers() {
-        final Multimap<Method, Class<? extends Message>> commandHandlers = getCommandHandlers();
-        final Multimap<Method, Class<? extends Message>> eventHandlers = getEventHandlers();
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(commandHandlers)
-                .putAll(eventHandlers)
-                .build();
-    }
-
-    /**
-     * Returns a map from methods to command classes they handle.
-     *
-     * @see ProcessManager#getHandledCommandClasses(Class)
-     */
-    private Multimap<Method, Class<? extends Message>> getCommandHandlers() {
+    public Set<CommandClass> getCommandClasses() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
-        final Method dispatcher = CommandDispatcher.DispatchMethod.of(this);
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(dispatcher, commandClasses)
-                .build();
+        final Set<CommandClass> result = CommandClass.setOf(commandClasses);
+        return result;
     }
 
-    /**
-     * Returns a map from methods to event classes they handle.
-     *
-     * @see ProcessManager#getHandledEventClasses(Class)
-     */
-    private Multimap<Method, Class<? extends Message>> getEventHandlers() {
+    @Override
+    public Set<EventClass> getEventClasses() {
         final Class<? extends ProcessManager> pmClass = getEntityClass();
         final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
-        final Method dispatcher = EventDispatcher.DispatchMethod.of(this);
-        return ImmutableMultimap.<Method, Class<? extends Message>>builder()
-                .putAll(dispatcher, eventClasses)
-                .build();
-    }
-
-    @Internal
-    @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new PmRepositoryDispatchMethod(this, method);
-    }
-
-    @Internal
-    @Override
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
+        final Set<EventClass> result = EventClass.setOf(eventClasses);
+        return result;
     }
 
     /**
@@ -171,8 +131,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #getId(Message, CommandContext)
      */
     @Override
-    public List<EventRecord> dispatch(Message command, CommandContext context)
-            throws FailureThrowable, InvocationTargetException {
+    public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
         final I id = getId(command, context);
         final PM manager = load(id);
         final List<EventRecord> events = manager.dispatchCommand(command, context);

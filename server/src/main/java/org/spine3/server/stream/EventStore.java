@@ -311,7 +311,7 @@ public abstract class EventStore implements AutoCloseable {
         public void append(EventRecord request, StreamObserver<Response> responseObserver) {
             try {
                 eventStore.append(request);
-                responseObserver.onNext(Responses.RESPONSE_OK);
+                responseObserver.onNext(Responses.ok());
                 responseObserver.onCompleted();
             } catch (RuntimeException e) {
                 responseObserver.onError(e);

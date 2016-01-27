@@ -23,11 +23,10 @@ package org.spine3.server;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
+import org.spine3.type.CommandClass;
 
-import java.lang.reflect.Method;
 import java.util.List;
-
-import static com.google.common.base.Throwables.propagate;
+import java.util.Set;
 
 /**
  * {@code CommandDispatcher} delivers commands to handlers and returns results of the command processing.
@@ -37,43 +36,24 @@ import static com.google.common.base.Throwables.propagate;
 public interface CommandDispatcher {
 
     /**
+     * Returns the set of command classes this dispatcher can dispatch.
+     *
+     * @return non-empty set of command classes
+     */
+    Set<CommandClass> getCommandClasses();
+
+    /**
      * Dispatches the command for processing and returns the generated events.
      *
      * @param command the command to dispatch
      * @param context context info of the command
      * @return a list of event records generated during the command execution, or
      *         an empty list if no events were generated
-     * @throws Exception if an exception occurs during command execution
-     * @throws FailureThrowable if a business failure occurred during the command execution
      */
-    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception, FailureThrowable;
+    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception;
+    //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
+    //TODO:2016-01-25:alexander.yevsyukov: Dispatch CommandRequest, not the couple of parameters.
 
-    /**
-     * Utility class for obtaining reference to {@link #dispatch(Message, CommandContext)} methods of implementations.
-     */
-    class DispatchMethod {
+    //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 
-        /**
-         * The name of the method used for dispatching commands.
-         *
-         * @see #dispatch(Message, CommandContext)
-         */
-        @SuppressWarnings("DuplicateStringLiteralInspection") // EventDispatcher has also such method.
-        private static final String DISPATCH_METHOD_NAME = "dispatch";
-
-        /**
-         * Obtains the reference to the {@link #dispatch(Message, CommandContext)} method of the implementation
-         * @param dispatcher the instance of the dispatcher
-         * @return {@code Method} instance
-         */
-        public static Method of(CommandDispatcher dispatcher) {
-            try {
-                return dispatcher.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-        }
-
-        private DispatchMethod() {}
-    }
 }

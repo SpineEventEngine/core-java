@@ -37,8 +37,8 @@ import static org.spine3.server.EntityId.checkType;
  *
  * @param <I> the type of the entity ID
  * @param <M> the type of the entity state
- * @see EntityId
  * @author Alexander Yevsyikov
+ * @see EntityId
  */
 public abstract class Entity<I, M extends Message> {
 
@@ -136,7 +136,6 @@ public abstract class Entity<I, M extends Message> {
     /**
      * @return current version number
      */
-    @CheckReturnValue
     public int getVersion() {
         return version;
     }

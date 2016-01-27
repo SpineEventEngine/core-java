@@ -20,29 +20,14 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.type.EventClass;
-
-import java.util.Set;
-
 /**
- * {@code EventDispatcher} delivers events to handlers.
+ * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
+ *
+ * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
+ * @see EventBus#subscribe(EventHandler)
+ * @see EventBus#register(EventDispatcher)
  */
-public interface EventDispatcher {
-
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
-
-    /**
-     * Dispatches the event and its context.
-     */
-    void dispatch(Message event, EventContext context);
-
+public interface EventHandler {
 }
