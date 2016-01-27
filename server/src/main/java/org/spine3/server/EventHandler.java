@@ -20,21 +20,14 @@
 
 package org.spine3.server;
 
-import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
-
-import java.lang.reflect.Method;
-
 /**
- * Unlike regular handlers objects that have one method per message class, {@code MultiHandler}
- * exposes methods that handle multiple message classes.
+ * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
+ *
+ * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
+ * @see EventBus#subscribe(EventHandler)
+ * @see EventBus#register(EventDispatcher)
  */
-public interface MultiHandler {
-
-    /**
-     * Returns a map from methods to message classes they handle.
-     */
-    Multimap<Method, Class<? extends Message>> getHandlers();
+public interface EventHandler {
 }

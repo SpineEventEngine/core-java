@@ -20,34 +20,15 @@
 
 package org.spine3.examples.aggregate.server;
 
-import org.junit.AfterClass;
 import org.junit.Test;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.filesystem.FileSystemStorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-
-import static org.spine3.io.file.FileUtil.deleteFileIfExists;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ApplicationShould {
-
-    private static final StorageFactory FS_STORAGE_FACTORY = FileSystemStorageFactory.newInstance(ApplicationShould.class);
-
-    @AfterClass
-    public static void cleanUp() {
-        deleteFileIfExists(((FileSystemStorageFactory)FS_STORAGE_FACTORY).getRootDirectoryPath());
-    }
 
     @Test
     public void execute_on_in_memory_storage() {
         final Application app = new Application(InMemoryStorageFactory.getInstance());
         app.execute();
-    }
-
-    @Test
-    public void execute_on_file_system_storage() throws Exception {
-        try (final Application app = new Application(FS_STORAGE_FACTORY))  {
-            app.execute();
-        }
     }
 }

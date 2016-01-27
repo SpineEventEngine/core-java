@@ -20,16 +20,12 @@
 
 package org.spine3.internal;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
-import org.spine3.server.MultiHandler;
 import org.spine3.server.Subscribe;
 import org.spine3.server.util.MethodMap;
 import org.spine3.server.util.Methods;
@@ -40,7 +36,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -130,53 +125,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
             final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
             result.put(eventClass, handler);
         }
-        // If the passed object is MultiHandler add its methods too.
-        if (target instanceof MultiHandler) {
-            final MultiHandler multiHandler = (MultiHandler) target;
-            final Map<EventClass, EventHandlerMethod> multiHandlersMap = createMap(multiHandler);
-            checkModifiers(toMethods(multiHandlersMap.values()));
-            result.putAll(multiHandlersMap);
-        }
         return result.build();
-    }
-
-    private static Map<EventClass, EventHandlerMethod> createMap(MultiHandler obj) {
-        final Multimap<Method, Class<? extends Message>> methodsToClasses = obj.getHandlers();
-        // Add entries exposed by the object as MultiHandler.
-        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
-        for (Method method : methodsToClasses.keySet()) {
-            // check if the method accepts an event context (and is not a command handler)
-            if (acceptsCorrectParams(method)) {
-                final Collection<Class<? extends Message>> classes = methodsToClasses.get(method);
-                builder.putAll(createMap(obj, method, classes));
-            }
-        }
-        return builder.build();
-    }
-
-    private static Iterable<Method> toMethods(Iterable<EventHandlerMethod> handlerMethods) {
-        return Iterables.transform(handlerMethods, new Function<EventHandlerMethod, Method>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public Method apply(@Nullable EventHandlerMethod eventHandlerMethod) {
-                if (eventHandlerMethod == null) {
-                    return null;
-                }
-                return eventHandlerMethod.getMethod();
-            }
-        });
-    }
-
-    private static Map<EventClass, EventHandlerMethod> createMap(Object target,
-                                                                 Method method,
-                                                                 Iterable<Class<? extends Message>> classes) {
-        final ImmutableMap.Builder<EventClass, EventHandlerMethod> builder = ImmutableMap.builder();
-        for (Class<? extends Message> messageClass : classes) {
-            final EventClass key = EventClass.of(messageClass);
-            final EventHandlerMethod value = new EventHandlerMethod(target, method);
-            builder.put(key, value);
-        }
-        return builder.build();
     }
 
     @Override
@@ -199,6 +148,14 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
                         Methods.getFullMethodName(method)));
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override // Promote to public to make it visible to routines inspecting EventBus.
+    public Object getTarget() {
+        return super.getTarget();
     }
 
     private enum LogSingleton {

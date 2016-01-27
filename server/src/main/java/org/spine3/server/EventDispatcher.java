@@ -24,10 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.type.EventClass;
 
-import java.lang.reflect.Method;
 import java.util.Set;
-
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * {@code EventDispatcher} delivers events to handlers.
@@ -48,27 +45,4 @@ public interface EventDispatcher {
      */
     void dispatch(Message event, EventContext context);
 
-    /**
-     * Utility class for obtaining reference to {@link #dispatch(Message, EventContext)} methods of implementations.
-     */
-    class DispatchMethod {
-
-        /**
-         * The name of the method used for dispatching events.
-         *
-         * @see #dispatch(Message, EventContext)
-         */
-        @SuppressWarnings("DuplicateStringLiteralInspection") // CommandDispatcher has also such method.
-        private static final String DISPATCH_METHOD_NAME = "dispatch";
-
-        public static Method of(EventDispatcher dispatcher) {
-            try {
-                return dispatcher.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, EventContext.class);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-        }
-
-        private DispatchMethod() {}
-    }
 }

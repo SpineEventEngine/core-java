@@ -1,6 +1,7 @@
 # IntelliJ IDEA modules and interim config files.
 *.iml
 .idea/libraries
+.idea/shelf
 .idea/*.xml
 
 # Gradle interim configs

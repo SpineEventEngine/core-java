@@ -77,6 +77,12 @@ public class TestEventFactory {
         return ProjectCreated.newBuilder().setProjectId(id).build();
     }
 
+    public static ProjectCreated projectCreatedEvent(String projectId) {
+        return ProjectCreated.newBuilder().setProjectId(
+                ProjectId.newBuilder().setId(projectId).build()
+        ).build();
+    }
+
     public static TaskAdded taskAddedEvent(ProjectId id) {
         return TaskAdded.newBuilder().setProjectId(id).build();
     }

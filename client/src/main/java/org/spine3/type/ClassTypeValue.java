@@ -75,4 +75,5 @@ abstract class ClassTypeValue {
         final ClassTypeValue other = (ClassTypeValue) obj;
         return Objects.equals(this.value, other.value);
     }
+
 }

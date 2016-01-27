@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
 
@@ -47,7 +48,6 @@ public class Server {
      */
     public Server(StorageFactory storageFactory) {
         this.application = new Application(storageFactory);
-
         this.clientServer = buildClientServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
     }
 
@@ -60,21 +60,16 @@ public class Server {
 
     /**
      * The entry point of the server application.
-     *
-     * <p/>To change the storage implementation, modify {@link Application#getStorageFactory()}.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-
-        final StorageFactory storageFactory = Application.getStorageFactory();
+        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
         final Server server = new Server(storageFactory);
-
         server.start();
 
         log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
 
         addShutdownHook(server);
-
         server.awaitTermination();
     }
 
@@ -107,7 +102,6 @@ public class Server {
     }
 
     private static void addShutdownHook(final Server server) {
-
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")

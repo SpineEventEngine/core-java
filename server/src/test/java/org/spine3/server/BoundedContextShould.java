@@ -99,7 +99,7 @@ public class BoundedContextShould {
     @After
     public void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus().unregister(handler);
+            boundedContext.getEventBus().unsubscribe(handler);
         }
         boundedContext.close();
     }
@@ -111,9 +111,11 @@ public class BoundedContextShould {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
-        boundedContext.getEventBus().register(handler);
+        boundedContext.getEventBus().subscribe(handler);
         handlersRegistered = true;
     }
+
+    //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
 
     private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
 
@@ -335,7 +337,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler {
+    private static class EmptyHandler implements EventHandler {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
@@ -391,6 +393,12 @@ public class BoundedContextShould {
         @Override
         protected Empty getDefaultState() {
             return Empty.getDefaultInstance();
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method.
+        @Subscribe
+        public void on(ProjectCreated event, EventContext context) {
+            // Do nothing. We have the method so that there's one event class exposed by the repository.
         }
     }
 
