@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    <li>Expose a public method that accepts the type of the event as the first parameter,
  *        and {@link EventContext} as the second parameter;
  *    <li>Mark the method with {@link Subscribe} annotation;</li>
- * <li>Register with an instance of EventBus using {@link #register(Object)}.</li>
+ * <li>Register with an instance of EventBus using {@link #subscribe(Object)}.</li>
  * </ol>
  * Note: Since Protobuf messages are final classes, a handler method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event that needs to be handled.
@@ -135,47 +135,34 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Registers event handler or event dispatcher with the bus.
-     *
-     * <p>In most cases the passed object will be either event handler (the object, which handles the event itself)
-     * or event dispatcher (the object, which redirects handling to other objects). This separation is
-     * not required, but encouraged to keep the event processing logic clear.
+     * Subscribes the event handler to receive events from the bus.
      *
      * <p>The event handler must expose at least one event subscriber method. If it is not the
      * case, {@code IllegalArgumentException} will be thrown.
      *
-     * <p>Event dispatchers must {@link EventDispatcher} interface and may not expose event subscriber methods.
-     *
-     * @param object the event handler object whose subscriber methods should be registered
+     * @param object the event handler object
      * @throws IllegalArgumentException if the object does not have event handling methods
      */
-    public void register(Object object) {
+    public void subscribe(EventHandler object) {
         checkNotNull(object);
-
-        boolean isDispatcher = false;
-        if (object instanceof EventDispatcher) {
-            registerDispatcher((EventDispatcher) object);
-            isDispatcher = true;
-        }
 
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersIfNotDispatcher(object, handlersEmpty, isDispatcher);
+        checkHandlersNotEmpty(object, handlersEmpty);
         if (!handlersEmpty) {
-            subscribe(handlers);
+            handlerRegistry.subscribe(handlers);
         }
     }
 
-    private static void checkHandlersIfNotDispatcher(Object object, boolean handlersEmpty, boolean isDispatcher) {
-        checkArgument(!handlersEmpty || isDispatcher, "No event subscriber methods found in %s", object);
+    private static void checkHandlersNotEmpty(Object object, boolean handlersEmpty) {
+        checkArgument(!handlersEmpty, "No event subscriber methods found in %s", object);
     }
 
-    private void registerDispatcher(EventDispatcher eventDispatcher) {
-        dispatcherRegistry.register(eventDispatcher);
-    }
-
-    private void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
-        handlerRegistry.subscribe(handlers);
+    /**
+     * Registers the passed dispatcher with the bus.
+     */
+    public void register(EventDispatcher dispatcher) {
+        dispatcherRegistry.register(dispatcher);
     }
 
     @VisibleForTesting
@@ -205,21 +192,22 @@ public class EventBus implements AutoCloseable {
      * @param object the object whose methods should be unregistered
      * @throws IllegalArgumentException if the object was not previously registered
      */
-    public void unregister(Object object) {
+    public void unsubscribe(Object object) {
         checkNotNull(object);
-
-        boolean isDispatcher = false;
-        if (object instanceof EventDispatcher) {
-            dispatcherRegistry.unregister((EventDispatcher) object);
-            isDispatcher = true;
-        }
 
         final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
         final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersIfNotDispatcher(object, handlersEmpty, isDispatcher);
+        checkHandlersNotEmpty(object, handlersEmpty);
         if (!handlersEmpty) {
-            unsubscribe(handlers);
+            unsubscribeMap(handlers);
         }
+    }
+
+    /**
+     * Removes dispatcher from the bus.
+     */
+    public void unregister(EventDispatcher dispatcher) {
+        dispatcherRegistry.unregister(dispatcher);
     }
 
     /**
@@ -227,7 +215,7 @@ public class EventBus implements AutoCloseable {
      *
      * @param handlers a map of the event handlers to remove
      */
-    private void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
+    private void unsubscribeMap(Map<EventClass, EventHandlerMethod> handlers) {
         handlerRegistry.unsubscribe(handlers);
     }
 

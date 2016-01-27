@@ -76,13 +76,13 @@ public class EventBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
         // Pass just String instance.
-        eventBus.register("reject_object_with_no_subscriber_methods");
+        eventBus.subscribe(new EventHandler() {});
     }
 
     /**
      * A simple one subscriber method handler class used in tests below.
      */
-    private static class ProjectCreatedHandler {
+    private static class ProjectCreatedHandler implements EventHandler {
 
         private boolean methodCalled = false;
 
@@ -99,11 +99,11 @@ public class EventBusShould {
 
     @Test
     public void register_event_handler() {
-        final Object handlerOne = new ProjectCreatedHandler();
-        final Object handlerTwo = new ProjectCreatedHandler();
+        final EventHandler handlerOne = new ProjectCreatedHandler();
+        final EventHandler handlerTwo = new ProjectCreatedHandler();
 
-        eventBus.register(handlerOne);
-        eventBus.register(handlerTwo);
+        eventBus.subscribe(handlerOne);
+        eventBus.subscribe(handlerTwo);
 
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         assertTrue(eventBus.hasSubscribers(eventClass));
@@ -115,13 +115,13 @@ public class EventBusShould {
 
     @Test
     public void unregister_handlers() {
-        final Object handlerOne = new ProjectCreatedHandler();
-        final Object handlerTwo = new ProjectCreatedHandler();
-        eventBus.register(handlerOne);
-        eventBus.register(handlerTwo);
+        final EventHandler handlerOne = new ProjectCreatedHandler();
+        final EventHandler handlerTwo = new ProjectCreatedHandler();
+        eventBus.subscribe(handlerOne);
+        eventBus.subscribe(handlerTwo);
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
 
-        eventBus.unregister(handlerOne);
+        eventBus.unsubscribe(handlerOne);
 
         // Check that the 2nd subscriber with the same event handling method remains
         // after the 1st subscriber unregisters.
@@ -130,7 +130,7 @@ public class EventBusShould {
         assertTrue(subscribers.contains(handlerTwo));
 
         // Check that after 2nd handler us unregisters he's no longer in
-        eventBus.unregister(handlerTwo);
+        eventBus.unsubscribe(handlerTwo);
 
         assertFalse(eventBus.getHandlers(eventClass).contains(handlerTwo));
     }
@@ -139,7 +139,7 @@ public class EventBusShould {
     public void call_subscribers_when_event_record_posted() {
         final ProjectCreatedHandler handler = new ProjectCreatedHandler();
 
-        eventBus.register(handler);
+        eventBus.subscribe(handler);
 
         final Message createProject = TestEventFactory.projectCreatedEvent("call_subscribers_when_event_record_posted");
         final EventRecord record = EventRecords.createEventRecord(createProject, EventContext.getDefaultInstance());
@@ -216,7 +216,7 @@ public class EventBusShould {
     public void catches_exceptions_caused_by_handlers() {
         final FaultyHandler faultyHandler = new FaultyHandler();
 
-        eventBus.register(faultyHandler);
+        eventBus.subscribe(faultyHandler);
         final Message createProject = TestEventFactory.projectCreatedEvent("catches_exceptions_caused_by_handlers");
         final EventRecord record = EventRecords.createEventRecord(createProject, EventContext.getDefaultInstance());
         eventBus.post(record);
@@ -227,7 +227,7 @@ public class EventBusShould {
     /**
      * The handler which throws exception from the subscriber method.
      */
-    private static class FaultyHandler {
+    private static class FaultyHandler implements EventHandler {
 
         private boolean methodCalled = false;
 
@@ -246,7 +246,7 @@ public class EventBusShould {
     @Test
     public void unregister_registries_on_close() throws Exception {
         eventBus.register(new BareDispatcher());
-        eventBus.register(new ProjectCreatedHandler());
+        eventBus.subscribe(new ProjectCreatedHandler());
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
 
         eventBus.close();

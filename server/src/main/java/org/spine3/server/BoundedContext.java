@@ -185,10 +185,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             commandBus.register((CommandHandler) repository);
         }
 
-        //TODO:2016-01-25:alexander.yevsyukov: Cast to EventDispatcher and register.
-        // In addition to being event handler the repository can simply dispatch EventRecords.
-
-        getEventBus().register(repository);
+        if (repository instanceof EventDispatcher) {
+            getEventBus().register((EventDispatcher)repository);
+        }
     }
 
     private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
@@ -198,12 +197,21 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
+    @SuppressWarnings({"ChainOfInstanceofChecks", "InstanceofIncompatibleInterface", "CastToIncompatibleInterface"})
+        // See comments for register(Repository<?, ?> repository).
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
             getCommandBus().unregister((CommandDispatcher) repository);
         }
 
-        getEventBus().unregister(repository);
+        if (repository instanceof CommandHandler) {
+            getCommandBus().unregister((CommandHandler)repository);
+        }
+
+        if (repository instanceof EventDispatcher) {
+            getEventBus().unregister((EventDispatcher) repository);
+        }
+
         repository.close();
     }
 

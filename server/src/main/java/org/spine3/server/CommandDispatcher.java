@@ -25,11 +25,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.type.CommandClass;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * {@code CommandDispatcher} delivers commands to handlers and returns results of the command processing.
@@ -59,32 +56,4 @@ public interface CommandDispatcher {
 
     //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 
-    /**
-     * Utility class for obtaining reference to {@link #dispatch(Message, CommandContext)} methods of implementations.
-     */
-    class DispatchMethod {
-
-        /**
-         * The name of the method used for dispatching commands.
-         *
-         * @see #dispatch(Message, CommandContext)
-         */
-        @SuppressWarnings("DuplicateStringLiteralInspection") // EventDispatcher has also such method.
-        private static final String DISPATCH_METHOD_NAME = "dispatch";
-
-        /**
-         * Obtains the reference to the {@link #dispatch(Message, CommandContext)} method of the implementation
-         * @param dispatcher the instance of the dispatcher
-         * @return {@code Method} instance
-         */
-        public static Method of(CommandDispatcher dispatcher) {
-            try {
-                return dispatcher.getClass().getMethod(DISPATCH_METHOD_NAME, Message.class, CommandContext.class);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-        }
-
-        private DispatchMethod() {}
-    }
 }
