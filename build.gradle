@@ -13,6 +13,7 @@ buildscript {
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'jacoco'
 
     group = 'org.spine3'
     version = '0.2'
