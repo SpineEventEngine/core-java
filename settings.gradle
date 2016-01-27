@@ -1,11 +1,10 @@
 rootProject.name = 'spine'
 
 include ':client'
-include ':server'
-include ':examples'
-include ':storage-filesystem'
-
 project(':client').projectDir = "$rootDir/client" as File
+
+include ':server'
 project(':server').projectDir = "$rootDir/server" as File
+
+include ':examples'
 project(':examples').projectDir = "$rootDir/examples" as File
-project(':storage-filesystem').projectDir = "$rootDir/storage-filesystem" as File
