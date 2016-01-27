@@ -13,6 +13,7 @@ buildscript {
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'jacoco'
 
     group = 'org.spine3'
     version = '0.2'
@@ -148,6 +149,15 @@ subprojects {
             }
         }
     }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled = true
+            html.enabled = true
+        }
+    }
+
+    check.dependsOn jacocoTestReport
 }
 
 task readPublishingCredentials << {
