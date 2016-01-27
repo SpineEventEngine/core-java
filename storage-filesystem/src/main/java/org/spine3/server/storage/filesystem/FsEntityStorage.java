@@ -78,8 +78,7 @@ class FsEntityStorage<I> extends EntityStorage<I> {
 
     @Override
     protected void writeInternal(I id, EntityStorageRecord record) {
-        final EntityStorageRecord.Id recordId = record.getId();
-        final String idString = idToStringWithEscaping(recordId);
+        final String idString = idToStringWithEscaping(id);
         final String filePath = createEntityFilePath(idString);
         deleteFileIfExists(Paths.get(filePath));
         final File file = tryCreateIfDoesNotExist(filePath);

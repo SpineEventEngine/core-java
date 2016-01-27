@@ -31,21 +31,18 @@ import public "google/protobuf/any.proto";
 
 // Used to store entities in the entity storage.
 message EntityStorageRecord {
-    // The entity identifier.
-    Id id = 1;
-
     // The timestamp of the last entity modification.
-    google.protobuf.Timestamp when_modified = 2;
+    google.protobuf.Timestamp when_modified = 1;
 
     // The version of the entity.
-    int32 version = 3;
+    int32 version = 2;
 
-    reserved 4 to 19;
+    reserved 3 to 19;
 
     // The state of the entity.
     google.protobuf.Any state = 20;
 
-    // Entity identifier.
+    // Entity record identifier.
     message Id {
         oneof type {
             // The string representation of the ID.
