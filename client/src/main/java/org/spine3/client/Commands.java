@@ -78,5 +78,13 @@ public class Commands {
         return request.build();
     }
 
+    /**
+     * Extracts the command from the passed {@code CommandRequest} instance.
+     */
+    public static Message getCommand(CommandRequest request) {
+        final Message command = Messages.fromAny(request.getCommand());
+        return command;
+    }
+
     private Commands() {}
 }

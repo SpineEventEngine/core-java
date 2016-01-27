@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
+import org.spine3.client.CommandRequest;
+import org.spine3.client.Commands;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.FailureThrowable;
@@ -109,7 +111,8 @@ public class ProcessManagerRepositoryShould {
     }
 
     private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
-        final List<EventRecord> records = repository.dispatch(command, COMMAND_CONTEXT);
+        final CommandRequest request = Commands.newCommandRequest(command, CommandContext.getDefaultInstance());
+        final List<EventRecord> records = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(command, manager.getState());
         return records;
@@ -129,7 +132,8 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        repository.dispatch(unknownCommand, COMMAND_CONTEXT);
+        final CommandRequest request = Commands.newCommandRequest(unknownCommand, CommandContext.getDefaultInstance());
+        repository.dispatch(request);
     }
 
     @Test(expected = MissingProcessManagerIdException.class)
