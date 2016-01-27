@@ -60,7 +60,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> StreamProjectionStorage<I> createStreamProjectionStorage(EntityStorage<I> entityStorage) {
+    public <I> StreamProjectionStorage<I> createStreamProjectionStorage() {
+        final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.<I>newInstance();
         return InMemoryStreamProjectionStorage.newInstance(entityStorage);
     }
 

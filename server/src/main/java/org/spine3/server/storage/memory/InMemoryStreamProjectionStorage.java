@@ -25,6 +25,8 @@ import org.spine3.server.EntityId;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StreamProjectionStorage;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The in-memory implementation of StreamProjectionStorage.
  *
@@ -33,23 +35,24 @@ import org.spine3.server.storage.StreamProjectionStorage;
  */
 public class InMemoryStreamProjectionStorage<I> extends StreamProjectionStorage<I> {
 
-    private final EntityStorage<I> entityStorage;
+    private final InMemoryEntityStorage<I> entityStorage;
 
     /**
      * The time of the last handled event.
      */
     private Timestamp timestamp;
 
-    public static <I> StreamProjectionStorage<I> newInstance(EntityStorage<I> entityStorage) {
+    public static <I> InMemoryStreamProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
         return new InMemoryStreamProjectionStorage<>(entityStorage);
     }
 
-    private InMemoryStreamProjectionStorage(EntityStorage<I> entityStorage) {
+    private InMemoryStreamProjectionStorage(InMemoryEntityStorage<I> entityStorage) {
         this.entityStorage = entityStorage;
     }
 
     @Override
     public void writeLastHandledEventTime(Timestamp timestamp) {
+        checkNotNull(timestamp);
         this.timestamp = timestamp;
     }
 
@@ -61,5 +64,20 @@ public class InMemoryStreamProjectionStorage<I> extends StreamProjectionStorage<
     @Override
     protected EntityStorage<I> getEntityStorage() {
         return entityStorage;
+    }
+
+    /**
+     * Clears all data in the storage.
+     */
+    protected void clear() {
+        timestamp = null;
+        entityStorage.clear();
+    }
+
+    @Override
+    public void close() throws Exception {
+        clear();
+        entityStorage.close();
+        super.close();
     }
 }

@@ -47,6 +47,7 @@ public interface StorageFactory extends AutoCloseable {
      * Creates a new {@link AggregateStorage} instance.
      *
      * @param <I> the type of aggregate IDs
+     * @param aggregateClass the class of aggregates to store
      * @see EntityId
      */
     <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> aggregateClass);
@@ -55,6 +56,7 @@ public interface StorageFactory extends AutoCloseable {
      * Creates a new {@link EntityStorage} instance.
      *
      * @param <I> the type of entity IDs
+     * @param entityClass the class of entities to store
      * @see EntityId
      */
     <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
@@ -65,5 +67,5 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I> the type of stream projection IDs
      * @see EntityId
      */
-    <I> StreamProjectionStorage<I> createStreamProjectionStorage(EntityStorage<I> entityStorage);
+    <I> StreamProjectionStorage<I> createStreamProjectionStorage();
 }

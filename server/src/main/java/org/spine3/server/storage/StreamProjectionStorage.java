@@ -39,6 +39,8 @@ public abstract class StreamProjectionStorage<I> extends AbstractStorage<I, Enti
     @Nullable
     @Override
     public EntityStorageRecord read(I id) {
+        checkNotClosed();
+
         final EntityStorage<I> storage = getEntityStorage();
         final EntityStorageRecord record = storage.read(id);
         return record;
@@ -46,6 +48,8 @@ public abstract class StreamProjectionStorage<I> extends AbstractStorage<I, Enti
 
     @Override
     public void write(I id, EntityStorageRecord record) {
+        checkNotClosed();
+
         final EntityStorage<I> storage = getEntityStorage();
         storage.write(id, record);
     }

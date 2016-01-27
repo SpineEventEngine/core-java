@@ -21,30 +21,43 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.util.Identifiers;
+import org.spine3.protobuf.Durations;
 
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.spine3.server.util.Identifiers.newUuid;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class EntityStorageShould {
+public abstract class StreamProjectionStorageShould {
 
-    private EntityStorage<String> storage;
+    private StreamProjectionStorage<String> storage;
 
     @Before
     public void setUpTest() {
         storage = getStorage();
     }
 
-    protected abstract EntityStorage<String> getStorage();
+    protected abstract StreamProjectionStorage<String> getStorage();
 
     @Test
     public void return_null_if_read_one_record_from_empty_storage() {
-        final Message message = storage.read("nothing");
+        final Message message = storage.read(newUuid());
         assertNull(message);
+    }
+
+    @Test
+    public void return_null_if_read_event_time_from_empty_storage() {
+        final Timestamp time = storage.readLastHandledEventTime();
+        assertNull(time);
     }
 
     @Test(expected = NullPointerException.class)
@@ -54,14 +67,25 @@ public abstract class EntityStorageShould {
     }
 
     @SuppressWarnings("ConstantConditions")
+     @Test(expected = NullPointerException.class)
+     public void throw_exception_if_write_null_record() {
+        storage.write(newUuid(), null);
+    }
+
+    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        storage.write(Identifiers.newUuid(), null);
+    public void throw_exception_if_write_null_event_time() {
+        storage.writeLastHandledEventTime(null);
     }
 
     @Test
     public void write_and_read_message() {
-        testWriteAndReadMessage("testId");
+        testWriteAndReadMessage(newUuid());
+    }
+
+    @Test
+    public void write_and_read_last_event_time() {
+        testWriteAndReadLastEventTime(getCurrentTime());
     }
 
     @Test
@@ -72,8 +96,16 @@ public abstract class EntityStorageShould {
     }
 
     @Test
+    public void write_and_read_last_event_time_several_times() {
+        final Timestamp time1 = getCurrentTime();
+        final Timestamp time2 = add(time1, Durations.ofSeconds(10));
+        testWriteAndReadLastEventTime(time1);
+        testWriteAndReadLastEventTime(time2);
+    }
+
+    @Test
     public void rewrite_message_if_write_with_same_id() {
-        final String id = "test-id-rewrite";
+        final String id = "testIdRewrite";
         testWriteAndReadMessage(id);
         testWriteAndReadMessage(id);
     }
@@ -86,4 +118,13 @@ public abstract class EntityStorageShould {
 
         assertEquals(expected, actual);
     }
+
+    private void testWriteAndReadLastEventTime(Timestamp expected) {
+        storage.writeLastHandledEventTime(expected);
+
+        final Timestamp actual = storage.readLastHandledEventTime();
+
+        assertEquals(expected, actual);
+    }
 }
+

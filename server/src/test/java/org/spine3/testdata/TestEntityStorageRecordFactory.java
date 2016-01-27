@@ -18,28 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.testdata;
 
-import org.junit.After;
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageShould;
+import com.google.protobuf.StringValue;
+import org.spine3.server.storage.EntityStorageRecord;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.util.Identifiers.newUuid;
 
 /**
- * In-memory implementation of {@link EntityStorage} tests.
+ * Creates {@link EntityStorageRecord}s for tests.
  *
  * @author Alexander Litus
  */
-public class InMemoryEntityStorageShould extends EntityStorageShould {
+public class TestEntityStorageRecordFactory {
 
-    private final InMemoryEntityStorage<String> storage = InMemoryEntityStorage.newInstance();
-
-    @Override
-    protected EntityStorage<String> getStorage() {
-        return storage;
+    private TestEntityStorageRecordFactory() {
     }
 
-    @After
-    public void tearDownTest() {
-        storage.clear();
+    /**
+     * Creates a new record with all fields set.
+     */
+    public static EntityStorageRecord newEntityStorageRecord() {
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setState(toAny(newStringValue(newUuid())))
+                .setWhenModified(getCurrentTime())
+                .setVersion(5); // set any non-default (non-zero) value
+        return builder.build();
+    }
+
+    private static StringValue newStringValue(String value) {
+        return StringValue.newBuilder().setValue(value).build();
     }
 }

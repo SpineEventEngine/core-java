@@ -26,7 +26,6 @@ import org.spine3.base.EventContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StreamProjectionStorage;
 import org.spine3.server.util.Identifiers;
@@ -48,9 +47,9 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     }
 
     @Override
+    @SuppressWarnings("RefusedBequest")
     protected AutoCloseable createStorage(StorageFactory factory) {
-        final EntityStorage entityStorage = (EntityStorage) super.createStorage(factory);
-        return factory.createStreamProjectionStorage(entityStorage);
+        return factory.createStreamProjectionStorage();
     }
 
     /**
