@@ -248,13 +248,11 @@ public class EventBus implements AutoCloseable {
         invokeHandlers(event, context);
     }
 
-    private void callDispatchers(EventRecord record) {
-        final Message event = EventRecords.getEvent(record);
-        final EventContext context = record.getContext();
-        final EventClass eventClass = EventRecords.getEventClass(record);
+    private void callDispatchers(EventRecord event) {
+        final EventClass eventClass = EventRecords.getEventClass(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
-            dispatcher.dispatch(event, context);
+            dispatcher.dispatch(event);
         }
     }
 

@@ -35,6 +35,7 @@ import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.util.EventRecords;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -63,8 +64,6 @@ import static org.spine3.testdata.TestEventFactory.*;
 public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = createProjectId("project78");
-    private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
-    private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
     private final TestProcessManagerRepository repository = new TestProcessManagerRepository(
             BoundedContextTestStubs.create());
@@ -92,10 +91,12 @@ public class ProcessManagerRepositoryShould {
         testDispatchEvent(projectStartedEvent(ID));
     }
 
-    private void testDispatchEvent(Message event) throws InvocationTargetException {
-        repository.dispatch(event, EVENT_CONTEXT);
+    private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
+        final EventRecord event = EventRecords.createEventRecord(eventMessage,
+                    EventContext.getDefaultInstance());
+        repository.dispatch(event);
         final TestProcessManager manager = repository.load(ID);
-        assertEquals(event, manager.getState());
+        assertEquals(eventMessage, manager.getState());
     }
 
     @Test
@@ -138,8 +139,10 @@ public class ProcessManagerRepositoryShould {
 
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
-        final StringValue unknownEvent = StringValue.getDefaultInstance();
-        repository.dispatch(unknownEvent, EVENT_CONTEXT);
+        final StringValue unknownEventMessage = StringValue.getDefaultInstance();
+        final EventRecord event = EventRecords.createEventRecord(unknownEventMessage,
+                    EventContext.getDefaultInstance());
+        repository.dispatch(event);
     }
 
     @Test

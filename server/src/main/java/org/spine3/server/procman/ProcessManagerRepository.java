@@ -31,6 +31,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.util.EventRecords;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -151,16 +152,17 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @param context the context of the event
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      * @see #getId(Message, EventContext)
      */
     @Override
-    public void dispatch(Message event, EventContext context) {
-        final I id = getId(event, context);
+    public void dispatch(EventRecord event) {
+        final Message eventMessage = EventRecords.getEvent(event);
+        final EventContext context = event.getContext();
+        final I id = getId(eventMessage, context);
         final PM manager = load(id);
         try {
-            manager.dispatchEvent(event, context);
+            manager.dispatchEvent(eventMessage, context);
             store(manager);
         } catch (InvocationTargetException e) {
             log().error("Error during dispatching event", e);
