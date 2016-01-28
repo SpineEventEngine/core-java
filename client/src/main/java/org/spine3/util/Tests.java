@@ -46,10 +46,10 @@ public class Tests {
      * and inclusion of the lines of code of this constructor into coverage report.
      *
      * @param utilityClass a utility class to verify
-     * @throws java.lang.IllegalStateException if the constructor of the passed class isn't private
+     * @throws IllegalStateException if the constructor of the passed class isn't private
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
-     * @throws java.lang.reflect.InvocationTargetException
+     * @throws InvocationTargetException
      * @throws InstantiationException
      */
     @VisibleForTesting

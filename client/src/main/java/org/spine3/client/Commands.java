@@ -49,7 +49,6 @@ public class Commands {
         return CommandId.newBuilder().setUuid(value).build();
     }
 
-    //TODO:2016-01-28:alexander.yevsyukov: Have CommandFactory, which is initialized with userId and zoneOffset
     /**
      * Creates new command context with the current time
      * @param userId the actor id
