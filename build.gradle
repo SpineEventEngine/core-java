@@ -6,7 +6,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.0'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.7.4'
     }
 }
 
@@ -21,7 +21,7 @@ allprojects {
 
 project.ext {
     // NOTE: if update Protobuf, consider updating TypeToClassMap.buildProtobufNamesMap() method.
-    PROTOBUF_VERSION = '3.0.0-beta-1';
+    PROTOBUF_VERSION = '3.0.0-beta-2';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
 }
