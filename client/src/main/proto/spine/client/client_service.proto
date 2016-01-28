@@ -28,9 +28,9 @@ option java_multiple_files = true;
 option java_outer_classname = "ClientServiceProto";
 option java_generate_equals_and_hash = true;
 
+import "spine/base/command.proto";
+import "spine/base/event.proto";
 import "spine/base/response.proto";
-import "spine/client/client.proto";
-import "spine/client/command_request.proto";
 
 // A topic of interest the client can subscribe and unsubscribe.
 message Topic {
@@ -43,7 +43,7 @@ message Topic {
 // A service for sending commands from clients.
 service ClientService {
     // Request to handle a command.
-    rpc Post(CommandRequest) returns (spine.base.Response);
+    rpc Post(spine.base.Command) returns (spine.base.Response);
 
     // Request to receive events on the topic of interest.
     rpc Subscribe(Topic) returns (stream spine.base.EventRecord);

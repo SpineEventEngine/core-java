@@ -26,11 +26,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.*;
 import org.spine3.client.Commands;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
@@ -121,11 +117,21 @@ public class CommandBus implements AutoCloseable {
      * <p>The command can be posted if it has either dispatcher or handler registered with
      * the command bus.
      *
-     * @param command the command instance to check
+     * <p>The method intended to be used with the instances of command messages extracted from {@link Command}.
+     *
+     * <p>If {@code Command} instance is passed, its message is extracted and validated.
+     *
+     * @param command the command message to check
      * @return the result of {@link Responses#ok()} if the command is supported,
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
+        if (command instanceof Command) {
+            final Command outerCommand = (Command) command;
+            //noinspection AssignmentToMethodParameter
+            command = Commands.getMessage(outerCommand); // Assign to the param to avoid recursive call or interim var.
+        }
+
         if (dispatcherRegistry.hasDispatcherFor(command)) {
             return Responses.ok();
         }
@@ -149,7 +155,7 @@ public class CommandBus implements AutoCloseable {
      * @throws UnsupportedCommandException if there is no handler or dispatcher registered for
      *  the class of the passed command
      */
-    public List<EventRecord> post(CommandRequest request) {
+    public List<EventRecord> post(Command request) {
 
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
 
@@ -165,16 +171,16 @@ public class CommandBus implements AutoCloseable {
         }
 
         if (handlerRegistered(commandClass)) {
-            final Message command = Commands.getCommand(request);
+            final Message command = Commands.getMessage(request);
             final CommandContext context = request.getContext();
             return invokeHandler(command, context);
         }
 
         //TODO:2016-01-24:alexander.yevsyukov: Unify exceptions with messages sent in Response.
-        throw new UnsupportedCommandException(Commands.getCommand(request));
+        throw new UnsupportedCommandException(Commands.getMessage(request));
     }
 
-    private List<EventRecord> dispatch(CommandRequest request) {
+    private List<EventRecord> dispatch(Command request) {
         final CommandClass commandClass = CommandClass.of(request);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         List<EventRecord> result = Collections.emptyList();
@@ -201,7 +207,7 @@ public class CommandBus implements AutoCloseable {
         return result;
     }
 
-    private void store(CommandRequest request) {
+    private void store(Command request) {
         commandStore.store(request);
     }
 

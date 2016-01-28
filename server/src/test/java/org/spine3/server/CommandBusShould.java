@@ -25,10 +25,10 @@ import com.google.common.base.Predicates;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Responses;
-import org.spine3.client.CommandRequest;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -84,7 +84,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+        public List<EventRecord> dispatch(Command request) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -126,7 +126,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+        public List<EventRecord> dispatch(Command request) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -144,7 +144,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+            public List<EventRecord> dispatch(Command request) throws Exception {
                 //noinspection ReturnOfNull
                 return null;
             }
@@ -168,7 +168,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+            public List<EventRecord> dispatch(Command request) throws Exception {
                 //noinspection ReturnOfNull
                 return null;
             }
@@ -242,7 +242,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+        public List<EventRecord> dispatch(Command request) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }
@@ -276,7 +276,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<EventRecord> dispatch(CommandRequest request) throws Exception {
+        public List<EventRecord> dispatch(Command request) throws Exception {
             //noinspection ReturnOfNull
             return null;
         }

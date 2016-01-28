@@ -22,7 +22,7 @@ package org.spine3.server.util;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.Command;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertFalse;
 import static org.spine3.testdata.TestCommandFactory.createProject;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class CommandRequestsShould {
+public class CommandUtilShould {
 
     @Test
     public void sort() {
@@ -44,23 +44,23 @@ public class CommandRequestsShould {
         final Timestamp thirtySecondsAgo = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(-30));
         final Timestamp fiveSecondsAgo = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(-5));
 
-        final CommandRequest commandRequest1 = createProject(minuteAgo);
-        final CommandRequest commandRequest2 = createProject(thirtySecondsAgo);
-        final CommandRequest commandRequest3 = createProject(fiveSecondsAgo);
+        final Command commandRequest1 = createProject(minuteAgo);
+        final Command commandRequest2 = createProject(thirtySecondsAgo);
+        final Command commandRequest3 = createProject(fiveSecondsAgo);
 
-        final Collection<CommandRequest> sortedList = new ArrayList<>();
+        final Collection<Command> sortedList = new ArrayList<>();
         sortedList.add(commandRequest1);
         sortedList.add(commandRequest2);
         sortedList.add(commandRequest3);
 
-        final List<CommandRequest> unSortedList = new ArrayList<>();
+        final List<Command> unSortedList = new ArrayList<>();
         unSortedList.add(commandRequest3);
         unSortedList.add(commandRequest1);
         unSortedList.add(commandRequest2);
 
         assertFalse(sortedList.equals(unSortedList));
 
-        CommandRequests.sort(unSortedList);
+        CommandUtil.sort(unSortedList);
 
         assertEquals(sortedList, unSortedList);
     }

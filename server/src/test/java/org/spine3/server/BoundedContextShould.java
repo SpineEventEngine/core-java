@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
-import org.spine3.client.CommandRequest;
 import org.spine3.client.UserUtil;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -117,26 +116,26 @@ public class BoundedContextShould {
 
     //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
 
-    private List<CommandResult> processRequests(Iterable<CommandRequest> requests) {
+    private List<CommandResult> processRequests(Iterable<Command> requests) {
 
         final List<CommandResult> results = newLinkedList();
-        for (CommandRequest request : requests) {
+        for (Command request : requests) {
             final CommandResult result = boundedContext.process(request);
             results.add(result);
         }
         return results;
     }
 
-    private List<CommandRequest> generateRequests() {
+    private List<Command> generateRequests() {
 
         final Duration delta = seconds(10);
         final Timestamp time1 = getCurrentTime();
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        final CommandRequest createProject = createProject(userId, projectId, time1);
-        final CommandRequest addTask = addTask(userId, projectId, time2);
-        final CommandRequest startProject = startProject(userId, projectId, time3);
+        final Command createProject = createProject(userId, projectId, time1);
+        final Command addTask = addTask(userId, projectId, time2);
+        final Command startProject = startProject(userId, projectId, time3);
 
         return newArrayList(createProject, addTask, startProject);
     }
@@ -152,7 +151,7 @@ public class BoundedContextShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_NPE_on_null_CommandRequest() {
+    public void throw_NPE_on_null_Command() {
         // noinspection ConstantConditions
         boundedContext.process(null);
     }
@@ -184,14 +183,14 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void post_CommandRequest() {
+    public void post_Command() {
         registerAll();
-        final CommandRequest request = createProject(userId, projectId, getCurrentTime());
+        final Command request = createProject(userId, projectId, getCurrentTime());
 
         boundedContext.post(request);
     }
 
-    private void assertCommandResultsAreValid(List<CommandRequest> requests, List<CommandResult> results) {
+    private void assertCommandResultsAreValid(List<Command> requests, List<CommandResult> results) {
         assertEquals(requests.size(), results.size());
 
         for (int i = 0; i < requests.size(); i++) {
@@ -199,7 +198,7 @@ public class BoundedContextShould {
         }
     }
 
-    private void assertRequestAndResultMatch(CommandRequest request, CommandResult result) {
+    private void assertRequestAndResultMatch(Command request, CommandResult result) {
         final Timestamp expectedTime = request.getContext().getTimestamp();
 
         final List<EventRecord> records = result.getEventRecordList();
@@ -246,9 +245,9 @@ public class BoundedContextShould {
 
         final ResponseObserver observer = new ResponseObserver();
 
-        final CommandRequest request = CommandRequest.newBuilder()
+        final Command request = Command.newBuilder()
                 // Pass empty command so that we have something valid to unpack in the context.
-                .setCommand(Any.pack(StringValue.getDefaultInstance()))
+                .setMessage(Any.pack(StringValue.getDefaultInstance()))
                 .build();
         bc.post(request, observer);
 

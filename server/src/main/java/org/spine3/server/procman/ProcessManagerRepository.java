@@ -23,10 +23,10 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
-import org.spine3.client.CommandRequest;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.Commands.getCommand;
+import static org.spine3.client.Commands.getMessage;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -135,8 +135,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #getId(Message, CommandContext)
      */
     @Override
-    public List<EventRecord> dispatch(CommandRequest request) throws InvocationTargetException {
-        final Message command = getCommand(checkNotNull(request));
+    public List<EventRecord> dispatch(Command request) throws InvocationTargetException {
+        final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
         final I id = getId(command, context);
         final PM manager = load(id);

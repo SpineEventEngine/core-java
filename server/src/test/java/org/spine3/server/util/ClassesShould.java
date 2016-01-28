@@ -18,35 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.util;
 
-import org.spine3.base.Command;
-import org.spine3.base.EventRecord;
-import org.spine3.type.CommandClass;
+import org.junit.Test;
+import org.spine3.util.Tests;
 
-import java.util.List;
-import java.util.Set;
-
-/**
- * {@code CommandDispatcher} delivers commands to handlers and returns results of the command processing.
- *
- * @author Alexander Yevsyukov
- */
-public interface CommandDispatcher {
-
-    /**
-     * Returns the set of command classes this dispatcher can dispatch.
-     *
-     * @return non-empty set of command classes
-     */
-    Set<CommandClass> getCommandClasses();
-
-    /**
-     * Dispatches the command request for processing.
-     */
-    List<EventRecord> dispatch(Command request) throws Exception;
-    //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
-
-    //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
-
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ClassesShould {
+    @Test
+    public void have_private_ctor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Classes.class);
+    }
 }

@@ -25,10 +25,10 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Command;
 import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.UserId;
-import org.spine3.client.CommandRequest;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
@@ -103,10 +103,10 @@ public class Client {
         final Client client = new Client();
         client.subscribe();
 
-        final List<CommandRequest> requests = generateRequests();
+        final List<Command> requests = generateRequests();
         try {
-            for (CommandRequest request : requests) {
-                log().info("Sending a request: " + request.getCommand().getTypeUrl() + "...");
+            for (Command request : requests) {
+                log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
                 final Response result = client.post(request);
                 log().info("Result: " + toText(result));
             }
@@ -119,18 +119,18 @@ public class Client {
     /**
      * Creates several test requests.
      */
-    public static List<CommandRequest> generateRequests() {
-        final List<CommandRequest> result = newArrayList();
+    public static List<Command> generateRequests() {
+        final List<Command> result = newArrayList();
 
         for (int i = 0; i < 10; i++) {
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
             final UserId userId = newUserId("user_" + i);
 
-            final CommandRequest createOrder = createOrder(userId, orderId);
+            final Command createOrder = createOrder(userId, orderId);
             result.add(createOrder);
-            final CommandRequest addOrderLine = addOrderLine(userId, orderId);
+            final Command addOrderLine = addOrderLine(userId, orderId);
             result.add(addOrderLine);
-            final CommandRequest payForOrder = payForOrder(userId, orderId);
+            final Command payForOrder = payForOrder(userId, orderId);
             result.add(payForOrder);
         }
         return result;
@@ -148,7 +148,7 @@ public class Client {
     /**
      * Sends a request to the server.
      */
-    private Response post(CommandRequest request) {
+    private Response post(Command request) {
         Response result = null;
         try {
             result = blockingClient.post(request);

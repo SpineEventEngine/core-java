@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.spine3.Internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +34,7 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public class Tests {
 
     private static final long MSEC_IN_SECOND = 1000L;
