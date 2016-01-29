@@ -130,8 +130,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed command.
      *
-     *
-     * @param request@see ProcessManager#dispatchCommand(Message, CommandContext)
+     * @param request a request to dispatch
+     * @see ProcessManager#dispatchCommand(Message, CommandContext)
      * @see #getId(Message, CommandContext)
      */
     @Override
