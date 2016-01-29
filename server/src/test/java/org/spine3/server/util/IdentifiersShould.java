@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.server.Identifiers;
 import org.spine3.test.*;
 import org.spine3.test.project.ProjectId;
 
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.util.Identifiers.*;
+import static org.spine3.server.Identifiers.*;
 
 /**
  * @author Alexander Litus

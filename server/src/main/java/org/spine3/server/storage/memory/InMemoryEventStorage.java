@@ -26,9 +26,9 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.server.stream.EventStreamQuery;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;

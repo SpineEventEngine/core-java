@@ -29,6 +29,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
+import org.spine3.server.command.CommandStore;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -45,7 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.spine3.server.CommandValidation.isUnsupportedCommand;
+import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommandFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

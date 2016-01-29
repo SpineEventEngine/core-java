@@ -20,16 +20,24 @@
 
 package org.spine3.client;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
 import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -87,4 +95,47 @@ public class Commands {
     }
 
     private Commands() {}
+
+    public static Predicate<Command> wereAfter(final Timestamp from) {
+        return new Predicate<Command>() {
+            @Override
+            public boolean apply(@Nullable Command request) {
+                checkNotNull(request);
+                final Timestamp timestamp = getTimestamp(request);
+                return Timestamps.isAfter(timestamp, from);
+            }
+        };
+    }
+
+    public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+        return new Predicate<Command>() {
+            @Override
+            public boolean apply(@Nullable Command request) {
+                checkNotNull(request);
+                final Timestamp timestamp = getTimestamp(request);
+                return Timestamps.isBetween(timestamp, from, to);
+            }
+        };
+    }
+
+    private static Timestamp getTimestamp(Command request) {
+        final Timestamp result = request.getContext().getTimestamp();
+        return result;
+    }
+
+    /**
+     * Sorts the command given command request list by command timestamp value.
+     *
+     * @param commands the command list to sort
+     */
+    public static void sort(List<Command> commands) {
+        Collections.sort(commands, new Comparator<Command>() {
+            @Override
+            public int compare(Command o1, Command o2) {
+                final Timestamp timestamp1 = getTimestamp(o1);
+                final Timestamp timestamp2 = getTimestamp(o2);
+                return Timestamps.compare(timestamp1, timestamp2);
+            }
+        });
+    }
 }

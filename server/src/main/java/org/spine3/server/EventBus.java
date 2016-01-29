@@ -32,9 +32,9 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.event.EventStore;
+import org.spine3.server.event.Events;
 import org.spine3.server.procman.ProcessManager;
-import org.spine3.server.stream.EventStore;
-import org.spine3.server.util.Events;
 import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;

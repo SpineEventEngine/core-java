@@ -23,7 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.server.util.Identifiers;
+import org.spine3.server.Identifiers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

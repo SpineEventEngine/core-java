@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.spine3.client.Commands;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileNameEscaper;
+import org.spine3.server.Identifiers;
+import org.spine3.server.event.Events;
 import org.spine3.testdata.*;
 import org.spine3.util.Math;
 import org.spine3.util.Tests;

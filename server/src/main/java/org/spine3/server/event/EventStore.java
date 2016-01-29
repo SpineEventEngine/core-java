@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.stream;
+package org.spine3.server.event;
 
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.server.event.grpc.EventStoreGrpc;
 import org.spine3.server.storage.EventStorage;
-import org.spine3.server.stream.grpc.EventStoreGrpc;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

@@ -25,8 +25,8 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.server.Identifiers;
 import org.spine3.server.aggregate.Snapshot;
-import org.spine3.server.util.Identifiers;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nonnull;

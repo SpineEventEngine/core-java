@@ -20,24 +20,32 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.server.Identifiers;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.server.util.CommandIdentifiers;
+import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A storage used by {@link org.spine3.server.CommandStore} for keeping command data.
+ * A storage used by {@link CommandStore} for keeping command data.
  *
  * @author Alexander Yevsyukov
  */
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
+
+    static {
+        Identifiers.IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
+    }
 
     public void store(AggregateId aggregateId, Command command) {
         checkNotNull(aggregateId, "aggregateId");
@@ -47,7 +55,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final CommandContext context = command.getContext();
         final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = CommandIdentifiers.idToString(commandId);
+        final String commandIdStr = Identifiers.idToString(commandId);
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
@@ -60,4 +68,14 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         write(commandId, builder.build());
     }
 
+    /* package */ static class CommandIdToStringConverter implements Function<CommandId, String> {
+        @Override
+        public String apply(@Nullable CommandId commandId) {
+            if (commandId == null) {
+                return Identifiers.NULL_ID_OR_FIELD;
+            }
+
+            return commandId.getUuid();
+        }
+    }
 }

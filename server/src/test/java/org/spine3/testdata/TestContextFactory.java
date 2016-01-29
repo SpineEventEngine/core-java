@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
 import org.spine3.client.Commands;
-import org.spine3.server.util.Events;
+import org.spine3.server.event.Events;
 import org.spine3.time.ZoneOffset;
 
 import static org.spine3.protobuf.Messages.toAny;

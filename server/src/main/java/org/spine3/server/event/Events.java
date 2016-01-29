@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.util;
+package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -29,7 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.stream.EventFilter;
+import org.spine3.server.Identifiers;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 

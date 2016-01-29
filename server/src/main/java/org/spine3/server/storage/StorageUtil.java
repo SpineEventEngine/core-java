@@ -29,7 +29,7 @@ import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.server.util.Events;
+import org.spine3.server.event.Events;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;

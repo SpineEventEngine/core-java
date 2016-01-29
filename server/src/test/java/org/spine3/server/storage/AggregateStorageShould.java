@@ -40,7 +40,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.server.util.Identifiers.newUuid;
+import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;

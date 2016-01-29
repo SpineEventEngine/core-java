@@ -23,7 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.server.EntityId;
-import org.spine3.server.stream.StreamProjection;
+import org.spine3.server.event.StreamProjection;
 
 import javax.annotation.Nullable;
 

@@ -25,7 +25,7 @@ import org.spine3.protobuf.MessageField;
 import org.spine3.server.EntityId;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 
-import static org.spine3.server.util.Identifiers.ID_PROPERTY_SUFFIX;
+import static org.spine3.server.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * A value object for process manager IDs.

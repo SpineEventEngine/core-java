@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.server.stream.grpc.EventStoreGrpc;
-import org.spine3.server.util.Events;
+import org.spine3.server.event.Events;
+import org.spine3.server.event.grpc.EventStoreGrpc;
 
 import java.util.concurrent.TimeUnit;
 

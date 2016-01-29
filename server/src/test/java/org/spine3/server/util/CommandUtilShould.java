@@ -23,6 +23,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.client.Commands;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 
@@ -60,7 +61,7 @@ public class CommandUtilShould {
 
         assertFalse(sortedList.equals(unSortedList));
 
-        CommandUtil.sort(unSortedList);
+        Commands.sort(unSortedList);
 
         assertEquals(sortedList, unSortedList);
     }

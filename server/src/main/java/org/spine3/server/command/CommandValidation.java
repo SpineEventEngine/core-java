@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
@@ -27,7 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
-import org.spine3.server.util.Identifiers;
+import org.spine3.server.Identifiers;
 
 import java.util.Map;
 
@@ -79,7 +79,8 @@ public class CommandValidation {
      */
     public static Response unknownNamespace(Message command, CommandContext context) {
         final String commandType = command.getDescriptorForType().getFullName();
-        final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType, Identifiers.idToString(context.getCommandId()));
+        final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType,
+                Identifiers.idToString(context.getCommandId()));
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
                     .setType(CommandValidationError.getDescriptor().getFullName())

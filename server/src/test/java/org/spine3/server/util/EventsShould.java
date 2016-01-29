@@ -21,6 +21,7 @@ package org.spine3.server.util;
 
 import org.junit.Test;
 import org.spine3.base.EventId;
+import org.spine3.server.event.Events;
 
 import static org.junit.Assert.assertFalse;
 

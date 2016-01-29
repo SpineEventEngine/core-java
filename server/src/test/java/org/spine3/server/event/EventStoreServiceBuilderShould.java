@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.stream;
+package org.spine3.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;

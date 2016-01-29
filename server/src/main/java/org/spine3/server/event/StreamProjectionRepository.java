@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.stream;
+package org.spine3.server.event;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -27,10 +27,9 @@ import org.spine3.base.EventContext;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.Identifiers;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StreamProjectionStorage;
-import org.spine3.server.util.Events;
-import org.spine3.server.util.Identifiers;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;

@@ -35,9 +35,9 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.event.Events;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.util.Classes;
-import org.spine3.server.util.Events;
 import org.spine3.server.util.MethodMap;
 
 import javax.annotation.CheckReturnValue;
@@ -51,10 +51,10 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.filter;
+import static org.spine3.server.Identifiers.idToAny;
 import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
-import static org.spine3.server.util.Identifiers.idToAny;
 
 /**
  * Abstract base for aggregates.

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.util;
+package org.spine3.server;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -38,12 +38,17 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
 
-/*
- * Utility class for working with IDs.
+/**
+ * This class manages conversion of identifies to/from string.
+ *
+ * <p>In addition to utility methods for the conversion, it provides {@link IdConverterRegistry}
+ * which allows to provide custom conversion logic for user-defined types of identifies.
  *
  * @author Alexander Litus
  */
 public class Identifiers {
+
+    private Identifiers() {}
 
     /*
      * Null message or field string representation
@@ -121,7 +126,7 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "IfMayBeConditional"})
+    @SuppressWarnings("IfMayBeConditional")
     private static String convert(Message message) {
 
         final String result;
@@ -310,7 +315,4 @@ public class Identifiers {
             return result;
         }
     }
-
-    //@formatter:off
-    private Identifiers() {}
 }

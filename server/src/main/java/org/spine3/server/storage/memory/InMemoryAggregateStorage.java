@@ -31,7 +31,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.util.Identifiers.idToString;
+import static org.spine3.server.Identifiers.idToString;
 
 /**
  * In-memory storage for aggregate root events and snapshots.

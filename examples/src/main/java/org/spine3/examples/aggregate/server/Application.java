@@ -29,19 +29,19 @@ import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandBus;
-import org.spine3.server.CommandStore;
 import org.spine3.server.EventBus;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.stream.EventStore;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.server.util.Identifiers.IdConverterRegistry;
-import static org.spine3.server.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.server.Identifiers.IdConverterRegistry;
+import static org.spine3.server.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * A sample application showing basic usage of the framework.

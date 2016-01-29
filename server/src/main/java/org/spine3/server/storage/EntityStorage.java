@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.util.Identifiers.idToString;
+import static org.spine3.server.Identifiers.idToString;
 
 /**
  * An entity storage keeps messages with identity.

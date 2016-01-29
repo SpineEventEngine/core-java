@@ -30,7 +30,7 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.spine3.server.util.Identifiers.newUuid;
+import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**

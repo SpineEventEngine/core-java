@@ -31,7 +31,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
-import org.spine3.server.util.Events;
+import org.spine3.server.event.Events;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
