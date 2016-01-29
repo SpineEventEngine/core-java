@@ -60,6 +60,7 @@ public class Timestamps {
      * The count of minutes in one hour.
      */
     public static final int MINUTES_PER_HOUR = 60;
+    public static final int HOURS_PER_DAY = 24;
 
     /**
      * The duration of one minute.

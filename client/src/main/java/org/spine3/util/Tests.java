@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.spine3.Internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +34,7 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public class Tests {
 
     private static final long MSEC_IN_SECOND = 1000L;
@@ -44,10 +46,10 @@ public class Tests {
      * and inclusion of the lines of code of this constructor into coverage report.
      *
      * @param utilityClass a utility class to verify
-     * @throws java.lang.IllegalStateException if the constructor of the passed class isn't private
+     * @throws IllegalStateException if the constructor of the passed class isn't private
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
-     * @throws java.lang.reflect.InvocationTargetException
+     * @throws InvocationTargetException
      * @throws InstantiationException
      */
     @VisibleForTesting

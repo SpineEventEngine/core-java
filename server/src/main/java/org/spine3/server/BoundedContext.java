@@ -25,11 +25,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.*;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
@@ -215,7 +211,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         repository.close();
     }
 
-    public CommandResult process(CommandRequest request) {
+    public CommandResult process(Command request) {
         checkNotNull(request);
 
         //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
@@ -236,24 +232,24 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return result;
     }
 
-    public void post(CommandRequest request)  {
+    public void post(Command request)  {
         commandBus.post(request);
     }
 
     @Override
-    public void post(CommandRequest request, StreamObserver<Response> responseObserver) {
-        final Message command = Messages.fromAny(request.getCommand());
+    public void post(Command request, StreamObserver<Response> responseObserver) {
+        final Message message = Messages.fromAny(request.getMessage());
         final CommandContext commandContext = request.getContext();
 
         Response reply = null;
 
         // Ensure `namespace` is defined in a multitenant app.
         if (isMultitenant() && !commandContext.hasNamespace()) {
-            reply = CommandValidation.unknownNamespace(command, request.getContext());
+            reply = CommandValidation.unknownNamespace(message, request.getContext());
         }
 
         if (reply == null) {
-            reply = validate(command);
+            reply = validate(message);
         }
 
         responseObserver.onNext(reply);
@@ -265,19 +261,19 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     }
 
     /**
-     * Validates the incoming command.
+     * Validates the incoming command message.
      *
-     * @param command the command to validate
+     * @param message the command message to validate
      * @return {@link Response} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    protected Response validate(Message command) {
+    protected Response validate(Message message) {
         final CommandBus dispatcher = getCommandBus();
-        final Response result = dispatcher.validate(command);
+        final Response result = dispatcher.validate(message);
         return result;
     }
 
-    private CommandResult dispatch(CommandRequest request) {
+    private CommandResult dispatch(Command request) {
         try {
             final List<EventRecord> eventRecords = this.commandBus.post(request);
 

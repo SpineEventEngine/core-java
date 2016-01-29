@@ -20,12 +20,10 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.Command;
+import org.spine3.client.Commands;
 import org.spine3.protobuf.MessageField;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
 
@@ -59,37 +57,30 @@ public final class AggregateId<I> extends EntityId<I> {
         return new AggregateId<>(value);
     }
 
-    public static AggregateId<? extends Message> of(EventContext value) {
-        final Message message = Messages.fromAny(value.getAggregateId());
-        final AggregateId<Message> result = new AggregateId<>(message);
-        return result;
-    }
-
     /**
-     * Obtains an aggregate id from the passed command instance.
-     * <p/>
+     * Obtains an aggregate id from the passed command message.
+     *
      * <p>The id value must be the first field of the proto message. Its name must end with "id".
      *
-     * @param command the command to get id from
+     * @param message the command message to get id from
      * @return value of the id
      */
-    public static AggregateId fromCommand(Message command) {
-        final Object value = FIELD.getValue(checkNotNull(command));
+    public static AggregateId fromCommandMessage(Message message) {
+        final Object value = FIELD.getValue(checkNotNull(message));
         return of(value);
     }
 
     /**
-     * Obtains an aggregate id from the passed command request.
-     * <p/>
+     * Obtains an aggregate id from the passed command.
+     *
      * <p>The id value must be the first field of the proto message. Its name must end with "id".
      *
-     * @param request the command request
+     * @param command the command request
      * @return value of the id
      */
-    public static AggregateId fromRequest(CommandRequest request) {
-        final Any any = request.getCommand();
-        final Message command = Messages.fromAny(any);
-        return fromCommand(command);
+    public static AggregateId fromCommand(Command command) {
+        final Message message = Commands.getMessage(command);
+        return fromCommandMessage(message);
     }
 
     /**

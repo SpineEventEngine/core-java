@@ -23,6 +23,7 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
@@ -30,6 +31,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.util.EventRecords;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -37,6 +39,9 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.Commands.getMessage;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -125,13 +130,14 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed command.
      *
-     * @param command the command to dispatch
-     * @param context the context of the command
+     * @param request a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
      * @see #getId(Message, CommandContext)
      */
     @Override
-    public List<EventRecord> dispatch(Message command, CommandContext context) throws InvocationTargetException {
+    public List<EventRecord> dispatch(Command request) throws InvocationTargetException {
+        final Message command = getMessage(checkNotNull(request));
+        final CommandContext context = request.getContext();
         final I id = getId(command, context);
         final PM manager = load(id);
         final List<EventRecord> events = manager.dispatchCommand(command, context);
@@ -146,16 +152,17 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @param context the context of the event
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      * @see #getId(Message, EventContext)
      */
     @Override
-    public void dispatch(Message event, EventContext context) {
-        final I id = getId(event, context);
+    public void dispatch(EventRecord event) {
+        final Message eventMessage = EventRecords.getEvent(event);
+        final EventContext context = event.getContext();
+        final I id = getId(eventMessage, context);
         final PM manager = load(id);
         try {
-            manager.dispatchEvent(event, context);
+            manager.dispatchEvent(eventMessage, context);
             store(manager);
         } catch (InvocationTargetException e) {
             log().error("Error during dispatching event", e);

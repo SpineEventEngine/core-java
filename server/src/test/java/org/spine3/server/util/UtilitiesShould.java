@@ -21,6 +21,7 @@
 package org.spine3.server.util;
 
 import org.junit.Test;
+import org.spine3.client.Commands;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileNameEscaper;
 import org.spine3.testdata.*;
@@ -49,8 +50,7 @@ public class UtilitiesShould {
 
         //TODO:2016-01-18:alexander.yevsyukov: Refactor to move these checks into corresponding tests.
         // util package
-        checkPrivateConstructor(Classes.class);
-        checkPrivateConstructor(CommandRequests.class);
+        checkPrivateConstructor(Commands.class);
         checkPrivateConstructor(Events.class);
         checkPrivateConstructor(FileNameEscaper.class);
         checkPrivateConstructor(Identifiers.class);

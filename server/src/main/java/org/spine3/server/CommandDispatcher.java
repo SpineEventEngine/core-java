@@ -20,8 +20,7 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import org.spine3.base.Command;
 import org.spine3.base.EventRecord;
 import org.spine3.type.CommandClass;
 
@@ -43,16 +42,10 @@ public interface CommandDispatcher {
     Set<CommandClass> getCommandClasses();
 
     /**
-     * Dispatches the command for processing and returns the generated events.
-     *
-     * @param command the command to dispatch
-     * @param context context info of the command
-     * @return a list of event records generated during the command execution, or
-     *         an empty list if no events were generated
+     * Dispatches the command request for processing.
      */
-    List<EventRecord> dispatch(Message command, CommandContext context) throws Exception;
+    List<EventRecord> dispatch(Command request) throws Exception;
     //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
-    //TODO:2016-01-25:alexander.yevsyukov: Dispatch CommandRequest, not the couple of parameters.
 
     //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
 

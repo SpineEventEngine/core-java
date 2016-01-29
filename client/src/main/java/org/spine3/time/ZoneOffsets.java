@@ -20,6 +20,11 @@
 
 package org.spine3.time;
 
+import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Utilities for working with ZoneOffset objects.
  *
@@ -30,6 +35,16 @@ public class ZoneOffsets {
     private ZoneOffsets() {}
 
     public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
+
+
+    public static ZoneOffset ofHours(int hours) {
+        checkArgument(Math.abs(hours) < Timestamps.HOURS_PER_DAY, "offset size must be < 24 hours");
+        @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
+        final int seconds = (int)Durations.toSeconds(Durations.ofHours(hours));
+        return ZoneOffset.newBuilder()
+                .setAmountSeconds(seconds)
+                .build();
+    }
 
     //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
 }

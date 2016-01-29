@@ -17,22 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
 
-import com.google.protobuf.Message;
+package org.spine3.server.util;
 
-/**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
- *
- * @author Mikhail Melnik
- */
-public class UnsupportedCommandException extends RuntimeException {
+import org.junit.Test;
+import org.spine3.util.Tests;
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ClassesShould {
+    @Test
+    public void have_private_ctor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Classes.class);
     }
-
-    private static final long serialVersionUID = 0L;
-
 }

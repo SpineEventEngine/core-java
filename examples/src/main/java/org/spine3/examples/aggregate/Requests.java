@@ -20,9 +20,9 @@
 package org.spine3.examples.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.UserId;
-import org.spine3.client.CommandRequest;
 import org.spine3.client.Commands;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
@@ -37,15 +37,15 @@ import org.spine3.time.ZoneOffset;
  */
 class Requests {
 
-    public static CommandRequest createOrder(UserId userId, OrderId orderId) {
+    public static Command createOrder(UserId userId, OrderId orderId) {
         final CreateOrder command = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        final CommandRequest request = newCommandRequest(userId, command);
+        final Command request = newCommand(userId, command);
         return request;
     }
 
-    public static CommandRequest addOrderLine(UserId userId, OrderId orderId) {
+    public static Command addOrderLine(UserId userId, OrderId orderId) {
         final double price = 51.33;
         final Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
@@ -63,24 +63,24 @@ class Requests {
         final AddOrderLine command = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        final CommandRequest result = newCommandRequest(userId, command);
+        final Command result = newCommand(userId, command);
         return result;
     }
 
-    public static CommandRequest payForOrder(UserId userId, OrderId orderId) {
+    public static Command payForOrder(UserId userId, OrderId orderId) {
         final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
         final PayForOrder command = PayForOrder.newBuilder()
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        final CommandRequest result = newCommandRequest(userId, command);
+        final Command result = newCommand(userId, command);
         return result;
     }
 
     //TODO:2016-01-14:alexander.yevsyukov: Use real utility method.
-    public static CommandRequest newCommandRequest(UserId userId, Message command) {
+    public static Command newCommand(UserId userId, Message command) {
         final CommandContext context = createCommandContext(userId);
-        final CommandRequest request = Commands.newCommandRequest(command, context);
+        final Command request = Commands.newCommand(command, context);
         return request;
     }
 

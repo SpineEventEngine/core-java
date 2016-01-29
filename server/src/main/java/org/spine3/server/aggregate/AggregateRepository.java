@@ -20,6 +20,7 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
 import org.spine3.server.BoundedContext;
@@ -37,7 +38,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.client.Commands.getMessage;
 
 /**
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
@@ -208,16 +211,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param command the command to dispatch
-     * @param context context info of the command
-     * @return a list of the event records
+     * @param request the request to dispatch
      * @throws IllegalStateException if storage for the repository was not initialized
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
     @Override
     @CheckReturnValue
-    public List<EventRecord> dispatch(Message command, CommandContext context)
+    public List<EventRecord> dispatch(Command request)
             throws IllegalStateException, InvocationTargetException {
+        final Message command = getMessage(checkNotNull(request));
+        final CommandContext context = request.getContext();
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 
@@ -252,6 +255,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     // To double check this we need to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateId.fromCommand(command).value();
+        return (I) AggregateId.fromCommandMessage(command).value();
     }
 }

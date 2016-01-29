@@ -20,7 +20,7 @@
 
 package org.spine3.server;
 
-import org.spine3.client.CommandRequest;
+import org.spine3.base.Command;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
@@ -46,10 +46,10 @@ public class CommandStore implements AutoCloseable {
      *
      * @param request command request to store
      */
-    public void store(CommandRequest request) {
+    public void store(Command request) {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
-        final AggregateId aggregateId = AggregateId.fromRequest(request);
+        final AggregateId aggregateId = AggregateId.fromCommand(request);
         //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
         storage.store(aggregateId, request);
     }

@@ -17,22 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
 
-import com.google.protobuf.Message;
+package org.spine3.time;
 
-/**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
- *
- * @author Mikhail Melnik
- */
-public class UnsupportedCommandException extends RuntimeException {
+import org.junit.Test;
+import org.spine3.protobuf.Timestamps;
+import org.spine3.util.Tests;
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+import java.lang.reflect.InvocationTargetException;
+
+import static org.junit.Assert.assertEquals;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ZoneOffsetsShould {
+
+    @SuppressWarnings("MethodWithTooExceptionsDeclared")
+    @Test
+    public void have_private_utility_ctor()
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Tests.callPrivateUtilityConstructor(ZoneOffsets.class);
     }
 
-    private static final long serialVersionUID = 0L;
-
+    @Test
+    public void create_instance_by_hour_offset() {
+        assertEquals(Timestamps.SECONDS_PER_MINUTE * Timestamps.MINUTES_PER_HOUR * 2,
+                     ZoneOffsets.ofHours(2).getAmountSeconds());
+    }
 }

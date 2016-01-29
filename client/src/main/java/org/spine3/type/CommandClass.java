@@ -22,6 +22,8 @@ package org.spine3.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
+import org.spine3.client.Commands;
 
 import java.util.Set;
 
@@ -55,7 +57,13 @@ public final class CommandClass extends ClassTypeValue {
      * @return new instance
      */
     public static CommandClass of(Message command) {
-        return of(checkNotNull(command).getClass());
+        checkNotNull(command);
+        if (command instanceof Command) {
+            final Command commandRequest = (Command) command;
+            final Message enclosed = Commands.getMessage(commandRequest);
+            return of(enclosed.getClass());
+        }
+        return of(command.getClass());
     }
 
     /**
