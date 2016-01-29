@@ -135,20 +135,20 @@ public class TimestampsShould {
 
     @Test
     public void return_true_if_timestamp_is_after_another_one() {
-        final Timestamp point = getCurrentTime();
-        final Timestamp afterFirst = add(point, DELTA);
+        final Timestamp fromPoint = getCurrentTime();
+        final Timestamp timeToCheck = add(fromPoint, DELTA);
 
-        final boolean isAfter = Timestamps.isAfter(point, afterFirst);
+        final boolean isAfter = Timestamps.isAfter(timeToCheck, fromPoint);
 
         assertTrue(isAfter);
     }
 
     @Test
     public void return_false_if_timestamp_is_not_after_another_one() {
-        final Timestamp point = getCurrentTime();
-        final Timestamp beforePoint = subtract(point, DELTA);
+        final Timestamp fromPoint = getCurrentTime();
+        final Timestamp timeToCheck = subtract(fromPoint, DELTA);
 
-        final boolean isAfter = Timestamps.isAfter(point, beforePoint);
+        final boolean isAfter = Timestamps.isAfter(timeToCheck, fromPoint);
 
         assertFalse(isAfter);
     }
