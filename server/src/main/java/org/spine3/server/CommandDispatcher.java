@@ -20,8 +20,8 @@
 
 package org.spine3.server;
 
+import org.spine3.base.Command;
 import org.spine3.base.EventRecord;
-import org.spine3.client.CommandRequest;
 import org.spine3.type.CommandClass;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public interface CommandDispatcher {
     /**
      * Dispatches the command request for processing.
      */
-    List<EventRecord> dispatch(CommandRequest request) throws Exception;
+    List<EventRecord> dispatch(Command request) throws Exception;
     //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
 
     //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.

@@ -24,7 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.Command;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
@@ -103,10 +103,10 @@ public class Application implements AutoCloseable {
         setUp();
 
         // Generate test requests
-        final List<CommandRequest> requests = Client.generateRequests();
+        final List<Command> requests = Client.generateRequests();
 
         // Process requests
-        for (CommandRequest request : requests) {
+        for (Command request : requests) {
             boundedContext.process(request);
         }
 

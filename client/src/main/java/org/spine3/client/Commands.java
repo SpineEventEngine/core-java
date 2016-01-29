@@ -20,8 +20,8 @@
 
 package org.spine3.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
@@ -52,37 +52,37 @@ public class Commands {
     /**
      * Creates new command context with the current time
      * @param userId the actor id
-     * @param offset the timezone offset
+     * @param zoneOffset the offset of the timezone in which the user works
      */
-    public static CommandContext createContext(UserId userId, ZoneOffset offset) {
+    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = CommandContext.newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .setCommandId(commandId)
-                .setZoneOffset(offset);
+                .setZoneOffset(zoneOffset);
         return result.build();
     }
 
     /**
-     * Creates a new command request with the given {@code command} converted to {@link Any} and the {@code context}.
+     * Creates a new command with the given {@code message} and the {@code context}.
      *
-     * @param command the command to convert to {@link Any} and set to the request
-     * @param context the context to set to the request
+     * @param message the domain model message to send in the command
+     * @param context the context of the command
      * @return a new command request
      */
-    public static CommandRequest newCommandRequest(Message command, CommandContext context) {
-        final CommandRequest.Builder request = CommandRequest.newBuilder()
-                .setCommand(Messages.toAny(command))
+    public static Command newCommand(Message message, CommandContext context) {
+        final Command.Builder request = Command.newBuilder()
+                .setMessage(Messages.toAny(message))
                 .setContext(context);
         return request.build();
     }
 
     /**
-     * Extracts the command from the passed {@code CommandRequest} instance.
+     * Extracts the message from the passed {@code Command} instance.
      */
-    public static Message getCommand(CommandRequest request) {
-        final Message command = Messages.fromAny(request.getCommand());
+    public static Message getMessage(Command request) {
+        final Message command = Messages.fromAny(request.getMessage());
         return command;
     }
 

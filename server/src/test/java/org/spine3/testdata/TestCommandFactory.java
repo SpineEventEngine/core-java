@@ -23,10 +23,10 @@ package org.spine3.testdata;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
-import org.spine3.client.CommandRequest;
 import org.spine3.client.Commands;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -37,7 +37,7 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
- * The utility class for creating the test data related to commands (command messages, CommandRequests etc.).
+ * The utility class for creating the test data related to commands (command messages, Commands etc.).
  *
  * @author Mikhail Mikhaylov
  */
@@ -50,50 +50,50 @@ public class TestCommandFactory {
     }
 
     /**
-     * Creates a new {@link CommandRequest} with default properties (current time etc).
+     * Creates a new {@link Command} with default properties (current time etc).
      */
-    public static CommandRequest createProject() {
+    public static Command createProject() {
         return createProject(TimeUtil.getCurrentTime());
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given timestamp.
+     * Creates a new {@link Command} with the given timestamp.
      */
-    public static CommandRequest createProject(Timestamp when) {
+    public static Command createProject(Timestamp when) {
         return createProject(STUB_USER_ID, STUB_PROJECT_ID, when);
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static CommandRequest createProject(UserId userId, ProjectId projectId, Timestamp when) {
+    public static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
         final CreateProject command = createProject(projectId);
-        return createCommandRequest(command, userId, when);
+        return createCommand(command, userId, when);
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static CommandRequest addTask(UserId userId, ProjectId projectId, Timestamp when) {
+    public static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
         final AddTask command = addTask(projectId);
-        return createCommandRequest(command, userId, when);
+        return createCommand(command, userId, when);
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given userId, projectId and timestamp.
+     * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static CommandRequest startProject(UserId userId, ProjectId projectId, Timestamp when) {
+    public static Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
         final StartProject command = startProject(projectId);
-        return createCommandRequest(command, userId, when);
+        return createCommand(command, userId, when);
     }
 
     /**
-     * Creates a new {@link CommandRequest} with the given command, userId and timestamp using default
+     * Creates a new {@link Command} with the given command, userId and timestamp using default
      * {@link CommandId} instance.
      */
-    public static CommandRequest createCommandRequest(Message command, UserId userId, Timestamp when) {
+    public static Command createCommand(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
-        final CommandRequest result = Commands.newCommandRequest(command, context);
+        final Command result = Commands.newCommand(command, context);
         return result;
     }
 

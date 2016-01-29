@@ -18,33 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.time;
+package org.spine3.server.util;
 
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import org.junit.Test;
+import org.spine3.util.Tests;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-/**
- * Utilities for working with ZoneOffset objects.
- *
- * @see ZoneOffset
- */
-public class ZoneOffsets {
-
-    private ZoneOffsets() {}
-
-    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
-
-
-    public static ZoneOffset ofHours(int hours) {
-        checkArgument(Math.abs(hours) < Timestamps.HOURS_PER_DAY, "offset size must be < 24 hours");
-        @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
-        final int seconds = (int)Durations.toSeconds(Durations.ofHours(hours));
-        return ZoneOffset.newBuilder()
-                .setAmountSeconds(seconds)
-                .build();
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ClassesShould {
+    @Test
+    public void have_private_ctor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Classes.class);
     }
-
-    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
 }

@@ -21,7 +21,7 @@ package org.spine3.server.util;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import org.spine3.client.CommandRequest;
+import org.spine3.base.Command;
 import org.spine3.protobuf.Timestamps;
 
 import javax.annotation.Nullable;
@@ -32,17 +32,17 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for working with {@link CommandRequest}s.
+ * Utility class for working with {@link Command}s at the server side.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class CommandRequests {
+public class CommandUtil {
 
-    public static Predicate<CommandRequest> wereAfter(final Timestamp from) {
-        return new Predicate<CommandRequest>() {
+    public static Predicate<Command> wereAfter(final Timestamp from) {
+        return new Predicate<Command>() {
             @Override
-            public boolean apply(@Nullable CommandRequest request) {
+            public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isAfter(timestamp, from);
@@ -50,10 +50,10 @@ public class CommandRequests {
         };
     }
 
-    public static Predicate<CommandRequest> wereWithinPeriod(final Timestamp from, final Timestamp to) {
-        return new Predicate<CommandRequest>() {
+    public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+        return new Predicate<Command>() {
             @Override
-            public boolean apply(@Nullable CommandRequest request) {
+            public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
                 return Timestamps.isBetween(timestamp, from, to);
@@ -61,7 +61,7 @@ public class CommandRequests {
         };
     }
 
-    private static Timestamp getTimestamp(CommandRequest request) {
+    private static Timestamp getTimestamp(Command request) {
         final Timestamp result = request.getContext().getTimestamp();
         return result;
     }
@@ -69,12 +69,12 @@ public class CommandRequests {
     /**
      * Sorts the command given command request list by command timestamp value.
      *
-     * @param commandRequests the command request list to sort
+     * @param commands the command list to sort
      */
-    public static void sort(List<CommandRequest> commandRequests) {
-        Collections.sort(commandRequests, new Comparator<CommandRequest>() {
+    public static void sort(List<Command> commands) {
+        Collections.sort(commands, new Comparator<Command>() {
             @Override
-            public int compare(CommandRequest o1, CommandRequest o2) {
+            public int compare(Command o1, Command o2) {
                 final Timestamp timestamp1 = getTimestamp(o1);
                 final Timestamp timestamp2 = getTimestamp(o2);
                 return Timestamps.compare(timestamp1, timestamp2);
@@ -82,5 +82,5 @@ public class CommandRequests {
         });
     }
 
-    private CommandRequests() {}
+    private CommandUtil() {}
 }

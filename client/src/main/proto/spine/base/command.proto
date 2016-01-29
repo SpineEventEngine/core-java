@@ -27,6 +27,7 @@ option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
 
 import "spine/base/user_id.proto";
 import "spine/time/time.proto";
@@ -37,7 +38,26 @@ message CommandId {
     string uuid = 1;
 }
 
-// Meta-information about the client environment, which generated the command.
+// `Command` is an instruction to do something.
+//
+// A command consists of two parts: command message and command context.
+message Command {
+    // This field contains a domain model part of the command.
+    //
+    // The type of the message enclosed into `Any` defines the type of the command.
+    // When we speak about a 'command' as a type, we refer to the message enclosed in this field.
+    //
+    // There should be one and only one command handler, which is associated with the type of the command.
+    //
+    // The message can hold any valid Protobuf message, but in most cases, it would be a type
+    // defined in `commands.proto` file of the corresponding aggregate or process manager.
+    google.protobuf.Any message = 1;
+
+    // Context information common for all commands.
+    spine.base.CommandContext context = 2;
+}
+
+// Meta-information about the command and the environment, which generated the command.
 message CommandContext {
     // The id of the command.
     CommandId command_id = 1;

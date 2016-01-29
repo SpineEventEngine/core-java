@@ -20,9 +20,9 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventRecord;
-import org.spine3.client.CommandRequest;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Repository;
@@ -40,7 +40,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.client.Commands.getCommand;
+import static org.spine3.client.Commands.getMessage;
 
 /**
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
@@ -217,9 +217,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      */
     @Override
     @CheckReturnValue
-    public List<EventRecord> dispatch(CommandRequest request)
+    public List<EventRecord> dispatch(Command request)
             throws IllegalStateException, InvocationTargetException {
-        final Message command = getCommand(checkNotNull(request));
+        final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
@@ -255,6 +255,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     // To double check this we need to check all the aggregate commands for the presence of the ID field and
     // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateId.fromCommand(command).value();
+        return (I) AggregateId.fromCommandMessage(command).value();
     }
 }

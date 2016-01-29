@@ -20,31 +20,27 @@
 
 package org.spine3.time;
 
-import org.spine3.protobuf.Durations;
+import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.util.Tests;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.lang.reflect.InvocationTargetException;
 
-/**
- * Utilities for working with ZoneOffset objects.
- *
- * @see ZoneOffset
- */
-public class ZoneOffsets {
+import static org.junit.Assert.assertEquals;
 
-    private ZoneOffsets() {}
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class ZoneOffsetsShould {
 
-    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
-
-
-    public static ZoneOffset ofHours(int hours) {
-        checkArgument(Math.abs(hours) < Timestamps.HOURS_PER_DAY, "offset size must be < 24 hours");
-        @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
-        final int seconds = (int)Durations.toSeconds(Durations.ofHours(hours));
-        return ZoneOffset.newBuilder()
-                .setAmountSeconds(seconds)
-                .build();
+    @SuppressWarnings("MethodWithTooExceptionsDeclared")
+    @Test
+    public void have_private_utility_ctor()
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Tests.callPrivateUtilityConstructor(ZoneOffsets.class);
     }
 
-    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
+    @Test
+    public void create_instance_by_hour_offset() {
+        assertEquals(Timestamps.SECONDS_PER_MINUTE * Timestamps.MINUTES_PER_HOUR * 2,
+                     ZoneOffsets.ofHours(2).getAmountSeconds());
+    }
 }

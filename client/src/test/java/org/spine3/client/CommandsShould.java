@@ -18,33 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.time;
+package org.spine3.client;
 
-import org.spine3.protobuf.Durations;
-import org.spine3.protobuf.Timestamps;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.util.Tests;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.lang.reflect.InvocationTargetException;
 
-/**
- * Utilities for working with ZoneOffset objects.
- *
- * @see ZoneOffset
- */
-public class ZoneOffsets {
+import static org.junit.Assert.assertEquals;
 
-    private ZoneOffsets() {}
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class CommandsShould {
 
-    public static final ZoneOffset UTC = ZoneOffset.newBuilder().setId("UTC").setAmountSeconds(0).build();
-
-
-    public static ZoneOffset ofHours(int hours) {
-        checkArgument(Math.abs(hours) < Timestamps.HOURS_PER_DAY, "offset size must be < 24 hours");
-        @SuppressWarnings("NumericCastThatLosesPrecision") // It is safe, as we check bounds of the argument.
-        final int seconds = (int)Durations.toSeconds(Durations.ofHours(hours));
-        return ZoneOffset.newBuilder()
-                .setAmountSeconds(seconds)
-                .build();
+    @SuppressWarnings("MethodWithTooExceptionsDeclared")
+    @Test
+    public void have_private_ctor()
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Tests.callPrivateUtilityConstructor(Commands.class);
     }
 
-    //TODO:2016-01-20:alexander.yevsyukov: Add other offsets
+    @Test
+    public void extract_message_from_command() {
+        final StringValue message = StringValue.newBuilder().setValue("extract_message_from_command").build();
+        final Command command = Commands.newCommand(message, CommandContext.getDefaultInstance());
+        assertEquals(message, Commands.getMessage(command));
+    }
 }
