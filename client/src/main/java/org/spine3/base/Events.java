@@ -71,10 +71,10 @@ public class Events {
     /**
      * Sorts the given event record list by the event timestamps.
      *
-     * @param eventRecords the event record list to sort
+     * @param events the event record list to sort
      */
-    public static void sort(List<Event> eventRecords) {
-        Collections.sort(eventRecords, EVENT_TIMESTAMP_COMPARATOR);
+    public static void sort(List<Event> events) {
+        Collections.sort(events, EVENT_TIMESTAMP_COMPARATOR);
     }
 
     /**

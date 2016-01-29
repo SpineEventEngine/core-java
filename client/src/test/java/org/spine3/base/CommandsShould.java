@@ -85,7 +85,7 @@ public class CommandsShould {
     @Test
     public void create_wereAfter_predicate() {
         final Command command = commandFactory.create(BoolValue.getDefaultInstance());
-        assertTrue(Commands.wereAfter(secondsAgo(1)).apply(command));
+        assertTrue(Commands.wereAfter(secondsAgo(5)).apply(command));
     }
 
     @Test

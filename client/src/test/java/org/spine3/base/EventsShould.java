@@ -25,6 +25,7 @@ import org.spine3.test.Tests;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertFalse;
+import static org.spine3.protobuf.Timestamps.secondsAgo;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
@@ -43,4 +44,18 @@ public class EventsShould {
         assertFalse(result.getUuid().isEmpty());
     }
 
+    @Test
+    public void return_null_from_null_input_in_IsAfter_predicate() {
+        assertFalse(new Events.IsAfter(secondsAgo(5)).apply(null));
+    }
+
+    @Test
+    public void return_null_from_null_input_in_IsBefore_predicate() {
+        assertFalse(new Events.IsBefore(secondsAgo(5)).apply(null));
+    }
+
+    @Test
+    public void return_null_from_null_input_in_IsBetween_predicate() {
+        assertFalse(new Events.IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+    }
 }
