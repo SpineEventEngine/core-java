@@ -155,15 +155,15 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         this.initialized = true;
     }
 
-    private void invokeApplier(Message event) throws InvocationTargetException {
-        final Class<? extends Message> eventClass = event.getClass();
+    private void invokeApplier(Message message) throws InvocationTargetException {
+        final Class<? extends Message> eventClass = message.getClass();
         final Method method = eventAppliers.get(eventClass);
         if (method == null) {
             throw missingEventApplier(eventClass);
         }
 
         final EventApplier applier = new EventApplier(this, method);
-        applier.invoke(event);
+        applier.invoke(message);
     }
 
     private Any getIdAsAny() {
