@@ -78,5 +78,19 @@ public class Commands {
         return request.build();
     }
 
+    /**
+     * Creates a new command request with the given {@code command} (converted to {@link Any} then)
+     * and the default command context.
+     *
+     * @param command the command to convert to {@link Any} and set to the request
+     * @return a new command request
+     */
+    public static CommandRequest newCommandRequest(Message command) {
+        final CommandRequest.Builder request = CommandRequest.newBuilder()
+                .setCommand(Messages.toAny(command))
+                .setContext(CommandContext.getDefaultInstance());
+        return request.build();
+    }
+
     private Commands() {}
 }
