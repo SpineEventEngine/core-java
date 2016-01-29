@@ -54,7 +54,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setCommandId(commandIdStr)
                 .setAggregateIdType(aggregateId.getShortTypeName())
                 .setAggregateId(aggregateId.toString())
-                .setCommand(wrappedMessage)
+                .setMessage(wrappedMessage)
                 .setContext(context);
 
         write(commandId, builder.build());

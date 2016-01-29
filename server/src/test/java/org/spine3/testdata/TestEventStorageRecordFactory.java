@@ -34,15 +34,15 @@ import static org.spine3.testdata.TestEventFactory.*;
 public class TestEventStorageRecordFactory {
 
     private static final EventStorageRecord PROJECT_CREATED_RECORD = EventStorageRecord.newBuilder()
-            .setEvent(projectCreatedEventAny())
+            .setMessage(projectCreatedEventAny())
             .setEventId("project_created").build();
 
     private static final EventStorageRecord TASK_ADDED_RECORD = EventStorageRecord.newBuilder()
-            .setEvent(taskAddedEventAny())
+            .setMessage(taskAddedEventAny())
             .setEventId("task_added").build();
 
     private static final EventStorageRecord PROJECT_STARTED_RECORD = EventStorageRecord.newBuilder()
-            .setEvent(projectStartedEventAny())
+            .setMessage(projectStartedEventAny())
             .setEventId("project_started").build();
 
     private TestEventStorageRecordFactory() {}
@@ -61,7 +61,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord projectCreated(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                .setEvent(projectCreatedEventAny())
+                .setMessage(projectCreatedEventAny())
                 .setEventId("project_created_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();
@@ -69,7 +69,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord taskAdded(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                .setEvent(taskAddedEventAny())
+                .setMessage(taskAddedEventAny())
                 .setEventId("task_added_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();
@@ -77,7 +77,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord projectStarted(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                .setEvent(projectStartedEventAny())
+                .setMessage(projectStartedEventAny())
                 .setEventId("project_started_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();

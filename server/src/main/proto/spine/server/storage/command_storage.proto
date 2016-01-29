@@ -59,7 +59,7 @@ message CommandStorageRecord {
     reserved 6 to 19;
 
     // The command instance.
-    google.protobuf.Any command = 20;
+    google.protobuf.Any message = 20;
 
     // The context of the command.
     spine.base.CommandContext context = 21;

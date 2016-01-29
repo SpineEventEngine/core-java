@@ -49,7 +49,7 @@ public class StorageUtil {
      */
     public static EventRecord toEventRecord(EventStorageRecord record) {
         final EventRecord.Builder builder = EventRecord.newBuilder()
-                .setEvent(record.getEvent())
+                .setEvent(record.getMessage())
                 .setContext(record.getContext());
         return builder.build();
     }
@@ -102,7 +102,7 @@ public class StorageUtil {
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
                 .setEventId(eventIdStr)
-                .setEvent(event)
+                .setMessage(event)
                 .setContext(context);
 
         return builder.build();
