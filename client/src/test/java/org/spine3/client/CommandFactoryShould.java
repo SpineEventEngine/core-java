@@ -59,7 +59,7 @@ public class CommandFactoryShould {
 
     @Test
     public void create_new_instances_with_current_time() {
-        final Timestamp beforeCall = TimeUtil.getCurrentTime();
+        final Timestamp beforeCall = Timestamps.secondsAgo(1);
         final Command command = commandFactory.create(StringValue.newBuilder().build());
         final Timestamp afterCall = TimeUtil.getCurrentTime();
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));

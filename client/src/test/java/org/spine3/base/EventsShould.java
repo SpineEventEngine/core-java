@@ -17,19 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.util;
+package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
+import org.spine3.test.Tests;
+
+import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertFalse;
 
-/**
- * @author Mikhail Melnik
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
+
+    @SuppressWarnings("MethodWithTooExceptionsDeclared")
+    @Test
+    public void have_private_ctor()
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Tests.callPrivateUtilityConstructor(Events.class);
+    }
 
     @Test
     public void generate_event_id() {
