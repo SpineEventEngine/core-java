@@ -86,8 +86,8 @@ public class AggregateShould {
     @Test
     public void accept_Message_id_to_constructor() {
         try {
-            final ProjectAggregate a = new ProjectAggregate(PROJECT_ID);
-            assertEquals(PROJECT_ID, a.getId());
+            final ProjectAggregate aggregate = new ProjectAggregate(PROJECT_ID);
+            assertEquals(PROJECT_ID, aggregate.getId());
         } catch (Throwable e) {
             fail();
         }
@@ -97,8 +97,8 @@ public class AggregateShould {
     public void accept_String_id_to_constructor() {
         try {
             final String id = "string_id";
-            final TestAggregateWithIdString a = new TestAggregateWithIdString(id);
-            assertEquals(id, a.getId());
+            final TestAggregateWithIdString agg = new TestAggregateWithIdString(id);
+            assertEquals(id, agg.getId());
         } catch (Throwable e) {
             fail();
         }
@@ -108,8 +108,8 @@ public class AggregateShould {
     public void accept_Integer_id_to_constructor() {
         try {
             final Integer id = 12;
-            final TestAggregateWithIdInteger a = new TestAggregateWithIdInteger(id);
-            assertEquals(id, a.getId());
+            final TestAggregateWithIdInteger agg = new TestAggregateWithIdInteger(id);
+            assertEquals(id, agg.getId());
         } catch (Throwable e) {
             fail();
         }
@@ -119,8 +119,8 @@ public class AggregateShould {
     public void accept_Long_id_to_constructor() {
         try {
             final Long id = 12L;
-            final TestAggregateWithIdLong a = new TestAggregateWithIdLong(id);
-            assertEquals(id, a.getId());
+            final TestAggregateWithIdLong agg = new TestAggregateWithIdLong(id);
+            assertEquals(id, agg.getId());
         } catch (Throwable e) {
             fail();
         }
@@ -177,27 +177,27 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
 
-        final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
-        r.dispatch(addTask, COMMAND_CONTEXT);
+        final TestAggregateForCaseMissingHandlerOrApplier agg = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
+        agg.dispatch(addTask, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() throws InvocationTargetException {
-        final TestAggregateForCaseMissingHandlerOrApplier r = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
+        final TestAggregateForCaseMissingHandlerOrApplier agg = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
         try {
-            r.dispatch(createProject, COMMAND_CONTEXT);
+            agg.dispatch(createProject, COMMAND_CONTEXT);
         } catch (IllegalStateException e) { // expected exception
-            assertTrue(r.isCreateProjectCommandHandled);
+            assertTrue(agg.isCreateProjectCommandHandled);
             throw e;
         }
     }
 
     @Test
     public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() throws InvocationTargetException {
-        final TestAggregateWithStateNeutralEvents r = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
+        final TestAggregateWithStateNeutralEvents agg = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
         try {
-            r.dispatch(addTask, COMMAND_CONTEXT);
-            assertTrue(r.isTaskAddedCommandHandled);
+            agg.dispatch(addTask, COMMAND_CONTEXT);
+            assertTrue(agg.isTaskAddedCommandHandled);
         } catch (IllegalStateException e) {
             fail("Method must not throw 'missing event applier exception' because this event is state neutral and " +
                     "the applier is not required.");
@@ -288,8 +288,8 @@ public class AggregateShould {
         aggregate.dispatch(startProject, COMMAND_CONTEXT);
         assertEquals(ProjectAggregate.STATUS_STARTED, aggregate.getState().getStatus());
 
-        final List<Event> Events = newArrayList(snapshotToEvent(snapshotNewProject));
-        aggregate.play(Events);
+        final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
+        aggregate.play(events);
         assertEquals(ProjectAggregate.STATUS_NEW, aggregate.getState().getStatus());
     }
 
