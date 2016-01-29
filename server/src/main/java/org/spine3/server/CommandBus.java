@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.*;
-import org.spine3.client.Commands;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
@@ -44,6 +43,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.Commands.getMessage;
 import static org.spine3.server.CommandValidation.unsupportedCommand;
 
 /**
@@ -126,17 +126,16 @@ public class CommandBus implements AutoCloseable {
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
-        if (command instanceof Command) {
-            final Command outerCommand = (Command) command;
-            //noinspection AssignmentToMethodParameter
-            command = Commands.getMessage(outerCommand); // Assign to the param to avoid recursive call or interim var.
-        }
+        checkNotNull(command);
+        final Message message = (command instanceof Command) ?
+                getMessage((Command) command) :
+                command;
 
-        if (dispatcherRegistry.hasDispatcherFor(command)) {
+        if (dispatcherRegistry.hasDispatcherFor(message)) {
             return Responses.ok();
         }
 
-        if (handlerRegistry.hasHandlerFor(command)) {
+        if (handlerRegistry.hasHandlerFor(message)) {
             return Responses.ok();
         }
 
@@ -144,7 +143,7 @@ public class CommandBus implements AutoCloseable {
         // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
         // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
 
-        return unsupportedCommand(command);
+        return unsupportedCommand(message);
     }
 
     /**
@@ -171,13 +170,13 @@ public class CommandBus implements AutoCloseable {
         }
 
         if (handlerRegistered(commandClass)) {
-            final Message command = Commands.getMessage(request);
+            final Message command = getMessage(request);
             final CommandContext context = request.getContext();
             return invokeHandler(command, context);
         }
 
         //TODO:2016-01-24:alexander.yevsyukov: Unify exceptions with messages sent in Response.
-        throw new UnsupportedCommandException(Commands.getMessage(request));
+        throw new UnsupportedCommandException(getMessage(request));
     }
 
     private List<EventRecord> dispatch(Command request) {
