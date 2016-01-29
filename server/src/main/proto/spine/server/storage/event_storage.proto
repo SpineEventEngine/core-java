@@ -52,7 +52,7 @@ message EventStorageRecord {
     reserved 5 to 19;
 
     // Event instance.
-    google.protobuf.Any event = 20;
+    google.protobuf.Any message = 20;
 
     // Event context.
     spine.base.EventContext context = 21;

@@ -123,7 +123,7 @@ public abstract class EventStorageShould {
     @Test
     public void write_and_filter_events_by_type() {
         final EventStorageRecord expectedRecord = EventStorageRecord.newBuilder()
-                .setEvent(toAny(newRandomStringValue()))
+                .setMessage(toAny(newRandomStringValue()))
                 .setEventId(Events.generateId().getUuid())
                 .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
