@@ -23,11 +23,7 @@ package org.spine3.testdata;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.UserId;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -41,12 +37,12 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  *
  * @author Mikhail Mikhaylov
  */
-public class TestCommandFactory {
+public class TestCommands {
 
     private static final UserId STUB_USER_ID = newUserId("stub_user_id");
     private static final ProjectId STUB_PROJECT_ID = createProjectId("stubProjectId");
 
-    private TestCommandFactory() {
+    private TestCommands() {
     }
 
     /**

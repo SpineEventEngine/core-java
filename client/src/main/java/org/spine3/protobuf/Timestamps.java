@@ -19,7 +19,7 @@
  */
 package org.spine3.protobuf;
 
-import com.google.protobuf.Duration;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.TimeUtil;
@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static com.google.protobuf.util.TimeUtil.subtract;
 
@@ -40,6 +41,8 @@ import static com.google.protobuf.util.TimeUtil.subtract;
  * @see TimeUtil
  */
 public class Timestamps {
+
+    private Timestamps() {}
 
     /**
      * The count of nanoseconds in one millisecond.
@@ -61,23 +64,6 @@ public class Timestamps {
      */
     public static final int MINUTES_PER_HOUR = 60;
     public static final int HOURS_PER_DAY = 24;
-
-    /**
-     * The duration of one minute.
-     */
-    private static final Duration MINUTE = Durations.ofMinutes(1);
-
-
-    /**
-     * Returns a timestamp of the moment a minute ago from now.
-     *
-     * @return a timestamp instance
-     */
-    public static Timestamp minuteAgo() {
-        final Timestamp currentTime = getCurrentTime();
-        final Timestamp result = subtract(currentTime, MINUTE);
-        return result;
-    }
 
     /**
      * Compares two timestamps. Returns a negative integer, zero, or a positive integer
@@ -161,6 +147,37 @@ public class Timestamps {
         private static final long serialVersionUID = 0;
     }
 
-    // @formatter:off
-    private Timestamps() {}
+
+    /**
+     * The testing assistance utility, which returns a timestamp of the moment
+     * of the passed number of minutes from now.
+     *
+     * @param value a positive number of minutes
+     * @return a timestamp instance
+     */
+    @VisibleForTesting
+    public static Timestamp minutesAgo(int value) {
+        checkPositive(value);
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp result = subtract(currentTime, Durations.ofMinutes(value));
+        return result;
+    }
+
+    /**
+     *
+     * @param value a positive number of minutes
+     * @return the moment `value` seconds ago
+     */
+    @VisibleForTesting
+    public static Timestamp secondsAgo(int value) {
+        checkPositive(value);
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp result = subtract(currentTime, Durations.ofSeconds(value));
+        return result;
+    }
+
+    private static void checkPositive(int value) {
+        checkArgument(value > 0, "value must be positive");
+    }
+
 }

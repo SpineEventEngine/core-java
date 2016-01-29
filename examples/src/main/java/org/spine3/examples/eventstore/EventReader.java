@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.event.Events;
 import org.spine3.server.event.grpc.EventStoreGrpc;
 import org.spine3.type.TypeName;
 

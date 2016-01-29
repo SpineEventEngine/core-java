@@ -25,15 +25,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.FailureThrowable;
-import org.spine3.server.event.Events;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
@@ -54,7 +49,7 @@ import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.server.procman.ProcessManagerShould.TestProcessManager;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommandFactory.*;
+import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**

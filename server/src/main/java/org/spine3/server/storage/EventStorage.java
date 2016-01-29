@@ -28,16 +28,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.server.Identifiers;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.event.Events;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -211,7 +212,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
 
             for (EventFilter filter : query.getFilterList()) {
-                final Predicate<Event> filterPredicate = new Events.MatchFilter(filter);
+                final Predicate<Event> filterPredicate = new MatchFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;
                 }
@@ -220,4 +221,41 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         }
     }
 
+    /**
+     * The predicate for filtering event records by {@link EventFilter}.
+     */
+    private static class MatchFilter implements Predicate<Event> {
+
+        private final EventFilter filter;
+        private final TypeName eventType;
+
+        public MatchFilter(EventFilter filter) {
+            this.filter = filter;
+            this.eventType = TypeName.of(filter.getEventType());
+        }
+
+        @Override
+        public boolean apply(@Nullable Event event) {
+            if (event == null) {
+                return false;
+            }
+
+            final Message message = Events.getMessage(event);
+            final TypeName actualType = TypeName.of(message);
+            final boolean specifiedEventType = eventType.value().isEmpty();
+            if (!eventType.equals(actualType) && !specifiedEventType) {
+                return false;
+            }
+
+            final EventContext context = event.getContext();
+            final Any aggregateId = context.getAggregateId();
+            final List<Any> aggregateIdList = filter.getAggregateIdList();
+            if (aggregateIdList.isEmpty()) {
+                return true;
+            } else {
+                final boolean matches = aggregateIdList.contains(aggregateId);
+                return matches;
+            }
+        }
+    }
 }

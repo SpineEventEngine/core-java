@@ -17,19 +17,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.event;
+package org.spine3.base;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.type.EventClass;
-import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -42,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
- * Utility class for working with {@link EventId} objects.
+ * Utility class for working with {@link Event} objects.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -191,41 +187,4 @@ public class Events {
         }
     }
 
-    /**
-     * The predicate for filtering event records by {@link EventFilter}.
-     */
-    public static class MatchFilter implements Predicate<Event> {
-
-        private final EventFilter filter;
-        private final TypeName eventType;
-
-        public MatchFilter(EventFilter filter) {
-            this.filter = filter;
-            this.eventType = TypeName.of(filter.getEventType());
-        }
-
-        @Override
-        public boolean apply(@Nullable Event event) {
-            if (event == null) {
-                return false;
-            }
-
-            final Message message = getMessage(event);
-            final TypeName actualType = TypeName.of(message);
-            final boolean specifiedEventType = eventType.value().isEmpty();
-            if (!eventType.equals(actualType) && !specifiedEventType) {
-                return false;
-            }
-
-            final EventContext context = event.getContext();
-            final Any aggregateId = context.getAggregateId();
-            final List<Any> aggregateIdList = filter.getAggregateIdList();
-            if (aggregateIdList.isEmpty()) {
-                return true;
-            } else {
-                final boolean matches = aggregateIdList.contains(aggregateId);
-                return matches;
-            }
-        }
-    }
 }

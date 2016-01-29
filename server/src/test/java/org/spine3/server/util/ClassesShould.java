@@ -21,7 +21,7 @@
 package org.spine3.server.util;
 
 import org.junit.Test;
-import org.spine3.util.Tests;
+import org.spine3.test.Tests;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClassesShould {

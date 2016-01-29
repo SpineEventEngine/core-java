@@ -32,7 +32,6 @@ import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
-import org.spine3.server.event.Events;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.util.Classes;
 import org.spine3.server.util.MethodMap;

@@ -23,11 +23,11 @@ package org.spine3.client;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
-import org.spine3.util.Tests;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.spine3.client.Commands.generateId;
+import static org.spine3.base.Commands.generateId;
 import static org.spine3.client.UserUtil.newUserId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")

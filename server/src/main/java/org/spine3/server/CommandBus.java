@@ -45,7 +45,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.Commands.getMessage;
+import static org.spine3.base.Commands.getMessage;
 import static org.spine3.server.command.CommandValidation.unsupportedCommand;
 
 /**

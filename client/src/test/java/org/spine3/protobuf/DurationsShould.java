@@ -22,7 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import org.junit.Test;
-import org.spine3.util.Tests;
+import org.spine3.test.Tests;
 
 import static com.google.protobuf.Duration.newBuilder;
 import static org.junit.Assert.*;

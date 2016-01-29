@@ -18,32 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+/**
+ * Classes for framework testing.
+ */
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.test;
 
-import com.google.protobuf.StringValue;
-import org.junit.Test;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.util.Tests;
+import org.spine3.Internal;
 
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.Assert.assertEquals;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class CommandsShould {
-
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
-    @Test
-    public void have_private_ctor()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(Commands.class);
-    }
-
-    @Test
-    public void extract_message_from_command() {
-        final StringValue message = StringValue.newBuilder().setValue("extract_message_from_command").build();
-        final Command command = Commands.newCommand(message, CommandContext.getDefaultInstance());
-        assertEquals(message, Commands.getMessage(command));
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

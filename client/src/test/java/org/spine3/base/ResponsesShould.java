@@ -21,7 +21,7 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.util.Tests;
+import org.spine3.test.Tests;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertTrue;

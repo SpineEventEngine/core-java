@@ -45,6 +45,5 @@ public class UserUtil {
                 .build();
     }
 
-    //@formatter:off
     private UserUtil() {}
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.test;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.spine3.Internal;

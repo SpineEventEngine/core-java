@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.client.Commands;
+import org.spine3.base.Commands;
 import org.spine3.protobuf.MessageField;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;

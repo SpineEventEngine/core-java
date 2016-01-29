@@ -23,7 +23,7 @@ package org.spine3.type;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.client.Commands;
+import org.spine3.base.Commands;
 
 import java.util.Set;
 

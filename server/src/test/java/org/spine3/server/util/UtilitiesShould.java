@@ -21,14 +21,14 @@
 package org.spine3.server.util;
 
 import org.junit.Test;
-import org.spine3.client.Commands;
+import org.spine3.base.Commands;
+import org.spine3.base.Events;
 import org.spine3.io.IoUtil;
 import org.spine3.io.file.FileNameEscaper;
 import org.spine3.server.Identifiers;
-import org.spine3.server.event.Events;
+import org.spine3.test.Tests;
 import org.spine3.testdata.*;
 import org.spine3.util.Math;
-import org.spine3.util.Tests;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -64,7 +64,7 @@ public class UtilitiesShould {
         // testutil package
         checkPrivateConstructor(TestAggregateIdFactory.class);
         checkPrivateConstructor(TestAggregateStorageRecordFactory.class);
-        checkPrivateConstructor(TestCommandFactory.class);
+        checkPrivateConstructor(TestCommands.class);
         checkPrivateConstructor(TestContextFactory.class);
         checkPrivateConstructor(TestEventFactory.class);
         checkPrivateConstructor(TestEventStorageRecordFactory.class);

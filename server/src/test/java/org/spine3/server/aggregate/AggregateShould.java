@@ -25,11 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.UserId;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.client.UserUtil;
 import org.spine3.server.Assign;
 import org.spine3.server.util.Classes;
@@ -41,7 +37,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommandFactory;
+import org.spine3.testdata.TestCommands;
 import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
@@ -54,21 +50,21 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
-import static org.spine3.client.Commands.createContext;
+import static org.spine3.base.Commands.createContext;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
+import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommandFactory.createProject;
-import static org.spine3.testdata.TestCommandFactory.startProject;
+import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestCommands.startProject;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 import static org.spine3.time.ZoneOffsets.UTC;
-import static org.spine3.util.Tests.currentTimeSeconds;
 
 /**
  * @author Alexander Litus
@@ -80,7 +76,7 @@ public class AggregateShould {
     private final ProjectAggregate aggregate = new ProjectAggregate(PROJECT_ID);
 
     private final CreateProject createProject = createProject(PROJECT_ID);
-    private final AddTask addTask = TestCommandFactory.addTask(PROJECT_ID);
+    private final AddTask addTask = TestCommands.addTask(PROJECT_ID);
     private final StartProject startProject = startProject(PROJECT_ID);
 
     private static final UserId USER_ID = newUserId("user_id_test");
