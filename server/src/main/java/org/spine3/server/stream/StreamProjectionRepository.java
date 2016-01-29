@@ -22,14 +22,14 @@ package org.spine3.server.stream;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StreamProjectionStorage;
-import org.spine3.server.util.EventRecords;
+import org.spine3.server.util.Events;
 import org.spine3.server.util.Identifiers;
 import org.spine3.type.EventClass;
 
@@ -109,8 +109,8 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      * @see StreamProjection#handle(Message, EventContext)
      */
     @Override
-    public void dispatch(EventRecord event) {
-        final Message eventMessage = EventRecords.getEvent(event);
+    public void dispatch(Event event) {
+        final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final I id = getEntityId(eventMessage, context);
         final P sp = load(id);

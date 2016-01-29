@@ -37,7 +37,6 @@ import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.util.Classes;
-import org.spine3.server.util.EventRecords;
 import org.spine3.server.util.Events;
 import org.spine3.server.util.MethodMap;
 
@@ -97,7 +96,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @see #commitEvents()
      */
-    private final List<EventRecord> uncommittedEvents = Lists.newLinkedList();
+    private final List<Event> uncommittedEvents = Lists.newLinkedList();
 
     /**
      * Creates a new instance.
@@ -213,40 +212,40 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     /**
      * Plays passed events on the aggregate.
      *
-     * @param records the list of the event records
+     * @param records the list of the events
      * @throws InvocationTargetException the exception is thrown if command dispatching fails inside
      */
-    public void play(Iterable<EventRecord> records) throws InvocationTargetException {
+    public void play(Iterable<Event> records) throws InvocationTargetException {
         init();
 
-        for (EventRecord record : records) {
-            final Message event = Messages.fromAny(record.getEvent());
-            apply(event);
+        for (Event record : records) {
+            final Message message = Messages.fromAny(record.getMessage());
+            apply(message);
         }
     }
 
     /**
      * Applies events to an aggregate unless they are state-neutral.
      *
-     * @param events the events to apply
+     * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      * @see #getStateNeutralEventClasses()
      */
-    private void apply(Iterable<? extends Message> events, CommandContext commandContext) throws InvocationTargetException {
+    private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
-        for (Message event : events) {
-            final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+        for (Message message : messages) {
+            final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
             if (!isStateNeutral) {
-                apply(event);
+                apply(message);
             }
             final int currentVersion = getVersion();
             final M state = getState();
-            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, event);
-            final EventRecord eventRecord = EventRecords.createEventRecord(event, eventContext);
-            putUncommitted(eventRecord);
+            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
+            final Event event = Events.createEvent(message, eventContext);
+            putUncommitted(event);
         }
     }
 
@@ -303,7 +302,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
 
-    private void putUncommitted(EventRecord record) {
+    private void putUncommitted(Event record) {
         uncommittedEvents.add(record);
     }
 
@@ -314,7 +313,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
-    public List<EventRecord> getUncommittedEvents() {
+    public List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
@@ -325,9 +324,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
-    protected Collection<EventRecord> getStateChangingUncommittedEvents() {
-        final Predicate<EventRecord> isStateChanging = isStateChangingEventRecord(getStateNeutralEventClasses());
-        final Collection<EventRecord> result = filter(uncommittedEvents, isStateChanging);
+    protected Collection<Event> getStateChangingUncommittedEvents() {
+        final Predicate<Event> isStateChanging = isStateChangingEventRecord(getStateNeutralEventClasses());
+        final Collection<Event> result = filter(uncommittedEvents, isStateChanging);
         return result;
     }
 
@@ -342,17 +341,16 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @return new predicate instance
      */
     @SuppressWarnings("MethodParameterNamingConvention") // Prefer longer name here for clarity.
-    private static Predicate<EventRecord> isStateChangingEventRecord(
+    private static Predicate<Event> isStateChangingEventRecord(
             final Collection<Class<? extends Message>> stateNeutralEventClasses) {
-        return new Predicate<EventRecord>() {
+        return new Predicate<Event>() {
             @Override
-            public boolean apply(@Nullable EventRecord record) {
-                if (record == null) {
+            public boolean apply(@Nullable Event event) {
+                if (event == null) {
                     return false;
                 }
-                final Any eventAsAny = record.getEvent();
-                final Message event = Messages.fromAny(eventAsAny);
-                final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+                final Message message = Events.getMessage(event);
+                final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
                 return !isStateNeutral;
             }
         };
@@ -363,8 +361,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @return the list of event records
      */
-    public List<EventRecord> commitEvents() {
-        final List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
+    public List<Event> commitEvents() {
+        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
     }

@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EventStorageRecord;
 
 import static org.spine3.testdata.TestContextFactory.createEventContext;
-import static org.spine3.testdata.TestEventFactory.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * Contains EventStorageRecords for tests.

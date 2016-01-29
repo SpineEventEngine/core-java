@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
 import org.spine3.server.Assign;
 import org.spine3.server.Subscribe;
 import org.spine3.test.project.ProjectId;
@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommandFactory.*;
-import static org.spine3.testdata.TestEventFactory.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
@@ -91,27 +91,27 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject(ID));
     }
 
-    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<EventRecord> records = processManager.dispatchCommand(command, COMMAND_CONTEXT);
+    private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
+        final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
         assertEquals(command, processManager.getState());
-        return records;
+        return events;
     }
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final List<EventRecord> records = testDispatchCommand(createProject(ID));
+        final List<Event> events = testDispatchCommand(createProject(ID));
 
-        assertEquals(1, records.size());
-        final EventRecord record = records.get(0);
-        assertNotNull(record);
-        final ProjectCreated event = fromAny(record.getEvent());
-        assertEquals(ID, event.getProjectId());
+        assertEquals(1, events.size());
+        final Event event = events.get(0);
+        assertNotNull(event);
+        final ProjectCreated message = fromAny(event.getMessage());
+        assertEquals(ID, message.getProjectId());
     }
 
     @Test
     public void dispatch_command_and_return_empty_event_list_if_handler_is_void() throws InvocationTargetException {
-        final List<EventRecord> records = testDispatchCommand(startProject(ID));
-        assertTrue(records.isEmpty());
+        final List<Event> events = testDispatchCommand(startProject(ID));
+        assertTrue(events.isEmpty());
     }
 
     @Test(expected = IllegalStateException.class)

@@ -62,7 +62,7 @@ import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommandFactory.*;
-import static org.spine3.testdata.TestEventFactory.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -201,9 +201,9 @@ public class BoundedContextShould {
     private void assertRequestAndResultMatch(Command request, CommandResult result) {
         final Timestamp expectedTime = request.getContext().getTimestamp();
 
-        final List<EventRecord> records = result.getEventRecordList();
-        assertEquals(1, records.size());
-        final EventRecord actualRecord = records.get(0);
+        final List<Event> events = result.getEventList();
+        assertEquals(1, events.size());
+        final Event actualRecord = events.get(0);
         final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
 
         assertEquals(projectId, actualProjectId);

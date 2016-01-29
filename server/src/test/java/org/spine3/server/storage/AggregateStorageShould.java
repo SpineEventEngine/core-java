@@ -25,7 +25,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.ProjectId;
 
@@ -44,7 +44,7 @@ import static org.spine3.server.util.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testdata.TestEventRecordFactory.projectCreated;
+import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class AggregateStorageShould {
@@ -76,21 +76,21 @@ public abstract class AggregateStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null_record() {
+    public void throw_exception_if_try_to_write_null_event() {
         // noinspection ConstantConditions
-        storage.write((EventRecord)null);
+        storage.write(null);
     }
 
     @Test
     public void store_and_read_one_record() {
-        final EventRecord expected = projectCreated(aggregateId);
+        final Event expected = projectCreated(aggregateId);
 
         storage.write(expected);
 
         final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(aggregateId);
         assertTrue(iterator.hasNext());
         final AggregateStorageRecord actual = iterator.next();
-        assertEquals(expected, actual.getEventRecord());
+        assertEquals(expected, actual.getEvent());
         assertFalse(iterator.hasNext());
     }
 
@@ -156,8 +156,8 @@ public abstract class AggregateStorageShould {
         writeAll(records);
 
         final AggregateEvents events = storage.read(aggregateId);
-        final List<EventRecord> expectedEventRecords = transform(records, TO_EVENT_RECORD);
-        assertEquals(expectedEventRecords, events.getEventRecordList());
+        final List<Event> expectedEvents = transform(records, TO_EVENT_RECORD);
+        assertEquals(expectedEvents, events.getEventList());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -174,11 +174,11 @@ public abstract class AggregateStorageShould {
         }
     }
 
-    private static final Function<AggregateStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<AggregateStorageRecord, EventRecord>() {
+    private static final Function<AggregateStorageRecord, Event> TO_EVENT_RECORD = new Function<AggregateStorageRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
-        public EventRecord apply(@Nullable AggregateStorageRecord input) {
-            return (input == null) ? null : input.getEventRecord();
+        public Event apply(@Nullable AggregateStorageRecord input) {
+            return (input == null) ? null : input.getEvent();
         }
     };
 

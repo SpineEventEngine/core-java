@@ -22,9 +22,9 @@ package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
 import org.spine3.SPI;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.server.util.Identifiers;
 import org.spine3.type.TypeName;
@@ -51,7 +51,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
 
-        final Deque<EventRecord> history = newLinkedList();
+        final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
         final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
@@ -62,8 +62,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
             final AggregateStorageRecord record = historyBackward.next();
 
             switch (record.getKindCase()) {
-                case EVENT_RECORD:
-                    history.addFirst(record.getEventRecord());
+                case EVENT:
+                    history.addFirst(record.getEvent());
                     break;
                 case SNAPSHOT:
                     snapshot = record.getSnapshot();
@@ -78,7 +78,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
-        builder.addAllEventRecord(history);
+        builder.addAllEvent(history);
 
         return builder.build();
     }
@@ -87,9 +87,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     public void write(I id, AggregateEvents record) {
         checkNotClosed();
 
-        final List<EventRecord> list = record.getEventRecordList();
-        for (final EventRecord eventRecord : list) {
-            write(eventRecord);
+        final List<Event> list = record.getEventList();
+        for (final Event event : list) {
+            write(event);
         }
     }
 
@@ -109,16 +109,16 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         writeInternal(builder.build());
     }
 
-    public void write(EventRecord record) {
+    public void write(Event event) {
         checkNotClosed();
 
-        final EventContext context = record.getContext();
-        final Any event = record.getEvent();
+        final EventContext context = event.getContext();
+        final Any message = event.getMessage();
         // TODO:2016-01-15:alexander.litus: store as a number if it is
         final String aggregateId = Identifiers.idToString(context.getAggregateId());
         final EventId eventId = context.getEventId();
         final String eventIdStr = Identifiers.idToString(eventId);
-        final String typeName = TypeName.ofEnclosed(event).nameOnly();
+        final String typeName = TypeName.ofEnclosed(message).nameOnly();
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
@@ -126,7 +126,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                 .setEventType(typeName)
                 .setEventId(eventIdStr)
                 .setVersion(context.getVersion())
-                .setEventRecord(record);
+                .setEvent(event);
 
         writeInternal(builder.build());
     }

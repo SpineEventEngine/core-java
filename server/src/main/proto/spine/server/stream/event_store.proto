@@ -35,9 +35,9 @@ import public "spine/server/stream/event_stream_query.proto";
 
 // `EventStore` service allows to store events and read them via streams.
 service EventStore {
-    // Request to append event records to the storage.
-    rpc Append(spine.base.EventRecord) returns (spine.base.Response);
+    // Request to append events to the storage.
+    rpc Append(spine.base.Event) returns (spine.base.Response);
 
-    // Provides event records matching the query as a stream.
-    rpc Read(EventStreamQuery) returns (stream spine.base.EventRecord);
+    // Provides events matching the query as a stream.
+    rpc Read(EventStreamQuery) returns (stream spine.base.Event);
 }

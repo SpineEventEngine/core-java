@@ -64,7 +64,7 @@ public class UtilitiesShould {
         checkPrivateConstructor(TestAggregateStorageRecordFactory.class);
         checkPrivateConstructor(TestCommandFactory.class);
         checkPrivateConstructor(TestContextFactory.class);
-        checkPrivateConstructor(TestEventRecordFactory.class);
+        checkPrivateConstructor(TestEventFactory.class);
         checkPrivateConstructor(TestEventStorageRecordFactory.class);
     }
 

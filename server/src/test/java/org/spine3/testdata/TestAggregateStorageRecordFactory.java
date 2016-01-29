@@ -22,7 +22,7 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.ProjectIdOrBuilder;
@@ -58,11 +58,11 @@ public class TestAggregateStorageRecordFactory {
     /**
      * Creates a new {@link AggregateStorageRecord} with the given timestamp, aggregateId and event record.
      */
-    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, EventRecord event) {
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, Event event) {
 
         final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp, aggregateId)
                 .toBuilder()
-                .setEventRecord(event);
+                .setEvent(event);
         return builder.build();
     }
 
@@ -85,9 +85,9 @@ public class TestAggregateStorageRecordFactory {
         final Timestamp timestamp2 = add(timestamp1, delta);
         final Timestamp timestamp3 = add(timestamp2, delta);
 
-        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, TestEventRecordFactory.projectCreated(id));
-        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, TestEventRecordFactory.taskAdded(id));
-        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, TestEventRecordFactory.projectStarted(id));
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, TestEventFactory.projectCreated(id));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, TestEventFactory.taskAdded(id));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, TestEventFactory.projectStarted(id));
 
         return newArrayList(record1, record2, record3);
     }

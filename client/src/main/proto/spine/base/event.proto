@@ -36,6 +36,15 @@ message EventId {
     string uuid = 1;
 }
 
+//TODO:2016-01-29:alexander.yevsyukov: Document
+message Event {
+    // Event data.
+    google.protobuf.Any message = 1;
+
+    // The context of the event.
+    EventContext context = 2;
+}
+
 // Meta-information for an event.
 message EventContext {
     // The id of the event.
@@ -58,11 +67,3 @@ message EventContext {
     map<string, google.protobuf.Any> attributes = 6;
 }
 
-// A couple of an event and its context information.
-message EventRecord {
-    // Event data.
-    google.protobuf.Any event = 1;
-
-    // The context of the event.
-    EventContext context = 2;
-}

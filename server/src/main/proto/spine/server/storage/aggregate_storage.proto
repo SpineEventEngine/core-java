@@ -33,16 +33,16 @@ import public "spine/base/event.proto";
 //
 // Different types of aggregates are managed by different storages.
 message AggregateStorageRecord {
-    // A timestamp of an event or a snapshot in this record.
+    // A timestamp of the event or snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
-     // string representation of an aggregate id.
+     // String representation of the id of the aggregate to which the event was applied.
     string aggregate_id = 2;
 
-    // A short Protobuf type name of the event.
+    // A short protobuf type name of the event.
     string event_type = 3;
 
-    // String representation of EventId.
+    // String representation of `EventId`.
     string event_id = 4;
 
     // The version of the aggregate after the event was applied.
@@ -51,8 +51,8 @@ message AggregateStorageRecord {
     reserved 6 to 19;
 
     oneof kind {
-        // Event data and context.
-        spine.base.EventRecord event_record = 20;
+        // Event stored in the record, or...
+        spine.base.Event event = 20;
 
         // Snapshot of the aggregate.
         spine.server.aggregate.Snapshot snapshot = 21;
@@ -61,14 +61,16 @@ message AggregateStorageRecord {
 
 // Event data for an aggregate returned by a storage managing the aggregate.
 message AggregateEvents {
-    // If present, Snapshot will be used for restoring aggregate state before playing other events.
+    // If the `snapshot` field is populated, it contains the last snapshot in the history of the aggregate.
+    // This value will be used for restoring the aggregate state before playing events that occurred
+    // after this snapshot was made.
     spine.server.aggregate.Snapshot snapshot = 1;
 
-    // Event records for the aggregate.
+    // Events of the aggregate.
     //
-    // If `snapshot` field is present, event records represent a 'tail' of event history of the aggregate.
-    // Otherwise, records are full history of the aggregate.
-    repeated spine.base.EventRecord event_record = 2;
+    // If `snapshot` field is populated, events represent the 'tail' of the event history of the aggregate.
+    // Otherwise, events are full history of the aggregate.
+    repeated spine.base.Event event = 2;
 }
 
 

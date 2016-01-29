@@ -20,74 +20,104 @@
 
 package org.spine3.testdata;
 
-import com.google.protobuf.Any;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.UserId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
+import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
- * Contains events for tests.
+ * The utility class which is used for creating Events for tests.
  *
- * @author Alexander Litus
+ * @author Mikhail Mikhaylov
  */
 public class TestEventFactory {
 
-    private static final ProjectId DUMMY_PROJECT_ID = createProjectId("testProjectID");
+    private static final ProjectId STUB_PROJECT_ID = createProjectId("dummy_project_id_456");
+    private static final UserId STUB_USER_ID = newUserId("test_user_id_147");
+    private static final EventContext STUB_EVENT_CONTEXT = createEventContext();
 
-    private static final ProjectCreated PROJECT_CREATED = projectCreatedEvent(DUMMY_PROJECT_ID);
-    private static final TaskAdded TASK_ADDED = taskAddedEvent(DUMMY_PROJECT_ID);
-    private static final ProjectStarted PROJECT_STARTED = projectStartedEvent(DUMMY_PROJECT_ID);
-
-    private static final Any PROJECT_CREATED_ANY = toAny(PROJECT_CREATED);
-    private static final Any TASK_ADDED_ANY = toAny(TASK_ADDED);
-    private static final Any PROJECT_STARTED_ANY = toAny(PROJECT_STARTED);
 
     private TestEventFactory() {}
 
 
-    public static ProjectCreated projectCreatedEvent() {
-        return PROJECT_CREATED;
+    /**
+     * Creates a new {@link Event} with default properties.
+     */
+    public static Event projectCreated() {
+        return projectCreated(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
-    public static TaskAdded taskAddedEvent() {
-        return TASK_ADDED;
+    /**
+     * Creates a new {@link Event} with default properties.
+     */
+    public static Event taskAdded() {
+        return taskAdded(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
-    public static ProjectStarted projectStartedEvent() {
-        return PROJECT_STARTED;
+    /**
+     * Creates a new {@link Event} with default properties.
+     */
+    public static Event projectStarted() {
+        return projectStarted(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
-    public static Any projectCreatedEventAny() {
-        return PROJECT_CREATED_ANY;
+    /**
+     * Creates a new {@link Event} with the given projectId.
+     */
+    public static Event projectCreated(ProjectId projectId) {
+        return projectCreated(projectId, createEventContext(projectId));
     }
 
-    public static Any taskAddedEventAny() {
-        return TASK_ADDED_ANY;
+    /**
+     * Creates a new {@link Event} with the given projectId.
+     */
+    public static Event taskAdded(ProjectId projectId) {
+        return taskAdded(projectId, createEventContext(projectId));
     }
 
-    public static Any projectStartedEventAny() {
-        return PROJECT_STARTED_ANY;
+    /**
+     * Creates a new {@link Event} with the given projectId.
+     */
+    public static Event projectStarted(ProjectId projectId) {
+        return projectStarted(projectId, createEventContext(projectId));
     }
 
-    public static ProjectCreated projectCreatedEvent(ProjectId id) {
-        return ProjectCreated.newBuilder().setProjectId(id).build();
+    /**
+     * Creates a new {@link Event} with the given projectId and eventContext.
+     */
+    public static Event projectCreated(ProjectId projectId, EventContext eventContext) {
+
+        final ProjectCreated event = projectCreatedEvent(projectId);
+        final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
+        return builder.build();
     }
 
-    public static ProjectCreated projectCreatedEvent(String projectId) {
-        return ProjectCreated.newBuilder().setProjectId(
-                ProjectId.newBuilder().setId(projectId).build()
-        ).build();
+    /**
+     * Creates a new {@link Event} with the given projectId and eventContext.
+     */
+    public static Event taskAdded(ProjectId projectId, EventContext eventContext) {
+
+        final TaskAdded event = taskAddedEvent(projectId);
+        final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
+        return builder.build();
     }
 
-    public static TaskAdded taskAddedEvent(ProjectId id) {
-        return TaskAdded.newBuilder().setProjectId(id).build();
-    }
+    /**
+     * Creates a new {@link Event} with the given projectId and eventContext.
+     */
+    public static Event projectStarted(ProjectId projectId, EventContext eventContext) {
 
-    public static ProjectStarted projectStartedEvent(ProjectId id) {
-        return ProjectStarted.newBuilder().setProjectId(id).build();
+        final ProjectStarted event = projectStartedEvent(projectId);
+        final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
+        return builder.build();
     }
 }

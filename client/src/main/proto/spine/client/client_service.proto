@@ -46,7 +46,7 @@ service ClientService {
     rpc Post(spine.base.Command) returns (spine.base.Response);
 
     // Request to receive events on the topic of interest.
-    rpc Subscribe(Topic) returns (stream spine.base.EventRecord);
+    rpc Subscribe(Topic) returns (stream spine.base.Event);
 
     // The request to unsubscribe from the topic.
     // This should close the stream opened by `Subscribe` call with the same `Topic` value.

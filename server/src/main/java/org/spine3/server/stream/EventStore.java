@@ -24,7 +24,7 @@ import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.storage.EventStorage;
@@ -77,47 +77,46 @@ public abstract class EventStore implements AutoCloseable {
     }
 
     /**
-     * Appends the passed event record to the history of events.
+     * Appends the passed event to the history of events.
      *
-     * @param record the record to append
+     * @param event the record to append
      */
-    public void append(EventRecord record) {
-        store(record);
-        logStored(record);
+    public void append(Event event) {
+        store(event);
+        logStored(event);
     }
 
     /**
-     * Implement this method for storing the passed event record.
+     * Implement this method for storing the passed event.
      *
-     * @param record the event record to store.
+     * @param event the event record to store.
      */
-    protected abstract void store(EventRecord record);
+    protected abstract void store(Event event);
 
     /**
-     * Creates iterator for traversing through the history of event records
-     * matching the passed query.
+     * Creates iterator for traversing through the history of events matching the passed query.
      *
      * @param query the query filtering the history
      * @return iterator instance
      */
-    protected abstract Iterator<EventRecord> iterator(EventStreamQuery query);
+    protected abstract Iterator<Event> iterator(EventStreamQuery query);
 
     /**
-     * Creates the steam with event records matching the passed query.
+     * Creates the steam with events matching the passed query.
      *
      * @param request the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream
      */
-    public void read(final EventStreamQuery request, final StreamObserver<EventRecord> responseObserver) {
+    public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
         logReadingStart(request, responseObserver);
 
         streamExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                final Iterator<EventRecord> eventRecords = iterator(request);
+                final Iterator<Event> eventRecords = iterator(request);
                 while (eventRecords.hasNext()) {
-                    final EventRecord record = eventRecords.next();
-                    responseObserver.onNext(record);
+                    final Event event = eventRecords.next();
+                    responseObserver.onNext(event);
                 }
                 responseObserver.onCompleted();
                 logCatchUpComplete(responseObserver);
@@ -235,12 +234,12 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        protected void store(EventRecord record) {
+        protected void store(Event record) {
             storage.write(record.getContext().getEventId(), record);
         }
 
         @Override
-        protected Iterator<EventRecord> iterator(EventStreamQuery query) {
+        protected Iterator<Event> iterator(EventStreamQuery query) {
             return storage.iterator(query);
         }
 
@@ -308,7 +307,7 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public void append(EventRecord request, StreamObserver<Response> responseObserver) {
+        public void append(Event request, StreamObserver<Response> responseObserver) {
             try {
                 eventStore.append(request);
                 responseObserver.onNext(Responses.ok());
@@ -319,7 +318,7 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public void read(EventStreamQuery request, StreamObserver<EventRecord> responseObserver) {
+        public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
             eventStore.read(request, responseObserver);
         }
     }
@@ -328,7 +327,7 @@ public abstract class EventStore implements AutoCloseable {
     // Logging methods
     //------------------------------------------
 
-    private void logStored(EventRecord request) {
+    private void logStored(Event request) {
         if (logger == null) {
             return;
         }
@@ -337,7 +336,7 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    private void logReadingStart(EventStreamQuery request, StreamObserver<EventRecord> responseObserver) {
+    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         if (logger == null) {
             return;
         }
@@ -348,7 +347,7 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    private void logCatchUpComplete(StreamObserver<EventRecord> observer) {
+    private void logCatchUpComplete(StreamObserver<Event> observer) {
         if (logger == null) {
             return;
         }

@@ -24,18 +24,18 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
+import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 import org.spine3.server.stream.EventRecordFilter;
 import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.EventStreamQuery;
+import org.spine3.server.util.Events;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static org.spine3.server.storage.StorageUtil.toEventRecord;
+import static org.spine3.server.storage.StorageUtil.toEvent;
 import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
-import static org.spine3.server.util.EventRecords.*;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -43,10 +43,10 @@ import static org.spine3.server.util.EventRecords.*;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class EventStorage extends AbstractStorage<EventId, EventRecord> {
+public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
     @Override
-    public void write(EventId id, EventRecord record) {
+    public void write(EventId id, Event record) {
         checkNotClosed();
 
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
@@ -55,27 +55,27 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
 
     @Nullable
     @Override
-    public EventRecord read(EventId id) {
+    public Event read(EventId id) {
         checkNotClosed();
 
         final EventStorageRecord storeRecord = readInternal(id);
         if (storeRecord == null) {
             return null;
         }
-        final EventRecord result = toEventRecord(storeRecord);
+        final Event result = toEvent(storeRecord);
         return result;
     }
 
     /**
-     * Returns iterator through event records matching the passed query.
+     * Returns iterator through events matching the passed query.
      *
      * @param query a filtering query
      * @return iterator instance
      */
-    public abstract Iterator<EventRecord> iterator(EventStreamQuery query);
+    public abstract Iterator<Event> iterator(EventStreamQuery query);
 
     /**
-     * Writes storage format record into the storage.
+     * Writes record into the storage.
      *
      * @param record the record to write
      */
@@ -90,13 +90,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
     protected abstract EventStorageRecord readInternal(EventId eventId);
 
     /**
-     * The predicate for filtering {@code EventRecord} instances by
+     * The predicate for filtering {@code Event} instances by
      * {@link EventStreamQuery}.
      */
-    public static class MatchesStreamQuery implements Predicate<EventRecord> {
+    public static class MatchesStreamQuery implements Predicate<Event> {
 
         private final EventStreamQuery query;
-        private final Predicate<EventRecord> timePredicate;
+        private final Predicate<Event> timePredicate;
 
         @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
         public MatchesStreamQuery(EventStreamQuery query) {
@@ -110,24 +110,24 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
 
             //noinspection IfStatementWithTooManyBranches
             if (afterSpecified && !beforeSpecified) {
-                this.timePredicate = new IsAfter(after);
+                this.timePredicate = new Events.IsAfter(after);
             } else if (!afterSpecified && beforeSpecified) {
-                this.timePredicate = new IsBefore(before);
+                this.timePredicate = new Events.IsBefore(before);
             } else if (afterSpecified /* && beforeSpecified is true here too */){
-                this.timePredicate = new IsBetween(after, before);
+                this.timePredicate = new Events.IsBetween(after, before);
             } else { // No timestamps specified.
                 this.timePredicate = Predicates.alwaysTrue();
             }
         }
 
         @Override
-        public boolean apply(@Nullable EventRecord input) {
+        public boolean apply(@Nullable Event input) {
             if (!timePredicate.apply(input)) {
                 return false;
             }
 
             for (EventRecordFilter filter : query.getFilterList()) {
-                final Predicate<EventRecord> filterPredicate = new MatchesFilter(filter);
+                final Predicate<Event> filterPredicate = new Events.MatchesFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;
                 }

@@ -26,9 +26,9 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import org.spine3.SPI;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 import org.spine3.server.util.Events;
 import org.spine3.type.TypeName;
 
@@ -45,55 +45,55 @@ import java.util.List;
 public class StorageUtil {
 
     /**
-     * Converts EventStorageRecord to EventRecord.
+     * Converts EventStorageRecord to Event.
      */
-    public static EventRecord toEventRecord(EventStorageRecord record) {
-        final EventRecord.Builder builder = EventRecord.newBuilder()
-                .setEvent(record.getMessage())
+    public static Event toEvent(EventStorageRecord record) {
+        final Event.Builder builder = Event.newBuilder()
+                .setMessage(record.getMessage())
                 .setContext(record.getContext());
         return builder.build();
     }
 
     /**
-     * Converts EventStorageRecords to EventRecords.
+     * Converts EventStorageRecords to Events.
      */
-    public static List<EventRecord> toEventRecordList(List<EventStorageRecord> records) {
+    public static List<Event> toEventList(List<EventStorageRecord> records) {
         return Lists.transform(records, TO_EVENT_RECORD);
     }
 
     /**
-     * Converts EventStorageRecords to EventRecords.
+     * Converts EventStorageRecords to Events.
      */
     @SuppressWarnings("OverloadedVarargsMethod")
-    public static List<EventRecord> toEventRecordList(EventStorageRecord... records) {
+    public static List<Event> toEventList(EventStorageRecord... records) {
         return Lists.transform(ImmutableList.copyOf(records), TO_EVENT_RECORD);
     }
 
     /**
-     * Converts EventStorageRecords to EventRecords.
+     * Converts {@code EventStorageRecord}s to {@code Event}s.
      */
-    public static Iterator<EventRecord> toEventRecordsIterator(Iterator<EventStorageRecord> records) {
+    public static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
         return Iterators.transform(records, TO_EVENT_RECORD);
     }
 
-    private static final Function<EventStorageRecord, EventRecord> TO_EVENT_RECORD = new Function<EventStorageRecord, EventRecord>() {
+    private static final Function<EventStorageRecord, Event> TO_EVENT_RECORD = new Function<EventStorageRecord, Event>() {
         @Override
-        public EventRecord apply(@Nullable EventStorageRecord input) {
+        public Event apply(@Nullable EventStorageRecord input) {
             if (input == null) {
-                return EventRecord.getDefaultInstance();
+                return Event.getDefaultInstance();
             }
-            final EventRecord result = toEventRecord(input);
+            final Event result = toEvent(input);
             return result;
         }
     };
 
     /**
-     * Creates storage record for the passed {@link EventRecord}.
+     * Creates storage record for the passed {@link Event}.
      */
-    public static EventStorageRecord toEventStorageRecord(EventRecord record) {
-        final Any event = record.getEvent();
-        final EventContext context = record.getContext();
-        final TypeName typeName = TypeName.ofEnclosed(event);
+    public static EventStorageRecord toEventStorageRecord(Event event) {
+        final Any message = event.getMessage();
+        final EventContext context = event.getContext();
+        final TypeName typeName = TypeName.ofEnclosed(message);
         final EventId eventId = context.getEventId();
         final String eventIdStr = Events.idToString(eventId);
 
@@ -102,12 +102,11 @@ public class StorageUtil {
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
                 .setEventId(eventIdStr)
-                .setMessage(event)
+                .setMessage(message)
                 .setContext(context);
 
         return builder.build();
     }
 
-    //@formatter:off
     private StorageUtil() {}
 }

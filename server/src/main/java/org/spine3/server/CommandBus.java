@@ -150,11 +150,11 @@ public class CommandBus implements AutoCloseable {
      * Directs a command request to the corresponding handler.
      *
      * @param request the command request to be processed
-     * @return a list of the event records as the result of handling the command
+     * @return a list of the events as the result of handling the command
      * @throws UnsupportedCommandException if there is no handler or dispatcher registered for
      *  the class of the passed command
      */
-    public List<EventRecord> post(Command request) {
+    public List<Event> post(Command request) {
 
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
 
@@ -179,10 +179,10 @@ public class CommandBus implements AutoCloseable {
         throw new UnsupportedCommandException(getMessage(request));
     }
 
-    private List<EventRecord> dispatch(Command request) {
+    private List<Event> dispatch(Command request) {
         final CommandClass commandClass = CommandClass.of(request);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        List<EventRecord> result = Collections.emptyList();
+        List<Event> result = Collections.emptyList();
         try {
             result = dispatcher.dispatch(request);
         } catch (Exception e) {
@@ -193,10 +193,10 @@ public class CommandBus implements AutoCloseable {
     }
 
 
-    /* package */ final List<EventRecord> invokeHandler(Message command, CommandContext context) {
+    /* package */ final List<Event> invokeHandler(Message command, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandHandlerMethod method = getHandler(commandClass);
-        List<EventRecord> result = Collections.emptyList();
+        List<Event> result = Collections.emptyList();
         try {
             result = method.invoke(command, context);
         } catch (InvocationTargetException e) {
