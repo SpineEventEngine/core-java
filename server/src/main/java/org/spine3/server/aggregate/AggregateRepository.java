@@ -165,7 +165,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     }
 
     /**
-     * Stores the passed aggregate root and commits its uncommitted events.
+     * Stores the passed aggregate and commits its uncommitted events.
      *
      * @param aggregate an instance to store
      */
@@ -178,29 +178,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
         // events, which isn't going to be the case. We need to read the number of events since the last
         // snapshot of the aggregate instead.
 
+        final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
         int eventCount = 0;
         for (EventRecord event : uncommittedEvents) {
-            storeEvent(event);
+            aggregateStorage().writeEvent(id, event);
             ++eventCount;
 
             if (eventCount > snapshotTrigger) {
-                createAndStoreSnapshot(aggregate);
+                createAndStoreSnapshot(id, aggregate);
                 eventCount = 0;
             }
         }
-
         aggregate.commitEvents();
     }
 
-    private void createAndStoreSnapshot(A aggregateRoot) {
-        final Snapshot snapshot = aggregateRoot.toSnapshot();
-        final I aggregateRootId = aggregateRoot.getId();
-        aggregateStorage().write(aggregateRootId, snapshot);
-    }
-
-    private void storeEvent(EventRecord event) {
-        aggregateStorage().write(event);
+    private void createAndStoreSnapshot(I id, A aggregate) {
+        final Snapshot snapshot = aggregate.toSnapshot();
+        aggregateStorage().write(id, snapshot);
     }
 
     /**
