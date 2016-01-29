@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.spine3.base.*;
 import org.spine3.client.UserUtil;
 import org.spine3.server.Assign;
-import org.spine3.server.util.Classes;
+import org.spine3.server.reflect.Classes;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;

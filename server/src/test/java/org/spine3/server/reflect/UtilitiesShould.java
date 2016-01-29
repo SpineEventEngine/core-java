@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.util;
+package org.spine3.server.reflect;
 
 import org.junit.Test;
 import org.spine3.base.Commands;

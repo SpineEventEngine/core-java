@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.util;
+package org.spine3.server;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.server.Identifiers;
 import org.spine3.test.*;
 import org.spine3.test.project.ProjectId;
 

@@ -26,8 +26,8 @@ import org.spine3.base.EventContext;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
-import org.spine3.server.util.Classes;
-import org.spine3.server.util.MethodMap;
+import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.MethodMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

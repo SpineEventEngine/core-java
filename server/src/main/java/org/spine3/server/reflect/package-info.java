@@ -22,7 +22,13 @@
  * This package contains server-side utility classes.
  */
 
+/**
+ * This package contains internal utilities for obtaining Reflection information.
+ */
+@Internal
 @ParametersAreNonnullByDefault
-package org.spine3.server.util;
+package org.spine3.server.reflect;
+
+import org.spine3.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

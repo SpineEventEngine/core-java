@@ -30,8 +30,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.util.MethodMap;
-import org.spine3.server.util.Methods;
+import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.Methods;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;

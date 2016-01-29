@@ -33,7 +33,7 @@ import org.spine3.server.command.CommandValidation;
 import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.util.Classes;
+import org.spine3.server.reflect.Classes;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;

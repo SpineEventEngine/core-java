@@ -17,14 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.util;
+package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.UserId;
-import org.spine3.protobuf.Messages;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.client.UserUtil.newUserId;

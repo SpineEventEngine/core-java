@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.UserId;
+import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -59,9 +60,13 @@ public class CommandFactoryShould {
 
     @Test
     public void create_new_instances_with_current_time() {
+        // We are creating a range of +/- second between the call to make sure the timestamp would fit
+        // into this range. The purpose of this test is to make sure it works with this precision
+        // and to add coverage.
         final Timestamp beforeCall = Timestamps.secondsAgo(1);
         final Command command = commandFactory.create(StringValue.newBuilder().build());
-        final Timestamp afterCall = TimeUtil.getCurrentTime();
+        final Timestamp afterCall = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(1));
+
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
     }
 }

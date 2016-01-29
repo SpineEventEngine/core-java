@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.util;
+package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
@@ -38,7 +37,6 @@ import java.util.Set;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@Internal
 public class Classes {
 
     /**
