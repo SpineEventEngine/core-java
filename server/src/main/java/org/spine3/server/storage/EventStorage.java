@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.server.stream.EventRecordFilter;
+import org.spine3.server.stream.EventFilter;
 import org.spine3.server.stream.EventStore;
 import org.spine3.server.stream.EventStreamQuery;
 import org.spine3.server.util.Events;
@@ -126,7 +126,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 return false;
             }
 
-            for (EventRecordFilter filter : query.getFilterList()) {
+            for (EventFilter filter : query.getFilterList()) {
                 final Predicate<Event> filterPredicate = new Events.MatchesFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;

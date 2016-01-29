@@ -29,7 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.stream.EventRecordFilter;
+import org.spine3.server.stream.EventFilter;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 
@@ -216,14 +216,14 @@ public static class IsBetween implements Predicate<Event> {
         return result;
     }
 } /**
- * The predicate for filtering event records by {@link EventRecordFilter}.
+ * The predicate for filtering event records by {@link EventFilter}.
  */
 public static class MatchesFilter implements Predicate<Event> {
 
-    private final EventRecordFilter filter;
+    private final EventFilter filter;
     private final TypeName eventType;
 
-    public MatchesFilter(EventRecordFilter filter) {
+    public MatchesFilter(EventFilter filter) {
         this.filter = filter;
         this.eventType = TypeName.of(filter.getEventType());
     }

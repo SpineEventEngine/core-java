@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.server.stream.EventRecordFilter;
+import org.spine3.server.stream.EventFilter;
 import org.spine3.server.stream.EventStreamQuery;
 import org.spine3.server.util.Events;
 import org.spine3.test.project.ProjectId;
@@ -130,7 +130,7 @@ public abstract class EventStorageShould {
         writeAll(expectedRecord, projectStarted(), taskAdded());
 
         final String typeName = TypeName.of(StringValue.class).value();
-        final EventRecordFilter filter = EventRecordFilter.newBuilder()
+        final EventFilter filter = EventFilter.newBuilder()
                 .setEventType(typeName).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                 .addFilter(filter).build();
@@ -147,7 +147,7 @@ public abstract class EventStorageShould {
         final Event expectedRecord = TestEventFactory.projectCreated(id);
         writeAll(toEventStorageRecord(expectedRecord), projectStarted(), taskAdded());
 
-        final EventRecordFilter filter = EventRecordFilter.newBuilder()
+        final EventFilter filter = EventFilter.newBuilder()
                 .addAggregateId(toAny(id)).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                 .addFilter(filter).build();
