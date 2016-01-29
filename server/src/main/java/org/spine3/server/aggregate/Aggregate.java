@@ -28,7 +28,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
@@ -40,7 +39,6 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -120,7 +118,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
     }
 
-    @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
         return new AggregateCommandHandler(this, method);
@@ -324,7 +321,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
     protected Collection<Event> getStateChangingUncommittedEvents() {
-        final Predicate<Event> isStateChanging = isStateChangingEventRecord(getStateNeutralEventClasses());
+        final Predicate<Event> isStateChanging = isStateChangingEventRecord();
         final Collection<Event> result = filter(uncommittedEvents, isStateChanging);
         return result;
     }
@@ -336,18 +333,17 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>The predicate uses passed event classes for the events that do not modify the
      * state of the aggregate. As such, they are called <strong>State Neutral.</strong>
      *
-     * @param stateNeutralEventClasses classes of events that do not modify aggregate state
      * @return new predicate instance
      */
-    @SuppressWarnings("MethodParameterNamingConvention") // Prefer longer name here for clarity.
-    private static Predicate<Event> isStateChangingEventRecord(
-            final Collection<Class<? extends Message>> stateNeutralEventClasses) {
+    private Predicate<Event> isStateChangingEventRecord() {
+        final Collection<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
         return new Predicate<Event>() {
             @Override
-            public boolean apply(@Nullable Event event) {
-                if (event == null) {
-                    return false;
-                }
+            public boolean apply(
+                    @SuppressWarnings("NullableProblems")
+                    /* The @Nullable annotation is removed to avoid checking for null input,
+                       which is not possible here. Having the null input doesn't allow to test
+                       that code branch. */ Event event) {
                 final Message message = Events.getMessage(event);
                 final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
                 return !isStateNeutral;

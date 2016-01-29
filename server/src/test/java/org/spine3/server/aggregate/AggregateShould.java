@@ -559,7 +559,9 @@ public class AggregateShould {
         }
 
         @Override
-        @SuppressWarnings("RefusedBequest") // the method from superclass returns nothing
+        @SuppressWarnings({"RefusedBequest", // OK as the default implementation returns empty set.
+                           "ReturnOfCollectionOrArrayField"}) // OK, as we return immutable implementation.
+        // the method from superclass returns nothing
         protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
             return STATE_NEUTRAL_EVENT_CLASSES;
         }
