@@ -29,8 +29,11 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.util.TimeUtil.subtract;
+
 /**
- * Utilities class for working with timestamps in addition to those available from {@link TimeUtil}.
+ * Utilities class for working with {@link Timestamp}s in addition to those available from {@link TimeUtil}.
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -38,53 +41,108 @@ import java.util.Date;
  */
 public class Timestamps {
 
+    /**
+     * The count of nanoseconds in one millisecond.
+     */
     public static final long NANOS_PER_MILLISECOND = 1_000_000;
-    public static final long MICROS_PER_SECOND = 1_000_000;
+
+    /**
+     * The count of milliseconds in one second.
+     */
     public static final int MILLIS_PER_SECOND = 1000;
 
+    /**
+     * The count of seconds in one minute.
+     */
     public static final int SECONDS_PER_MINUTE = 60;
+
+    /**
+     * The count of minutes in one hour.
+     */
     public static final int MINUTES_PER_HOUR = 60;
 
     /**
-     * @return timestamp of the moment a minute ago from now.
+     * The duration of one minute.
+     */
+    private static final Duration MINUTE = Durations.ofMinutes(1);
+
+
+    /**
+     * Returns a timestamp of the moment a minute ago from now.
+     *
+     * @return a timestamp instance
      */
     public static Timestamp minuteAgo() {
-        final Duration minute = TimeUtil.createDurationFromMillis(MICROS_PER_SECOND * SECONDS_PER_MINUTE * -1);
-        final Timestamp result = TimeUtil.add(TimeUtil.getCurrentTime(), minute);
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp result = subtract(currentTime, MINUTE);
         return result;
     }
 
+    /**
+     * Compares two timestamps. Returns a negative integer, zero, or a positive integer
+     * if the first timestamp is less than, equal to, or greater than the second one.
+     *
+     * @param t1 a timestamp to compare
+     * @param t2 another timestamp to compare
+     * @return a negative integer, zero, or a positive integer
+     * if the first timestamp is less than, equal to, or greater than the second one
+     */
     public static int compare(@Nullable Timestamp t1, @Nullable Timestamp t2) {
         if (t1 == null) {
-            return t2 == null ? 0 : 1;
+            return (t2 == null) ? 0 : -1;
         }
         if (t2 == null) {
-            return -1;
+            return 1;
         }
-
         int result = Long.compare(t1.getSeconds(), t2.getSeconds());
-        result = result == 0
-                ? Integer.compare(t1.getNanos(), t2.getNanos())
-                : result;
+        result = (result == 0) ?
+                Integer.compare(t1.getNanos(), t2.getNanos()) :
+                result;
         return result;
     }
 
+    /**
+     * Calculates if the {@code timestamp} is between the {@code start} and {@code finish} timestamps.
+     *
+     * @param timestamp the timestamp to check if it is between the {@code start} and {@code finish}
+     * @param start the first point in time, must be before the {@code finish} timestamp
+     * @param finish the second point in time, must be after the {@code start} timestamp
+     * @return true if the {@code timestamp} is after the {@code start} and before the {@code finish} timestamps,
+     * false otherwise
+     */
     public static boolean isBetween(Timestamp timestamp, Timestamp start, Timestamp finish) {
         final boolean isAfterStart = compare(start, timestamp) < 0;
         final boolean isBeforeFinish = compare(timestamp, finish) < 0;
         return isAfterStart && isBeforeFinish;
     }
 
-    public static boolean isAfter(Timestamp timestamp, Timestamp from) {
-        return (compare(from, timestamp) < 0);
+    /**
+     * Calculates if the {@code isAfter} timestamp is after the {@code point} timestamp.
+     *
+     * @param point the first point in time which is supposed to be before the {@code isAfter} timestamp
+     * @param isAfter the timestamp to check if it is after the {@code point} timestamp
+     * @return true if the {@code isAfter} timestamp is after the {@code point} timestamp, false otherwise
+     */
+    public static boolean isAfter(Timestamp point, Timestamp isAfter) {
+        final boolean result = compare(point, isAfter) < 0;
+        return result;
     }
 
+    /**
+     * Compares two timestamps. Returns a negative integer, zero, or a positive integer
+     * if the first timestamp is less than, equal to, or greater than the second one.
+     *
+     * @return a negative integer, zero, or a positive integer
+     * if the first timestamp is less than, equal to, or greater than the second one
+     */
     public static Comparator<? super Timestamp> comparator() {
         return new TimestampComparator();
     }
 
-    /*
-     * Converts Timestamp to Date to the nearest millisecond.
+    /**
+     * Converts a {@link Timestamp} to {@link Date} to the nearest millisecond.
+     *
+     * @return a {@link Date} instance
      */
     public static Date convertToDate(TimestampOrBuilder timestamp) {
         final long millisecsFromNanos = timestamp.getNanos() / NANOS_PER_MILLISECOND;

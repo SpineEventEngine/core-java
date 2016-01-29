@@ -20,18 +20,170 @@
 
 package org.spine3.protobuf;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import java.util.Date;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
+import static com.google.protobuf.util.TimeUtil.*;
+import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
+import static org.spine3.util.Tests.callPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
+
+    private static final Duration DELTA = Durations.ofSeconds(10);
+
+    private static final Duration MINUTE = Durations.ofMinutes(1);
+
+    @Test
+    public void have_private_constructor() throws Exception {
+        callPrivateUtilityConstructor(Timestamps.class);
+    }
+
+    @Test
+    public void calculate_timestamp_of_moment_minute_ago_from_now() {
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp expected = subtract(currentTime, MINUTE);
+
+        final Timestamp actual = Timestamps.minuteAgo();
+
+        assertEquals(expected.getSeconds(), actual.getSeconds());
+    }
+
+    @Test
+    public void compare_two_timestamps_return_negative_int_if_first_less_than_second_one() {
+        final Timestamp time1 = getCurrentTime();
+        final Timestamp time2 = add(time1, DELTA);
+
+        final int result = Timestamps.compare(time1, time2);
+
+        assertTrue(result < 0);
+    }
+
+    @Test
+    public void compare_two_timestamps_return_negative_int_if_first_is_null() {
+        final Timestamp currentTime = getCurrentTime();
+
+        final int result = Timestamps.compare(null, currentTime);
+
+        assertTrue(result < 0);
+    }
+
+    @Test
+    public void compare_two_timestamps_return_zero_if_timestamps_are_equal() {
+        final int secs = 256;
+        final int nanos = 512;
+        final Timestamp time1 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+        final Timestamp time2 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+
+        final int result = Timestamps.compare(time1, time2);
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void compare_two_timestamps_return_zero_if_pass_null() {
+        final int result = Timestamps.compare(null, null);
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void compare_two_timestamps_return_positive_int_if_first_greater_than_second_one() {
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp timeAfterCurrent = add(currentTime, DELTA);
+
+        final int result = Timestamps.compare(timeAfterCurrent, currentTime);
+
+        assertTrue(result > 0);
+    }
+
+    @Test
+    public void compare_two_timestamps_return_positive_int_if_second_one_is_null() {
+        final Timestamp currentTime = getCurrentTime();
+
+        final int result = Timestamps.compare(currentTime, null);
+
+        assertTrue(result > 0);
+    }
+
+    @Test
+    public void return_true_if_timestamp_is_between_two_timestamps() {
+        final Timestamp start = getCurrentTime();
+        final Timestamp timeBetween = add(start, DELTA);
+        final Timestamp finish = add(timeBetween, DELTA);
+
+        final boolean isBetween = Timestamps.isBetween(timeBetween, start, finish);
+
+        assertTrue(isBetween);
+    }
+
+    @Test
+    public void return_false_if_timestamp_is_not_between_two_timestamps() {
+        final Timestamp start = getCurrentTime();
+        final Timestamp finish = add(start, DELTA);
+        final Timestamp timeNotBetween = add(finish, DELTA);
+
+        final boolean isBetween = Timestamps.isBetween(timeNotBetween, start, finish);
+
+        assertFalse(isBetween);
+    }
+
+    @Test
+    public void return_true_if_timestamp_is_after_another_one() {
+        final Timestamp point = getCurrentTime();
+        final Timestamp afterFirst = add(point, DELTA);
+
+        final boolean isAfter = Timestamps.isAfter(point, afterFirst);
+
+        assertTrue(isAfter);
+    }
+
+    @Test
+    public void return_false_if_timestamp_is_not_after_another_one() {
+        final Timestamp point = getCurrentTime();
+        final Timestamp beforePoint = subtract(point, DELTA);
+
+        final boolean isAfter = Timestamps.isAfter(point, beforePoint);
+
+        assertFalse(isAfter);
+    }
+
+    @Test
+    public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
+        final Timestamp time1 = getCurrentTime();
+        final Timestamp time2 = add(time1, DELTA);
+
+        final int result = Timestamps.comparator().compare(time1, time2);
+
+        assertTrue(result < 0);
+    }
+
+    @Test
+    public void compare_two_timestamps_using_comparator_return_zero_if_timestamps_are_equal() {
+        final int secs = 256;
+        final int nanos = 512;
+        final Timestamp time1 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+        final Timestamp time2 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+
+        final int result = Timestamps.comparator().compare(time1, time2);
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
+        final Timestamp currentTime = getCurrentTime();
+        final Timestamp timeAfterCurrent = add(currentTime, DELTA);
+
+        final int result = Timestamps.comparator().compare(timeAfterCurrent, currentTime);
+
+        assertTrue(result > 0);
+    }
 
     @Test
     public void convert_timestamp_to_date_to_nearest_second() {
@@ -39,7 +191,7 @@ public class TimestampsShould {
         final Timestamp expectedTime = getCurrentTime();
 
         final Date actualDate = convertToDate(expectedTime);
-        final long actualSeconds = actualDate.getTime() / (long) MILLIS_PER_SECOND;
+        final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
 
         assertEquals(expectedTime.getSeconds(), actualSeconds);
     }
