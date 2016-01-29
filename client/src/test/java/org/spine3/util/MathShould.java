@@ -38,7 +38,7 @@ public class MathShould {
     }
 
     @Test
-    public void quickly_return_minus_a_on_multiply_by_minus_one() {
+    public void quickly_return_negative_number_on_multiply_by_minus_one() {
         assertEquals(-100, Math.safeMultiply(100, -1));
     }
 
