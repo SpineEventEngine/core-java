@@ -28,13 +28,16 @@ import org.spine3.server.event.StreamProjection;
 import javax.annotation.Nullable;
 
 /**
- * {@link StreamProjectionStorage} keeps {@link StreamProjection}s and the timestamp of the last event handled.
+ * The storage used by projection repositories for keeping {@link StreamProjection}s
+ * and the timestamp of the last event processed by the projection repository.
+ *
+ * <p>This timestamp is used for 'catch-up' operation of the projection repositories.
  *
  * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
  * @author Alexander Litus
  */
 @SPI
-public abstract class StreamProjectionStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
+public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
     @Nullable
     @Override

@@ -28,8 +28,8 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.Identifiers;
+import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.StreamProjectionStorage;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
@@ -115,7 +115,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
         final P sp = load(id);
         sp.handle(eventMessage, context);
         store(sp);
-        final StreamProjectionStorage<I> storage = streamProjectionStorage();
+        final ProjectionStorage<I> storage = streamProjectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);
     }
@@ -127,9 +127,9 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      * @throws IllegalStateException if the storage is null
      */
     @Nonnull
-    protected StreamProjectionStorage<I> streamProjectionStorage() {
+    protected ProjectionStorage<I> streamProjectionStorage() {
         @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
-        final StreamProjectionStorage<I> storage = (StreamProjectionStorage<I>) getStorage();
+        final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return checkStorage(storage);
     }
 }

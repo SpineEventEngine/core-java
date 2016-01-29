@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import org.spine3.SPI;
 import org.spine3.base.Command;
@@ -31,8 +30,6 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -42,10 +39,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
-
-    static {
-        Identifiers.IdConverterRegistry.getInstance().register(CommandId.class, new CommandIdToStringConverter());
-    }
 
     public void store(AggregateId aggregateId, Command command) {
         checkNotNull(aggregateId, "aggregateId");
@@ -68,14 +61,4 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         write(commandId, builder.build());
     }
 
-    /* package */ static class CommandIdToStringConverter implements Function<CommandId, String> {
-        @Override
-        public String apply(@Nullable CommandId commandId) {
-            if (commandId == null) {
-                return Identifiers.NULL_ID_OR_FIELD;
-            }
-
-            return commandId.getUuid();
-        }
-    }
 }

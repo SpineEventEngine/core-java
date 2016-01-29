@@ -24,6 +24,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.*;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
@@ -41,7 +43,7 @@ import static org.spine3.protobuf.Messages.fromAny;
 /**
  * This class manages conversion of identifies to/from string.
  *
- * <p>In addition to utility methods for the conversion, it provides {@link IdConverterRegistry}
+ * <p>In addition to utility methods for the conversion, it provides {@link ConverterRegistry}
  * which allows to provide custom conversion logic for user-defined types of identifies.
  *
  * @author Alexander Litus
@@ -114,7 +116,7 @@ public class Identifiers {
     private static String idMessageToString(Message message) {
 
         final String result;
-        final IdConverterRegistry registry = IdConverterRegistry.getInstance();
+        final ConverterRegistry registry = ConverterRegistry.getInstance();
 
         if (registry.containsConverter(message)) {
             final Function<Message, String> converter = registry.getConverter(message);
@@ -230,10 +232,10 @@ public class Identifiers {
     }
 
     /**
-     * Converts the passed timestamp to human-readable string representation.
+     * Converts the passed timestamp to the string, which will serve as ID.
      *
-     * @param timestamp  the value to convert
-     * @return string representation of timestamp
+     * @param timestamp the value to convert
+     * @return string representation of timestamp-based ID
      */
     public static String timestampToIdString(Timestamp timestamp) {
         String result = TimeUtil.toString(timestamp);
@@ -261,15 +263,17 @@ public class Identifiers {
     /**
      * The registry of converters of ID types to string representations.
      */
-    public static class IdConverterRegistry {
+    public static class ConverterRegistry {
 
         private final Map<Class<?>, Function<?, String>> entries = newHashMap(
                 ImmutableMap.<Class<?>, Function<?, String>>builder()
                         .put(Timestamp.class, new TimestampToStringConverter())
+                        .put(EventId.class, new EventIdToStringConverter())
+                        .put(CommandId.class, new CommandIdToStringConverter())
                         .build()
         );
 
-        private IdConverterRegistry() {
+        private ConverterRegistry() {
         }
 
         public <I extends Message> void register(Class<I> idClass, Function<I, String> converter) {
@@ -296,10 +300,10 @@ public class Identifiers {
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final IdConverterRegistry value = new IdConverterRegistry();
+            private final ConverterRegistry value = new ConverterRegistry();
         }
 
-        public static IdConverterRegistry getInstance() {
+        public static ConverterRegistry getInstance() {
             return Singleton.INSTANCE.value;
         }
 
@@ -313,6 +317,30 @@ public class Identifiers {
             }
             final String result = timestampToIdString(timestamp);
             return result;
+        }
+    }
+
+    public static class EventIdToStringConverter implements Function<EventId, String> {
+        @Override
+        public String apply(@Nullable EventId eventId) {
+
+            if (eventId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            return eventId.getUuid();
+        }
+
+    }
+
+    public static class CommandIdToStringConverter implements Function<CommandId, String> {
+        @Override
+        public String apply(@Nullable CommandId commandId) {
+            if (commandId == null) {
+                return NULL_ID_OR_FIELD;
+            }
+
+            return commandId.getUuid();
         }
     }
 }

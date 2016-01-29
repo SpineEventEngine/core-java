@@ -20,22 +20,29 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.server.Identifiers;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.event.Events;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-
-import static org.spine3.server.storage.StorageUtil.toEvent;
-import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
+import java.util.List;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -44,6 +51,61 @@ import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
  */
 @SPI
 public abstract class EventStorage extends AbstractStorage<EventId, Event> {
+
+    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
+        @Override
+        public Event apply(@Nullable EventStorageRecord input) {
+            if (input == null) {
+                return Event.getDefaultInstance();
+            }
+            final Event result = toEvent(input);
+            return result;
+        }
+    };
+
+    /**
+     * Converts EventStorageRecord to Event.
+     */
+    protected static Event toEvent(EventStorageRecord record) {
+        final Event.Builder builder = Event.newBuilder()
+                .setMessage(record.getMessage())
+                .setContext(record.getContext());
+        return builder.build();
+    }
+
+    /**
+     * Converts EventStorageRecords to Events.
+     */
+    @VisibleForTesting
+    /* package */ static List<Event> toEventList(List<EventStorageRecord> records) {
+        return Lists.transform(records, TO_EVENT);
+    }
+
+    /**
+     * Converts EventStorageRecords to Events.
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    @VisibleForTesting
+    /* package */ static List<Event> toEventList(EventStorageRecord... records) {
+        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
+    }
+
+    /**
+     * Converts {@code EventStorageRecord}s to {@code Event}s.
+     */
+    protected static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
+        return Iterators.transform(records, TO_EVENT);
+    }
+
+    /**
+     * Converts {@code EventId} into string.
+     *
+     * @param id the id to convert
+     * @return Json representation of the id
+     */
+    private static String idToString(EventId id) {
+        return Identifiers.idToString(id);
+    }
 
     @Override
     public void write(EventId id, Event record) {
@@ -64,6 +126,28 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         }
         final Event result = toEvent(storeRecord);
         return result;
+    }
+
+    /**
+     * Creates storage record for the passed {@link Event}.
+     */
+    @VisibleForTesting
+    /* package */ static EventStorageRecord toEventStorageRecord(Event event) {
+        final Any message = event.getMessage();
+        final EventContext context = event.getContext();
+        final TypeName typeName = TypeName.ofEnclosed(message);
+        final EventId eventId = context.getEventId();
+        final String eventIdStr = idToString(eventId);
+
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                .setTimestamp(context.getTimestamp())
+                .setEventType(typeName.nameOnly())
+                .setAggregateId(context.getAggregateId().toString())
+                .setEventId(eventIdStr)
+                .setMessage(message)
+                .setContext(context);
+
+        return builder.build();
     }
 
     /**
@@ -127,7 +211,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
 
             for (EventFilter filter : query.getFilterList()) {
-                final Predicate<Event> filterPredicate = new Events.MatchesFilter(filter);
+                final Predicate<Event> filterPredicate = new Events.MatchFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;
                 }
@@ -135,4 +219,5 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             return true;
         }
     }
+
 }

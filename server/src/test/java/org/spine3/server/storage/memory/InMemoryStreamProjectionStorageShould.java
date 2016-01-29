@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
-import org.spine3.server.storage.StreamProjectionStorage;
+import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StreamProjectionStorageShould;
 
 /**
@@ -29,11 +29,11 @@ import org.spine3.server.storage.StreamProjectionStorageShould;
  */
 public class InMemoryStreamProjectionStorageShould extends StreamProjectionStorageShould {
 
-    private final InMemoryStreamProjectionStorage<String> storage = InMemoryStreamProjectionStorage.newInstance(
+    private final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(
             InMemoryEntityStorage.<String>newInstance());
 
     @Override
-    protected StreamProjectionStorage<String> getStorage() {
+    protected ProjectionStorage<String> getStorage() {
         return storage;
     }
 

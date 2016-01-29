@@ -62,10 +62,10 @@ public interface StorageFactory extends AutoCloseable {
     <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> entityClass);
 
     /**
-     * Creates a new {@link StreamProjectionStorage} instance.
+     * Creates a new {@link ProjectionStorage} instance.
      *
      * @param <I> the type of stream projection IDs
      * @see EntityId
      */
-    <I> StreamProjectionStorage<I> createStreamProjectionStorage();
+    <I> ProjectionStorage<I> createStreamProjectionStorage();
 }

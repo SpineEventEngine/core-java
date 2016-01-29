@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.EntityId;
 import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.StreamProjectionStorage;
+import org.spine3.server.storage.ProjectionStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
  * @author Alexander Litus
  */
-public class InMemoryStreamProjectionStorage<I> extends StreamProjectionStorage<I> {
+public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final InMemoryEntityStorage<I> entityStorage;
 
@@ -42,11 +42,11 @@ public class InMemoryStreamProjectionStorage<I> extends StreamProjectionStorage<
      */
     private Timestamp timestamp;
 
-    public static <I> InMemoryStreamProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
-        return new InMemoryStreamProjectionStorage<>(entityStorage);
+    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
+        return new InMemoryProjectionStorage<>(entityStorage);
     }
 
-    private InMemoryStreamProjectionStorage(InMemoryEntityStorage<I> entityStorage) {
+    private InMemoryProjectionStorage(InMemoryEntityStorage<I> entityStorage) {
         this.entityStorage = entityStorage;
     }
 

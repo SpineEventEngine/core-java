@@ -40,7 +40,6 @@ import java.util.PriorityQueue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.filter;
-import static org.spine3.server.storage.StorageUtil.toEventIterator;
 
 /**
  * In-memory implementation of {@link EventStorage}.

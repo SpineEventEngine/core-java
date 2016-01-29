@@ -39,14 +39,14 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
 @SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class StreamProjectionStorageShould {
 
-    private StreamProjectionStorage<String> storage;
+    private ProjectionStorage<String> storage;
 
     @Before
     public void setUpTest() {
         storage = getStorage();
     }
 
-    protected abstract StreamProjectionStorage<String> getStorage();
+    protected abstract ProjectionStorage<String> getStorage();
 
     @Test
     public void return_null_if_read_one_record_from_empty_storage() {

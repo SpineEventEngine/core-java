@@ -19,25 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.server.stream;
+package spine.server.event;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EventStoreProto";
+option java_outer_classname = "EventStreamQueryProto";
+option java_package = "org.spine3.server.event";
 
-// Put under the 'grpc' sub-package, which is @Internal.
-option java_package = "org.spine3.server.stream.grpc";
+import public "google/protobuf/timestamp.proto";
 
-import public "spine/base/event.proto";
-import public "spine/base/response.proto";
+import public "spine/server/event/event_filter.proto";
 
-import public "spine/server/stream/event_stream_query.proto";
+// The query specifies event to return from the event store.
+message EventStreamQuery {
+    // Include events with timestamp after this value.
+    //
+    // If this parameter is not specified, all events since the start of
+    // the history will be included.
+    google.protobuf.Timestamp after = 1;
 
-// `EventStore` service allows to store events and read them via streams.
-service EventStore {
-    // Request to append events to the storage.
-    rpc Append(spine.base.Event) returns (spine.base.Response);
+    // Include events with the timestamp before this value.
+    //
+    // If this parameter is not specified, all events till the end of
+    // the history will be included.
+    google.protobuf.Timestamp before = 2;
 
-    // Provides events matching the query as a stream.
-    rpc Read(EventStreamQuery) returns (stream spine.base.Event);
+    // Specification of `Event`s to be included into resulting stream.
+    repeated EventFilter filter = 3;
 }

@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.server.Identifiers.IdConverterRegistry;
+import static org.spine3.server.Identifiers.ConverterRegistry;
 import static org.spine3.server.Identifiers.NULL_ID_OR_FIELD;
 
 /**
@@ -128,7 +128,7 @@ public class Application implements AutoCloseable {
 
         //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters
-        IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
+        ConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
     /**

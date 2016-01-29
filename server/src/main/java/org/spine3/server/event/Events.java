@@ -19,7 +19,6 @@
  */
 package org.spine3.server.event;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -29,7 +28,6 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.Identifiers;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 
@@ -49,8 +47,10 @@ import static org.spine3.protobuf.Timestamps.isBetween;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
 public class Events {
+
+    private Events() {
+    }
 
     /**
      * Compares two events by their timestamps.
@@ -63,10 +63,6 @@ public class Events {
             return Timestamps.compare(timestamp1, timestamp2);
         }
     };
-
-    static {
-        Identifiers.IdConverterRegistry.getInstance().register(EventId.class, new EventIdToStringConverter());
-    }
 
     /**
      * Generates a new random UUID-based {@code EventId}.
@@ -83,16 +79,6 @@ public class Events {
      */
     public static void sort(List<Event> eventRecords) {
         Collections.sort(eventRecords, EVENT_TIMESTAMP_COMPARATOR);
-    }
-
-    /**
-     * Converts {@code EventId} into Json string.
-     *
-     * @param id the id to convert
-     * @return Json representation of the id
-     */
-        public static String idToString(EventId id) {
-        return Identifiers.idToString(id);
     }
 
     /**
@@ -132,123 +118,114 @@ public class Events {
         return result;
     }
 
-    @SuppressWarnings("StringBufferWithoutInitialCapacity")
-    public static class EventIdToStringConverter implements Function<EventId, String> {
-        @Override
-        public String apply(@Nullable EventId eventId) {
+    /**
+     * The predicate to filter event records after some point in time.
+     */
+    public static class IsAfter implements Predicate<Event> {
 
-            if (eventId == null) {
-                return Identifiers.NULL_ID_OR_FIELD;
+        private final Timestamp timestamp;
+
+        public IsAfter(Timestamp timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public boolean apply(@Nullable Event record) {
+            if (record == null) {
+                return false;
+            }
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
+            return result;
+        }
+    }
+
+    /**
+     * The predicate to filter event records before some point in time.
+     */
+    public static class IsBefore implements Predicate<Event> {
+
+        private final Timestamp timestamp;
+
+        public IsBefore(Timestamp timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public boolean apply(@Nullable Event record) {
+            if (record == null) {
+                return false;
             }
 
-            return eventId.getUuid();
-        }
-
-    }
-
-    // @formatter:off
-    private Events() {}
-/**
- * The predicate to filter event records after some point in time.
- */
-public static class IsAfter implements Predicate<Event> {
-
-    private final Timestamp timestamp;
-
-    public IsAfter(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public boolean apply(@Nullable Event record) {
-        if (record == null) {
-            return false;
-        }
-        final Timestamp ts = getTimestamp(record);
-        final boolean result = Timestamps.compare(ts, this.timestamp) > 0;
-        return result;
-    }
-} /**
- * The predicate to filter event records before some point in time.
- */
-public static class IsBefore implements Predicate<Event> {
-
-    private final Timestamp timestamp;
-
-    public IsBefore(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public boolean apply(@Nullable Event record) {
-        if (record == null) {
-            return false;
-        }
-
-        final Timestamp ts = getTimestamp(record);
-        final boolean result = Timestamps.compare(ts, this.timestamp) < 0;
-        return result;
-    }
-} /**
- * The predicate to filter event records within a given time range.
- */
-public static class IsBetween implements Predicate<Event> {
-
-    private final Timestamp start;
-    private final Timestamp finish;
-
-    public IsBetween(Timestamp start, Timestamp finish) {
-        checkNotNull(start, "after");
-        checkNotNull(finish, "before");
-        checkArgument(Timestamps.compare(start, finish) < 0, "`start` must be before `finish`");
-        this.start = start;
-        this.finish = finish;
-    }
-
-    @Override
-    public boolean apply(@Nullable Event event) {
-        if (event == null) {
-            return false;
-        }
-
-        final Timestamp ts = getTimestamp(event);
-        final boolean result = isBetween(ts, start, finish);
-        return result;
-    }
-} /**
- * The predicate for filtering event records by {@link EventFilter}.
- */
-public static class MatchesFilter implements Predicate<Event> {
-
-    private final EventFilter filter;
-    private final TypeName eventType;
-
-    public MatchesFilter(EventFilter filter) {
-        this.filter = filter;
-        this.eventType = TypeName.of(filter.getEventType());
-    }
-
-    @Override
-    public boolean apply(@Nullable Event event) {
-        if (event == null) {
-            return false;
-        }
-
-        final Message message = getMessage(event);
-        final TypeName actualType = TypeName.of(message);
-        final boolean specifiedEventType = eventType.value().isEmpty();
-        if (!eventType.equals(actualType) && !specifiedEventType) {
-            return false;
-        }
-
-        final EventContext context = event.getContext();
-        final Any aggregateId = context.getAggregateId();
-        final List<Any> aggregateIdList = filter.getAggregateIdList();
-        if (aggregateIdList.isEmpty()) {
-            return true;
-        } else {
-            final boolean matches = aggregateIdList.contains(aggregateId);
-            return matches;
+            final Timestamp ts = getTimestamp(record);
+            final boolean result = Timestamps.compare(ts, this.timestamp) < 0;
+            return result;
         }
     }
-}}
+
+    /**
+     * The predicate to filter event records within a given time range.
+     */
+    public static class IsBetween implements Predicate<Event> {
+
+        private final Timestamp start;
+        private final Timestamp finish;
+
+        public IsBetween(Timestamp start, Timestamp finish) {
+            checkNotNull(start, "after");
+            checkNotNull(finish, "before");
+            checkArgument(Timestamps.compare(start, finish) < 0, "`start` must be before `finish`");
+            this.start = start;
+            this.finish = finish;
+        }
+
+        @Override
+        public boolean apply(@Nullable Event event) {
+            if (event == null) {
+                return false;
+            }
+
+            final Timestamp ts = getTimestamp(event);
+            final boolean result = isBetween(ts, start, finish);
+            return result;
+        }
+    }
+
+    /**
+     * The predicate for filtering event records by {@link EventFilter}.
+     */
+    public static class MatchFilter implements Predicate<Event> {
+
+        private final EventFilter filter;
+        private final TypeName eventType;
+
+        public MatchFilter(EventFilter filter) {
+            this.filter = filter;
+            this.eventType = TypeName.of(filter.getEventType());
+        }
+
+        @Override
+        public boolean apply(@Nullable Event event) {
+            if (event == null) {
+                return false;
+            }
+
+            final Message message = getMessage(event);
+            final TypeName actualType = TypeName.of(message);
+            final boolean specifiedEventType = eventType.value().isEmpty();
+            if (!eventType.equals(actualType) && !specifiedEventType) {
+                return false;
+            }
+
+            final EventContext context = event.getContext();
+            final Any aggregateId = context.getAggregateId();
+            final List<Any> aggregateIdList = filter.getAggregateIdList();
+            if (aggregateIdList.isEmpty()) {
+                return true;
+            } else {
+                final boolean matches = aggregateIdList.contains(aggregateId);
+                return matches;
+            }
+        }
+    }
+}
