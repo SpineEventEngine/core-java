@@ -142,11 +142,11 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
         final CommandHandlerMethod commandHandler = new PmCommandHandler(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
-        final List<Event> eventRecords = toEventRecords(events, context.getCommandId());
+        final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
     }
 
-    private List<Event> toEventRecords(final List<? extends Message> events, final CommandId commandId) {
+    private List<Event> toEvents(final List<? extends Message> events, final CommandId commandId) {
         return Lists.transform(events, new Function<Message, Event>() {
             @Nullable // return null because an exception won't be propagated in this case
             @Override

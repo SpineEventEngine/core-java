@@ -156,7 +156,7 @@ public abstract class AggregateStorageShould {
         writeAll(records);
 
         final AggregateEvents events = storage.read(aggregateId);
-        final List<Event> expectedEvents = transform(records, TO_EVENT_RECORD);
+        final List<Event> expectedEvents = transform(records, TO_EVENT);
         assertEquals(expectedEvents, events.getEventList());
     }
 
@@ -174,7 +174,7 @@ public abstract class AggregateStorageShould {
         }
     }
 
-    private static final Function<AggregateStorageRecord, Event> TO_EVENT_RECORD = new Function<AggregateStorageRecord, Event>() {
+    private static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
         public Event apply(@Nullable AggregateStorageRecord input) {

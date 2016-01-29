@@ -58,7 +58,7 @@ public class StorageUtil {
      * Converts EventStorageRecords to Events.
      */
     public static List<Event> toEventList(List<EventStorageRecord> records) {
-        return Lists.transform(records, TO_EVENT_RECORD);
+        return Lists.transform(records, TO_EVENT);
     }
 
     /**
@@ -66,17 +66,17 @@ public class StorageUtil {
      */
     @SuppressWarnings("OverloadedVarargsMethod")
     public static List<Event> toEventList(EventStorageRecord... records) {
-        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT_RECORD);
+        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
     }
 
     /**
      * Converts {@code EventStorageRecord}s to {@code Event}s.
      */
     public static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
-        return Iterators.transform(records, TO_EVENT_RECORD);
+        return Iterators.transform(records, TO_EVENT);
     }
 
-    private static final Function<EventStorageRecord, Event> TO_EVENT_RECORD = new Function<EventStorageRecord, Event>() {
+    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
         @Override
         public Event apply(@Nullable EventStorageRecord input) {
             if (input == null) {
