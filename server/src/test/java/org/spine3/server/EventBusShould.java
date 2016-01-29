@@ -161,7 +161,7 @@ public class EventBusShould {
         }
 
         @Override
-        public void dispatch(Message event, EventContext context) {
+        public void dispatch(EventRecord event) {
             dispatchCalled = true;
         }
 

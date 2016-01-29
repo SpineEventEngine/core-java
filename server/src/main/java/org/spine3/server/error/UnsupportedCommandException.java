@@ -30,7 +30,7 @@ import com.google.protobuf.Message;
 public class UnsupportedCommandException extends RuntimeException {
 
     public UnsupportedCommandException(Message command) {
-        super("There is no registered handler for the command: " + command.getClass().getName());
+        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
     }
 
     private static final long serialVersionUID = 0L;

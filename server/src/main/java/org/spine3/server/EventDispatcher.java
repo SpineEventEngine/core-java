@@ -20,8 +20,7 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
+import org.spine3.base.EventRecord;
 import org.spine3.type.EventClass;
 
 import java.util.Set;
@@ -41,8 +40,8 @@ public interface EventDispatcher {
     Set<EventClass> getEventClasses();
 
     /**
-     * Dispatches the event and its context.
+     * Dispatches the event.
      */
-    void dispatch(Message event, EventContext context);
+    void dispatch(EventRecord event);
 
 }

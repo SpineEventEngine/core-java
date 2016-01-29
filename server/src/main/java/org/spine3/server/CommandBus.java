@@ -31,8 +31,8 @@ import org.spine3.base.EventRecord;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandRequest;
+import org.spine3.client.Commands;
 import org.spine3.internal.MessageHandlerMethod;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -157,29 +157,29 @@ public class CommandBus implements AutoCloseable {
 
         store(request);
 
-        final Message command = Messages.fromAny(request.getCommand());
-        final CommandContext context = request.getContext();
 
-        final CommandClass commandClass = CommandClass.of(command);
+        final CommandClass commandClass = CommandClass.of(request);
 
         if (dispatcherRegistered(commandClass)) {
-            return dispatch(command, context);
+            return dispatch(request);
         }
 
         if (handlerRegistered(commandClass)) {
+            final Message command = Commands.getCommand(request);
+            final CommandContext context = request.getContext();
             return invokeHandler(command, context);
         }
 
         //TODO:2016-01-24:alexander.yevsyukov: Unify exceptions with messages sent in Response.
-        throw new UnsupportedCommandException(command);
+        throw new UnsupportedCommandException(Commands.getCommand(request));
     }
 
-    private List<EventRecord> dispatch(Message command, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(command);
+    private List<EventRecord> dispatch(CommandRequest request) {
+        final CommandClass commandClass = CommandClass.of(request);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         List<EventRecord> result = Collections.emptyList();
         try {
-            result = dispatcher.dispatch(command, context);
+            result = dispatcher.dispatch(request);
         } catch (Exception e) {
             //TODO:2016-01-24:alexander.yevsyukov: Update command status here?
             log().error("", e);

@@ -18,30 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.procman;
+package org.spine3.util;
 
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.junit.Test;
 
-import java.lang.reflect.Method;
+import static org.junit.Assert.assertEquals;
 
-/**
- * A wrapper for {@link ProcessManagerRepository#dispatch(Message, CommandContext)}.
- *
- * <p>This specific type of {@code CommandHandlerMethod} is needed for distinguishing the dispatching
- * method of a repository for actual handling methods.
- *
- * @author Alexander Yevsyukov
- */
-class PmRepositoryDispatchMethod extends CommandHandlerMethod {
-    /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param target object to which the method applies
-     * @param method subscriber method
-     */
-    protected PmRepositoryDispatchMethod(Object target, Method method) {
-        super(target, method);
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class MathShould {
+
+    @Test
+    public void have_private_constructor() throws Exception {
+        Tests.callPrivateUtilityConstructor(Math.class);
+    }
+
+    @Test(expected = ArithmeticException.class)
+    public void throw_ArithmethicException_multiply_MIN_VALUE_by_minus_one() {
+        Math.safeMultiply(Long.MIN_VALUE, -1);
+    }
+
+    @Test
+    public void quickly_return_negative_number_on_multiply_by_minus_one() {
+        assertEquals(-100, Math.safeMultiply(100, -1));
+    }
+
+    @Test
+    public void quickly_return_zero_when_multiplying_by_zero() {
+        assertEquals(0, Math.safeMultiply(100, 0));
+    }
+
+    @Test
+    public void quickly_return_same_value_when_multiplying_by_one() {
+        assertEquals(8, Math.safeMultiply(8, 1));
     }
 }
