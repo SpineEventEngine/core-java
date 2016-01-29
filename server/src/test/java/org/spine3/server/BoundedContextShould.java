@@ -34,10 +34,10 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.event.StreamProjection;
-import org.spine3.server.event.StreamProjectionRepository;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
@@ -382,7 +382,7 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReport extends StreamProjection<ProjectId, Empty> {
+    private static class ProjectReport extends Projection<ProjectId, Empty> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // Public constructor is a part of projection public API. It's called by a repository.
@@ -402,7 +402,7 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReportRepository extends StreamProjectionRepository<ProjectId, ProjectReport, Empty> {
+    private static class ProjectReportRepository extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }

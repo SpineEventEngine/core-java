@@ -23,12 +23,12 @@ package org.spine3.server.storage;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.server.EntityId;
-import org.spine3.server.event.StreamProjection;
+import org.spine3.server.projection.Projection;
 
 import javax.annotation.Nullable;
 
 /**
- * The storage used by projection repositories for keeping {@link StreamProjection}s
+ * The storage used by projection repositories for keeping {@link Projection}s
  * and the timestamp of the last event processed by the projection repository.
  *
  * <p>This timestamp is used for 'catch-up' operation of the projection repositories.

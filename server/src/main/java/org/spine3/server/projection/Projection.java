@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -42,13 +42,13 @@ import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
  * by event handlers for the events of interest. These event handlers are implemented
  * in the classes extending this abstract class.
  *
- * <p>Event handlers are invoked by a {@link StreamProjectionRepository} that manages instances
+ * <p>Event handlers are invoked by a {@link ProjectionRepository} that manages instances
  * of a stream projection class.
  *
  * @param <I> the type of the IDs
  * @param <M> the type of the state objects holding projection data
  */
-public abstract class StreamProjection<I, M extends Message> extends Entity<I, M> {
+public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
     private MethodMap handlers;
 
@@ -59,7 +59,7 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      * @see EntityId
      */
-    protected StreamProjection(I id) {
+    protected Projection(I id) {
         super(id);
     }
 
@@ -92,7 +92,7 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
     protected void init() {
         if (!isInitialized()) {
             final Registry registry = Registry.getInstance();
-            final Class<? extends StreamProjection> thisClass = getClass();
+            final Class<? extends Projection> thisClass = getClass();
 
             if (!registry.contains(thisClass)) {
                 registry.register(thisClass);
@@ -108,7 +108,7 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
      * @param clazz the class to inspect
      * @return immutable set of event classes or an empty set if no events are handled
      */
-    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends StreamProjection> clazz) {
+    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Projection> clazz) {
         return Classes.getHandledMessageClasses(clazz, IS_EVENT_HANDLER);
     }
 
@@ -118,17 +118,17 @@ public abstract class StreamProjection<I, M extends Message> extends Entity<I, M
     }
 
     private static class Registry {
-        private final MethodMap.Registry<StreamProjection> eventHandlers = new MethodMap.Registry<>();
+        private final MethodMap.Registry<Projection> eventHandlers = new MethodMap.Registry<>();
 
-        boolean contains(Class<? extends StreamProjection> clazz) {
+        boolean contains(Class<? extends Projection> clazz) {
             return eventHandlers.contains(clazz);
         }
 
-        void register(Class<? extends StreamProjection> clazz) {
+        void register(Class<? extends Projection> clazz) {
             eventHandlers.register(clazz, IS_EVENT_HANDLER);
         }
 
-        MethodMap getEventHandlers(Class<? extends StreamProjection> clazz) {
+        MethodMap getEventHandlers(Class<? extends Projection> clazz) {
             final MethodMap result = eventHandlers.get(clazz);
             return result;
         }

@@ -21,13 +21,13 @@
 package org.spine3.server.storage.memory;
 
 import org.junit.After;
+import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.server.storage.ProjectionStorage;
-import org.spine3.server.storage.StreamProjectionStorageShould;
 
 /**
  * @author Alexander Litus
  */
-public class InMemoryStreamProjectionStorageShould extends StreamProjectionStorageShould {
+public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
 
     private final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(
             InMemoryEntityStorage.<String>newInstance());

@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.projection;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
+import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.ProjectionStorage;
 
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -37,7 +39,7 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class StreamProjectionStorageShould {
+public abstract class ProjectionStorageShould {
 
     private ProjectionStorage<String> storage;
 

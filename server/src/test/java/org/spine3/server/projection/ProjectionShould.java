@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.StringValue;
@@ -31,11 +31,11 @@ import org.spine3.server.Subscribe;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class StreamProjectionShould {
+public class ProjectionShould {
 
-    private static class TestStreamProjection extends StreamProjection<Integer, StringValue> {
+    private static class TestProjection extends Projection<Integer, StringValue> {
 
-        protected TestStreamProjection(Integer id) {
+        protected TestProjection(Integer id) {
             super(id);
         }
 
@@ -74,11 +74,11 @@ public class StreamProjectionShould {
         }
     }
 
-    private TestStreamProjection test;
+    private TestProjection test;
 
     @Before
     public void setUp() {
-        test = new TestStreamProjection(1);
+        test = new TestProjection(1);
         test.setDefault();
     }
 

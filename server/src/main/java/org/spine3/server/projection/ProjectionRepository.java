@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.projection;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -28,6 +28,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.Identifiers;
+import org.spine3.server.event.Events;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.EventClass;
@@ -36,14 +37,14 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 
 /**
- * Abstract base for repositories managing {@link StreamProjection}s.
+ * Abstract base for repositories managing {@link Projection}s.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class StreamProjectionRepository<I, P extends StreamProjection<I, M>, M extends Message>
+public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements EventDispatcher {
 
-    protected StreamProjectionRepository(BoundedContext boundedContext) {
+    protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
@@ -58,8 +59,8 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      */
     @Override
     public Set<EventClass> getEventClasses() {
-        final Class<? extends StreamProjection> projectionClass = getEntityClass();
-        final Set<Class<? extends Message>> eventClasses = StreamProjection.getEventClasses(projectionClass);
+        final Class<? extends Projection> projectionClass = getEntityClass();
+        final Set<Class<? extends Message>> eventClasses = Projection.getEventClasses(projectionClass);
         final Set<EventClass> result = EventClass.setOf(eventClasses);
         return result;
     }
@@ -97,7 +98,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
     }
 
     /**
-     * Dispatches the passed event to corresponding {@link StreamProjection}.
+     * Dispatches the passed event to corresponding {@link Projection}.
      *
      * <p>The ID of the projection must be specified as the first property of the passed event.
      *
@@ -105,7 +106,7 @@ public abstract class StreamProjectionRepository<I, P extends StreamProjection<I
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @see StreamProjection#handle(Message, EventContext)
+     * @see Projection#handle(Message, EventContext)
      */
     @Override
     public void dispatch(Event event) {
