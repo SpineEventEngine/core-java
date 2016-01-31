@@ -628,14 +628,18 @@ public class AggregateShould {
     }
 
     @Test
-    public void record_modification_timestamp() {
+    public void record_modification_timestamp() throws InterruptedException {
         final Timestamp start = aggregate.whenModified();
         aggregate.dispatchCommands(createProject);
+        Thread.sleep(100);
 
         final Timestamp afterCreate = aggregate.whenModified();
         assertTrue(Timestamps.isAfter(afterCreate, start));
+        Thread.sleep(100);
 
         aggregate.dispatchCommands(startProject);
+        Thread.sleep(100);
+
         final Timestamp afterStart = aggregate.whenModified();
         assertTrue(Timestamps.isAfter(afterStart, afterCreate));
     }
