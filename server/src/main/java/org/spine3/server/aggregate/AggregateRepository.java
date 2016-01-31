@@ -159,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
             result.play(events);
 
             return result;
-        } catch (InvocationTargetException e) {
+        } catch (Throwable e) {
             throw propagate(e);
         }
     }

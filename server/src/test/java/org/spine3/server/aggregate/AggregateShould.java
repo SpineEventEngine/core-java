@@ -21,12 +21,16 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
 import org.spine3.client.UserUtil;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.Assign;
 import org.spine3.server.reflect.Classes;
 import org.spine3.test.project.Project;
@@ -41,7 +45,6 @@ import org.spine3.testdata.TestCommands;
 import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -72,16 +75,23 @@ import static org.spine3.time.ZoneOffsets.UTC;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private static final ProjectId PROJECT_ID = createProjectId("testProjectId");
-    private final ProjectAggregate aggregate = new ProjectAggregate(PROJECT_ID);
+    private static final ProjectId PROJECT_ID = createProjectId("AggregateShould");
 
     private final CreateProject createProject = createProject(PROJECT_ID);
     private final AddTask addTask = TestCommands.addTask(PROJECT_ID);
     private final StartProject startProject = startProject(PROJECT_ID);
 
-    private static final UserId USER_ID = newUserId("user_id_test");
+    private static final UserId USER_ID = newUserId("AggregateShould@spine3.org");
+
     private static final CommandContext COMMAND_CONTEXT = createContext(USER_ID, UTC);
     private static final EventContext EVENT_CONTEXT = createEventContext(PROJECT_ID);
+
+    private ProjectAggregate aggregate;
+
+    @Before
+    public void setUp() {
+        aggregate = new ProjectAggregate(PROJECT_ID);
+    }
 
     @Test
     public void accept_Message_id_to_constructor() {
@@ -135,7 +145,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_one_command_and_apply_appropriate_event() throws InvocationTargetException {
+    public void handle_one_command_and_apply_appropriate_event() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -144,7 +154,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_only_appropriate_command() throws InvocationTargetException {
+    public void handle_only_appropriate_command() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -159,7 +169,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_appropriate_commands_sequentially() throws InvocationTargetException {
+    public void handle_appropriate_commands_sequentially() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         assertTrue(aggregate.isCreateProjectCommandHandled);
@@ -175,14 +185,14 @@ public class AggregateShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
+    public void throw_exception_if_missing_command_handler() {
 
         final TestAggregateForCaseMissingHandlerOrApplier agg = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
         agg.dispatch(addTask, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() throws InvocationTargetException {
+    public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() {
         final TestAggregateForCaseMissingHandlerOrApplier agg = new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
         try {
             agg.dispatch(createProject, COMMAND_CONTEXT);
@@ -193,7 +203,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() throws InvocationTargetException {
+    public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() {
         final TestAggregateWithStateNeutralEvents agg = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
         try {
             agg.dispatch(addTask, COMMAND_CONTEXT);
@@ -232,7 +242,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_current_state_after_dispatch() throws InvocationTargetException {
+    public void return_current_state_after_dispatch() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -243,7 +253,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_current_state_after_several_dispatches() throws InvocationTargetException {
+    public void return_current_state_after_several_dispatches() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         assertEquals(ProjectAggregate.STATUS_NEW, aggregate.getState().getStatus());
@@ -260,7 +270,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_time_when_was_last_modified() throws InvocationTargetException {
+    public void return_time_when_was_last_modified() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         final long expectedTimeSec = currentTimeSeconds();
@@ -271,7 +281,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void play_events() throws InvocationTargetException {
+    public void play_events() {
 
         final List<Event> events = getProjectEvents();
         aggregate.play(events);
@@ -279,7 +289,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void play_snapshot_event_and_restore_state() throws InvocationTargetException {
+    public void play_snapshot_event_and_restore_state() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -301,7 +311,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
+    public void return_uncommitted_event_records_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
         final List<Event> events = aggregate.getUncommittedEvents();
@@ -311,7 +321,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_only_state_changing_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
+    public void return_only_state_changing_uncommitted_event_records_after_dispatch() {
         final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
 
         aggregate.dispatchCommands(createProject, addTask);
@@ -328,7 +338,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_event_records_when_commit_after_dispatch() throws InvocationTargetException {
+    public void return_events_when_commit_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
         final List<Event> events = aggregate.commitEvents();
@@ -338,7 +348,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void clear_event_records_when_commit_after_dispatch() throws InvocationTargetException {
+    public void clear_event_records_when_commit_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
         final List<Event> events = aggregate.commitEvents();
@@ -349,7 +359,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void transform_current_state_to_snapshot_event() throws InvocationTargetException {
+    public void transform_current_state_to_snapshot_event() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -361,7 +371,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void restore_state_from_snapshot_event() throws InvocationTargetException {
+    public void restore_state_from_snapshot_event() {
 
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
@@ -403,7 +413,6 @@ public class AggregateShould {
     }
 
     private static void assertProjectEventsApplied(ProjectAggregate a) {
-
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
@@ -485,7 +494,7 @@ public class AggregateShould {
             isProjectStartedEventApplied = true;
         }
 
-        public void dispatchCommands(Message... commands) throws InvocationTargetException {
+        public void dispatchCommands(Message... commands) {
             final UserId userId = UserUtil.newUserId("aggregate_should@spine3.org");
             for (Message cmd : commands) {
                 final CommandContext ctx = Commands.createContext(userId, ZoneOffsets.UTC);
@@ -566,7 +575,7 @@ public class AggregateShould {
             return STATE_NEUTRAL_EVENT_CLASSES;
         }
 
-        public void dispatchCommands(Message... commands) throws InvocationTargetException {
+        public void dispatchCommands(Message... commands) {
             for (Message cmd : commands) {
                 dispatch(cmd, COMMAND_CONTEXT);
             }
@@ -606,6 +615,115 @@ public class AggregateShould {
         }
         @Override protected Project getDefaultState() {
             return Project.getDefaultInstance();
+        }
+    }
+
+    @Test
+    public void increment_version_when_applying_state_changing_event() {
+        final int version = aggregate.getVersion();
+        // Dispatch two commands that cause events that modify aggregate state.
+        aggregate.dispatchCommands(createProject, startProject);
+
+        assertEquals(version + 2, aggregate.getVersion());
+    }
+
+    @Test
+    public void record_modification_timestamp() {
+        final Timestamp start = aggregate.whenModified();
+        aggregate.dispatchCommands(createProject);
+
+        final Timestamp afterCreate = aggregate.whenModified();
+        assertTrue(Timestamps.isAfter(afterCreate, start));
+
+        aggregate.dispatchCommands(startProject);
+        final Timestamp afterStart = aggregate.whenModified();
+        assertTrue(Timestamps.isAfter(afterStart, afterCreate));
+    }
+
+    /**
+     * The class to check raising and catching exceptions.
+     */
+    private static class FaultyAggregate extends Aggregate<ProjectId, Project>  {
+
+        /* package */ static final String BROKEN_HANDLER = "broken_handler";
+        /* package */ static final String BROKEN_APPLIER = "broken_applier";
+
+        private final boolean brokenHandler;
+        private final boolean brokenApplier;
+
+        public FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
+            super(id);
+            this.brokenHandler = brokenHandler;
+            this.brokenApplier = brokenApplier;
+        }
+
+        @Override
+        protected Project getDefaultState() {
+            return Project.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            if (brokenHandler) {
+                throw new IllegalStateException(BROKEN_HANDLER);
+            }
+            return projectCreatedEvent(cmd.getProjectId());
+        }
+
+        @Apply
+        private void event(ProjectCreated event) {
+            if (brokenApplier) {
+                throw new IllegalStateException(BROKEN_APPLIER);
+            }
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .build();
+
+            incrementState(newState);
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_handler_throws() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(PROJECT_ID, true, false);
+
+        final Command command = createProject();
+        try {
+            faultyAggregate.dispatch(command.getMessage(), command.getContext());
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_HANDLER, cause.getMessage());
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_applier_throws() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(PROJECT_ID, false, true);
+
+        final Command command = createProject();
+        try {
+            faultyAggregate.dispatch(command.getMessage(), command.getContext());
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_play_raises_exception() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(PROJECT_ID, false, true);
+        try {
+            faultyAggregate.play(ImmutableList.of(projectCreated()));
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
     }
 }

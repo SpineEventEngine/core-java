@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
 import static org.spine3.server.Identifiers.idToAny;
 import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
@@ -151,17 +152,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         this.initialized = true;
     }
 
-    private void invokeApplier(Message message) throws InvocationTargetException {
-        final Class<? extends Message> eventClass = message.getClass();
-        final Method method = eventAppliers.get(eventClass);
-        if (method == null) {
-            throw missingEventApplier(eventClass);
-        }
-
-        final EventApplier applier = new EventApplier(this, method);
-        applier.invoke(message);
-    }
-
     private Any getIdAsAny() {
         return idAsAny;
     }
@@ -169,54 +159,91 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     /**
      * Dispatches commands, generates events and applies them to the aggregate.
      *
-     * @param command the command to be executed on aggregate
-     * @param context of the command
-     * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
+     * @param command the command message to be executed on the aggregate.
+     *                If this parameter is passed as {@link Any} the enclosing message will be unwrapped.
+     * @param context the context of the command
+     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause.
      */
     @VisibleForTesting  // otherwise this method would have had package access.
-    protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
-        init();
-        final List<? extends Message> events = generateEvents(command, context);
-        apply(events, context);
-    }
-
-    /**
-     * Directs the passed command to the corresponding command handler method of the aggregate.
-     *
-     * @param command the command to be processed
-     * @param context the context of the command
-     * @return a list of the event messages that were produced as the result of handling the command
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    private List<? extends Message> generateEvents(Message command, CommandContext context)
-            throws InvocationTargetException {
+    protected final void dispatch(Message command, CommandContext context) {
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(command, "command");
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(context, "context");
 
-        final Class<? extends Message> commandClass = command.getClass();
+        init();
+
+        if (command instanceof Any) {
+            // We're likely getting the result of command.getMessage().
+            // Extract the wrapped message out of it.
+            final Any any = (Any) command;
+            //noinspection AssignmentToMethodParameter
+            command = Messages.fromAny(any);
+        }
+
+        try {
+            final List<? extends Message> events = invokeHandler(command, context);
+            apply(events, context);
+        } catch (InvocationTargetException e) {
+            propagate(e.getCause());
+        }
+    }
+
+    /**
+     * Directs the passed command to the corresponding command handler method of the aggregate.
+     *
+     * @param commandMessage the command to be processed
+     * @param context the context of the command
+     * @return a list of the event messages that were produced as the result of handling the command
+     * @throws InvocationTargetException if an exception occurs during command handling
+     */
+    private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
+            throws InvocationTargetException {
+        final Class<? extends Message> commandClass = commandMessage.getClass();
         final Method method = commandHandlers.get(commandClass);
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
+
         final CommandHandlerMethod commandHandler = new AggregateCommandHandler(this, method);
-        final List<? extends Message> result = commandHandler.invoke(command, context);
+        final List<? extends Message> result = commandHandler.invoke(commandMessage, context);
         return result;
+    }
+
+    /**
+     * Invokes applier method for the passed event message.
+     *
+     * @param eventMessage the event message to apply
+     * @throws InvocationTargetException if an exception was thrown during the method invocation
+     */
+    private void invokeApplier(Message eventMessage) throws InvocationTargetException {
+        final Class<? extends Message> eventClass = eventMessage.getClass();
+        final Method method = eventAppliers.get(eventClass);
+        if (method == null) {
+            throw missingEventApplier(eventClass);
+        }
+
+        final EventApplier applier = new EventApplier(this, method);
+        applier.invoke(eventMessage);
     }
 
     /**
      * Plays passed events on the aggregate.
      *
-     * @param records the list of the events
-     * @throws InvocationTargetException the exception is thrown if command dispatching fails inside
+     * @param events the list of the events
+     * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
+     *                          for the thrown {@code RuntimeException}
      */
-    public void play(Iterable<Event> records) throws InvocationTargetException {
+    public void play(Iterable<Event> events) {
         init();
 
-        for (Event record : records) {
-            final Message message = Messages.fromAny(record.getMessage());
-            apply(message);
+        for (Event event : events) {
+            final Message message = Events.getMessage(event);
+            try {
+                apply(message);
+            } catch (InvocationTargetException e) {
+                propagate(e.getCause());
+            }
         }
     }
 
@@ -253,7 +280,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param event the event to apply
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
-     * @throws InvocationTargetException    if an exception occurs during event applying
+     * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
     private void apply(Message event) throws InvocationTargetException {
         if (event instanceof Snapshot) {
