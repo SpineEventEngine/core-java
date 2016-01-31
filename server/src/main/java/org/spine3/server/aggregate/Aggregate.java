@@ -39,6 +39,7 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -50,8 +51,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
 import static org.spine3.server.Identifiers.idToAny;
-import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
-import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
 /**
@@ -64,6 +63,9 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
+
+    static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new IsCommandHandler();
+    static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -517,5 +519,85 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
+    }
+
+    /**
+     * The predicate for filtering command handler methods of aggregates.
+     */
+    private static class IsCommandHandler implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return check(method);
+        }
+
+        /**
+         * Checks if a method is a command handler of an aggregate.
+         *
+         * @param method a method to check
+         * @return {@code true} if the method is a command handler, {@code false} otherwise
+         */
+        private static boolean check(Method method) {
+            if (!CommandHandlerMethod.isAnnotatedCorrectly(method)){
+                return false;
+            }
+            if (!CommandHandlerMethod.acceptsCorrectParams(method)) {
+                return false;
+            }
+            final boolean returnsMessageOrList = returnsMessageOrList(method);
+            return returnsMessageOrList;
+        }
+
+        private static boolean returnsMessageOrList(Method method) {
+            final Class<?> returnType = method.getReturnType();
+
+            if (Message.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            //noinspection RedundantIfStatement
+            if (List.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * The predicate for filtering event applier methods.
+     */
+    private static class IsEventApplier implements Predicate<Method> {
+
+        private static final int EVENT_PARAM_INDEX = 0;
+
+        /**
+         * Checks if a method is an event applier.
+         *
+         * @param method to check
+         * @return {@code true} if the method is an event applier, {@code false} otherwise
+         */
+        public static boolean isEventApplier(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+            if (!isAnnotated) {
+                return false;
+            }
+
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+            final boolean hasOneParam = parameterTypes.length == 1;
+            if (!hasOneParam) {
+                return false;
+            }
+
+            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
+            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+
+            return firstParamIsMessage && returnsNothing;
+        }
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isEventApplier(method);
+        }
     }
 }

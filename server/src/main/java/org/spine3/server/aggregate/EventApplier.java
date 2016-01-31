@@ -20,7 +20,6 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +27,10 @@ import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.reflect.Methods;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
@@ -42,16 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
-
-    private static final int EVENT_PARAM_INDEX = 0;
-
-    static final Predicate<Method> IS_EVENT_APPLIER = new Predicate<Method>() {
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventApplier(method);
-        }
-    };
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -65,32 +51,8 @@ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
 
     @Override
     protected <R> R invoke(Message message) throws InvocationTargetException {
+        // Make this method visible to Aggregate class.
         return super.invoke(message);
-    }
-
-    /**
-     * Checks if a method is an event applier.
-     *
-     * @param method to check
-     * @return {@code true} if the method is an event applier, {@code false} otherwise
-     */
-    @SuppressWarnings("LocalVariableNamingConvention") // -- we want longer names here for clarity.
-    public static boolean isEventApplier(Method method) {
-        final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-        if (!isAnnotated) {
-            return false;
-        }
-
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-        final boolean hasOneParam = parameterTypes.length == 1;
-        if (!hasOneParam) {
-            return false;
-        }
-
-        final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
-        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-
-        return firstParamIsMessage && returnsNothing;
     }
 
     /**

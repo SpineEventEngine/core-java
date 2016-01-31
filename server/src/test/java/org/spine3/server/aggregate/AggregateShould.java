@@ -57,7 +57,7 @@ import static org.spine3.base.Commands.createContext;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
+import static org.spine3.server.aggregate.Aggregate.IS_EVENT_APPLIER;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
