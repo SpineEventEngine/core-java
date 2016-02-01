@@ -163,6 +163,27 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         return builder.build();
     }
 
+    /**
+     * Converts an aggregate ID to a storage record ID with the string ID representation or number ID value.
+     *
+     * @param id an ID to convert
+     * @see EntityId
+     */
+    protected static <I> AggregateStorageRecord.Id toRecordId(I id) {
+        checkNotNull(id);
+        final AggregateStorageRecord.Id.Builder builder = AggregateStorageRecord.Id.newBuilder();
+        //noinspection ChainOfInstanceofChecks
+        if (id instanceof Long) {
+            builder.setLongValue((Long) id);
+        } else if (id instanceof Integer) {
+            builder.setIntValue((Integer) id);
+        } else {
+            final String stringId = idToString(id);
+            builder.setStringValue(stringId);
+        }
+        return builder.build();
+    }
+
     private static void checkTimestamp(Event event) {
         checkArgument(event.getContext().hasTimestamp(),
                 "Event context must have a timestamp because it is used to sort storage records.");
