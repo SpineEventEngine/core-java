@@ -21,6 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.AggregateStorage;
@@ -30,9 +31,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.Identifiers.idToString;
-
 /**
  * In-memory storage for aggregate root events and snapshots.
  *
@@ -41,9 +39,9 @@ import static org.spine3.server.Identifiers.idToString;
 @SuppressWarnings("ComparatorNotSerializable")
 class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<String, AggregateStorageRecord> storage = TreeMultimap.create(
-            new StringComparator(),
-            new AggregateStorageRecordReverseComparator()
+    private final Multimap<I, AggregateStorageRecord> storage = TreeMultimap.create(
+            Ordering.arbitrary(), // key comparator
+            new AggregateStorageRecordReverseComparator() // value comparator
     );
 
     /**
@@ -54,17 +52,13 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     }
 
     @Override
-    protected void writeInternal(AggregateStorageRecord record) {
-        checkNotNull(record);
-        checkNotNull(record.getAggregateId());
-        storage.put(record.getAggregateId(), record);
+    protected void writeInternal(I id, AggregateStorageRecord record) {
+        storage.put(id, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-
-        final String idString = idToString(id);
-        final Collection<AggregateStorageRecord> records = storage.get(idString);
+        final Collection<AggregateStorageRecord> records = storage.get(id);
         return records.iterator();
     }
 
@@ -75,21 +69,14 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         storage.clear();
     }
 
-
     /*
      * Used for sorting by timestamp descending (from newer to older)
      */
     private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord> {
         @Override
         public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
-            return Timestamps.compare(second.getTimestamp(), first.getTimestamp());
-        }
-    }
-
-    private static class StringComparator implements Comparator<String> {
-        @Override
-        public int compare(String first, String second) {
-            return first.compareTo(second);
+            final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
+            return result;
         }
     }
 }

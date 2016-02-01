@@ -60,8 +60,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.test.project.Project.getDefaultInstance;
-import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -275,7 +273,7 @@ public class BoundedContextShould {
 
         @Override
         protected Project getDefaultState() {
-            return getDefaultInstance();
+            return Project.getDefaultInstance();
         }
 
         @Assign
@@ -300,7 +298,7 @@ public class BoundedContextShould {
         @Apply
         private void event(ProjectCreated event) {
 
-            final Project newState = newBuilder(getState())
+            final Project newState = Project.newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_NEW)
                     .build();
@@ -318,7 +316,7 @@ public class BoundedContextShould {
         @Apply
         private void event(ProjectStarted event) {
 
-            final Project newState = newBuilder(getState())
+            final Project newState = Project.newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_STARTED)
                     .build();

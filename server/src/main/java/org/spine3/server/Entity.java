@@ -98,7 +98,6 @@ public abstract class Entity<I, M extends Message> {
      * @param state the state object to set
      * @param version the entity version to set
      * @param whenLastModified the time of the last modification to set
-     * @throws NullPointerException if the state or whenLastModified is {@code null}
      * @see #validate(M)
      */
     protected void setState(M state, int version, Timestamp whenLastModified) {
