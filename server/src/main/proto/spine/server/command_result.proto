@@ -33,10 +33,11 @@ import "spine/base/failure.proto";
 
 // A result of executing a command.
 message CommandResult {
+
     // Events generated as the result of the command.
     //
     // Note that `CommandId` can be obtained from `EventId.command_id`.
-    repeated spine.base.EventRecord eventRecord = 1;
+    repeated spine.base.Event event = 1;
 
     // Errors that may occur during the command execution.
     repeated google.protobuf.Any error = 2;

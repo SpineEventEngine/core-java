@@ -22,9 +22,9 @@ package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
 import org.spine3.SPI;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.server.util.Identifiers.idToString;
+import static org.spine3.server.Identifiers.idToString;
 
 /**
  * An event-sourced storage of aggregate root events and snapshots.
@@ -54,7 +54,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
 
-        final Deque<EventRecord> history = newLinkedList();
+        final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
 
         final Iterator<AggregateStorageRecord> historyBackward = historyBackward(aggregateId);
@@ -65,8 +65,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
             final AggregateStorageRecord record = historyBackward.next();
 
             switch (record.getKindCase()) {
-                case EVENT_RECORD:
-                    history.addFirst(record.getEventRecord());
+                case EVENT:
+                    history.addFirst(record.getEvent());
                     break;
                 case SNAPSHOT:
                     snapshot = record.getSnapshot();
@@ -81,7 +81,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
-        builder.addAllEventRecord(history);
+        builder.addAllEvent(history);
 
         return builder.build();
     }
@@ -96,11 +96,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(id, "ID");
         checkNotNull(events, "events");
-        final List<EventRecord> eventList = events.getEventRecordList();
+        final List<Event> eventList = events.getEventList();
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
-        for (final EventRecord event : eventList) {
-            checkTimestamp(event);
+        for (final Event event : eventList) {
+            checkTimestamp(event.getContext().hasTimestamp());
             final AggregateStorageRecord storageRecord = toStorageRecord(event);
             writeInternal(id, storageRecord);
         }
@@ -113,11 +113,12 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      * @param event the event to write
      * @throws IllegalStateException if the storage is closed
      */
-    public void writeEvent(I id, EventRecord event) {
+    public void writeEvent(I id, Event event) {
         checkNotClosed();
         checkNotNull(id, "aggregate id");
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(event, "event");
+        checkTimestamp(event.getContext().hasTimestamp());
 
         final AggregateStorageRecord record = toStorageRecord(event);
         writeInternal(id, record);
@@ -136,6 +137,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId, "aggregate ID");
         checkNotNull(snapshot, "snapshot");
+        checkTimestamp(snapshot.hasTimestamp());
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
@@ -147,11 +149,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         writeInternal(aggregateId, record);
     }
 
-    private static AggregateStorageRecord toStorageRecord(EventRecord event) {
+    private static AggregateStorageRecord toStorageRecord(Event event) {
         final EventContext context = event.getContext();
         final EventId eventId = context.getEventId();
         final String eventIdStr = idToString(eventId);
-        final Any eventMsg = event.getEvent();
+        final Any eventMsg = event.getMessage();
         final String typeName = TypeName.ofEnclosed(eventMsg).nameOnly();
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
@@ -159,12 +161,33 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                 .setEventType(typeName)
                 .setEventId(eventIdStr)
                 .setVersion(context.getVersion())
-                .setEventRecord(event);
+                .setEvent(event);
         return builder.build();
     }
 
-    private static void checkTimestamp(EventRecord event) {
-        checkArgument(event.getContext().hasTimestamp(),
+    /**
+     * Converts an aggregate ID to a storage record ID with the string ID representation or number ID value.
+     *
+     * @param id an ID to convert
+     * @see EntityId
+     */
+    protected static <I> AggregateStorageRecord.Id toRecordId(I id) {
+        checkNotNull(id);
+        final AggregateStorageRecord.Id.Builder builder = AggregateStorageRecord.Id.newBuilder();
+        //noinspection ChainOfInstanceofChecks
+        if (id instanceof Long) {
+            builder.setLongValue((Long) id);
+        } else if (id instanceof Integer) {
+            builder.setIntValue((Integer) id);
+        } else {
+            final String stringId = idToString(id);
+            builder.setStringValue(stringId);
+        }
+        return builder.build();
+    }
+
+    private static void checkTimestamp(boolean hasTimestamp) {
+        checkArgument(hasTimestamp,
                 "Event context must have a timestamp because it is used to sort storage records.");
     }
 

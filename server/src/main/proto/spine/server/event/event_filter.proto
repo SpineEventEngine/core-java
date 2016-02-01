@@ -1,0 +1,53 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.event;
+
+option java_package = "org.spine3.server.event";
+option java_multiple_files = true;
+option java_outer_classname = "EventFilterProto";
+option java_generate_equals_and_hash = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/base/field_filter.proto";
+
+// Filters `Event`s by:
+//   1. the type of the event message,
+//   2. aggregate ID,
+//   3. event message field values,
+//   4. values stored in `event_context` field of the event.
+//
+// The time of the event is filtered by `before` and `after` attributes of `EventStreamQuery`.
+message EventFilter {
+    // The full protobuf type name of the event message.
+    string event_type = 1;
+
+    // The list of aggregate IDs of interest. Or empty, if include events for all aggregates.
+    repeated google.protobuf.Any aggregate_id = 2;
+
+    // Accepted event message field values.
+    repeated spine.base.FieldFilter event_field_filter = 3;
+
+    // Accepted `EventContext` field values.
+    repeated spine.base.FieldFilter context_field_filter = 4;
+}
+

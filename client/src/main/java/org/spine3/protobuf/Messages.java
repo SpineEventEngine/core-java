@@ -60,7 +60,7 @@ public class Messages {
 
     /**
      * Creates a new instance of {@link Any} with the message represented by its byte
-     * content and passed type.
+     * content and the passed type.
      *
      * @param type the type of the message to be wrapped into {@code Any}
      * @param value the byte content of the message
@@ -191,7 +191,9 @@ public class Messages {
         }
     }
 
-    //TODO:2016-01-24:alexander.yevsyukov: Document
+    /**
+     * Returns descriptor for the passed message class.
+     */
     public static Descriptors.GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);

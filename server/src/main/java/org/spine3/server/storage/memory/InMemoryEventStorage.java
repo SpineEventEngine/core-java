@@ -23,12 +23,12 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageRecord;
-import org.spine3.server.stream.EventStreamQuery;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -40,7 +40,6 @@ import java.util.PriorityQueue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterators.filter;
-import static org.spine3.server.storage.StorageUtil.toEventRecordsIterator;
 
 /**
  * In-memory implementation of {@link EventStorage}.
@@ -55,13 +54,13 @@ class InMemoryEventStorage extends EventStorage {
     @SuppressWarnings("CollectionDeclaredAsConcreteClass") // to stress that the queue is sorted.
     private final PriorityQueue<EventStorageRecord> storage = new PriorityQueue<>(
             INITIAL_CAPACITY,
-            new EventRecordComparator());
+            new EventStorageRecordComparator());
     private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
 
     /**
-     * Compares event records by timestamp of events.
+     * Compares event records by timestamps of events.
      */
-    private static class EventRecordComparator implements Comparator<EventStorageRecord>, Serializable {
+    private static class EventStorageRecordComparator implements Comparator<EventStorageRecord>, Serializable {
         @Override
         public int compare(EventStorageRecord record1, EventStorageRecord record2) {
             final Timestamp time1 = record1.getTimestamp();
@@ -74,10 +73,10 @@ class InMemoryEventStorage extends EventStorage {
     }
 
     @Override
-    public Iterator<EventRecord> iterator(EventStreamQuery query) {
-        final Predicate<EventRecord> matchesQuery = new MatchesStreamQuery(query);
-        final Iterator<EventRecord> transformed = toEventRecordsIterator(storage.iterator());
-        final Iterator<EventRecord> result = filter(transformed, matchesQuery);
+    public Iterator<Event> iterator(EventStreamQuery query) {
+        final Predicate<Event> matchesQuery = new MatchesStreamQuery(query);
+        final Iterator<Event> transformed = toEventIterator(storage.iterator());
+        final Iterator<Event> result = filter(transformed, matchesQuery);
         return result;
     }
 

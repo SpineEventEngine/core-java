@@ -31,14 +31,15 @@ import org.spine3.client.UserUtil;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
-import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.projection.Projection;
+import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.stream.EventStore;
-import org.spine3.server.stream.StreamProjection;
-import org.spine3.server.stream.StreamProjectionRepository;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -59,10 +60,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.test.project.Project.getDefaultInstance;
-import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testdata.TestCommandFactory.*;
-import static org.spine3.testdata.TestEventFactory.*;
+import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -201,9 +200,9 @@ public class BoundedContextShould {
     private void assertRequestAndResultMatch(Command request, CommandResult result) {
         final Timestamp expectedTime = request.getContext().getTimestamp();
 
-        final List<EventRecord> records = result.getEventRecordList();
-        assertEquals(1, records.size());
-        final EventRecord actualRecord = records.get(0);
+        final List<Event> events = result.getEventList();
+        assertEquals(1, events.size());
+        final Event actualRecord = events.get(0);
         final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
 
         assertEquals(projectId, actualProjectId);
@@ -274,7 +273,7 @@ public class BoundedContextShould {
 
         @Override
         protected Project getDefaultState() {
-            return getDefaultInstance();
+            return Project.getDefaultInstance();
         }
 
         @Assign
@@ -299,7 +298,7 @@ public class BoundedContextShould {
         @Apply
         private void event(ProjectCreated event) {
 
-            final Project newState = newBuilder(getState())
+            final Project newState = Project.newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_NEW)
                     .build();
@@ -317,7 +316,7 @@ public class BoundedContextShould {
         @Apply
         private void event(ProjectStarted event) {
 
-            final Project newState = newBuilder(getState())
+            final Project newState = Project.newBuilder(getState())
                     .setProjectId(event.getProjectId())
                     .setStatus(STATUS_STARTED)
                     .build();
@@ -381,7 +380,7 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReport extends StreamProjection<ProjectId, Empty> {
+    private static class ProjectReport extends Projection<ProjectId, Empty> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // Public constructor is a part of projection public API. It's called by a repository.
@@ -401,7 +400,7 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReportRepository extends StreamProjectionRepository<ProjectId, ProjectReport, Empty> {
+    private static class ProjectReportRepository extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
         protected ProjectReportRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }

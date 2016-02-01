@@ -28,7 +28,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
@@ -36,10 +35,8 @@ import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.util.Classes;
-import org.spine3.server.util.EventRecords;
-import org.spine3.server.util.Events;
-import org.spine3.server.util.MethodMap;
+import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -51,11 +48,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
-import static org.spine3.server.aggregate.AggregateCommandHandler.IS_AGGREGATE_COMMAND_HANDLER;
-import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
+import static org.spine3.server.Identifiers.idToAny;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
-import static org.spine3.server.util.Identifiers.idToAny;
 
 /**
  * Abstract base for aggregates.
@@ -67,6 +63,9 @@ import static org.spine3.server.util.Identifiers.idToAny;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
+
+    static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new IsCommandHandler();
+    static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -97,7 +96,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @see #commitEvents()
      */
-    private final List<EventRecord> uncommittedEvents = Lists.newLinkedList();
+    private final List<Event> uncommittedEvents = Lists.newLinkedList();
 
     /**
      * Creates a new instance.
@@ -122,7 +121,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
     }
 
-    @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
         return new AggregateCommandHandler(this, method);
@@ -156,17 +154,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         this.initialized = true;
     }
 
-    private void invokeApplier(Message event) throws InvocationTargetException {
-        final Class<? extends Message> eventClass = event.getClass();
-        final Method method = eventAppliers.get(eventClass);
-        if (method == null) {
-            throw missingEventApplier(eventClass);
-        }
-
-        final EventApplier applier = new EventApplier(this, method);
-        applier.invoke(event);
-    }
-
     private Any getIdAsAny() {
         return idAsAny;
     }
@@ -174,79 +161,116 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     /**
      * Dispatches commands, generates events and applies them to the aggregate.
      *
-     * @param command the command to be executed on aggregate
-     * @param context of the command
-     * @throws InvocationTargetException is thrown if an exception occurs during command dispatching
+     * @param command the command message to be executed on the aggregate.
+     *                If this parameter is passed as {@link Any} the enclosing message will be unwrapped.
+     * @param context the context of the command
+     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause.
      */
     @VisibleForTesting  // otherwise this method would have had package access.
-    protected final void dispatch(Message command, CommandContext context) throws InvocationTargetException {
-        init();
-        final List<? extends Message> events = generateEvents(command, context);
-        apply(events, context);
-    }
-
-    /**
-     * Directs the passed command to the corresponding command handler method of the aggregate.
-     *
-     * @param command the command to be processed
-     * @param context the context of the command
-     * @return a list of the event messages that were produced as the result of handling the command
-     * @throws InvocationTargetException if an exception occurs during command handling
-     */
-    private List<? extends Message> generateEvents(Message command, CommandContext context)
-            throws InvocationTargetException {
+    protected final void dispatch(Message command, CommandContext context) {
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(command, "command");
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(context, "context");
 
-        final Class<? extends Message> commandClass = command.getClass();
+        init();
+
+        if (command instanceof Any) {
+            // We're likely getting the result of command.getMessage().
+            // Extract the wrapped message out of it.
+            final Any any = (Any) command;
+            //noinspection AssignmentToMethodParameter
+            command = Messages.fromAny(any);
+        }
+
+        try {
+            final List<? extends Message> events = invokeHandler(command, context);
+            apply(events, context);
+        } catch (InvocationTargetException e) {
+            propagate(e.getCause());
+        }
+    }
+
+    /**
+     * Directs the passed command to the corresponding command handler method of the aggregate.
+     *
+     * @param commandMessage the command to be processed
+     * @param context the context of the command
+     * @return a list of the event messages that were produced as the result of handling the command
+     * @throws InvocationTargetException if an exception occurs during command handling
+     */
+    private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
+            throws InvocationTargetException {
+        final Class<? extends Message> commandClass = commandMessage.getClass();
         final Method method = commandHandlers.get(commandClass);
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
+
         final CommandHandlerMethod commandHandler = new AggregateCommandHandler(this, method);
-        final List<? extends Message> result = commandHandler.invoke(command, context);
+        final List<? extends Message> result = commandHandler.invoke(commandMessage, context);
         return result;
+    }
+
+    /**
+     * Invokes applier method for the passed event message.
+     *
+     * @param eventMessage the event message to apply
+     * @throws InvocationTargetException if an exception was thrown during the method invocation
+     */
+    private void invokeApplier(Message eventMessage) throws InvocationTargetException {
+        final Class<? extends Message> eventClass = eventMessage.getClass();
+        final Method method = eventAppliers.get(eventClass);
+        if (method == null) {
+            throw missingEventApplier(eventClass);
+        }
+
+        final EventApplier applier = new EventApplier(this, method);
+        applier.invoke(eventMessage);
     }
 
     /**
      * Plays passed events on the aggregate.
      *
-     * @param records the list of the event records
-     * @throws InvocationTargetException the exception is thrown if command dispatching fails inside
+     * @param events the list of the events
+     * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
+     *                          for the thrown {@code RuntimeException}
      */
-    public void play(Iterable<EventRecord> records) throws InvocationTargetException {
+    public void play(Iterable<Event> events) {
         init();
 
-        for (EventRecord record : records) {
-            final Message event = Messages.fromAny(record.getEvent());
-            apply(event);
+        for (Event event : events) {
+            final Message message = Events.getMessage(event);
+            try {
+                apply(message);
+            } catch (InvocationTargetException e) {
+                propagate(e.getCause());
+            }
         }
     }
 
     /**
      * Applies events to an aggregate unless they are state-neutral.
      *
-     * @param events the events to apply
+     * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      * @see #getStateNeutralEventClasses()
      */
-    private void apply(Iterable<? extends Message> events, CommandContext commandContext) throws InvocationTargetException {
+    private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
         //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
-        for (Message event : events) {
-            final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+        for (Message message : messages) {
+            final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
             if (!isStateNeutral) {
-                apply(event);
+                apply(message);
             }
             final int currentVersion = getVersion();
             final M state = getState();
-            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, event);
-            final EventRecord eventRecord = EventRecords.createEventRecord(event, eventContext);
-            putUncommitted(eventRecord);
+            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
+            final Event event = Events.createEvent(message, eventContext);
+            putUncommitted(event);
         }
     }
 
@@ -258,7 +282,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param event the event to apply
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
-     * @throws InvocationTargetException    if an exception occurs during event applying
+     * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
     private void apply(Message event) throws InvocationTargetException {
         if (event instanceof Snapshot) {
@@ -303,7 +327,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
     }
 
-    private void putUncommitted(EventRecord record) {
+    private void putUncommitted(Event record) {
         uncommittedEvents.add(record);
     }
 
@@ -314,7 +338,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
-    public List<EventRecord> getUncommittedEvents() {
+    public List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
@@ -325,9 +349,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
-    protected Collection<EventRecord> getStateChangingUncommittedEvents() {
-        final Predicate<EventRecord> isStateChanging = isStateChangingEventRecord(getStateNeutralEventClasses());
-        final Collection<EventRecord> result = filter(uncommittedEvents, isStateChanging);
+    protected Collection<Event> getStateChangingUncommittedEvents() {
+        final Predicate<Event> isStateChanging = isStateChangingEventRecord();
+        final Collection<Event> result = filter(uncommittedEvents, isStateChanging);
         return result;
     }
 
@@ -338,21 +362,19 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>The predicate uses passed event classes for the events that do not modify the
      * state of the aggregate. As such, they are called <strong>State Neutral.</strong>
      *
-     * @param stateNeutralEventClasses classes of events that do not modify aggregate state
      * @return new predicate instance
      */
-    @SuppressWarnings("MethodParameterNamingConvention") // Prefer longer name here for clarity.
-    private static Predicate<EventRecord> isStateChangingEventRecord(
-            final Collection<Class<? extends Message>> stateNeutralEventClasses) {
-        return new Predicate<EventRecord>() {
+    private Predicate<Event> isStateChangingEventRecord() {
+        final Collection<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
+        return new Predicate<Event>() {
             @Override
-            public boolean apply(@Nullable EventRecord record) {
-                if (record == null) {
-                    return false;
-                }
-                final Any eventAsAny = record.getEvent();
-                final Message event = Messages.fromAny(eventAsAny);
-                final boolean isStateNeutral = stateNeutralEventClasses.contains(event.getClass());
+            public boolean apply(
+                    @SuppressWarnings("NullableProblems")
+                    /* The @Nullable annotation is removed to avoid checking for null input,
+                       which is not possible here. Having the null input doesn't allow to test
+                       that code branch. */ Event event) {
+                final Message message = Events.getMessage(event);
+                final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
                 return !isStateNeutral;
             }
         };
@@ -363,8 +385,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @return the list of event records
      */
-    public List<EventRecord> commitEvents() {
-        final List<EventRecord> result = ImmutableList.copyOf(uncommittedEvents);
+    public List<Event> commitEvents() {
+        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
     }
@@ -497,5 +519,85 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
+    }
+
+    /**
+     * The predicate for filtering command handler methods of aggregates.
+     */
+    private static class IsCommandHandler implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return check(method);
+        }
+
+        /**
+         * Checks if a method is a command handler of an aggregate.
+         *
+         * @param method a method to check
+         * @return {@code true} if the method is a command handler, {@code false} otherwise
+         */
+        private static boolean check(Method method) {
+            if (!CommandHandlerMethod.isAnnotatedCorrectly(method)){
+                return false;
+            }
+            if (!CommandHandlerMethod.acceptsCorrectParams(method)) {
+                return false;
+            }
+            final boolean returnsMessageOrList = returnsMessageOrList(method);
+            return returnsMessageOrList;
+        }
+
+        private static boolean returnsMessageOrList(Method method) {
+            final Class<?> returnType = method.getReturnType();
+
+            if (Message.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            //noinspection RedundantIfStatement
+            if (List.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * The predicate for filtering event applier methods.
+     */
+    private static class IsEventApplier implements Predicate<Method> {
+
+        private static final int EVENT_PARAM_INDEX = 0;
+
+        /**
+         * Checks if a method is an event applier.
+         *
+         * @param method to check
+         * @return {@code true} if the method is an event applier, {@code false} otherwise
+         */
+        public static boolean isEventApplier(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+            if (!isAnnotated) {
+                return false;
+            }
+
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+            final boolean hasOneParam = parameterTypes.length == 1;
+            if (!hasOneParam) {
+                return false;
+            }
+
+            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
+            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+
+            return firstParamIsMessage && returnsNothing;
+        }
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isEventApplier(method);
+        }
     }
 }

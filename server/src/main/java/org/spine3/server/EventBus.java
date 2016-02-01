@@ -28,13 +28,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Events;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.procman.ProcessManager;
-import org.spine3.server.stream.EventStore;
-import org.spine3.server.util.EventRecords;
 import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,16 +55,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    <li>Expose a public method that accepts the type of the event as the first parameter,
  *        and {@link EventContext} as the second parameter;
  *    <li>Mark the method with {@link Subscribe} annotation;</li>
- * <li>Register with an instance of EventBus using {@link #subscribe(Object)}.</li>
+ * <li>Register with an instance of EventBus using {@link #subscribe(EventHandler)}.</li>
  * </ol>
  * Note: Since Protobuf messages are final classes, a handler method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event that needs to be handled.
  *
  * <h2>Posting Events</h2>
- * <p>Events are posted to an EventBus using {@link #post(EventRecord)} method. Normally this
+ * <p>Events are posted to an EventBus using {@link #post(Event)} method. Normally this
  * is done by an {@link AggregateRepository} in the process of handling a command, or by a {@link ProcessManager}.
  *
- * <p>The passed {@link EventRecord} is stored in the {@link EventStore} associated with the {@code EventBus}
+ * <p>The passed {@link Event} is stored in the {@link EventStore} associated with the {@code EventBus}
  * <strong>before</strong> it is passed to handlers.
  *
  * <p>The execution of handler methods is performed by an {@link Executor} associated with the instance of
@@ -233,23 +233,23 @@ public class EventBus implements AutoCloseable {
     /**
      * Posts the event for handling.
      *
-     * <p>The record is stored in the associated {@link EventStore} before passing it to dispatchers and handlers.
+     * <p>The event is stored in the associated {@link EventStore} before passing it to dispatchers and handlers.
      *
-     * @param record the event record to be handled
+     * @param event the event to be handled
      */
-    public void post(EventRecord record) {
-        store(record);
+    public void post(Event event) {
+        store(event);
 
-        callDispatchers(record);
+        callDispatchers(event);
 
-        final Message event = EventRecords.getEvent(record);
-        final EventContext context = record.getContext();
+        final Message message = Events.getMessage(event);
+        final EventContext context = event.getContext();
 
-        invokeHandlers(event, context);
+        invokeHandlers(message, context);
     }
 
-    private void callDispatchers(EventRecord event) {
-        final EventClass eventClass = EventRecords.getEventClass(event);
+    private void callDispatchers(Event event) {
+        final EventClass eventClass = Events.getEventClass(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
             dispatcher.dispatch(event);
@@ -269,8 +269,8 @@ public class EventBus implements AutoCloseable {
         }
     }
 
-    private void store(EventRecord record) {
-        eventStore.append(record);
+    private void store(Event event) {
+        eventStore.append(event);
     }
 
     private void invokeHandler(final EventHandlerMethod handler, final Message event, final EventContext context) {

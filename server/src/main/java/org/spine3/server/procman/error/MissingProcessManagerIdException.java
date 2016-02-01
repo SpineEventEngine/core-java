@@ -21,7 +21,7 @@ package org.spine3.server.procman.error;
 
 import com.google.protobuf.Message;
 
-import static org.spine3.server.util.Identifiers.ID_PROPERTY_SUFFIX;
+import static org.spine3.server.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * Exception is thrown if a command/event, which is intended to be used for a process manager,

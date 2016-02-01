@@ -25,17 +25,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.util.EventRecords;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -54,8 +49,8 @@ import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.server.procman.ProcessManagerShould.TestProcessManager;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommandFactory.*;
-import static org.spine3.testdata.TestEventFactory.*;
+import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -92,7 +87,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
-        final EventRecord event = EventRecords.createEventRecord(eventMessage,
+        final Event event = Events.createEvent(eventMessage,
                     EventContext.getDefaultInstance());
         repository.dispatch(event);
         final TestProcessManager manager = repository.load(ID);
@@ -111,23 +106,23 @@ public class ProcessManagerRepositoryShould {
         testDispatchCommand(startProject(ID));
     }
 
-    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
+    private List<Event> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
         final Command request = Commands.newCommand(command, CommandContext.getDefaultInstance());
-        final List<EventRecord> records = repository.dispatch(request);
+        final List<Event> events = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(command, manager.getState());
-        return records;
+        return events;
     }
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        final List<EventRecord> records = testDispatchCommand(addTask(ID));
+        final List<Event> events = testDispatchCommand(addTask(ID));
 
-        assertEquals(1, records.size());
-        final EventRecord record = records.get(0);
-        assertNotNull(record);
-        final TaskAdded event = fromAny(record.getEvent());
-        assertEquals(ID, event.getProjectId());
+        assertEquals(1, events.size());
+        final Event event = events.get(0);
+        assertNotNull(event);
+        final TaskAdded message = fromAny(event.getMessage());
+        assertEquals(ID, message.getProjectId());
     }
 
     @Test(expected = MissingProcessManagerIdException.class)
@@ -140,7 +135,7 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final EventRecord event = EventRecords.createEventRecord(unknownEventMessage,
+        final Event event = Events.createEvent(unknownEventMessage,
                     EventContext.getDefaultInstance());
         repository.dispatch(event);
     }

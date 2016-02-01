@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.Repository;
@@ -40,7 +40,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.client.Commands.getMessage;
+import static org.spine3.base.Commands.getMessage;
 
 /**
  * {@code AggregateRepository} manages instances of {@link Aggregate} of the type
@@ -150,7 +150,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
                     ? aggregateEvents.getSnapshot()
                     : null;
             final A result = create(id);
-            final List<EventRecord> events = aggregateEvents.getEventRecordList();
+            final List<Event> events = aggregateEvents.getEventList();
 
             if (snapshot != null) {
                 result.restore(snapshot);
@@ -159,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
             result.play(events);
 
             return result;
-        } catch (InvocationTargetException e) {
+        } catch (Throwable e) {
             throw propagate(e);
         }
     }
@@ -171,7 +171,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      */
     @Override
     public void store(A aggregate) {
-        final Iterable<EventRecord> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
+        final Iterable<Event> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
 
         //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
         // Now we're storing snapshot in a seria of uncommitted
@@ -181,7 +181,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
         int eventCount = 0;
-        for (EventRecord event : uncommittedEvents) {
+        for (Event event : uncommittedEvents) {
             aggregateStorage().writeEvent(id, event);
             ++eventCount;
 
@@ -212,7 +212,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      */
     @Override
     @CheckReturnValue
-    public List<EventRecord> dispatch(Command request)
+    public List<Event> dispatch(Command request)
             throws IllegalStateException, InvocationTargetException {
         final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
@@ -229,7 +229,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
             return null;
         }
 
-        final List<EventRecord> eventRecords = aggregate.getUncommittedEvents();
+        final List<Event> events = aggregate.getUncommittedEvents();
 
         //noinspection OverlyBroadCatchBlock
         try {
@@ -241,7 +241,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
 
         //TODO:2016-01-25:alexander.yevsyukov: Post events to EventBus.
 
-        return eventRecords;
+        return events;
     }
 
     @SuppressWarnings("unchecked")

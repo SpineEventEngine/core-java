@@ -22,7 +22,7 @@ package org.spine3.server.storage.memory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.Commands;
+import org.spine3.base.Commands;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
