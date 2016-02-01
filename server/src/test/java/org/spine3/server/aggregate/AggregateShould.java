@@ -59,7 +59,6 @@ import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.Aggregate.IS_EVENT_APPLIER;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.createProject;
@@ -76,7 +75,6 @@ import static org.spine3.time.ZoneOffsets.UTC;
 public class AggregateShould {
 
     private static final ProjectId PROJECT_ID = createProjectId("AggregateShould");
-    private static final ProjectId PROJECT_ID = createProjectId("testProjectId");
 
     private final CreateProject createProject = createProject(PROJECT_ID);
     private final AddTask addTask = TestCommands.addTask(PROJECT_ID);
@@ -97,7 +95,7 @@ public class AggregateShould {
     @Test
     public void accept_Message_id_to_constructor() {
         try {
-            final ProjectAggregate aggregate = new ProjectAggregate(PROJECT_ID);
+            final TestAggregate aggregate = new TestAggregate(PROJECT_ID);
             assertEquals(PROJECT_ID, aggregate.getId());
         } catch (Throwable e) {
             fail();
@@ -290,7 +288,7 @@ public class AggregateShould {
         aggregate.dispatch(startProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
 
-        final List<EventRecord> eventRecords = newArrayList(snapshotToEventRecord(snapshotNewProject));
+        final List<Event> eventRecords = newArrayList(snapshotToEvent(snapshotNewProject));
         aggregate.play(eventRecords);
         assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
     }
@@ -323,7 +321,7 @@ public class AggregateShould {
 
     @Test
     public void not_return_any_event_records_when_commit_by_default() {
-        final List<EventRecord> events = aggregate.commitEvents();
+        final List<Event> events = aggregate.commitEvents();
 
         assertTrue(events.isEmpty());
     }
@@ -626,11 +624,6 @@ public class AggregateShould {
             super(id);
             this.brokenHandler = brokenHandler;
             this.brokenApplier = brokenApplier;
-        }
-
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
 
         @Assign

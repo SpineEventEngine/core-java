@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -45,7 +46,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.util.Identifiers.newUuid;
+import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -66,7 +67,7 @@ public class ProcessManagerShould {
 
     @Test
     public void have_default_state_initially() throws InvocationTargetException {
-        assertEquals(pm.getDefaultState(), pm.getState());
+        assertEquals(processManager.getDefaultState(), processManager.getState());
     }
 
     @Test
@@ -82,8 +83,8 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
-        pm.dispatchEvent(event, EVENT_CONTEXT);
-        assertEquals(toAny(event), pm.getState());
+        processManager.dispatchEvent(event, EVENT_CONTEXT);
+        assertEquals(toAny(event), processManager.getState());
     }
 
     @Test
@@ -98,13 +99,9 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject(ID));
     }
 
-    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<EventRecord> records = pm.dispatchCommand(command, COMMAND_CONTEXT);
-        assertEquals(toAny(command), pm.getState());
-        return records;
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
         final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
-        assertEquals(command, processManager.getState());
+        assertEquals(toAny(command), processManager.getState());
         return events;
     }
 
@@ -155,7 +152,7 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
-    public static class TestProcessManager extends ProcessManager<ProjectId, Any> {
+    private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
         public TestProcessManager(ProjectId id) {
             super(id);

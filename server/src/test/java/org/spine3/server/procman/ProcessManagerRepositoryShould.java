@@ -25,15 +25,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.server.*;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.util.EventRecords;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -51,7 +46,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.util.Identifiers.newUuid;
+import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -115,7 +110,7 @@ public class ProcessManagerRepositoryShould {
         final List<Event> events = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(toState(command), manager.getState());
-        return records;
+        return events;
     }
 
     @Test
