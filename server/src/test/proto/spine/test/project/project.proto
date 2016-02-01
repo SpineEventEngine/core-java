@@ -30,7 +30,6 @@ message Project {
     ProjectId project_id = 1;
     repeated Task task = 2;
     string status = 3;
-    int32 tasks_count = 4;
 }
 
 message ProjectId {
