@@ -22,10 +22,14 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.server.util.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
+import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.server.EntityId.checkType;
@@ -42,6 +46,11 @@ import static org.spine3.server.EntityId.checkType;
  */
 public abstract class Entity<I, M extends Message> {
 
+    /**
+     * The index of the declaration of the generic type {@code M} in this class.
+     */
+    private static final int STATE_CLASS_GENERIC_INDEX = 1;
+
     private final I id;
 
     private M state;
@@ -49,6 +58,8 @@ public abstract class Entity<I, M extends Message> {
     private Timestamp whenModified;
 
     private int version;
+
+    private final M defaultState;
 
     /**
      * Creates a new instance.
@@ -62,10 +73,30 @@ public abstract class Entity<I, M extends Message> {
         // classes. We require that entity constructors be public as they are called by repositories.
         checkType(id);
         this.id = id;
+        this.defaultState = retrieveDefaultState();
     }
 
+    /**
+     * Obtains the default entity state using {@code getDefaultInstance()} method of the state class.
+     *
+     * @return the default state of the entity
+     */
     @CheckReturnValue
-    protected abstract M getDefaultState();
+    protected M getDefaultState() {
+        return defaultState;
+    }
+
+    private M retrieveDefaultState() {
+        final Class<M> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
+        try {
+            final Constructor<M> constructor = stateClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            final M state = constructor.newInstance();
+            return state;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw propagate(e);
+        }
+    }
 
     /**
      * Obtains the entity state.

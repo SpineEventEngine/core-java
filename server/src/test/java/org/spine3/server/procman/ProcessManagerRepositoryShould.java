@@ -30,12 +30,11 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventRecord;
 import org.spine3.client.Commands;
-import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
-import org.spine3.server.FailureThrowable;
+import org.spine3.server.*;
 import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.util.EventRecords;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -52,7 +51,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.procman.ProcessManagerShould.TestProcessManager;
+import static org.spine3.server.util.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommandFactory.*;
 import static org.spine3.testdata.TestEventFactory.*;
@@ -63,7 +62,7 @@ import static org.spine3.testdata.TestEventFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerRepositoryShould {
 
-    private static final ProjectId ID = createProjectId("project78");
+    private static final ProjectId ID = createProjectId(newUuid());
 
     private final TestProcessManagerRepository repository = new TestProcessManagerRepository(
             BoundedContextTestStubs.create());
@@ -92,11 +91,10 @@ public class ProcessManagerRepositoryShould {
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
-        final EventRecord event = EventRecords.createEventRecord(eventMessage,
-                    EventContext.getDefaultInstance());
+        final EventRecord event = EventRecords.createEventRecord(eventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
         final TestProcessManager manager = repository.load(ID);
-        assertEquals(eventMessage, manager.getState());
+        assertEquals(toState(eventMessage), manager.getState());
     }
 
     @Test
@@ -115,7 +113,7 @@ public class ProcessManagerRepositoryShould {
         final Command request = Commands.newCommand(command, CommandContext.getDefaultInstance());
         final List<EventRecord> records = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
-        assertEquals(command, manager.getState());
+        assertEquals(toState(command), manager.getState());
         return records;
     }
 
@@ -141,7 +139,7 @@ public class ProcessManagerRepositoryShould {
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final EventRecord event = EventRecords.createEventRecord(unknownEventMessage,
-                    EventContext.getDefaultInstance());
+                EventContext.getDefaultInstance());
         repository.dispatch(event);
     }
 
@@ -159,7 +157,6 @@ public class ProcessManagerRepositoryShould {
         assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
         assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
-
     }
 
     @Test
@@ -174,10 +171,64 @@ public class ProcessManagerRepositoryShould {
         assertEquals(ID, actual);
     }
 
+    private static Project toState(Message status) {
+        final String statusStr = status.getClass().getName();
+        final Project.Builder project = Project.newBuilder()
+                .setProjectId(ID)
+                .setStatus(statusStr);
+        return project.build();
+    }
+
     private static class TestProcessManagerRepository
-            extends ProcessManagerRepository<ProjectId, ProcessManagerShould.TestProcessManager, Message> {
+            extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+    }
+
+    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+
+        public TestProcessManager(ProjectId id) {
+            super(id);
+        }
+
+        // is overridden to make it accessible from tests
+        @Override
+        @SuppressWarnings("RefusedBequest")
+        protected Project getDefaultState() {
+            return Project.getDefaultInstance();
+        }
+
+        @Subscribe
+        public void on(ProjectCreated event, EventContext ignored) {
+            incrementState(toState(event));
+        }
+
+        @Subscribe
+        public void on(TaskAdded event, EventContext ignored) {
+            incrementState(toState(event));
+        }
+
+        @Subscribe
+        public void on(ProjectStarted event, EventContext ignored) {
+            incrementState(toState(event));
+        }
+
+        @Assign
+        public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
+            incrementState(toState(command));
+            return projectCreatedEvent(command.getProjectId());
+        }
+
+        @Assign
+        public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
+            incrementState(toState(command));
+            return taskAddedEvent(command.getProjectId());
+        }
+
+        @Assign
+        public void handleCommand(StartProject command, CommandContext ignored) {
+            incrementState(toState(command));
         }
     }
 }

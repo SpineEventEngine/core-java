@@ -42,7 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Messages.checkDefault;
-import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.testdata.TestEventFactory.projectCreatedEvent;
 import static org.spine3.testdata.TestEventFactory.taskAddedEvent;
 
@@ -50,13 +49,12 @@ import static org.spine3.testdata.TestEventFactory.taskAddedEvent;
 public class AggregateRepositoryShould {
 
     private StorageFactory storageFactory;
-    private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     @Before
     public void setUp() {
         storageFactory = InMemoryStorageFactory.getInstance();
-        boundedContext = BoundedContextTestStubs.create(storageFactory);
+        final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new ProjectAggregateRepository(boundedContext);
 
     }
@@ -65,11 +63,6 @@ public class AggregateRepositoryShould {
 
         public ProjectAggregate(ProjectId id) {
             super(id);
-        }
-
-        @Override
-        protected Project getDefaultState() {
-            return getDefaultInstance();
         }
 
         @Assign

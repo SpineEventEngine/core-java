@@ -33,8 +33,6 @@ import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 
-import javax.annotation.Nonnull;
-
 /**
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -44,12 +42,6 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     public OrderAggregate(OrderId id) {
         super(id);
-    }
-
-    @Nonnull
-    @Override
-    protected Order getDefaultState() {
-        return Order.getDefaultInstance();
     }
 
     @Assign
@@ -139,5 +131,4 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
             throw new IllegalArgumentException("Order ID is missing: " + cmd);
         }
     }
-
 }

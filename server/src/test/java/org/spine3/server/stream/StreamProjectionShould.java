@@ -39,11 +39,6 @@ public class StreamProjectionShould {
             super(id);
         }
 
-        @Override
-        protected StringValue getDefaultState() {
-            return StringValue.getDefaultInstance();
-        }
-
         @Subscribe
         public void on(StringValue event, EventContext ignored) {
             final StringValue newSate = createNewState("string", event.getValue());

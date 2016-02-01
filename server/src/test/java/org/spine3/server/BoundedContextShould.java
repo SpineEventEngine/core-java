@@ -59,7 +59,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.test.project.Project.getDefaultInstance;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommandFactory.*;
 import static org.spine3.testdata.TestEventFactory.*;
@@ -272,11 +271,6 @@ public class BoundedContextShould {
             super(id);
         }
 
-        @Override
-        protected Project getDefaultState() {
-            return getDefaultInstance();
-        }
-
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
@@ -357,11 +351,6 @@ public class BoundedContextShould {
             super(id);
         }
 
-        @Override
-        protected Empty getDefaultState() {
-            return Empty.getDefaultInstance();
-        }
-
         @SuppressWarnings("UnusedParameters") // OK for test method
         @Assign
         public void handle(CreateProject command, CommandContext ctx) {
@@ -387,11 +376,6 @@ public class BoundedContextShould {
         // Public constructor is a part of projection public API. It's called by a repository.
         public ProjectReport(ProjectId id) {
             super(id);
-        }
-
-        @Override
-        protected Empty getDefaultState() {
-            return Empty.getDefaultInstance();
         }
 
         @SuppressWarnings("UnusedParameters") // OK for test method.

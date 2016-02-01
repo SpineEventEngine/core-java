@@ -64,10 +64,6 @@ public class RepositoryShould {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
     }
 
     public static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
@@ -102,13 +98,8 @@ public class RepositoryShould {
     }
 
     public static class EntityWithProtectedConstructor extends Entity<ProjectId, Project> {
-
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
-        }
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
     }
 
@@ -147,10 +138,6 @@ public class RepositoryShould {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
     }
 
     public static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
@@ -181,11 +168,6 @@ public class RepositoryShould {
     public static class ProjectEntity extends Entity<ProjectId, Project> {
         public ProjectEntity(ProjectId id) {
             super(id);
-        }
-
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
     }
 
@@ -274,11 +256,6 @@ public class RepositoryShould {
             super(id);
             throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
         }
-
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
     }
 
     public static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity> {
@@ -302,5 +279,5 @@ public class RepositoryShould {
         protected AutoCloseable createStorage(StorageFactory factory) {
             return null;
         }
-}
+    }
 }
