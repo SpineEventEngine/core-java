@@ -36,19 +36,16 @@ message AggregateStorageRecord {
     // A timestamp of an event or a snapshot in this record.
     google.protobuf.Timestamp timestamp = 1;
 
-     // string representation of an aggregate id.
-    string aggregate_id = 2;
-
     // A short Protobuf type name of the event.
-    string event_type = 3;
+    string event_type = 2;
 
     // String representation of EventId.
-    string event_id = 4;
+    string event_id = 3;
 
     // The version of the aggregate after the event was applied.
-    int32 version = 5;
+    int32 version = 4;
 
-    reserved 6 to 19;
+    reserved 5 to 19;
 
     oneof kind {
         // Event data and context.
@@ -56,6 +53,20 @@ message AggregateStorageRecord {
 
         // Snapshot of the aggregate.
         spine.server.aggregate.Snapshot snapshot = 21;
+    }
+
+    // Aggregate record identifier.
+    message Id {
+        oneof type {
+            // The string representation of the ID.
+            string string_value = 1;
+
+            // The long representation of the ID.
+            int64 long_value = 2;
+
+            // The integer representation of the ID.
+            int32 int_value = 3;
+        }
     }
 }
 
@@ -70,5 +81,3 @@ message AggregateEvents {
     // Otherwise, records are full history of the aggregate.
     repeated spine.base.EventRecord event_record = 2;
 }
-
-
