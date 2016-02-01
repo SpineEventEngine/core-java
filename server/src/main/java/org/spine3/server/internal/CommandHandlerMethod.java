@@ -50,7 +50,7 @@ import static java.util.Collections.singletonList;
  * @author Alexander Yevsyukov
  */
 @Internal
-public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     /**
      * A command must be the first parameter of a handling method.
@@ -73,7 +73,7 @@ public abstract class CommandHandlerMethod extends MessageHandlerMethod<Object, 
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected CommandHandlerMethod(Object target, Method method) {
+    public CommandHandlerMethod(Object target, Method method) {
         super(target, method);
     }
 

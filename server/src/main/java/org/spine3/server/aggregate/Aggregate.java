@@ -123,7 +123,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
 
     @Override
     public CommandHandlerMethod createMethod(Method method) {
-        return new AggregateCommandHandler(this, method);
+        return new CommandHandlerMethod(this, method);
     }
 
     @Override
@@ -207,7 +207,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             throw missingCommandHandler(commandClass);
         }
 
-        final CommandHandlerMethod commandHandler = new AggregateCommandHandler(this, method);
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final List<? extends Message> result = commandHandler.invoke(commandMessage, context);
         return result;
     }
