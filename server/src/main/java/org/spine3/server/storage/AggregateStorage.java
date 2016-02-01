@@ -100,7 +100,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (final Event event : eventList) {
-            checkTimestamp(event);
+            checkTimestamp(event.getContext().hasTimestamp());
             final AggregateStorageRecord storageRecord = toStorageRecord(event);
             writeInternal(id, storageRecord);
         }
@@ -118,6 +118,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(id, "aggregate id");
         //noinspection DuplicateStringLiteralInspection
         checkNotNull(event, "event");
+        checkTimestamp(event.getContext().hasTimestamp());
 
         final AggregateStorageRecord record = toStorageRecord(event);
         writeInternal(id, record);
@@ -136,6 +137,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId, "aggregate ID");
         checkNotNull(snapshot, "snapshot");
+        checkTimestamp(snapshot.hasTimestamp());
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
@@ -184,8 +186,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         return builder.build();
     }
 
-    private static void checkTimestamp(Event event) {
-        checkArgument(event.getContext().hasTimestamp(),
+    private static void checkTimestamp(boolean hasTimestamp) {
+        checkArgument(hasTimestamp,
                 "Event context must have a timestamp because it is used to sort storage records.");
     }
 
