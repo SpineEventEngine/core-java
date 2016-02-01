@@ -40,11 +40,6 @@ public class TaskAggregate extends Aggregate<TaskId, Task> {
         super(id);
     }
 
-    @Override
-    protected Task getDefaultState() {
-        return Task.getDefaultInstance();
-    }
-
     @Assign
     public TaskCancelled handle(CancelTask command, CommandContext context) throws CannotCancelTaskInProgress {
         final Task task = getState();

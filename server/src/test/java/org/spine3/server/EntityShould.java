@@ -29,7 +29,9 @@ import org.spine3.test.project.Project;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.currentTimeSeconds;
+import static org.spine3.server.util.Identifiers.newUuid;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.util.Tests.currentTimeSeconds;
 
 /**
  * @author Alexander Litus
@@ -37,31 +39,30 @@ import static org.spine3.test.Tests.currentTimeSeconds;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EntityShould {
 
-    private static final String TEST_ID = "test_id";
+    private static final String ID = newUuid();
+    private final Project state = newProject();
 
-    private TestEntity entity;
-    private final Project state = Project.newBuilder().setStatus("test_state").build();
+    private TestEntity entity = new TestEntity(ID);
 
     @Before
     public void setUp() {
-        entity = new TestEntity(TEST_ID);
+        entity = new TestEntity(ID);
     }
 
     @Test
-    public void have_non_null_fields_by_default() {
-        assertEquals(entity.getState(), entity.getDefaultState());
-        assertEquals(entity.whenModified(), Timestamp.getDefaultInstance());
-        assertEquals(0, entity.getVersion());
+    public void return_default_state() {
+        final Project state = entity.getDefaultState();
+        assertEquals(Project.getDefaultInstance(), state);
     }
 
     @Test
     public void set_id_in_constructor() {
-        assertEquals(TEST_ID, entity.getId());
+        assertEquals(ID, entity.getId());
     }
 
     @Test
     public void store_state() {
-        final Project state = Project.newBuilder().setStatus("status").build();
+        final Project state = newProject();
         final Timestamp whenLastModified = getCurrentTime();
         final int version = 3;
 
@@ -98,6 +99,7 @@ public class EntityShould {
 
     @Test
     public void set_default_state() {
+        entity.incrementState(newProject());
         entity.setDefault();
         final long expectedTimeSec = currentTimeSeconds();
 
@@ -127,7 +129,7 @@ public class EntityShould {
 
     @Test
     public void update_state() {
-        final Project newState = Project.newBuilder().setStatus("new_state").build();
+        final Project newState = newProject();
         entity.incrementState(newState);
         assertEquals(newState, entity.getState());
     }
@@ -146,18 +148,19 @@ public class EntityShould {
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
 
-    public static class TestEntity extends Entity<String, Project> {
+    private static Project newProject() {
+        final Project.Builder project = Project.newBuilder()
+                .setProjectId(createProjectId(newUuid()))
+                .setStatus(newUuid());
+        return project.build();
+    }
 
-        private static final Project DEFAULT_STATE = Project.newBuilder().setStatus("default state").build();
+    private static class TestEntity extends Entity<String, Project> {
+
         private boolean isValidateMethodCalled = false;
 
         protected TestEntity(String id) {
             super(id);
-        }
-
-        @Override
-        protected Project getDefaultState() {
-            return DEFAULT_STATE;
         }
 
         @Override
@@ -167,15 +170,10 @@ public class EntityShould {
         }
     }
 
-    public static class EntityWithUnsupportedId extends Entity<Exception, Project> {
+    private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
 
-        public EntityWithUnsupportedId(Exception id) {
+        protected EntityWithUnsupportedId(Exception id) {
             super(id);
-        }
-
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
         }
     }
 }

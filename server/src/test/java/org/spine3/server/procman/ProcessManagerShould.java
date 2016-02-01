@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -43,6 +44,8 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.util.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -50,16 +53,20 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
 
-    private static final ProjectId ID = createProjectId("project123");
+    private static final ProjectId ID = createProjectId(newUuid());
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
-    private final TestProcessManager processManager = new TestProcessManager(ID);
+    private TestProcessManager processManager;
 
+    @Before
+    public void setUp() {
+        processManager = new TestProcessManager(ID);
+    }
 
     @Test
     public void have_default_state_initially() throws InvocationTargetException {
-        assertEquals(processManager.getDefaultState(), processManager.getState());
+        assertEquals(pm.getDefaultState(), pm.getState());
     }
 
     @Test
@@ -75,8 +82,8 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
-        processManager.dispatchEvent(event, EVENT_CONTEXT);
-        assertEquals(event, processManager.getState());
+        pm.dispatchEvent(event, EVENT_CONTEXT);
+        assertEquals(toAny(event), pm.getState());
     }
 
     @Test
@@ -91,6 +98,10 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject(ID));
     }
 
+    private List<EventRecord> testDispatchCommand(Message command) throws InvocationTargetException {
+        final List<EventRecord> records = pm.dispatchCommand(command, COMMAND_CONTEXT);
+        assertEquals(toAny(command), pm.getState());
+        return records;
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
         final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
         assertEquals(command, processManager.getState());
@@ -144,47 +155,48 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
-    public static class TestProcessManager extends ProcessManager<ProjectId, Message> {
+    public static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
         public TestProcessManager(ProjectId id) {
             super(id);
         }
 
+        @Override
+        @SuppressWarnings("RefusedBequest")
+        protected Any getDefaultState() {
+            return Any.getDefaultInstance();
+        }
+
         @Subscribe
         public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(event);
+            incrementState(toAny(event));
         }
 
         @Subscribe
         public void on(TaskAdded event, EventContext ignored) {
-            incrementState(event);
+            incrementState(toAny(event));
         }
 
         @Subscribe
         public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(event);
+            incrementState(toAny(event));
         }
 
         @Assign
         public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
-            incrementState(command);
+            incrementState(toAny(command));
             return projectCreatedEvent(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
-            incrementState(command);
+            incrementState(toAny(command));
             return taskAddedEvent(command.getProjectId());
         }
 
         @Assign
         public void handleCommand(StartProject command, CommandContext ignored) {
-            incrementState(command);
-        }
-
-        @Override
-        protected StringValue getDefaultState() {
-            return StringValue.getDefaultInstance();
+            incrementState(toAny(command));
         }
     }
 }
