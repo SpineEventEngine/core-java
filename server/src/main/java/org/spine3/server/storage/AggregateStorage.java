@@ -72,7 +72,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                     snapshot = record.getSnapshot();
                     break;
                 case KIND_NOT_SET:
-                    throw new IllegalStateException("Event record or snapshot missing in record: \"" +
+                    throw new IllegalStateException("Event or snapshot missing in record: \"" +
                             shortDebugString(record) + '\"');
             }
         }
@@ -107,20 +107,20 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     /**
-     * Writes an event record to the storage by an aggregate ID.
+     * Writes an event to the storage by an aggregate ID.
      *
      * @param id the aggregate ID
-     * @param eventRecord the record to write
-     * @throws NullPointerException if the ID or record is {@code null}
+     * @param event the event to write
      * @throws IllegalStateException if the storage is closed
      */
-    public void writeEvent(I id, EventRecord eventRecord) {
+    public void writeEvent(I id, EventRecord event) {
         checkNotClosed();
         checkNotNull(id, "aggregate id");
-        checkNotNull(eventRecord, "event record");
+        //noinspection DuplicateStringLiteralInspection
+        checkNotNull(event, "event");
 
-        final AggregateStorageRecord storageRecord = toStorageRecord(eventRecord);
-        writeInternal(id, storageRecord);
+        final AggregateStorageRecord record = toStorageRecord(event);
+        writeInternal(id, record);
     }
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
@@ -130,7 +130,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      *
      * @param aggregateId an ID of an aggregate of which the snapshot is made
      * @param snapshot the snapshot of the aggregate
-     * @throws NullPointerException if the ID or snapshot is {@code null}
      * @throws IllegalStateException if the storage is closed
      */
     public void write(I aggregateId, Snapshot snapshot) {
@@ -148,19 +147,19 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         writeInternal(aggregateId, record);
     }
 
-    private static AggregateStorageRecord toStorageRecord(EventRecord record) {
-        final EventContext context = record.getContext();
-        final Any event = record.getEvent();
+    private static AggregateStorageRecord toStorageRecord(EventRecord event) {
+        final EventContext context = event.getContext();
         final EventId eventId = context.getEventId();
         final String eventIdStr = idToString(eventId);
-        final String typeName = TypeName.ofEnclosed(event).nameOnly();
+        final Any eventMsg = event.getEvent();
+        final String typeName = TypeName.ofEnclosed(eventMsg).nameOnly();
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setEventType(typeName)
                 .setEventId(eventIdStr)
                 .setVersion(context.getVersion())
-                .setEventRecord(record);
+                .setEventRecord(event);
         return builder.build();
     }
 
