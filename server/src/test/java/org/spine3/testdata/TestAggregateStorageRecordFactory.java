@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.ProjectIdOrBuilder;
 
 import java.util.List;
 
@@ -33,6 +32,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 
 
 /**
@@ -45,22 +46,19 @@ public class TestAggregateStorageRecordFactory {
     private TestAggregateStorageRecordFactory() {}
 
     /**
-     * Creates a new {@link AggregateStorageRecord} with the given timestamp and aggregateId.
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp.
      */
-    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId) {
-
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp) {
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setAggregateId(aggregateId.getId())
                 .setTimestamp(timestamp);
         return builder.build();
     }
 
     /**
-     * Creates a new {@link AggregateStorageRecord} with the given timestamp, aggregateId and event record.
+     * Creates a new {@link AggregateStorageRecord} with the given timestamp and event record.
      */
-    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, ProjectIdOrBuilder aggregateId, Event event) {
-
-        final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp, aggregateId)
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, Event event) {
+        final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp)
                 .toBuilder()
                 .setEvent(event);
         return builder.build();
@@ -79,15 +77,16 @@ public class TestAggregateStorageRecordFactory {
      * @param timestamp1 the timestamp of first record.
      */
     public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id, Timestamp timestamp1) {
-
         final Duration delta = seconds(10);
-
         final Timestamp timestamp2 = add(timestamp1, delta);
         final Timestamp timestamp3 = add(timestamp2, delta);
 
-        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1, id, TestEventFactory.projectCreated(id));
-        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2, id, TestEventFactory.taskAdded(id));
-        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3, id, TestEventFactory.projectStarted(id));
+        final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1,
+                projectCreated(id, createEventContext(timestamp1)));
+        final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2,
+                taskAdded(id, createEventContext(timestamp2)));
+        final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3,
+                projectStarted(id, createEventContext(timestamp3)));
 
         return newArrayList(record1, record2, record3);
     }
