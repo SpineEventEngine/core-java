@@ -65,6 +65,7 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();
+        checkNotNull(id);
 
         final EntityStorageRecord record = readInternal(checkNotNull(id));
         return record;

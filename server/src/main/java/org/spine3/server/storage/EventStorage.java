@@ -45,6 +45,8 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A storage used by {@link EventStore} for keeping event data.
  *
@@ -111,6 +113,8 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @Override
     public void write(EventId id, Event record) {
         checkNotClosed();
+        checkNotNull(id, "id");
+        checkNotNull(record, "record");
 
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
         writeInternal(storeRecord);
@@ -120,6 +124,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @Override
     public Event read(EventId id) {
         checkNotClosed();
+        checkNotNull(id);
 
         final EventStorageRecord storeRecord = readInternal(id);
         if (storeRecord == null) {

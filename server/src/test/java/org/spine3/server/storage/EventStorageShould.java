@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
@@ -84,10 +85,22 @@ public abstract class EventStorageShould {
         assertFalse(iterator.hasNext());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_read_with_null_id() {
+        //noinspection ConstantConditions
+        storage.read(null);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
-        storage.writeInternal(null);
+        storage.write(EventId.getDefaultInstance(), null);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_write_by_null_id() {
+        storage.write(null, Event.getDefaultInstance());
     }
 
     @Test
