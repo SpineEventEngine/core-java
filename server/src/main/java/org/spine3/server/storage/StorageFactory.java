@@ -67,5 +67,5 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I> the type of stream projection IDs
      * @see EntityId
      */
-    <I> ProjectionStorage<I> createStreamProjectionStorage();
+    <I> ProjectionStorage<I> createProjectionStorage();
 }

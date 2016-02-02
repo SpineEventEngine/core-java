@@ -51,7 +51,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Override
     @SuppressWarnings("RefusedBequest")
     protected AutoCloseable createStorage(StorageFactory factory) {
-        return factory.createStreamProjectionStorage();
+        return factory.createProjectionStorage();
     }
 
     /**
@@ -116,7 +116,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final P sp = load(id);
         sp.handle(eventMessage, context);
         store(sp);
-        final ProjectionStorage<I> storage = streamProjectionStorage();
+        final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);
     }
@@ -128,7 +128,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * @throws IllegalStateException if the storage is null
      */
     @Nonnull
-    protected ProjectionStorage<I> streamProjectionStorage() {
+    protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return checkStorage(storage);
