@@ -20,22 +20,30 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
-import org.spine3.server.stream.EventRecordFilter;
-import org.spine3.server.stream.EventStore;
-import org.spine3.server.stream.EventStreamQuery;
+import org.spine3.base.Events;
+import org.spine3.server.Identifiers;
+import org.spine3.server.event.EventFilter;
+import org.spine3.server.event.EventStore;
+import org.spine3.server.event.EventStreamQuery;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-
-import static org.spine3.server.storage.StorageUtil.toEventRecord;
-import static org.spine3.server.storage.StorageUtil.toEventStorageRecord;
-import static org.spine3.server.util.EventRecords.*;
+import java.util.List;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -43,10 +51,65 @@ import static org.spine3.server.util.EventRecords.*;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class EventStorage extends AbstractStorage<EventId, EventRecord> {
+public abstract class EventStorage extends AbstractStorage<EventId, Event> {
+
+    private static final Function<EventStorageRecord, Event> TO_EVENT = new Function<EventStorageRecord, Event>() {
+        @Override
+        public Event apply(@Nullable EventStorageRecord input) {
+            if (input == null) {
+                return Event.getDefaultInstance();
+            }
+            final Event result = toEvent(input);
+            return result;
+        }
+    };
+
+    /**
+     * Converts EventStorageRecord to Event.
+     */
+    protected static Event toEvent(EventStorageRecord record) {
+        final Event.Builder builder = Event.newBuilder()
+                .setMessage(record.getMessage())
+                .setContext(record.getContext());
+        return builder.build();
+    }
+
+    /**
+     * Converts EventStorageRecords to Events.
+     */
+    @VisibleForTesting
+    /* package */ static List<Event> toEventList(List<EventStorageRecord> records) {
+        return Lists.transform(records, TO_EVENT);
+    }
+
+    /**
+     * Converts EventStorageRecords to Events.
+     */
+    @SuppressWarnings("OverloadedVarargsMethod")
+    @VisibleForTesting
+    /* package */ static List<Event> toEventList(EventStorageRecord... records) {
+        return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
+    }
+
+    /**
+     * Converts {@code EventStorageRecord}s to {@code Event}s.
+     */
+    protected static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
+        return Iterators.transform(records, TO_EVENT);
+    }
+
+    /**
+     * Converts {@code EventId} into string.
+     *
+     * @param id the id to convert
+     * @return Json representation of the id
+     */
+    private static String idToString(EventId id) {
+        return Identifiers.idToString(id);
+    }
 
     @Override
-    public void write(EventId id, EventRecord record) {
+    public void write(EventId id, Event record) {
         checkNotClosed();
 
         final EventStorageRecord storeRecord = toEventStorageRecord(record);
@@ -55,27 +118,49 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
 
     @Nullable
     @Override
-    public EventRecord read(EventId id) {
+    public Event read(EventId id) {
         checkNotClosed();
 
         final EventStorageRecord storeRecord = readInternal(id);
         if (storeRecord == null) {
             return null;
         }
-        final EventRecord result = toEventRecord(storeRecord);
+        final Event result = toEvent(storeRecord);
         return result;
     }
 
     /**
-     * Returns iterator through event records matching the passed query.
+     * Creates storage record for the passed {@link Event}.
+     */
+    @VisibleForTesting
+    /* package */ static EventStorageRecord toEventStorageRecord(Event event) {
+        final Any message = event.getMessage();
+        final EventContext context = event.getContext();
+        final TypeName typeName = TypeName.ofEnclosed(message);
+        final EventId eventId = context.getEventId();
+        final String eventIdStr = idToString(eventId);
+
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                .setTimestamp(context.getTimestamp())
+                .setEventType(typeName.nameOnly())
+                .setAggregateId(context.getAggregateId().toString())
+                .setEventId(eventIdStr)
+                .setMessage(message)
+                .setContext(context);
+
+        return builder.build();
+    }
+
+    /**
+     * Returns iterator through events matching the passed query.
      *
      * @param query a filtering query
      * @return iterator instance
      */
-    public abstract Iterator<EventRecord> iterator(EventStreamQuery query);
+    public abstract Iterator<Event> iterator(EventStreamQuery query);
 
     /**
-     * Writes storage format record into the storage.
+     * Writes record into the storage.
      *
      * @param record the record to write
      */
@@ -90,13 +175,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
     protected abstract EventStorageRecord readInternal(EventId eventId);
 
     /**
-     * The predicate for filtering {@code EventRecord} instances by
+     * The predicate for filtering {@code Event} instances by
      * {@link EventStreamQuery}.
      */
-    public static class MatchesStreamQuery implements Predicate<EventRecord> {
+    public static class MatchesStreamQuery implements Predicate<Event> {
 
         private final EventStreamQuery query;
-        private final Predicate<EventRecord> timePredicate;
+        private final Predicate<Event> timePredicate;
 
         @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
         public MatchesStreamQuery(EventStreamQuery query) {
@@ -110,29 +195,67 @@ public abstract class EventStorage extends AbstractStorage<EventId, EventRecord>
 
             //noinspection IfStatementWithTooManyBranches
             if (afterSpecified && !beforeSpecified) {
-                this.timePredicate = new IsAfter(after);
+                this.timePredicate = new Events.IsAfter(after);
             } else if (!afterSpecified && beforeSpecified) {
-                this.timePredicate = new IsBefore(before);
+                this.timePredicate = new Events.IsBefore(before);
             } else if (afterSpecified /* && beforeSpecified is true here too */){
-                this.timePredicate = new IsBetween(after, before);
+                this.timePredicate = new Events.IsBetween(after, before);
             } else { // No timestamps specified.
                 this.timePredicate = Predicates.alwaysTrue();
             }
         }
 
         @Override
-        public boolean apply(@Nullable EventRecord input) {
+        public boolean apply(@Nullable Event input) {
             if (!timePredicate.apply(input)) {
                 return false;
             }
 
-            for (EventRecordFilter filter : query.getFilterList()) {
-                final Predicate<EventRecord> filterPredicate = new MatchesFilter(filter);
+            for (EventFilter filter : query.getFilterList()) {
+                final Predicate<Event> filterPredicate = new MatchFilter(filter);
                 if (!filterPredicate.apply(input)) {
                     return false;
                 }
             }
             return true;
+        }
+    }
+
+    /**
+     * The predicate for filtering event records by {@link EventFilter}.
+     */
+    private static class MatchFilter implements Predicate<Event> {
+
+        private final EventFilter filter;
+        private final TypeName eventType;
+
+        public MatchFilter(EventFilter filter) {
+            this.filter = filter;
+            this.eventType = TypeName.of(filter.getEventType());
+        }
+
+        @Override
+        public boolean apply(@Nullable Event event) {
+            if (event == null) {
+                return false;
+            }
+
+            final Message message = Events.getMessage(event);
+            final TypeName actualType = TypeName.of(message);
+            final boolean specifiedEventType = eventType.value().isEmpty();
+            if (!eventType.equals(actualType) && !specifiedEventType) {
+                return false;
+            }
+
+            final EventContext context = event.getContext();
+            final Any aggregateId = context.getAggregateId();
+            final List<Any> aggregateIdList = filter.getAggregateIdList();
+            if (aggregateIdList.isEmpty()) {
+                return true;
+            } else {
+                final boolean matches = aggregateIdList.contains(aggregateId);
+                return matches;
+            }
         }
     }
 }

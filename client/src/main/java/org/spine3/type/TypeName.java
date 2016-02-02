@@ -110,7 +110,7 @@ public final class TypeName extends StringTypeValue {
 
     private static final String TYPE_URL_SEPARATOR = "/";
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(TYPE_URL_SEPARATOR);
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR = Pattern.compile(".");
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR = Pattern.compile("\\.");
 
     private static String getTypeName(String typeUrl)
             throws InvalidProtocolBufferException {
@@ -132,18 +132,6 @@ public final class TypeName extends StringTypeValue {
     public String toTypeUrl() {
         final String result = TYPE_URL_PREFIX + TYPE_URL_SEPARATOR + value();
         return result;
-    }
-
-    /**
-     * Returns string to be used as a type URL in {@code Any}.
-     *
-     * @return string with "type.googleapis.com/" prefix followed by the full type name
-     * @see Any#getTypeUrl()
-     * @see #toTypeUrl()
-     */
-    public static String toTypeUrl(Descriptors.Descriptor descriptor) {
-        final TypeName typeName = of(descriptor);
-        return typeName.toTypeUrl();
     }
 
     /**

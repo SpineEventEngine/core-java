@@ -20,7 +20,7 @@
 
 package org.spine3.server;
 
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.type.EventClass;
 
 import java.util.Set;
@@ -42,6 +42,6 @@ public interface EventDispatcher {
     /**
      * Dispatches the event.
      */
-    void dispatch(EventRecord event);
+    void dispatch(Event event);
 
 }

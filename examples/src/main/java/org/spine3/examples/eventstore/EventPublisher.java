@@ -26,12 +26,11 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.EventRecord;
-import org.spine3.server.stream.grpc.EventStoreGrpc;
-import org.spine3.server.util.EventRecords;
-import org.spine3.server.util.Events;
+import org.spine3.base.Events;
+import org.spine3.server.event.grpc.EventStoreGrpc;
 
 import java.util.concurrent.TimeUnit;
 
@@ -58,7 +57,7 @@ public class EventPublisher {
         log().info(CHANNEL_SHUT_DOWN);
     }
 
-    public void publish(EventRecord record) {
+    public void publish(Event record) {
         blockingClient.append(record);
         log().trace("Event published: {}", TextFormat.shortDebugString(record));
     }
@@ -67,7 +66,7 @@ public class EventPublisher {
         final EventPublisher publisher = new EventPublisher(EVENT_STORE_SERVICE_HOST, PORT);
 
         try {
-            for (GeneratedMessage event : events) {
+            for (GeneratedMessage message : events) {
                 // Simulate event id generation.
                 final EventId eventId = Events.generateId();
 
@@ -75,7 +74,7 @@ public class EventPublisher {
                 // the framework code when new instance of `EventContext` is generated.
                 final EventContext context = EventContext.newBuilder().setEventId(eventId).build();
 
-                final EventRecord record = EventRecords.createEventRecord(event, context);
+                final Event record = Events.createEvent(message, context);
                 publisher.publish(record);
             }
         } finally {

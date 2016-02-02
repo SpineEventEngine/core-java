@@ -30,12 +30,12 @@ import static com.google.protobuf.util.TimeUtil.*;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
-import static org.spine3.util.Tests.callPrivateUtilityConstructor;
+import static org.spine3.test.Tests.callPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
 
-    private static final Duration DELTA = Durations.ofSeconds(10);
+    private static final Duration TEN_SECONDS = Durations.ofSeconds(10);
 
     private static final Duration MINUTE = Durations.ofMinutes(1);
 
@@ -49,7 +49,7 @@ public class TimestampsShould {
         final Timestamp currentTime = getCurrentTime();
         final Timestamp expected = subtract(currentTime, MINUTE);
 
-        final Timestamp actual = Timestamps.minuteAgo();
+        final Timestamp actual = Timestamps.minutesAgo(1);
 
         assertEquals(expected.getSeconds(), actual.getSeconds());
     }
@@ -57,7 +57,7 @@ public class TimestampsShould {
     @Test
     public void compare_two_timestamps_return_negative_int_if_first_less_than_second_one() {
         final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, DELTA);
+        final Timestamp time2 = add(time1, TEN_SECONDS);
 
         final int result = Timestamps.compare(time1, time2);
 
@@ -95,7 +95,7 @@ public class TimestampsShould {
     @Test
     public void compare_two_timestamps_return_positive_int_if_first_greater_than_second_one() {
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp timeAfterCurrent = add(currentTime, DELTA);
+        final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
         final int result = Timestamps.compare(timeAfterCurrent, currentTime);
 
@@ -114,8 +114,8 @@ public class TimestampsShould {
     @Test
     public void return_true_if_timestamp_is_between_two_timestamps() {
         final Timestamp start = getCurrentTime();
-        final Timestamp timeBetween = add(start, DELTA);
-        final Timestamp finish = add(timeBetween, DELTA);
+        final Timestamp timeBetween = add(start, TEN_SECONDS);
+        final Timestamp finish = add(timeBetween, TEN_SECONDS);
 
         final boolean isBetween = Timestamps.isBetween(timeBetween, start, finish);
 
@@ -125,8 +125,8 @@ public class TimestampsShould {
     @Test
     public void return_false_if_timestamp_is_not_between_two_timestamps() {
         final Timestamp start = getCurrentTime();
-        final Timestamp finish = add(start, DELTA);
-        final Timestamp timeNotBetween = add(finish, DELTA);
+        final Timestamp finish = add(start, TEN_SECONDS);
+        final Timestamp timeNotBetween = add(finish, TEN_SECONDS);
 
         final boolean isBetween = Timestamps.isBetween(timeNotBetween, start, finish);
 
@@ -136,7 +136,7 @@ public class TimestampsShould {
     @Test
     public void return_true_if_timestamp_is_after_another_one() {
         final Timestamp fromPoint = getCurrentTime();
-        final Timestamp timeToCheck = add(fromPoint, DELTA);
+        final Timestamp timeToCheck = add(fromPoint, TEN_SECONDS);
 
         final boolean isAfter = Timestamps.isAfter(timeToCheck, fromPoint);
 
@@ -146,7 +146,7 @@ public class TimestampsShould {
     @Test
     public void return_false_if_timestamp_is_not_after_another_one() {
         final Timestamp fromPoint = getCurrentTime();
-        final Timestamp timeToCheck = subtract(fromPoint, DELTA);
+        final Timestamp timeToCheck = subtract(fromPoint, TEN_SECONDS);
 
         final boolean isAfter = Timestamps.isAfter(timeToCheck, fromPoint);
 
@@ -156,7 +156,7 @@ public class TimestampsShould {
     @Test
     public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
         final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, DELTA);
+        final Timestamp time2 = add(time1, TEN_SECONDS);
 
         final int result = Timestamps.comparator().compare(time1, time2);
 
@@ -178,7 +178,7 @@ public class TimestampsShould {
     @Test
     public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
         final Timestamp currentTime = getCurrentTime();
-        final Timestamp timeAfterCurrent = add(currentTime, DELTA);
+        final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
         final int result = Timestamps.comparator().compare(timeAfterCurrent, currentTime);
 

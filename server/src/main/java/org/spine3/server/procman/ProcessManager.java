@@ -33,10 +33,8 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.util.Classes;
-import org.spine3.server.util.EventRecords;
-import org.spine3.server.util.Events;
-import org.spine3.server.util.MethodMap;
+import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -131,7 +129,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
     @SuppressWarnings("DuplicateStringLiteralInspection")
-    protected List<EventRecord> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    protected List<Event> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
         checkNotNull(command, "command");
         checkNotNull(context, "context");
 
@@ -143,20 +141,20 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
         final CommandHandlerMethod commandHandler = new PmCommandHandler(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
-        final List<EventRecord> eventRecords = toEventRecords(events, context.getCommandId());
+        final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
     }
 
-    private List<EventRecord> toEventRecords(final List<? extends Message> events, final CommandId commandId) {
-        return Lists.transform(events, new Function<Message, EventRecord>() {
+    private List<Event> toEvents(final List<? extends Message> events, final CommandId commandId) {
+        return Lists.transform(events, new Function<Message, Event>() {
             @Nullable // return null because an exception won't be propagated in this case
             @Override
-            public EventRecord apply(@Nullable Message event) {
+            public Event apply(@Nullable Message event) {
                 if (event == null) {
-                    return EventRecord.getDefaultInstance();
+                    return Event.getDefaultInstance();
                 }
                 final EventContext eventContext = createEventContext(commandId, event, getState(), whenModified(), getVersion());
-                final EventRecord result = EventRecords.createEventRecord(event, eventContext);
+                final Event result = Events.createEvent(event, eventContext);
                 return result;
             }
         });

@@ -22,7 +22,7 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.server.storage.AggregateStorageRecord;
 import org.spine3.test.project.ProjectId;
 
@@ -32,8 +32,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.testdata.TestContextFactory.*;
-import static org.spine3.testdata.TestEventRecordFactory.*;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 
 
 /**
@@ -57,10 +57,10 @@ public class TestAggregateStorageRecordFactory {
     /**
      * Creates a new {@link AggregateStorageRecord} with the given timestamp and event record.
      */
-    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, EventRecord event) {
-        final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setTimestamp(timestamp)
-                .setEventRecord(event);
+    public static AggregateStorageRecord newAggregateStorageRecord(Timestamp timestamp, Event event) {
+        final AggregateStorageRecord.Builder builder = newAggregateStorageRecord(timestamp)
+                .toBuilder()
+                .setEvent(event);
         return builder.build();
     }
 

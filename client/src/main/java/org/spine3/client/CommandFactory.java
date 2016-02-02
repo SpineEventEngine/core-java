@@ -23,6 +23,7 @@ package org.spine3.client;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
 

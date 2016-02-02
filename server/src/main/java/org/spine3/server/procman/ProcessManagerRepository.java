@@ -23,15 +23,11 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.*;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
-import org.spine3.server.util.EventRecords;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -41,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.Commands.getMessage;
+import static org.spine3.base.Commands.getMessage;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -135,12 +131,12 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #getId(Message, CommandContext)
      */
     @Override
-    public List<EventRecord> dispatch(Command request) throws InvocationTargetException {
+    public List<Event> dispatch(Command request) throws InvocationTargetException {
         final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
         final I id = getId(command, context);
         final PM manager = load(id);
-        final List<EventRecord> events = manager.dispatchCommand(command, context);
+        final List<Event> events = manager.dispatchCommand(command, context);
         store(manager);
         return events;
     }
@@ -156,8 +152,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      * @see #getId(Message, EventContext)
      */
     @Override
-    public void dispatch(EventRecord event) {
-        final Message eventMessage = EventRecords.getEvent(event);
+    public void dispatch(Event event) {
+        final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final I id = getId(eventMessage, context);
         final PM manager = load(id);

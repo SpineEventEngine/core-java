@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.server.Subscribe;
-import org.spine3.server.util.MethodMap;
-import org.spine3.server.util.Methods;
+import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.Methods;
 import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;

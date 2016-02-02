@@ -26,11 +26,11 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.server.stream.EventStreamQuery;
-import org.spine3.server.stream.grpc.EventStoreGrpc;
-import org.spine3.server.util.EventRecords;
+import org.spine3.base.Events;
+import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.event.grpc.EventStoreGrpc;
 import org.spine3.type.TypeName;
 
 import java.util.Iterator;
@@ -58,10 +58,10 @@ public class EventReader {
     }
 
     public void readEvents() {
-        final Iterator<EventRecord> iterator = blockingClient.read(EventStreamQuery.getDefaultInstance());
+        final Iterator<Event> iterator = blockingClient.read(EventStreamQuery.getDefaultInstance());
         while (iterator.hasNext()) {
-            final EventRecord next = iterator.next();
-            final Message event = EventRecords.getEvent(next);
+            final Event next = iterator.next();
+            final Message event = Events.getMessage(next);
             final EventContext context = next.getContext();
             log().info("Event: {} ({})", TypeName.of(event), TextFormat.shortDebugString(event));
             log().info("Context: {}", TextFormat.shortDebugString(context));

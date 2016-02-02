@@ -23,12 +23,10 @@ package org.spine3.testdata;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.*;
-import org.spine3.client.Commands;
-import org.spine3.server.util.Events;
 import org.spine3.time.ZoneOffset;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
@@ -62,7 +60,7 @@ public class TestContextFactory {
      * Creates a new {@link EventContext} with default properties.
      */
     public static EventContext createEventContext() {
-        final Timestamp now = TimeUtil.getCurrentTime();
+        final Timestamp now = getCurrentTime();
         final CommandContext commandContext = createCommandContext(
                 UserId.getDefaultInstance(), Commands.generateId(), now);
         final EventId eventId = Events.generateId();
@@ -71,6 +69,7 @@ public class TestContextFactory {
                 .setEventId(eventId)
                 .setCommandContext(commandContext)
                 .setAggregateId(AGGREGATE_ID)
+                .setTimestamp(now)
                 .build();
     }
 
@@ -81,7 +80,8 @@ public class TestContextFactory {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(toAny(aggregateId));
+                .setAggregateId(toAny(aggregateId))
+                .setTimestamp(getCurrentTime());
         return builder.build();
     }
 

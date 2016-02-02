@@ -22,7 +22,7 @@ package org.spine3.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.server.util.Classes;
+import org.spine3.server.reflect.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

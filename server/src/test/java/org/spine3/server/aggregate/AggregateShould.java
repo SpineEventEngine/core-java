@@ -21,18 +21,18 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Function;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
-import org.spine3.base.UserId;
-import org.spine3.client.Commands;
+import org.spine3.base.*;
 import org.spine3.client.UserUtil;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.server.Assign;
-import org.spine3.server.util.Classes;
+import org.spine3.server.reflect.Classes;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -41,11 +41,10 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommandFactory;
+import org.spine3.testdata.TestCommands;
 import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -54,20 +53,20 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
-import static org.spine3.client.Commands.createContext;
+import static org.spine3.base.Commands.createContext;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.EventApplier.IS_EVENT_APPLIER;
+import static org.spine3.server.aggregate.Aggregate.IS_EVENT_APPLIER;
+import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommandFactory.createProject;
-import static org.spine3.testdata.TestCommandFactory.startProject;
+import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestCommands.startProject;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
-import static org.spine3.testdata.TestEventRecordFactory.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 import static org.spine3.time.ZoneOffsets.UTC;
-import static org.spine3.util.Tests.currentTimeSeconds;
 
 /**
  * @author Alexander Litus
@@ -75,22 +74,29 @@ import static org.spine3.util.Tests.currentTimeSeconds;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private static final ProjectId PROJECT_ID = createProjectId("testProjectId");
-    private final TestAggregate aggregate = new TestAggregate(PROJECT_ID);
+    private static final ProjectId ID = createProjectId("AggregateShould");
 
-    private final CreateProject createProject = createProject(PROJECT_ID);
-    private final AddTask addTask = TestCommandFactory.addTask(PROJECT_ID);
-    private final StartProject startProject = startProject(PROJECT_ID);
+    private final CreateProject createProject = createProject(ID);
+    private final AddTask addTask = TestCommands.addTask(ID);
+    private final StartProject startProject = startProject(ID);
 
-    private static final UserId USER_ID = newUserId("user_id_test");
+    private static final UserId USER_ID = newUserId("AggregateShould@spine3.org");
+
     private static final CommandContext COMMAND_CONTEXT = createContext(USER_ID, UTC);
-    private static final EventContext EVENT_CONTEXT = createEventContext(PROJECT_ID);
+    private static final EventContext EVENT_CONTEXT = createEventContext(ID);
+
+    private TestAggregate aggregate;
+    
+    @Before
+    public void setUpTest() {
+        aggregate = new TestAggregate(ID);
+    }
 
     @Test
     public void accept_Message_id_to_constructor() {
         try {
-            final TestAggregate aggregate = new TestAggregate(PROJECT_ID);
-            assertEquals(PROJECT_ID, aggregate.getId());
+            final TestAggregate aggregate = new TestAggregate(ID);
+            assertEquals(ID, aggregate.getId());
         } catch (Throwable e) {
             fail();
         }
@@ -137,7 +143,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_one_command_and_apply_appropriate_event() throws InvocationTargetException {
+    public void handle_one_command_and_apply_appropriate_event() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
@@ -145,7 +151,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_only_appropriate_command() throws InvocationTargetException {
+    public void handle_only_appropriate_command() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
@@ -159,7 +165,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void handle_appropriate_commands_sequentially() throws InvocationTargetException {
+    public void handle_appropriate_commands_sequentially() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -174,17 +180,17 @@ public class AggregateShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_missing_command_handler() throws InvocationTargetException {
+    public void throw_exception_if_missing_command_handler() {
         final TestAggregateForCaseMissingHandlerOrApplier aggregate =
-                new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
-
+                new TestAggregateForCaseMissingHandlerOrApplier(ID);
+        
         aggregate.dispatch(addTask, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() throws InvocationTargetException {
+    public void throw_exception_if_missing_event_applier_for_non_state_neutral_event() {
         final TestAggregateForCaseMissingHandlerOrApplier aggregate =
-                new TestAggregateForCaseMissingHandlerOrApplier(PROJECT_ID);
+                new TestAggregateForCaseMissingHandlerOrApplier(ID);
         try {
             aggregate.dispatch(createProject, COMMAND_CONTEXT);
         } catch (IllegalStateException e) { // expected exception
@@ -194,8 +200,8 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() throws InvocationTargetException {
-        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
+    public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() {
+        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(ID);
         try {
             aggregate.dispatch(addTask, COMMAND_CONTEXT);
             assertTrue(aggregate.isTaskAddedCommandHandled);
@@ -232,17 +238,17 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_current_state_after_dispatch() throws InvocationTargetException {
+    public void return_current_state_after_dispatch() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         final Project state = aggregate.getState();
 
-        assertEquals(PROJECT_ID, state.getProjectId());
+        assertEquals(ID, state.getProjectId());
         assertEquals(TestAggregate.STATUS_NEW, state.getStatus());
     }
 
     @Test
-    public void return_current_state_after_several_dispatches() throws InvocationTargetException {
+    public void return_current_state_after_several_dispatches() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
 
@@ -252,12 +258,12 @@ public class AggregateShould {
 
     @Test
     public void return_non_null_time_when_was_last_modified() {
-        final Timestamp creationTime = new TestAggregate(PROJECT_ID).whenModified();
+        final Timestamp creationTime = new TestAggregate(ID).whenModified();
         assertNotNull(creationTime);
     }
 
     @Test
-    public void return_time_when_was_last_modified() throws InvocationTargetException {
+    public void return_time_when_was_last_modified() {
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
         final long expectedTimeSec = currentTimeSeconds();
 
@@ -267,16 +273,17 @@ public class AggregateShould {
     }
 
     @Test
-    public void play_events() throws InvocationTargetException {
-        final List<EventRecord> events = getProjectEventRecords();
-
+    public void play_events() {
+        final List<Event> events = getProjectEvents();
+        
         aggregate.play(events);
-
+        
         assertProjectEventsApplied(aggregate);
     }
 
     @Test
-    public void play_snapshot_event_and_restore_state() throws InvocationTargetException {
+    public void play_snapshot_event_and_restore_state() {
+
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
@@ -284,79 +291,81 @@ public class AggregateShould {
         aggregate.dispatch(startProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
 
-        final List<EventRecord> eventRecords = newArrayList(snapshotToEventRecord(snapshotNewProject));
-        aggregate.play(eventRecords);
+        final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
+        aggregate.play(events);
         assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
     }
 
     @Test
     public void not_return_any_uncommitted_event_records_by_default() {
-        final List<EventRecord> events = aggregate.getUncommittedEvents();
-
+        final List<Event> events = aggregate.getUncommittedEvents();
+        
         assertTrue(events.isEmpty());
     }
 
     @Test
-    public void return_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
+    public void return_uncommitted_event_records_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
-        final List<EventRecord> events = aggregate.getUncommittedEvents();
+        final List<Event> events = aggregate.getUncommittedEvents();
 
-        assertContains(eventRecordsToClasses(events),
+        assertContains(eventsToClasses(events),
                 ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
-    public void return_only_state_changing_uncommitted_event_records_after_dispatch() throws InvocationTargetException {
-        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(PROJECT_ID);
+    public void return_only_state_changing_uncommitted_event_records_after_dispatch() {
+        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(ID);
 
         aggregate.dispatchCommands(createProject, addTask);
 
-        final Collection<EventRecord> events = aggregate.getStateChangingUncommittedEvents();
-        assertContains(eventRecordsToClasses(events), ProjectCreated.class);
+        final Collection<Event> events = aggregate.getStateChangingUncommittedEvents();
+        assertContains(eventsToClasses(events), ProjectCreated.class);
     }
 
     @Test
     public void not_return_any_event_records_when_commit_by_default() {
-        final List<EventRecord> events = aggregate.commitEvents();
-
+        final List<Event> events = aggregate.commitEvents();
+        
         assertTrue(events.isEmpty());
     }
 
     @Test
-    public void return_event_records_when_commit_after_dispatch() throws InvocationTargetException {
+    public void return_events_when_commit_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
-        final List<EventRecord> events = aggregate.commitEvents();
+        final List<Event> events = aggregate.commitEvents();
 
-        assertContains(eventRecordsToClasses(events),
+        assertContains(eventsToClasses(events),
                 ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
-    public void clear_event_records_when_commit_after_dispatch() throws InvocationTargetException {
+    public void clear_event_records_when_commit_after_dispatch() {
         aggregate.dispatchCommands(createProject, addTask, startProject);
 
-        final List<EventRecord> events = aggregate.commitEvents();
+        final List<Event> events = aggregate.commitEvents();
         assertFalse(events.isEmpty());
 
-        final List<EventRecord> emptyList = aggregate.commitEvents();
+        final List<Event> emptyList = aggregate.commitEvents();
         assertTrue(emptyList.isEmpty());
     }
 
     @Test
-    public void transform_current_state_to_snapshot_event() throws InvocationTargetException {
+    public void transform_current_state_to_snapshot_event() {
+
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshot = aggregate.toSnapshot();
         final Project state = fromAny(snapshot.getState());
 
-        assertEquals(PROJECT_ID, state.getProjectId());
+        assertEquals(ID, state.getProjectId());
         assertEquals(TestAggregate.STATUS_NEW, state.getStatus());
     }
 
     @Test
-    public void restore_state_from_snapshot_event() throws InvocationTargetException {
+    public void restore_state_from_snapshot_event() {
+
         aggregate.dispatch(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
@@ -368,15 +377,15 @@ public class AggregateShould {
         assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
     }
 
-    private static Collection<Class<? extends Message>> eventRecordsToClasses(Collection<EventRecord> events) {
-        return transform(events, new Function<EventRecord, Class<? extends Message>>() {
+    private static Collection<Class<? extends Message>> eventsToClasses(Collection<Event> events) {
+        return transform(events, new Function<Event, Class<? extends Message>>() {
             @Nullable // return null because an exception won't be propagated in this case
             @Override
-            public Class<? extends Message> apply(@Nullable EventRecord record) {
+            public Class<? extends Message> apply(@Nullable Event record) {
                 if (record == null) {
                     return null;
                 }
-                return fromAny(record.getEvent()).getClass();
+                return fromAny(record.getMessage()).getClass();
             }
         });
     }
@@ -387,22 +396,22 @@ public class AggregateShould {
         assertEquals(expectedClasses.length, actualClasses.size());
     }
 
-    private static List<EventRecord> getProjectEventRecords() {
-        final List<EventRecord> events = newLinkedList();
-        events.add(projectCreated(PROJECT_ID, EVENT_CONTEXT));
-        events.add(taskAdded(PROJECT_ID, EVENT_CONTEXT));
-        events.add(projectStarted(PROJECT_ID, EVENT_CONTEXT));
+    private static List<Event> getProjectEvents() {
+        final List<Event> events = newLinkedList();
+        events.add(projectCreated(ID, EVENT_CONTEXT));
+        events.add(taskAdded(ID, EVENT_CONTEXT));
+        events.add(projectStarted(ID, EVENT_CONTEXT));
         return events;
     }
-
+    
     private static void assertProjectEventsApplied(TestAggregate a) {
         assertTrue(a.isProjectCreatedEventApplied);
         assertTrue(a.isTaskAddedEventApplied);
         assertTrue(a.isProjectStartedEventApplied);
     }
 
-    private static EventRecord snapshotToEventRecord(Snapshot snapshot) {
-        return EventRecord.newBuilder().setContext(EVENT_CONTEXT).setEvent(toAny(snapshot)).build();
+    private static Event snapshotToEvent(Snapshot snapshot) {
+        return Event.newBuilder().setContext(EVENT_CONTEXT).setMessage(toAny(snapshot)).build();
     }
 
     private static class TestAggregate extends Aggregate<ProjectId, Project> {
@@ -475,14 +484,13 @@ public class AggregateShould {
             isProjectStartedEventApplied = true;
         }
 
-        public void dispatchCommands(Message... commands) throws InvocationTargetException {
+        public void dispatchCommands(Message... commands) {
             final UserId userId = UserUtil.newUserId("aggregate_should@spine3.org");
             for (Message cmd : commands) {
                 final CommandContext ctx = Commands.createContext(userId, ZoneOffsets.UTC);
                 dispatch(cmd, ctx);
             }
         }
-
     }
 
     /*
@@ -539,13 +547,13 @@ public class AggregateShould {
         }
 
         @Override
-        @SuppressWarnings({"RefusedBequest", "ReturnOfCollectionOrArrayField"})
-        // the method from superclass returns nothing
+        @SuppressWarnings({"RefusedBequest", // OK as the default implementation returns empty set.
+                           "ReturnOfCollectionOrArrayField"}) // OK, as we return immutable implementation.
         protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
             return STATE_NEUTRAL_EVENT_CLASSES;
         }
 
-        public void dispatchCommands(Message... commands) throws InvocationTargetException {
+        public void dispatchCommands(Message... commands) {
             for (Message cmd : commands) {
                 dispatch(cmd, COMMAND_CONTEXT);
             }
@@ -573,6 +581,115 @@ public class AggregateShould {
     public static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project> {
         protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
+        }
+    }
+
+
+    @Test
+    public void increment_version_when_applying_state_changing_event() {
+        final int version = aggregate.getVersion();
+        // Dispatch two commands that cause events that modify aggregate state.
+        aggregate.dispatchCommands(createProject, startProject);
+
+        assertEquals(version + 2, aggregate.getVersion());
+    }
+
+    @Test
+    public void record_modification_timestamp() throws InterruptedException {
+        final Timestamp start = aggregate.whenModified();
+        aggregate.dispatchCommands(createProject);
+        Thread.sleep(100);
+
+        final Timestamp afterCreate = aggregate.whenModified();
+        assertTrue(Timestamps.isAfter(afterCreate, start));
+        Thread.sleep(100);
+
+        aggregate.dispatchCommands(startProject);
+        Thread.sleep(100);
+
+        final Timestamp afterStart = aggregate.whenModified();
+        assertTrue(Timestamps.isAfter(afterStart, afterCreate));
+    }
+
+    /**
+     * The class to check raising and catching exceptions.
+     */
+    private static class FaultyAggregate extends Aggregate<ProjectId, Project>  {
+
+        /* package */ static final String BROKEN_HANDLER = "broken_handler";
+        /* package */ static final String BROKEN_APPLIER = "broken_applier";
+
+        private final boolean brokenHandler;
+        private final boolean brokenApplier;
+
+        public FaultyAggregate(ProjectId id, boolean brokenHandler, boolean brokenApplier) {
+            super(id);
+            this.brokenHandler = brokenHandler;
+            this.brokenApplier = brokenApplier;
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            if (brokenHandler) {
+                throw new IllegalStateException(BROKEN_HANDLER);
+            }
+            return projectCreatedEvent(cmd.getProjectId());
+        }
+
+        @Apply
+        private void event(ProjectCreated event) {
+            if (brokenApplier) {
+                throw new IllegalStateException(BROKEN_APPLIER);
+            }
+
+            final Project newState = newBuilder(getState())
+                    .setProjectId(event.getProjectId())
+                    .build();
+
+            incrementState(newState);
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_handler_throws() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
+
+        final Command command = createProject();
+        try {
+            faultyAggregate.dispatch(command.getMessage(), command.getContext());
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_HANDLER, cause.getMessage());
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_applier_throws() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+
+        final Command command = createProject();
+        try {
+            faultyAggregate.dispatch(command.getMessage(), command.getContext());
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
+        }
+    }
+
+    @Test
+    public void propagate_RuntimeException_when_play_raises_exception() {
+        final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
+        try {
+            faultyAggregate.play(ImmutableList.of(projectCreated()));
+        } catch (RuntimeException e) {
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            final Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof IllegalStateException);
+            assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
     }
 }

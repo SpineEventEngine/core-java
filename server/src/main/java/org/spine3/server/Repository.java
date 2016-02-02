@@ -20,8 +20,8 @@
 
 package org.spine3.server;
 
+import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.util.Classes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

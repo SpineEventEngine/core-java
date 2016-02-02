@@ -29,19 +29,19 @@ import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandBus;
-import org.spine3.server.CommandStore;
 import org.spine3.server.EventBus;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.stream.EventStore;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.server.util.Identifiers.IdConverterRegistry;
-import static org.spine3.server.util.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.server.Identifiers.ConverterRegistry;
+import static org.spine3.server.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * A sample application showing basic usage of the framework.
@@ -128,7 +128,7 @@ public class Application implements AutoCloseable {
 
         //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
         // Register id converters
-        IdConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
+        ConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
     /**

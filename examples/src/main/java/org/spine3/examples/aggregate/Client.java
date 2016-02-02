@@ -26,7 +26,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.UserId;
 import org.spine3.client.grpc.ClientServiceGrpc;
@@ -61,10 +61,10 @@ public class Client {
     private final ClientServiceGrpc.ClientServiceBlockingClient blockingClient;
     private final ClientServiceGrpc.ClientServiceStub nonBlockingClient;
 
-    private final StreamObserver<EventRecord> observer = new StreamObserver<EventRecord>() {
+    private final StreamObserver<Event> observer = new StreamObserver<Event>() {
         @Override
-        public void onNext(EventRecord record) {
-            final String eventText = Messages.toText(record.getEvent());
+        public void onNext(Event event) {
+            final String eventText = Messages.toText(event.getMessage());
             log().info(eventText);
         }
 

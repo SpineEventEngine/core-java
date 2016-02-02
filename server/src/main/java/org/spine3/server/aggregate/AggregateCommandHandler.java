@@ -20,32 +20,18 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.common.base.Predicate;
-import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.server.internal.CommandHandlerMethod;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The wrapper for a command handler method of an Aggregate.
+ * The wrapper for a command handler method of an {@link Aggregate}.
  *
  * @author Alexander Litus
  */
 @Internal
-class AggregateCommandHandler extends CommandHandlerMethod {
-
-    static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new Predicate<Method>() {
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isAggregateCommandHandler(method);
-        }
-    };
+/* package */ class AggregateCommandHandler extends CommandHandlerMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -53,37 +39,8 @@ class AggregateCommandHandler extends CommandHandlerMethod {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    AggregateCommandHandler(Object target, Method method) {
+    /* package */ AggregateCommandHandler(Object target, Method method) {
         super(target, method);
     }
 
-    /**
-     * Checks if a method is a command handler of an aggregate root.
-     *
-     * @param method a method to check
-     * @return {@code true} if the method is a command handler, {@code false} otherwise
-     */
-    static boolean isAggregateCommandHandler(Method method) {
-        if (!isAnnotatedCorrectly(method)){
-            return false;
-        }
-        if (!acceptsCorrectParams(method)) {
-            return false;
-        }
-        final boolean returnsMessageOrList = returnsMessageOrList(method);
-        return returnsMessageOrList;
-    }
-
-    private static boolean returnsMessageOrList(Method method) {
-        final Class<?> returnType = method.getReturnType();
-
-        if (Message.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        //noinspection RedundantIfStatement
-        if (List.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        return false;
-    }
 }

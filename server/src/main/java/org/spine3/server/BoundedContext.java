@@ -30,10 +30,12 @@ import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.CommandValidation;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.stream.EventStore;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Collections;
@@ -223,7 +225,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             log().error("", e);
         }
 
-        final List<EventRecord> eventRecords = result.getEventRecordList();
+        final List<Event> eventRecords = result.getEventList();
 
         postEvents(eventRecords);
 
@@ -275,7 +277,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
     private CommandResult dispatch(Command request) {
         try {
-            final List<EventRecord> eventRecords = this.commandBus.post(request);
+            final List<Event> eventRecords = this.commandBus.post(request);
 
             final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
             return result;
@@ -284,9 +286,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
-    private static CommandResult toCommandResult(Iterable<EventRecord> eventRecords, Iterable<Any> errors) {
+    private static CommandResult toCommandResult(Iterable<Event> eventRecords, Iterable<Any> errors) {
         return CommandResult.newBuilder()
-                .addAllEventRecord(eventRecords)
+                .addAllEvent(eventRecords)
                 .addAllError(errors)
                 .build();
     }
@@ -294,15 +296,15 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(Iterable<EventRecord> records) {
+    private void postEvents(Iterable<Event> events) {
         final EventBus eventBus = getEventBus();
-        for (EventRecord record : records) {
-            eventBus.post(record);
+        for (Event event : events) {
+            eventBus.post(event);
         }
     }
 
     @Override
-    public void subscribe(Topic request, StreamObserver<EventRecord> responseObserver) {
+    public void subscribe(Topic request, StreamObserver<Event> responseObserver) {
         //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 

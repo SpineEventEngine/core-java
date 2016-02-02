@@ -22,7 +22,7 @@ package org.spine3.time;
 
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.util.Tests;
+import org.spine3.test.Tests;
 
 import java.lang.reflect.InvocationTargetException;
 

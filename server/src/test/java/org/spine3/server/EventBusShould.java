@@ -25,14 +25,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventRecord;
+import org.spine3.base.Events;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.stream.EventStore;
-import org.spine3.server.util.EventRecords;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.testdata.TestEventFactory;
+import org.spine3.testdata.TestEventMessageFactory;
 import org.spine3.type.EventClass;
 
 import java.util.Set;
@@ -141,8 +141,8 @@ public class EventBusShould {
 
         eventBus.subscribe(handler);
 
-        final Message createProject = TestEventFactory.projectCreatedEvent("call_subscribers_when_event_record_posted");
-        final EventRecord record = EventRecords.createEventRecord(createProject, EventContext.getDefaultInstance());
+        final Message createProject = TestEventMessageFactory.projectCreatedEvent("call_subscribers_when_event_record_posted");
+        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
         eventBus.post(record);
 
         assertTrue(handler.isMethodCalled());
@@ -161,7 +161,7 @@ public class EventBusShould {
         }
 
         @Override
-        public void dispatch(EventRecord event) {
+        public void dispatch(Event event) {
             dispatchCalled = true;
         }
 
@@ -185,8 +185,8 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        final Message createProject = TestEventFactory.projectCreatedEvent("call_dispatchers");
-        final EventRecord record = EventRecords.createEventRecord(createProject, EventContext.getDefaultInstance());
+        final Message createProject = TestEventMessageFactory.projectCreatedEvent("call_dispatchers");
+        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
         eventBus.post(record);
 
         assertTrue(dispatcher.isDispatchCalled());
@@ -217,8 +217,8 @@ public class EventBusShould {
         final FaultyHandler faultyHandler = new FaultyHandler();
 
         eventBus.subscribe(faultyHandler);
-        final Message createProject = TestEventFactory.projectCreatedEvent("catches_exceptions_caused_by_handlers");
-        final EventRecord record = EventRecords.createEventRecord(createProject, EventContext.getDefaultInstance());
+        final Message createProject = TestEventMessageFactory.projectCreatedEvent("catches_exceptions_caused_by_handlers");
+        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
         eventBus.post(record);
 
         assertTrue(faultyHandler.isMethodCalled());
