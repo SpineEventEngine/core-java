@@ -42,11 +42,6 @@ public class MethodMapShould {
             super(id);
         }
 
-        @Override
-        protected Project getDefaultState() {
-            return Project.getDefaultInstance();
-        }
-
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext context) {
             return ProjectCreated.getDefaultInstance();
