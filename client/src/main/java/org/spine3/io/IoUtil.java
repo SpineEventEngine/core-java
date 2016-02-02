@@ -20,6 +20,7 @@
 
 package org.spine3.io;
 
+import com.google.common.collect.FluentIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,17 +50,7 @@ public class IoUtil {
      */
     @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static void close(Closeable... closeables) {
-        try {
-            for (Closeable c : closeables) {
-                if (c != null) {
-                    c.close();
-                }
-            }
-        } catch (IOException e) {
-            if (log().isErrorEnabled()) {
-                log().error(ERROR_MESSAGE, e);
-            }
-        }
+        close(FluentIterable.of(closeables));
     }
 
     /**
@@ -89,17 +80,7 @@ public class IoUtil {
      */
     @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static void closeAll(AutoCloseable... closeables) {
-        try {
-            for (AutoCloseable c : closeables) {
-                if (c != null) {
-                    c.close();
-                }
-            }
-        } catch (Exception e) {
-            if (log().isErrorEnabled()) {
-                log().error(ERROR_MESSAGE, e);
-            }
-        }
+        closeAll(FluentIterable.of(closeables));
     }
 
     /**
