@@ -53,6 +53,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     @Override
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
+        checkNotNull(aggregateId, "ID");
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;

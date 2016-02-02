@@ -46,7 +46,7 @@ import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequen
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.testdata.TestEventFactory.projectCreated;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould {
 
     private final ProjectId id = createProjectId(newUuid());
@@ -67,12 +67,16 @@ public abstract class AggregateStorageShould {
         assertFalse(iterator.hasNext());
     }
 
-    @Test
-    public void return_iterator_over_empty_collection_if_read_by_null_id() {
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_read_events_by_null_id() {
         // noinspection ConstantConditions
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(null);
+        storage.read(null);
+    }
 
-        assertFalse(iterator.hasNext());
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_read_history_by_null_id() {
+        // noinspection ConstantConditions
+        storage.historyBackward(null);
     }
 
     @Test(expected = NullPointerException.class)
@@ -94,7 +98,7 @@ public abstract class AggregateStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_event_record_by_null_id() {
+    public void throw_exception_if_try_to_write_event_by_null_id() {
         // noinspection ConstantConditions
         storage.writeEvent(null, Event.getDefaultInstance());
     }
@@ -112,7 +116,7 @@ public abstract class AggregateStorageShould {
     }
 
     @Test
-    public void write_and_read_one_event_record() {
+    public void write_and_read_one_event() {
         final Event expected = projectCreated(id);
 
         storage.writeEvent(id, expected);
@@ -152,15 +156,15 @@ public abstract class AggregateStorageShould {
     @Test
     public void write_and_read_aggregate_events() {
         final List<AggregateStorageRecord> records = createSequentialRecords(id);
-        final List<Event> expectedRecords = transform(records, TO_EVENT);
-        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedRecords).build();
+        final List<Event> expectedEvents = transform(records, TO_EVENT);
+        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedEvents).build();
 
         storage.write(id, aggregateEvents);
 
         final AggregateEvents events = storage.read(id);
 
-        final List<Event> actualRecords = events.getEventList();
-        assertEquals(expectedRecords, actualRecords);
+        final List<Event> actualEvents = events.getEventList();
+        assertEquals(expectedEvents, actualEvents);
     }
 
     @Test
@@ -201,7 +205,8 @@ public abstract class AggregateStorageShould {
 
         final AggregateEvents events = storage.read(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
-        assertEquals(expectedEvents, events.getEventList());
+        final List<Event> actualEvents = events.getEventList();
+        assertEquals(expectedEvents, actualEvents);
     }
 
     private void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
