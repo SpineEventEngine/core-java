@@ -38,15 +38,17 @@ import static com.google.common.base.Throwables.propagate;
  */
 public class IoUtil {
 
+    private static final String ERROR_MESSAGE = "Exception while closing:";
+
     private IoUtil() {}
 
     /**
-     * Closes passed closeables one by one silently.
+     * Closes passed closeables one by one.
      *
-     * <p>Logs each {@link java.io.IOException} if it occurs.
+     * <p>Logs each {@link IOException} if it occurs.
      */
     @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
-    public static void closeSilently(Closeable... closeables) {
+    public static void close(Closeable... closeables) {
         try {
             for (Closeable c : closeables) {
                 if (c != null) {
@@ -55,7 +57,67 @@ public class IoUtil {
             }
         } catch (IOException e) {
             if (log().isErrorEnabled()) {
-                log().error("Exception while closing stream", e);
+                log().error(ERROR_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Closes passed closeables one by one.
+     *
+     * <p>Logs each {@link IOException} if it occurs.
+     */
+    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
+    public static <T extends Closeable> void close(Iterable<T> closeables) {
+        try {
+            for (T c : closeables) {
+                if (c != null) {
+                    c.close();
+                }
+            }
+        } catch (IOException e) {
+            if (log().isErrorEnabled()) {
+                log().error(ERROR_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Closes passed closeables one by one.
+     *
+     * <p>Logs each {@link Exception} if it occurs.
+     */
+    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
+    public static void closeAll(AutoCloseable... closeables) {
+        try {
+            for (AutoCloseable c : closeables) {
+                if (c != null) {
+                    c.close();
+                }
+            }
+        } catch (Exception e) {
+            if (log().isErrorEnabled()) {
+                log().error(ERROR_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Closes passed auto-closeables one by one.
+     *
+     * <p>Logs each {@link Exception} if it occurs.
+     */
+    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
+    public static <T extends AutoCloseable> void closeAll(Iterable<T> closeables) {
+        try {
+            for (T c : closeables) {
+                if (c != null) {
+                    c.close();
+                }
+            }
+        } catch (Exception e) {
+            if (log().isErrorEnabled()) {
+                log().error(ERROR_MESSAGE, e);
             }
         }
     }
@@ -65,7 +127,7 @@ public class IoUtil {
      *
      * <p>Logs each {@link IOException} if it occurs.
      */
-    public static void flushSilently(@Nullable Flushable... flushables) {
+    public static void flushAll(@Nullable Flushable... flushables) {
         try {
             flush(flushables);
         } catch (IOException e) {
@@ -78,7 +140,7 @@ public class IoUtil {
     /**
      * Flushes streams in turn.
      *
-     * @throws java.lang.RuntimeException if {@link IOException} occurs
+     * @throws RuntimeException if {@link IOException} occurs
      */
     public static void tryToFlush(@Nullable Flushable... flushables) {
         try {
@@ -101,14 +163,16 @@ public class IoUtil {
     }
 
     /**
-     * Flushes and closes output streams in turn silently. Logs IOException if occurs.
+     * Flushes and closes output streams in turn silently.
+     *
+     * <p>Logs each {@link IOException} if it occurs.
      */
-    public static void flushAndCloseSilently(@Nullable OutputStream... streams) {
+    public static void flushAndCloseAll(@Nullable OutputStream... streams) {
         if (streams == null) {
             return;
         }
-        flushSilently(streams);
-        closeSilently(streams);
+        flushAll(streams);
+        close(streams);
     }
 
     private static Logger log() {
