@@ -24,6 +24,7 @@ import org.spine3.test.Tests;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 
@@ -57,5 +58,12 @@ public class EventsShould {
     @Test
     public void return_null_from_null_input_in_IsBetween_predicate() {
         assertFalse(new Events.IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+    }
+
+    @Test
+    public void return_actor_from_EventContext() {
+        // Since Events.getActor() is merely wrapper over the chain of generated method calls
+        // the main reason to have this test is to mark the Events.getActor() as `used`.
+        checkNotNull(Events.getActor(EventContext.getDefaultInstance()));
     }
 }

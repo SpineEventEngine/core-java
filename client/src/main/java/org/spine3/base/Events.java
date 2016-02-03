@@ -115,6 +115,19 @@ public class Events {
     }
 
     /**
+     * Obtains the actor user ID from the passed {@code EventContext}.
+     *
+     * <p>The 'actor' is the user who sent the command, which generated the event which context is
+     * passed to this method.
+     *
+     * <p>This is a convenience method for obtaining actor in event handling methods.
+     */
+    public static UserId getActor(EventContext context) {
+        final CommandContext commandContext = checkNotNull(context).getCommandContext();
+        return commandContext.getActor();
+    }
+
+    /**
      * The predicate to filter event records after some point in time.
      */
     public static class IsAfter implements Predicate<Event> {

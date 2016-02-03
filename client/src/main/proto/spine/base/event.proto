@@ -69,10 +69,19 @@ message EventContext {
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
-    // The id of the aggregate the event was applied to.
-    google.protobuf.Any aggregate_id = 4;
+    //TODO:2016-02-03:alexander.yevsyukov: Should it be just entity_id? Or oneof?
+    // The type of the thing, which generated the ID should be already wrapped inside the Any instance
+    // if we use typed IDs. If we don't, then we probably should.
 
-    // The version of the aggregate after the event was applied.
+    oneof source {
+        // The id of the aggregate which generated the event.
+        google.protobuf.Any aggregate_id = 4;
+
+        // The id of the process manager which generated the event.
+        google.protobuf.Any process_manager_id = 7;
+    }
+
+    // The version of the entity after the event was applied.
     int32 version = 5;
 
     // Service attributes that the system wants to store in addition to the domain attributes
