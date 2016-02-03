@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.base.Events;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.test.project.ProjectId;
@@ -40,6 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.base.Events.generateId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.Identifiers.newUuid;
@@ -84,17 +84,29 @@ public abstract class EventStorageShould {
         assertFalse(iterator.hasNext());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_read_with_null_id() {
+        //noinspection ConstantConditions
+        storage.read(null);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null() {
-        storage.writeInternal(null);
+        storage.write(generateId(), null);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_write_by_null_id() {
+        storage.write(null, Event.getDefaultInstance());
     }
 
     @Test
     public void store_and_read_one_event() {
         final Event expected = TestEventFactory.projectCreated();
 
-        storage.write(Events.generateId(), expected);
+        storage.write(generateId(), expected);
 
         assertStorageContainsOnly(expected);
     }
@@ -124,7 +136,7 @@ public abstract class EventStorageShould {
     public void write_and_filter_events_by_type() {
         final EventStorageRecord expectedRecord = EventStorageRecord.newBuilder()
                 .setMessage(toAny(newRandomStringValue()))
-                .setEventId(Events.generateId().getUuid())
+                .setEventId(generateId().getUuid())
                 .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
 

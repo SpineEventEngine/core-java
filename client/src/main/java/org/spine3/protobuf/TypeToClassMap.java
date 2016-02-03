@@ -230,7 +230,7 @@ public class TypeToClassMap {
                 log().warn("Failed to load properties file.", e);
             }
         } finally {
-            IoUtil.closeSilently(inputStream);
+            IoUtil.close(inputStream);
         }
         return properties;
     }

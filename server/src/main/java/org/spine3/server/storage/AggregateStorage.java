@@ -53,6 +53,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     @Override
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
+        checkNotNull(aggregateId, "ID");
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
@@ -162,27 +163,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                 .setEventId(eventIdStr)
                 .setVersion(context.getVersion())
                 .setEvent(event);
-        return builder.build();
-    }
-
-    /**
-     * Converts an aggregate ID to a storage record ID with the string ID representation or number ID value.
-     *
-     * @param id an ID to convert
-     * @see EntityId
-     */
-    protected static <I> AggregateStorageRecord.Id toRecordId(I id) {
-        checkNotNull(id);
-        final AggregateStorageRecord.Id.Builder builder = AggregateStorageRecord.Id.newBuilder();
-        //noinspection ChainOfInstanceofChecks
-        if (id instanceof Long) {
-            builder.setLongValue((Long) id);
-        } else if (id instanceof Integer) {
-            builder.setIntValue((Integer) id);
-        } else {
-            final String stringId = idToString(id);
-            builder.setStringValue(stringId);
-        }
         return builder.build();
     }
 

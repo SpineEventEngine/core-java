@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.spine3.base.Commands;
 import org.spine3.base.Events;
 import org.spine3.io.IoUtil;
-import org.spine3.io.file.FileNameEscaper;
 import org.spine3.server.Identifiers;
 import org.spine3.test.Tests;
 import org.spine3.testdata.*;
@@ -54,7 +53,6 @@ public class UtilitiesShould {
         // util package
         checkPrivateConstructor(Commands.class);
         checkPrivateConstructor(Events.class);
-        checkPrivateConstructor(FileNameEscaper.class);
         checkPrivateConstructor(Identifiers.class);
         checkPrivateConstructor(IoUtil.class);
         checkPrivateConstructor(Math.class);

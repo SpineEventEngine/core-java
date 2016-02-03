@@ -31,6 +31,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * In-memory storage for aggregate root events and snapshots.
  *
@@ -58,6 +60,8 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
+        checkNotNull(id, "id");
+
         final Collection<AggregateStorageRecord> records = storage.get(id);
         return records.iterator();
     }

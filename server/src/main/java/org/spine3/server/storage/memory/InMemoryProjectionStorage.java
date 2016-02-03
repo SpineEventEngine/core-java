@@ -28,7 +28,7 @@ import org.spine3.server.storage.ProjectionStorage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The in-memory implementation of StreamProjectionStorage.
+ * The in-memory implementation of {@link ProjectionStorage}.
  *
  * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
  * @author Alexander Litus
