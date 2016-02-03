@@ -54,20 +54,6 @@ message AggregateStorageRecord {
         // Snapshot of the aggregate.
         spine.server.aggregate.Snapshot snapshot = 21;
     }
-
-    // Aggregate record identifier.
-    message Id {
-        oneof type {
-            // The string representation of the ID.
-            string string_value = 1;
-
-            // The long representation of the ID.
-            int64 long_value = 2;
-
-            // The integer representation of the ID.
-            int32 int_value = 3;
-        }
-    }
 }
 
 // Event data for an aggregate returned by a storage managing the aggregate.

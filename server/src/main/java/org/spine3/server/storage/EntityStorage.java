@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.Identifiers.idToString;
 
 /**
  * An entity storage keeps messages with identity.
@@ -40,31 +39,11 @@ import static org.spine3.server.Identifiers.idToString;
 @SPI
 public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    /**
-     * Converts an entity ID to a storage record ID with the string ID representation or number ID value.
-     *
-     * @param id an ID to convert
-     * @see EntityId
-     */
-    public static <I> EntityStorageRecord.Id toRecordId(I id) {
-        checkNotNull(id);
-        final EntityStorageRecord.Id.Builder builder = EntityStorageRecord.Id.newBuilder();
-        //noinspection ChainOfInstanceofChecks
-        if (id instanceof Long) {
-            builder.setLongValue((Long) id);
-        } else if (id instanceof Integer) {
-            builder.setIntValue((Integer) id);
-        } else {
-            final String stringId = idToString(id);
-            builder.setStringValue(stringId);
-        }
-        return builder.build();
-    }
-
     @Nullable
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();
+        checkNotNull(id);
 
         final EntityStorageRecord record = readInternal(checkNotNull(id));
         return record;

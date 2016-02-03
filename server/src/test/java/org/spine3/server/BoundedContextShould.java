@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.*;
-import org.spine3.client.UserUtil;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -48,7 +47,6 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestAggregateIdFactory;
 
 import java.util.List;
 
@@ -58,8 +56,11 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.server.Identifiers.newUuid;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -69,8 +70,8 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class BoundedContextShould {
 
-    private final UserId userId = UserUtil.newUserId("test_user");
-    private final ProjectId projectId = TestAggregateIdFactory.createProjectId("test_project_id");
+    private final UserId userId = newUserId(newUuid());
+    private final ProjectId projectId = createProjectId(newUuid());
     private final EmptyHandler handler = new EmptyHandler();
 
     private StorageFactory storageFactory;

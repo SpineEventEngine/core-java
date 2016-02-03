@@ -36,7 +36,7 @@ import static com.google.common.base.Throwables.propagate;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 
 /**
- * {@code StreamProjection} holds a structural representation of data extracted from a stream of events.
+ * {@link Projection} holds a structural representation of data extracted from a stream of events.
  *
  * <p>The process of projecting the event stream into data we collect is performed
  * by event handlers for the events of interest. These event handlers are implemented
@@ -103,7 +103,7 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
     }
 
     /**
-     * Returns the set of event classes handled by the passed {@code StreamProjection} class.
+     * Returns the set of event classes handled by the passed {@link Projection} class.
      *
      * @param clazz the class to inspect
      * @return immutable set of event classes or an empty set if no events are handled

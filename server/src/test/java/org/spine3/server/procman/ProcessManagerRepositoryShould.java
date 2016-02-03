@@ -86,8 +86,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
-        final Event event = Events.createEvent(eventMessage,
-                    EventContext.getDefaultInstance());
+        final Event event = Events.createEvent(eventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(toState(eventMessage), manager.getState());
@@ -134,8 +133,7 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = Events.createEvent(unknownEventMessage,
-                    EventContext.getDefaultInstance());
+        final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
     }
 
@@ -182,7 +180,7 @@ public class ProcessManagerRepositoryShould {
         }
     }
 
-    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
         public TestProcessManager(ProjectId id) {
             super(id);

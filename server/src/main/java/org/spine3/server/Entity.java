@@ -28,9 +28,11 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.server.EntityId.checkType;
 
@@ -59,8 +61,6 @@ public abstract class Entity<I, M extends Message> {
 
     private int version;
 
-    private final M defaultState;
-
     /**
      * Creates a new instance.
      *
@@ -72,16 +72,23 @@ public abstract class Entity<I, M extends Message> {
         // classes. We require that entity constructors be public as they are called by repositories.
         checkType(id);
         this.id = id;
-        this.defaultState = retrieveDefaultState();
     }
 
     /**
-     * Obtains the default entity state using {@code getDefaultInstance()} method of the state class.
+     * Obtains the default entity state.
      *
-     * @return the default state of the entity
+     * @return an empty instance of the state class
      */
     @CheckReturnValue
     protected M getDefaultState() {
+        final Class<? extends Entity> entityClass = getClass();
+        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
+        if (!registry.contains(entityClass)) {
+            final M state = retrieveDefaultState();
+            registry.put(entityClass, state);
+        }
+        @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
+        final M defaultState = (M) registry.get(entityClass);
         return defaultState;
     }
 
@@ -195,5 +202,60 @@ public abstract class Entity<I, M extends Message> {
     @Nonnull
     public Timestamp whenModified() {
         return (whenModified == null) ? Timestamp.getDefaultInstance() : whenModified;
+    }
+
+    /**
+     * A wrapper for the map from entity classes to entity default states.
+     */
+    private static class DefaultStateRegistry {
+
+        private final Map<Class<? extends Entity>, Message> defaultStates = newHashMap();
+
+        /**
+         * Specifies if the entity state of this class is already registered.
+         *
+         * @param entityClass the class to check
+         * @return {@code true} if there is a state for the passed class, {@code false} otherwise
+         */
+        @CheckReturnValue
+        public boolean contains(Class<? extends Entity> entityClass) {
+            final boolean result = defaultStates.containsKey(entityClass);
+            return result;
+        }
+
+        /**
+         * Saves a state.
+         *
+         * @param entityClass an entity class
+         * @param state a default state of the entity
+         * @throws IllegalArgumentException if the state of this class is already registered
+         */
+        public void put(Class<? extends Entity> entityClass, Message state) {
+            if (contains(entityClass)) {
+                throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
+            }
+            defaultStates.put(entityClass, state);
+        }
+
+        /**
+         * Obtains a state for the passed class..
+         *
+         * @param entityClass an entity class
+         */
+        @CheckReturnValue
+        public Message get(Class<? extends Entity> entityClass) {
+            final Message state = defaultStates.get(entityClass);
+            return state;
+        }
+
+        public static DefaultStateRegistry getInstance() {
+            return Singleton.INSTANCE.value;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final DefaultStateRegistry value = new DefaultStateRegistry();
+        }
     }
 }

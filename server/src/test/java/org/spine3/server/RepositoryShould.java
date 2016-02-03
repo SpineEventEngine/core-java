@@ -60,14 +60,14 @@ public class RepositoryShould {
         }
     }
 
-    public static class EntityWithPrivateConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithPrivateConstructor extends Entity<ProjectId, Project> {
         private EntityWithPrivateConstructor(ProjectId id) {
             super(id);
         }
     }
 
-    public static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
-        public RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
+    private static class RepositoryForEntitiesWithPrivateConstructor extends Repository<ProjectId, EntityWithPrivateConstructor> {
+        private RepositoryForEntitiesWithPrivateConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
@@ -97,13 +97,13 @@ public class RepositoryShould {
         }
     }
 
-    public static class EntityWithProtectedConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithProtectedConstructor extends Entity<ProjectId, Project> {
         protected EntityWithProtectedConstructor(ProjectId id) {
             super(id);
         }
     }
 
-    public static class RepositoryForEntitiesWithProtectedConstructor extends Repository<ProjectId, EntityWithProtectedConstructor> {
+    private static class RepositoryForEntitiesWithProtectedConstructor extends Repository<ProjectId, EntityWithProtectedConstructor> {
         public RepositoryForEntitiesWithProtectedConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
@@ -134,14 +134,14 @@ public class RepositoryShould {
         }
     }
 
-    public static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project> {
+    private static class EntityWithoutRequiredConstructor extends Entity<ProjectId, Project> {
         private EntityWithoutRequiredConstructor() {
             super(ProjectId.getDefaultInstance());
         }
     }
 
-    public static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
-        public RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
+    private static class RepositoryForEntitiesWithoutRequiredConstructor extends Repository<ProjectId, EntityWithoutRequiredConstructor> {
+        private RepositoryForEntitiesWithoutRequiredConstructor(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
@@ -165,15 +165,15 @@ public class RepositoryShould {
     // Tests of regular work
     //-----------------------
 
-    public static class ProjectEntity extends Entity<ProjectId, Project> {
+    private static class ProjectEntity extends Entity<ProjectId, Project> {
         public ProjectEntity(ProjectId id) {
             super(id);
         }
     }
 
-    public static class TestRepo extends Repository<ProjectId, ProjectEntity> {
+    private static class TestRepo extends Repository<ProjectId, ProjectEntity> {
 
-        protected TestRepo(BoundedContext boundedContext) {
+        private TestRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
@@ -251,16 +251,16 @@ public class RepositoryShould {
         repo.create(ProjectId.newBuilder().setId("works?").build());
     }
 
-    public static class FailingEntity extends Entity<ProjectId, Project> {
-        public FailingEntity(ProjectId id) {
+    private static class FailingEntity extends Entity<ProjectId, Project> {
+        private FailingEntity(ProjectId id) {
             super(id);
             throw new UnsupportedOperationException("This constructor does not finish by design of this test.");
         }
     }
 
-    public static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity> {
+    private static class RepoForFailingEntities extends Repository<ProjectId, FailingEntity> {
 
-        protected RepoForFailingEntities(BoundedContext boundedContext) {
+        private RepoForFailingEntities(BoundedContext boundedContext) {
             super(boundedContext);
         }
 

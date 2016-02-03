@@ -48,6 +48,12 @@ public abstract class EntityStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
+    public void throw_exception_if_read_with_null_id() {
+        //noinspection ConstantConditions
+        storage.read(null);
+    }
+
+    @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_with_null_id() {
         //noinspection ConstantConditions
         storage.write(null, EntityStorageRecord.getDefaultInstance());

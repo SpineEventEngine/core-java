@@ -22,23 +22,21 @@ package org.spine3.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.testdata.TestEventMessageFactory;
 import org.spine3.type.EventClass;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
+import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
@@ -76,6 +74,7 @@ public class EventBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void reject_object_with_no_subscriber_methods() {
         // Pass just String instance.
+        //noinspection EmptyClass
         eventBus.subscribe(new EventHandler() {});
     }
 
@@ -136,14 +135,11 @@ public class EventBusShould {
     }
 
     @Test
-    public void call_subscribers_when_event_record_posted() {
+    public void call_subscribers_when_event_posted() {
         final ProjectCreatedHandler handler = new ProjectCreatedHandler();
 
         eventBus.subscribe(handler);
-
-        final Message createProject = TestEventMessageFactory.projectCreatedEvent("call_subscribers_when_event_record_posted");
-        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
-        eventBus.post(record);
+        eventBus.post(projectCreated());
 
         assertTrue(handler.isMethodCalled());
     }
@@ -185,9 +181,7 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        final Message createProject = TestEventMessageFactory.projectCreatedEvent("call_dispatchers");
-        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
-        eventBus.post(record);
+        eventBus.post(projectCreated());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -217,9 +211,7 @@ public class EventBusShould {
         final FaultyHandler faultyHandler = new FaultyHandler();
 
         eventBus.subscribe(faultyHandler);
-        final Message createProject = TestEventMessageFactory.projectCreatedEvent("catches_exceptions_caused_by_handlers");
-        final Event record = Events.createEvent(createProject, EventContext.getDefaultInstance());
-        eventBus.post(record);
+        eventBus.post(projectCreated());
 
         assertTrue(faultyHandler.isMethodCalled());
     }
