@@ -35,7 +35,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.server.Identifiers;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
@@ -100,16 +99,6 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         return Iterators.transform(records, TO_EVENT);
     }
 
-    /**
-     * Converts {@code EventId} into string.
-     *
-     * @param id the id to convert
-     * @return Json representation of the id
-     */
-    private static String idToString(EventId id) {
-        return Identifiers.idToString(id);
-    }
-
     @Override
     public void write(EventId id, Event record) {
         checkNotClosed();
@@ -143,7 +132,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         final EventContext context = event.getContext();
         final TypeName typeName = TypeName.ofEnclosed(message);
         final EventId eventId = context.getEventId();
-        final String eventIdStr = idToString(eventId);
+        final String eventIdStr = eventId.getUuid();
 
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
