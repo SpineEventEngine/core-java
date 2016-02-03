@@ -18,29 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.reflect;
 
-import org.spine3.Internal;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.junit.Test;
+import org.spine3.base.CommandContext;
+import org.spine3.server.Assign;
+import org.spine3.server.CommandHandler;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.test.project.Project;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.event.ProjectCreated;
 
-import java.lang.reflect.Method;
+import static org.junit.Assert.assertFalse;
 
-/**
- * The wrapper for a command handler method of an {@link Aggregate}.
- *
- * @author Alexander Litus
- */
-@Internal
-/* package */ class AggregateCommandHandler extends CommandHandlerMethod {
+public class MethodMapShould {
 
     /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param target object to which the method applies
-     * @param method subscriber method
+     * Test aggregate in which methods are scanned.
      */
-    /* package */ AggregateCommandHandler(Object target, Method method) {
-        super(target, method);
+    private static final class TestAggregate extends Aggregate<Long, Project> {
+
+        public TestAggregate(Long id) {
+            super(id);
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject command, CommandContext context) {
+            return ProjectCreated.getDefaultInstance();
+        }
     }
 
+    @Test
+    public void expose_key_set() {
+        final MethodMap methodMap = new MethodMap(TestAggregate.class, CommandHandler.METHOD_PREDICATE);
+        assertFalse(methodMap.keySet().isEmpty());
+    }
 }

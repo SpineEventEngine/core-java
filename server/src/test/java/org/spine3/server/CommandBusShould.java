@@ -22,7 +22,6 @@ package org.spine3.server;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -39,7 +38,6 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +98,7 @@ public class CommandBusShould {
 
         @Override
         public CommandHandlerMethod createMethod(Method method) {
-            return new CommandHandlerMethod(this, method) {};
+            return new CommandHandlerMethod(this, method);
         }
 
         @Override
@@ -217,12 +215,7 @@ public class CommandBusShould {
 
         @Override
         public CommandHandlerMethod createMethod(Method method) {
-            return new CommandHandlerMethod(this, method) {
-                @Override
-                public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
-                    return super.invoke(message, context);
-                }
-            };
+            return new CommandHandlerMethod(this, method);
         }
 
         @Override
