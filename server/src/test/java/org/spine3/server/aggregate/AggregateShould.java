@@ -86,7 +86,7 @@ public class AggregateShould {
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);
 
     private TestAggregate aggregate;
-    
+
     @Before
     public void setUpTest() {
         aggregate = new TestAggregate(ID);
@@ -496,7 +496,7 @@ public class AggregateShould {
     /*
      * Class only for test cases: exception if missing command handler or missing event applier.
      */
-    public static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project> {
+    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -517,7 +517,7 @@ public class AggregateShould {
     /*
      * Class only for test case: applier is not required for state-neutral event.
      */
-    public static class TestAggregateWithStateNeutralEvents extends Aggregate<ProjectId, Project> {
+    private static class TestAggregateWithStateNeutralEvents extends Aggregate<ProjectId, Project> {
 
         private static final ImmutableSet<Class<? extends Message>> STATE_NEUTRAL_EVENT_CLASSES =
                 ImmutableSet.<Class<? extends Message>>of(TaskAdded.class);
@@ -560,26 +560,26 @@ public class AggregateShould {
         }
     }
 
-    public static class TestAggregateWithIdString extends Aggregate<String, Project> {
-        protected TestAggregateWithIdString(String id) {
+    private static class TestAggregateWithIdString extends Aggregate<String, Project> {
+        private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
-    public static class TestAggregateWithIdInteger extends Aggregate<Integer, Project> {
-        protected TestAggregateWithIdInteger(Integer id) {
+    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project> {
+        private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    public static class TestAggregateWithIdLong extends Aggregate<Long, Project> {
-        protected TestAggregateWithIdLong(Long id) {
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project> {
+        private TestAggregateWithIdLong(Long id) {
             super(id);
         }
     }
 
-    public static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project> {
-        protected TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
+    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project> {
+        private TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
     }

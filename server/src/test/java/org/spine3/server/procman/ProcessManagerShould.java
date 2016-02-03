@@ -147,9 +147,9 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
-    public static class TestProcessManager extends ProcessManager<ProjectId, Any> {
+    private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
-        public TestProcessManager(ProjectId id) {
+        private TestProcessManager(ProjectId id) {
             super(id);
         }
 

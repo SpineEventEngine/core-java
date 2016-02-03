@@ -180,7 +180,7 @@ public class ProcessManagerRepositoryShould {
         }
     }
 
-    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
         public TestProcessManager(ProjectId id) {
             super(id);

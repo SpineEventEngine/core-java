@@ -77,7 +77,7 @@ public class CommandBusShould {
         commandBus.register(new EmptyDispatcher());
     }
 
-    public static class EmptyDispatcher implements CommandDispatcher {
+    private static class EmptyDispatcher implements CommandDispatcher {
 
         @Override
         public Set<CommandClass> getCommandClasses() {
@@ -100,6 +100,7 @@ public class CommandBusShould {
 
         @Override
         public CommandHandlerMethod createMethod(Method method) {
+            //noinspection EmptyClass
             return new CommandHandlerMethod(this, method) {};
         }
 
