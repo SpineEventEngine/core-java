@@ -175,9 +175,11 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Predicate<Method> isHandlerPredicate = object.getHandlerMethodPredicate();
-        final MethodMap handlers = new MethodMap(object.getClass(), isHandlerPredicate);
+        final Predicate<Method> methodPredicate = object.getHandlerMethodPredicate();
+        final MethodMap handlers = new MethodMap(object.getClass(), methodPredicate);
+
         checkModifiers(handlers.values());
+
         for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
             final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
@@ -187,18 +189,18 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
-     * Verifiers modifiers in the methods in the passed map to be 'public'.
+     * Verifies that passed methods are declared {@code public}.
      *
      * <p>Logs warning for the methods with a non-public modifier.
      *
-     * @param methods the map of methods to check
+     * @param methods methods to check
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                log().warn(String.format("Command handler %s must be declared 'public'.",
-                        Methods.getFullMethodName(method)));
+                final String fullMethodName = Methods.getFullMethodName(method);
+                log().warn(String.format("Command handler method %s should be declared 'public'.", fullMethodName));
             }
         }
     }
