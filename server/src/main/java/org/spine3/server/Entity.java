@@ -61,8 +61,6 @@ public abstract class Entity<I, M extends Message> {
 
     private int version;
 
-    private static final DefaultStateRegistry DEFAULT_STATE_REGISTRY = new DefaultStateRegistry();
-
     /**
      * Creates a new instance.
      *
@@ -85,12 +83,13 @@ public abstract class Entity<I, M extends Message> {
     @CheckReturnValue
     protected M getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
-        if (!DEFAULT_STATE_REGISTRY.contains(entityClass)) {
+        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
+        if (!registry.contains(entityClass)) {
             final M state = retrieveDefaultState();
-            DEFAULT_STATE_REGISTRY.put(entityClass, state);
+            registry.put(entityClass, state);
         }
         @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
-        final M defaultState = (M) DEFAULT_STATE_REGISTRY.get(entityClass);
+        final M defaultState = (M) registry.get(entityClass);
         return defaultState;
     }
 
@@ -248,6 +247,16 @@ public abstract class Entity<I, M extends Message> {
         public Message get(Class<? extends Entity> entityClass) {
             final Message state = defaultStates.get(entityClass);
             return state;
+        }
+
+        public static DefaultStateRegistry getInstance() {
+            return Singleton.INSTANCE.value;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final DefaultStateRegistry value = new DefaultStateRegistry();
         }
     }
 }
