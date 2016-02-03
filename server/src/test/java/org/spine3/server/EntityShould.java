@@ -23,6 +23,7 @@ package org.spine3.server;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
 
@@ -40,9 +41,14 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 public class EntityShould {
 
     private static final String ID = newUuid();
-
-    private final TestEntity entity = new TestEntity(ID);
     private final Project state = newProject();
+
+    private TestEntity entity = new TestEntity(ID);
+
+    @Before
+    public void setUp() {
+        entity = new TestEntity(ID);
+    }
 
     @Test
     public void return_default_state() {

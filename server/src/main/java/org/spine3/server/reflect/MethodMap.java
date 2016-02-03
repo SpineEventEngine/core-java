@@ -53,27 +53,6 @@ public class MethodMap {
                 .build();
     }
 
-    @CheckReturnValue
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-        private final Map<Class<? extends Message>, Method> map = Maps.newHashMap();
-
-        public Builder addMany(Iterable<Class<? extends Message>> keys, Method value) {
-            for (Class<? extends Message> key : keys) {
-                map.put(key, value);
-            }
-            return this;
-        }
-
-        public MethodMap build() {
-            final MethodMap result = new MethodMap(map);
-            return result;
-        }
-    }
-
     /**
      * @return {@code true} if the map is empty, {@code false} otherwise
      */
@@ -95,11 +74,6 @@ public class MethodMap {
     @CheckReturnValue
     public ImmutableCollection<Method> values() {
         return map.values();
-    }
-
-    @CheckReturnValue
-    public boolean containsHandlerFor(Class<? extends Message> messageClass) {
-        return map.containsKey(checkNotNull(messageClass));
     }
 
     @CheckReturnValue

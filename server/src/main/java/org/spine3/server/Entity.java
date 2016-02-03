@@ -66,7 +66,6 @@ public abstract class Entity<I, M extends Message> {
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
-     * @see EntityId
      */
     public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived

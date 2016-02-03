@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -57,12 +58,16 @@ public class ProcessManagerShould {
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
-    private final TestProcessManager pm = new TestProcessManager(ID);
+    private TestProcessManager processManager;
 
+    @Before
+    public void setUp() {
+        processManager = new TestProcessManager(ID);
+    }
 
     @Test
     public void have_default_state_initially() throws InvocationTargetException {
-        assertEquals(pm.getDefaultState(), pm.getState());
+        assertEquals(processManager.getDefaultState(), processManager.getState());
     }
 
     @Test
@@ -78,8 +83,8 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
-        pm.dispatchEvent(event, EVENT_CONTEXT);
-        assertEquals(toAny(event), pm.getState());
+        processManager.dispatchEvent(event, EVENT_CONTEXT);
+        assertEquals(toAny(event), processManager.getState());
     }
 
     @Test
@@ -95,9 +100,9 @@ public class ProcessManagerShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
-        final List<Event> records = pm.dispatchCommand(command, COMMAND_CONTEXT);
-        assertEquals(toAny(command), pm.getState());
-        return records;
+        final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
+        assertEquals(toAny(command), processManager.getState());
+        return events;
     }
 
     @Test
@@ -120,13 +125,13 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        pm.dispatchCommand(unknownCommand, COMMAND_CONTEXT);
+        processManager.dispatchCommand(unknownCommand, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        pm.dispatchEvent(unknownEvent, EVENT_CONTEXT);
+        processManager.dispatchEvent(unknownEvent, EVENT_CONTEXT);
     }
 
     @Test
