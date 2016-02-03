@@ -122,11 +122,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new CommandHandlerMethod(this, method);
-    }
-
-    @Override
     public Predicate<Method> getHandlerMethodPredicate() {
         return IS_AGGREGATE_COMMAND_HANDLER;
     }

@@ -255,12 +255,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
 
     @Internal
     @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new CommandHandlerMethod(this, method);
-    }
-
-    @Internal
-    @Override
     public Predicate<Method> getHandlerMethodPredicate() {
         return CommandHandler.METHOD_PREDICATE;
     }

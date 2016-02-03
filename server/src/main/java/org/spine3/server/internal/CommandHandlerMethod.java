@@ -180,7 +180,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         checkModifiers(handlers.values());
         for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
-            final CommandHandlerMethod handler = object.createMethod(entry.getValue());
+            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
             result.put(commandClass, handler);
         }
         return result.build();

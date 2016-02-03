@@ -22,7 +22,6 @@ package org.spine3.server;
 
 import com.google.common.base.Predicate;
 import org.spine3.Internal;
-import org.spine3.server.internal.CommandHandlerMethod;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -44,12 +43,6 @@ public interface CommandHandler {
     // The same applies to event handlers.
     //
     // The methods are annotated as @Internal temporarily. We need to move them out of the interface.
-
-    /**
-     * Creates a method wrapper, which holds reference to this object and the passed method.
-     */
-    @Internal
-    CommandHandlerMethod createMethod(Method method);
 
     /**
      * Returns the predicate for filtering command handling methods.
