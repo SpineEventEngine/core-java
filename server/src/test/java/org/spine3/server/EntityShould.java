@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
@@ -47,6 +48,16 @@ public class EntityShould {
     public void return_default_state() {
         final Project state = entity.getDefaultState();
         assertEquals(Project.getDefaultInstance(), state);
+    }
+
+    @Test
+    public void return_default_state_for_different_entities() {
+        assertEquals(Project.getDefaultInstance(), entity.getDefaultState());
+
+        final EntityWithIntId entityWithIntId = new EntityWithIntId(5);
+        final StringValue expected = StringValue.getDefaultInstance();
+        assertEquals(expected, entityWithIntId.getDefaultState());
+        assertEquals(expected, entityWithIntId.getDefaultState());
     }
 
     @Test
@@ -167,6 +178,13 @@ public class EntityShould {
     private static class EntityWithUnsupportedId extends Entity<Exception, Project> {
 
         protected EntityWithUnsupportedId(Exception id) {
+            super(id);
+        }
+    }
+
+    private static class EntityWithIntId extends Entity<Integer, StringValue> {
+
+        protected EntityWithIntId(Integer id) {
             super(id);
         }
     }
