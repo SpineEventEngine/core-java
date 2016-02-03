@@ -32,7 +32,7 @@ import java.util.Map;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.newConcurrentMap;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.server.EntityId.checkType;
 
@@ -209,7 +209,7 @@ public abstract class Entity<I, M extends Message> {
      */
     private static class DefaultStateRegistry {
 
-        private final Map<Class<? extends Entity>, Message> defaultStates = newConcurrentMap();
+        private final Map<Class<? extends Entity>, Message> defaultStates = newHashMap();
 
         /**
          * Specifies if the entity state of this class is already registered.
