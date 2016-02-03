@@ -30,6 +30,7 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
@@ -39,8 +40,8 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
  */
 public class TestCommands {
 
-    private static final UserId STUB_USER_ID = newUserId("stub_user_id");
-    private static final ProjectId STUB_PROJECT_ID = createProjectId("stubProjectId");
+    private static final UserId STUB_USER_ID = newUserId(newUuid());
+    private static final ProjectId STUB_PROJECT_ID = createProjectId(newUuid());
 
     private TestCommands() {
     }
