@@ -29,9 +29,19 @@ import java.lang.reflect.Method;
 import static org.spine3.server.internal.CommandHandlerMethod.*;
 
 /**
- * The interface for classes that can declare command handling methods.
+ * The interface for classes that have command handling methods.
+ *
+ * <p>A command handler is responsible for:
+ * <ol>
+ *     <li>Changing the state of the business model</li>
+ *     <li>Producing corresponding events.</li>
+ * </ol>
+ *
+ * <p>Unlike {@code CommandHandler} a {@link CommandDispatcher} is responsible for
+ * delivering a command to its handler.
  *
  * @author Alexander Yevsyukov
+ * @see CommandDispatcher
  */
 public interface CommandHandler {
 
