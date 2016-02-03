@@ -168,8 +168,8 @@ public class Events {
         private final Timestamp finish;
 
         public IsBetween(Timestamp start, Timestamp finish) {
-            checkNotNull(start, "after");
-            checkNotNull(finish, "before");
+            checkNotNull(start);
+            checkNotNull(finish);
             checkArgument(Timestamps.compare(start, finish) < 0, "`start` must be before `finish`");
             this.start = start;
             this.finish = finish;

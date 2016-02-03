@@ -401,9 +401,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
                 this.name = DEFAULT_NAME;
             }
 
-            checkNotNull(storageFactory, "storageFactory is not set");
-            checkNotNull(commandBus, "commandDispatcher is not set");
-            checkNotNull(eventBus, "eventBus is not set");
+            checkNotNull(storageFactory, "storageFactory must be set");
+            checkNotNull(commandBus, "commandDispatcher must be set");
+            checkNotNull(eventBus, "eventBus must be set");
 
             final BoundedContext result = new BoundedContext(this);
 

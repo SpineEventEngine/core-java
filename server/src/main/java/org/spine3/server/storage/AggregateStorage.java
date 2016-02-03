@@ -53,7 +53,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     @Override
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
-        checkNotNull(aggregateId, "ID");
+        checkNotNull(aggregateId);
 
         final Deque<Event> history = newLinkedList();
         Snapshot snapshot = null;
@@ -90,13 +90,13 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException if events list is empty
+     * @throws IllegalArgumentException if event list is empty
      */
     @Override
     public void write(I id, AggregateEvents events) {
         checkNotClosed();
-        checkNotNull(id, "ID");
-        checkNotNull(events, "events");
+        checkNotNull(id);
+        checkNotNull(events);
         final List<Event> eventList = events.getEventList();
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
@@ -116,9 +116,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      */
     public void writeEvent(I id, Event event) {
         checkNotClosed();
-        checkNotNull(id, "aggregate id");
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(event, "event");
+        checkNotNull(id);
+        checkNotNull(event);
         checkTimestamp(event.getContext().hasTimestamp());
 
         final AggregateStorageRecord record = toStorageRecord(event);
@@ -136,8 +135,8 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
      */
     public void write(I aggregateId, Snapshot snapshot) {
         checkNotClosed();
-        checkNotNull(aggregateId, "aggregate ID");
-        checkNotNull(snapshot, "snapshot");
+        checkNotNull(aggregateId);
+        checkNotNull(snapshot);
         checkTimestamp(snapshot.hasTimestamp());
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
