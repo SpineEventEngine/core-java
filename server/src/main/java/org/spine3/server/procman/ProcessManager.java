@@ -46,7 +46,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 import static org.spine3.internal.EventHandlerMethod.checkModifiers;
-import static org.spine3.server.procman.PmCommandHandler.IS_PM_COMMAND_HANDLER;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -139,7 +138,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new PmCommandHandler(this, method);
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
@@ -233,7 +232,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, IS_PM_COMMAND_HANDLER);
+        return Classes.getHandledMessageClasses(pmClass, CommandHandler.METHOD_PREDICATE);
     }
 
     /**
@@ -259,13 +258,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     @Internal
     @Override
     public CommandHandlerMethod createMethod(Method method) {
-        return new PmCommandHandler(this, method);
+        return new CommandHandlerMethod(this, method);
     }
 
     @Internal
     @Override
     public Predicate<Method> getHandlerMethodPredicate() {
-        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
+        return CommandHandler.METHOD_PREDICATE;
     }
 
     /**
@@ -280,7 +279,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
         void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, IS_PM_COMMAND_HANDLER);
+            commandHandlers.register(clazz, CommandHandler.METHOD_PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, IS_EVENT_HANDLER);

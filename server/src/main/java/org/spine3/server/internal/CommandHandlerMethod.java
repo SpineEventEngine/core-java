@@ -35,6 +35,7 @@ import org.spine3.server.reflect.Methods;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -42,6 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 /**
@@ -129,10 +131,15 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     /**
      * Casts a command handling result to a list of event messages.
      *
-     * @param handlingResult the command handler method return value. Could be a {@link Message} or a list of messages.
-     * @return the list of events as messages
+     * @param handlingResult the command handler method return value. Could be a {@link Message}, a list of messages,
+     *                       or {@code null}.
+     * @return the list of event messages or an empty list if {@code null} is passed
      */
-    protected <R> List<? extends Message> commandHandlingResultToEvents(R handlingResult) {
+    protected <R> List<? extends Message> commandHandlingResultToEvents(@Nullable R handlingResult) {
+        if (handlingResult == null) {
+            return emptyList();
+        }
+
         final Class<?> resultClass = handlingResult.getClass();
         if (List.class.isAssignableFrom(resultClass)) {
             // Cast to the list of messages as it is the one of the return types we expect by methods we call.
