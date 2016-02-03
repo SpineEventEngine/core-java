@@ -209,19 +209,19 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Assign
-        public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
+        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toState(command));
             return projectCreatedEvent(command.getProjectId());
         }
 
         @Assign
-        public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
+        public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toState(command));
             return taskAddedEvent(command.getProjectId());
         }
 
         @Assign
-        public void handleCommand(StartProject command, CommandContext ignored) {
+        public void handle(StartProject command, CommandContext ignored) {
             incrementState(toState(command));
         }
     }
