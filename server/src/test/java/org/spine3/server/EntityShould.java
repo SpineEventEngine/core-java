@@ -57,7 +57,6 @@ public class EntityShould {
         final EntityWithIntId entityWithIntId = new EntityWithIntId(5);
         final StringValue expected = StringValue.getDefaultInstance();
         assertEquals(expected, entityWithIntId.getDefaultState());
-        assertEquals(expected, entityWithIntId.getDefaultState());
     }
 
     @Test
