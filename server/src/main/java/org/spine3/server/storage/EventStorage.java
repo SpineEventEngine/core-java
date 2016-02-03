@@ -101,12 +101,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     }
 
     @Override
-    public void write(EventId id, Event record) {
+    public void write(EventId id, Event event) {
         checkNotClosed();
-        checkArgument(!id.getUuid().isEmpty(), "Event ID must not be empty.");
-        checkNotNull(record, "record");
+        final String idString = id.getUuid();
+        checkArgument(!idString.isEmpty(), "Event ID must not be empty.");
+        checkNotNull(event);
 
-        final EventStorageRecord storeRecord = toEventStorageRecord(record);
+        final EventStorageRecord storeRecord = toEventStorageRecord(idString, event);
         writeInternal(storeRecord);
     }
 
@@ -116,11 +117,11 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotClosed();
         checkNotNull(id);
 
-        final EventStorageRecord storeRecord = readInternal(id);
-        if (storeRecord == null) {
+        final EventStorageRecord record = readInternal(id);
+        if (record == null) {
             return null;
         }
-        final Event result = toEvent(storeRecord);
+        final Event result = toEvent(record);
         return result;
     }
 
@@ -128,21 +129,17 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * Creates storage record for the passed {@link Event}.
      */
     @VisibleForTesting
-    /* package */ static EventStorageRecord toEventStorageRecord(Event event) {
+    /* package */ static EventStorageRecord toEventStorageRecord(String eventId, Event event) {
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
         final TypeName typeName = TypeName.ofEnclosed(message);
-        final EventId eventId = context.getEventId();
-        final String eventIdStr = eventId.getUuid();
-
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setEventType(typeName.nameOnly())
                 .setAggregateId(context.getAggregateId().toString())
-                .setEventId(eventIdStr)
+                .setEventId(eventId)
                 .setMessage(message)
                 .setContext(context);
-
         return builder.build();
     }
 
@@ -217,7 +214,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     }
 
     /**
-     * The predicate for filtering event records by {@link EventFilter}.
+     * The predicate for filtering events by {@link EventFilter}.
      */
     private static class MatchFilter implements Predicate<Event> {
 
