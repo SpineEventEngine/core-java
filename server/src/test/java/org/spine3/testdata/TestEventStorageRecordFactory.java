@@ -62,6 +62,7 @@ public class TestEventStorageRecordFactory {
     public static EventStorageRecord projectCreated(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectCreatedEventAny())
+                .setTimestamp(when)
                 .setEventId("project_created_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();
@@ -70,6 +71,7 @@ public class TestEventStorageRecordFactory {
     public static EventStorageRecord taskAdded(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(taskAddedEventAny())
+                .setTimestamp(when)
                 .setEventId("task_added_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();
@@ -78,6 +80,7 @@ public class TestEventStorageRecordFactory {
     public static EventStorageRecord projectStarted(Timestamp when) {
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectStartedEventAny())
+                .setTimestamp(when)
                 .setEventId("project_started_" + when.getSeconds())
                 .setContext(createEventContext(when));
         return result.build();
