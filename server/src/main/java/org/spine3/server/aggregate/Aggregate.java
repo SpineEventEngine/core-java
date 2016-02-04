@@ -64,7 +64,7 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
-    private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.METHOD_PREDICATE;
+    private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
 
     @VisibleForTesting // otherwise would have been private.
     protected static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();

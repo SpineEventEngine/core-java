@@ -348,7 +348,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.METHOD_PREDICATE);
+        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.PREDICATE);
     }
 
     /**
@@ -383,7 +383,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
         /* package */ void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, CommandHandlerMethod.METHOD_PREDICATE);
+            commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, IS_EVENT_HANDLER);

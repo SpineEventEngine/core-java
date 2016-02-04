@@ -54,7 +54,11 @@ import static java.util.Collections.singletonList;
 @Internal
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
-    public static final Predicate<Method> METHOD_PREDICATE = new MethodPredicate();
+    /**
+     * The instsance of the predicate to filter command handler methods of a class.
+     */
+    public static final Predicate<Method> PREDICATE = new MethodPredicate();
+
     /**
      * A command must be the first parameter of a handling method.
      */
@@ -174,7 +178,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Predicate<Method> methodPredicate = METHOD_PREDICATE;
+        final Predicate<Method> methodPredicate = PREDICATE;
         final MethodMap handlers = new MethodMap(object.getClass(), methodPredicate);
 
         checkModifiers(handlers.values());
@@ -204,17 +208,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    public static class MethodPredicate implements Predicate<Method> {
+    privateRe static class MethodPredicate implements Predicate<Method> {
 
         @Override
         public boolean apply(@Nullable Method method) {
@@ -226,5 +220,15 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
                     && acceptsCorrectParams(method)
                     && returnsMessageList(method);
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

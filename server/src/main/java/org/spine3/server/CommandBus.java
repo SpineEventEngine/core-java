@@ -457,7 +457,7 @@ public class CommandBus implements AutoCloseable {
     @SuppressWarnings("InstanceMethodNamingConvention") // prefer longer name here for clarity.
     private void checkNoDispatchersRegisteredForCommandsOf(CommandHandler handler) {
         final ImmutableSet<Class<? extends Message>> handledMessageClasses = Classes.getHandledMessageClasses(
-                handler.getClass(), CommandHandlerMethod.METHOD_PREDICATE);
+                handler.getClass(), CommandHandlerMethod.PREDICATE);
 
         final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
         for (Class<? extends Message> handledMessageClass : handledMessageClasses) {
