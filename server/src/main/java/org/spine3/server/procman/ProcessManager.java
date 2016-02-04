@@ -21,12 +21,10 @@
 package org.spine3.server.procman;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.CommandBus;
@@ -350,7 +348,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, CommandHandler.METHOD_PREDICATE);
+        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.METHOD_PREDICATE);
     }
 
     /**
@@ -373,12 +371,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                 eventClass, this.getClass()));
     }
 
-    @Internal
-    @Override
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return CommandHandler.METHOD_PREDICATE;
-    }
-
     /**
      * The registry of method maps for all process manager classes.
      *
@@ -391,7 +383,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
         /* package */ void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, CommandHandler.METHOD_PREDICATE);
+            commandHandlers.register(clazz, CommandHandlerMethod.METHOD_PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, IS_EVENT_HANDLER);

@@ -54,6 +54,7 @@ import static java.util.Collections.singletonList;
 @Internal
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
+    public static final Predicate<Method> METHOD_PREDICATE = new MethodPredicate();
     /**
      * A command must be the first parameter of a handling method.
      */
@@ -96,19 +97,17 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         return acceptsCorrectParams;
     }
 
-    public static boolean returnsMessageListOrVoid(Method method) {
+    public static boolean returnsMessageList(Method method) {
         final Class<?> returnType = method.getReturnType();
 
         if (Message.class.isAssignableFrom(returnType)) {
             return true;
         }
+        //noinspection RedundantIfStatement
         if (List.class.isAssignableFrom(returnType)) {
             return true;
         }
-        //noinspection RedundantIfStatement
-        if (Void.TYPE.equals(returnType)) {
-            return true;
-        }
+
         return false;
     }
 
@@ -175,7 +174,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Predicate<Method> methodPredicate = object.getHandlerMethodPredicate();
+        final Predicate<Method> methodPredicate = METHOD_PREDICATE;
         final MethodMap handlers = new MethodMap(object.getClass(), methodPredicate);
 
         checkModifiers(handlers.values());
@@ -213,5 +212,19 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    public static class MethodPredicate implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            //noinspection SimplifiableIfStatement
+            if (method == null) {
+                return false;
+            }
+            return isAnnotatedCorrectly(method)
+                    && acceptsCorrectParams(method)
+                    && returnsMessageList(method);
+        }
     }
 }

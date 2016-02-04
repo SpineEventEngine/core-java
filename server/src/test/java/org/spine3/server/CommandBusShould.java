@@ -20,8 +20,6 @@
 
 package org.spine3.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -34,10 +32,9 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
+import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.type.CommandClass;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -95,10 +92,6 @@ public class CommandBusShould {
 
     private static class EmptyCommandHandler implements CommandHandler {
 
-        @Override
-        public Predicate<Method> getHandlerMethodPredicate() {
-            return Predicates.alwaysFalse();
-        }
     }
 
     //
@@ -203,19 +196,10 @@ public class CommandBusShould {
     private static class CreateProjectHandler implements CommandHandler {
 
         @Assign
-        public void handle(CreateProject command, CommandContext ctx) {
-            // Do nothing.
+        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+            return ProjectCreated.getDefaultInstance();
         }
 
-        @Override
-        public Predicate<Method> getHandlerMethodPredicate() {
-            return new Predicate<Method>() {
-                @Override
-                public boolean apply(@Nullable Method input) {
-                    return input != null && input.getName().equals("handle");
-                }
-            };
-        }
     }
 
     private static class CreateProjectDispatcher implements CommandDispatcher {
