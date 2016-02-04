@@ -90,7 +90,7 @@ public class TestCommands {
      */
     public static Command createCommand(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
-        final Command result = Commands.newCommand(command, context);
+        final Command result = Commands.create(command, context);
         return result;
     }
 

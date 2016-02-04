@@ -29,12 +29,13 @@ import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.base.*;
 import org.spine3.internal.EventHandlerMethod;
+import org.spine3.server.CommandBus;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
-import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
+import org.spine3.time.ZoneOffset;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 import static org.spine3.internal.EventHandlerMethod.checkModifiers;
 
@@ -78,6 +80,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     private volatile boolean initialized = false;
 
+    private volatile CommandBus commandBus;
+
     /**
      * The map of command handler methods for this process manager.
      *
@@ -93,11 +97,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     private MethodMap eventHandlers;
 
     /**
-     * Creates a new instance.
-     *
-     * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
-     * @see EntityId
+     * {@inheritDoc}
      */
     protected ProcessManager(I id) {
         super(id);
@@ -118,6 +118,14 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             eventHandlers = registry.getEventHandlers(pmClass);
             this.initialized = true;
         }
+    }
+
+    /* package */ void setCommandBus(CommandBus commandBus) {
+        this.commandBus = commandBus;
+    }
+
+    protected CommandBus getCommandBus() {
+        return commandBus;
     }
 
     /**
@@ -180,6 +188,104 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     }
 
     /**
+     * Creates a new {@link CommandRouter} instance.
+     */
+    protected CommandRouter newRouter() {
+        final CommandBus commandBus = getCommandBus();
+        checkState(commandBus != null, "CommandBus must be initialized");
+        return new CommandRouter(commandBus);
+    }
+
+    /**
+     * A {@code CommandRouter} allows to create and post one or more commands
+     * in response to a command received by the {@code ProcessManager}.
+     *
+     * <p>A typical usage looks like this:
+     *
+     * <pre>
+     *     {@literal @}Assign
+     *     public CommandRouted on(MyCommand message, CommandContext context) {
+     *         // Create new command messages here.
+     *         return new Router().of(message, context)
+     *                  .add(messageOne)
+     *                  .add(messageTwo)
+     *                  .route();
+     *     }
+     * </pre>
+     */
+    protected static class CommandRouter {
+
+        private final CommandBus commandBus;
+        private Message source;
+        private CommandContext sourceContext;
+
+        /**
+         * The actor of the command we route.
+         *
+         * <p>We route commands on the original's author behalf.
+         */
+        private UserId actor;
+
+        /**
+         * The zone offset from which the actor works.
+         */
+        private ZoneOffset zoneOffset;
+
+        /**
+         * Command messages to route.
+         */
+        private final List<Message> toRoute = Lists.newArrayList();
+
+        private CommandRouter(CommandBus commandBus) {
+            this.commandBus = commandBus;
+        }
+
+        /**
+         * Sets command to be routed.
+         */
+        protected CommandRouter of(Message source, CommandContext context) {
+            this.source = checkNotNull(source);
+            this.sourceContext = checkNotNull(context);
+
+            this.actor = context.getActor();
+            this.zoneOffset = context.getZoneOffset();
+
+            return this;
+        }
+
+        /**
+         * Adds {@code commandMessage} to be routed as a command.
+         */
+        protected CommandRouter add(Message commandMessage) {
+            toRoute.add(commandMessage);
+            return this;
+        }
+
+        /**
+         * Posts the added messages as commands to {@code CommandBus}.
+         *
+         * @return the event with source and produced commands
+         */
+        protected CommandRouted route() {
+            final CommandRouted.Builder result = CommandRouted.newBuilder();
+            result.setSource(Commands.create(this.source, this.sourceContext));
+
+            for (Message message : toRoute) {
+                final Command command = produceCommand(message);
+                commandBus.post(command);
+                result.addProduced(command);
+            }
+            return result.build();
+        }
+
+        private Command produceCommand(Message newMessage) {
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset);
+            final Command result = Commands.create(newMessage, newContext);
+            return result;
+        }
+    }
+
+    /**
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
@@ -198,7 +304,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(whenModified)
-                .setVersion(currentVersion);
+                .setVersion(currentVersion)
+                .setProducerId(Identifiers.idToAny(getId()));
 
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
 

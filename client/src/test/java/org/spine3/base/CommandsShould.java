@@ -78,7 +78,7 @@ public class CommandsShould {
     @Test
     public void extract_message_from_command() {
         final StringValue message = StringValue.newBuilder().setValue("extract_message_from_command").build();
-        final Command command = Commands.newCommand(message, CommandContext.getDefaultInstance());
+        final Command command = Commands.create(message, CommandContext.getDefaultInstance());
         assertEquals(message, Commands.getMessage(command));
     }
 

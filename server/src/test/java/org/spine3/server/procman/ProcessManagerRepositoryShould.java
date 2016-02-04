@@ -105,7 +105,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
-        final Command request = Commands.newCommand(command, CommandContext.getDefaultInstance());
+        final Command request = Commands.create(command, CommandContext.getDefaultInstance());
         final List<Event> events = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(toState(command), manager.getState());
@@ -126,7 +126,7 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final Command request = Commands.newCommand(unknownCommand, CommandContext.getDefaultInstance());
+        final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
@@ -221,8 +221,11 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Assign
-        public void handle(StartProject command, CommandContext ignored) {
+        public CommandRouted handle(StartProject command, CommandContext ignored) {
             incrementState(toState(command));
+            //TODO:2016-02-04:alexander.yevsyukov: Have routeCommand(source, generatedCommands), which returns
+            // the event.
+            return CommandRouted.getDefaultInstance();
         }
     }
 }
