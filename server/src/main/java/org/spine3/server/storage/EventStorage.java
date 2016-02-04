@@ -232,19 +232,21 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 return false;
             }
 
-            final Message message = Events.getMessage(event);
-            final TypeName actualType = TypeName.of(message);
-            final boolean specifiedEventType = eventType.value().isEmpty();
-            if (!eventType.equals(actualType) && !specifiedEventType) {
-                return false;
+            final boolean specifiedEventType = !eventType.value().isEmpty();
+            if (specifiedEventType) {
+                final Message message = Events.getMessage(event);
+                final TypeName actualType = TypeName.of(message);
+                if (!eventType.equals(actualType)) {
+                    return false;
+                }
             }
 
-            final EventContext context = event.getContext();
-            final Any aggregateId = context.getAggregateId();
             final List<Any> aggregateIdList = filter.getAggregateIdList();
             if (aggregateIdList.isEmpty()) {
                 return true;
             } else {
+                final EventContext context = event.getContext();
+                final Any aggregateId = context.getAggregateId();
                 final boolean matches = aggregateIdList.contains(aggregateId);
                 return matches;
             }
