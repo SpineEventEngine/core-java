@@ -208,7 +208,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
     }
 
-    privateRe static class MethodPredicate implements Predicate<Method> {
+    private static class MethodPredicate implements Predicate<Method> {
 
         @Override
         public boolean apply(@Nullable Method method) {
