@@ -50,7 +50,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
-import static org.spine3.server.Identifiers.idToAny;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
 /**
@@ -407,7 +407,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
                 .setCommandContext(commandContext)
                 .setTimestamp(whenModified)
                 .setVersion(currentVersion)
-                .setAggregateId(getIdAsAny());
+                .setProducerId(getIdAsAny());
         addEventContextAttributes(result, commandContext.getCommandId(), event, currentState, currentVersion);
         return result.build();
     }

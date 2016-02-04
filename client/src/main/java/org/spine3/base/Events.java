@@ -128,6 +128,22 @@ public class Events {
     }
 
     /**
+     * Obtains event producer ID from the passed {@code EventContext} and casts it to the
+     * {@code <I>} type.
+     *
+     * @param context the event context to to get the event producer ID
+     * @param <I> the type of the producer ID wrapped in the passed {@code EventContext}
+     * @return producer ID
+     */
+    public static <I> I getProducer(EventContext context) {
+        final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
+        @SuppressWarnings("unchecked") // It is the caller responsibility to know the type of the wrapper ID.
+        final I id = (I)aggregateId;
+        return id;
+
+    }
+
+    /**
      * The predicate to filter event records after some point in time.
      */
     public static class IsAfter implements Predicate<Event> {

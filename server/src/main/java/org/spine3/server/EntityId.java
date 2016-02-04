@@ -25,6 +25,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
+import org.spine3.base.Identifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;

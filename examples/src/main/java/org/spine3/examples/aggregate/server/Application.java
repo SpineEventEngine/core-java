@@ -40,8 +40,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.server.Identifiers.ConverterRegistry;
-import static org.spine3.server.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.base.Identifiers.ConverterRegistry;
+import static org.spine3.base.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * A sample application showing basic usage of the framework.

@@ -41,10 +41,8 @@ message EventStorageRecord {
     // A short name of Protobuf type of the event.
     string event_type = 2;
 
-    // String representation of ID of the aggregate, which generated the event.
-    //
-    // This field is empty, if the event is not from an aggregate.
-    string aggregate_id = 3;
+    // String representation of ID of the aggregate or another entity, which generated the event.
+    string producer_id = 3;
 
     // String representation of `EventId`.
     string event_id = 4;

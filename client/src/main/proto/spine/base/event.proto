@@ -69,17 +69,9 @@ message EventContext {
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
-    //TODO:2016-02-03:alexander.yevsyukov: Should it be just entity_id? Or oneof?
-    // The type of the thing, which generated the ID should be already wrapped inside the Any instance
-    // if we use typed IDs. If we don't, then we probably should.
-
-    oneof source {
-        // The id of the aggregate which generated the event.
-        google.protobuf.Any aggregate_id = 4;
-
-        // The id of the process manager which generated the event.
-        google.protobuf.Any process_manager_id = 7;
-    }
+    // The id of the entity which generated the event.
+    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`).
+    google.protobuf.Any producer_id = 4;
 
     // The version of the entity after the event was applied.
     int32 version = 5;

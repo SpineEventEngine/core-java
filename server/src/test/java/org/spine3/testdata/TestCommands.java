@@ -29,8 +29,8 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**

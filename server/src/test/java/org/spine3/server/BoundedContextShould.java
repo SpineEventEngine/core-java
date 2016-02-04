@@ -56,10 +56,10 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -204,7 +204,7 @@ public class BoundedContextShould {
         final List<Event> events = result.getEventList();
         assertEquals(1, events.size());
         final Event actualRecord = events.get(0);
-        final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
+        final ProjectId actualProjectId = fromAny(actualRecord.getContext().getProducerId());
 
         assertEquals(projectId, actualProjectId);
         assertEquals(userId, actualRecord.getContext().getCommandContext().getActor());

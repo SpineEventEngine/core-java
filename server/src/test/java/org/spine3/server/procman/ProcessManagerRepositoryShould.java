@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;

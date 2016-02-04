@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.*;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
@@ -185,8 +183,8 @@ public class Identifiers {
             final Message message = (Message) id;
             anyId = Messages.toAny(message);
         } else if (id instanceof String) {
-            final String s = (String) id;
-            anyId = Messages.toAny(StringValue.newBuilder().setValue(s).build());
+            final String strValue = (String) id;
+            anyId = Messages.toAny(StringValue.newBuilder().setValue(strValue).build());
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
             anyId = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());

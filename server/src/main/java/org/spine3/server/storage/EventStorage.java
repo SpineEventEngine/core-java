@@ -31,10 +31,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
+import org.spine3.base.*;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
@@ -133,10 +130,11 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
         final TypeName typeName = TypeName.ofEnclosed(message);
+        final String producerId = Identifiers.idToString(Events.getProducer(context));
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setEventType(typeName.nameOnly())
-                .setAggregateId(context.getAggregateId().toString())
+                .setProducerId(producerId)
                 .setEventId(eventId)
                 .setMessage(message)
                 .setContext(context);
@@ -240,7 +238,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
 
             final EventContext context = event.getContext();
-            final Any aggregateId = context.getAggregateId();
+            final Any aggregateId = context.getProducerId();
             final List<Any> aggregateIdList = filter.getAggregateIdList();
             if (aggregateIdList.isEmpty()) {
                 return true;

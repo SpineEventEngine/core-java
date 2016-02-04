@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.server.Identifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * An event-sourced storage of aggregate root events and snapshots.

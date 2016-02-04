@@ -25,7 +25,7 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.server.Identifiers;
+import org.spine3.base.Identifiers;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
