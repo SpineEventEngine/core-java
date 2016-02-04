@@ -22,6 +22,10 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.test.project.event.ProjectStarted;
+import org.spine3.test.project.event.TaskAdded;
+import org.spine3.type.TypeName;
 
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -35,15 +39,21 @@ public class TestEventStorageRecordFactory {
 
     private static final EventStorageRecord PROJECT_CREATED_RECORD = EventStorageRecord.newBuilder()
             .setMessage(projectCreatedEventAny())
-            .setEventId("project_created").build();
+            .setEventId("project_created")
+            .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
+            .build();
 
     private static final EventStorageRecord TASK_ADDED_RECORD = EventStorageRecord.newBuilder()
             .setMessage(taskAddedEventAny())
-            .setEventId("task_added").build();
+            .setEventId("task_added")
+            .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
+            .build();
 
     private static final EventStorageRecord PROJECT_STARTED_RECORD = EventStorageRecord.newBuilder()
             .setMessage(projectStartedEventAny())
-            .setEventId("project_started").build();
+            .setEventId("project_started")
+            .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
+            .build();
 
     private TestEventStorageRecordFactory() {}
 

@@ -146,18 +146,16 @@ public abstract class EventStorageShould {
 
     @Test
     public void write_and_filter_events_by_type() {
+        final String typeName = TypeName.of(StringValue.class).value();
         final EventStorageRecord expectedRecord = EventStorageRecord.newBuilder()
                 .setMessage(toAny(newRandomStringValue()))
                 .setEventId(generateId().getUuid())
+                .setEventType(typeName)
                 .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
-
-        final String typeName = TypeName.of(StringValue.class).value();
-        final EventFilter filter = EventFilter.newBuilder()
-                .setEventType(typeName).build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .addFilter(filter).build();
         final List<Event> expectedEvents = toEventList(expectedRecord);
+        final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
 
         final Iterator<Event> actual = storage.iterator(query);
 
