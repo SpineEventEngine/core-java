@@ -46,6 +46,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.server.Identifiers.idToString;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -133,10 +135,12 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
         final TypeName typeName = TypeName.ofEnclosed(message);
+        final Message aggregateId = fromAny(context.getAggregateId());
+        final String aggregateIdString = idToString(aggregateId);
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setEventType(typeName.nameOnly())
-                .setAggregateId(context.getAggregateId().toString())
+                .setAggregateId(aggregateIdString)
                 .setEventId(eventId)
                 .setMessage(message)
                 .setContext(context);
