@@ -37,10 +37,12 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestCommands;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -59,11 +61,27 @@ public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = createProjectId(newUuid());
 
-    private final TestProcessManagerRepository repository = new TestProcessManagerRepository(
-            BoundedContextTestStubs.create());
+    private TestProcessManagerRepository repository;
 
     @Before
     public void setUp() {
+        final BoundedContext boundedContext = BoundedContextTestStubs.create();
+
+        boundedContext.getCommandBus().register(new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getCommandClasses() {
+                return CommandClass.setOf(AddTask.class);
+            }
+
+            @Override
+            public List<Event> dispatch(Command request) throws Exception {
+                // Simply swallow the command. We need this dispatcher for allowing Process Manager
+                // under test to route the AddTask command.
+                return Collections.emptyList();
+            }
+        });
+
+        repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
     }
 
@@ -221,11 +239,13 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Assign
-        public CommandRouted handle(StartProject command, CommandContext ignored) {
+        public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toState(command));
-            //TODO:2016-02-04:alexander.yevsyukov: Have routeCommand(source, generatedCommands), which returns
-            // the event.
-            return CommandRouted.getDefaultInstance();
+            final Message addTask = TestCommands.addTask(command.getProjectId());
+
+            return newRouter().of(command, context)
+                    .add(addTask)
+                    .route();
         }
     }
 }

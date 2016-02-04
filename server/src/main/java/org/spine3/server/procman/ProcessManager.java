@@ -80,17 +80,20 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      */
     private volatile boolean initialized = false;
 
+    /**
+     * The Command Bus to post routed commands.
+     */
     private volatile CommandBus commandBus;
 
     /**
-     * The map of command handler methods for this process manager.
+     * The map of command handler methods of this process manager.
      *
      * @see Registry
      */
     private MethodMap commandHandlers;
 
     /**
-     * The map of event handlers for this process manager.
+     * The map of event handler methods of this process manager.
      *
      * @see Registry
      */
@@ -120,10 +123,16 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
     }
 
+    /**
+     * The method to inject {@code CommandBus} instance from the repository.
+     */
     /* package */ void setCommandBus(CommandBus commandBus) {
-        this.commandBus = commandBus;
+        this.commandBus = checkNotNull(commandBus);
     }
 
+    /**
+     * Returns the {@code CommandBus} to which post commands produced by this process manager.
+     */
     protected CommandBus getCommandBus() {
         return commandBus;
     }
@@ -212,6 +221,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      *                  .route();
      *     }
      * </pre>
+     *
+     * <p>The routed commands are created on behalf of the actor of the original command.
+     * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
+     * instances will be the same as in the incoming command.
      */
     protected static class CommandRouter {
 
@@ -299,7 +312,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return new instance of the {@code EventContext}
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
+    private EventContext createEventContext(CommandId commandId, Message event, M currentState,
+                                              Timestamp whenModified, int currentVersion) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
@@ -322,7 +336,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param event          the event message
      * @param currentState   the current state of the aggregate after the event was applied
      * @param currentVersion the version of the process manager after the event was applied
-     * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
@@ -377,7 +390,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
-        void register(Class<? extends ProcessManager> clazz) {
+        /* package */ void register(Class<? extends ProcessManager> clazz) {
             commandHandlers.register(clazz, CommandHandler.METHOD_PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
@@ -386,25 +399,25 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         @CheckReturnValue
-        boolean contains(Class<? extends ProcessManager> clazz) {
+        /* package */ boolean contains(Class<? extends ProcessManager> clazz) {
             final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
+        /* package */ MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
+        /* package */ MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = eventHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        static Registry getInstance() {
+        /* package */ static Registry getInstance() {
             return Singleton.INSTANCE.value;
         }
 

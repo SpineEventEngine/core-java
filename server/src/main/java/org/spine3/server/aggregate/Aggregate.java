@@ -461,7 +461,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
 
         private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
-        void register(Class<? extends Aggregate> clazz) {
+        /* package */ void register(Class<? extends Aggregate> clazz) {
             commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
             checkModifiers(commandHandlers.get(clazz).values());
 
@@ -470,25 +470,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         }
 
         @CheckReturnValue
-        boolean contains(Class<? extends Aggregate> clazz) {
+        /* package */ boolean contains(Class<? extends Aggregate> clazz) {
             final boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
+        /* package */ MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
             final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
+        /* package */ MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
             final MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        static Registry getInstance() {
+        /* package */ static Registry getInstance() {
             return Singleton.INSTANCE.value;
         }
 
