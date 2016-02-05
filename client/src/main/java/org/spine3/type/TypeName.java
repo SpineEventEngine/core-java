@@ -21,6 +21,7 @@
 package org.spine3.type;
 
 import com.google.protobuf.*;
+import org.spine3.Internal;
 
 import java.util.regex.Pattern;
 
@@ -69,22 +70,9 @@ public final class TypeName extends StringTypeValue {
      * @param typeName the name of the type
      * @return new instance
      */
+    @Internal
     public static TypeName of(String typeName) {
         return new TypeName(typeName);
-    }
-
-    /**
-     * Creates a new instance with the passed class name.
-     * @param clazz the class to get name from
-     * @return new instance
-     */
-    public static TypeName of(Class<? extends Message> clazz) {
-
-        final String fullQualifiedName = clazz.getName();
-        final int dotIndex = fullQualifiedName.indexOf('.');
-        // name that matches Protobuf conventions (proto type url)
-        final String protoClassName = fullQualifiedName.substring(dotIndex + 1);
-        return of(protoClassName);
     }
 
     /**

@@ -152,7 +152,7 @@ public abstract class EventStorageShould {
                 .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
 
-        final String typeName = TypeName.of(StringValue.class).value();
+        final String typeName = TypeName.of(StringValue.getDefaultInstance()).value();
         final EventFilter filter = EventFilter.newBuilder()
                 .setEventType(typeName).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
