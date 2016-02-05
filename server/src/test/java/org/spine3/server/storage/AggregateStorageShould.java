@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -224,6 +225,9 @@ public abstract class AggregateStorageShould {
     };
 
     private static Snapshot newSnapshot(Timestamp time) {
-        return Snapshot.newBuilder().setTimestamp(time).build();
+        return Snapshot.newBuilder()
+                .setState(Any.getDefaultInstance())
+                .setTimestamp(time)
+                .build();
     }
 }

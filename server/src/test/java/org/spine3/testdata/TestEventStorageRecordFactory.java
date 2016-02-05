@@ -22,11 +22,15 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EventStorageRecord;
+import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.type.TypeName;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.server.Identifiers.newUuid;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -37,62 +41,80 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
  */
 public class TestEventStorageRecordFactory {
 
-    private static final EventStorageRecord PROJECT_CREATED_RECORD = EventStorageRecord.newBuilder()
-            .setMessage(projectCreatedEventAny())
-            .setEventId("project_created")
-            .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
-            .build();
-
-    private static final EventStorageRecord TASK_ADDED_RECORD = EventStorageRecord.newBuilder()
-            .setMessage(taskAddedEventAny())
-            .setEventId("task_added")
-            .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
-            .build();
-
-    private static final EventStorageRecord PROJECT_STARTED_RECORD = EventStorageRecord.newBuilder()
-            .setMessage(projectStartedEventAny())
-            .setEventId("project_started")
-            .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
-            .build();
-
     private TestEventStorageRecordFactory() {}
 
     public static EventStorageRecord projectCreated() {
-        return PROJECT_CREATED_RECORD;
+        final Timestamp time = getCurrentTime();
+        final ProjectId projectId = createProjectId(newUuid());
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                .setMessage(projectCreatedEventAny())
+                .setTimestamp(time)
+                .setEventId("project_created")
+                .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, time));
+        return builder.build();
     }
 
     public static EventStorageRecord taskAdded() {
-        return TASK_ADDED_RECORD;
+        final Timestamp time = getCurrentTime();
+        final ProjectId projectId = createProjectId(newUuid());
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                .setMessage(taskAddedEventAny())
+                .setTimestamp(time)
+                .setEventId("task_added")
+                .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, time));
+        return builder.build();
     }
 
     public static EventStorageRecord projectStarted() {
-        return PROJECT_STARTED_RECORD;
+        final Timestamp time = getCurrentTime();
+        final ProjectId projectId = createProjectId(newUuid());
+        final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                .setMessage(projectStartedEventAny())
+                .setTimestamp(time)
+                .setEventId("project_started")
+                .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, time));
+        return builder.build();
     }
 
     public static EventStorageRecord projectCreated(Timestamp when) {
+        final ProjectId projectId = createProjectId(newUuid());
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectCreatedEventAny())
                 .setTimestamp(when)
                 .setEventId("project_created_" + when.getSeconds())
-                .setContext(createEventContext(when));
+                .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, when));
         return result.build();
     }
 
     public static EventStorageRecord taskAdded(Timestamp when) {
+        final ProjectId projectId = createProjectId(newUuid());
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(taskAddedEventAny())
                 .setTimestamp(when)
                 .setEventId("task_added_" + when.getSeconds())
-                .setContext(createEventContext(when));
+                .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, when));
         return result.build();
     }
 
     public static EventStorageRecord projectStarted(Timestamp when) {
+        final ProjectId projectId = createProjectId(newUuid());
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectStartedEventAny())
                 .setTimestamp(when)
                 .setEventId("project_started_" + when.getSeconds())
-                .setContext(createEventContext(when));
+                .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
+                .setAggregateId(projectId.getId())
+                .setContext(createEventContext(projectId, when));
         return result.build();
     }
 }

@@ -106,11 +106,11 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     public void write(EventId id, Event event) {
         checkNotClosed();
         final String idString = id.getUuid();
-        checkArgument(!idString.isEmpty(), "Event ID must not be empty.");
         checkNotNull(event);
 
-        final EventStorageRecord storeRecord = toEventStorageRecord(idString, event);
-        writeInternal(storeRecord);
+        final EventStorageRecord record = toEventStorageRecord(idString, event);
+        checkRecord(record);
+        writeInternal(record);
     }
 
     @Nullable
@@ -145,6 +145,23 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 .setMessage(message)
                 .setContext(context);
         return builder.build();
+    }
+
+    private static void checkRecord(EventStorageRecord record) {
+        checkNotEmptyOrBlank(record.getEventId(), "event ID");
+        checkNotEmptyOrBlank(record.getEventType(), "event type");
+        checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID ");
+        final Timestamp timestamp = record.getTimestamp();
+        final long seconds = timestamp.getSeconds();
+        final int nanos = timestamp.getNanos();
+        checkArgument(seconds > 0, "Event seconds are not set.");
+        checkArgument(nanos > 0, "Event nanoseconds are not set.");
+    }
+
+    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
+        checkArgument(!stringToCheck.isEmpty(), fieldName + " is an empty string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " is a blank string.");
+        return stringToCheck;
     }
 
     /**

@@ -97,4 +97,16 @@ public class TestContextFactory {
                 .setAggregateId(AGGREGATE_ID);
         return builder.build();
     }
+
+    /**
+     * Creates a new {@link EventContext} with the given aggregate ID and timestamp.
+     */
+    public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
+        final EventId eventId = Events.generateId();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                .setEventId(eventId)
+                .setTimestamp(timestamp)
+                .setAggregateId(toAny(aggregateId));
+        return builder.build();
+    }
 }
