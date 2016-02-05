@@ -30,29 +30,35 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MessageHandlerMethodShould {
 
-    private static class TestHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
+    private static class TwoParamMethod extends MessageHandlerMethod<Object, EventContext> {
 
-        protected TestHandlerMethod(Object target, Method method) {
+        protected TwoParamMethod(Object target, Method method) {
+            super(target, method);
+        }
+    }
+
+    private static class OneParamMethod extends MessageHandlerMethod<Object, Void> {
+
+        protected OneParamMethod(Object target, Method method) {
             super(target, method);
         }
     }
 
     private MessageHandlerMethod<Object, EventContext> twoParamMethod;
-    private MessageHandlerMethod<Object, EventContext> oneParamMethod;
+    private MessageHandlerMethod<Object, Void> oneParamMethod;
 
     private Object target;
 
     @Before
     public void setUp() {
         target = new StubHandler();
-        twoParamMethod = new TestHandlerMethod(target, StubHandler.getTwoParameterMethod());
-        oneParamMethod = new TestHandlerMethod(target, StubHandler.getOneParameterMethod());
+        twoParamMethod = new TwoParamMethod(target, StubHandler.getTwoParameterMethod());
+        oneParamMethod = new OneParamMethod(target, StubHandler.getOneParameterMethod());
     }
 
     @SuppressWarnings("UnusedParameters") // OK for test methods.
@@ -104,13 +110,13 @@ public class MessageHandlerMethodShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target() {
         //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
-        new TestHandlerMethod(null, StubHandler.getTwoParameterMethod());
+        new TwoParamMethod(null, StubHandler.getTwoParameterMethod());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_method() {
         //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
-        new TestHandlerMethod(new StubHandler(), null);
+        new TwoParamMethod(new StubHandler(), null);
     }
 
     @Test
@@ -145,5 +151,41 @@ public class MessageHandlerMethodShould {
         oneParamMethod.invoke(BoolValue.getDefaultInstance());
 
         assertTrue(((StubHandler)target).wasHandleInvoked());
+    }
+
+    @Test
+    public void return_full_name_in_toString() {
+        assertEquals(twoParamMethod.getFullName(), twoParamMethod.toString());
+    }
+
+    @Test
+    public void be_equal_to_itself() {
+        //noinspection EqualsWithItself
+        assertTrue(twoParamMethod.equals(twoParamMethod));
+    }
+
+    @Test
+    public void be_not_equal_to_null() {
+        //noinspection ObjectEqualsNull
+        assertFalse(oneParamMethod.equals(null));
+    }
+
+    @Test
+    public void be_not_equal_to_another_class_instance() {
+        //noinspection EqualsBetweenInconvertibleTypes
+        assertFalse(twoParamMethod.equals(oneParamMethod));
+    }
+
+    @Test
+    public void compare_fields_in_equals() {
+        final MessageHandlerMethod<Object, EventContext> anotherMethod =
+                new TwoParamMethod(target, StubHandler.getTwoParameterMethod());
+
+        assertTrue(twoParamMethod.equals(anotherMethod));
+    }
+
+    @Test
+    public void have_hashCode() {
+        assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 }

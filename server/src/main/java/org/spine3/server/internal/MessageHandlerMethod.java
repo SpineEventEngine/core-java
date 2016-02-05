@@ -170,13 +170,6 @@ public abstract class MessageHandlerMethod<T, C> {
     }
 
     /**
-     * @return the class of the target object.
-     */
-    public Class<?> getTargetClass() {
-        return target.getClass();
-    }
-
-    /**
      * @return full name of the handler method
      * @see #getFullName()
      */
@@ -188,7 +181,6 @@ public abstract class MessageHandlerMethod<T, C> {
     @Override
     public int hashCode() {
         final int prime = 31;
-        // We need to hash only by the target's identity.
         return (prime + method.hashCode()) * prime
                 + System.identityHashCode(target);
     }
