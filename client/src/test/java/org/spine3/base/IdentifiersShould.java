@@ -179,7 +179,6 @@ public class IdentifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-
     @Test
     public void generate_new_UUID() {
         // We have non-empty values.
@@ -187,5 +186,25 @@ public class IdentifiersShould {
 
         // Values are random.
         assertNotEquals(Identifiers.newUuid(), Identifiers.newUuid());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_convert_unsupported_ID_type_to_Any() {
+        //noinspection UnnecessaryBoxing
+        idToAny(Boolean.valueOf(false));
+    }
+
+    @Test
+    public void handle_null_in_standard_converters() {
+        final ConverterRegistry registry = ConverterRegistry.getInstance();
+
+        assertEquals(Identifiers.NULL_ID_OR_FIELD,
+                registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
+
+        assertEquals(Identifiers.NULL_ID_OR_FIELD,
+                registry.getConverter(EventId.getDefaultInstance()).apply(null));
+
+        assertEquals(Identifiers.NULL_ID_OR_FIELD,
+                registry.getConverter(CommandId.getDefaultInstance()).apply(null));
     }
 }

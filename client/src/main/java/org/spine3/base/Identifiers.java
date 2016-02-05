@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
@@ -281,12 +282,21 @@ public class Identifiers {
         }
 
         public <I> Function<I, String> getConverter(I id) {
+            checkNotNull(id);
+            checkNotClass(id);
+
             final Function<?, String> func = entries.get(id.getClass());
 
             @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
                 @see #register(Class, com.google.common.base.Function) */
             final Function<I, String> result = (Function<I, String>) func;
             return result;
+        }
+
+        private static <I> void checkNotClass(I id) {
+            if (id instanceof Class) {
+                checkArgument(false, "Class instance passed instead of value: " + id.toString());
+            }
         }
 
         public <I> boolean containsConverter(I id) {
@@ -321,11 +331,9 @@ public class Identifiers {
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Override
         public String apply(@Nullable EventId eventId) {
-
             if (eventId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             return eventId.getUuid();
         }
 
@@ -337,7 +345,6 @@ public class Identifiers {
             if (commandId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             return commandId.getUuid();
         }
     }
