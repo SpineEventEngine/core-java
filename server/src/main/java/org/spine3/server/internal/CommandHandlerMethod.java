@@ -39,7 +39,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -149,8 +148,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
-        } else if (Void.class.equals(resultClass)) {
-            return Collections.emptyList();
         } else {
             // Another type of result is single event message (as Message).
             final List<Message> result = singletonList((Message) handlingResult);
