@@ -152,7 +152,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         } else if (Void.class.equals(resultClass)) {
             return Collections.emptyList();
         } else {
-            // Another type of result is single event (as Message).
+            // Another type of result is single event message (as Message).
             final List<Message> result = singletonList((Message) handlingResult);
             return result;
         }

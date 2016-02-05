@@ -172,9 +172,11 @@ public abstract class EventStorageShould {
         writeAll(toEventStorageRecord(eventId, expectedEvent), projectStarted(), taskAdded());
 
         final EventFilter filter = EventFilter.newBuilder()
-                .addAggregateId(toAny(id)).build();
+                .addAggregateId(toAny(id))
+                .build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .addFilter(filter).build();
+                .addFilter(filter)
+                .build();
 
         final Iterator<Event> actual = storage.iterator(query);
 

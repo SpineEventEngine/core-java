@@ -26,13 +26,16 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
+import org.spine3.client.CommandFactory;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.time.ZoneOffsets;
 import org.spine3.type.CommandClass;
 
 import java.util.Collections;
@@ -195,11 +198,16 @@ public class CommandBusShould {
 
     private static class CreateProjectHandler implements CommandHandler {
 
+        private boolean handlerInvoked = false;
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+            handlerInvoked = true;
             return ProjectCreated.getDefaultInstance();
         }
 
+        public boolean wasHandlerInvoked() {
+            return handlerInvoked;
+        }
     }
 
     private static class CreateProjectDispatcher implements CommandDispatcher {
@@ -258,5 +266,27 @@ public class CommandBusShould {
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
         assertTrue(commandStore.isClosed());
+    }
+
+    @Test
+    public void remove_all_handlers_on_close() throws Exception {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+
+        commandBus.close();
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProject("remove_all_handlers_on_close"))));
+    }
+
+    @Test
+    public void invoke_handler_when_command_posted() {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+
+        final CommandFactory factory = TestCommandFactory.newInstance("invoke_handler",
+                ZoneOffsets.UTC);
+        final Command command = factory.create(createProject("_when_command_posted"));
+        commandBus.post(command);
+
+        assertTrue(handler.wasHandlerInvoked());
     }
 }

@@ -216,12 +216,27 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      */
     private static class MatchFilter implements Predicate<Event> {
 
-        private final EventFilter filter;
+        /**
+         * The type of events to accept.
+         * <p>If null, all events are accepted.
+         */
+        @Nullable
         private final TypeName eventType;
 
+        /**
+         * The list of aggregate IDs of which events to accept.
+         * <p>If null, all IDs are accepted.
+         */
+        @Nullable
+        private final List<Any> aggregateIds;
+
         public MatchFilter(EventFilter filter) {
-            this.filter = filter;
-            this.eventType = TypeName.of(filter.getEventType());
+            final String eventType = filter.getEventType();
+            this.eventType = eventType.isEmpty() ? null :
+                    TypeName.of(eventType);
+            final List<Any> aggregateIdList = filter.getAggregateIdList();
+            this.aggregateIds = aggregateIdList.isEmpty() ? null :
+                    aggregateIdList;
         }
 
         @Override
@@ -232,20 +247,22 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
             final Message message = Events.getMessage(event);
             final TypeName actualType = TypeName.of(message);
-            final boolean specifiedEventType = eventType.value().isEmpty();
-            if (!eventType.equals(actualType) && !specifiedEventType) {
-                return false;
+
+            if (eventType != null) {
+                if (!eventType.equals(actualType)) {
+                    return false;
+                }
             }
 
             final EventContext context = event.getContext();
             final Any aggregateId = context.getProducerId();
-            final List<Any> aggregateIdList = filter.getAggregateIdList();
-            if (aggregateIdList.isEmpty()) {
-                return true;
-            } else {
-                final boolean matches = aggregateIdList.contains(aggregateId);
+
+            if (aggregateIds != null) {
+                final boolean matches = aggregateIds.contains(aggregateId);
                 return matches;
             }
+
+            return true;
         }
     }
 }
