@@ -24,6 +24,7 @@ import com.google.protobuf.*;
 
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
@@ -37,7 +38,7 @@ import static com.google.common.base.Throwables.propagate;
 public final class TypeName extends StringTypeValue {
 
     private TypeName(String value) {
-        super(checkNotNull(value));
+        super(checkNotEmpty(value));
     }
 
     private TypeName(MessageOrBuilder msg) {
@@ -153,10 +154,16 @@ public final class TypeName extends StringTypeValue {
     public String nameOnly() {
         final String value = value();
         final String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
-        if (parts.length == 0) {
+        if (parts.length < 2) {
             return value;
         }
         final String result = parts[parts.length - 1];
         return result;
+    }
+
+    private static String checkNotEmpty(String value) {
+        checkNotNull(value, "TypeName cannot be null.") ;
+        checkArgument(!value.isEmpty(), "TypeName cannot be empty string.");
+        return value;
     }
 }

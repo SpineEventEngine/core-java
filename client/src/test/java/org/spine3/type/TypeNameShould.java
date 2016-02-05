@@ -31,6 +31,17 @@ import static org.junit.Assert.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeNameShould {
 
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_value() {
+        //noinspection ConstantConditions
+        TypeName.of((String)null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_emtpy_string() {
+        TypeName.of("");
+    }
+
     @Test
     public void return_type_url() {
         final TypeName test = TypeName.of(StringValue.newBuilder().setValue("return_type_url").build());
@@ -51,5 +62,11 @@ public class TypeNameShould {
     @Test
     public void return_name_only() {
         assertEquals("UInt64Value", TypeName.of(UInt64Value.getDefaultInstance()).nameOnly());
+    }
+
+    @Test
+    public void return_name_if_no_package() {
+        final String name = TypeNameShould.class.getSimpleName();
+        assertEquals(name, TypeName.of(name).nameOnly());
     }
 }
