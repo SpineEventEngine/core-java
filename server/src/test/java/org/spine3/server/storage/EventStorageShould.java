@@ -39,7 +39,6 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.generateId;
-import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
@@ -177,14 +176,38 @@ public abstract class EventStorageShould {
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time() {
-        givenSequentialRecords();
+    @SuppressWarnings("MagicNumber")
+    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_bigger() {
+        givenSequentialRecords(10, 10);
+        findEventsWhichHappenedAfterPointInTimeTest();
+    }
+
+    @Test
+    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_equal() {
+        givenSequentialRecords(10, 0);
+        findEventsWhichHappenedAfterPointInTimeTest();
+    }
+
+    @Test
+    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_less() {
+        givenSequentialRecords(10, -5);
+        findEventsWhichHappenedAfterPointInTimeTest();
+    }
+
+    @Test
+    public void find_events_which_happened_after_a_point_in_time_case_secs_equal_and_nanos_bigger() {
+        givenSequentialRecords(0, 10);
+        findEventsWhichHappenedAfterPointInTimeTest();
+    }
+
+    private void findEventsWhichHappenedAfterPointInTimeTest() {
         final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
         final List<Event> expected = toEventList(record2, record3);
 
-        final Iterator<Event> actual = storage.iterator(query);
+        final Iterator<Event> iterator = storage.iterator(query);
+        final List<Event> actual = newArrayList(iterator);
 
-        assertEquals(expected, newArrayList(actual));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -213,7 +236,11 @@ public abstract class EventStorageShould {
     }
 
     private void givenSequentialRecords() {
-        final Duration delta = seconds(10);
+        givenSequentialRecords(10, 10);
+    }
+
+    private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
+        final Duration delta = Duration.newBuilder().setSeconds(deltaSeconds).setNanos(deltaNanos).build();
         time1 = getCurrentTime();
         record1 = projectCreated(time1);
         time2 = add(time1, delta);
