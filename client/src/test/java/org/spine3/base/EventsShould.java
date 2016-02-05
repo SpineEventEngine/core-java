@@ -20,22 +20,19 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
-
-import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
 
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
     @Test
-    public void have_private_ctor()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(Events.class);
+    public void have_private_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(Events.class));
     }
 
     @Test

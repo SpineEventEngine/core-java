@@ -30,7 +30,7 @@ import static com.google.protobuf.util.TimeUtil.*;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
-import static org.spine3.test.Tests.callPrivateUtilityConstructor;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
@@ -40,8 +40,8 @@ public class TimestampsShould {
     private static final Duration MINUTE = Durations.ofMinutes(1);
 
     @Test
-    public void have_private_constructor() throws Exception {
-        callPrivateUtilityConstructor(Timestamps.class);
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Timestamps.class));
     }
 
     @Test

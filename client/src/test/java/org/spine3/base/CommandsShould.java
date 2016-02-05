@@ -28,10 +28,8 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.test.TestCommandFactory;
-import org.spine3.test.Tests;
 import org.spine3.time.ZoneOffsets;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +37,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandsShould {
@@ -68,11 +67,9 @@ public class CommandsShould {
         assertEquals(sortedList, unSortedList);
     }
 
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
     @Test
-    public void have_private_ctor()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(Commands.class);
+    public void have_private_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(Commands.class));
     }
 
     @Test

@@ -22,20 +22,17 @@ package org.spine3.time;
 
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.test.Tests;
-
-import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
 
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
     @Test
-    public void have_private_utility_ctor()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(ZoneOffsets.class);
+    public void have_private_utility_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(ZoneOffsets.class));
     }
 
     @Test

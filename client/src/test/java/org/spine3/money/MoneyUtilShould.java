@@ -18,30 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.money;
 
 import org.junit.Test;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ResponsesShould {
+public class MoneyUtilShould {
 
     @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Responses.class));
+    public void have_private_utility_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(MoneyUtil.class));
     }
 
     @Test
-    public void return_ok_response() {
-        checkNotNull(Responses.ok());
-    }
+    public void create_new_Money_instance() {
+        final long amount = 100500L;
 
-    @Test
-    public void recognize_ok_response() {
-        assertTrue(Responses.isOk(Responses.ok()));
-    }
+        final Money money = MoneyUtil.newMoney(amount, Currency.USD);
 
+        assertEquals(amount, money.getAmount());
+        assertEquals(Currency.USD, money.getCurrency());
+    }
 }
