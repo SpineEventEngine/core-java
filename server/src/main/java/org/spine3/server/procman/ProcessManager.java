@@ -26,11 +26,11 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.*;
-import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.CommandBus;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.time.ZoneOffset;
@@ -44,8 +44,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
-import static org.spine3.internal.EventHandlerMethod.checkModifiers;
+import static org.spine3.server.internal.EventHandlerMethod.IS_EVENT_HANDLER;
+import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.

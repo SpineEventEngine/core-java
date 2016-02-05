@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.reflect.MethodMap;

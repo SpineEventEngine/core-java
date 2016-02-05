@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The content of this package and its subpackages are for internal use of the framework
- * and are considered annotated with {@link org.spine3.Internal}.
- */
-@Internal
-@ParametersAreNonnullByDefault
 package org.spine3.internal;
 
-import org.spine3.Internal;
+import org.junit.Before;
+import org.spine3.server.internal.MessageHandlerMethod;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.reflect.Method;
+
+public class MessageHandlerMethodShould {
+
+    private static class TestMessageHandler extends MessageHandlerMethod<Object, Void> {
+
+        protected TestMessageHandler(Object target, Method method) {
+            super(target, method);
+        }
+    }
+
+    private MessageHandlerMethod method;
+
+    @Before
+    public void setUp() {
+
+    }
+}

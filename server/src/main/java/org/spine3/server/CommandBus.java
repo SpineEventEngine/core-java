@@ -27,12 +27,12 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.*;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.CommandValidation;
 import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.type.CommandClass;
 
