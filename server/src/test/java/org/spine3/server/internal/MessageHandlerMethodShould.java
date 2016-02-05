@@ -1,0 +1,149 @@
+/*
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.spine3.server.internal;
+
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.StringValue;
+import org.junit.Before;
+import org.junit.Test;
+import org.spine3.base.EventContext;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static com.google.common.base.Throwables.propagate;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class MessageHandlerMethodShould {
+
+    private static class TestHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
+
+        protected TestHandlerMethod(Object target, Method method) {
+            super(target, method);
+        }
+    }
+
+    private MessageHandlerMethod<Object, EventContext> twoParamMethod;
+    private MessageHandlerMethod<Object, EventContext> oneParamMethod;
+
+    private Object target;
+
+    @Before
+    public void setUp() {
+        target = new StubHandler();
+        twoParamMethod = new TestHandlerMethod(target, StubHandler.getTwoParameterMethod());
+        oneParamMethod = new TestHandlerMethod(target, StubHandler.getOneParameterMethod());
+    }
+
+    @SuppressWarnings("UnusedParameters") // OK for test methods.
+    private static class StubHandler {
+
+        private boolean onInvoked;
+        private boolean handleInvoked;
+
+        public void on(StringValue message, EventContext context) {
+            onInvoked = true;
+        }
+
+        @SuppressWarnings("unused") // The method is used via reflection.
+        private void handle(BoolValue message) {
+            handleInvoked = true;
+        }
+
+        /* package */ static Method getTwoParameterMethod() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getMethod("on", StringValue.class, EventContext.class);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+            return method;
+        }
+
+        /* package */ static Method getOneParameterMethod() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getDeclaredMethod("handle", BoolValue.class);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+            return method;
+        }
+
+        /* package */ boolean wasOnInvoked() {
+            return onInvoked;
+        }
+
+        /* package */ boolean wasHandleInvoked() {
+            return handleInvoked;
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_target() {
+        //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
+        new TestHandlerMethod(null, StubHandler.getTwoParameterMethod());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_method() {
+        //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
+        new TestHandlerMethod(new StubHandler(), null);
+    }
+
+    @Test
+    public void return_target() {
+        assertEquals(target, twoParamMethod.getTarget());
+    }
+
+    @Test
+    public void return_method() {
+        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getMethod());
+    }
+
+    @Test
+    public void check_if_public() {
+        assertTrue(twoParamMethod.isPublic());
+    }
+
+    @Test
+    public void check_if_private() {
+        assertTrue(oneParamMethod.isPrivate());
+    }
+
+    @Test
+    public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
+        twoParamMethod.invoke(StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
+
+        assertTrue(((StubHandler)target).wasOnInvoked());
+    }
+
+    @Test
+    public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
+        oneParamMethod.invoke(BoolValue.getDefaultInstance());
+
+        assertTrue(((StubHandler)target).wasHandleInvoked());
+    }
+}
