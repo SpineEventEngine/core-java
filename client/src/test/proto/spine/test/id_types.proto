@@ -23,31 +23,38 @@ package spine.test;
 
 option java_package="org.spine3.test";
 option java_multiple_files = true;
+option java_outer_classname = "TestIdentifiers";
 
 import "google/protobuf/timestamp.proto";
 
-message TestIdWithStringField {
+message StringFieldId {
     string id = 1;
 }
 
-message TestIdWithIntField {
+message IntFieldId {
     int32 id = 1;
 }
 
-message TestIdWithLongField {
+message LongFieldId {
     int64 id = 1;
 }
 
-message TestIdWithMessageField {
-    TestIdWithStringField id = 1;
+message NestedMessageId {
+    StringFieldId id = 1;
 }
 
-message TestIdWithTimestampField {
+message TimestampFieldId {
     google.protobuf.Timestamp id = 1;
 }
 
-message TestIdWithMultipleFields {
+message SeveralFieldsId {
     string string = 1;
     int32 int = 2;
-    TestIdWithStringField message = 3;
+    StringFieldId message = 3;
+}
+
+message IdWithStructure {
+    string name = 1;
+    int32 number = 2;
+    bool flag = 3;
 }

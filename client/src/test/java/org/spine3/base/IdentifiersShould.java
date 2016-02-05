@@ -18,15 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
 import org.spine3.test.*;
-import org.spine3.test.project.ProjectId;
 
 import javax.annotation.Nullable;
 
@@ -43,10 +41,28 @@ public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
 
+    @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
     @Test
-    public void return_same_string_when_convert_string() {
+    public void convert_to_string_number_ids() {
+        assertEquals("10", idToString(Integer.valueOf(10)));
+        assertEquals("100", idToString(Long.valueOf(100)));
+    }
 
-        final TestIdWithStringField id = newTestIdWithStringField(TEST_ID);
+    @Test
+    public void return_string_id_as_is() {
+        assertEquals(TEST_ID, idToString(TEST_ID));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_object_of_unsuppored_class_passed() {
+        //noinspection UnnecessaryBoxing
+        idToString(Boolean.valueOf(true));
+    }
+
+    @Test
+    public void return_same_string_when_convert_string_wrapped_into_message() {
+
+        final StringFieldId id = newTestIdWithStringField(TEST_ID);
 
         final String result = idToString(id);
 
@@ -54,10 +70,9 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void convert_to_string_integer_id() {
-
-        final Integer value = 256;
-        final TestIdWithIntField id = TestIdWithIntField.newBuilder().setId(value).build();
+    public void convert_to_string_integer_id_wrapped_into_message() {
+        final Integer value = 1024;
+        final IntFieldId id = IntFieldId.newBuilder().setId(value).build();
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -66,32 +81,19 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void convert_to_string_long_id() {
-
-        final Long value = 256L;
-        final TestIdWithLongField id = TestIdWithLongField.newBuilder().setId(value).build();
+    public void convert_to_string_long_id_wrapped_into_message() {
+        final Long value = 100500L;
+        final LongFieldId id = LongFieldId.newBuilder().setId(value).build();
         final String expected = value.toString();
 
         final String actual = idToString(id);
 
         assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_registered_project_id_message() {
-
-        ConverterRegistry.getInstance().register(ProjectId.class, ID_TO_STRING_CONVERTER);
-
-        final ProjectId id = ProjectId.newBuilder().setId(TEST_ID).build();
-        final String result = idToString(id);
-
-        assertEquals(TEST_ID, result);
     }
 
     @Test
     public void convert_to_string_message_id_with_string_field() {
-
-        final TestIdWithStringField id = newTestIdWithStringField(TEST_ID);
+        final StringFieldId id = newTestIdWithStringField(TEST_ID);
 
         final String result = idToString(id);
 
@@ -99,34 +101,9 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void convert_to_string_message_id_with_integer_field() {
-
-        final Integer value = 256;
-        final TestIdWithIntField id = TestIdWithIntField.newBuilder().setId(value).build();
-        final String expected = value.toString();
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_to_string_message_id_with_long_field() {
-
-        final Long value = 256L;
-        final TestIdWithLongField id = TestIdWithLongField.newBuilder().setId(value).build();
-        final String expected = value.toString();
-
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void convert_to_string_message_id_with_timestamp_field() {
-
         final Timestamp currentTime = getCurrentTime();
-        final TestIdWithTimestampField id = TestIdWithTimestampField.newBuilder().setId(currentTime).build();
+        final TimestampFieldId id = TimestampFieldId.newBuilder().setId(currentTime).build();
         final String expected = timestampToIdString(currentTime);
 
         final String actual = idToString(id);
@@ -136,9 +113,8 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_with_message_field() {
-
-        final TestIdWithStringField value = newTestIdWithStringField(TEST_ID);
-        final TestIdWithMessageField idToConvert = TestIdWithMessageField.newBuilder().setId(value).build();
+        final StringFieldId value = newTestIdWithStringField(TEST_ID);
+        final NestedMessageId idToConvert = NestedMessageId.newBuilder().setId(value).build();
 
         final String result = idToString(idToConvert);
 
@@ -146,13 +122,13 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void convert_to_string_message_id_with_several_fields() {
+    public void have_default_to_string_conversion_of_message_id_with_several_fields() {
 
         final String nestedString = "nested_string";
         final String outerString = "outer_string";
         final Integer number = 256;
 
-        final TestIdWithMultipleFields idToConvert = TestIdWithMultipleFields.newBuilder()
+        final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
                 .setString(outerString)
                 .setInt(number)
                 .setMessage(newTestIdWithStringField(nestedString))
@@ -171,7 +147,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
 
-        final TestIdWithStringField messageToWrap = newTestIdWithStringField(TEST_ID);
+        final StringFieldId messageToWrap = newTestIdWithStringField(TEST_ID);
         final Any any = toAny(messageToWrap);
 
         final String result = idToString(any);
@@ -179,16 +155,30 @@ public class IdentifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static TestIdWithStringField newTestIdWithStringField(String nestedString) {
-        return TestIdWithStringField.newBuilder().setId(nestedString).build();
+    private static StringFieldId newTestIdWithStringField(String nestedString) {
+        return StringFieldId.newBuilder().setId(nestedString).build();
     }
 
-    private static final Function<ProjectId, String> ID_TO_STRING_CONVERTER = new Function<ProjectId, String>() {
+    private static final Function<IdWithStructure, String> ID_TO_STRING_CONVERTER = new Function<IdWithStructure, String>() {
         @Override
-        public String apply(@Nullable ProjectId projectId) {
-            return projectId != null ? projectId.getId() : NULL_ID_OR_FIELD;
+        public String apply(@Nullable IdWithStructure id) {
+            if (id == null) {
+                return NULL_ID_OR_FIELD;
+            }
+            return id.getName();
         }
     };
+
+    @Test
+    public void convert_to_string_registered_id_message_type() {
+        ConverterRegistry.getInstance().register(IdWithStructure.class, ID_TO_STRING_CONVERTER);
+
+        final IdWithStructure id = IdWithStructure.newBuilder().setName(TEST_ID).build();
+        final String result = idToString(id);
+
+        assertEquals(TEST_ID, result);
+    }
+
 
     @Test
     public void generate_new_UUID() {
