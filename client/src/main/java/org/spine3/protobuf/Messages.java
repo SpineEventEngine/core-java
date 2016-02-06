@@ -66,7 +66,7 @@ public class Messages {
      * @param value the byte content of the message
      * @return new {@code Any} instance
      */
-    public static Any ofType(TypeName type, ByteString value) {
+    public static Any toAny(TypeName type, ByteString value) {
         final String typeUrl = type.toTypeUrl();
         final Any result = Any.newBuilder()
                 .setValue(value)
@@ -233,8 +233,9 @@ public class Messages {
      *                     will be converted to a string using {@link String#valueOf(Object)}
      * @throws IllegalStateException if the object is in its default state
      */
-    public static void checkNotDefault(Message object, @Nullable Object errorMessage) {
+    public static <M extends Message> M checkNotDefault(M object, @Nullable Object errorMessage) {
         checkState(isNotDefault(object), errorMessage);
+        return object;
     }
 
     /**
@@ -246,8 +247,9 @@ public class Messages {
      * @throws IllegalStateException if the object is in its default state
      */
     @SuppressWarnings("OverloadedVarargsMethod")
-    public static void checkNotDefault(Message object, String errorMessageTemplate, Object... errorMessageArgs) {
+    public static <M extends Message> M checkNotDefault(M object, String errorMessageTemplate, Object... errorMessageArgs) {
         checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
+        return object;
     }
 
     /**
@@ -256,8 +258,9 @@ public class Messages {
      * @param object the {@code Message} instance to check
      * @throws IllegalStateException if the object is in its default state
      */
-    public static void checkNotDefault(Message object) {
+    public static <M extends Message> M checkNotDefault(M object) {
         checkNotDefault(object, "The message is in the default state: %s", object);
+        return object;
     }
 
     /**
