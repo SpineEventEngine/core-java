@@ -187,6 +187,7 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
+    @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
         private TestProcessManager(ProjectId id) {
