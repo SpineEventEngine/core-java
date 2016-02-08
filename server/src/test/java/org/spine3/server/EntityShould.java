@@ -158,6 +158,13 @@ public class EntityShould {
         assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
     }
 
+    @Test
+    public void return_id_class() {
+        final Class<String> actual = Entity.getIdClass(TestEntity.class);
+
+        assertEquals(String.class, actual);
+    }
+
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
                 .setProjectId(createProjectId(newUuid()))
