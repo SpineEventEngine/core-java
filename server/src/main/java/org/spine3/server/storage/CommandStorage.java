@@ -41,10 +41,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
     public void store(AggregateId aggregateId, Command command) {
-        checkNotNull(aggregateId, "aggregateId");
-        checkNotClosed("Cannot store to closed storage");
+        checkNotNull(aggregateId);
+        checkNotNull(command);
+        checkNotClosed();
 
-        final Any wrappedMessage = checkNotNull(command).getMessage();
+        final Any wrappedMessage = command.getMessage();
         final CommandContext context = command.getContext();
         final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
         final CommandId commandId = context.getCommandId();

@@ -29,7 +29,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.command.AddTask;
@@ -95,12 +94,6 @@ public class CommandBusShould {
     }
 
     private static class EmptyCommandHandler implements CommandHandler {
-
-        @Override
-        public CommandHandlerMethod createMethod(Method method) {
-            //noinspection EmptyClass
-            return new CommandHandlerMethod(this, method) {};
-        }
 
         @Override
         public Predicate<Method> getHandlerMethodPredicate() {
@@ -212,11 +205,6 @@ public class CommandBusShould {
         @Assign
         public void handle(CreateProject command, CommandContext ctx) {
             // Do nothing.
-        }
-
-        @Override
-        public CommandHandlerMethod createMethod(Method method) {
-            return new CommandHandlerMethod(this, method);
         }
 
         @Override

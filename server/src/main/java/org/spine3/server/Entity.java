@@ -146,9 +146,9 @@ public abstract class Entity<Id, State extends Message> {
      */
     protected void setState(State state, int version, Timestamp whenLastModified) {
         validate(state);
-        this.state = checkNotNull(state, "state");
+        this.state = checkNotNull(state);
         this.version = version;
-        this.whenModified = checkNotNull(whenLastModified, "whenLastModified");
+        this.whenModified = checkNotNull(whenLastModified);
     }
 
     /**

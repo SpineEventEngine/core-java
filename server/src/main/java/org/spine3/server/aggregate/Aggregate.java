@@ -122,11 +122,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new CommandHandlerMethod(this, method);
-    }
-
-    @Override
     public Predicate<Method> getHandlerMethodPredicate() {
         return IS_AGGREGATE_COMMAND_HANDLER;
     }
@@ -168,10 +163,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) {
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(command, "command");
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(context, "context");
+        checkNotNull(command);
+        checkNotNull(context);
 
         init();
 
