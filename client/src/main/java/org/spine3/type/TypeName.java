@@ -20,7 +20,12 @@
 
 package org.spine3.type;
 
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.AnyOrBuilder;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
 import org.spine3.Internal;
 
 import java.util.regex.Pattern;

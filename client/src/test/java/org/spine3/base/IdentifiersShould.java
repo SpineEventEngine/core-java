@@ -24,7 +24,13 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.*;
+import org.spine3.test.IdWithStructure;
+import org.spine3.test.IntFieldId;
+import org.spine3.test.LongFieldId;
+import org.spine3.test.NestedMessageId;
+import org.spine3.test.SeveralFieldsId;
+import org.spine3.test.StringFieldId;
+import org.spine3.test.TimestampFieldId;
 
 import javax.annotation.Nullable;
 

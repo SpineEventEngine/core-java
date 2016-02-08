@@ -23,8 +23,16 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.*;
-import org.spine3.server.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Events;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.CommandBus;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.server.EntityRepository;
+import org.spine3.server.EventDispatcher;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
