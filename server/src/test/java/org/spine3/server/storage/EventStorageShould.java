@@ -39,7 +39,7 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.generateId;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.server.Identifiers.idToAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
@@ -47,6 +47,18 @@ import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould {
+
+    /**
+     * Small positive delta in seconds or nanoseconds.
+     */
+    private static final int POSITIVE_DELTA = 10;
+
+    /**
+     * Small negative delta in seconds or nanoseconds.
+     */
+    private static final int NEGATIVE_DELTA = -POSITIVE_DELTA;
+
+    private static final int ZERO = 0;
 
     /**
      * The point in time when the first event happened.
@@ -165,7 +177,7 @@ public abstract class EventStorageShould {
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = toAny(createProjectId(record1.getAggregateId()));
+        final Any id = idToAny(createProjectId(record1.getAggregateId()));
         final EventFilter filter = EventFilter.newBuilder().addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
         final List<Event> expected = toEventList(record1);
@@ -175,32 +187,65 @@ public abstract class EventStorageShould {
         assertEquals(expected, newArrayList(actual));
     }
 
+    /**
+     * Find events which happened AFTER a point in time tests.
+     */
+
     @Test
-    @SuppressWarnings("MagicNumber")
-    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_bigger() {
-        givenSequentialRecords(10, 10);
-        findEventsWhichHappenedAfterPointInTimeTest();
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_BIGGER() {
+        givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
+        assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_equal() {
-        givenSequentialRecords(10, 0);
-        findEventsWhichHappenedAfterPointInTimeTest();
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_EQUAL() {
+        givenSequentialRecords(POSITIVE_DELTA, ZERO);
+        assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_case_secs_bigger_and_nanos_less() {
-        givenSequentialRecords(10, -5);
-        findEventsWhichHappenedAfterPointInTimeTest();
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_LESS() {
+        givenSequentialRecords(POSITIVE_DELTA, NEGATIVE_DELTA);
+        assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_case_secs_equal_and_nanos_bigger() {
-        givenSequentialRecords(0, 10);
-        findEventsWhichHappenedAfterPointInTimeTest();
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_BIGGER() {
+        givenSequentialRecords(0, POSITIVE_DELTA);
+        assertThereAreEventsAfterTime();
     }
 
-    private void findEventsWhichHappenedAfterPointInTimeTest() {
+    @Test
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_LESS() {
+        givenSequentialRecords(NEGATIVE_DELTA, NEGATIVE_DELTA);
+        assertNoEventsAfterTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_BIGGER() {
+        givenSequentialRecords(NEGATIVE_DELTA, POSITIVE_DELTA);
+        assertNoEventsAfterTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_LESS() {
+        givenSequentialRecords(ZERO, NEGATIVE_DELTA);
+        assertNoEventsAfterTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_EQUAL() {
+        givenSequentialRecords(ZERO, ZERO);
+        assertNoEventsAfterTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_EQUAL() {
+        givenSequentialRecords(NEGATIVE_DELTA, ZERO);
+        assertNoEventsAfterTime();
+    }
+
+    private void assertThereAreEventsAfterTime() {
         final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
         final List<Event> expected = toEventList(record2, record3);
 
@@ -210,15 +255,84 @@ public abstract class EventStorageShould {
         assertEquals(expected, actual);
     }
 
+    private void assertNoEventsAfterTime() {
+        final EventStreamQuery query = EventStreamQuery.newBuilder().setAfter(time1).build();
+        final Iterator<Event> iterator = storage.iterator(query);
+        assertFalse(iterator.hasNext());
+    }
+
+    /**
+     * Find events which happened BEFORE a point in time tests.
+     */
+
     @Test
-    public void find_events_which_happened_before_a_point_in_time() {
-        givenSequentialRecords();
-        final EventStreamQuery query = EventStreamQuery.newBuilder().setBefore(time3).build();
-        final List<Event> expected = toEventList(record1, record2);
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_LESS() {
+        givenSequentialRecords(NEGATIVE_DELTA, NEGATIVE_DELTA);
+        assertThereAreEventsBeforeTime();
+    }
 
-        final Iterator<Event> actual = storage.iterator(query);
+    @Test
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_EQUAL() {
+        givenSequentialRecords(NEGATIVE_DELTA, ZERO);
+        assertThereAreEventsBeforeTime();
+    }
 
-        assertEquals(expected, newArrayList(actual));
+    @Test
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_BIGGER() {
+        givenSequentialRecords(NEGATIVE_DELTA, POSITIVE_DELTA);
+        assertThereAreEventsBeforeTime();
+    }
+
+    @Test
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_LESS() {
+        givenSequentialRecords(ZERO, NEGATIVE_DELTA);
+        assertThereAreEventsBeforeTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_BIGGER() {
+        givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
+        assertNoEventsBeforeTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_LESS() {
+        givenSequentialRecords(POSITIVE_DELTA, NEGATIVE_DELTA);
+        assertNoEventsBeforeTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_BIGGER() {
+        givenSequentialRecords(ZERO, POSITIVE_DELTA);
+        assertNoEventsBeforeTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_EQUAL() {
+        givenSequentialRecords(ZERO, ZERO);
+        assertNoEventsBeforeTime();
+    }
+
+    @Test
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_EQUAL() {
+        givenSequentialRecords(POSITIVE_DELTA, ZERO);
+        assertNoEventsBeforeTime();
+    }
+
+    private void assertThereAreEventsBeforeTime() {
+        final EventStreamQuery query = EventStreamQuery.newBuilder().setBefore(time1).build();
+        final List<Event> expected = toEventList(record3, record2);
+
+        final Iterator<Event> iterator = storage.iterator(query);
+        final List<Event> actual = newArrayList(iterator);
+
+        assertEquals(expected, actual);
+    }
+
+    private void assertNoEventsBeforeTime() {
+        final EventStreamQuery query = EventStreamQuery.newBuilder().setBefore(time1).build();
+        final Iterator<Event> iterator = storage.iterator(query);
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -235,13 +349,31 @@ public abstract class EventStorageShould {
         assertEquals(expected, newArrayList(actual));
     }
 
+    @Test
+    public void filter_events_by_type_and_aggregate_id_and_time() {
+        givenSequentialRecords();
+        final String typeName = record2.getEventType();
+        final Any id = idToAny(createProjectId(record2.getAggregateId()));
+        final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).addAggregateId(id).build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                .addFilter(filter)
+                .setAfter(time1)
+                .setBefore(time3)
+                .build();
+        final List<Event> expected = toEventList(record2);
+
+        final Iterator<Event> actual = storage.iterator(query);
+
+        assertEquals(expected, newArrayList(actual));
+    }
+
     private void givenSequentialRecords() {
-        givenSequentialRecords(10, 10);
+        givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
     }
 
     private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
         final Duration delta = Duration.newBuilder().setSeconds(deltaSeconds).setNanos(deltaNanos).build();
-        time1 = getCurrentTime();
+        time1 = getCurrentTime().toBuilder().setNanos(POSITIVE_DELTA * 10).build(); // to be sure that nanos are bigger than delta
         record1 = projectCreated(time1);
         time2 = add(time1, delta);
         record2 = taskAdded(time2);
