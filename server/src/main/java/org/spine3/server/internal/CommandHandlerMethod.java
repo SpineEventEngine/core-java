@@ -99,7 +99,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         return acceptsCorrectParams;
     }
 
-    public static boolean returnsMessageList(Method method) {
+    public static boolean returnsMessageOrList(Method method) {
         final Class<?> returnType = method.getReturnType();
 
         if (Message.class.isAssignableFrom(returnType)) {
@@ -214,7 +214,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
             }
             return isAnnotatedCorrectly(method)
                     && acceptsCorrectParams(method)
-                    && returnsMessageList(method);
+                    && returnsMessageOrList(method);
         }
     }
 

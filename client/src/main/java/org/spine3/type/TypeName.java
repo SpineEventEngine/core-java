@@ -143,6 +143,8 @@ public final class TypeName extends StringTypeValue {
         final String value = value();
         final String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
         if (parts.length < 2) {
+            // There's only one element in the array since there's no separator found.
+            // If this is so, the type name has no package.
             return value;
         }
         final String result = parts[parts.length - 1];
