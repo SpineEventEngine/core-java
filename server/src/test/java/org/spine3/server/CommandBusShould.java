@@ -20,25 +20,24 @@
 
 package org.spine3.server;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
+import org.spine3.client.CommandFactory;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
+import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.time.ZoneOffsets;
 import org.spine3.type.CommandClass;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -96,16 +95,6 @@ public class CommandBusShould {
 
     private static class EmptyCommandHandler implements CommandHandler {
 
-        @Override
-        public CommandHandlerMethod createMethod(Method method) {
-            //noinspection EmptyClass
-            return new CommandHandlerMethod(this, method) {};
-        }
-
-        @Override
-        public Predicate<Method> getHandlerMethodPredicate() {
-            return Predicates.alwaysFalse();
-        }
     }
 
     //
@@ -209,24 +198,15 @@ public class CommandBusShould {
 
     private static class CreateProjectHandler implements CommandHandler {
 
+        private boolean handlerInvoked = false;
         @Assign
-        public void handle(CreateProject command, CommandContext ctx) {
-            // Do nothing.
+        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+            handlerInvoked = true;
+            return ProjectCreated.getDefaultInstance();
         }
 
-        @Override
-        public CommandHandlerMethod createMethod(Method method) {
-            return new CommandHandlerMethod(this, method);
-        }
-
-        @Override
-        public Predicate<Method> getHandlerMethodPredicate() {
-            return new Predicate<Method>() {
-                @Override
-                public boolean apply(@Nullable Method input) {
-                    return input != null && input.getName().equals("handle");
-                }
-            };
+        public boolean wasHandlerInvoked() {
+            return handlerInvoked;
         }
     }
 
@@ -286,5 +266,27 @@ public class CommandBusShould {
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
         assertTrue(commandStore.isClosed());
+    }
+
+    @Test
+    public void remove_all_handlers_on_close() throws Exception {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+
+        commandBus.close();
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProject("remove_all_handlers_on_close"))));
+    }
+
+    @Test
+    public void invoke_handler_when_command_posted() {
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+
+        final CommandFactory factory = TestCommandFactory.newInstance("invoke_handler",
+                ZoneOffsets.UTC);
+        final Command command = factory.create(createProject("_when_command_posted"));
+        commandBus.post(command);
+
+        assertTrue(handler.wasHandlerInvoked());
     }
 }

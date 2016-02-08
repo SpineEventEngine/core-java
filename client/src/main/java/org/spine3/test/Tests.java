@@ -20,11 +20,9 @@
 
 package org.spine3.test;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.spine3.Internal;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import static java.lang.System.currentTimeMillis;
@@ -42,30 +40,45 @@ public class Tests {
     private Tests() {}
 
     /**
-     * Utility method for verifying existence of the private constructor in the passed utility class
-     * and inclusion of the lines of code of this constructor into coverage report.
+     * Verifies if the passed class has private parameterless constructor and invokes it
+     * using Reflection.
      *
-     * @param utilityClass a utility class to verify
-     * @throws IllegalStateException if the constructor of the passed class isn't private
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
+     * <p>Use this method to add utility constructor into covered code:
+     * <pre>
+     * public class MyUtilityShould
+     *     ...
+     *     {@literal @}Test
+     *     public void have_private_utility_ctor() {
+     *         assertTrue(hasPrivateUtilityConstructor(MyUtility.class));
+     *     }
+     * </pre>
+     * @return true if the class has private parameterless constructor
      */
-    @VisibleForTesting
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
-    public static void callPrivateUtilityConstructor(Class<?> utilityClass)
-            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        final Constructor constructor = utilityClass.getDeclaredConstructor();
+    public static boolean hasPrivateUtilityConstructor(Class<?> utilityClass) {
+        final Constructor constructor;
+        try {
+            constructor = utilityClass.getDeclaredConstructor();
+        } catch (NoSuchMethodException ignored) {
+            return false;
+        }
 
-        // We throw exception if the modified isn't private instead of asserting via JUnit to avoid dependency
-        // on JUnit in the main part of the code.
         if (!Modifier.isPrivate(constructor.getModifiers())) {
-            throw new IllegalStateException("Constructor must be private.");
+            return false;
         }
 
         constructor.setAccessible(true);
-        constructor.newInstance();
+
+        //noinspection OverlyBroadCatchBlock
+        try {
+            // Call the constructor to include it into the coverage.
+
+            // Some of the coding conventions may encourage throwing AssertionError to prevent the instantiation
+            // of the utility class from within the class.
+            constructor.newInstance();
+        } catch (Exception ignored) {
+            return true;
+        }
+        return true;
     }
 
     public static long currentTimeSeconds() {

@@ -28,7 +28,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.*;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
@@ -50,7 +55,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
-import static org.spine3.server.Identifiers.idToAny;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
 /**
@@ -64,8 +69,10 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
-    static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = new IsCommandHandler();
-    static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
+    private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
+
+    @VisibleForTesting // otherwise would have been private.
+    protected static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -121,16 +128,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
     }
 
-    @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new CommandHandlerMethod(this, method);
-    }
-
-    @Override
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return IS_AGGREGATE_COMMAND_HANDLER;
-    }
-
     /**
      * Performs initialization of the instance and registers this class of aggregates
      * in the {@link Registry} if it is not registered yet.
@@ -168,10 +165,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @VisibleForTesting  // otherwise this method would have had package access.
     protected final void dispatch(Message command, CommandContext context) {
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(command, "command");
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(context, "context");
+        checkNotNull(command);
+        checkNotNull(context);
 
         init();
 
@@ -414,7 +409,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
                 .setCommandContext(commandContext)
                 .setTimestamp(whenModified)
                 .setVersion(currentVersion)
-                .setAggregateId(getIdAsAny());
+                .setProducerId(getIdAsAny());
         addEventContextAttributes(result, commandContext.getCommandId(), event, currentState, currentVersion);
         return result.build();
     }
@@ -468,7 +463,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
 
         private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
-        void register(Class<? extends Aggregate> clazz) {
+        /* package */ void register(Class<? extends Aggregate> clazz) {
             commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
             checkModifiers(commandHandlers.get(clazz).values());
 
@@ -477,25 +472,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         }
 
         @CheckReturnValue
-        boolean contains(Class<? extends Aggregate> clazz) {
+        /* package */ boolean contains(Class<? extends Aggregate> clazz) {
             final boolean result = commandHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
+        /* package */ MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
             final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
+        /* package */ MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
             final MethodMap result = eventAppliers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        static Registry getInstance() {
+        /* package */ static Registry getInstance() {
             return Singleton.INSTANCE.value;
         }
 
@@ -519,48 +514,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
-    }
-
-    /**
-     * The predicate for filtering command handler methods of aggregates.
-     */
-    private static class IsCommandHandler implements Predicate<Method> {
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return check(method);
-        }
-
-        /**
-         * Checks if a method is a command handler of an aggregate.
-         *
-         * @param method a method to check
-         * @return {@code true} if the method is a command handler, {@code false} otherwise
-         */
-        private static boolean check(Method method) {
-            if (!CommandHandlerMethod.isAnnotatedCorrectly(method)){
-                return false;
-            }
-            if (!CommandHandlerMethod.acceptsCorrectParams(method)) {
-                return false;
-            }
-            final boolean returnsMessageOrList = returnsMessageOrList(method);
-            return returnsMessageOrList;
-        }
-
-        private static boolean returnsMessageOrList(Method method) {
-            final Class<?> returnType = method.getReturnType();
-
-            if (Message.class.isAssignableFrom(returnType)) {
-                return true;
-            }
-            //noinspection RedundantIfStatement
-            if (List.class.isAssignableFrom(returnType)) {
-                return true;
-            }
-            return false;
-        }
     }
 
     /**

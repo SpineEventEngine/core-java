@@ -21,18 +21,29 @@
 package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandValidationError;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Response;
+import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.projection.Projection;
@@ -56,10 +67,10 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -91,7 +102,7 @@ public class BoundedContextShould {
             .build());
     }
 
-    private static CommandBus newCommandDispatcher(StorageFactory storageFactory) {
+    private static CommandBus newCommandBus(StorageFactory storageFactory) {
         return CommandBus.create(new CommandStore(storageFactory.createCommandStorage()));
     }
 
@@ -204,7 +215,7 @@ public class BoundedContextShould {
         final List<Event> events = result.getEventList();
         assertEquals(1, events.size());
         final Event actualRecord = events.get(0);
-        final ProjectId actualProjectId = fromAny(actualRecord.getContext().getAggregateId());
+        final ProjectId actualProjectId = fromAny(actualRecord.getContext().getProducerId());
 
         assertEquals(projectId, actualProjectId);
         assertEquals(userId, actualRecord.getContext().getCommandContext().getActor());
@@ -238,7 +249,7 @@ public class BoundedContextShould {
     public void verify_namespace_attribute_if_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandBus(newCommandDispatcher(storageFactory))
+                .setCommandBus(newCommandBus(storageFactory))
                 .setEventBus(newEventBus(storageFactory))
                 .setMultitenant(true)
                 .build();
@@ -354,8 +365,8 @@ public class BoundedContextShould {
 
         @SuppressWarnings("UnusedParameters") // OK for test method
         @Assign
-        public void handle(CreateProject command, CommandContext ctx) {
-            // Do nothing, just watch.
+        public CommandRouted handle(CreateProject command, CommandContext ctx) {
+            return CommandRouted.getDefaultInstance();
         }
 
         @SuppressWarnings("UnusedParameters") // OK for test method

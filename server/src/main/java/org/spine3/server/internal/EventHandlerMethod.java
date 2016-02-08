@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.internal;
+package org.spine3.server.internal;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;

@@ -23,12 +23,18 @@ package org.spine3.testdata;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.*;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 
@@ -69,7 +75,7 @@ public class TestContextFactory {
         return EventContext.newBuilder()
                 .setEventId(eventId)
                 .setCommandContext(commandContext)
-                .setAggregateId(AGGREGATE_ID)
+                .setProducerId(AGGREGATE_ID)
                 .setTimestamp(now)
                 .build();
     }
@@ -81,7 +87,7 @@ public class TestContextFactory {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setAggregateId(toAny(aggregateId))
+                .setProducerId(toAny(aggregateId))
                 .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -94,7 +100,7 @@ public class TestContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(timestamp)
-                .setAggregateId(AGGREGATE_ID);
+                .setProducerId(AGGREGATE_ID);
         return builder.build();
     }
 }

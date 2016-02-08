@@ -65,7 +65,7 @@ public abstract class Entity<I, M extends Message> {
      * Creates a new instance.
      *
      * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
     public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived
@@ -140,9 +140,9 @@ public abstract class Entity<I, M extends Message> {
      */
     protected void setState(M state, int version, Timestamp whenLastModified) {
         validate(state);
-        this.state = checkNotNull(state, "state");
+        this.state = checkNotNull(state);
         this.version = version;
-        this.whenModified = checkNotNull(whenLastModified, "whenLastModified");
+        this.whenModified = checkNotNull(whenLastModified);
     }
 
     /**

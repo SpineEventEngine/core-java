@@ -60,7 +60,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
-        checkNotNull(id, "id");
+        checkNotNull(id);
 
         final Collection<AggregateStorageRecord> records = storage.get(id);
         return records.iterator();

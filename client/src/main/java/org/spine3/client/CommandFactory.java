@@ -86,7 +86,7 @@ public class CommandFactory {
     public Command create(Message message) {
         checkNotNull(message);
         final CommandContext context = Commands.createContext(getActor(), getZoneOffset());
-        final Command result = Commands.newCommand(message, context);
+        final Command result = Commands.create(message, context);
         return result;
     }
 }

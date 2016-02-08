@@ -19,13 +19,22 @@
  */
 package org.spine3.protobuf;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.util.JsonFormat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.UserId;
+import org.spine3.test.Tests;
+import org.spine3.type.TypeName;
 
-import static org.junit.Assert.assertEquals;
+import java.util.List;
+
+import static org.junit.Assert.*;
 import static org.spine3.client.UserUtil.newUserId;
 
 /**
@@ -36,6 +45,11 @@ public class MessagesShould {
 
     private final UserId id = newUserId("messages_test");
     private final Any any = Any.pack(id);
+
+    @Test
+    public void have_private_utility_ctor() {
+        assertTrue(Tests.hasPrivateUtilityConstructor(Messages.class));
+    }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
@@ -53,6 +67,17 @@ public class MessagesShould {
     public void convert_id_to_Any() {
         final Any test = Messages.toAny(id);
         assertEquals(any, test);
+    }
+
+
+    @Test
+    public void convert_ByteString_to_Any() {
+        final StringValue message = StringValue.newBuilder()
+                .setValue("convert_ByteString_to_Any")
+                .build();
+        final ByteString byteString = message.toByteString();
+
+        assertEquals(Any.pack(message), Messages.toAny(TypeName.of(message), byteString));
     }
 
     @Test
@@ -80,5 +105,81 @@ public class MessagesShould {
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
         Messages.fromAny(null);
+    }
+
+    //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.
+    @Ignore
+    @Test
+    public void print_to_json() {
+        final StringValue value = StringValue.newBuilder().setValue("print_to_json").build();
+        assertFalse(Messages.toJson(value).isEmpty());
+    }
+
+    //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.
+    @Ignore
+    @Test
+    public void build_JsonFormat_registry_for_known_types() {
+        final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
+
+        final List<Descriptors.Descriptor> found = Lists.newLinkedList();
+        for (TypeName typeName : TypeToClassMap.knownTypes()) {
+            final Descriptors.Descriptor descriptor = typeRegistry.find(typeName.value());
+            if (descriptor != null) {
+                found.add(descriptor);
+            }
+        }
+
+        assertFalse(found.isEmpty());
+    }
+
+    @Test
+    public void return_descriptor_by_message_class() {
+        assertEquals(StringValue.getDefaultInstance().getDescriptorForType(),
+                     Messages.getClassDescriptor(StringValue.class));
+    }
+
+    @Test
+    public void verify_if_message_is_not_in_default_state() {
+        final Message msg = StringValue.newBuilder().setValue("check_if_message_is_not_in_default_state").build();
+
+        assertTrue(Messages.isNotDefault(msg));
+        assertFalse(Messages.isNotDefault(StringValue.getDefaultInstance()));
+    }
+
+    @Test
+    public void verify_if_message_is_in_default_state() {
+        final Message nonDefault = StringValue.newBuilder().setValue("check_if_message_is_in_default_state").build();
+
+        assertTrue(Messages.isDefault(StringValue.getDefaultInstance()));
+        assertFalse(Messages.isDefault(nonDefault));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void check_if_message_is_in_default_state_throwing_IAE_if_not() {
+        final StringValue nonDefault = StringValue.newBuilder()
+                .setValue("check_if_message_is_in_default_state_throwing_IAE_if_not")
+                .build();
+        Messages.checkDefault(nonDefault);
+    }
+
+    @Test
+    public void return_default_value_on_check() {
+        final Message defaultValue = StringValue.getDefaultInstance();
+        assertEquals(defaultValue, Messages.checkDefault(defaultValue));
+        assertEquals(defaultValue, Messages.checkDefault(defaultValue, "error message"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void check_if_message_is_in_not_in_default_state_throwing_IAE_if_not() {
+        Messages.checkNotDefault(StringValue.getDefaultInstance());
+    }
+
+    @Test
+    public void return_non_default_value_on_check() {
+        final StringValue nonDefault = StringValue.newBuilder()
+                .setValue("return_non_default_value_on_check")
+                .build();
+        assertEquals(nonDefault, Messages.checkNotDefault(nonDefault));
+        assertEquals(nonDefault, Messages.checkNotDefault(nonDefault, "with error message"));
     }
 }

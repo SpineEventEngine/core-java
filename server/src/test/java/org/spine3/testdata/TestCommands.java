@@ -23,14 +23,18 @@ package org.spine3.testdata;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.UserId;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
@@ -90,7 +94,7 @@ public class TestCommands {
      */
     public static Command createCommand(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
-        final Command result = Commands.newCommand(command, context);
+        final Command result = Commands.create(command, context);
         return result;
     }
 

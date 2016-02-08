@@ -69,10 +69,11 @@ message EventContext {
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
-    // The id of the aggregate the event was applied to.
-    google.protobuf.Any aggregate_id = 4;
+    // The id of the entity which generated the event.
+    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`).
+    google.protobuf.Any producer_id = 4;
 
-    // The version of the aggregate after the event was applied.
+    // The version of the entity after the event was applied.
     int32 version = 5;
 
     // Service attributes that the system wants to store in addition to the domain attributes

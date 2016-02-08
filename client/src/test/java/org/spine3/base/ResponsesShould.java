@@ -21,17 +21,17 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ResponsesShould {
 
     @Test
-    public void have_private_constructor() throws Exception {
-        Tests.callPrivateUtilityConstructor(Responses.class);
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Responses.class));
     }
 
     @Test

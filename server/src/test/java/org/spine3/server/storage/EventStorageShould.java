@@ -41,9 +41,9 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.generateId;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.server.storage.EventStorage.*;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
@@ -152,7 +152,7 @@ public abstract class EventStorageShould {
                 .build();
         writeAll(expectedRecord, projectStarted(), taskAdded());
 
-        final String typeName = TypeName.of(StringValue.class).value();
+        final String typeName = TypeName.of(StringValue.getDefaultInstance()).value();
         final EventFilter filter = EventFilter.newBuilder()
                 .setEventType(typeName).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
@@ -172,9 +172,11 @@ public abstract class EventStorageShould {
         writeAll(toEventStorageRecord(eventId, expectedEvent), projectStarted(), taskAdded());
 
         final EventFilter filter = EventFilter.newBuilder()
-                .addAggregateId(toAny(id)).build();
+                .addAggregateId(toAny(id))
+                .build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .addFilter(filter).build();
+                .addFilter(filter)
+                .build();
 
         final Iterator<Event> actual = storage.iterator(query);
 

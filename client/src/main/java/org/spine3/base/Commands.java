@@ -43,6 +43,8 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  */
 public class Commands {
 
+    private Commands() {}
+
     /**
      * Creates a new {@link CommandId} based on random UUID.
      *
@@ -69,13 +71,13 @@ public class Commands {
     }
 
     /**
-     * Creates a new command with the given {@code message} and the {@code context}.
+     * Creates a command instance with the given {@code message} and the {@code context}.
      *
      * @param message the domain model message to send in the command
      * @param context the context of the command
      * @return a new command request
      */
-    public static Command newCommand(Message message, CommandContext context) {
+    public static Command create(Message message, CommandContext context) {
         final Command.Builder request = Command.newBuilder()
                 .setMessage(Messages.toAny(message))
                 .setContext(context);
@@ -85,12 +87,10 @@ public class Commands {
     /**
      * Extracts the message from the passed {@code Command} instance.
      */
-    public static Message getMessage(Command request) {
-        final Message command = Messages.fromAny(request.getMessage());
-        return command;
+    public static Message getMessage(Command command) {
+        final Message result = Messages.fromAny(command.getMessage());
+        return result;
     }
-
-    private Commands() {}
 
     public static Predicate<Command> wereAfter(final Timestamp from) {
         return new Predicate<Command>() {

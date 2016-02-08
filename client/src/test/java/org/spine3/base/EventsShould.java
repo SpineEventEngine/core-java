@@ -20,21 +20,19 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
 
-import java.lang.reflect.InvocationTargetException;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
 
-    @SuppressWarnings("MethodWithTooExceptionsDeclared")
     @Test
-    public void have_private_ctor()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(Events.class);
+    public void have_private_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(Events.class));
     }
 
     @Test
@@ -57,5 +55,12 @@ public class EventsShould {
     @Test
     public void return_null_from_null_input_in_IsBetween_predicate() {
         assertFalse(new Events.IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+    }
+
+    @Test
+    public void return_actor_from_EventContext() {
+        // Since Events.getActor() is merely wrapper over the chain of generated method calls
+        // the main reason to have this test is to mark the Events.getActor() as `used`.
+        checkNotNull(Events.getActor(EventContext.getDefaultInstance()));
     }
 }

@@ -23,9 +23,9 @@ package org.spine3.server.projection;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.internal.EventHandlerMethod;
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
+import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 
@@ -33,7 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
+import static org.spine3.server.internal.EventHandlerMethod.IS_EVENT_HANDLER;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.

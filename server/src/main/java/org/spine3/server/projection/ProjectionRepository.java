@@ -28,7 +28,6 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
-import org.spine3.server.Identifiers;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.EventClass;
@@ -66,16 +65,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Casts result of {@link EventContext#getAggregateId()} to the type of index of this
-     * storage.
+     * Obtains the ID of the event producer from the passed event context and
+     * casts it to the type of index used by this repository.
      *
-     * <p>Override to provide custom logic of ID generation.
+     * @param event the event message. This parameter is not used by default implementation.
+     *              Override to provide custom logic of ID generation.
+     * @param context the event context
      */
-    @SuppressWarnings("UnusedParameters") // Overriding methods may want to use this parameter.
+    @SuppressWarnings("UnusedParameters") // Overriding methods may want to use the `event` parameter.
     protected I getEntityId(Message event, EventContext context) {
-        final Object aggregateId = Identifiers.idFromAny(context.getAggregateId());
-        @SuppressWarnings("unchecked")
-        final I id = (I)aggregateId;
+        final I id = Events.getProducer(context);
         return id;
     }
 

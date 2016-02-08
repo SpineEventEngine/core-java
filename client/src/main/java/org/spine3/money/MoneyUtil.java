@@ -21,10 +21,10 @@
 package org.spine3.money;
 
 /**
- * The utility class containing convenience methods for {@code Money} messages creation.
+ * The utility class containing convenience methods for working with {@link Money}.
  *
- * @see Money
  * @author Alexander Litus
+ * @see Money
  */
 public class MoneyUtil {
 
@@ -39,7 +39,7 @@ public class MoneyUtil {
      *                 due to negligible value or do not exist at all)
      * @param currency the currency of the amount of money
      */
-    public static Money newMoney(int amount, Currency currency) {
+    public static Money newMoney(long amount, Currency currency) {
         final Money.Builder result = Money.newBuilder()
                 .setAmount(amount)
                 .setCurrency(currency);

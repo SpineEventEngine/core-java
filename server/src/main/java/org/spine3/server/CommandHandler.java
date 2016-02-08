@@ -20,56 +20,20 @@
 
 package org.spine3.server;
 
-import com.google.common.base.Predicate;
-import org.spine3.Internal;
-import org.spine3.server.internal.CommandHandlerMethod;
-
-import javax.annotation.Nullable;
-import java.lang.reflect.Method;
-
-import static org.spine3.server.internal.CommandHandlerMethod.*;
-
 /**
- * The interface for classes that can declare command handling methods.
+ * The marker interface for classes that expose command handling methods.
+ *
+ * <p>A command handler is responsible for:
+ * <ol>
+ *     <li>Changing the state of the business model</li>
+ *     <li>Producing corresponding events.</li>
+ * </ol>
+ *
+ * <p>Unlike {@code CommandHandler} a {@link CommandDispatcher} is responsible for
+ * delivering a command to its handler.
  *
  * @author Alexander Yevsyukov
+ * @see CommandDispatcher
  */
 public interface CommandHandler {
-
-    //TODO:2016-01-24:alexander.yevsyukov: We cannot keep this interface @Internal because there can be cases
-    // when custom logic (which doesn't fall into classes provided by the framework) would be needed.
-    //
-    // Having the common interface (event if it would be marker interface) for command handlers is
-    // beneficial because it would simplify finding all command handlers in an app.
-    // The same applies to event handlers.
-    //
-    // The methods are annotated as @Internal temporarily. We need to move them out of the interface.
-
-    /**
-     * Creates a method wrapper, which holds reference to this object and the passed method.
-     */
-    @Internal
-    CommandHandlerMethod createMethod(Method method);
-
-    /**
-     * Returns the predicate for filtering command handling methods.
-     */
-    @Internal
-    Predicate<Method> getHandlerMethodPredicate();
-
-    class MethodPredicate implements Predicate<Method> {
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            //noinspection SimplifiableIfStatement
-            if (method == null) {
-                return false;
-            }
-            return isAnnotatedCorrectly(method)
-                    && acceptsCorrectParams(method)
-                    && returnsMessageListOrVoid(method);
-        }
-    }
-
-    Predicate<Method> METHOD_PREDICATE = new MethodPredicate();
 }

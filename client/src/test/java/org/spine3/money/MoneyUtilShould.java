@@ -18,14 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The content of this package and its subpackages are for internal use of the framework
- * and are considered annotated with {@link org.spine3.Internal}.
- */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.internal;
+package org.spine3.money;
 
-import org.spine3.Internal;
+import org.junit.Test;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class MoneyUtilShould {
+
+    @Test
+    public void have_private_utility_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(MoneyUtil.class));
+    }
+
+    @Test
+    public void create_new_Money_instance() {
+        final long amount = 100500L;
+
+        final Money money = MoneyUtil.newMoney(amount, Currency.USD);
+
+        assertEquals(amount, money.getAmount());
+        assertEquals(Currency.USD, money.getCurrency());
+    }
+}

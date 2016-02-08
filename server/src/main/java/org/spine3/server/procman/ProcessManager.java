@@ -21,20 +21,28 @@
 package org.spine3.server.procman;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
-import org.spine3.base.*;
-import org.spine3.internal.EventHandlerMethod;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.Identifiers;
+import org.spine3.base.UserId;
+import org.spine3.server.CommandBus;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
-import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
+import org.spine3.time.ZoneOffset;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -44,9 +52,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.internal.EventHandlerMethod.IS_EVENT_HANDLER;
-import static org.spine3.internal.EventHandlerMethod.checkModifiers;
-import static org.spine3.server.procman.PmCommandHandler.IS_PM_COMMAND_HANDLER;
+import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.internal.EventHandlerMethod.IS_EVENT_HANDLER;
+import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -80,25 +88,26 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     private volatile boolean initialized = false;
 
     /**
-     * The map of command handler methods for this process manager.
+     * The Command Bus to post routed commands.
+     */
+    private volatile CommandBus commandBus;
+
+    /**
+     * The map of command handler methods of this process manager.
      *
      * @see Registry
      */
     private MethodMap commandHandlers;
 
     /**
-     * The map of event handlers for this process manager.
+     * The map of event handler methods of this process manager.
      *
      * @see Registry
      */
     private MethodMap eventHandlers;
 
     /**
-     * Creates a new instance.
-     *
-     * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
-     * @see EntityId
+     * {@inheritDoc}
      */
     protected ProcessManager(I id) {
         super(id);
@@ -122,16 +131,29 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     }
 
     /**
+     * The method to inject {@code CommandBus} instance from the repository.
+     */
+    /* package */ void setCommandBus(CommandBus commandBus) {
+        this.commandBus = checkNotNull(commandBus);
+    }
+
+    /**
+     * Returns the {@code CommandBus} to which post commands produced by this process manager.
+     */
+    protected CommandBus getCommandBus() {
+        return commandBus;
+    }
+
+    /**
      * Dispatches a command to the command handler method of the process manager.
      *
      * @param command the command to be executed on the process manager
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     protected List<Event> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
-        checkNotNull(command, "command");
-        checkNotNull(context, "context");
+        checkNotNull(command);
+        checkNotNull(context);
 
         init();
         final Class<? extends Message> commandClass = command.getClass();
@@ -139,7 +161,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new PmCommandHandler(this, method);
+        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
         final List<? extends Message> events = commandHandler.invoke(command, context);
         final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
@@ -168,9 +190,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @throws InvocationTargetException if an exception occurs during event dispatching
      */
     protected void dispatchEvent(Message event, EventContext context) throws InvocationTargetException {
-        //noinspection DuplicateStringLiteralInspection
-        checkNotNull(context, "context");
-        checkNotNull(event, "event");
+        checkNotNull(context);
+        checkNotNull(event);
 
         init();
         final Class<? extends Message> eventClass = event.getClass();
@@ -180,6 +201,108 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
         final EventHandlerMethod handler = new EventHandlerMethod(this, method);
         handler.invoke(event, context);
+    }
+
+    /**
+     * Creates a new {@link CommandRouter} instance.
+     */
+    protected CommandRouter newRouter() {
+        final CommandBus commandBus = getCommandBus();
+        checkState(commandBus != null, "CommandBus must be initialized");
+        return new CommandRouter(commandBus);
+    }
+
+    /**
+     * A {@code CommandRouter} allows to create and post one or more commands
+     * in response to a command received by the {@code ProcessManager}.
+     *
+     * <p>A typical usage looks like this:
+     *
+     * <pre>
+     *     {@literal @}Assign
+     *     public CommandRouted on(MyCommand message, CommandContext context) {
+     *         // Create new command messages here.
+     *         return new Router().of(message, context)
+     *                  .add(messageOne)
+     *                  .add(messageTwo)
+     *                  .route();
+     *     }
+     * </pre>
+     *
+     * <p>The routed commands are created on behalf of the actor of the original command.
+     * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
+     * instances will be the same as in the incoming command.
+     */
+    protected static class CommandRouter {
+
+        private final CommandBus commandBus;
+        private Message source;
+        private CommandContext sourceContext;
+
+        /**
+         * The actor of the command we route.
+         *
+         * <p>We route commands on the original's author behalf.
+         */
+        private UserId actor;
+
+        /**
+         * The zone offset from which the actor works.
+         */
+        private ZoneOffset zoneOffset;
+
+        /**
+         * Command messages to route.
+         */
+        private final List<Message> toRoute = Lists.newArrayList();
+
+        private CommandRouter(CommandBus commandBus) {
+            this.commandBus = commandBus;
+        }
+
+        /**
+         * Sets command to be routed.
+         */
+        protected CommandRouter of(Message source, CommandContext context) {
+            this.source = checkNotNull(source);
+            this.sourceContext = checkNotNull(context);
+
+            this.actor = context.getActor();
+            this.zoneOffset = context.getZoneOffset();
+
+            return this;
+        }
+
+        /**
+         * Adds {@code commandMessage} to be routed as a command.
+         */
+        protected CommandRouter add(Message commandMessage) {
+            toRoute.add(commandMessage);
+            return this;
+        }
+
+        /**
+         * Posts the added messages as commands to {@code CommandBus}.
+         *
+         * @return the event with source and produced commands
+         */
+        protected CommandRouted route() {
+            final CommandRouted.Builder result = CommandRouted.newBuilder();
+            result.setSource(Commands.create(this.source, this.sourceContext));
+
+            for (Message message : toRoute) {
+                final Command command = produceCommand(message);
+                commandBus.post(command);
+                result.addProduced(command);
+            }
+            return result.build();
+        }
+
+        private Command produceCommand(Message newMessage) {
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset);
+            final Command result = Commands.create(newMessage, newContext);
+            return result;
+        }
     }
 
     /**
@@ -196,12 +319,14 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return new instance of the {@code EventContext}
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandId commandId, Message event, M currentState, Timestamp whenModified, int currentVersion) {
+    private EventContext createEventContext(CommandId commandId, Message event, M currentState,
+                                              Timestamp whenModified, int currentVersion) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(whenModified)
-                .setVersion(currentVersion);
+                .setVersion(currentVersion)
+                .setProducerId(Identifiers.idToAny(getId()));
 
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
 
@@ -218,7 +343,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param event          the event message
      * @param currentState   the current state of the aggregate after the event was applied
      * @param currentVersion the version of the process manager after the event was applied
-     * @see #createEventContext(CommandId, Message, Message, Timestamp, int)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
@@ -233,7 +357,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of command classes or an empty set if no commands are handled
      */
     public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, IS_PM_COMMAND_HANDLER);
+        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.PREDICATE);
     }
 
     /**
@@ -256,18 +380,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                 eventClass, this.getClass()));
     }
 
-    @Internal
-    @Override
-    public CommandHandlerMethod createMethod(Method method) {
-        return new PmCommandHandler(this, method);
-    }
-
-    @Internal
-    @Override
-    public Predicate<Method> getHandlerMethodPredicate() {
-        return PmCommandHandler.IS_PM_COMMAND_HANDLER;
-    }
-
     /**
      * The registry of method maps for all process manager classes.
      *
@@ -279,8 +391,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
         private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
 
-        void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, IS_PM_COMMAND_HANDLER);
+        /* package */ void register(Class<? extends ProcessManager> clazz) {
+            commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
             eventHandlers.register(clazz, IS_EVENT_HANDLER);
@@ -288,25 +400,25 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         @CheckReturnValue
-        boolean contains(Class<? extends ProcessManager> clazz) {
+        /* package */ boolean contains(Class<? extends ProcessManager> clazz) {
             final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
+        /* package */ MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = commandHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
+        /* package */ MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
             final MethodMap result = eventHandlers.get(clazz);
             return result;
         }
 
         @CheckReturnValue
-        static Registry getInstance() {
+        /* package */ static Registry getInstance() {
             return Singleton.INSTANCE.value;
         }
 

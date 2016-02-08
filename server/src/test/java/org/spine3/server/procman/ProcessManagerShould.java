@@ -26,10 +26,15 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Events;
+import org.spine3.protobuf.Messages;
 import org.spine3.server.Assign;
+import org.spine3.server.CommandBus;
 import org.spine3.server.Subscribe;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -38,15 +43,18 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestCommands;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -58,10 +66,14 @@ public class ProcessManagerShould {
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
+    private CommandBus commandBus;
+
     private TestProcessManager processManager;
 
     @Before
     public void setUp() {
+        commandBus = Mockito.mock(CommandBus.class);
+
         processManager = new TestProcessManager(ID);
     }
 
@@ -94,6 +106,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException {
+        processManager.setCommandBus(commandBus);
         testDispatchCommand(createProject(ID));
         testDispatchCommand(addTask(ID));
         testDispatchCommand(startProject(ID));
@@ -116,10 +129,36 @@ public class ProcessManagerShould {
         assertEquals(ID, message.getProjectId());
     }
 
+    /**
+     * Tests command routing.
+     *
+     * @see TestProcessManager#handle(StartProject, CommandContext)
+     */
     @Test
-    public void dispatch_command_and_return_empty_event_list_if_handler_is_void() throws InvocationTargetException {
+    public void route_commands() throws InvocationTargetException {
+        processManager.setCommandBus(commandBus);
         final List<Event> events = testDispatchCommand(startProject(ID));
-        assertTrue(events.isEmpty());
+
+        // There's only one event generated.
+        assertEquals(1, events.size());
+
+        final Event event = events.get(0);
+
+        // The producer of the event is our Process Manager.
+        assertEquals(processManager.getId(), Events.getProducer(event.getContext()));
+
+        final Message message = Messages.fromAny(event.getMessage());
+
+        // The event type is CommandRouted.
+        assertTrue(message instanceof CommandRouted);
+
+        final CommandRouted commandRouted = (CommandRouted) message;
+
+        // The source of the command is StartProject.
+        assertTrue(Commands.getMessage(commandRouted.getSource()) instanceof StartProject);
+
+        // The produced command was posted to CommandBus once, and the same command is in the generated event.
+        verify(commandBus, times(1)).post(commandRouted.getProduced(0));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -152,6 +191,7 @@ public class ProcessManagerShould {
         assertTrue(classes.contains(ProjectStarted.class));
     }
 
+    @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
 
         private TestProcessManager(ProjectId id) {
@@ -180,20 +220,25 @@ public class ProcessManagerShould {
         }
 
         @Assign
-        public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
+        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toAny(command));
             return projectCreatedEvent(command.getProjectId());
         }
 
         @Assign
-        public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
+        public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toAny(command));
             return taskAddedEvent(command.getProjectId());
         }
 
         @Assign
-        public void handleCommand(StartProject command, CommandContext ignored) {
+        public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toAny(command));
+
+            final Message startProject = TestCommands.startProject(command.getProjectId());
+            return newRouter().of(command, context)
+                    .add(startProject)
+                    .route();
         }
     }
 }

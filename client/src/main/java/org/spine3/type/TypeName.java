@@ -20,10 +20,17 @@
 
 package org.spine3.type;
 
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.AnyOrBuilder;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
+import org.spine3.Internal;
 
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
@@ -37,7 +44,7 @@ import static com.google.common.base.Throwables.propagate;
 public final class TypeName extends StringTypeValue {
 
     private TypeName(String value) {
-        super(checkNotNull(value));
+        super(checkNotEmpty(value));
     }
 
     private TypeName(MessageOrBuilder msg) {
@@ -68,22 +75,9 @@ public final class TypeName extends StringTypeValue {
      * @param typeName the name of the type
      * @return new instance
      */
+    @Internal
     public static TypeName of(String typeName) {
         return new TypeName(typeName);
-    }
-
-    /**
-     * Creates a new instance with the passed class name.
-     * @param clazz the class to get name from
-     * @return new instance
-     */
-    public static TypeName of(Class<? extends Message> clazz) {
-
-        final String fullQualifiedName = clazz.getName();
-        final int dotIndex = fullQualifiedName.indexOf('.');
-        // name that matches Protobuf conventions (proto type url)
-        final String protoClassName = fullQualifiedName.substring(dotIndex + 1);
-        return of(protoClassName);
     }
 
     /**
@@ -153,10 +147,18 @@ public final class TypeName extends StringTypeValue {
     public String nameOnly() {
         final String value = value();
         final String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
-        if (parts.length == 0) {
+        if (parts.length < 2) {
+            // There's only one element in the array since there's no separator found.
+            // If this is so, the type name has no package.
             return value;
         }
         final String result = parts[parts.length - 1];
         return result;
+    }
+
+    private static String checkNotEmpty(String value) {
+        checkNotNull(value, "TypeName cannot be null.") ;
+        checkArgument(!value.isEmpty(), "TypeName cannot be empty string.");
+        return value;
     }
 }

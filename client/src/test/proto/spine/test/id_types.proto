@@ -19,39 +19,42 @@
 //
 syntax = "proto3";
 
-package spine.server.storage;
+package spine.test;
 
-option java_package = "org.spine3.server.storage";
+option java_package="org.spine3.test";
 option java_multiple_files = true;
-option java_outer_classname = "EventStorageProto";
-option java_generate_equals_and_hash = true;
+option java_outer_classname = "TestIdentifiers";
 
-import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/base/event.proto";
+message StringFieldId {
+    string id = 1;
+}
 
-// This type defines the way events are stored in event storage.
-// Some of the fields are defined as string representation of corresponding message types
-// so that these fields are available for querying.
-message EventStorageRecord {
-    // A moment of time when the event occurred.
-    google.protobuf.Timestamp timestamp = 1;
+message IntFieldId {
+    int32 id = 1;
+}
 
-    // A short name of Protobuf type of the event.
-    string event_type = 2;
+message LongFieldId {
+    int64 id = 1;
+}
 
-    // String representation of ID of the aggregate or another entity, which generated the event.
-    string producer_id = 3;
+message NestedMessageId {
+    StringFieldId id = 1;
+}
 
-    // String representation of `EventId`.
-    string event_id = 4;
+message TimestampFieldId {
+    google.protobuf.Timestamp id = 1;
+}
 
-    reserved 5 to 19;
+message SeveralFieldsId {
+    string string = 1;
+    int32 int = 2;
+    StringFieldId message = 3;
+}
 
-    // Event instance.
-    google.protobuf.Any message = 20;
-
-    // Event context.
-    spine.base.EventContext context = 21;
+message IdWithStructure {
+    string name = 1;
+    int32 number = 2;
+    bool flag = 3;
 }

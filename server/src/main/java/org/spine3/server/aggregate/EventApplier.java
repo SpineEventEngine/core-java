@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.internal.MessageHandlerMethod;
+import org.spine3.server.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.reflect.Methods;
 

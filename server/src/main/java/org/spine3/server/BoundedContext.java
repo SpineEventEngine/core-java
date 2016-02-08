@@ -25,7 +25,11 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
@@ -401,9 +405,9 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
                 this.name = DEFAULT_NAME;
             }
 
-            checkNotNull(storageFactory, "storageFactory is not set");
-            checkNotNull(commandBus, "commandDispatcher is not set");
-            checkNotNull(eventBus, "eventBus is not set");
+            checkNotNull(storageFactory, "storageFactory must be set");
+            checkNotNull(commandBus, "commandDispatcher must be set");
+            checkNotNull(eventBus, "eventBus must be set");
 
             final BoundedContext result = new BoundedContext(this);
 

@@ -23,8 +23,13 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.CommandBus;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
@@ -170,6 +175,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      *
      * <p>The process manager is created if there was no manager with such an ID stored before.
      *
+     * <p>The repository injects {@code CommandBus} from its {@code BoundedContext} into the
+     * instance of the process manager so that it can post commands if needed.
+     *
      * @param id the ID of the process manager to load
      * @return loaded or created process manager instance
      */
@@ -180,6 +188,10 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         if (result == null) {
             result = create(id);
         }
+
+        final CommandBus commandBus = getBoundedContext().getCommandBus();
+        result.setCommandBus(commandBus);
+
         return result;
     }
 

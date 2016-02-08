@@ -23,10 +23,15 @@ package org.spine3.server.reflect;
 import org.junit.Test;
 import org.spine3.base.Commands;
 import org.spine3.base.Events;
+import org.spine3.base.Identifiers;
 import org.spine3.io.IoUtil;
-import org.spine3.server.Identifiers;
 import org.spine3.test.Tests;
-import org.spine3.testdata.*;
+import org.spine3.testdata.TestAggregateIdFactory;
+import org.spine3.testdata.TestAggregateStorageRecordFactory;
+import org.spine3.testdata.TestCommands;
+import org.spine3.testdata.TestContextFactory;
+import org.spine3.testdata.TestEventFactory;
+import org.spine3.testdata.TestEventStorageRecordFactory;
 import org.spine3.util.Math;
 
 import java.lang.reflect.Constructor;

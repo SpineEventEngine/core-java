@@ -22,11 +22,11 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static com.google.protobuf.Duration.newBuilder;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.*;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 
 /**
@@ -35,10 +35,9 @@ import static org.spine3.protobuf.Durations.*;
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber", "ClassWithTooManyMethods"})
 public class DurationsShould {
 
-    @SuppressWarnings("OverlyBroadThrowsClause")
     @Test
-    public void have_private_constructor() throws Exception {
-        Tests.callPrivateUtilityConstructor(Durations.class);
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Durations.class));
     }
 
     @Test
