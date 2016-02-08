@@ -23,32 +23,33 @@ package org.spine3.util;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodWithTooExceptionsDeclared"})
 public class TestsShould {
 
-    @SuppressWarnings("RedundantNoArgConstructor")
     private static class TestsTest {
-        private TestsTest() {}
-    }
-
-    @Test
-    public void call_private_ctor_for_coverage() throws
-            InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(TestsTest.class);
+        @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.
+        private TestsTest() {
+            // Do nothing.
+        }
     }
 
     private static class ClassWithPublicCtor {
         public ClassWithPublicCtor() {}
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_IllegalStateException_if_utlity_ctor_is_not_private()
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Tests.callPrivateUtilityConstructor(ClassWithPublicCtor.class);
+    private static class ClassThrowingExceptionInConstructor {
+        private ClassThrowingExceptionInConstructor() {
+            throw new AssertionError("Private constructor must not be called.");
+        }
+    }
+
+    @Test
+    public void verify_public_constructor() {
+        assertFalse(Tests.hasPrivateUtilityConstructor(ClassWithPublicCtor.class));
+        assertTrue(Tests.hasPrivateUtilityConstructor(TestsTest.class));
+        assertTrue(Tests.hasPrivateUtilityConstructor(ClassThrowingExceptionInConstructor.class));
     }
 
     @Test

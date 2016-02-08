@@ -27,12 +27,12 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.*;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.CommandValidation;
 import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.type.CommandClass;
 
@@ -73,10 +73,10 @@ public class CommandBus implements AutoCloseable {
     /**
      * Registers the passed command dispatcher.
      *
-     * @param dispatcher the dispatcher
+     * @param dispatcher the dispatcher to register
      * @throws IllegalArgumentException if {@link CommandDispatcher#getCommandClasses()} returns empty set
      */
-    /* package */ void register(CommandDispatcher dispatcher) {
+    public void register(CommandDispatcher dispatcher) {
         checkNoHandlersRegisteredForCommandsOf(dispatcher);
         dispatcherRegistry.register(dispatcher);
     }
@@ -89,7 +89,7 @@ public class CommandBus implements AutoCloseable {
      *
      * @param dispatcher the dispatcher to unregister
      */
-    /* package */ void unregister(CommandDispatcher dispatcher) {
+    public void unregister(CommandDispatcher dispatcher) {
         dispatcherRegistry.unregister(dispatcher);
     }
 
@@ -99,7 +99,7 @@ public class CommandBus implements AutoCloseable {
      * @param handler a {@code non-null} handler object
      * @throws IllegalArgumentException if the handler does not have command handling methods
      */
-    /* package */ void register(CommandHandler handler) {
+    public void register(CommandHandler handler) {
         checkNoDispatchersRegisteredForCommandsOf(handler);
         handlerRegistry.register(handler);
     }
@@ -109,7 +109,7 @@ public class CommandBus implements AutoCloseable {
      *
      * @param handler the handler to unregister
      */
-    /* package */ void unregister(CommandHandler handler) {
+    public void unregister(CommandHandler handler) {
         handlerRegistry.unregister(handler);
     }
 
@@ -457,7 +457,7 @@ public class CommandBus implements AutoCloseable {
     @SuppressWarnings("InstanceMethodNamingConvention") // prefer longer name here for clarity.
     private void checkNoDispatchersRegisteredForCommandsOf(CommandHandler handler) {
         final ImmutableSet<Class<? extends Message>> handledMessageClasses = Classes.getHandledMessageClasses(
-                handler.getClass(), CommandHandler.METHOD_PREDICATE);
+                handler.getClass(), CommandHandlerMethod.PREDICATE);
 
         final Set<CommandClass> alreadyRegistered = Sets.newHashSet();
         for (Class<? extends Message> handledMessageClass : handledMessageClasses) {

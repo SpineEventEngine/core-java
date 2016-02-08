@@ -37,16 +37,18 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestCommands;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -59,11 +61,27 @@ public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = createProjectId(newUuid());
 
-    private final TestProcessManagerRepository repository = new TestProcessManagerRepository(
-            BoundedContextTestStubs.create());
+    private TestProcessManagerRepository repository;
 
     @Before
     public void setUp() {
+        final BoundedContext boundedContext = BoundedContextTestStubs.create();
+
+        boundedContext.getCommandBus().register(new CommandDispatcher() {
+            @Override
+            public Set<CommandClass> getCommandClasses() {
+                return CommandClass.setOf(AddTask.class);
+            }
+
+            @Override
+            public List<Event> dispatch(Command request) throws Exception {
+                // Simply swallow the command. We need this dispatcher for allowing Process Manager
+                // under test to route the AddTask command.
+                return Collections.emptyList();
+            }
+        });
+
+        repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
     }
 
@@ -105,7 +123,7 @@ public class ProcessManagerRepositoryShould {
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
-        final Command request = Commands.newCommand(command, CommandContext.getDefaultInstance());
+        final Command request = Commands.create(command, CommandContext.getDefaultInstance());
         final List<Event> events = repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(toState(command), manager.getState());
@@ -126,7 +144,7 @@ public class ProcessManagerRepositoryShould {
     @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final Command request = Commands.newCommand(unknownCommand, CommandContext.getDefaultInstance());
+        final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
@@ -209,20 +227,25 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Assign
-        public ProjectCreated handleCommand(CreateProject command, CommandContext ignored) {
+        public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toState(command));
             return projectCreatedEvent(command.getProjectId());
         }
 
         @Assign
-        public TaskAdded handleCommand(AddTask command, CommandContext ignored) {
+        public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toState(command));
             return taskAddedEvent(command.getProjectId());
         }
 
         @Assign
-        public void handleCommand(StartProject command, CommandContext ignored) {
+        public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toState(command));
+            final Message addTask = TestCommands.addTask(command.getProjectId());
+
+            return newRouter().of(command, context)
+                    .add(addTask)
+                    .route();
         }
     }
 }

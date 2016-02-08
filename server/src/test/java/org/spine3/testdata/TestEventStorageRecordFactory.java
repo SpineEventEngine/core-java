@@ -29,7 +29,7 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -51,7 +51,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(time)
                 .setEventId("project_created")
                 .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, time));
         return builder.build();
     }
@@ -64,7 +64,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(time)
                 .setEventId("task_added")
                 .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, time));
         return builder.build();
     }
@@ -77,7 +77,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(time)
                 .setEventId("project_started")
                 .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, time));
         return builder.build();
     }
@@ -89,7 +89,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(when)
                 .setEventId("project_created_" + when.getSeconds())
                 .setEventType(TypeName.of(ProjectCreated.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, when));
         return result.build();
     }
@@ -101,7 +101,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(when)
                 .setEventId("task_added_" + when.getSeconds())
                 .setEventType(TypeName.of(TaskAdded.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, when));
         return result.build();
     }
@@ -113,7 +113,7 @@ public class TestEventStorageRecordFactory {
                 .setTimestamp(when)
                 .setEventId("project_started_" + when.getSeconds())
                 .setEventType(TypeName.of(ProjectStarted.getDescriptor()).value())
-                .setAggregateId(projectId.getId())
+                .setProducerId(projectId.getId())
                 .setContext(createEventContext(projectId, when));
         return result.build();
     }

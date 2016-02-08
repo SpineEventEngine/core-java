@@ -23,12 +23,12 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
+import org.spine3.base.Identifiers;
 import org.spine3.examples.aggregate.event.OrderCreated;
 import org.spine3.examples.aggregate.event.OrderLineAdded;
 import org.spine3.examples.aggregate.event.OrderPaid;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.EventHandler;
-import org.spine3.server.Identifiers;
 import org.spine3.server.Subscribe;
 
 /**

@@ -80,7 +80,7 @@ class Requests {
     //TODO:2016-01-14:alexander.yevsyukov: Use real utility method.
     public static Command newCommand(UserId userId, Message command) {
         final CommandContext context = createCommandContext(userId);
-        final Command request = Commands.newCommand(command, context);
+        final Command request = Commands.create(command, context);
         return request;
     }
 

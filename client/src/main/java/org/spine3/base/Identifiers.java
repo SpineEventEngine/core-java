@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.*;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
@@ -34,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
@@ -185,8 +184,8 @@ public class Identifiers {
             final Message message = (Message) id;
             anyId = Messages.toAny(message);
         } else if (id instanceof String) {
-            final String s = (String) id;
-            anyId = Messages.toAny(StringValue.newBuilder().setValue(s).build());
+            final String strValue = (String) id;
+            anyId = Messages.toAny(StringValue.newBuilder().setValue(strValue).build());
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
             anyId = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
@@ -283,12 +282,21 @@ public class Identifiers {
         }
 
         public <I> Function<I, String> getConverter(I id) {
+            checkNotNull(id);
+            checkNotClass(id);
+
             final Function<?, String> func = entries.get(id.getClass());
 
             @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
                 @see #register(Class, com.google.common.base.Function) */
             final Function<I, String> result = (Function<I, String>) func;
             return result;
+        }
+
+        private static <I> void checkNotClass(I id) {
+            if (id instanceof Class) {
+                checkArgument(false, "Class instance passed instead of value: " + id.toString());
+            }
         }
 
         public <I> boolean containsConverter(I id) {
@@ -323,11 +331,9 @@ public class Identifiers {
     public static class EventIdToStringConverter implements Function<EventId, String> {
         @Override
         public String apply(@Nullable EventId eventId) {
-
             if (eventId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             return eventId.getUuid();
         }
 
@@ -339,7 +345,6 @@ public class Identifiers {
             if (commandId == null) {
                 return NULL_ID_OR_FIELD;
             }
-
             return commandId.getUuid();
         }
     }

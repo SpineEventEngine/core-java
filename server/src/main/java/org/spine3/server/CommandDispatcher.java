@@ -28,21 +28,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * {@code CommandDispatcher} delivers commands to handlers and returns results of the command processing.
+ * {@code CommandDispatcher} delivers commands to their handlers.
+ *
+ * <p>A dispatcher can deliver more than one class of commands.
+ *
+ * <p>Unlike {@link CommandHandler} the dispatcher does not change business model or
+ * produce events.
  *
  * @author Alexander Yevsyukov
+ * @see CommandHandler
  */
 public interface CommandDispatcher {
 
     /**
-     * Returns the set of command classes this dispatcher can dispatch.
+     * Returns the set of command classes processed by this dispatcher.
      *
      * @return non-empty set of command classes
      */
     Set<CommandClass> getCommandClasses();
 
     /**
-     * Dispatches the command request for processing.
+     * Dispatches the command to its handler.
      */
     List<Event> dispatch(Command request) throws Exception;
     //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.

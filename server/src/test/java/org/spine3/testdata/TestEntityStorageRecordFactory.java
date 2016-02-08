@@ -24,8 +24,8 @@ import com.google.protobuf.StringValue;
 import org.spine3.server.storage.EntityStorageRecord;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.Identifiers.newUuid;
 
 /**
  * Creates {@link EntityStorageRecord}s for tests.

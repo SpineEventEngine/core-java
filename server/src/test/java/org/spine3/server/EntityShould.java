@@ -30,7 +30,7 @@ import org.spine3.test.project.Project;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.Identifiers.newUuid;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 

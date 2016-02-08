@@ -71,7 +71,7 @@ public abstract class Entity<Id, State extends Message> {
      * Creates a new instance.
      *
      * @param id the ID for the new instance
-     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
     public Entity(Id id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived

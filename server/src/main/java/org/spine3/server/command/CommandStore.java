@@ -42,16 +42,18 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
-     * Stores the command request.
+     * Stores the command.
      *
-     * @param request command request to store
+     * <p>The underlying storage must be opened.
+     *
+     * @param command the command to store
      */
-    public void store(Command request) {
+    public void store(Command command) {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
-        final AggregateId aggregateId = AggregateId.fromCommand(request);
+        final AggregateId aggregateId = AggregateId.fromCommand(command);
         //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
-        storage.store(aggregateId, request);
+        storage.store(aggregateId, command);
     }
 
     @Override

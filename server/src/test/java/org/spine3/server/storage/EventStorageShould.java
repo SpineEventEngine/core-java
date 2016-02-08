@@ -39,7 +39,7 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.generateId;
-import static org.spine3.server.Identifiers.idToAny;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
 import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
@@ -169,15 +169,16 @@ public abstract class EventStorageShould {
         final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
         final List<Event> expected = toEventList(record1);
 
-        final Iterator<Event> actual = storage.iterator(query);
+        final Iterator<Event> iterator = storage.iterator(query);
+        final List<Event> actual = newArrayList(iterator);
 
-        assertEquals(expected, newArrayList(actual));
+        assertEquals(expected, actual);
     }
 
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = idToAny(createProjectId(record1.getAggregateId()));
+        final Any id = idToAny(createProjectId(record1.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder().addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
         final List<Event> expected = toEventList(record1);
@@ -353,7 +354,7 @@ public abstract class EventStorageShould {
     public void filter_events_by_type_and_aggregate_id_and_time() {
         givenSequentialRecords();
         final String typeName = record2.getEventType();
-        final Any id = idToAny(createProjectId(record2.getAggregateId()));
+        final Any id = idToAny(createProjectId(record2.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                 .addFilter(filter)

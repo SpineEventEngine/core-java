@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
-import org.spine3.internal.MessageHandlerMethod;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.reflect.MethodMap;
@@ -39,7 +38,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +51,11 @@ import static java.util.Collections.singletonList;
  */
 @Internal
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+
+    /**
+     * The instsance of the predicate to filter command handler methods of a class.
+     */
+    public static final Predicate<Method> PREDICATE = new MethodPredicate();
 
     /**
      * A command must be the first parameter of a handling method.
@@ -96,19 +99,17 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         return acceptsCorrectParams;
     }
 
-    public static boolean returnsMessageListOrVoid(Method method) {
+    public static boolean returnsMessageList(Method method) {
         final Class<?> returnType = method.getReturnType();
 
         if (Message.class.isAssignableFrom(returnType)) {
             return true;
         }
+        //noinspection RedundantIfStatement
         if (List.class.isAssignableFrom(returnType)) {
             return true;
         }
-        //noinspection RedundantIfStatement
-        if (Void.TYPE.equals(returnType)) {
-            return true;
-        }
+
         return false;
     }
 
@@ -146,10 +147,8 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;
             return result;
-        } else if (Void.class.equals(resultClass)) {
-            return Collections.emptyList();
         } else {
-            // Another type of result is single event (as Message).
+            // Another type of result is single event message (as Message).
             final List<Message> result = singletonList((Message) handlingResult);
             return result;
         }
@@ -175,9 +174,11 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Predicate<Method> isHandlerPredicate = object.getHandlerMethodPredicate();
-        final MethodMap handlers = new MethodMap(object.getClass(), isHandlerPredicate);
+        final Predicate<Method> methodPredicate = PREDICATE;
+        final MethodMap handlers = new MethodMap(object.getClass(), methodPredicate);
+
         checkModifiers(handlers.values());
+
         for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
             final CommandClass commandClass = CommandClass.of(entry.getKey());
             final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
@@ -187,19 +188,33 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     }
 
     /**
-     * Verifiers modifiers in the methods in the passed map to be 'public'.
+     * Verifies that passed methods are declared {@code public}.
      *
      * <p>Logs warning for the methods with a non-public modifier.
      *
-     * @param methods the map of methods to check
+     * @param methods methods to check
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                log().warn(String.format("Command handler %s must be declared 'public'.",
-                        Methods.getFullMethodName(method)));
+                final String fullMethodName = Methods.getFullMethodName(method);
+                log().warn(String.format("Command handler method %s should be declared 'public'.", fullMethodName));
             }
+        }
+    }
+
+    private static class MethodPredicate implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            //noinspection SimplifiableIfStatement
+            if (method == null) {
+                return false;
+            }
+            return isAnnotatedCorrectly(method)
+                    && acceptsCorrectParams(method)
+                    && returnsMessageList(method);
         }
     }
 

@@ -23,11 +23,8 @@ package org.spine3.server.command;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandValidationError;
+import org.spine3.base.*;
 import org.spine3.base.Error;
-import org.spine3.base.Response;
-import org.spine3.server.Identifiers;
 
 import java.util.Map;
 

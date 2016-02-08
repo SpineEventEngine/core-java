@@ -21,12 +21,14 @@
 package org.spine3.server.reflect;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
+
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClassesShould {
     @Test
-    public void have_private_ctor() throws Exception {
-        Tests.callPrivateUtilityConstructor(Classes.class);
+    public void have_private_ctor() {
+        assertTrue(hasPrivateUtilityConstructor(Classes.class));
     }
 }

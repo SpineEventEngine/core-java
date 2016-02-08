@@ -21,16 +21,17 @@
 package org.spine3.util;
 
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MathShould {
 
     @Test
     public void have_private_constructor() throws Exception {
-        Tests.callPrivateUtilityConstructor(Math.class);
+        assertTrue(hasPrivateUtilityConstructor(Math.class));
     }
 
     @Test(expected = ArithmeticException.class)

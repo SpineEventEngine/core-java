@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.internal;
+package org.spine3.server.internal;
 
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.Methods;
@@ -170,13 +170,6 @@ public abstract class MessageHandlerMethod<T, C> {
     }
 
     /**
-     * @return the class of the target object.
-     */
-    public Class<?> getTargetClass() {
-        return target.getClass();
-    }
-
-    /**
      * @return full name of the handler method
      * @see #getFullName()
      */
@@ -188,7 +181,6 @@ public abstract class MessageHandlerMethod<T, C> {
     @Override
     public int hashCode() {
         final int prime = 31;
-        // We need to hash only by the target's identity.
         return (prime + method.hashCode()) * prime
                 + System.identityHashCode(target);
     }

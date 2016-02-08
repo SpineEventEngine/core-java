@@ -28,7 +28,7 @@ import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.Identifiers.ID_PROPERTY_SUFFIX;
+import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * Value object for aggregate IDs.
