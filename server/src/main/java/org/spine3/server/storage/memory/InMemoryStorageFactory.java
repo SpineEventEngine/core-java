@@ -22,7 +22,12 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.Entity;
 import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.storage.*;
+import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.StorageFactory;
 
 /**
  * A factory for in-memory storages.
@@ -60,7 +65,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage() {
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
         final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.newInstance();
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }
