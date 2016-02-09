@@ -43,7 +43,6 @@ import static org.spine3.testdata.TestCommands.createProject;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class CommandStorageShould {
 
-    private static final int TEST_ITERATION_COUNT = 500;
     private CommandStorage storage;
 
     @Before
