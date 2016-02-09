@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -31,6 +32,7 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 
@@ -68,7 +70,27 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setMessage(wrappedMessage)
                 .setContext(context);
 
+        checkRecord(builder);
+
         write(commandId, builder.build());
+    }
+
+    private static void checkRecord(CommandStorageRecordOrBuilder record) {
+        checkNotEmptyOrBlank(record.getCommandType(), "command type");
+        checkNotEmptyOrBlank(record.getCommandId(), "command ID");
+        checkNotEmptyOrBlank(record.getAggregateIdType(), "aggregate ID type");
+        checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID");
+        final Timestamp timestamp = record.getTimestamp();
+        final long seconds = timestamp.getSeconds();
+        checkArgument(seconds > 0, "Command time must be set.");
+        checkArgument(record.hasMessage(), "Command message must be set.");
+        checkArgument(record.hasContext(), "Command context must be set.");
+    }
+
+    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
+        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        return stringToCheck;
     }
 
     @Nullable
