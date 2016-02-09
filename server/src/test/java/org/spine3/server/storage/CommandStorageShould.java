@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
@@ -93,6 +94,18 @@ public abstract class CommandStorageShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
         storage.write(Commands.generateId(), null);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void store_and_read_command() {
+        final Command command = createProject();
+        final CommandId id = command.getContext().getCommandId();
+        storage.store(command, AggregateId.fromCommand(command));
+
+        final CommandStorageRecord record = storage.read(id);
+
+        assertEquals(command.getMessage(), record.getMessage());
     }
 
     @Test
