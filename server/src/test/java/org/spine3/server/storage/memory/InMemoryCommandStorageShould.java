@@ -22,9 +22,8 @@ package org.spine3.server.storage.memory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Commands;
+import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
-import org.spine3.server.storage.CommandStorageRecord;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryCommandStorageShould {
@@ -38,12 +37,7 @@ public class InMemoryCommandStorageShould {
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        storage.write(Commands.generateId(), null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_write_record_with_empty_command_id() {
-        storage.write(Commands.generateId(), CommandStorageRecord.getDefaultInstance());
+    public void throw_exception_if_store_null_command() {
+        storage.store(null, AggregateId.of("anyId"));
     }
 }

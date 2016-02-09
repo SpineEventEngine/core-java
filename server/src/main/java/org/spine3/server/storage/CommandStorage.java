@@ -25,12 +25,14 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.Identifiers;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -40,7 +42,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
-    public void store(AggregateId aggregateId, Command command) {
+    /**
+     * Stores a command by a command ID from command context.
+     *
+     * @param command a command to store
+     * @param aggregateId an aggregate ID to store
+     */
+    public void store(Command command, AggregateId aggregateId) {
         checkNotNull(aggregateId);
         checkNotNull(command);
         checkNotClosed();
@@ -49,17 +57,23 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final CommandContext context = command.getContext();
         final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = Identifiers.idToString(commandId);
+        final String commandIdStr = commandId.getUuid();
+        final String aggregateIdStr = idToString(aggregateId.value());
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)
                 .setAggregateIdType(aggregateId.getShortTypeName())
-                .setAggregateId(aggregateId.toString())
+                .setAggregateId(aggregateIdStr)
                 .setMessage(wrappedMessage)
                 .setContext(context);
 
         write(commandId, builder.build());
     }
 
+    @Nullable
+    @Override
+    public CommandStorageRecord read(CommandId id) {
+        throw new UnsupportedOperationException("Reading is not implemented because there is no need yet.");
+    }
 }

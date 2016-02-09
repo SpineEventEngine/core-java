@@ -53,7 +53,7 @@ public class CommandStore implements AutoCloseable {
 
         final AggregateId aggregateId = AggregateId.fromCommand(command);
         //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
-        storage.store(aggregateId, command);
+        storage.store(command, aggregateId);
     }
 
     @Override

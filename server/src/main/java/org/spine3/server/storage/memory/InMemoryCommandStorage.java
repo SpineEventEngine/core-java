@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.protobuf.Messages.checkNotDefault;
 
-class InMemoryCommandStorage extends CommandStorage {
+/*package*/ class InMemoryCommandStorage extends CommandStorage {
 
     private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
 
@@ -51,6 +51,7 @@ class InMemoryCommandStorage extends CommandStorage {
 
     @Nullable
     @Override
+    @SuppressWarnings("RefusedBequest") // ignores the method from the superclass because it throws an exception
     public CommandStorageRecord read(CommandId id) {
         final CommandStorageRecord result = storage.get(id);
         return result;
