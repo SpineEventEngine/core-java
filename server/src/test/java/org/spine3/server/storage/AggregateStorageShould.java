@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -57,6 +58,11 @@ public abstract class AggregateStorageShould {
     @Before
     public void setUpTest() {
         storage = getStorage();
+    }
+
+    @After
+    public void tearDownTest() throws Exception {
+        storage.close();
     }
 
     /**
