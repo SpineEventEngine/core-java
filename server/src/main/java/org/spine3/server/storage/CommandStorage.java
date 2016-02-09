@@ -45,7 +45,7 @@ import static org.spine3.base.Identifiers.idToString;
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
     /**
-     * Stores a command by a command ID from command context.
+     * Stores a command by a command ID from a command context.
      *
      * @param command a command to store
      * @param aggregateId an aggregate ID to store
