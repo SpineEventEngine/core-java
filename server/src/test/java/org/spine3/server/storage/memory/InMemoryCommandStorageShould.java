@@ -20,24 +20,15 @@
 
 package org.spine3.server.storage.memory;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
+import org.spine3.server.storage.CommandStorageShould;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class InMemoryCommandStorageShould {
+public class InMemoryCommandStorageShould extends CommandStorageShould {
 
-    private CommandStorage storage;
-
-    @Before
-    public void setUp() {
-        storage = InMemoryStorageFactory.getInstance().createCommandStorage();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_store_null_command() {
-        storage.store(null, AggregateId.of("anyId"));
+    @Override
+    protected CommandStorage getStorage() {
+        final CommandStorage storage = InMemoryStorageFactory.getInstance().createCommandStorage();
+        return storage;
     }
 }

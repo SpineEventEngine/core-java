@@ -53,6 +53,7 @@ import static org.spine3.protobuf.Messages.checkNotDefault;
     @Override
     @SuppressWarnings("RefusedBequest") // ignores the method from the superclass because it throws an exception
     public CommandStorageRecord read(CommandId id) {
+        checkNotNull(id);
         final CommandStorageRecord result = storage.get(id);
         return result;
     }
