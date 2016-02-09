@@ -39,6 +39,11 @@ public abstract class EntityStorageShould {
         storage = getStorage();
     }
 
+    /**
+     * Used to initialize the storage before each test.
+     *
+     * @return an empty storage instance
+     */
     protected abstract EntityStorage<String> getStorage();
 
     @Test

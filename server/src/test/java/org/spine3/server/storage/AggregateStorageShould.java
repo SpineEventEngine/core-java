@@ -59,6 +59,11 @@ public abstract class AggregateStorageShould {
         storage = getStorage();
     }
 
+    /**
+     * Used to initialize the storage before each test.
+     *
+     * @return an empty storage instance
+     */
     protected abstract AggregateStorage<ProjectId> getStorage();
 
     @Test
