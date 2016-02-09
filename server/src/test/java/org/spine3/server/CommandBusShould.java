@@ -93,6 +93,7 @@ public class CommandBusShould {
         commandBus.register(new EmptyCommandHandler());
     }
 
+    @SuppressWarnings("EmptyClass")
     private static class EmptyCommandHandler implements CommandHandler {
 
     }
