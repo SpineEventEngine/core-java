@@ -41,13 +41,13 @@ import static org.spine3.server.EntityId.checkType;
  *
  * <p>See {@link EntityId} for supported ID types.
  *
- * @param <Id> the type of the entity ID
- * @param <State> the type of the entity state
+ * @param <I> the type of the entity ID
+ * @param <S> the type of the entity state
  * @author Alexander Yevsyikov
  * @author Alexander Litus
  * @see EntityId
  */
-public abstract class Entity<Id, State extends Message> {
+public abstract class Entity<I, S extends Message> {
 
     /**
      * The index of the declaration of the generic parameter type {@code Id} in this class.
@@ -59,9 +59,9 @@ public abstract class Entity<Id, State extends Message> {
      */
     private static final int STATE_CLASS_GENERIC_INDEX = 1;
 
-    private final Id id;
+    private final I id;
 
-    private State state;
+    private S state;
 
     private Timestamp whenModified;
 
@@ -73,7 +73,7 @@ public abstract class Entity<Id, State extends Message> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
-    public Entity(Id id) {
+    public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived
         // classes. We require that entity constructors be public as they are called by repositories.
         checkType(id);
@@ -86,24 +86,24 @@ public abstract class Entity<Id, State extends Message> {
      * @return an empty instance of the state class
      */
     @CheckReturnValue
-    protected State getDefaultState() {
+    protected S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
         if (!registry.contains(entityClass)) {
-            final State state = retrieveDefaultState();
+            final S state = retrieveDefaultState();
             registry.put(entityClass, state);
         }
         @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
-        final State defaultState = (State) registry.get(entityClass);
+        final S defaultState = (S) registry.get(entityClass);
         return defaultState;
     }
 
-    private State retrieveDefaultState() {
-        final Class<State> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
+    private S retrieveDefaultState() {
+        final Class<S> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
         try {
-            final Constructor<State> constructor = stateClass.getDeclaredConstructor();
+            final Constructor<S> constructor = stateClass.getDeclaredConstructor();
             constructor.setAccessible(true);
-            final State state = constructor.newInstance();
+            final S state = constructor.newInstance();
             return state;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw propagate(e);
@@ -116,8 +116,8 @@ public abstract class Entity<Id, State extends Message> {
      * @return the current state object or the value produced by {@link #getDefaultState()} if the state wasn't set
      */
     @CheckReturnValue
-    public State getState() {
-        final State result = (state == null) ? getDefaultState() : state;
+    public S getState() {
+        final S result = (state == null) ? getDefaultState() : state;
         return result;
     }
 
@@ -132,7 +132,7 @@ public abstract class Entity<Id, State extends Message> {
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
     // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(State state) throws IllegalStateException {
+    protected void validate(S state) throws IllegalStateException {
         // Do nothing by default.
     }
 
@@ -142,9 +142,9 @@ public abstract class Entity<Id, State extends Message> {
      * @param state the state object to set
      * @param version the entity version to set
      * @param whenLastModified the time of the last modification to set
-     * @see #validate(State)
+     * @see #validate(S)
      */
-    protected void setState(State state, int version, Timestamp whenLastModified) {
+    protected void setState(S state, int version, Timestamp whenLastModified) {
         validate(state);
         this.state = checkNotNull(state);
         this.version = version;
@@ -156,7 +156,7 @@ public abstract class Entity<Id, State extends Message> {
      *
      * @param newState a new state to set
      */
-    protected void incrementState(State newState) {
+    protected void incrementState(S newState) {
         setState(newState, incrementVersion(), getCurrentTime());
     }
 
@@ -194,7 +194,7 @@ public abstract class Entity<Id, State extends Message> {
     }
 
     @CheckReturnValue
-    public Id getId() {
+    public I getId() {
         return id;
     }
 
@@ -216,8 +216,8 @@ public abstract class Entity<Id, State extends Message> {
      * @param entityClass the class of entities to check
      * @return the entity ID class
      */
-    public static <Id> Class<Id> getIdClass(Class<? extends Entity<Id, ?>> entityClass) {
-        final Class<Id> idClass = Classes.getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
+    public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
     }
 
