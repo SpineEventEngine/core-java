@@ -32,7 +32,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-class InMemoryEntityStorage<I> extends EntityStorage<I> {
+/*package*/ class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
     private final Map<I, EntityStorageRecord> storage = newHashMap();
 

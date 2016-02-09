@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Litus
  */
 @SuppressWarnings("ComparatorNotSerializable")
-class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+/*package*/ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final Multimap<I, AggregateStorageRecord> storage = TreeMultimap.create(
             Ordering.arbitrary(), // key comparator
