@@ -48,13 +48,13 @@ public abstract class EntityStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_with_null_id() {
+    public void throw_exception_if_read_by_null_id() {
         //noinspection ConstantConditions
         storage.read(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_with_null_id() {
+    public void throw_exception_if_write_by_null_id() {
         //noinspection ConstantConditions
         storage.write(null, EntityStorageRecord.getDefaultInstance());
     }
@@ -71,14 +71,14 @@ public abstract class EntityStorageShould {
     }
 
     @Test
-    public void write_and_read_several_messages_with_different_ids() {
+    public void write_and_read_several_messages_by_different_ids() {
         testWriteAndReadMessage("id-1");
         testWriteAndReadMessage("id-2");
         testWriteAndReadMessage("id-3");
     }
 
     @Test
-    public void rewrite_message_if_write_with_same_id() {
+    public void rewrite_message_if_write_by_the_same_id() {
         final String id = "test-id-rewrite";
         testWriteAndReadMessage(id);
         testWriteAndReadMessage(id);
