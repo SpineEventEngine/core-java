@@ -31,7 +31,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.base.*;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
+import org.spine3.base.Identifiers;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
@@ -147,9 +151,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(record.getProducerId(), "producer ID ");
         final Timestamp timestamp = record.getTimestamp();
         final long seconds = timestamp.getSeconds();
-        final int nanos = timestamp.getNanos();
         checkArgument(seconds > 0, "Event seconds are not set.");
-        checkArgument(nanos > 0, "Event nanoseconds are not set.");
     }
 
     private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
