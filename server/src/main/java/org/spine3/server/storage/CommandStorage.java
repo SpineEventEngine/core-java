@@ -21,16 +21,20 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.Identifiers;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -40,7 +44,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
-    public void store(AggregateId aggregateId, Command command) {
+    /**
+     * Stores a command by a command ID from a command context.
+     *
+     * @param command a command to store
+     * @param aggregateId an aggregate ID to store
+     */
+    public void store(Command command, AggregateId aggregateId) {
         checkNotNull(aggregateId);
         checkNotNull(command);
         checkNotClosed();
@@ -49,17 +59,43 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final CommandContext context = command.getContext();
         final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = Identifiers.idToString(commandId);
+        final String commandIdStr = commandId.getUuid();
+        final String aggregateIdStr = idToString(aggregateId.value());
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(commandIdStr)
                 .setAggregateIdType(aggregateId.getShortTypeName())
-                .setAggregateId(aggregateId.toString())
+                .setAggregateId(aggregateIdStr)
                 .setMessage(wrappedMessage)
                 .setContext(context);
+
+        checkRecord(builder);
 
         write(commandId, builder.build());
     }
 
+    private static void checkRecord(CommandStorageRecordOrBuilder record) {
+        checkNotEmptyOrBlank(record.getCommandType(), "command type");
+        checkNotEmptyOrBlank(record.getCommandId(), "command ID");
+        checkNotEmptyOrBlank(record.getAggregateIdType(), "aggregate ID type");
+        checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID");
+        final Timestamp timestamp = record.getTimestamp();
+        final long seconds = timestamp.getSeconds();
+        checkArgument(seconds > 0, "Command time must be set.");
+        checkArgument(record.hasMessage(), "Command message must be set.");
+        checkArgument(record.hasContext(), "Command context must be set.");
+    }
+
+    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
+        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        return stringToCheck;
+    }
+
+    @Nullable
+    @Override
+    public CommandStorageRecord read(CommandId id) {
+        throw new UnsupportedOperationException("Reading is not implemented because there is no need yet.");
+    }
 }

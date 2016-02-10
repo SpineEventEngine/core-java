@@ -50,7 +50,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Override
     @SuppressWarnings("RefusedBequest")
     protected AutoCloseable createStorage(StorageFactory factory) {
-        return factory.createProjectionStorage();
+        final Class<P> projectionClass = getEntityClass();
+        return factory.createProjectionStorage(projectionClass);
     }
 
     /**

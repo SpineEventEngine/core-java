@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
  * @author Alexander Litus
  */
-public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
+/*package*/ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final InMemoryEntityStorage<I> entityStorage;
 

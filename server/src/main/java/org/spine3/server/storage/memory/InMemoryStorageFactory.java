@@ -65,8 +65,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage() {
-        final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.<I>newInstance();
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
+        final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.newInstance();
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 
