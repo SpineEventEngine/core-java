@@ -44,7 +44,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
-import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testutil.TestCommands.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandBusShould {

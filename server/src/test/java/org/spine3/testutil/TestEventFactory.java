@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testdata;
+package org.spine3.testutil;
 
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -29,9 +29,9 @@ import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
-import static org.spine3.testdata.TestEventMessageFactory.*;
+import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testutil.TestContextFactory.createEventContext;
+import static org.spine3.testutil.TestEventMessageFactory.*;
 
 /**
  * The utility class which is used for creating Events for tests.

@@ -18,27 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testdata;
+package org.spine3.testutil;
 
-import org.spine3.test.project.ProjectId;
+import com.google.protobuf.StringValue;
+import org.spine3.server.storage.EntityStorageRecord;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
- * The utility class which is used for creating Aggregate Root Ids for tests.
+ * Creates {@link EntityStorageRecord}s for tests.
  *
- * @author Mikhail Mikhaylov
+ * @author Alexander Litus
  */
-public class TestAggregateIdFactory {
+public class TestEntityStorageRecordFactory {
 
-    private TestAggregateIdFactory() {
+    private TestEntityStorageRecordFactory() {
     }
 
     /**
-     * Generates a new ProjectId.
-     *
-     * @param id the project id
-     * @return ProjectId instance
+     * Creates a new record with all fields set.
      */
-    public static ProjectId createProjectId(String id) {
-        return ProjectId.newBuilder().setId(id).build();
+    public static EntityStorageRecord newEntityStorageRecord() {
+        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
+                .setState(toAny(newStringValue(newUuid())))
+                .setWhenModified(getCurrentTime())
+                .setVersion(5); // set any non-default (non-zero) value
+        return builder.build();
+    }
+
+    private static StringValue newStringValue(String value) {
+        return StringValue.newBuilder().setValue(value).build();
     }
 }

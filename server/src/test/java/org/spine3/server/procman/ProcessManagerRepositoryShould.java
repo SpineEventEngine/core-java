@@ -37,7 +37,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommands;
+import org.spine3.testutil.TestCommands;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -49,9 +49,9 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestEventMessageFactory.*;
+import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testutil.TestCommands.*;
+import static org.spine3.testutil.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus

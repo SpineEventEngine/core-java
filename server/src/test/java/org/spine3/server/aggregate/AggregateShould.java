@@ -41,7 +41,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommands;
+import org.spine3.testutil.TestCommands;
 import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
@@ -60,12 +60,12 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.aggregate.Aggregate.IS_EVENT_APPLIER;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testdata.TestCommands.createProject;
-import static org.spine3.testdata.TestCommands.startProject;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
-import static org.spine3.testdata.TestEventFactory.*;
-import static org.spine3.testdata.TestEventMessageFactory.*;
+import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testutil.TestCommands.createProject;
+import static org.spine3.testutil.TestCommands.startProject;
+import static org.spine3.testutil.TestContextFactory.createEventContext;
+import static org.spine3.testutil.TestEventFactory.*;
+import static org.spine3.testutil.TestEventMessageFactory.*;
 import static org.spine3.time.ZoneOffsets.UTC;
 
 /**

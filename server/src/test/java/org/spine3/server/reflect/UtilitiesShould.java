@@ -26,7 +26,7 @@ import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.io.IoUtil;
 import org.spine3.test.Tests;
-import org.spine3.testdata.*;
+import org.spine3.testutil.*;
 import org.spine3.util.Math;
 
 import java.lang.reflect.Constructor;

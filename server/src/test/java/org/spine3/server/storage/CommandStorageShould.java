@@ -29,14 +29,14 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.server.aggregate.AggregateId;
-import org.spine3.testdata.TestContextFactory;
+import org.spine3.testutil.TestContextFactory;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testutil.TestCommands.createProject;
 
 /**
  * @author Alexander Litus

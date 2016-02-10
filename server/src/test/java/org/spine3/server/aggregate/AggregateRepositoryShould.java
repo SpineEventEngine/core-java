@@ -42,8 +42,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Messages.checkDefault;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
-import static org.spine3.testdata.TestEventMessageFactory.taskAddedEvent;
+import static org.spine3.testutil.TestEventMessageFactory.projectCreatedEvent;
+import static org.spine3.testutil.TestEventMessageFactory.taskAddedEvent;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class AggregateRepositoryShould {

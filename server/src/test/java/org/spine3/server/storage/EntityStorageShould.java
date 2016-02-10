@@ -27,7 +27,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
+import static org.spine3.testutil.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class EntityStorageShould {
