@@ -151,7 +151,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(record.getProducerId(), "producer ID ");
         final Timestamp timestamp = record.getTimestamp();
         final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Event seconds are not set.");
+        checkArgument(seconds > 0, "Event time is not set.");
     }
 
     private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
