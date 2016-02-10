@@ -26,7 +26,12 @@ import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.io.IoUtil;
 import org.spine3.test.Tests;
-import org.spine3.testutil.*;
+import org.spine3.testutil.TestAggregateIdFactory;
+import org.spine3.testutil.TestAggregateStorageRecordFactory;
+import org.spine3.testutil.TestCommands;
+import org.spine3.testutil.TestContextFactory;
+import org.spine3.testutil.TestEventFactory;
+import org.spine3.testutil.TestEventStorageRecordFactory;
 import org.spine3.util.Math;
 
 import java.lang.reflect.Constructor;

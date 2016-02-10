@@ -22,7 +22,14 @@ package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.StringValueOrBuilder;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.protobuf.Messages;
 

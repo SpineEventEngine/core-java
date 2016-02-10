@@ -20,7 +20,12 @@
 
 package org.spine3.type;
 
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.AnyOrBuilder;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
 import org.spine3.Internal;
 
 import java.util.regex.Pattern;
@@ -143,6 +148,8 @@ public final class TypeName extends StringTypeValue {
         final String value = value();
         final String[] parts = PROTOBUF_PACKAGE_SEPARATOR.split(value);
         if (parts.length < 2) {
+            // There's only one element in the array since there's no separator found.
+            // If this is so, the type name has no package.
             return value;
         }
         final String result = parts[parts.length - 1];

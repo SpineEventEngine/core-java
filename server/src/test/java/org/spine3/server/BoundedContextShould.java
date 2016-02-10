@@ -21,12 +21,22 @@
 package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.*;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandValidationError;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Response;
+import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;

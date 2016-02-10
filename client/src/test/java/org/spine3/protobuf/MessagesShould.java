@@ -20,7 +20,11 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.*;
+import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Ignore;
 import org.junit.Test;
