@@ -62,7 +62,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
-    protected EntityStorage<I> getEntityStorage() {
+    public EntityStorage<I> getEntityStorage() {
         return entityStorage;
     }
 

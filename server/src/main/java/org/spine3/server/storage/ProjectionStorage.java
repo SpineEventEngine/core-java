@@ -75,5 +75,5 @@ public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStor
     /**
      * Returns an entity storage implementation.
      */
-    protected abstract EntityStorage<I> getEntityStorage();
+    public abstract EntityStorage<I> getEntityStorage();
 }
