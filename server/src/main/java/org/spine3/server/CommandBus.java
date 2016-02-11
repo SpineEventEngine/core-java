@@ -314,7 +314,7 @@ public class CommandBus implements AutoCloseable {
                                                       CommandDispatcher dispatcher) {
             log().warn(
                     "Another dispatcher {} found when trying to unregister dispatcher {} for the command class {}." +
-                    "Dispatcher for the command class {} will not be unregistered.",
+                    " Dispatcher for the command class {} will not be unregistered.",
                     registeredDispatcher, dispatcher, commandClass, commandClass);
         }
 
