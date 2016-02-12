@@ -28,6 +28,7 @@ import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.EventClass;
@@ -43,6 +44,8 @@ import java.util.Set;
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
         extends EntityRepository<I, P, M> implements EventDispatcher {
 
+    private EntityStorage<I> entityStorage;
+
     protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
@@ -51,7 +54,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @SuppressWarnings("RefusedBequest")
     protected AutoCloseable createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
-        return factory.createProjectionStorage(projectionClass);
+        final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
+        this.entityStorage = projectionStorage.getEntityStorage();
+        return projectionStorage;
+    }
+
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Override
+    @Nonnull
+    @SuppressWarnings("RefusedBequest")
+    protected EntityStorage<I> entityStorage() {
+        return checkStorage(entityStorage);
     }
 
     /**

@@ -52,7 +52,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * The index of the declaration of the generic type {@code E} in this class.
      */
     private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
-    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage not assigned";
+
+    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
     /**
      * The {@code BoundedContext} in which this repository works.
@@ -139,7 +140,6 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
         try {
             final E result = entityConstructor.newInstance(id);
             result.setDefault();
-
             return result;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw propagate(e);
@@ -234,5 +234,4 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
             this.storage = null;
         }
     }
-
 }
