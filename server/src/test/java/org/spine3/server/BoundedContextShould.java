@@ -71,9 +71,9 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testutil.TestCommands.*;
-import static org.spine3.testutil.TestEventMessageFactory.*;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus

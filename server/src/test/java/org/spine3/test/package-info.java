@@ -18,27 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
-
-import org.spine3.test.project.ProjectId;
-
 /**
- * The utility class which is used for creating Aggregate Root Ids for tests.
- *
- * @author Mikhail Mikhaylov
+ * Classes for framework testing.
  */
-public class TestAggregateIdFactory {
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.test;
 
-    private TestAggregateIdFactory() {
-    }
+import org.spine3.Internal;
 
-    /**
-     * Generates a new ProjectId.
-     *
-     * @param id the project id
-     * @return ProjectId instance
-     */
-    public static ProjectId createProjectId(String id) {
-        return ProjectId.newBuilder().setId(id).build();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Any;
 import org.spine3.test.project.ProjectId;
@@ -28,7 +28,7 @@ import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
  * Contains events for tests.

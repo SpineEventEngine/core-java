@@ -30,7 +30,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.testutil.TestEventFactory;
+import org.spine3.testdata.TestEventFactory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -43,8 +43,8 @@ import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testutil.TestEventStorageRecordFactory.*;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould {

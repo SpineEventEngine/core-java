@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
-import static org.spine3.testutil.TestEventFactory.projectCreated;
+import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {

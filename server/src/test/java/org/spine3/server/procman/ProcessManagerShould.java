@@ -43,7 +43,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testutil.TestCommands;
+import org.spine3.testdata.TestCommands;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -55,9 +55,9 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testutil.TestCommands.*;
-import static org.spine3.testutil.TestEventMessageFactory.*;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {

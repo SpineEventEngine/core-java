@@ -43,10 +43,10 @@ import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testutil.TestAggregateStorageRecordFactory.createSequentialRecords;
-import static org.spine3.testutil.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testutil.TestEventFactory.projectCreated;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
+import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
+import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould {

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -32,8 +32,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.testutil.TestContextFactory.createEventContext;
-import static org.spine3.testutil.TestEventFactory.*;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventFactory.*;
 
 
 /**

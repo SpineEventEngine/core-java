@@ -8,7 +8,7 @@
  * http://www.eclipse.org/org/documents/edl-v10.php.
  */
 
-package org.spine3.testutil;
+package org.spine3.test;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;

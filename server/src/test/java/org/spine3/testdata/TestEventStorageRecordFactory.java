@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.server.storage.EventStorageRecord;
@@ -30,9 +30,9 @@ import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
-import static org.spine3.testutil.TestContextFactory.createEventContext;
-import static org.spine3.testutil.TestEventMessageFactory.*;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * Contains EventStorageRecords for tests.

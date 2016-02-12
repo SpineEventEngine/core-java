@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testutil;
+package org.spine3.testdata;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -35,7 +35,7 @@ import org.spine3.test.project.command.StartProject;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.testutil.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 
 /**
  * The utility class for creating the test data related to commands (command messages, Commands etc.).
