@@ -64,12 +64,12 @@ public class Application implements AutoCloseable {
 
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandBus(createCommandDispatcher())
+                .setCommandBus(createCommandBus())
                 .setEventBus(createEventBus(storageFactory))
                 .build();
     }
 
-    private static CommandBus createCommandDispatcher() {
+    private static CommandBus createCommandBus() {
         return CommandBus.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
     }
 
