@@ -53,8 +53,6 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
     /**
      * Writes a record into the storage.
      *
-     * <p>Rewrites it if a record with the same ID already exists.
-     *
      * @param id the ID for the record
      * @param record a record to store
      * @throws IllegalStateException if the storage was closed before

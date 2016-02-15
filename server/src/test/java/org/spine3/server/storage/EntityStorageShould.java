@@ -20,13 +20,13 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -39,22 +39,32 @@ public abstract class EntityStorageShould {
         storage = getStorage();
     }
 
+    @After
+    public void tearDownTest() throws Exception {
+        storage.close();
+    }
+
+    /**
+     * Used to initialize the storage before each test.
+     *
+     * @return an empty storage instance
+     */
     protected abstract EntityStorage<String> getStorage();
 
     @Test
-    public void return_null_if_read_one_record_from_empty_storage() {
-        final Message message = storage.read("nothing");
-        assertNull(message);
+    public void return_null_if_no_record_with_such_id() {
+        final EntityStorageRecord record = storage.read("nothing");
+        assertNull(record);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_with_null_id() {
+    public void throw_exception_if_read_by_null_id() {
         //noinspection ConstantConditions
         storage.read(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_with_null_id() {
+    public void throw_exception_if_write_by_null_id() {
         //noinspection ConstantConditions
         storage.write(null, EntityStorageRecord.getDefaultInstance());
     }
@@ -62,29 +72,33 @@ public abstract class EntityStorageShould {
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        storage.write(Identifiers.newUuid(), null);
+        storage.write(newUuid(), null);
     }
 
     @Test
-    public void write_and_read_message() {
-        testWriteAndReadMessage("testId");
+    public void write_and_read_record() {
+        writeAndReadRecordTest();
     }
 
     @Test
-    public void write_and_read_several_messages_with_different_ids() {
-        testWriteAndReadMessage("id-1");
-        testWriteAndReadMessage("id-2");
-        testWriteAndReadMessage("id-3");
+    public void write_and_read_several_records_by_different_ids() {
+        writeAndReadRecordTest();
+        writeAndReadRecordTest();
+        writeAndReadRecordTest();
     }
 
     @Test
-    public void rewrite_message_if_write_with_same_id() {
+    public void rewrite_record_if_write_by_the_same_id() {
         final String id = "test-id-rewrite";
-        testWriteAndReadMessage(id);
-        testWriteAndReadMessage(id);
+        writeAndReadRecordTest(id);
+        writeAndReadRecordTest(id);
     }
 
-    private void testWriteAndReadMessage(String id) {
+    private void writeAndReadRecordTest() {
+        writeAndReadRecordTest(newUuid());
+    }
+
+    private void writeAndReadRecordTest(String id) {
         final EntityStorageRecord expected = newEntityStorageRecord();
         storage.write(id, expected);
 

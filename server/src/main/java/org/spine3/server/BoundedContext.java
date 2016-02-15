@@ -195,7 +195,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
         if (!repository.storageAssigned()) {
             throw new IllegalArgumentException("The repository " + repository + " has no assigned storage. " +
-                    "Please call Repository.assignStorage() before registration with BoundedContext.");
+                    "Please call Repository.initStorage() before registration with BoundedContext.");
         }
     }
 

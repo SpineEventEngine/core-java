@@ -18,48 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
-
-import org.spine3.server.storage.EntityStorage;
-import org.spine3.server.storage.EntityStorageRecord;
-
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
-
 /**
- * Memory-based implementation of {@link EntityStorage}.
- *
- * @author Alexander Litus
+ * Classes for framework testing.
  */
-/*package*/ class InMemoryEntityStorage<I> extends EntityStorage<I> {
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.test;
 
-    private final Map<I, EntityStorageRecord> storage = newHashMap();
+import org.spine3.Internal;
 
-    protected static <I> InMemoryEntityStorage<I> newInstance() {
-        return new InMemoryEntityStorage<>();
-    }
-
-    @Override
-    protected EntityStorageRecord readInternal(I id) {
-        return storage.get(id);
-    }
-
-    @Override
-    protected void writeInternal(I id, EntityStorageRecord record) {
-        storage.put(id, record);
-    }
-
-    /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        storage.clear();
-    }
-
-    @Override
-    public void close() throws Exception {
-        clear();
-        super.close();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

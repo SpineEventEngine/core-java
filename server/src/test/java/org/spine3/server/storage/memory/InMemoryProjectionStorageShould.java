@@ -20,25 +20,18 @@
 
 package org.spine3.server.storage.memory;
 
-import org.junit.After;
-import org.spine3.server.projection.ProjectionStorageShould;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.ProjectionStorageShould;
 
 /**
  * @author Alexander Litus
  */
 public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
 
-    private final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(
-            InMemoryEntityStorage.<String>newInstance());
-
     @Override
     protected ProjectionStorage<String> getStorage() {
+        final InMemoryEntityStorage<String> entityStorage = InMemoryEntityStorage.newInstance();
+        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(entityStorage);
         return storage;
-    }
-
-    @After
-    public void tearDownTest() {
-        storage.clear();
     }
 }

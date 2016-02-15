@@ -56,7 +56,6 @@ public class AggregateRepositoryShould {
         storageFactory = InMemoryStorageFactory.getInstance();
         final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new ProjectAggregateRepository(boundedContext);
-
     }
 
     private static class ProjectAggregate extends Aggregate<ProjectId, Project> {

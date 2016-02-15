@@ -49,6 +49,8 @@ import static org.spine3.base.Identifiers.idToString;
 @SPI
 public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEvents> {
 
+    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
+
     @Nonnull
     @Override
     public AggregateEvents read(I aggregateId) {
@@ -101,9 +103,9 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
         for (final Event event : eventList) {
-            checkTimestamp(event.getContext().hasTimestamp());
-            final AggregateStorageRecord storageRecord = toStorageRecord(event);
-            writeInternal(id, storageRecord);
+            final AggregateStorageRecord record = toStorageRecord(event);
+            checkRecord(record);
+            writeInternal(id, record);
         }
     }
 
@@ -118,13 +120,11 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(event);
-        checkTimestamp(event.getContext().hasTimestamp());
 
         final AggregateStorageRecord record = toStorageRecord(event);
+        checkRecord(record);
         writeInternal(id, record);
     }
-
-    private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
     /**
      * Writes a {@code snapshot} by an {@code aggregateId} to the storage.
@@ -137,7 +137,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotClosed();
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        checkTimestamp(snapshot.hasTimestamp());
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
                 .setTimestamp(snapshot.getTimestamp())
@@ -146,6 +145,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot)
                 .build();
+        checkRecord(record);
         writeInternal(aggregateId, record);
     }
 
@@ -165,9 +165,14 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         return builder.build();
     }
 
-    private static void checkTimestamp(boolean hasTimestamp) {
-        checkArgument(hasTimestamp,
-                "Event context must have a timestamp because it is used to sort storage records.");
+    private static void checkRecord(AggregateStorageRecord record) {
+        checkArgument(record.hasTimestamp(), "Storage record must have a timestamp.");
+        final String eventType = record.getEventType();
+        checkArgument(!eventType.isEmpty(), "Event type is an empty string.");
+        checkArgument(eventType.trim().length() > 0, "Event type is a blank string.");
+        final Event event = record.getEvent();
+        final Snapshot snapshot = record.getSnapshot();
+        checkArgument(event.hasMessage() || snapshot.hasState(), "Record must have an event or a snapshot with a state.");
     }
 
     // Storage implementation API.

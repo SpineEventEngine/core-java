@@ -67,12 +67,13 @@ public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStor
     /**
      * Reads the time of the last handled event from the storage.
      *
-     * @return the time of the event
+     * @return the time of the last event or {@code null} if there is no event in the storage
      */
+    @Nullable
     public abstract Timestamp readLastHandledEventTime();
 
     /**
-     * Returns the entity storage implementation.
+     * Returns an entity storage implementation.
      */
-    protected abstract EntityStorage<I> getEntityStorage();
+    public abstract EntityStorage<I> getEntityStorage();
 }

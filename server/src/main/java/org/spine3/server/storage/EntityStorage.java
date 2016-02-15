@@ -49,6 +49,11 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
         return record;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Rewrites it if a record with the same ID already exists in the storage.
+     */
     @Override
     public void write(I id, EntityStorageRecord record) {
         checkNotNull(id);
@@ -62,7 +67,22 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     // Internal storage methods
     //---------------------------
 
+    /**
+     * Reads a record from the storage by the passed ID.
+     *
+     * @param id the ID of the record to load
+     * @return a record instance or {@code null} if there is no record with this ID
+     */
+    @Nullable
     protected abstract EntityStorageRecord readInternal(I id);
 
+    /**
+     * Writes a record into the storage.
+     *
+     * <p>Rewrites it if a record with the same ID already exists in the storage.
+     *
+     * @param id an ID of the record
+     * @param record a record to store
+     */
     protected abstract void writeInternal(I id, EntityStorageRecord record);
 }
