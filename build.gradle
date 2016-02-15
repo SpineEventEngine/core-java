@@ -51,7 +51,6 @@ subprojects {
     apply plugin: 'java';
     apply plugin: "idea";
     apply plugin: 'com.google.protobuf';
-    apply plugin: 'maven-publish';
 
     sourceCompatibility = 1.7;
     targetCompatibility = 1.7;
@@ -125,33 +124,6 @@ subprojects {
         classifier "test"
     }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                groupId = "${group}"
-                artifactId = "${project.name}"
-                version = "${project.version}"
-
-                from components.java
-
-                artifact sourceJar;
-                artifact testOutputJar;
-            }
-        }
-    }
-
-    publishing {
-        repositories {
-            maven {
-                credentials {
-                    username = "${repositoryUserName}";
-                    password = "${repositoryUserPassword}";
-                }
-                url = project.MAVEN_REPOSITORY_URL;
-            }
-        }
-    }
-
     jacocoTestReport {
         reports {
             xml.enabled = true
@@ -172,7 +144,7 @@ task readPublishingCredentials << {
 
 task publish << {}
 
-subprojects.each { final project ->
+void dependPublish(Project project) {
     final Set<Task> credentialsTasks = getTasksByName("readPublishingCredentials", false);
     project.getTasksByName("publish", false).each { final task ->
         task.dependsOn credentialsTasks;
@@ -180,3 +152,41 @@ subprojects.each { final project ->
     publish.dependsOn project.getTasksByName("publish", false);
 }
 
+// Artifacts to publish
+def publishingProjects = ["client", "server"];
+
+publishingProjects.each {
+    project(":$it") { currentProject ->
+
+        apply plugin: 'maven-publish';
+
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    groupId = "${group}";
+                    artifactId = "${currentProject.name}";
+                    version = "${currentProject.version}";
+
+                    from components.java;
+
+                    artifact sourceJar;
+                    artifact testOutputJar;
+                }
+            }
+        }
+
+        publishing {
+            repositories {
+                maven {
+                    credentials {
+                        username = "${repositoryUserName}";
+                        password = "${repositoryUserPassword}";
+                    }
+                    url = project.MAVEN_REPOSITORY_URL;
+                }
+            }
+        }
+
+        dependPublish(project);
+    }
+}
