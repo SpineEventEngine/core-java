@@ -23,6 +23,88 @@ syntax = "proto3";
 // (required = true) instead of (spine.base.required = true)
 // package spine.base;
 
+extend google.protobuf.MessageOptions {
+    string err = 51001;
+}
+
+extend google.protobuf.FieldOptions {
+    RequiredOption required = 51002;
+    DecimalOption decimal = 51003;
+    DigitsOption digits = 51004;
+    TimeOption when = 51006;
+    MaxOption max = 51007;
+    MinOption min = 51008;
+    PatternOption pattern = 51009;
+}
+
+message RequiredOption {
+    option (err) = "Field must be set";
+
+    bool value = 1;
+    string err = 2;
+}
+
+// we can have Option suffix here, because we don't need name to define values [IN PROTOBUF]
+message DecimalOption {
+    option (err) = "Field value must fit into range";
+
+    int32 min = 1;
+    int32 max = 2;
+    bool inclusive = 3;
+    string err = 4;
+}
+
+// we can have Option suffix here, because we don't need name to define values [IN PROTOBUF]
+message DigitsOption {
+    option (err) = "Field should have valid digital value";
+
+    int32 integer = 1;
+    int32 fraction = 2;
+    string err = 3;
+}
+
+message TimeOption {
+    option (err) = "Inappropriate time";
+
+    Time in = 1;
+    string err = 2;
+}
+
+// we can NOT have Option suffix here, because user will be using Time.FUTURE syntax [IN PROTOBUF]
+enum Time {
+    UNDEFINED = 0;
+    PAST = 1;
+    FUTURE = 2;
+}
+
+// we can have Option suffix here, because we don't need name to define values [IN PROTOBUF]
+message PatternOption {
+    option (err) = "Field should match pattern";
+
+    string regex = 1;
+    int32 flag = 2;
+    string err = 3;
+}
+
+message MinOption {
+    option (err) = "Field must be larger than min value";
+
+    double value = 1;
+    string err = 2;
+}
+
+message MaxOption {
+    option (err) = "Field should be less than max value";
+
+    double value = 1;
+    string err = 2;
+}
+
+// we can even specify package for XxxOption messages
+
+// for java code we will require full names
+
+// Time in root package may collide with something
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "OptionsProto";
@@ -30,6 +112,3 @@ option java_package = "org.spine3.base";
 
 import "google/protobuf/descriptor.proto";
 
-extend google.protobuf.FieldOptions {
-    bool required = 51001;
-}
