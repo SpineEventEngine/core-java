@@ -31,10 +31,11 @@ extend google.protobuf.FieldOptions {
     RequiredOption required = 51002;
     DecimalOption decimal = 51003;
     DigitsOption digits = 51004;
-    TimeOption when = 51006;
-    MaxOption max = 51007;
-    MinOption min = 51008;
-    PatternOption pattern = 51009;
+    TimeOption when = 51005;
+    MaxOption max = 51006;
+    MinOption min = 51007;
+    PatternOption pattern = 51008;
+    ValidOption valid = 51009;
 }
 
 message RequiredOption {
@@ -97,6 +98,13 @@ message MaxOption {
     option (err) = "Field should be less than max value";
 
     double value = 1;
+    string err = 2;
+}
+
+message ValidOption {
+    option (err) = "Field should be valid";
+
+    bool value = 1;
     string err = 2;
 }
 
