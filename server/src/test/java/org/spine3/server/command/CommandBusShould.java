@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.command;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +27,9 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
+import org.spine3.server.Assign;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.server.CommandHandler;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
@@ -42,7 +45,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.spine3.server.CommandValidation.isUnsupportedCommand;
+import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -282,11 +285,15 @@ public class CommandBusShould {
         final CreateProjectHandler handler = new CreateProjectHandler();
         commandBus.register(handler);
 
-        final CommandFactory factory = TestCommandFactory.newInstance("invoke_handler",
-                ZoneOffsets.UTC);
+        final CommandFactory factory = TestCommandFactory.newInstance("invoke_handler", ZoneOffsets.UTC);
         final Command command = factory.create(createProject("_when_command_posted"));
         commandBus.post(command);
 
         assertTrue(handler.wasHandlerInvoked());
+    }
+
+    @Test
+    public void set_command_status_to_OK_when_handler_returns() {
+        //TODO:2016-02-18:alexander.yevsyukov: Implement
     }
 }

@@ -28,8 +28,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.CommandStore;
 import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;

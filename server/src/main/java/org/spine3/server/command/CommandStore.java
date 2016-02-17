@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.command;
 
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;

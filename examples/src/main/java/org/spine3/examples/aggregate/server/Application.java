@@ -28,10 +28,10 @@ import org.spine3.base.Command;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandBus;
-import org.spine3.server.CommandStore;
 import org.spine3.server.EventBus;
 import org.spine3.server.EventStore;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
