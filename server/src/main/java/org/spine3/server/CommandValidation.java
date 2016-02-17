@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;

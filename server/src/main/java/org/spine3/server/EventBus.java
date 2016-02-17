@@ -32,7 +32,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.type.EventClass;

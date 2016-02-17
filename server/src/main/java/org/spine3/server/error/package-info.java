@@ -19,9 +19,9 @@
  */
 
 /**
- * This package provides classes and interfaces for working with event and event streams.
+ * This package contains server-side exceptions related to commands.
  */
 @ParametersAreNonnullByDefault
-package org.spine3.server.event;
+package org.spine3.server.error;
 
 import javax.annotation.ParametersAreNonnullByDefault;

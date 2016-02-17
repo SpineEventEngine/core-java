@@ -33,10 +33,8 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.CommandValidation;
-import org.spine3.server.command.error.CommandHandlerAlreadyRegisteredException;
-import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
+import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.Classes;
@@ -52,7 +50,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.server.command.CommandValidation.unsupportedCommand;
+import static org.spine3.server.CommandValidation.unsupportedCommand;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.

@@ -36,8 +36,8 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
+import org.spine3.server.EventStore;
 import org.spine3.server.event.EventFilter;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.type.TypeName;
 
