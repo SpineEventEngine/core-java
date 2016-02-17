@@ -76,6 +76,13 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
+     * Sets the status of the command to {@link org.spine3.base.CommandStatus#OK}
+     */
+    public void setCommandStatusOk(CommandId commandId) {
+        storage.setOkStatus(commandId);
+    }
+
+    /**
      * Updates the status of the command processing with the exception.
      *
      * @param commandId the ID of the command

@@ -200,7 +200,7 @@ public class CommandBus implements AutoCloseable {
         try {
             result = method.invoke(command, context);
 
-            //TODO:2016-02-18:alexander.yevsyukov: Set command status to OK.
+            setCommandStatusOk(context.getCommandId());
 
         } catch (InvocationTargetException e) {
             final CommandId commandId = context.getCommandId();
@@ -227,6 +227,10 @@ public class CommandBus implements AutoCloseable {
         }
 
         return result;
+    }
+
+    private void setCommandStatusOk(CommandId commandId) {
+        commandStore.setCommandStatusOk(commandId);
     }
 
     private void updateCommandStatus(CommandId commandId, Exception exception) {
@@ -284,5 +288,4 @@ public class CommandBus implements AutoCloseable {
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

@@ -55,7 +55,6 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Nullable
     @Override
-    @SuppressWarnings("RefusedBequest") // ignores the method from the superclass because it throws an exception
     public CommandStorageRecord read(CommandId id) {
         checkNotNull(id);
         final CommandStorageRecord result = get(id);
@@ -84,6 +83,16 @@ import static com.google.common.collect.Maps.newHashMap;
                 .toBuilder()
                 .setStatus(CommandStatus.FAILURE)
                 .setFailure(failure)
+                .build();
+        put(id, updatedRecord);
+    }
+
+    @Override
+    public void setOkStatus(CommandId id) {
+        checkNotNull(id);
+        final CommandStorageRecord updatedRecord = get(id)
+                .toBuilder()
+                .setStatus(CommandStatus.OK)
                 .build();
         put(id, updatedRecord);
     }

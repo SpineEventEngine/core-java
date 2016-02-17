@@ -32,8 +32,6 @@ import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
@@ -99,11 +97,10 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         return stringToCheck;
     }
 
-    @Nullable
-    @Override
-    public CommandStorageRecord read(CommandId id) {
-        throw new UnsupportedOperationException("Reading is not implemented because there is no need yet.");
-    }
+    /**
+     * Updates the status of the command to {@link org.spine3.base.CommandStatus#OK}
+     */
+    public abstract void setOkStatus(CommandId commandId);
 
     /**
      * Updates the status of the command with the error.
