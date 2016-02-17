@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -52,9 +54,9 @@ public class BoundedContextBuilderShould {
 
     private static EventBus newEventBus(StorageFactory storageFactory) {
         return EventBus.newInstance(EventStore.newBuilder()
-                .setStreamExecutor(MoreExecutors.directExecutor())
-                .setStorage(storageFactory.createEventStorage())
-                .build());
+                                              .setStreamExecutor(MoreExecutors.directExecutor())
+                                              .setStorage(storageFactory.createEventStorage())
+                                              .build());
     }
 
     @Test(expected = NullPointerException.class)

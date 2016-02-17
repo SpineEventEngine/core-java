@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
@@ -31,6 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.server.EventDispatcher;
+import org.spine3.server.EventHandler;
+import org.spine3.server.Subscribe;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.procman.ProcessManager;

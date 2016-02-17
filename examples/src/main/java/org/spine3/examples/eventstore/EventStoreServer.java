@@ -25,7 +25,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.EventStore;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -26,6 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.server.EventDispatcher;
+import org.spine3.server.EventHandler;
+import org.spine3.server.Subscribe;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.event.ProjectCreated;

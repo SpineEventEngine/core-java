@@ -22,9 +22,9 @@ package org.spine3.server.storage;
 
 import org.spine3.server.Entity;
 import org.spine3.server.EntityId;
-import org.spine3.server.EventStore;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventStore;
 
 /**
  * A factory for creating storages used by repositories, {@link CommandStore} and {@link EventStore}.
