@@ -21,6 +21,9 @@
 package org.spine3.server.command;
 
 import org.spine3.base.Command;
+import org.spine3.base.CommandId;
+import org.spine3.base.Errors;
+import org.spine3.base.Failure;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
@@ -28,8 +31,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Manages commands received by the system.
- *
- * //TODO:2016-01-25:alexander.yevsyukov: Add API for updating status and loading.
  *
  * @author Mikhail Mikhaylov
  */
@@ -52,7 +53,6 @@ public class CommandStore implements AutoCloseable {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
         final AggregateId aggregateId = AggregateId.fromCommand(command);
-        //TODO:2016-01-15:alexander.yevsyukov: write with the "RECEIVED" status.
         storage.store(command, aggregateId);
     }
 
@@ -73,5 +73,35 @@ public class CommandStore implements AutoCloseable {
      */
     public boolean isClosed() {
         return !isOpen();
+    }
+
+    /**
+     * Updates the status of the command processing with the exception.
+     *
+     * @param commandId the ID of the command
+     * @param exception the exception occurred during command processing
+     */
+    public void updateStatus(CommandId commandId, Exception exception) {
+        storage.updateStatus(commandId, Errors.fromException(exception));
+    }
+
+    /**
+     * Updates the status of the command with the passed error.
+     *
+     * @param commandId the ID of the command
+     * @param error the error, which ocurred during command processing
+     */
+    public void updateStatus(CommandId commandId, org.spine3.base.Error error) {
+        storage.updateStatus(commandId, error);
+    }
+
+    /**
+     * Updates the status of the command with the business failure.
+     *
+     * @param commandId the ID of the command
+     * @param failure the business failure occurred during command processing
+     */
+    public void updateStatus(CommandId commandId, Failure failure) {
+        storage.updateStatus(commandId, failure);
     }
 }

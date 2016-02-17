@@ -138,48 +138,4 @@ public class MessagesShould {
                      Messages.getClassDescriptor(StringValue.class));
     }
 
-    @Test
-    public void verify_if_message_is_not_in_default_state() {
-        final Message msg = StringValue.newBuilder().setValue("check_if_message_is_not_in_default_state").build();
-
-        assertTrue(Messages.isNotDefault(msg));
-        assertFalse(Messages.isNotDefault(StringValue.getDefaultInstance()));
-    }
-
-    @Test
-    public void verify_if_message_is_in_default_state() {
-        final Message nonDefault = StringValue.newBuilder().setValue("check_if_message_is_in_default_state").build();
-
-        assertTrue(Messages.isDefault(StringValue.getDefaultInstance()));
-        assertFalse(Messages.isDefault(nonDefault));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_default_state_throwing_IAE_if_not() {
-        final StringValue nonDefault = StringValue.newBuilder()
-                .setValue("check_if_message_is_in_default_state_throwing_IAE_if_not")
-                .build();
-        Messages.checkDefault(nonDefault);
-    }
-
-    @Test
-    public void return_default_value_on_check() {
-        final Message defaultValue = StringValue.getDefaultInstance();
-        assertEquals(defaultValue, Messages.checkDefault(defaultValue));
-        assertEquals(defaultValue, Messages.checkDefault(defaultValue, "error message"));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_not_in_default_state_throwing_IAE_if_not() {
-        Messages.checkNotDefault(StringValue.getDefaultInstance());
-    }
-
-    @Test
-    public void return_non_default_value_on_check() {
-        final StringValue nonDefault = StringValue.newBuilder()
-                .setValue("return_non_default_value_on_check")
-                .build();
-        assertEquals(nonDefault, Messages.checkNotDefault(nonDefault));
-        assertEquals(nonDefault, Messages.checkNotDefault(nonDefault, "with error message"));
-    }
 }

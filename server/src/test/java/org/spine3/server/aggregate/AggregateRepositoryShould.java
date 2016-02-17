@@ -35,13 +35,13 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.type.CommandClass;
+import org.spine3.validate.Validate;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Messages.checkDefault;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 import static org.spine3.testdata.TestEventMessageFactory.taskAddedEvent;
 
@@ -113,7 +113,7 @@ public class AggregateRepositoryShould {
         repository.initStorage(storageFactory);
         final ProjectAggregate pa = repository.load(ProjectId.newBuilder().setId("load_or_create_aggregate_by_id").build());
         checkNotNull(pa);
-        checkDefault(pa.getState());
+        Validate.checkDefault(pa.getState());
     }
 
     @Test

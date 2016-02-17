@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
@@ -58,6 +60,7 @@ import static org.spine3.server.command.CommandValidation.unsupportedCommand;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public class CommandBus implements AutoCloseable {
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
@@ -185,19 +188,20 @@ public class CommandBus implements AutoCloseable {
         throw new UnsupportedCommandException(getMessage(request));
     }
 
-    private List<Event> dispatch(Command request) {
-        final CommandClass commandClass = CommandClass.of(request);
+    private List<Event> dispatch(Command command) {
+        final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         List<Event> result = Collections.emptyList();
         try {
-            result = dispatcher.dispatch(request);
+            result = dispatcher.dispatch(command);
         } catch (Exception e) {
-            //TODO:2016-01-24:alexander.yevsyukov: Update command status here?
-            log().error("", e);
+            final CommandId commandId = command.getContext().getCommandId();
+            log().error("Unable to dispatch command with ID: " + commandId.getUuid(), e);
+
+            updateCommandStatus(commandId, e);
         }
         return result;
     }
-
 
     /* package */ final List<Event> invokeHandler(Message command, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(command);
@@ -206,10 +210,41 @@ public class CommandBus implements AutoCloseable {
         try {
             result = method.invoke(command, context);
         } catch (InvocationTargetException e) {
-            //TODO:2016-01-24:alexander.yevsyukov: Update command status here?
-            log().error("", e);
+            final CommandId commandId = context.getCommandId();
+            final String commandIdStr = commandId.getUuid();
+            final Throwable cause = e.getCause();
+
+            //noinspection ChainOfInstanceofChecks
+            if (cause instanceof Exception) {
+                final Exception exception = (Exception) cause;
+                log().error(String.format("Exception while handling command ID: `%s`" , commandIdStr), e);
+                updateCommandStatus(commandId, exception);
+            } else if (cause instanceof FailureThrowable){
+                final FailureThrowable failure = (FailureThrowable) cause;
+                log().warn(
+                        String.format("Business failure ocurred when handling command with ID: `%s`", commandIdStr),
+                        failure);
+                updateCommandStatus(commandId, failure);
+            } else {
+                log().error(
+                        String.format("Throwable encountered when handling command with ID: `%s`", commandIdStr),
+                        cause);
+                updateCommandStatus(commandId, Errors.fromThrowable(cause));
+            }
         }
         return result;
+    }
+
+    private void updateCommandStatus(CommandId commandId, Exception exception) {
+        commandStore.updateStatus(commandId, exception);
+    }
+
+    private void updateCommandStatus(CommandId commandId, FailureThrowable failure) {
+        commandStore.updateStatus(commandId, failure.toMessage());
+    }
+
+    private void updateCommandStatus(CommandId commandId, org.spine3.base.Error error) {
+        commandStore.updateStatus(commandId, error);
     }
 
     private void store(Command request) {

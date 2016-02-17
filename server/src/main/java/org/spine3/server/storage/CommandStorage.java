@@ -26,6 +26,8 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
@@ -44,6 +46,7 @@ import static org.spine3.base.Identifiers.idToString;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
+    //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
      * Stores a command by a command ID from a command context.
      *
@@ -76,12 +79,15 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     }
 
     private static void checkRecord(CommandStorageRecordOrBuilder record) {
+        //TODO:2016-02-17:alexander.yevsyukov: We check the state we create right in this class. Why not check input to this class instead?
         checkNotEmptyOrBlank(record.getCommandType(), "command type");
         checkNotEmptyOrBlank(record.getCommandId(), "command ID");
         checkNotEmptyOrBlank(record.getAggregateIdType(), "aggregate ID type");
         checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID");
         final Timestamp timestamp = record.getTimestamp();
         final long seconds = timestamp.getSeconds();
+
+        //TODO:2016-02-18:alexander.yevsyukov: It's too late to check these things here. Check in store();
         checkArgument(seconds > 0, "Command time must be set.");
         checkArgument(record.hasMessage(), "Command message must be set.");
         checkArgument(record.hasContext(), "Command context must be set.");
@@ -98,4 +104,14 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     public CommandStorageRecord read(CommandId id) {
         throw new UnsupportedOperationException("Reading is not implemented because there is no need yet.");
     }
+
+    /**
+     * Updates the status of the command with the error.
+     */
+    public abstract void updateStatus(CommandId commandId, Error error);
+
+    /**
+     * Updates the status of the command with the business failure.
+     */
+    public abstract void updateStatus(CommandId commandId, Failure failure);
 }

@@ -93,3 +93,22 @@ enum CommandValidationError {
     // The command context does not have `namespace` attribute defined in a multitenant application.
     NAMESPACE_UNKNOWN = 3;
 }
+
+// This enumeration defines possible statuses of command processing.
+enum CommandStatus {
+    // Reserved value.
+    UNDEFINED = 0;
+
+    // The command has been received by backend and stored.
+    RECEIVED = 1;
+
+    // The command has been successfully handled.
+    // Expect one or more events produced in as the result of handling this command.
+    OK = 2;
+
+    // There was an exception or another kind of technical error during command processing.
+    ERROR = 3;
+
+    // A business failure encountered during command processing.
+    FAILURE = 4;
+}
