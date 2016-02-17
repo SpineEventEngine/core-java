@@ -43,7 +43,7 @@ import static com.google.common.collect.Sets.newHashSet;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings({"ExtendsUtilityClass", "ClassWithTooManyMethods", "OverlyComplexClass", "ErrorNotRethrown", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"ExtendsUtilityClass", "ClassWithTooManyMethods", "OverlyComplexClass", "ErrorNotRethrown", "DuplicateStringLiteralInspection", "unused"})
 public final class Verify extends Assert {
 
     private static final String SHOULD_NOT_BE_EQUAL = " should not be equal:<";
@@ -51,6 +51,10 @@ public final class Verify extends Assert {
     private static final String EXPECTED_ITEMS_IN_ASSERTION_MESSAGE = "Expected items in assertion";
     private static final String ITERABLE = "iterable";
     private static final String SHOULD_NOT_BE_EMPTY_MESSAGE = " should be non-empty, but was empty";
+
+    @SuppressWarnings("AccessOfSystemProperties")
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
 
     private Verify() {}
 
@@ -186,9 +190,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEquals(float expected, float actual, float delta) {
         try {
-            Verify.assertNotEquals("float", expected, actual, delta);
+            assertNotEquals("float", expected, actual, delta);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -201,7 +205,7 @@ public final class Verify extends Assert {
                 Assert.fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -210,9 +214,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEquals(boolean notExpected, boolean actual) {
         try {
-            Verify.assertNotEquals("boolean", notExpected, actual);
+            assertNotEquals("boolean", notExpected, actual);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -225,7 +229,7 @@ public final class Verify extends Assert {
                 Assert.fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -234,9 +238,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEquals(byte notExpected, byte actual) {
         try {
-            Verify.assertNotEquals("byte", notExpected, actual);
+            assertNotEquals("byte", notExpected, actual);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -249,7 +253,7 @@ public final class Verify extends Assert {
                 Assert.fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -258,9 +262,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEquals(char notExpected, char actual) {
         try {
-            Verify.assertNotEquals("char", notExpected, actual);
+            assertNotEquals("char", notExpected, actual);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -273,7 +277,7 @@ public final class Verify extends Assert {
                 Assert.fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -282,9 +286,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEquals(short notExpected, short actual) {
         try {
-            Verify.assertNotEquals("short", notExpected, actual);
+            assertNotEquals("short", notExpected, actual);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -293,9 +297,9 @@ public final class Verify extends Assert {
      */
     public static void assertIterableEmpty(Iterable<?> iterable) {
         try {
-            Verify.assertIterableEmpty(ITERABLE, iterable);
+            assertIterableEmpty(ITERABLE, iterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -304,14 +308,14 @@ public final class Verify extends Assert {
      */
     public static void assertIterableEmpty(String iterableName, Iterable<?> iterable) {
         try {
-            Verify.assertObjectNotNull(iterableName, iterable);
+            assertObjectNotNull(iterableName, iterable);
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (!fluentIterable.isEmpty()) {
                 Assert.fail(iterableName + " must be empty; actual size:<" + fluentIterable.size() + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -320,10 +324,10 @@ public final class Verify extends Assert {
      */
     public static void assertInstanceOf(Class<?> expectedClassType, Object actualObject) {
         try {
-            Verify.assertInstanceOf(actualObject.getClass()
-                                                .getName(), expectedClassType, actualObject);
+            assertInstanceOf(actualObject.getClass()
+                                         .getName(), expectedClassType, actualObject);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -336,7 +340,7 @@ public final class Verify extends Assert {
                 Assert.fail(objectName + " is not an instance of " + expectedClassType.getName());
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -345,10 +349,10 @@ public final class Verify extends Assert {
      */
     public static void assertNotInstanceOf(Class<?> expectedClassType, Object actualObject) {
         try {
-            Verify.assertNotInstanceOf(actualObject.getClass()
-                                                   .getName(), expectedClassType, actualObject);
+            assertNotInstanceOf(actualObject.getClass()
+                                            .getName(), expectedClassType, actualObject);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -361,7 +365,7 @@ public final class Verify extends Assert {
                 Assert.fail(objectName + " is an instance of " + expectedClassType.getName());
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -370,9 +374,9 @@ public final class Verify extends Assert {
      */
     public static void assertEmpty(Map<?, ?> actualMap) {
         try {
-            Verify.assertEmpty("map", actualMap);
+            assertEmpty("map", actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -381,9 +385,9 @@ public final class Verify extends Assert {
      */
     public static void assertEmpty(Multimap<?, ?> actualMultimap) {
         try {
-            Verify.assertEmpty("multimap", actualMultimap);
+            assertEmpty("multimap", actualMultimap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -392,13 +396,13 @@ public final class Verify extends Assert {
      */
     public static void assertEmpty(String multimapName, Multimap<?, ?> actualMultimap) {
         try {
-            Verify.assertObjectNotNull(multimapName, actualMultimap);
+            assertObjectNotNull(multimapName, actualMultimap);
 
             if (!actualMultimap.isEmpty()) {
                 Assert.fail(multimapName + " should be empty; actual size:<" + actualMultimap.size() + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -408,7 +412,7 @@ public final class Verify extends Assert {
     @SuppressWarnings("MethodWithMoreThanThreeNegations")
     public static void assertEmpty(String mapName, Map<?, ?> actualMap) {
         try {
-            Verify.assertObjectNotNull(mapName, actualMap);
+            assertObjectNotNull(mapName, actualMap);
 
             final String errorMessage = " should be empty; actual size:<";
             if (!actualMap.isEmpty()) {
@@ -433,7 +437,7 @@ public final class Verify extends Assert {
                                                               .size() + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -442,9 +446,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(Iterable<?> actualIterable) {
         try {
-            Verify.assertNotEmpty(ITERABLE, actualIterable);
+            assertNotEmpty(ITERABLE, actualIterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -453,11 +457,11 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(String iterableName, Iterable<?> actualIterable) {
         try {
-            Verify.assertObjectNotNull(iterableName, actualIterable);
+            assertObjectNotNull(iterableName, actualIterable);
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
             Assert.assertFalse(iterableName + SHOULD_NOT_BE_EMPTY_MESSAGE, fluentIterable.isEmpty());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -466,9 +470,9 @@ public final class Verify extends Assert {
      */
     public static void assertIterableNotEmpty(Iterable<?> iterable) {
         try {
-            Verify.assertNotEmpty(ITERABLE, iterable);
+            assertNotEmpty(ITERABLE, iterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -477,9 +481,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(Map<?, ?> actualMap) {
         try {
-            Verify.assertNotEmpty("map", actualMap);
+            assertNotEmpty("map", actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -488,7 +492,7 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(String mapName, Map<?, ?> actualMap) {
         try {
-            Verify.assertObjectNotNull(mapName, actualMap);
+            assertObjectNotNull(mapName, actualMap);
             Assert.assertFalse(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, actualMap.isEmpty());
             Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.size());
             Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.keySet()
@@ -498,7 +502,7 @@ public final class Verify extends Assert {
             Assert.assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMap.entrySet()
                                                                                       .size());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -507,9 +511,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(Multimap<?, ?> actualMultimap) {
         try {
-            Verify.assertNotEmpty("multimap", actualMultimap);
+            assertNotEmpty("multimap", actualMultimap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -518,28 +522,28 @@ public final class Verify extends Assert {
      */
     public static void assertNotEmpty(String multimapName, Multimap<?, ?> actualMultimap) {
         try {
-            Verify.assertObjectNotNull(multimapName, actualMultimap);
+            assertObjectNotNull(multimapName, actualMultimap);
             Assert.assertFalse(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, actualMultimap.isEmpty());
             Assert.assertNotEquals(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0, actualMultimap.size());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     public static <T> void assertNotEmpty(String itemsName, T[] items) {
         try {
-            Verify.assertObjectNotNull(itemsName, items);
-            Verify.assertNotEquals(itemsName, 0, items.length);
+            assertObjectNotNull(itemsName, items);
+            assertNotEquals(itemsName, 0, items.length);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     public static <T> void assertNotEmpty(T[] items) {
         try {
-            Verify.assertNotEmpty("items", items);
+            assertNotEmpty("items", items);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -548,9 +552,9 @@ public final class Verify extends Assert {
      */
     public static void assertSize(int expectedSize, Object[] actualArray) {
         try {
-            Verify.assertSize("array", expectedSize, actualArray);
+            assertSize("array", expectedSize, actualArray);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -572,7 +576,7 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -581,9 +585,9 @@ public final class Verify extends Assert {
      */
     public static void assertSize(int expectedSize, Iterable<?> actualIterable) {
         try {
-            Verify.assertSize(ITERABLE, expectedSize, actualIterable);
+            assertSize(ITERABLE, expectedSize, actualIterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -595,7 +599,7 @@ public final class Verify extends Assert {
             int expectedSize,
             Iterable<?> actualIterable) {
         try {
-            Verify.assertObjectNotNull(iterableName, actualIterable);
+            assertObjectNotNull(iterableName, actualIterable);
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
             final int actualSize = fluentIterable.size();
@@ -609,7 +613,7 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -618,9 +622,9 @@ public final class Verify extends Assert {
      */
     public static void assertIterableSize(int expectedSize, Iterable<?> actualIterable) {
         try {
-            Verify.assertIterableSize(ITERABLE, expectedSize, actualIterable);
+            assertIterableSize(ITERABLE, expectedSize, actualIterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -632,7 +636,7 @@ public final class Verify extends Assert {
             int expectedSize,
             Iterable<?> actualIterable) {
         try {
-            Verify.assertObjectNotNull(iterableName, actualIterable);
+            assertObjectNotNull(iterableName, actualIterable);
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
             final int actualSize = fluentIterable.size();
@@ -646,7 +650,7 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -655,9 +659,9 @@ public final class Verify extends Assert {
      */
     public static void assertSize(String mapName, int expectedSize, Map<?, ?> actualMap) {
         try {
-            Verify.assertSize(mapName, expectedSize, actualMap.keySet());
+            assertSize(mapName, expectedSize, actualMap.keySet());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -666,9 +670,9 @@ public final class Verify extends Assert {
      */
     public static void assertSize(int expectedSize, Map<?, ?> actualMap) {
         try {
-            Verify.assertSize("map", expectedSize, actualMap);
+            assertSize("map", expectedSize, actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -677,9 +681,9 @@ public final class Verify extends Assert {
      */
     public static void assertSize(int expectedSize, Multimap<?, ?> actualMultimap) {
         try {
-            Verify.assertSize("multimap", expectedSize, actualMultimap);
+            assertSize("multimap", expectedSize, actualMultimap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -699,25 +703,25 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert the size of the given {@link ImmutableSet}.
      */
-    public static void assertSize(int expectedSize, ImmutableSet<?> actualImmutableSet) {
+    public static void assertSize(int expectedSize, Collection<?> actualImmutableSet) {
         try {
-            Verify.assertSize("immutable set", expectedSize, actualImmutableSet);
+            assertSize("immutable set", expectedSize, actualImmutableSet);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert the size of the given {@link ImmutableSet}.
      */
-    public static void assertSize(String immutableSetName, int expectedSize, ImmutableSet<?> actualImmutableSet) {
+    public static void assertSize(String immutableSetName, int expectedSize, Collection<?> actualImmutableSet) {
         try {
             final int actualSize = actualImmutableSet.size();
             if (actualSize != expectedSize) {
@@ -730,36 +734,36 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}.
      */
-    public static void assertContains(String stringToFind, String stringToSearch) {
+    public static void assertContains(CharSequence stringToFind, String stringToSearch) {
         try {
-            Verify.assertContains("string", stringToFind, stringToSearch);
+            assertContains("string", stringToFind, stringToSearch);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}.
      */
-    public static void assertNotContains(String unexpectedString, String stringToSearch) {
+    public static void assertNotContains(CharSequence unexpectedString, String stringToSearch) {
         try {
-            Verify.assertNotContains("string", unexpectedString, stringToSearch);
+            assertNotContains("string", unexpectedString, stringToSearch);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}.
      */
-    public static void assertContains(String stringName, String stringToFind, String stringToSearch) {
+    public static void assertContains(String stringName, CharSequence stringToFind, String stringToSearch) {
         try {
             Assert.assertNotNull("stringToFind should not be null", stringToFind);
             Assert.assertNotNull("stringToSearch should not be null", stringToSearch);
@@ -773,14 +777,14 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert that the given {@code unexpectedString} is <em>not</em> contained within the {@code stringToSearch}.
      */
-    public static void assertNotContains(String stringName, String unexpectedString, String stringToSearch) {
+    public static void assertNotContains(String stringName, CharSequence unexpectedString, String stringToSearch) {
         try {
             Assert.assertNotNull("unexpectedString should not be null", unexpectedString);
             Assert.assertNotNull("stringToSearch should not be null", stringToSearch);
@@ -794,7 +798,7 @@ public final class Verify extends Assert {
                         + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -803,9 +807,9 @@ public final class Verify extends Assert {
      */
     public static void assertContains(Object expectedItem, Collection<?> actualCollection) {
         try {
-            Verify.assertContains("collection", expectedItem, actualCollection);
+            assertContains("collection", expectedItem, actualCollection);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -817,24 +821,24 @@ public final class Verify extends Assert {
             Object expectedItem,
             Collection<?> actualCollection) {
         try {
-            Verify.assertObjectNotNull(collectionName, actualCollection);
+            assertObjectNotNull(collectionName, actualCollection);
 
             if (!actualCollection.contains(expectedItem)) {
                 Assert.fail(collectionName + " did not contain expectedItem:<" + expectedItem + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Assert that the given {@link ImmutableCollection} contains the given item.
      */
-    public static void assertContains(Object expectedItem, ImmutableCollection<?> actualImmutableCollection) {
+    public static void assertContains(Object expectedItem, ImmutableCollection<?> actualCollection) {
         try {
-            Verify.assertContains("ImmutableCollection", expectedItem, actualImmutableCollection);
+            assertContains("ImmutableCollection", expectedItem, actualCollection);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -842,50 +846,42 @@ public final class Verify extends Assert {
      * Assert that the given {@link ImmutableCollection} contains the given item.
      */
     public static void assertContains(
-            String immutableCollectionName,
+            String collectionName,
             Object expectedItem,
-            ImmutableCollection<?> actualImmutableCollection) {
+            ImmutableCollection<?> actualCollection) {
         try {
-            Verify.assertObjectNotNull(immutableCollectionName, actualImmutableCollection);
+            assertObjectNotNull(collectionName, actualCollection);
 
-            if (!actualImmutableCollection.contains(expectedItem)) {
-                Assert.fail(immutableCollectionName + " did not contain expectedItem:<" + expectedItem + '>');
+            if (!actualCollection.contains(expectedItem)) {
+                Assert.fail(collectionName + " did not contain expectedItem:<" + expectedItem + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
-    public static void assertContainsAll(
-            Iterable<?> iterable,
-            Object... items) {
+    @SuppressWarnings("OverloadedVarargsMethod")
+    @SafeVarargs
+    public static<T> void assertContainsAll(
+            Iterable<T> iterable,
+            T... items) {
         try {
-            Verify.assertContainsAll(ITERABLE, iterable, items);
-        } catch (AssertionError e) {
-            throw Verify.mangledException(e);
-        }
-    }
+            assertObjectNotNull("Collection", iterable);
 
-    public static void assertContainsAll(
-            String collectionName,
-            final Iterable<?> iterable,
-            Object... items) {
-        try {
-            Verify.assertObjectNotNull(collectionName, iterable);
-
-            Verify.assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
+            assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
 
             for (Object item : items) {
                 assertTrue(fluentIterable.contains(item));
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
-    public static void assertMapsEqual(Map<?, ?> expectedMap, Map<?, ?> actualMap, String actualMapName) {
+    public static<K, V> void assertMapsEqual(Map<K, V> expectedMap, Map<K, V> actualMap, String actualMapName) {
         try {
+            //noinspection ConstantConditions
             if (expectedMap == null) {
                 Assert.assertNull(actualMapName + " should be null", actualMap);
                 return;
@@ -893,34 +889,35 @@ public final class Verify extends Assert {
 
             Assert.assertNotNull(actualMapName + " should not be null", actualMap);
 
-            final Set<? extends Map.Entry<?, ?>> expectedEntries = expectedMap.entrySet();
-            for (Map.Entry<?, ?> expectedEntry : expectedEntries) {
-                final Object expectedKey = expectedEntry.getKey();
-                final Object expectedValue = expectedEntry.getValue();
-                final Object actualValue = actualMap.get(expectedKey);
+            final Set<? extends Map.Entry<K, V>> expectedEntries = expectedMap.entrySet();
+            for (Map.Entry<K, V> expectedEntry : expectedEntries) {
+                final K expectedKey = expectedEntry.getKey();
+                final V expectedValue = expectedEntry.getValue();
+                final V actualValue = actualMap.get(expectedKey);
                 if (!Objects.equals(actualValue, expectedValue)) {
                     Assert.fail("Values differ at key " + expectedKey + " expected " + expectedValue + " but was " + actualValue);
                 }
             }
-            Verify.assertSetsEqual(expectedMap.keySet(), actualMap.keySet());
-            Verify.assertSetsEqual(expectedMap.entrySet(), actualMap.entrySet());
+            assertSetsEqual(expectedMap.keySet(), actualMap.keySet());
+            assertSetsEqual(expectedMap.entrySet(), actualMap.entrySet());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
-    public static void assertSetsEqual(Set<?> expectedSet, Set<?> actualSet) {
+    public static<T> void assertSetsEqual(Collection<T> expectedSet, Collection<T> actualSet) {
         try {
+            //noinspection ConstantConditions
             if (expectedSet == null) {
                 Assert.assertNull("Actual set should be null", actualSet);
                 return;
             }
 
-            Verify.assertObjectNotNull("actual set", actualSet);
-            Verify.assertSize(expectedSet.size(), actualSet);
+            assertObjectNotNull("actual set", actualSet);
+            assertSize(expectedSet.size(), actualSet);
 
             if (!actualSet.equals(expectedSet)) {
-                final Set<?> inExpectedOnlySet = newHashSet(expectedSet);
+                final Set<T> inExpectedOnlySet = newHashSet(expectedSet);
                 inExpectedOnlySet.removeAll(actualSet);
 
                 final int numberDifferences = inExpectedOnlySet.size();
@@ -930,13 +927,13 @@ public final class Verify extends Assert {
                     Assert.fail("Actual set: " + numberDifferences + " elements different.");
                 }
 
-                final Set<?> inActualOnlySet = newHashSet(actualSet);
+                final Set<T> inActualOnlySet = newHashSet(actualSet);
                 inActualOnlySet.removeAll(expectedSet);
 
                 fail("Sets are not equal.");
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -948,9 +945,9 @@ public final class Verify extends Assert {
             V expectedValue,
             Multimap<K, V> actualMultimap) {
         try {
-            Verify.assertContainsEntry("multimap", expectedKey, expectedValue, actualMultimap);
+            assertContainsEntry("multimap", expectedKey, expectedValue, actualMultimap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -969,7 +966,7 @@ public final class Verify extends Assert {
                 Assert.fail(multimapName + " did not contain entry: <" + expectedKey + ", " + expectedValue + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -978,9 +975,9 @@ public final class Verify extends Assert {
      */
     public static void assertContainsKey(Object expectedKey, Map<?, ?> actualMap) {
         try {
-            Verify.assertContainsKey("map", expectedKey, actualMap);
+            assertContainsKey("map", expectedKey, actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -995,7 +992,7 @@ public final class Verify extends Assert {
                 Assert.fail(mapName + " did not contain expectedKey:<" + expectedKey + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1004,9 +1001,9 @@ public final class Verify extends Assert {
      */
     public static void denyContainsKey(Object unexpectedKey, Map<?, ?> actualMap) {
         try {
-            Verify.denyContainsKey("map", unexpectedKey, actualMap);
+            denyContainsKey("map", unexpectedKey, actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1021,7 +1018,7 @@ public final class Verify extends Assert {
                 Assert.fail(mapName + " contained unexpectedKey:<" + unexpectedKey + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1033,9 +1030,9 @@ public final class Verify extends Assert {
             Object expectedValue,
             Map<?, ?> actualMap) {
         try {
-            Verify.assertContainsKeyValue("map", expectedKey, expectedValue, actualMap);
+            assertContainsKeyValue("map", expectedKey, expectedValue, actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1048,7 +1045,7 @@ public final class Verify extends Assert {
             Object expectedValue,
             Map<?, ?> actualMap) {
         try {
-            Verify.assertContainsKey(mapName, expectedKey, actualMap);
+            assertContainsKey(mapName, expectedKey, actualMap);
 
             final Object actualValue = actualMap.get(expectedKey);
             if (!Objects.equals(actualValue, expectedValue)) {
@@ -1065,7 +1062,7 @@ public final class Verify extends Assert {
                                 + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1074,9 +1071,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotContains(Object unexpectedItem, Collection<?> actualCollection) {
         try {
-            Verify.assertNotContains("collection", unexpectedItem, actualCollection);
+            assertNotContains("collection", unexpectedItem, actualCollection);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1088,13 +1085,13 @@ public final class Verify extends Assert {
             Object unexpectedItem,
             Collection<?> actualCollection) {
         try {
-            Verify.assertObjectNotNull(collectionName, actualCollection);
+            assertObjectNotNull(collectionName, actualCollection);
 
             if (actualCollection.contains(unexpectedItem)) {
                 Assert.fail(collectionName + " should not contain unexpectedItem:<" + unexpectedItem + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1103,9 +1100,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotContains(Object unexpectedItem, Iterable<?> iterable) {
         try {
-            Verify.assertNotContains(ITERABLE, unexpectedItem, iterable);
+            assertNotContains(ITERABLE, unexpectedItem, iterable);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1117,14 +1114,14 @@ public final class Verify extends Assert {
             Object unexpectedItem,
             Iterable<?> iterable) {
         try {
-            Verify.assertObjectNotNull(collectionName, iterable);
+            assertObjectNotNull(collectionName, iterable);
 
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (fluentIterable.contains(unexpectedItem)) {
                 Assert.fail(collectionName + " should not contain unexpectedItem:<" + unexpectedItem + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1133,9 +1130,9 @@ public final class Verify extends Assert {
      */
     public static void assertNotContainsKey(Object unexpectedKey, Map<?, ?> actualMap) {
         try {
-            Verify.assertNotContainsKey("map", unexpectedKey, actualMap);
+            assertNotContainsKey("map", unexpectedKey, actualMap);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1144,13 +1141,13 @@ public final class Verify extends Assert {
      */
     public static void assertNotContainsKey(String mapName, Object unexpectedKey, Map<?, ?> actualMap) {
         try {
-            Verify.assertObjectNotNull(mapName, actualMap);
+            assertObjectNotNull(mapName, actualMap);
 
             if (actualMap.containsKey(unexpectedKey)) {
                 Assert.fail(mapName + " should not contain unexpectedItem:<" + unexpectedKey + '>');
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1158,11 +1155,11 @@ public final class Verify extends Assert {
      * Assert that the formerItem appears before the latterItem in the given {@link Collection}.
      * Both the formerItem and the latterItem must appear in the collection, or this assert will fail.
      */
-    public static void assertBefore(Object formerItem, Object latterItem, List<?> actualList) {
+    public static<T> void assertBefore(T formerItem, T latterItem, List<T> actualList) {
         try {
-            Verify.assertBefore("list", formerItem, latterItem, actualList);
+            assertBefore("list", formerItem, latterItem, actualList);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1171,18 +1168,18 @@ public final class Verify extends Assert {
      * {@link #assertContains(String, Object, Collection)} will be called for both the formerItem and the
      * latterItem, prior to the "before" assertion.
      */
-    public static void assertBefore(
+    public static<T> void assertBefore(
             String listName,
-            Object formerItem,
-            Object latterItem,
-            List<?> actualList) {
+            T formerItem,
+            T latterItem,
+            List<T> actualList) {
         try {
-            Verify.assertObjectNotNull(listName, actualList);
-            Verify.assertNotEquals(
+            assertObjectNotNull(listName, actualList);
+            assertNotEquals(
                     "Bad test, formerItem and latterItem are equal, listName:<" + listName + '>',
                     formerItem,
                     latterItem);
-            Verify.assertContainsAll(listName, actualList, formerItem, latterItem);
+            assertContainsAll(actualList, formerItem, latterItem);
             final int formerPosition = actualList.indexOf(formerItem);
             final int latterPosition = actualList.indexOf(latterItem);
             if (latterPosition < formerPosition) {
@@ -1197,7 +1194,7 @@ public final class Verify extends Assert {
                         + ">, but didn't");
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1205,7 +1202,7 @@ public final class Verify extends Assert {
         try {
             Assert.assertNotNull(objectName + " should not be null", actualObject);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1214,9 +1211,9 @@ public final class Verify extends Assert {
      */
     public static void assertItemAtIndex(Object expectedItem, int index, List<?> list) {
         try {
-            Verify.assertItemAtIndex("list", expectedItem, index, list);
+            assertItemAtIndex("list", expectedItem, index, list);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1225,69 +1222,79 @@ public final class Verify extends Assert {
      */
     public static void assertItemAtIndex(Object expectedItem, int index, Object[] array) {
         try {
-            Verify.assertItemAtIndex("array", expectedItem, index, array);
+            assertItemAtIndex("array", expectedItem, index, array);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
+    @SafeVarargs
+    @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertStartsWith(T[] array, T... items) {
         try {
-            Verify.assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
+            assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
                 final T item = items[i];
-                Verify.assertItemAtIndex("array", item, i, array);
+                assertItemAtIndex("array", item, i, array);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
+    @SuppressWarnings("OverloadedVarargsMethod")
+    @SafeVarargs
     public static <T> void assertStartsWith(List<T> list, T... items) {
         try {
-            Verify.assertStartsWith("list", list, items);
+            assertStartsWith("list", list, items);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
+    @SafeVarargs
+    @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertStartsWith(String listName, List<T> list, T... items) {
         try {
-            Verify.assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
+            assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
                 final T item = items[i];
-                Verify.assertItemAtIndex(listName, item, i, list);
+                assertItemAtIndex(listName, item, i, list);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
+    @SafeVarargs
+    @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertEndsWith(List<T> list, T... items) {
         try {
-            Verify.assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
+            assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
                 final T item = items[i];
-                Verify.assertItemAtIndex("list", item, list.size() - items.length + i, list);
+                assertItemAtIndex("list", item, list.size() - items.length + i, list);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
+    @SafeVarargs
+    @SuppressWarnings("OverloadedVarargsMethod")
     public static <T> void assertEndsWith(T[] array, T... items) {
         try {
-            Verify.assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
+            assertNotEmpty(EXPECTED_ITEMS_IN_ASSERTION_MESSAGE, items);
 
             for (int i = 0; i < items.length; i++) {
                 final T item = items[i];
-                Verify.assertItemAtIndex("array", item, array.length - items.length + i, array);
+                assertItemAtIndex("array", item, array.length - items.length + i, array);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1300,7 +1307,7 @@ public final class Verify extends Assert {
             int index,
             List<?> list) {
         try {
-            Verify.assertObjectNotNull(listName, list);
+            assertObjectNotNull(listName, list);
 
             final Object actualItem = list.get(index);
             if (!Objects.equals(expectedItem, actualItem)) {
@@ -1310,7 +1317,7 @@ public final class Verify extends Assert {
                         actualItem);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1332,7 +1339,7 @@ public final class Verify extends Assert {
                         actualItem);
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1342,9 +1349,9 @@ public final class Verify extends Assert {
      */
     public static void assertEqualsAndHashCode(Object objectA, Object objectB) {
         try {
-            Verify.assertEqualsAndHashCode("objects", objectA, objectB);
+            assertEqualsAndHashCode("objects", objectA, objectB);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1355,7 +1362,7 @@ public final class Verify extends Assert {
         try {
             Assert.assertTrue(value + " is not negative", value < 0);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1366,7 +1373,7 @@ public final class Verify extends Assert {
         try {
             Assert.assertTrue(value + " is not positive", value > 0);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1377,7 +1384,7 @@ public final class Verify extends Assert {
         try {
             Assert.assertEquals(0, value);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1387,14 +1394,13 @@ public final class Verify extends Assert {
      */
     public static void assertEqualsAndHashCode(String itemNames, Object objectA, Object objectB) {
         try {
+            //noinspection ConstantConditions
             if (objectA == null || objectB == null) {
                 Assert.fail("Neither item should be null: <" + objectA + "> <" + objectB + '>');
             }
 
-            Assert.assertFalse("Neither item should equal null", objectA.equals(null));
-            Assert.assertFalse("Neither item should equal null", objectB.equals(null));
-            Verify.assertNotEquals("Neither item should equal new Object()", objectA.equals(new Object()));
-            Verify.assertNotEquals("Neither item should equal new Object()", objectB.equals(new Object()));
+            assertNotEquals("Neither item should equal new Object()", objectA.equals(new Object()));
+            assertNotEquals("Neither item should equal new Object()", objectB.equals(new Object()));
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectA, objectA);
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectB, objectB);
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectA, objectB);
@@ -1404,15 +1410,15 @@ public final class Verify extends Assert {
                     objectA.hashCode(),
                     objectB.hashCode());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     public static void assertShallowClone(Cloneable object) {
         try {
-            Verify.assertShallowClone("object", object);
+            assertShallowClone("object", object);
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1423,27 +1429,28 @@ public final class Verify extends Assert {
             final Object clone = method.invoke(object);
             final String prefix = itemName + " and its clone";
             Assert.assertNotSame(prefix, object, clone);
-            Verify.assertEqualsAndHashCode(prefix, object, clone);
+            assertEqualsAndHashCode(prefix, object, clone);
         } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | IllegalAccessException |
                 AssertionError | SecurityException e) {
-            throw new AssertionError(e.getLocalizedMessage());
+            throw new AssertionError(e.getLocalizedMessage(), e);
         }
     }
 
     public static <T> void assertClassNonInstantiable(Class<T> aClass) {
         try {
             try {
+                //noinspection ClassNewInstance
                 aClass.newInstance();
                 Assert.fail("Expected class '" + aClass + "' to be non-instantiable");
             } catch (InstantiationException e) {
                 // pass
             } catch (IllegalAccessException e) {
-                if (Verify.canInstantiateThroughReflection(aClass)) {
+                if (canInstantiateThroughReflection(aClass)) {
                     Assert.fail("Expected constructor of non-instantiable class '" + aClass + "' to throw an exception, but didn't");
                 }
             }
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
@@ -1482,20 +1489,20 @@ public final class Verify extends Assert {
                         ex.getClass());
                 return;
             } catch (AssertionError e) {
-                throw Verify.mangledException(e);
+                throw mangledException(e);
             }
         }
 
         try {
             Assert.fail("Block did not throw an error of type " + expectedErrorClass.getName());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code expectedExceptionClass}.
+     * {@code exceptionClass}.
      * <p>
      * {@code Callable} is most appropriate when a checked exception will be thrown.
      * If a subclass of {@link RuntimeException} will be thrown, the form
@@ -1515,40 +1522,41 @@ public final class Verify extends Assert {
      * @see #assertThrows(Class, Runnable)
      */
     public static void assertThrows(
-            Class<? extends Exception> expectedExceptionClass,
+            Class<? extends Exception> exceptionClass,
             Callable<?> code) {
         try {
             code.call();
         } catch (Exception ex) {
             try {
+
                 Assert.assertSame(
                         "Caught exception of type <"
                                 + ex.getClass()
                                     .getName()
                                 + ">, expected one of type <"
-                                + expectedExceptionClass.getName()
+                                + exceptionClass.getName()
                                 + '>'
-                                + '\n'
+                                + LINE_SEPARATOR
                                 + "Exception Message: " + ex.getMessage()
-                                + '\n',
-                        expectedExceptionClass,
+                                + LINE_SEPARATOR,
+                        exceptionClass,
                         ex.getClass());
                 return;
             } catch (AssertionError e) {
-                throw Verify.mangledException(e);
+                throw mangledException(e);
             }
         }
 
         try {
-            Assert.fail("Block did not throw an exception of type " + expectedExceptionClass.getName());
+            Assert.fail("Block did not throw an exception of type " + exceptionClass.getName());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code expectedExceptionClass}.
+     * {@code expectedClass}.
      * <p>
      * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException} will be thrown.
      * If a checked exception will be thrown, the form {@link #assertThrows(Class, Callable)} may be more
@@ -1569,7 +1577,7 @@ public final class Verify extends Assert {
      * @see #assertThrows(Class, Callable)
      */
     public static void assertThrows(
-            Class<? extends Exception> expectedExceptionClass,
+            Class<? extends Exception> expectedClass,
             Runnable code) {
         try {
             code.run();
@@ -1580,29 +1588,29 @@ public final class Verify extends Assert {
                                 + ex.getClass()
                                     .getName()
                                 + ">, expected one of type <"
-                                + expectedExceptionClass.getName()
+                                + expectedClass.getName()
                                 + '>'
-                                + '\n'
+                                + LINE_SEPARATOR
                                 + "Exception Message: " + ex.getMessage()
-                                + '\n',
-                        expectedExceptionClass,
+                                + LINE_SEPARATOR,
+                        expectedClass,
                         ex.getClass());
                 return;
             } catch (AssertionError e) {
-                throw Verify.mangledException(e);
+                throw mangledException(e);
             }
         }
 
         try {
-            Assert.fail("Block did not throw an exception of type " + expectedExceptionClass.getName());
+            Assert.fail("Block did not throw an exception of type " + expectedClass.getName());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Runs the {@link Callable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code expectedExceptionClass}, which contains a cause of type expectedCauseClass.
+     * {@code exceptionClass}, which contains a cause of type expectedCauseClass.
      * <p>
      * {@code Callable} is most appropriate when a checked exception will be thrown.
      * If a subclass of {@link RuntimeException} will be thrown, the form
@@ -1630,7 +1638,7 @@ public final class Verify extends Assert {
      * @see #assertThrowsWithCause(Class, Class, Runnable)
      */
     public static void assertThrowsWithCause(
-            Class<? extends Exception> expectedExceptionClass,
+            Class<? extends Exception> exceptionClass,
             Class<? extends Throwable> expectedCauseClass,
             Callable<?> code) {
         try {
@@ -1642,9 +1650,9 @@ public final class Verify extends Assert {
                                 + ex.getClass()
                                     .getName()
                                 + ">, expected one of type <"
-                                + expectedExceptionClass.getName()
+                                + exceptionClass.getName()
                                 + '>',
-                        expectedExceptionClass,
+                        exceptionClass,
                         ex.getClass());
                 final Throwable actualCauseClass = ex.getCause();
                 Assert.assertNotNull(
@@ -1663,20 +1671,20 @@ public final class Verify extends Assert {
                         actualCauseClass.getClass());
                 return;
             } catch (AssertionError e) {
-                throw Verify.mangledException(e);
+                throw mangledException(e);
             }
         }
 
         try {
-            Assert.fail("Block did not throw an exception of type " + expectedExceptionClass.getName());
+            Assert.fail("Block did not throw an exception of type " + exceptionClass.getName());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 
     /**
      * Runs the {@link Runnable} {@code code} and asserts that it throws an {@code Exception} of the type
-     * {@code expectedExceptionClass}, which contains a cause of type expectedCauseClass.
+     * {@code exceptionClass}, which contains a cause of type expectedCauseClass.
      * <p>
      * {@code Runnable} is most appropriate when a subclass of {@link RuntimeException} will be thrown.
      * If a checked exception will be thrown, the form {@link #assertThrowsWithCause(Class, Class, Callable)}
@@ -1703,7 +1711,7 @@ public final class Verify extends Assert {
      * @see #assertThrowsWithCause(Class, Class, Callable)
      */
     public static void assertThrowsWithCause(
-            Class<? extends Exception> expectedExceptionClass,
+            Class<? extends Exception> exceptionClass,
             Class<? extends Throwable> expectedCauseClass,
             Runnable code) {
         try {
@@ -1715,9 +1723,9 @@ public final class Verify extends Assert {
                                 + ex.getClass()
                                     .getName()
                                 + ">, expected one of type <"
-                                + expectedExceptionClass.getName()
+                                + exceptionClass.getName()
                                 + '>',
-                        expectedExceptionClass,
+                        exceptionClass,
                         ex.getClass());
                 final Throwable actualCauseClass = ex.getCause();
                 Assert.assertNotNull(
@@ -1736,14 +1744,14 @@ public final class Verify extends Assert {
                         actualCauseClass.getClass());
                 return;
             } catch (AssertionError e) {
-                throw Verify.mangledException(e);
+                throw mangledException(e);
             }
         }
 
         try {
-            Assert.fail("Block did not throw an exception of type " + expectedExceptionClass.getName());
+            Assert.fail("Block did not throw an exception of type " + exceptionClass.getName());
         } catch (AssertionError e) {
-            throw Verify.mangledException(e);
+            throw mangledException(e);
         }
     }
 }
