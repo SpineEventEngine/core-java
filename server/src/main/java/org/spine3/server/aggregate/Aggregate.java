@@ -58,11 +58,49 @@ import static com.google.common.collect.Collections2.filter;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
+//TODO:2016-02-17:alexander.yevsyukov: Define syntax of event applier methods.
+//TODO:2016-02-17:alexander.yevsyukov: Describe dealing with command validation and throwing Failures.
+//TODO:2016-02-17:alexander.yevsyukov: Describe (not) throwing exceptions.
+
 /**
  * Abstract base for aggregates.
  *
+ * <p>Aggregate is the main building block of a business model. Aggregates guarantee consistency of data modifications
+ * in response to commands they receive. Aggregate is the most common case of {@link CommandHandler}.
+ *
+ * <p>An aggregate modifies its state in response to a command and produces one or more events.
+ * These events are used later to restore the state of the aggregate.
+ *
+ * <h2>Creating aggregate class</h2>
+ * <p>In order to create a new aggregate class you need to:
+ * <ol>
+ *     <li>Select a type for identifiers of the aggregates. If you select to use a typed identifier
+ *     (which is recommended), you need to define a protobuf message for the ID type.</li>
+ *     <li>Define aggregate state structure as a protobuf message.</li>
+ *     <li>Generate Java code for ID and state types.</li>
+ *     <li>Create new aggregate class derived from {@code Aggreate} passing ID and state types.</li>
+ * </ol>
+ *
+ * <h2>Adding command handler methods</h2>
+ * <p>Command handling methods in the  an aggregate are defined in the same was as described in {@link CommandHandler}.
+ *
+ * <h2>Adding event applier methods</h2>
+ * <p>Aggregate data is stored as sequence of events it produces. In order to restore the state of the aggregate
+ * these events are passed to the {@link #play(Iterable)} method, which invokes corresponding
+ * <em>applier methods</em>.
+ *
+ * <p>An event applier is a method that changes the state of the aggregate in response to an event. The aggregate
+ * must have applier methods for <em>all</em> event types it produces.
+ *
+ * <h2>Handling snapshots</h2>
+ * In order to optimise the restoration of aggregates, an {@link AggregateRepository} can periodically store
+ * snapshots of aggregate state.
+ *
+ * <p>The {@code Aggregate} restores its state in {@link #restore(Snapshot)} method.
+ *
  * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link EntityId}
  * @param <M> the type of the state held by the aggregate
+ *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -355,7 +393,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * of the aggregate.
      *
      * <p>The predicate uses passed event classes for the events that do not modify the
-     * state of the aggregate. As such, they are called <strong>State Neutral.</strong>
+     * state of the aggregate. As such, they are called <em>State Neutral.</em>
      *
      * @return new predicate instance
      */
@@ -426,7 +464,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @param currentVersion the version of the aggregate after the event was applied
      * @see #createEventContext(CommandContext, Message, Timestamp, int, Message)
      */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid overriding.
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
                                              CommandId commandId, Message event, M currentState, int currentVersion) {
         // Do nothing.

@@ -32,8 +32,8 @@ import java.util.Set;
  *
  * <p>A dispatcher can deliver more than one class of commands.
  *
- * <p>Unlike {@link CommandHandler} the dispatcher does not change business model or
- * produce events.
+ * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the business model, neither it
+ * produces events.
  *
  * @author Alexander Yevsyukov
  * @see CommandHandler
@@ -41,7 +41,7 @@ import java.util.Set;
 public interface CommandDispatcher {
 
     /**
-     * Returns the set of command classes processed by this dispatcher.
+     * Returns the set of command classes that can be processed by this dispatcher.
      *
      * @return non-empty set of command classes
      */
