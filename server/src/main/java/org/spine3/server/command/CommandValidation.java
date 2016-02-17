@@ -45,7 +45,6 @@ public class CommandValidation {
      */
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
-
     }
 
     /**
