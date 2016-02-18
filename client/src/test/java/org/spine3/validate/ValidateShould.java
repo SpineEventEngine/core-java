@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public class ValidateShould {
 
     @Test
-    public void verify_if_message_is_not_in_default_state() {
+    public void verify_that_message_is_not_in_default_state() {
         final Message msg = StringValue.newBuilder().setValue("check_if_message_is_not_in_default_state").build();
 
         assertTrue(Validate.isNotDefault(msg));
@@ -38,7 +38,7 @@ public class ValidateShould {
     }
 
     @Test
-    public void verify_if_message_is_in_default_state() {
+    public void verify_that_message_is_in_default_state() {
         final Message nonDefault = StringValue.newBuilder().setValue("check_if_message_is_in_default_state").build();
 
         assertTrue(Validate.isDefault(StringValue.getDefaultInstance()));
@@ -46,9 +46,9 @@ public class ValidateShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_default_state_throwing_IAE_if_not() {
+    public void check_if_message_is_in_default_state_throwing_exception_if_not() {
         final StringValue nonDefault = StringValue.newBuilder()
-                                                  .setValue("check_if_message_is_in_default_state_throwing_IAE_if_not")
+                                                  .setValue("check_if_message_is_in_default_state_throwing_exception_if_not")
                                                   .build();
         Validate.checkDefault(nonDefault);
     }
@@ -61,7 +61,7 @@ public class ValidateShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_not_in_default_state_throwing_IAE_if_not() {
+    public void check_if_message_is_in_not_in_default_state_throwing_exception_if_not() {
         Validate.checkNotDefault(StringValue.getDefaultInstance());
     }
 
