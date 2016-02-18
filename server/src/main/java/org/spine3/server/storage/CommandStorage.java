@@ -56,39 +56,38 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         checkNotNull(command);
         checkNotClosed();
 
+        checkArgument(command.hasMessage(), "Command message must be set.");
         final Any wrappedMessage = command.getMessage();
+
+        checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
-        final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
+
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = commandId.getUuid();
-        final String aggregateIdStr = idToString(aggregateId.value());
-        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setTimestamp(context.getTimestamp())
-                .setCommandType(commandType.nameOnly())
-                .setCommandId(commandIdStr)
-                .setAggregateIdType(aggregateId.getShortTypeName())
-                .setAggregateId(aggregateIdStr)
-                .setMessage(wrappedMessage)
-                .setContext(context);
+        final String commandIdString = commandId.getUuid();
+        checkNotEmptyOrBlank(commandIdString, "command ID");
 
-        checkRecord(builder);
-
-        write(commandId, builder.build());
-    }
-
-    private static void checkRecord(CommandStorageRecordOrBuilder record) {
-        //TODO:2016-02-17:alexander.yevsyukov: We check the state we create right in this class. Why not check input to this class instead?
-        checkNotEmptyOrBlank(record.getCommandType(), "command type");
-        checkNotEmptyOrBlank(record.getCommandId(), "command ID");
-        checkNotEmptyOrBlank(record.getAggregateIdType(), "aggregate ID type");
-        checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID");
-        final Timestamp timestamp = record.getTimestamp();
+        final Timestamp timestamp = context.getTimestamp();
         final long seconds = timestamp.getSeconds();
+        checkArgument(seconds > 0, "Command time must be set in the context.");
 
-        //TODO:2016-02-18:alexander.yevsyukov: It's too late to check these things here. Check in store();
-        checkArgument(seconds > 0, "Command time must be set.");
-        checkArgument(record.hasMessage(), "Command message must be set.");
-        checkArgument(record.hasContext(), "Command context must be set.");
+        final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
+        checkNotEmptyOrBlank(commandType, "command type");
+
+        final String aggregateIdString = idToString(aggregateId.value());
+        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+
+        final String aggregateIdType = aggregateId.getShortTypeName();
+        checkNotEmptyOrBlank(aggregateIdType, "aggregate ID type");
+
+        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
+                .setMessage(wrappedMessage)
+                .setTimestamp(timestamp)
+                .setCommandType(commandType)
+                .setCommandId(commandIdString)
+                .setAggregateIdType(aggregateIdType)
+                .setAggregateId(aggregateIdString)
+                .setContext(context);
+        write(commandId, builder.build());
     }
 
     private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
