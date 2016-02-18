@@ -152,14 +152,15 @@ public class Validate {
     }
 
     /**
-     * Ensures that the passed timestamp have positive {@code seconds} value.
+     * Ensures that the passed timestamp have {@code seconds} value which is greater than zero.
      *
      * @param timestamp the timestamp to check
      * @return the passed timestamp
+     * @throws IllegalArgumentException if the timestamp {@code seconds} value is less or equal to zero
      */
     public static Timestamp checkTimestamp(Timestamp timestamp, String fieldName) {
         final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, fieldName + " must have positive 'seconds' value.");
+        checkArgument(seconds > 0, fieldName + " is invalid.");
         return timestamp;
     }
 }
