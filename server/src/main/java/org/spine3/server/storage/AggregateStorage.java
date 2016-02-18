@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -36,6 +37,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.base.Identifiers.idToString;
@@ -104,7 +106,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
         for (final Event event : eventList) {
             final AggregateStorageRecord record = toStorageRecord(event);
-            checkRecord(record);
             writeInternal(id, record);
         }
     }
@@ -122,7 +123,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(event);
 
         final AggregateStorageRecord record = toStorageRecord(event);
-        checkRecord(record);
         writeInternal(id, record);
     }
 
@@ -139,40 +139,45 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(snapshot);
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
-                .setTimestamp(snapshot.getTimestamp())
+                .setTimestamp(checkTimestamp(snapshot.getTimestamp()))
                 .setEventType(SNAPSHOT_TYPE_NAME)
                 .setEventId("") // No event ID for snapshots because it's not a domain event.
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot)
                 .build();
-        checkRecord(record);
         writeInternal(aggregateId, record);
     }
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
+
+        checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
+
+        final Timestamp timestamp = context.getTimestamp();
+        checkTimestamp(timestamp);
+
         final EventId eventId = context.getEventId();
         final String eventIdStr = idToString(eventId);
+
+        checkArgument(event.hasMessage(), "Event message must be set.");
         final Any eventMsg = event.getMessage();
-        final String typeName = TypeName.ofEnclosed(eventMsg).nameOnly();
+
+        final String eventType = TypeName.ofEnclosed(eventMsg).nameOnly();
+        checkArgument(!isNullOrEmpty(eventType), "Event type must not be null or empty.");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setTimestamp(context.getTimestamp())
-                .setEventType(typeName)
+                .setEvent(event)
+                .setTimestamp(timestamp)
                 .setEventId(eventIdStr)
-                .setVersion(context.getVersion())
-                .setEvent(event);
+                .setEventType(eventType)
+                .setVersion(context.getVersion());
         return builder.build();
     }
 
-    private static void checkRecord(AggregateStorageRecord record) {
-        checkArgument(record.hasTimestamp(), "Storage record must have a timestamp.");
-        final String eventType = record.getEventType();
-        checkArgument(!eventType.isEmpty(), "Event type is an empty string.");
-        checkArgument(eventType.trim().length() > 0, "Event type is a blank string.");
-        final Event event = record.getEvent();
-        final Snapshot snapshot = record.getSnapshot();
-        checkArgument(event.hasMessage() || snapshot.hasState(), "Record must have an event or a snapshot with a state.");
+    private static Timestamp checkTimestamp(Timestamp timestamp) {
+        final long seconds = timestamp.getSeconds();
+        checkArgument(seconds > 0, "Event time must be set in the context.");
+        return timestamp;
     }
 
     // Storage implementation API.
