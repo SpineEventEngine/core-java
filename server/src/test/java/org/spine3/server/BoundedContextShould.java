@@ -20,10 +20,12 @@
 
 package org.spine3.server;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -60,6 +62,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -83,7 +86,7 @@ public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
     private final ProjectId projectId = createProjectId(newUuid());
-    private final EmptyHandler handler = new EmptyHandler();
+    private final EventHandler handler = new EmptyHandler();
 
     private StorageFactory storageFactory;
     private BoundedContext boundedContext;
@@ -265,7 +268,7 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "TypeMayBeWeakened"})
     private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "STATUS_NEW";
@@ -279,6 +282,7 @@ public class BoundedContextShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // it is required to be public
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -359,12 +363,13 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // it is required to be public
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("UnusedParameters") // OK for test method
         @Assign
+        @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
         public CommandRouted handle(CreateProject command, CommandContext ctx) {
             return CommandRouted.getDefaultInstance();
         }
@@ -377,8 +382,34 @@ public class BoundedContextShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+
+        private final Map<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>> idExtractors =
+                ImmutableMap.<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>>builder()
+                .put(ProjectCreated.class, new IdExtractorFromEventProjectCreated())
+                .put(CreateProject.class, new IdExtractorFromCommandCreateProject())
+                .build();
+
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @Override
+        protected IdExtractor<? extends Message, ? extends Message> getExtractor(Class<? extends Message> messageClass) {
+            return idExtractors.get(messageClass);
+        }
+
+        private class IdExtractorFromEventProjectCreated extends IdExtractor<ProjectCreated, EventContext> {
+            @Override
+            protected ProjectId extract(ProjectCreated message, EventContext context) {
+                return message.getProjectId();
+            }
+        }
+
+        private class IdExtractorFromCommandCreateProject extends IdExtractor<CreateProject, CommandContext> {
+            @Override
+            protected ProjectId extract(CreateProject message, CommandContext context) {
+                return message.getProjectId();
+            }
         }
     }
 

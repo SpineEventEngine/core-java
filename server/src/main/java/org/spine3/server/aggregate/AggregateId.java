@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
- * Value object for aggregate IDs.
+ * Value object for {@link Aggregate} IDs.
  *
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov

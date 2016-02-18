@@ -63,6 +63,7 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  *
  * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link EntityId}
  * @param <M> the type of the state held by the aggregate
+ * @see AggregateId
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */

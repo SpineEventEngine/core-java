@@ -38,6 +38,7 @@ import org.spine3.base.UserId;
 import org.spine3.server.CommandBus;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.Entity;
+import org.spine3.server.EntityId;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
@@ -76,8 +77,9 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  *     <li><a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a></li>
  * </ul>
  *
- * @param <I> the type of the process manager IDs
+ * @param <I> the type of the process manager IDs. See {@link EntityId} for supported types
  * @param <M> the type of the process manager state
+ * @see ProcessManagerId
  * @author Alexander Litus
  */
 public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandler {
