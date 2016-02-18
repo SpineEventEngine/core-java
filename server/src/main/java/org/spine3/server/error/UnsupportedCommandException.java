@@ -17,11 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.error;
+
+import com.google.protobuf.Message;
 
 /**
- * This package contains server-side exceptions related to commands.
+ * Exception that is thrown when unsupported command is obtained
+ * or in case there is no class for given Protobuf command message.
+ *
+ * @author Mikhail Melnik
  */
-@ParametersAreNonnullByDefault
-package org.spine3.server.command.error;
+public class UnsupportedCommandException extends RuntimeException {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public UnsupportedCommandException(Message command) {
+        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+    }
+
+    private static final long serialVersionUID = 0L;
+
+}

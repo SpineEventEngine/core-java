@@ -1,0 +1,151 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+// We do not define the package for this file to allow shorter options for user-defined types.
+// This would allow to write...
+//
+//     [(required).value = true];
+//
+// instead of
+//
+//     [(spine.base.required).value = true)];
+//
+
+option java_generate_equals_and_hash = false;
+option java_multiple_files = true;
+option java_outer_classname = "ValidationProto";
+option java_package = "org.spine3.validation.options";
+
+import "google/protobuf/descriptor.proto";
+
+
+// This option defines default format for validation error message text.
+//
+// The number of parameters and their types are determined by the type of field options.
+extend google.protobuf.MessageOptions {
+    string default_message = 51001;
+}
+
+// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) from Google.
+
+extend google.protobuf.FieldOptions {
+    RequiredOption required = 51002;
+    DecimalOption decimal = 51003;
+    DigitsOption digits = 51004;
+    TimeOption when = 51005;
+    MaxOption max = 51006;
+    MinOption min = 51007;
+    PatternOption pattern = 51008;
+    ValidOption valid = 51009;
+}
+
+//TODO:2016-02-16:alexander.yevsyukov: Document each message option.
+
+//TODO:2016-02-16:alexander.yevsyukov: Take default messages from Hibernate Validator.
+//TODO:2016-02-16:alexander.yevsyukov: Have default texts formatted messages and document message format parameters as comment for `option (default_message)`.
+
+message RequiredOption {
+    // The default format string for missing field. The parameter is the name of the missing field.
+    option (default_message) = "Field %s must be set";
+
+    bool value = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
+}
+
+message DecimalOption {
+    option (default_message) = "Field value must fit into range";
+
+    int32 min = 1;
+    int32 max = 2;
+    bool inclusive = 3;
+    string msg = 4;
+}
+
+message DigitsOption {
+    option (default_message) = "Field should have valid digital value";
+
+    int32 integer = 1;
+    int32 fraction = 2;
+
+    // User-defined validation error message format.
+    string msg = 3;
+}
+
+// This enumeration defines restriction for date/time values.
+enum Time {
+    // Reserved for errors.
+    UNDEFINED = 0;
+
+    // The value must be in the past.
+    PAST = 1;
+
+    // The value must be in the future.
+    FUTURE = 2;
+}
+
+message TimeOption {
+    option (default_message) = "Inappropriate time";
+
+    Time in = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
+}
+
+
+message PatternOption {
+    option (default_message) = "Field should match pattern";
+
+    string regex = 1;
+    int32 flag = 2;
+
+    // User-defined validation error message format.
+    string msg = 3;
+}
+
+message MinOption {
+    option (default_message) = "Field must be larger than min value";
+
+    double value = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
+}
+
+message MaxOption {
+    option (default_message) = "Field should be less than max value";
+
+    double value = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
+}
+
+message ValidOption {
+    option (default_message) = "Field should be valid";
+
+    bool value = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
+}

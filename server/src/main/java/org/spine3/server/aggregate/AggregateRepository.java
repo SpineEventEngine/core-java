@@ -49,7 +49,7 @@ import static org.spine3.base.Commands.getMessage;
  * <p>This class is made abstract for preserving type information of aggregate ID and
  * aggregate classes used by implementations. A simple repository class looks like this:
  * <pre>
- * public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate> {
+ * public class OrderRepository extends AggregateRepository&lt;OrderId, OrderAggregate&gt; {
  *     public OrderRepository(BoundedContext boundedContext) {
  *         super(boundedContext);
  *     }

@@ -27,6 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.UserId;
 import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 
 /**
  * The command factory, which allows generating commands as if the were
@@ -38,6 +39,10 @@ public class TestCommandFactory extends CommandFactory {
 
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
         return new TestCommandFactory(UserId.newBuilder().setValue(actor).build(), zoneOffset);
+    }
+
+    public static TestCommandFactory newInstance(Class<?> testClass) {
+        return newInstance(testClass.getName(), ZoneOffsets.UTC);
     }
 
     protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {

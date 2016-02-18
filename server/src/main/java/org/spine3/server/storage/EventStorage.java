@@ -45,8 +45,9 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -104,11 +105,9 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @Override
     public void write(EventId id, Event event) {
         checkNotClosed();
-        final String idString = id.getUuid();
         checkNotNull(event);
 
-        final EventStorageRecord record = toEventStorageRecord(idString, event);
-        checkRecord(record);
+        final EventStorageRecord record = toEventStorageRecord(id, event);
         writeInternal(record);
     }
 
@@ -130,34 +129,23 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * Creates storage record for the passed {@link Event}.
      */
     @VisibleForTesting
-    /* package */ static EventStorageRecord toEventStorageRecord(String eventId, Event event) {
+    /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
+        final String eventIdString = checkNotEmptyOrBlank(eventId.getUuid(), "event ID");
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
-        final TypeName typeName = TypeName.ofEnclosed(message);
+        final String eventType = TypeName.ofEnclosed(message).nameOnly();
+        checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = Identifiers.idToString(Events.getProducer(context));
+        checkNotEmptyOrBlank(producerId, "producer ID");
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                .setTimestamp(context.getTimestamp())
-                .setEventType(typeName.nameOnly())
+                .setTimestamp(timestamp)
+                .setEventType(eventType)
                 .setProducerId(producerId)
-                .setEventId(eventId)
+                .setEventId(eventIdString)
                 .setMessage(message)
                 .setContext(context);
         return builder.build();
-    }
-
-    private static void checkRecord(EventStorageRecord record) {
-        checkNotEmptyOrBlank(record.getEventId(), "event ID");
-        checkNotEmptyOrBlank(record.getEventType(), "event type");
-        checkNotEmptyOrBlank(record.getProducerId(), "producer ID ");
-        final Timestamp timestamp = record.getTimestamp();
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Event time is not set.");
-    }
-
-    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
-        checkArgument(!stringToCheck.isEmpty(), fieldName + " is an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " is a blank string.");
-        return stringToCheck;
     }
 
     /**

@@ -28,9 +28,9 @@ import org.spine3.base.Command;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandBus;
-import org.spine3.server.EventBus;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -64,12 +64,12 @@ public class Application implements AutoCloseable {
 
         this.boundedContext = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandBus(createCommandDispatcher())
+                .setCommandBus(createCommandBus())
                 .setEventBus(createEventBus(storageFactory))
                 .build();
     }
 
-    private static CommandBus createCommandDispatcher() {
+    private static CommandBus createCommandBus() {
         return CommandBus.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
     }
 
