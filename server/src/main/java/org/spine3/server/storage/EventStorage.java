@@ -45,8 +45,9 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -130,35 +131,19 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     @VisibleForTesting
     /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
         final String eventIdString = eventId.getUuid();
-        checkNotEmptyOrBlank(eventIdString, "event ID");
-
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
-
         final String eventType = TypeName.ofEnclosed(message).nameOnly();
-        checkNotEmptyOrBlank(eventType, "event type");
-
         final String producerId = Identifiers.idToString(Events.getProducer(context));
-        checkNotEmptyOrBlank(producerId, "producer ID ");
-
         final Timestamp timestamp = context.getTimestamp();
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Event time is not set.");
-
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                .setTimestamp(timestamp)
-                .setEventType(eventType)
-                .setProducerId(producerId)
-                .setEventId(eventIdString)
+                .setTimestamp(checkTimestamp(timestamp, "event time"))
+                .setEventType(checkNotEmptyOrBlank(eventType, "event type"))
+                .setProducerId(checkNotEmptyOrBlank(producerId, "producer ID"))
+                .setEventId(checkNotEmptyOrBlank(eventIdString, "event ID"))
                 .setMessage(message)
                 .setContext(context);
         return builder.build();
-    }
-
-    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
-        checkArgument(!stringToCheck.isEmpty(), fieldName + " is an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " is a blank string.");
-        return stringToCheck;
     }
 
     /**

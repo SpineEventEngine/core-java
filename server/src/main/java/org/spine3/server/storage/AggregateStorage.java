@@ -21,11 +21,9 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
@@ -37,10 +35,11 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * An event-sourced storage of aggregate root events and snapshots.
@@ -139,7 +138,7 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(snapshot);
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
-                .setTimestamp(checkTimestamp(snapshot.getTimestamp()))
+                .setTimestamp(checkTimestamp(snapshot.getTimestamp(), "Snapshot timestamp"))
                 .setEventType(SNAPSHOT_TYPE_NAME)
                 .setEventId("") // No event ID for snapshots because it's not a domain event.
                 .setVersion(snapshot.getVersion())
@@ -153,31 +152,20 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
-        final Timestamp timestamp = context.getTimestamp();
-        checkTimestamp(timestamp);
-
-        final EventId eventId = context.getEventId();
-        final String eventIdStr = idToString(eventId);
+        final String eventIdStr = idToString(context.getEventId());
 
         checkArgument(event.hasMessage(), "Event message must be set.");
         final Any eventMsg = event.getMessage();
 
         final String eventType = TypeName.ofEnclosed(eventMsg).nameOnly();
-        checkArgument(!isNullOrEmpty(eventType), "Event type must not be null or empty.");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setEvent(event)
-                .setTimestamp(timestamp)
-                .setEventId(eventIdStr)
-                .setEventType(eventType)
+                .setTimestamp(checkTimestamp(context.getTimestamp(), "Event time"))
+                .setEventId(checkNotEmptyOrBlank(eventIdStr, "Event ID"))
+                .setEventType(checkNotEmptyOrBlank(eventType, "Event type"))
                 .setVersion(context.getVersion());
         return builder.build();
-    }
-
-    private static Timestamp checkTimestamp(Timestamp timestamp) {
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Event time must be set in the context.");
-        return timestamp;
     }
 
     // Storage implementation API.

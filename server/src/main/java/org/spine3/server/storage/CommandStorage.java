@@ -21,7 +21,6 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -35,6 +34,8 @@ import org.spine3.type.TypeName;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -58,42 +59,23 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
 
         checkArgument(command.hasMessage(), "Command message must be set.");
         final Any wrappedMessage = command.getMessage();
-
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
-
         final CommandId commandId = context.getCommandId();
         final String commandIdString = commandId.getUuid();
-        checkNotEmptyOrBlank(commandIdString, "command ID");
-
-        final Timestamp timestamp = context.getTimestamp();
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Command time must be set in the context.");
-
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
-        checkNotEmptyOrBlank(commandType, "command type");
-
         final String aggregateIdString = idToString(aggregateId.value());
-        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
-
         final String aggregateIdType = aggregateId.getShortTypeName();
-        checkNotEmptyOrBlank(aggregateIdType, "aggregate ID type");
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setMessage(wrappedMessage)
-                .setTimestamp(timestamp)
-                .setCommandType(commandType)
-                .setCommandId(commandIdString)
-                .setAggregateIdType(aggregateIdType)
-                .setAggregateId(aggregateIdString)
+                .setTimestamp(checkTimestamp(context.getTimestamp(), "Command time"))
+                .setCommandType(checkNotEmptyOrBlank(commandType, "command type"))
+                .setCommandId(checkNotEmptyOrBlank(commandIdString, "command ID"))
+                .setAggregateIdType(checkNotEmptyOrBlank(aggregateIdType, "aggregate ID type"))
+                .setAggregateId(checkNotEmptyOrBlank(aggregateIdString, "aggregate ID"))
                 .setContext(context);
         write(commandId, builder.build());
-    }
-
-    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
-        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
-        return stringToCheck;
     }
 
     /**
