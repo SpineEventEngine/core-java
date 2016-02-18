@@ -152,7 +152,7 @@ public class CommandBus implements AutoCloseable {
      *
      * @param request the command request to be processed
      * @return a list of the events as the result of handling the command
-     * @throws UnsupportedCommandException if there is no handler or dispatcher registered for
+     * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
     public List<Event> post(Command request) {
@@ -175,7 +175,6 @@ public class CommandBus implements AutoCloseable {
             return invokeHandler(command, context);
         }
 
-        //TODO:2016-01-24:alexander.yevsyukov: Unify exceptions with messages sent in Response.
         throw new UnsupportedCommandException(getMessage(request));
     }
 
