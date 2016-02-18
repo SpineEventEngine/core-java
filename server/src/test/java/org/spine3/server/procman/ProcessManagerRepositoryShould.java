@@ -20,7 +20,6 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -38,7 +37,7 @@ import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.Subscribe;
-import org.spine3.server.procman.error.NoIdExtractorException;
+import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -55,7 +54,6 @@ import org.spine3.type.EventClass;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -159,24 +157,18 @@ public class ProcessManagerRepositoryShould {
         assertNotNull(extractor);
     }
 
-    @Test(expected = NoIdExtractorException.class)
+    @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
         final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
-    @Test(expected = NoIdExtractorException.class)
+    @Test(expected = MissingProcessManagerIdException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_create_id_extractor_with_wrong_context_param() {
-        //noinspection ResultOfObjectAllocationIgnored
-        repository.new IdExtractorWithInvalidContextParam();
     }
 
     @Test
@@ -206,72 +198,13 @@ public class ProcessManagerRepositoryShould {
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
-        private final Map<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>> idExtractors =
-                ImmutableMap.<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>>builder()
-                .put(ProjectCreated.class, new IdExtractorFromEventProjectCreated())
-                .put(TaskAdded.class, new IdExtractorFromEventTaskAdded())
-                .put(ProjectStarted.class, new IdExtractorFromEventProjectStarted())
-                .put(CreateProject.class, new IdExtractorFromCommandCreateProject())
-                .put(AddTask.class, new IdExtractorFromCommandAddTask())
-                .put(StartProject.class, new IdExtractorFromCommandStartProject())
-                .build();
-
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
         @Override
         protected IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass) {
-            return idExtractors.get(messageClass);
-        }
-
-        private class IdExtractorFromEventProjectCreated extends IdExtractor<ProjectCreated, EventContext> {
-            @Override
-            protected ProjectId extract(ProjectCreated message, EventContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromEventTaskAdded extends IdExtractor<TaskAdded, EventContext> {
-            @Override
-            protected ProjectId extract(TaskAdded message, EventContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromEventProjectStarted extends IdExtractor<ProjectStarted, EventContext> {
-            @Override
-            protected ProjectId extract(ProjectStarted message, EventContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromCommandCreateProject extends IdExtractor<CreateProject, CommandContext> {
-            @Override
-            protected ProjectId extract(CreateProject message, CommandContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromCommandAddTask extends IdExtractor<AddTask, CommandContext> {
-            @Override
-            protected ProjectId extract(AddTask message, CommandContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromCommandStartProject extends IdExtractor<StartProject, CommandContext> {
-            @Override
-            protected ProjectId extract(StartProject message, CommandContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorWithInvalidContextParam extends IdExtractor<Message, Message> {
-            @Override
-            protected ProjectId extract(Message message, Message context) {
-                return ProjectId.getDefaultInstance();
-            }
+            return new IdFieldByIndexExtractor<>(0);
         }
     }
 

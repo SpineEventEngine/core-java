@@ -19,8 +19,6 @@
  */
 package org.spine3.server.procman.error;
 
-import com.google.protobuf.Message;
-
 import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
@@ -34,21 +32,12 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  */
 public class MissingProcessManagerIdException extends RuntimeException {
 
-    public MissingProcessManagerIdException(Message message, String methodName, Throwable cause) {
-        super(createMessage(message, methodName), cause);
+    public MissingProcessManagerIdException(String messageClassName, String propertyName, int fieldIndex) {
+        super(createMessage(messageClassName, propertyName, fieldIndex));
     }
 
-    private static String createMessage(Message message, String methodName) {
-        return "Unable to call the ID accessor method " + methodName + " from the message of class "
-                + message.getClass().getName();
-    }
-
-    public MissingProcessManagerIdException(String messageClassName, String propertyName) {
-        super(createMessage(messageClassName, propertyName));
-    }
-
-    private static String createMessage(String messageClassName, String propertyName) {
-        return "The first property of the process manager message " + messageClassName +
+    private static String createMessage(String messageClassName, String propertyName, int fieldIndex) {
+        return "The property with the index '" + fieldIndex + "' of the process manager message " + messageClassName +
                 " must define a process manager ID with a name ending with '" + ID_PROPERTY_SUFFIX +
                 "'. Found property: " + propertyName;
     }

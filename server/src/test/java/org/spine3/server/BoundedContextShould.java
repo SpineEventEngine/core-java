@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -62,7 +61,6 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -383,33 +381,13 @@ public class BoundedContextShould {
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
 
-        private final Map<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>> idExtractors =
-                ImmutableMap.<Class<? extends Message>, IdExtractor<? extends Message, ? extends Message>>builder()
-                .put(ProjectCreated.class, new IdExtractorFromEventProjectCreated())
-                .put(CreateProject.class, new IdExtractorFromCommandCreateProject())
-                .build();
-
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
         @Override
         protected IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass) {
-            return idExtractors.get(messageClass);
-        }
-
-        private class IdExtractorFromEventProjectCreated extends IdExtractor<ProjectCreated, EventContext> {
-            @Override
-            protected ProjectId extract(ProjectCreated message, EventContext context) {
-                return message.getProjectId();
-            }
-        }
-
-        private class IdExtractorFromCommandCreateProject extends IdExtractor<CreateProject, CommandContext> {
-            @Override
-            protected ProjectId extract(CreateProject message, CommandContext context) {
-                return message.getProjectId();
-            }
+            return new IdFieldByIndexExtractor<>(0);
         }
     }
 

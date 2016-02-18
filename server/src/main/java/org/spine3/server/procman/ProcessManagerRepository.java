@@ -28,13 +28,14 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.protobuf.MessageField;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandBus;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.procman.error.NoIdExtractorException;
-import org.spine3.server.reflect.Classes;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -46,6 +47,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
+import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -182,19 +184,6 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      */
     protected abstract class IdExtractor<M extends Message, C extends Message> {
 
-        private static final int CONTEXT_GENERIC_PARAM_INDEX = 1;
-
-        protected IdExtractor() {
-            final Class<C> contextClass = Classes.getGenericParameterType(getClass(), CONTEXT_GENERIC_PARAM_INDEX);
-            final boolean isExpectedClass =
-                    contextClass.equals(EventContext.class) ||
-                    contextClass.equals(CommandContext.class);
-            if (!isExpectedClass) {
-                throw new IllegalArgumentException("Expected either command or event context class, found: " +
-                        contextClass.getName());
-            }
-        }
-
         /**
          * Extracts a process manager ID from event/command message and context.
          *
@@ -205,9 +194,59 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         protected abstract I extract(M message, C context);
     }
 
+    /**
+     * Extracts a process manager ID from event/command message and context based on the passed field index.
+     *
+     * @param <M> the type of event or command message to extract ID from
+     * @param <C> either {@link EventContext} or {@link CommandContext} type
+     */
+    protected class IdFieldByIndexExtractor<M extends Message, C extends Message> extends IdExtractor<M, C> {
+
+        private final ProcessManagerIdField idField;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param idIndex the index of ID field in this type of messages
+         */
+        public IdFieldByIndexExtractor(int idIndex) {
+            this.idField = new ProcessManagerIdField(idIndex);
+        }
+
+        @Override
+        protected I extract(M message, C context) {
+            @SuppressWarnings("unchecked") // we expect that the field is of this type
+            final I id = (I) idField.getValue(message);
+            return id;
+        }
+
+        /**
+         * Accessor for process manager ID fields.
+         *
+         * <p>A process manager ID name must end with {@code "id"} suffix.
+         */
+        private class ProcessManagerIdField extends MessageField {
+
+            private ProcessManagerIdField(int index) {
+                super(index);
+            }
+
+            @Override
+            protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
+                return new MissingProcessManagerIdException(message.getClass().getName(), fieldName, getIndex());
+            }
+
+            @Override
+            protected boolean isFieldAvailable(Message message) {
+                final String fieldName = MessageField.getFieldName(message, getIndex());
+                final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
+                return result;
+            }
+        };
+    }
+
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(ProcessManagerRepository.class);
     }
