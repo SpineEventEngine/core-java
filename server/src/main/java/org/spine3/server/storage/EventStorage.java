@@ -130,17 +130,19 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      */
     @VisibleForTesting
     /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
-        final String eventIdString = eventId.getUuid();
+        final String eventIdString = checkNotEmptyOrBlank(eventId.getUuid(), "event ID");
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
         final String eventType = TypeName.ofEnclosed(message).nameOnly();
+        checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = Identifiers.idToString(Events.getProducer(context));
-        final Timestamp timestamp = context.getTimestamp();
+        checkNotEmptyOrBlank(producerId, "producer ID");
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                .setTimestamp(checkTimestamp(timestamp, "event time"))
-                .setEventType(checkNotEmptyOrBlank(eventType, "event type"))
-                .setProducerId(checkNotEmptyOrBlank(producerId, "producer ID"))
-                .setEventId(checkNotEmptyOrBlank(eventIdString, "event ID"))
+                .setTimestamp(timestamp)
+                .setEventType(eventType)
+                .setProducerId(producerId)
+                .setEventId(eventIdString)
                 .setMessage(message)
                 .setContext(context);
         return builder.build();

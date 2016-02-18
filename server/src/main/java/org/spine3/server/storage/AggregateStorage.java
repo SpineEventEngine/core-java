@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -148,22 +149,25 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
-
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
         final String eventIdStr = idToString(context.getEventId());
+        checkNotEmptyOrBlank(eventIdStr, "Event ID");
 
         checkArgument(event.hasMessage(), "Event message must be set.");
         final Any eventMsg = event.getMessage();
 
         final String eventType = TypeName.ofEnclosed(eventMsg).nameOnly();
+        checkNotEmptyOrBlank(eventType, "Event type");
+
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Event time");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
                 .setEvent(event)
-                .setTimestamp(checkTimestamp(context.getTimestamp(), "Event time"))
-                .setEventId(checkNotEmptyOrBlank(eventIdStr, "Event ID"))
-                .setEventType(checkNotEmptyOrBlank(eventType, "Event type"))
+                .setTimestamp(timestamp)
+                .setEventId(eventIdStr)
+                .setEventType(eventType)
                 .setVersion(context.getVersion());
         return builder.build();
     }

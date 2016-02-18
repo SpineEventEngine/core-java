@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -59,21 +60,29 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
 
         checkArgument(command.hasMessage(), "Command message must be set.");
         final Any wrappedMessage = command.getMessage();
+
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
+
         final CommandId commandId = context.getCommandId();
-        final String commandIdString = commandId.getUuid();
+        final String commandIdString = checkNotEmptyOrBlank(commandId.getUuid(), "command ID");
+
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
+        checkNotEmptyOrBlank(commandType, "command type");
+
         final String aggregateIdString = idToString(aggregateId.value());
-        final String aggregateIdType = aggregateId.getShortTypeName();
+        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+
+        final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Command time");
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setMessage(wrappedMessage)
-                .setTimestamp(checkTimestamp(context.getTimestamp(), "Command time"))
-                .setCommandType(checkNotEmptyOrBlank(commandType, "command type"))
-                .setCommandId(checkNotEmptyOrBlank(commandIdString, "command ID"))
-                .setAggregateIdType(checkNotEmptyOrBlank(aggregateIdType, "aggregate ID type"))
-                .setAggregateId(checkNotEmptyOrBlank(aggregateIdString, "aggregate ID"))
+                .setTimestamp(timestamp)
+                .setCommandType(commandType)
+                .setCommandId(commandIdString)
+                .setAggregateIdType(aggregateIdType)
+                .setAggregateId(aggregateIdString)
                 .setContext(context);
         write(commandId, builder.build());
     }
