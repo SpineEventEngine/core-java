@@ -21,6 +21,7 @@
 package org.spine3.server.command;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -68,9 +69,9 @@ public class CommandBusShould {
         CommandBus.create(null);
     }
 
-    //
-    // Test for empty handler
-    //--------------------------
+    /**
+     * Test for an empty handler.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
@@ -100,10 +101,9 @@ public class CommandBusShould {
 
     }
 
-    //
-    // Test for duplicate dispatchers
-    //----------------------------------
-
+    /**
+     * Test for duplicate dispatchers.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_another_dispatcher_for_already_registered_commands() {
         commandBus.register(new TwoCommandDispatcher());
@@ -175,9 +175,9 @@ public class CommandBusShould {
         assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
     }
 
-    //
-    // Test for not overriding handlers by dispatchers and vice versa
-    //-------------------------------------------------------------------
+    /**
+     * Tests for not overriding handlers by dispatchers and vice versa.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
@@ -292,6 +292,7 @@ public class CommandBusShould {
         assertTrue(handler.wasHandlerInvoked());
     }
 
+    @Ignore
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
         //TODO:2016-02-18:alexander.yevsyukov: Implement
