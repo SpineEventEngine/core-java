@@ -21,10 +21,15 @@
 package org.spine3.type;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
+import org.spine3.base.Command;
+import org.spine3.client.CommandFactory;
+import org.spine3.test.RunTest;
+import org.spine3.test.TestCommandFactory;
 
 import static org.junit.Assert.*;
 
@@ -68,5 +73,25 @@ public class TypeNameShould {
     public void return_name_if_no_package() {
         final String name = TypeNameShould.class.getSimpleName();
         assertEquals(name, TypeName.of(name).nameOnly());
+    }
+
+    @Test
+    public void create_by_descriptor() {
+        final Descriptors.Descriptor descriptor = StringValue.getDefaultInstance().getDescriptorForType();
+
+        final TypeName typeName = TypeName.of(descriptor);
+        assertEquals(TypeName.of(StringValue.getDefaultInstance()), typeName);
+    }
+
+    @Test
+    public void obtain_type_of_command() {
+        final CommandFactory factory = TestCommandFactory.newInstance(TypeNameShould.class);
+        final RunTest message = RunTest.newBuilder()
+                                       .setMethodName("obtain_type_of_command")
+                                       .build();
+        final Command command = factory.create(message);
+
+        final TypeName typeName = TypeName.ofCommand(command);
+        assertEquals(TypeName.of(message), typeName);
     }
 }

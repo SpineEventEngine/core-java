@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.getMessage;
+import static org.spine3.base.Commands.*;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -58,6 +58,9 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
+    private final CommandStatusHelper commandStatus;
+    private final ProblemLog problemLog = new ProblemLog();
+
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
         return new CommandBus(checkNotNull(store));
@@ -65,6 +68,7 @@ public class CommandBus implements AutoCloseable {
 
     protected CommandBus(CommandStore commandStore) {
         this.commandStore = commandStore;
+        this.commandStatus = new CommandStatusHelper(commandStore);
     }
 
     /**
@@ -126,15 +130,13 @@ public class CommandBus implements AutoCloseable {
      */
     public Response validate(Message command) {
         checkNotNull(command);
-        final Message message = (command instanceof Command) ?
-                getMessage((Command) command) :
-                command;
+        final CommandClass commandClass = CommandClass.of(command);
 
-        if (dispatcherRegistry.hasDispatcherFor(message)) {
+        if (dispatcherRegistered(commandClass)) {
             return Responses.ok();
         }
 
-        if (handlerRegistry.hasHandlerFor(message)) {
+        if (handlerRegistered(commandClass)) {
             return Responses.ok();
         }
 
@@ -142,7 +144,7 @@ public class CommandBus implements AutoCloseable {
         // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
         // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
 
-        return CommandValidation.unsupportedCommand(message);
+        return CommandValidation.unsupportedCommand(command);
     }
 
     /**
@@ -184,64 +186,101 @@ public class CommandBus implements AutoCloseable {
         try {
             result = dispatcher.dispatch(command);
         } catch (Exception e) {
-            final CommandId commandId = command.getContext().getCommandId();
-            log().error("Unable to dispatch command with ID: " + commandId.getUuid(), e);
-
-            updateCommandStatus(commandId, e);
+            problemLog.errorDispatching(e, command);
+            commandStatus.setToError(command.getContext().getCommandId(), e);
         }
         return result;
     }
 
-    /* package */ final List<Event> invokeHandler(Message command, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(command);
+    private List<Event> invokeHandler(Message msg, CommandContext context) {
+        final CommandClass commandClass = CommandClass.of(msg);
         final CommandHandlerMethod method = getHandler(commandClass);
         List<Event> result = Collections.emptyList();
         try {
-            result = method.invoke(command, context);
+            result = method.invoke(msg, context);
 
-            setCommandStatusOk(context.getCommandId());
+            commandStatus.setOk(context.getCommandId());
 
         } catch (InvocationTargetException e) {
             final CommandId commandId = context.getCommandId();
-            final String commandIdStr = commandId.getUuid();
             final Throwable cause = e.getCause();
-
             //noinspection ChainOfInstanceofChecks
             if (cause instanceof Exception) {
                 final Exception exception = (Exception) cause;
-                log().error(String.format("Exception while handling command ID: `%s`" , commandIdStr), e);
-                updateCommandStatus(commandId, exception);
+                problemLog.errorHandling(exception, msg, commandId);
+                commandStatus.setToError(commandId, exception);
             } else if (cause instanceof FailureThrowable){
                 final FailureThrowable failure = (FailureThrowable) cause;
-                log().warn(
-                        String.format("Business failure ocurred when handling command with ID: `%s`", commandIdStr),
-                        failure);
-                updateCommandStatus(commandId, failure);
+                problemLog.failureHandling(failure, msg, commandId);
+                commandStatus.setToFailure(commandId, failure);
             } else {
-                log().error(
-                        String.format("Throwable encountered when handling command with ID: `%s`", commandIdStr),
-                        cause);
-                updateCommandStatus(commandId, Errors.fromThrowable(cause));
+                problemLog.errorHandlingUnknown(cause, msg, commandId);
+                commandStatus.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
 
         return result;
     }
 
-    private void setCommandStatusOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
+    /**
+     * Convenience wrapper for logging errors and warnings.
+     */
+    @SuppressWarnings("MethodMayBeStatic") // made non-static and package-visible for testing.
+    /* package */ static class ProblemLog {
+        /* package */ void errorDispatching(Exception exception, Command command) {
+            final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
+            log().error(msg, exception);
+        }
+
+        /* package */ void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
+            final String msg = formatMessageTypeAndId("Exception while handling command `%s` (ID: `%s`)",
+                    commandMessage, commandId);
+            log().error(msg, exception);
+        }
+
+        /* package */ void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
+            final String msg = formatMessageTypeAndId("Business failure occurred when handling command `%s` (ID: `%s`)",
+                    commandMessage, commandId);
+            log().warn(msg, flr);
+        }
+
+        /* package */ void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
+            final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
+                    commandMessage, commandId);
+            log().error(msg, throwable);
+        }
     }
 
-    private void updateCommandStatus(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
+    @VisibleForTesting
+    /* package */ ProblemLog getProblemLog() {
+        return problemLog;
     }
 
-    private void updateCommandStatus(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toMessage());
-    }
+    /**
+     * The helper class for updating command status.
+     */
+    private static class CommandStatusHelper {
+        private final CommandStore commandStore;
 
-    private void updateCommandStatus(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
+        private CommandStatusHelper(CommandStore commandStore) {
+            this.commandStore = commandStore;
+        }
+
+        private void setOk(CommandId commandId) {
+            commandStore.setCommandStatusOk(commandId);
+        }
+
+        private void setToError(CommandId commandId, Exception exception) {
+            commandStore.updateStatus(commandId, exception);
+        }
+
+        private void setToFailure(CommandId commandId, FailureThrowable failure) {
+            commandStore.updateStatus(commandId, failure.toMessage());
+        }
+
+        private void setToError(CommandId commandId, org.spine3.base.Error error) {
+            commandStore.updateStatus(commandId, error);
+        }
     }
 
     private void store(Command request) {

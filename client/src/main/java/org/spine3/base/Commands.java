@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
@@ -92,6 +94,9 @@ public class Commands {
         return result;
     }
 
+    /**
+     * Creates a predicate for filtering commands created after the passed timestamp.
+     */
     public static Predicate<Command> wereAfter(final Timestamp from) {
         return new Predicate<Command>() {
             @Override
@@ -103,6 +108,9 @@ public class Commands {
         };
     }
 
+    /**
+     * Creates a predicate for filtering commands created withing given timerange.
+     */
     public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
         return new Predicate<Command>() {
             @Override
@@ -133,5 +141,42 @@ public class Commands {
                 return Timestamps.compare(timestamp1, timestamp2);
             }
         });
+    }
+
+    /**
+     * Creates a formatted string with type and ID of the passed command.
+     *
+     * <p>The {@code format} string must have two {@code %s} format specifiers.
+     * The first specifier is for command type name. The second is for command ID.
+     *
+     * @param format the format string with two parameters
+     * @param command the command to log
+     * @return formatted string
+     */
+    public static String formatCommandTypeAndId(String format, Command command) {
+        final CommandId commandId = command.getContext().getCommandId();
+        final Message commandMessage = getMessage(command);
+
+        return formatMessageTypeAndId(format, commandMessage, commandId);
+    }
+
+    /**
+     * Creates a formatted string with type of the command message and command ID.
+     *
+     * <p>The {@code format} string must have two {@code %s} format specifiers.
+     * The first specifier is for message type name. The second is for command ID.
+     *
+     * @param format the format string
+     * @param commandId the ID of the command
+     * @return formatted string
+     */
+    public static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
+        checkNotNull(format);
+        checkArgument(!format.isEmpty());
+
+        final TypeName commandType = TypeName.of(commandMessage);
+        final String id = commandId.getUuid();
+        final String result = String.format(format, commandType, id);
+        return result;
     }
 }

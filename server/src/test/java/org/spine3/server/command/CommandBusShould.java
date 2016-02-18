@@ -21,7 +21,6 @@
 package org.spine3.server.command;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -32,21 +31,20 @@ import org.spine3.server.Assign;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.time.ZoneOffsets;
 import org.spine3.type.CommandClass;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 
@@ -55,13 +53,14 @@ public class CommandBusShould {
 
     private CommandBus commandBus;
     private CommandStore commandStore;
+    private CommandFactory commandFactory;
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        commandStore = mock(CommandStore.class);
 
-        commandStore = new CommandStore(storageFactory.createCommandStorage());
         commandBus = CommandBus.create(commandStore);
+        commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
     @Test(expected = NullPointerException.class)
@@ -70,9 +69,9 @@ public class CommandBusShould {
         CommandBus.create(null);
     }
 
-    /**
-     * Test for an empty handler.
-     */
+    //
+    // Test for empty handler
+    //--------------------------
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
@@ -102,9 +101,10 @@ public class CommandBusShould {
 
     }
 
-    /**
-     * Test for duplicate dispatchers.
-     */
+    //
+    // Test for duplicate dispatchers
+    //----------------------------------
+
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_another_dispatcher_for_already_registered_commands() {
         commandBus.register(new TwoCommandDispatcher());
@@ -176,9 +176,9 @@ public class CommandBusShould {
         assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
     }
 
-    /**
-     * Tests for not overriding handlers by dispatchers and vice versa.
-     */
+    //
+    // Test for not overriding handlers by dispatchers and vice versa
+    //-------------------------------------------------------------------
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
@@ -203,6 +203,7 @@ public class CommandBusShould {
     private static class CreateProjectHandler implements CommandHandler {
 
         private boolean handlerInvoked = false;
+
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ctx) {
             handlerInvoked = true;
@@ -277,7 +278,8 @@ public class CommandBusShould {
     @Test
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
-        assertTrue(commandStore.isClosed());
+
+        verify(commandStore, atMost(1)).close();
     }
 
     @Test
@@ -294,22 +296,18 @@ public class CommandBusShould {
         final CreateProjectHandler handler = new CreateProjectHandler();
         commandBus.register(handler);
 
-        final CommandFactory factory = TestCommandFactory.newInstance("invoke_handler", ZoneOffsets.UTC);
-        final Command command = factory.create(createProject("_when_command_posted"));
+        final Command command = commandFactory.create(createProject("_when_command_posted"));
         commandBus.post(command);
 
         assertTrue(handler.wasHandlerInvoked());
     }
 
-    @Ignore
     @Test
     public void invoke_dispatcher_when_command_posted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
 
-        final CommandFactory factory = TestCommandFactory.newInstance("invoke_dispatcher", ZoneOffsets.UTC);
-        final String projectId = "@Test invoke_dispatcher";
-        final Command command = factory.create(addTask(projectId));
+        final Command command = commandFactory.create(addTask("@Test invoke_dispatcher"));
 
         commandBus.post(command);
 
@@ -318,15 +316,37 @@ public class CommandBusShould {
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_when_there_is_no_neither_handler_nor_dispatcher() {
-        final CommandFactory factory = TestCommandFactory.newInstance("unsupported_command", ZoneOffsets.UTC);
-        final String projectId = "@Test unsupported_command";
-        final Command command = factory.create(addTask(projectId));
+        final Command command = commandFactory.create(addTask("@Test unsupported_command"));
 
         commandBus.post(command);
     }
 
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
-        //TODO:2016-02-18:alexander.yevsyukov: Implement
+        final CreateProjectHandler handler = new CreateProjectHandler();
+        commandBus.register(handler);
+        final Command command = commandFactory.create(createProject("set_command_status_to_OK_when_handler_returns"));
+
+        commandBus.post(command);
+
+        // See that we called CommandStore only once with the right command ID.
+        verify(commandStore, atMost(1)).setCommandStatusOk(command.getContext().getCommandId());
+    }
+
+    @Test
+    public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
+        final CommandDispatcher throwingDispatcher = mock(CommandDispatcher.class);
+        when(throwingDispatcher.getCommandClasses()).thenReturn(CommandClass.setOf(CreateProject.class));
+        final IOException exception = new IOException("Unable to dispatch");
+        doThrow(exception).when(throwingDispatcher).dispatch(any(Command.class));
+        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
+
+        commandBus.register(throwingDispatcher);
+        final Command command = commandFactory.create(createProject("set_command_status_to_error_when_dispatcher_throws"));
+
+        commandBus.post(command);
+
+        verify(commandStore, atMost(1)).updateStatus(eq(command.getContext().getCommandId()), eq(exception));
+        verify(log, atMost(1)).errorDispatching(eq(exception), eq(command));
     }
 }
