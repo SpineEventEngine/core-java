@@ -21,9 +21,12 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -131,5 +134,33 @@ public class Validate {
     public static <M extends Message> M checkDefault(M object) {
         checkDefault(object, "The message is not in the default state: %s", object);
         return object;
+    }
+
+    /**
+     * Ensures that the passed string is not {@code null}, empty or blank string.
+     *
+     * @param stringToCheck the string to check
+     * @param fieldName     the name of the string field
+     * @return the passed string
+     * @throws IllegalArgumentException if the string is empty or blank
+     */
+    public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
+        checkNotNull(stringToCheck, fieldName + " must not be null.");
+        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        return stringToCheck;
+    }
+
+    /**
+     * Ensures that the passed timestamp have {@code seconds} value which is greater than zero.
+     *
+     * @param timestamp the timestamp to check
+     * @return the passed timestamp
+     * @throws IllegalArgumentException if the timestamp {@code seconds} value is less or equal to zero
+     */
+    public static Timestamp checkTimestamp(Timestamp timestamp, String fieldName) {
+        final long seconds = timestamp.getSeconds();
+        checkArgument(seconds > 0, fieldName + " is invalid.");
+        return timestamp;
     }
 }

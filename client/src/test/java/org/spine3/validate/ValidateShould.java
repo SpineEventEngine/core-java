@@ -22,6 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -72,5 +74,36 @@ public class ValidateShould {
                                                   .build();
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault));
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault, "with error message"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_timestamp_seconds_are_not_positive() {
+        Validate.checkTimestamp(Timestamp.getDefaultInstance(), "");
+    }
+
+    @Test
+    public void do_not_throw_exception_if_timestamp_seconds_are_positive() {
+        Validate.checkTimestamp(TimeUtil.getCurrentTime(), "");
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_checked_string_is_null() {
+        //noinspection ConstantConditions
+        Validate.checkNotEmptyOrBlank(null, "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_string_is_empty() {
+        Validate.checkNotEmptyOrBlank("", "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_string_is_blank() {
+        Validate.checkNotEmptyOrBlank("   ", "");
+    }
+
+    @Test
+    public void do_not_throw_exception_if_checked_string_is_valid() {
+        Validate.checkNotEmptyOrBlank("valid_string", "");
     }
 }
