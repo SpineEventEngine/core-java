@@ -151,7 +151,7 @@ public class CommandBus implements AutoCloseable {
      * @param request the command request to be processed
      * @return a list of the events as the result of handling the command
      * @throws UnsupportedCommandException if there is no handler or dispatcher registered for
-     *  the class of the passed command
+     *                                     the class of the passed command
      */
     public List<Event> post(Command request) {
 
@@ -160,7 +160,6 @@ public class CommandBus implements AutoCloseable {
         checkNotNull(request);
 
         store(request);
-
 
         final CommandClass commandClass = CommandClass.of(request);
 

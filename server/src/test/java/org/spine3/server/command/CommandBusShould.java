@@ -30,6 +30,7 @@ import org.spine3.client.CommandFactory;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
+import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
@@ -248,6 +249,9 @@ public class CommandBusShould {
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
+
+        private boolean dispatcherInvoked = false;
+
         @Override
         public Set<CommandClass> getCommandClasses() {
             return CommandClass.setOf(AddTask.class);
@@ -255,8 +259,13 @@ public class CommandBusShould {
 
         @Override
         public List<Event> dispatch(Command request) throws Exception {
+            dispatcherInvoked = true;
             //noinspection ReturnOfNull
             return null;
+        }
+
+        public boolean wasDispatcherInvoked() {
+            return dispatcherInvoked;
         }
     }
 
@@ -290,6 +299,29 @@ public class CommandBusShould {
         commandBus.post(command);
 
         assertTrue(handler.wasHandlerInvoked());
+    }
+
+    @Test
+    public void invoke_dispatcher_when_command_posted() {
+        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        commandBus.register(dispatcher);
+
+        final CommandFactory factory = TestCommandFactory.newInstance("invoke_dispatcher", ZoneOffsets.UTC);
+        final String projectId = "@Test invoke_dispatcher";
+        final Command command = factory.create(addTask(projectId));
+
+        commandBus.post(command);
+
+        assertTrue(dispatcher.wasDispatcherInvoked());
+    }
+
+    @Test(expected = UnsupportedCommandException.class)
+    public void throw_exception_when_there_is_no_neither_handler_nor_dispatcher() {
+        final CommandFactory factory = TestCommandFactory.newInstance("unsupported_command", ZoneOffsets.UTC);
+        final String projectId = "@Test unsupported_command";
+        final Command command = factory.create(addTask(projectId));
+
+        commandBus.post(command);
     }
 
     @Test
