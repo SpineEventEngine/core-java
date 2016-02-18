@@ -394,7 +394,7 @@ public class BoundedContextShould {
         }
 
         @Override
-        protected IdExtractor<? extends Message, ? extends Message> getExtractor(Class<? extends Message> messageClass) {
+        protected IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass) {
             return idExtractors.get(messageClass);
         }
 

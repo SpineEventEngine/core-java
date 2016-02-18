@@ -33,10 +33,13 @@ import org.spine3.server.CommandBus;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.EntityRepository;
 import org.spine3.server.EventDispatcher;
+import org.spine3.server.procman.error.NoIdExtractorException;
+import org.spine3.server.reflect.Classes;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
@@ -49,64 +52,19 @@ import static org.spine3.base.Commands.getMessage;
  *
  * @param <I> the type of IDs of process managers
  * @param <PM> the type of process managers
- * @param <M> the type of process manager state messages
+ * @param <S> the type of process manager state messages
  * @see ProcessManager
  * @author Alexander Litus
  */
-public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M>, M extends Message>
-                          extends EntityRepository<I, PM, M>
+public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S>, S extends Message>
+                          extends EntityRepository<I, PM, S>
                           implements CommandDispatcher, EventDispatcher {
+
     /**
      * {@inheritDoc}
      */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
         super(boundedContext);
-    }
-
-    /**
-     * Intended to return a process manager ID based on the command and command context.
-     *
-     * <p>The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
-     * Override any of these methods if you need.
-     *
-     * @param command command which the process manager handles
-     * @param context context of the command
-     * @return a process manager ID
-     * @see #getId(Message)
-     */
-    @SuppressWarnings("UnusedParameters") // Overriding implementations may use the `context` parameter.
-    protected I getId(Message command, CommandContext context) {
-        return getId(command);
-    }
-
-    /**
-     * Intended to return a process manager ID based on the event and event context.
-     *
-     * <p>The default implementation uses {@link #getId(Message)} method and does not use the {@code context}.
-     * Override any of these methods if you need.
-     *
-     * @param event event which the process manager handles
-     * @param context context of the event
-     * @return a process manager ID
-     */
-    @SuppressWarnings("UnusedParameters") // Overriding implementations may use the `context` parameter.
-    protected I getId(Message event, EventContext context) {
-        return getId(event);
-    }
-
-    /**
-     * Returns a process manager ID based on the command/event message.
-     *
-     * @param message a command/event which the process manager handles
-     * @return a process manager ID
-     * @see ProcessManagerId#from(Message)
-     */
-    protected I getId(Message message) {
-        // We cast to this type because assume that all commands/events for the manager refer to IDs of the same type <I>.
-        // If this assumption fails, we would get ClassCastException.
-        @SuppressWarnings("unchecked")
-        final I result = (I) ProcessManagerId.from(message).value();
-        return result;
     }
 
     @Override
@@ -133,10 +91,12 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      *
      * @param request a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
-     * @see #getId(Message, CommandContext)
+     * @throws InvocationTargetException if an exception occurs during command dispatching
+     * @throws NoIdExtractorException if there is no {@link IdExtractor} defined for this type of command message
      */
     @Override
-    public List<Event> dispatch(Command request) throws InvocationTargetException {
+    public List<Event> dispatch(Command request)
+            throws InvocationTargetException, IllegalStateException, NoIdExtractorException {
         final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
         final I id = getId(command, context);
@@ -154,10 +114,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
      *
      * @param event the event to dispatch
      * @see ProcessManager#dispatchEvent(Message, EventContext)
-     * @see #getId(Message, EventContext)
      */
     @Override
-    public void dispatch(Event event) {
+    public void dispatch(Event event) throws NoIdExtractorException {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final I id = getId(eventMessage, context);
@@ -195,6 +154,57 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
         return result;
     }
 
+    private I getId(Message message, Message context) throws NoIdExtractorException {
+        final IdExtractor idExtractor = getIdExtractor(message.getClass());
+        if (idExtractor == null) {
+            throw new NoIdExtractorException(message.getClass());
+        }
+        // All id extractors are supposed to return IDs of this type.
+        @SuppressWarnings("unchecked")
+        final I result = (I) idExtractor.extract(message, context);
+        return result;
+    }
+
+    /**
+     * Returns extractor which can extract an ID from a message of the passed class.
+     *
+     * @param messageClass any class of event/command messages handled by the process manager
+     * @return an ID extractor or {@code null} if no extractor for such message type exists
+     */
+    @Nullable
+    protected abstract IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass);
+
+    /**
+     * Extracts a process manager ID from event/command message and context.
+     *
+     * @param <M> the type of event or command message to extract ID from
+     * @param <C> either {@link EventContext} or {@link CommandContext} type
+     */
+    protected abstract class IdExtractor<M extends Message, C extends Message> {
+
+        private static final int CONTEXT_GENERIC_PARAM_INDEX = 1;
+
+        protected IdExtractor() {
+            final Class<C> contextClass = Classes.getGenericParameterType(getClass(), CONTEXT_GENERIC_PARAM_INDEX);
+            final boolean isExpectedClass =
+                    contextClass.equals(EventContext.class) ||
+                    contextClass.equals(CommandContext.class);
+            if (!isExpectedClass) {
+                throw new IllegalArgumentException("Expected either command or event context class, found: " +
+                        contextClass.getName());
+            }
+        }
+
+        /**
+         * Extracts a process manager ID from event/command message and context.
+         *
+         * @param message an event or command message to extract an ID from
+         * @param context either {@link EventContext} or {@link CommandContext} instance
+         * @return a process manager ID based on the input parameters
+         */
+        protected abstract I extract(M message, C context);
+    }
+
     private enum LogSingleton {
         INSTANCE;
 
@@ -205,5 +215,4 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, M
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

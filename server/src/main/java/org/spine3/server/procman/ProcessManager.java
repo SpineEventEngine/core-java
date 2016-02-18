@@ -79,7 +79,6 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  *
  * @param <I> the type of the process manager IDs. See {@link EntityId} for supported types
  * @param <M> the type of the process manager state
- * @see ProcessManagerId
  * @author Alexander Litus
  */
 public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandler {
@@ -152,8 +151,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param command the command to be executed on the process manager
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
+     * @throws IllegalStateException if no command handler method found for a command
      */
-    protected List<Event> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    protected List<Event> dispatchCommand(Message command, CommandContext context)
+            throws InvocationTargetException, IllegalStateException {
         checkNotNull(command);
         checkNotNull(context);
 
