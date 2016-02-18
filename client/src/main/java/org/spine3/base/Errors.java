@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 
 /**
@@ -48,7 +49,7 @@ public class Errors {
      * Creates new instance of {@link Error} by the passed {@code Throwable}.
      */
     public static Error fromThrowable(Throwable throwable) {
-        final String message = throwable.getMessage();
+        final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()
                 .setType(throwable.getClass().getName())
                 .setMessage(message)
