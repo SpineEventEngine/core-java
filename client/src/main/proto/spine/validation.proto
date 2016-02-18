@@ -44,6 +44,8 @@ extend google.protobuf.MessageOptions {
     string default_message = 51001;
 }
 
+// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) from Google.
+
 extend google.protobuf.FieldOptions {
     RequiredOption required = 51002;
     DecimalOption decimal = 51003;
@@ -147,5 +149,3 @@ message ValidOption {
     // User-defined validation error message format.
     string msg = 2;
 }
-
-
