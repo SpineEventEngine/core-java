@@ -57,8 +57,8 @@ message Command {
     // The message of the command wrapped into `Any`.
     google.protobuf.Any message = 1;
 
-    // Command context.
-    spine.base.CommandContext context = 2;
+    // Service information about the environment in which the command was created.
+    CommandContext context = 2;
 }
 
 // Meta-information about the command and the environment, which generated the command.
@@ -92,4 +92,23 @@ enum CommandValidationError {
 
     // The command context does not have `namespace` attribute defined in a multitenant application.
     NAMESPACE_UNKNOWN = 3;
+}
+
+// This enumeration defines possible statuses of command processing.
+enum CommandStatus {
+    // Reserved value.
+    UNDEFINED = 0;
+
+    // The command has been received by backend and stored.
+    RECEIVED = 1;
+
+    // The command has been successfully handled.
+    // Expect one or more events produced in as the result of handling this command.
+    OK = 2;
+
+    // There was an exception or another kind of technical error during command processing.
+    ERROR = 3;
+
+    // A business failure encountered during command processing.
+    FAILURE = 4;
 }

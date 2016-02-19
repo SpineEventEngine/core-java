@@ -17,13 +17,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server;
+package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
@@ -31,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.server.EventDispatcher;
+import org.spine3.server.EventHandler;
+import org.spine3.server.Subscribe;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.type.EventClass;
@@ -301,114 +300,13 @@ public class EventBus implements AutoCloseable {
         eventStore.close();
     }
 
-    /**
-     * The registry of objects that dispatch event to handlers.
-     *
-     * <p>There can be multiple dispatchers per event class.
-     */
-    private static class DispatcherRegistry {
-
-        private final HashMultimap<EventClass, EventDispatcher> dispatchers = HashMultimap.create();
-
-        /* package */ void register(EventDispatcher dispatcher) {
-            checkNotNull(dispatcher);
-            final Set<EventClass> eventClasses = dispatcher.getEventClasses();
-            checkNotEmpty(dispatcher, eventClasses);
-
-            for (EventClass eventClass : eventClasses) {
-                dispatchers.put(eventClass, dispatcher);
-            }
-        }
-
-        /* package */ Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-            final Set<EventDispatcher> result = this.dispatchers.get(eventClass);
-            return result;
-        }
-
-        /* package */ void unregister(EventDispatcher dispatcher) {
-            final Set<EventClass> eventClasses = dispatcher.getEventClasses();
-            checkNotEmpty(dispatcher, eventClasses);
-            for (EventClass eventClass : eventClasses) {
-                dispatchers.remove(eventClass, dispatcher);
-            }
-        }
-
-        /* package */ void undergisterAll() {
-            dispatchers.clear();
-        }
-
-        /**
-         * Ensures that the dispatcher forwards at least one event.
-         *
-         * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
-         * @throws NullPointerException if the dispatcher returns null set
-         */
-        private static void checkNotEmpty(EventDispatcher dispatcher, Set<EventClass> eventClasses) {
-            checkArgument(!eventClasses.isEmpty(),
-                    "No event classes are forwarded by this dispatcher: %s", dispatcher);
-        }
-    }
-
-    /**
-     * The registry of event handling methods by event class.
-     *
-     * <p>There can be multiple handlers per event class.
-     */
-    private static class HandlerRegistry {
-
-        private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
-
-        /* package */ void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
-            for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
-                handlersByClass.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        /* package */ void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
-            for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
-
-                final EventClass eventClass = entry.getKey();
-                final EventHandlerMethod handler = entry.getValue();
-
-                unsubscribe(eventClass, handler);
-            }
-        }
-
-        private void unsubscribe(EventClass c, EventHandlerMethod handler) {
-            final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
-            if (!currentSubscribers.contains(handler)) {
-                throw handlerMethodWasNotRegistered(handler);
-            }
-            currentSubscribers.remove(handler);
-        }
-
-        /* package */ void unsubscribeAll() {
-            handlersByClass.clear();
-            log().info("All subscribers cleared.");
-        }
-
-        private static IllegalArgumentException handlerMethodWasNotRegistered(EventHandlerMethod handler) {
-            return new IllegalArgumentException(
-                    "Cannot un-subscribe the event handler, which was not subscribed before:" + handler.getFullName());
-        }
-
-        /* package */ Collection<EventHandlerMethod> getSubscribers(EventClass c) {
-            return ImmutableList.copyOf(handlersByClass.get(c));
-        }
-
-        /* package */ boolean hasSubscribers(EventClass eventClass) {
-            final Collection<EventHandlerMethod> handlers = getSubscribers(eventClass);
-            return !handlers.isEmpty();
-        }
-    }
-
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(EventBus.class);
     }
 
-    private static Logger log() {
+    /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
 }

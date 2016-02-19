@@ -26,15 +26,17 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -44,6 +46,7 @@ import static org.spine3.base.Identifiers.idToString;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
+    //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
      * Stores a command by a command ID from a command context.
      *
@@ -55,47 +58,47 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         checkNotNull(command);
         checkNotClosed();
 
+        checkArgument(command.hasMessage(), "Command message must be set.");
         final Any wrappedMessage = command.getMessage();
+
+        checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
-        final TypeName commandType = TypeName.ofEnclosed(wrappedMessage);
+
         final CommandId commandId = context.getCommandId();
-        final String commandIdStr = commandId.getUuid();
-        final String aggregateIdStr = idToString(aggregateId.value());
+        final String commandIdString = checkNotEmptyOrBlank(commandId.getUuid(), "command ID");
+
+        final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
+        checkNotEmptyOrBlank(commandType, "command type");
+
+        final String aggregateIdString = idToString(aggregateId.value());
+        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+
+        final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Command time");
+
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setTimestamp(context.getTimestamp())
-                .setCommandType(commandType.nameOnly())
-                .setCommandId(commandIdStr)
-                .setAggregateIdType(aggregateId.getShortTypeName())
-                .setAggregateId(aggregateIdStr)
                 .setMessage(wrappedMessage)
+                .setTimestamp(timestamp)
+                .setCommandType(commandType)
+                .setCommandId(commandIdString)
+                .setAggregateIdType(aggregateIdType)
+                .setAggregateId(aggregateIdString)
                 .setContext(context);
-
-        checkRecord(builder);
-
         write(commandId, builder.build());
     }
 
-    private static void checkRecord(CommandStorageRecordOrBuilder record) {
-        checkNotEmptyOrBlank(record.getCommandType(), "command type");
-        checkNotEmptyOrBlank(record.getCommandId(), "command ID");
-        checkNotEmptyOrBlank(record.getAggregateIdType(), "aggregate ID type");
-        checkNotEmptyOrBlank(record.getAggregateId(), "aggregate ID");
-        final Timestamp timestamp = record.getTimestamp();
-        final long seconds = timestamp.getSeconds();
-        checkArgument(seconds > 0, "Command time must be set.");
-        checkArgument(record.hasMessage(), "Command message must be set.");
-        checkArgument(record.hasContext(), "Command context must be set.");
-    }
+    /**
+     * Updates the status of the command to {@link org.spine3.base.CommandStatus#OK}
+     */
+    public abstract void setOkStatus(CommandId commandId);
 
-    private static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
-        checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
-        return stringToCheck;
-    }
+    /**
+     * Updates the status of the command with the error.
+     */
+    public abstract void updateStatus(CommandId commandId, Error error);
 
-    @Nullable
-    @Override
-    public CommandStorageRecord read(CommandId id) {
-        throw new UnsupportedOperationException("Reading is not implemented because there is no need yet.");
-    }
+    /**
+     * Updates the status of the command with the business failure.
+     */
+    public abstract void updateStatus(CommandId commandId, Failure failure);
 }

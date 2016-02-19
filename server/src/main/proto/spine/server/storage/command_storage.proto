@@ -30,6 +30,8 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/base/command.proto";
+import "spine/base/error.proto";
+import "spine/base/failure.proto";
 
 // This type defines the way commands are stored in command storage.
 // Some of the fields are defined as string representation of corresponding message types
@@ -44,19 +46,35 @@ message CommandStorageRecord {
     // String representation of CommandId.
     string command_id = 3;
 
+    // The status of the command processing.
+    // This field must be set to `RECEIVED` when a new record is created.
+    spine.base.CommandStatus status = 4;
+
+    // `status_data` provides additional information on what went wrong if the value
+    // of `status` is not equal to `RECEIVED` or `OK`.
+    oneof status_data {
+        // The technical error occurred during command processing.
+        spine.base.Error error = 5;
+
+        // A business failure occurred during command processing.
+        spine.base.Failure failure = 6;
+    }
+
+    reserved 7 to 9;
+
     // A short Protobuf type name of the aggregate the command is for.
     //
     // If the command is not for an aggregate, this field is empty.
     // We store the type of aggregate ID, not the type of the aggregate itself,
     // because it is not available at the level of commands.
-    string aggregate_id_type = 4;
+    string aggregate_id_type = 10;
 
     // String representation of the ID of the aggregate for which the command is for.
     //
     // This field is empty if the command is not for an aggregate.
-    string aggregate_id = 5;
+    string aggregate_id = 11;
 
-    reserved 6 to 19;
+    reserved 12 to 19;
 
     // The command instance.
     google.protobuf.Any message = 20;

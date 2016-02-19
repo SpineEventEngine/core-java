@@ -19,8 +19,9 @@
  */
 
 /**
- * This package provides classes and interfaces for working with event and event streams.
+ * This package provides classes for server-side event processing.
  */
+
 @ParametersAreNonnullByDefault
 package org.spine3.server.event;
 

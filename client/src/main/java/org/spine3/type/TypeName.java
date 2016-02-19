@@ -27,6 +27,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import org.spine3.Internal;
+import org.spine3.base.Command;
+import org.spine3.validate.Validate;
 
 import java.util.regex.Pattern;
 
@@ -72,6 +74,7 @@ public final class TypeName extends StringTypeValue {
 
     /**
      * Creates a new instance with the passed type name.
+     *
      * @param typeName the name of the type
      * @return new instance
      */
@@ -98,6 +101,22 @@ public final class TypeName extends StringTypeValue {
         }
         assert typeName != null;
         return of(typeName);
+    }
+
+    /**
+     * Obtains the type name of the command's message.
+     *
+     * <p>The passed command must have non-default message.
+     *
+     * @param command the command to inspect
+     * @return the type name of the command message
+     */
+    public static TypeName ofCommand(Command command) {
+        final Any message = command.getMessage();
+        Validate.checkNotDefault(message);
+
+        final TypeName commandType = ofEnclosed(message);
+        return commandType;
     }
 
     private static final String TYPE_URL_PREFIX = "type.googleapis.com";

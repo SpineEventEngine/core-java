@@ -17,22 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.command.error;
 
-import com.google.protobuf.Message;
+package org.spine3.base;
 
-/**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
- *
- * @author Mikhail Melnik
- */
-public class UnsupportedCommandException extends RuntimeException {
+import org.junit.Test;
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+import static org.junit.Assert.assertEquals;
+
+public class ErrorsShould {
+
+    @Test
+    public void create_Error_by_Exception() {
+        final String msg = "create_error_by_exception";
+        final Exception exception = new NullPointerException(msg);
+        final Error error = Errors.fromException(exception);
+
+        assertEquals(msg, error.getMessage());
+        assertEquals(exception.getClass().getName(), error.getType());
     }
 
-    private static final long serialVersionUID = 0L;
+    @Test
+    public void create_Error_by_Throwable() {
+        final String msg = "create_Error_by_Throwable";
+        @SuppressWarnings("ThrowableInstanceNeverThrown")
+        final Throwable throwable = new IllegalStateException(msg);
 
+        final Error error = Errors.fromThrowable(throwable);
+        assertEquals(msg, error.getMessage());
+        assertEquals(throwable.getClass().getName(), error.getType());
+    }
 }

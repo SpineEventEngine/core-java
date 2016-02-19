@@ -25,10 +25,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.test.RunTest;
 import org.spine3.test.TestCommandFactory;
-import org.spine3.time.ZoneOffsets;
+import org.spine3.type.TypeName;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +44,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandsShould {
 
-    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance("CommandsShould", ZoneOffsets.UTC);
+    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
 
     @Test
     public void sort() {
@@ -74,7 +76,9 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = StringValue.newBuilder().setValue("extract_message_from_command").build();
+        final StringValue message = StringValue.newBuilder()
+                                               .setValue("extract_message_from_command")
+                                               .build();
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
         assertEquals(message, Commands.getMessage(command));
     }
@@ -82,7 +86,8 @@ public class CommandsShould {
     @Test
     public void create_wereAfter_predicate() {
         final Command command = commandFactory.create(BoolValue.getDefaultInstance());
-        assertTrue(Commands.wereAfter(secondsAgo(5)).apply(command));
+        assertTrue(Commands.wereAfter(secondsAgo(5))
+                           .apply(command));
     }
 
     @Test
@@ -96,6 +101,23 @@ public class CommandsShould {
         final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3, command4, command5);
         final Iterable<Command> filter = Iterables.filter(commands, Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10)));
 
-        assertEquals(3, FluentIterable.from(filter).size());
+        assertEquals(3, FluentIterable.from(filter)
+                                      .size());
+    }
+
+    @Test
+    public void create_logging_message_for_command_with_type_and_id() {
+        final Message message = RunTest.newBuilder()
+                                       .setMethodName("create_logging_message_for_command_with_type_and_id")
+                                       .build();
+        final Command command = commandFactory.create(message);
+        final String typeName = TypeName.ofCommand(command).toString();
+        final String commandId = command.getContext().getCommandId().getUuid();
+
+        @SuppressWarnings("QuestionableName") // is OK for this test.
+        final String string = Commands.formatCommandTypeAndId("To log: %s %s", command);
+
+        assertTrue(string.contains(typeName));
+        assertTrue(string.contains(commandId));
     }
 }

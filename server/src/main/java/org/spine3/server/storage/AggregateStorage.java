@@ -21,10 +21,10 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
@@ -39,6 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
+import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
  * An event-sourced storage of aggregate root events and snapshots.
@@ -104,7 +106,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
         for (final Event event : eventList) {
             final AggregateStorageRecord record = toStorageRecord(event);
-            checkRecord(record);
             writeInternal(id, record);
         }
     }
@@ -122,7 +123,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(event);
 
         final AggregateStorageRecord record = toStorageRecord(event);
-        checkRecord(record);
         writeInternal(id, record);
     }
 
@@ -139,40 +139,37 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
         checkNotNull(snapshot);
 
         final AggregateStorageRecord record = AggregateStorageRecord.newBuilder()
-                .setTimestamp(snapshot.getTimestamp())
+                .setTimestamp(checkTimestamp(snapshot.getTimestamp(), "Snapshot timestamp"))
                 .setEventType(SNAPSHOT_TYPE_NAME)
                 .setEventId("") // No event ID for snapshots because it's not a domain event.
                 .setVersion(snapshot.getVersion())
                 .setSnapshot(snapshot)
                 .build();
-        checkRecord(record);
         writeInternal(aggregateId, record);
     }
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
+        checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
-        final EventId eventId = context.getEventId();
-        final String eventIdStr = idToString(eventId);
+
+        final String eventIdStr = idToString(context.getEventId());
+        checkNotEmptyOrBlank(eventIdStr, "Event ID");
+
+        checkArgument(event.hasMessage(), "Event message must be set.");
         final Any eventMsg = event.getMessage();
-        final String typeName = TypeName.ofEnclosed(eventMsg).nameOnly();
+
+        final String eventType = TypeName.ofEnclosed(eventMsg).nameOnly();
+        checkNotEmptyOrBlank(eventType, "Event type");
+
+        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Event time");
 
         final AggregateStorageRecord.Builder builder = AggregateStorageRecord.newBuilder()
-                .setTimestamp(context.getTimestamp())
-                .setEventType(typeName)
+                .setEvent(event)
+                .setTimestamp(timestamp)
                 .setEventId(eventIdStr)
-                .setVersion(context.getVersion())
-                .setEvent(event);
+                .setEventType(eventType)
+                .setVersion(context.getVersion());
         return builder.build();
-    }
-
-    private static void checkRecord(AggregateStorageRecord record) {
-        checkArgument(record.hasTimestamp(), "Storage record must have a timestamp.");
-        final String eventType = record.getEventType();
-        checkArgument(!eventType.isEmpty(), "Event type is an empty string.");
-        checkArgument(eventType.trim().length() > 0, "Event type is a blank string.");
-        final Event event = record.getEvent();
-        final Snapshot snapshot = record.getSnapshot();
-        checkArgument(event.hasMessage() || snapshot.hasState(), "Record must have an event or a snapshot with a state.");
     }
 
     // Storage implementation API.

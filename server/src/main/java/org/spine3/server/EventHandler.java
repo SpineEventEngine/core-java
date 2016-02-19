@@ -20,6 +20,8 @@
 
 package org.spine3.server;
 
+import org.spine3.server.event.EventBus;
+
 /**
  * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
  *

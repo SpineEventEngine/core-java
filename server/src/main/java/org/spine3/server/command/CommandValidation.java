@@ -26,7 +26,6 @@ import com.google.protobuf.Value;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 
 import java.util.Map;
@@ -46,7 +45,6 @@ public class CommandValidation {
      */
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
-
     }
 
     /**
@@ -54,12 +52,13 @@ public class CommandValidation {
      */
     public static Response unsupportedCommand(Message command) {
         final String commandType = command.getDescriptorForType().getFullName();
+        final String errMsg = String.format("Commands of the type `%s` are not supported.", commandType);
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
                     .setType(CommandValidationError.getDescriptor().getFullName())
                     .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
                     .putAllAttributes(commandTypeAttribute(commandType))
-                    .setMessage("Command " + commandType + " is not supported."))
+                    .setMessage(errMsg))
                     .build();
         return response;
     }
@@ -79,8 +78,9 @@ public class CommandValidation {
      */
     public static Response unknownNamespace(Message command, CommandContext context) {
         final String commandType = command.getDescriptorForType().getFullName();
-        final String errMsg = String.format("Command %s (id: %s) has no namespace attribute in the context.", commandType,
-                Identifiers.idToString(context.getCommandId()));
+        final String errMsg = String.format("Command `%s` (id: `%s`) has no namespace attribute in the context.",
+                commandType,
+                context.getCommandId().getUuid());
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
                     .setType(CommandValidationError.getDescriptor().getFullName())
