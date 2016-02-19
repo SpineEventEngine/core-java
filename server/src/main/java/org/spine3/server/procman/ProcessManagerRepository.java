@@ -94,7 +94,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      * @param request a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws NoIdExtractorException if there is no {@link IdExtractor} defined for this type of command message
+     * @throws NoIdExtractorException if no {@link IdExtractor} found for this type of command message
      */
     @Override
     public List<Event> dispatch(Command request)
@@ -156,6 +156,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         return result;
     }
 
+    /**
+     * Obtains a process manager ID from event/command message and context.
+     *
+     * @param message an event or command message to extract an ID from
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @throws NoIdExtractorException if no {@link IdExtractor} found for this type of message
+     */
     private I getId(Message message, Message context) throws NoIdExtractorException {
         final IdExtractor idExtractor = getIdExtractor(message.getClass());
         if (idExtractor == null) {
@@ -197,6 +204,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     /**
      * Extracts a process manager ID from event/command message and context based on the passed field index.
      *
+     * <p>A process manager ID field name must end with {@code "id"} suffix.
+     *
      * @param <M> the type of event or command message to extract ID from
      * @param <C> either {@link EventContext} or {@link CommandContext} type
      */
@@ -222,8 +231,6 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
 
         /**
          * Accessor for process manager ID fields.
-         *
-         * <p>A process manager ID name must end with {@code "id"} suffix.
          */
         private class ProcessManagerIdField extends MessageField {
 
@@ -242,7 +249,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
                 final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
                 return result;
             }
-        };
+        }
     }
 
     private enum LogSingleton {
