@@ -26,13 +26,14 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /* package */ class InMemoryCommandStorage extends CommandStorage {
 
@@ -41,14 +42,11 @@ import static com.google.common.collect.Maps.newHashMap;
     @Override
     public void write(CommandId id, CommandStorageRecord record) {
         checkNotNull(id);
-        Validate.checkNotDefault(id);
+        checkNotDefault(id);
         checkNotNull(record);
-
         final String commandId = record.getCommandId();
-        if (commandId.isEmpty() || commandId.trim()
-                                            .isEmpty()) {
-            throw new IllegalArgumentException("Command id in the record can not be empty or blank.");
-        }
+        checkNotEmptyOrBlank(commandId, "Command ID");
+        checkNotContains(id, commandId);
 
         put(id, record);
     }
@@ -103,5 +101,11 @@ import static com.google.common.collect.Maps.newHashMap;
 
     private CommandStorageRecord get(CommandId id) {
         return storage.get(id);
+    }
+
+    private void checkNotContains(CommandId id, String commandId) {
+        if (storage.containsKey(id)) {
+            throw new IllegalArgumentException("Storage already contains a command with such an ID: " + commandId);
+        }
     }
 }

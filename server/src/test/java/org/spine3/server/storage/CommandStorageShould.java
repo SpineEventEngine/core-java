@@ -21,13 +21,17 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.server.aggregate.AggregateId;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
@@ -37,6 +41,7 @@ import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 
 /**
  * @author Alexander Litus
@@ -45,6 +50,8 @@ import static org.spine3.testdata.TestCommands.createProject;
 public abstract class CommandStorageShould {
 
     private CommandStorage storage;
+    private CommandStorageRecord record;
+    private CommandId id;
 
     @Before
     public void setUpTest() {
@@ -121,13 +128,54 @@ public abstract class CommandStorageShould {
     }
 
     private void writeAndReadRecordTest() {
-        final CommandStorageRecord expected = newCommandStorageRecord();
-        final CommandId id = expected.getContext().getCommandId();
-        storage.write(id, expected);
+        givenNewRecord();
 
         final CommandStorageRecord actual = storage.read(id);
 
-        assertEquals(expected, actual);
+        assertEquals(record, actual);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_ok_command_status() {
+        givenNewRecord();
+
+        storage.setOkStatus(id);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.OK, actual.getStatus());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_error_command_status() {
+        givenNewRecord();
+        final Error error = newError();
+
+        storage.updateStatus(id, error);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.ERROR, actual.getStatus());
+        assertEquals(error, actual.getError());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_failure_command_status() {
+        givenNewRecord();
+        final Failure failure = newFailure();
+
+        storage.updateStatus(id, failure);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.FAILURE, actual.getStatus());
+        assertEquals(failure, actual.getFailure());
+    }
+
+    private void givenNewRecord() {
+        record = newCommandStorageRecord();
+        id = record.getContext().getCommandId();
+        storage.write(id, record);
     }
 
     private static CommandStorageRecord newCommandStorageRecord() {
@@ -145,5 +193,22 @@ public abstract class CommandStorageShould {
                 .setMessage(command)
                 .setContext(context);
         return builder.build();
+    }
+
+    private static Error newError() {
+        return Error.newBuilder()
+                .setType("error type 123")
+                .setCode(5)
+                .setMessage("error message 123")
+                .setStacktrace("stacktrace")
+                .build();
+    }
+
+    private static Failure newFailure() {
+        return Failure.newBuilder()
+                .setInstance(projectCreatedEventAny())
+                .setStacktrace("failure stacktrace")
+                .setTimestamp(TimeUtil.getCurrentTime())
+                .build();
     }
 }
