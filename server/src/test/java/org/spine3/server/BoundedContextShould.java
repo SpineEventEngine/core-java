@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -393,12 +394,12 @@ public class BoundedContextShould {
         }
 
         @Override
-        public IdFunction<ProjectId, CommandContext> getIdFunction(CommandClass messageClass) {
+        public <M extends Message> IdFunction<ProjectId, M, CommandContext> getIdFunction(CommandClass messageClass) {
             return new GetIdByFieldIndex<>(0);
         }
 
         @Override
-        public IdFunction<ProjectId, EventContext> getIdFunction(EventClass messageClass) {
+        public <M extends Message> IdFunction<ProjectId, M, EventContext> getIdFunction(EventClass messageClass) {
             return new GetIdByFieldIndex<>(0);
         }
     }

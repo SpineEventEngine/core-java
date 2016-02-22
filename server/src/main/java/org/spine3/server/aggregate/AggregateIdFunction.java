@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.EntityId;
@@ -34,7 +35,7 @@ import org.spine3.server.entity.GetIdByFieldIndex;
  * @param <I> the type of aggregate IDs. See {@link EntityId} for more info
  * @author Alexander Litus
  */
-public class AggregateIdFunction<I> extends GetIdByFieldIndex<I, CommandContext> {
+public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
 
     public static final int ID_FIELD_INDEX = 0;
 
@@ -45,7 +46,7 @@ public class AggregateIdFunction<I> extends GetIdByFieldIndex<I, CommandContext>
     /**
      * Creates a new ID function instance.
      */
-    public static<I> AggregateIdFunction<I> newInstance() {
+    public static<I, M extends Message> AggregateIdFunction<I, M> newInstance() {
         return new AggregateIdFunction<>();
     }
 }

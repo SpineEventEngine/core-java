@@ -112,7 +112,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(message);
         checkCommandClass(commandClass);
-        final IdFunction<I, CommandContext> idFunction = getIdFunction(commandClass);
+        final IdFunction<I, Message, CommandContext> idFunction = getIdFunction(commandClass);
         final I id = idFunction.getId(message, context);
         final PM manager = load(id);
         final List<Event> events = manager.dispatchCommand(message, context);
@@ -136,7 +136,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final EventContext context = event.getContext();
         final EventClass eventClass = EventClass.of(message);
         checkEventClass(eventClass);
-        final IdFunction<I, EventContext> idFunction = getIdFunction(eventClass);
+        final IdFunction<I, Message, EventContext> idFunction = getIdFunction(eventClass);
         final I id = idFunction.getId(message, context);
         final PM manager = load(id);
         try {

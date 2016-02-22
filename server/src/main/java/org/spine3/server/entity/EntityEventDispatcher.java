@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.EventDispatcher;
 import org.spine3.type.EventClass;
@@ -39,6 +40,6 @@ public interface EntityEventDispatcher<I> extends EventDispatcher {
      * @param eventClass a class of any event handled by the entity
      * @return an ID function
      */
-    IdFunction<I, EventContext> getIdFunction(EventClass eventClass);
+    <M extends Message> IdFunction<I, M, EventContext> getIdFunction(EventClass eventClass);
 
 }
