@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.spine3.base.Commands.getMessage;
 
 /**
@@ -59,6 +61,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
                           extends EntityRepository<I, PM, S>
                           implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
 
+
+    private final Set<CommandClass> commandClasses = newHashSet();
+
+    private final Set<EventClass> eventClasses = newHashSet();
+
     /**
      * {@inheritDoc}
      */
@@ -68,18 +75,22 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
 
     @Override
     public Set<CommandClass> getCommandClasses() {
-        final Class<? extends ProcessManager> pmClass = getEntityClass();
-        final Set<Class<? extends Message>> commandClasses = ProcessManager.getHandledCommandClasses(pmClass);
-        final Set<CommandClass> result = CommandClass.setOf(commandClasses);
-        return result;
+        if (commandClasses.isEmpty()) {
+            final Class<? extends ProcessManager> pmClass = getEntityClass();
+            final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(pmClass);
+            commandClasses.addAll(CommandClass.setOf(classes));
+        }
+        return ImmutableSet.copyOf(commandClasses);
     }
 
     @Override
     public Set<EventClass> getEventClasses() {
-        final Class<? extends ProcessManager> pmClass = getEntityClass();
-        final Set<Class<? extends Message>> eventClasses = ProcessManager.getHandledEventClasses(pmClass);
-        final Set<EventClass> result = EventClass.setOf(eventClasses);
-        return result;
+        if (eventClasses.isEmpty()) {
+            final Class<? extends ProcessManager> pmClass = getEntityClass();
+            final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(pmClass);
+            eventClasses.addAll(EventClass.setOf(classes));
+        }
+        return ImmutableSet.copyOf(eventClasses);
     }
 
     /**
