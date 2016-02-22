@@ -28,26 +28,23 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.protobuf.MessageField;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandDispatcher;
+import org.spine3.server.EntityCommandDispatcher;
+import org.spine3.server.EntityEventDispatcher;
 import org.spine3.server.EntityRepository;
-import org.spine3.server.EventDispatcher;
+import org.spine3.server.IdFunction;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.procman.error.MissingProcessManagerIdException;
-import org.spine3.server.procman.error.NoIdExtractorException;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -60,7 +57,7 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S>, S extends Message>
                           extends EntityRepository<I, PM, S>
-                          implements CommandDispatcher, EventDispatcher {
+                          implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
 
     /**
      * {@inheritDoc}
@@ -91,19 +88,23 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed command.
      *
-     * @param request a request to dispatch
+     * @param command a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
      * @throws InvocationTargetException if an exception occurs during command dispatching
-     * @throws NoIdExtractorException if no {@link IdExtractor} found for this type of command message
+     * @throws IllegalStateException if no command handler method found for a command
+     * @throws IllegalArgumentException if commands of this type are not handled by the process manager
      */
     @Override
-    public List<Event> dispatch(Command request)
-            throws InvocationTargetException, IllegalStateException, NoIdExtractorException {
-        final Message command = getMessage(checkNotNull(request));
-        final CommandContext context = request.getContext();
-        final I id = getId(command, context);
+    public List<Event> dispatch(Command command)
+            throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
+        final Message message = getMessage(checkNotNull(command));
+        final CommandContext context = command.getContext();
+        final CommandClass commandClass = CommandClass.of(message);
+        checkCommandClass(commandClass);
+        final IdFunction idFunction = getIdFunction(commandClass);
+        final I id = getId(idFunction, message, context);
         final PM manager = load(id);
-        final List<Event> events = manager.dispatchCommand(command, context);
+        final List<Event> events = manager.dispatchCommand(message, context);
         store(manager);
         return events;
     }
@@ -115,16 +116,20 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
+     * @throws IllegalArgumentException if events of this type are not handled by the process manager
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override
-    public void dispatch(Event event) throws NoIdExtractorException {
-        final Message eventMessage = Events.getMessage(event);
+    public void dispatch(Event event) throws IllegalArgumentException {
+        final Message message = Events.getMessage(event);
         final EventContext context = event.getContext();
-        final I id = getId(eventMessage, context);
+        final EventClass eventClass = EventClass.of(message);
+        checkEventClass(eventClass);
+        final IdFunction idFunction = getIdFunction(eventClass);
+        final I id = getId(idFunction, message, context);
         final PM manager = load(id);
         try {
-            manager.dispatchEvent(eventMessage, context);
+            manager.dispatchEvent(message, context);
             store(manager);
         } catch (InvocationTargetException e) {
             log().error("Error during dispatching event", e);
@@ -149,10 +154,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         if (result == null) {
             result = create(id);
         }
-
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
-
         return result;
     }
 
@@ -161,95 +164,22 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      *
      * @param message an event or command message to extract an ID from
      * @param context either {@link EventContext} or {@link CommandContext} instance
-     * @throws NoIdExtractorException if no {@link IdExtractor} found for this type of message
      */
-    private I getId(Message message, Message context) throws NoIdExtractorException {
-        final IdExtractor idExtractor = getIdExtractor(message.getClass());
-        if (idExtractor == null) {
-            throw new NoIdExtractorException(message.getClass());
-        }
-        // All id extractors are supposed to return IDs of this type.
+    private I getId(IdFunction idFunction, Message message, Message context) {
+        // All ID functions are supposed to return IDs of this type.
         @SuppressWarnings("unchecked")
-        final I result = (I) idExtractor.extract(message, context);
+        final I result = (I) idFunction.getId(message, context);
         return result;
     }
 
-    /**
-     * Returns extractor which can extract an ID from a message of the passed class.
-     *
-     * @param messageClass any class of event/command messages handled by the process manager
-     * @return an ID extractor or {@code null} if no extractor for such message type exists
-     */
-    @Nullable
-    protected abstract IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass);
-
-    /**
-     * Extracts a process manager ID from event/command message and context.
-     *
-     * @param <M> the type of event or command message to extract ID from
-     * @param <C> either {@link EventContext} or {@link CommandContext} type
-     */
-    protected abstract class IdExtractor<M extends Message, C extends Message> {
-
-        /**
-         * Extracts a process manager ID from event/command message and context.
-         *
-         * @param message an event or command message to extract an ID from
-         * @param context either {@link EventContext} or {@link CommandContext} instance
-         * @return a process manager ID based on the input parameters
-         */
-        protected abstract I extract(M message, C context);
+    private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
+        final Set<CommandClass> classes = getCommandClasses();
+        checkArgument(classes.contains(commandClass), "Unexpected command of class: " + commandClass.value().getName());
     }
 
-    /**
-     * Extracts a process manager ID from event/command message and context based on the passed field index.
-     *
-     * <p>A process manager ID field name must end with {@code "id"} suffix.
-     *
-     * @param <M> the type of event or command message to extract ID from
-     * @param <C> either {@link EventContext} or {@link CommandContext} type
-     */
-    protected class IdFieldByIndexExtractor<M extends Message, C extends Message> extends IdExtractor<M, C> {
-
-        private final ProcessManagerIdField idField;
-
-        /**
-         * Creates a new instance.
-         *
-         * @param idIndex the index of ID field in this type of messages
-         */
-        public IdFieldByIndexExtractor(int idIndex) {
-            this.idField = new ProcessManagerIdField(idIndex);
-        }
-
-        @Override
-        protected I extract(M message, C context) {
-            @SuppressWarnings("unchecked") // we expect that the field is of this type
-            final I id = (I) idField.getValue(message);
-            return id;
-        }
-
-        /**
-         * Accessor for process manager ID fields.
-         */
-        private class ProcessManagerIdField extends MessageField {
-
-            private ProcessManagerIdField(int index) {
-                super(index);
-            }
-
-            @Override
-            protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
-                return new MissingProcessManagerIdException(message.getClass().getName(), fieldName, getIndex());
-            }
-
-            @Override
-            protected boolean isFieldAvailable(Message message) {
-                final String fieldName = MessageField.getFieldName(message, getIndex());
-                final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
-                return result;
-            }
-        }
+    private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
+        final Set<EventClass> classes = getEventClasses();
+        checkArgument(classes.contains(eventClass), "Unexpected event of class: " + eventClass.value().getName());
     }
 
     private enum LogSingleton {

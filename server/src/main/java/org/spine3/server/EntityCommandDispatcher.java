@@ -18,7 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.procman.error;
+package org.spine3.server;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.type.CommandClass;
+
+/**
+ * Delivers commands to handlers (which are supposed to be entities).
+ *
+ * @param <I> the type of entity IDs. See {@link EntityId} for more info.
+ * @author Alexander Litus
+ * @see CommandDispatcher
+ */
+public interface EntityCommandDispatcher<I> extends CommandDispatcher {
+
+    /**
+     * Returns a function which can obtain an ID using a message of the passed class.
+     *
+     * @param commandClass a class of any command handled by the entity
+     * @return an ID function
+     */
+    IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass);
+
+}

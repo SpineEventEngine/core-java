@@ -36,8 +36,9 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.FailureThrowable;
+import org.spine3.server.GetIdByFieldIndex;
+import org.spine3.server.IdFunction;
 import org.spine3.server.Subscribe;
-import org.spine3.server.procman.error.MissingProcessManagerIdException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -153,18 +154,18 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void return_id_extractor_for_message() {
-        final ProcessManagerRepository.IdExtractor extractor = repository.getIdExtractor(CreateProject.class);
+        final IdFunction extractor = repository.getIdFunction(EventClass.of(CreateProject.class));
         assertNotNull(extractor);
     }
 
-    @Test(expected = MissingProcessManagerIdException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
         final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
-    @Test(expected = MissingProcessManagerIdException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
@@ -203,15 +204,21 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Override
-        protected IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass) {
-            return new IdFieldByIndexExtractor<>(0);
+        public IdFunction<ProjectId, ? extends Message, CommandContext> getIdFunction(CommandClass messageClass) {
+            return new GetIdByFieldIndex<>(0);
+        }
+
+        @Override
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass messageClass) {
+            return new GetIdByFieldIndex<>(0);
         }
     }
 
     @SuppressWarnings({"TypeMayBeWeakened", "UnusedParameters", "unused"})
     private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") // it is required
+        // a ProcessManager constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public TestProcessManager(ProjectId id) {
             super(id);
         }

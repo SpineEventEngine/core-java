@@ -17,25 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.procman.error;
+package org.spine3.server.error;
 
-import com.google.protobuf.Message;
-import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.base.Identifiers;
+
+import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
- * Is thrown if there is no {@link ProcessManagerRepository.IdExtractor} found for a command/event message.
+ * This exception is thrown if the corresponding Protobuf command/event message definition does not have
+ * an entity ID field whose name ends with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
  * @author Alexander Litus
- * @see ProcessManagerRepository#getIdExtractor(Class)
  */
-public class NoIdExtractorException extends RuntimeException {
+public class MissingEntityIdException extends RuntimeException {
 
-    public NoIdExtractorException(Class<? extends Message> messageClass) {
-        super(createMessage(messageClass));
+    public MissingEntityIdException(String messageClassName, String propertyName, int fieldIndex) {
+        super(createMessage(messageClassName, propertyName, fieldIndex));
     }
 
-    private static String createMessage(Class<? extends Message> messageClass) {
-        return "No ID extractor found for the message of type: " + messageClass;
+    private static String createMessage(String messageClassName, String propertyName, int fieldIndex) {
+        final String message = "The property with the index '" + fieldIndex + "' of the entity message " + messageClassName +
+                " must define an entity ID with the name ending with '" + ID_PROPERTY_SUFFIX +
+                "'. Found property with the name: " + propertyName;
+        return message;
     }
 
     private static final long serialVersionUID = 348L;
