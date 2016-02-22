@@ -35,7 +35,7 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  * <p>An entity ID field name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
  * @param <I> the type of entity IDs. See {@link EntityId} for more info.
- * @param <M> the type of event or command message to extract an ID from
+ * @param <M> the type of event or command messages to extract IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
 public class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
