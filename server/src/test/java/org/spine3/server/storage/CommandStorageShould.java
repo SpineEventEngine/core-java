@@ -28,7 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 

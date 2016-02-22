@@ -20,8 +20,8 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.server.Entity;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventStore;

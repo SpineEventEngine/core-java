@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.server.CommandDispatcher;
 import org.spine3.type.CommandClass;
 
 /**

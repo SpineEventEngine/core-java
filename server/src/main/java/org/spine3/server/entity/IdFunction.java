@@ -18,36 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
-import org.spine3.server.entity.EntityId;
-import org.spine3.server.entity.GetIdByFieldIndex;
+import org.spine3.base.EventContext;
 
 /**
- * Obtains an aggregate ID based on a command message and context.
+ * Obtains an entity ID based on an event/command message and context.
  *
- * <p>An aggregate ID must be the first field in messages.
- * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
- *
- * @param <I> the type of aggregate IDs. See {@link EntityId} for more info
- * @param <M> the type of command messages to extract IDs from
- * @author Alexander Litus
+ * @param <I> the type of entity IDs. See {@link EntityId} for more info.
+ * @param <M> the type of event or command messages to extract IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
-public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
-
-    public static final int ID_FIELD_INDEX = 0;
-
-    private AggregateIdFunction() {
-        super(ID_FIELD_INDEX);
-    }
+public interface IdFunction<I, M extends Message, C extends Message> {
 
     /**
-     * Creates a new ID function instance.
+     * Obtains an entity ID based on passed event/command message and context.
+     *
+     * @param message an event or command message to use to get an ID
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return an entity ID
      */
-    public static<I, M extends Message> AggregateIdFunction<I, M> newInstance() {
-        return new AggregateIdFunction<>();
-    }
+    I getId(M message, C context);
+
 }

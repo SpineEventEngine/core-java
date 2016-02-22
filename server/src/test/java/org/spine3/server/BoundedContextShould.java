@@ -43,6 +43,8 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.entity.GetIdByFieldIndex;
+import org.spine3.server.entity.IdFunction;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;

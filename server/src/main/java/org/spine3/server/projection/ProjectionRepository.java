@@ -26,7 +26,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.EntityRepository;
+import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -34,7 +34,7 @@ import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.EntityId.checkType;
+import static org.spine3.server.entity.EntityId.checkType;
 
 /**
  * A server-side wrapper for objects with an identity.

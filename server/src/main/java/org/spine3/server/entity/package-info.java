@@ -18,27 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import com.google.protobuf.Message;
-import org.spine3.base.EventContext;
-import org.spine3.type.EventClass;
-
 /**
- * Delivers events to handlers (which are supposed to be entities).
- *
- * @param <I> the type of entity IDs. See {@link EntityId} for more info.
- * @author Alexander Litus
- * @see EventDispatcher
+ * This package contains server-side exceptions related to commands.
  */
-public interface EntityEventDispatcher<I> extends EventDispatcher {
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity;
 
-    /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
-     */
-    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

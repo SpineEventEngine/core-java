@@ -27,7 +27,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.AggregateIdFunction;
 import org.spine3.server.storage.CommandStorage;
 

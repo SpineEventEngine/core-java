@@ -18,28 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
+import org.spine3.server.EventDispatcher;
+import org.spine3.type.EventClass;
 
 /**
- * Obtains an entity ID based on an event/command message and context.
+ * Delivers events to handlers (which are supposed to be entities).
  *
  * @param <I> the type of entity IDs. See {@link EntityId} for more info.
- * @param <M> the type of event or command messages to extract IDs from
- * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @author Alexander Litus
+ * @see EventDispatcher
  */
-public interface IdFunction<I, M extends Message, C extends Message> {
+public interface EntityEventDispatcher<I> extends EventDispatcher {
 
     /**
-     * Obtains an entity ID based on passed event/command message and context.
+     * Returns a function which can obtain an ID using a message of the passed class.
      *
-     * @param message an event or command message to use to get an ID
-     * @param context either {@link EventContext} or {@link CommandContext} instance
-     * @return an entity ID
+     * @param eventClass a class of any event handled by the entity
+     * @return an ID function
      */
-    I getId(M message, C context);
+    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
 
 }
