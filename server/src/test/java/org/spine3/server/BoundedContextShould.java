@@ -61,6 +61,8 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import java.util.List;
 
@@ -282,7 +284,8 @@ public class BoundedContextShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") // it is required to be public
+        // an aggregate constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -363,7 +366,8 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass") // it is required to be public
+        // a ProcessManager constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
@@ -388,8 +392,13 @@ public class BoundedContextShould {
         }
 
         @Override
-        protected IdExtractor<? extends Message, ? extends Message> getIdExtractor(Class<? extends Message> messageClass) {
-            return new IdFieldByIndexExtractor<>(0);
+        public IdFunction<ProjectId, ? extends Message, CommandContext> getIdFunction(CommandClass messageClass) {
+            return new GetIdByFieldIndex<>(0);
+        }
+
+        @Override
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass messageClass) {
+            return new GetIdByFieldIndex<>(0);
         }
     }
 

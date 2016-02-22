@@ -23,6 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.MessageField;
 import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingAggregateIdException;
@@ -60,7 +61,8 @@ public final class AggregateId<I> extends EntityId<I> {
     /**
      * Obtains an aggregate id from the passed command message.
      *
-     * <p>The id value must be the first field of the proto message. Its name must end with "id".
+     * <p>The id value must be the first field of the proto message.
+     * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
      *
      * @param message the command message to get id from
      * @return value of the id
@@ -73,7 +75,8 @@ public final class AggregateId<I> extends EntityId<I> {
     /**
      * Obtains an aggregate id from the passed command.
      *
-     * <p>The id value must be the first field of the proto message. Its name must end with "id".
+     * <p>The id value must be the first field of the proto message.
+     * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
      *
      * @param command the command request
      * @return value of the id
@@ -87,7 +90,7 @@ public final class AggregateId<I> extends EntityId<I> {
      * Accessor object for aggregate ID fields in commands.
      * <p/>
      * <p>An aggregate ID must be the first field declared in a message and its
-     * name must end with {@code "id"} suffix.
+     * name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
      */
     private static final MessageField FIELD = new MessageField(ID_FIELD_INDEX) {
 
