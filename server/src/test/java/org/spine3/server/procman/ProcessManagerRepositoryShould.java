@@ -153,9 +153,9 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void return_id_extractor_for_message() {
-        final IdFunction extractor = repository.getIdFunction(EventClass.of(CreateProject.class));
-        assertNotNull(extractor);
+    public void return_id_function_for_message() {
+        final IdFunction function = repository.getIdFunction(EventClass.of(CreateProject.class));
+        assertNotNull(function);
     }
 
     @Test(expected = IllegalArgumentException.class)
