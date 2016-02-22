@@ -246,13 +246,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     }
 
     private I getAggregateId(Message command) {
-        final AggregateIdFunction<I, Message> idFunction = AggregateIdFunction.newInstance();
+        final AggregateIdFunction<I> idFunction = AggregateIdFunction.newInstance();
         final I id = idFunction.getId(command, CommandContext.getDefaultInstance());
         return id;
     }
 
     @Override
-    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
+    public IdFunction<I, CommandContext> getIdFunction(CommandClass commandClass) {
         return AggregateIdFunction.newInstance();
     }
 }

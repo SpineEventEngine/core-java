@@ -204,12 +204,12 @@ public class ProcessManagerRepositoryShould {
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, CommandContext> getIdFunction(CommandClass messageClass) {
+        public IdFunction<ProjectId, CommandContext> getIdFunction(CommandClass messageClass) {
             return new GetIdByFieldIndex<>(0);
         }
 
         @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass messageClass) {
+        public IdFunction<ProjectId, EventContext> getIdFunction(EventClass messageClass) {
             return new GetIdByFieldIndex<>(0);
         }
     }

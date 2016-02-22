@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.type.CommandClass;
@@ -40,6 +39,6 @@ public interface EntityCommandDispatcher<I> extends CommandDispatcher {
      * @param commandClass a class of any command handled by the entity
      * @return an ID function
      */
-    IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass);
+    IdFunction<I, CommandContext> getIdFunction(CommandClass commandClass);
 
 }

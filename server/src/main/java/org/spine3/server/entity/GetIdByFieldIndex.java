@@ -35,17 +35,16 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  * <p>An entity ID field name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
  * @param <I> the type of entity IDs. See {@link EntityId} for more info.
- * @param <M> the type of event or command messages to extract IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
-public class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
+public class GetIdByFieldIndex<I, C extends Message> implements IdFunction<I, C> {
 
     private final EntityIdField idField;
 
     /**
      * Creates a new instance.
      *
-     * @param idIndex the index of ID field in this type of messages
+     * @param idIndex a zero-based index of an ID field in this type of messages
      */
     public GetIdByFieldIndex(int idIndex) {
         this.idField = new EntityIdField(idIndex);
@@ -58,7 +57,7 @@ public class GetIdByFieldIndex<I, M extends Message, C extends Message> implemen
      * @throws ClassCastException if the field type is invalid
      */
     @Override
-    public I getId(M message, C context) throws MissingEntityIdException {
+    public <M extends Message> I getId(M message, C context) throws MissingEntityIdException {
         @SuppressWarnings("unchecked") // we expect that the field is of this type
         final I id = (I) idField.getValue(message);
         return id;
