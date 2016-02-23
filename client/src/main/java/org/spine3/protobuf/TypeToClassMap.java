@@ -38,6 +38,7 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.io.IoUtil;
 import org.spine3.protobuf.error.UnknownTypeInAnyException;
 import org.spine3.type.ClassName;
@@ -60,6 +61,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  */
+@Internal
 public class TypeToClassMap {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
