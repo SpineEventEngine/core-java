@@ -46,7 +46,6 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
         checkNotNull(record);
         final String commandId = record.getCommandId();
         checkNotEmptyOrBlank(commandId, "Command ID");
-        checkNotContains(id, commandId);
 
         put(id, record);
     }
@@ -101,11 +100,5 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     private CommandStorageRecord get(CommandId id) {
         return storage.get(id);
-    }
-
-    private void checkNotContains(CommandId id, String commandId) {
-        if (storage.containsKey(id)) {
-            throw new IllegalArgumentException("Storage already contains a command with such an ID: " + commandId);
-        }
     }
 }
