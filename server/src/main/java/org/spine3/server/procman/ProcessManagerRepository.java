@@ -30,11 +30,11 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.EntityCommandDispatcher;
 import org.spine3.server.entity.EntityEventDispatcher;
 import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.IdFunction;
-import org.spine3.server.command.CommandBus;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -45,7 +45,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
 import static org.spine3.base.Commands.getMessage;
 
 /**
@@ -62,9 +61,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
                           implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
 
 
-    private final Set<CommandClass> commandClasses = newHashSet();
+    private ImmutableSet<CommandClass> commandClasses;
 
-    private final Set<EventClass> eventClasses = newHashSet();
+    private ImmutableSet<EventClass> eventClasses;
 
     /**
      * {@inheritDoc}
@@ -74,23 +73,25 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     }
 
     @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<CommandClass> getCommandClasses() {
-        if (commandClasses.isEmpty()) {
+        if (commandClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
             final Set<Class<? extends Message>> classes = ProcessManager.getHandledCommandClasses(pmClass);
-            commandClasses.addAll(CommandClass.setOf(classes));
+            commandClasses = CommandClass.setOf(classes);
         }
-        return ImmutableSet.copyOf(commandClasses);
+        return commandClasses;
     }
 
     @Override
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getEventClasses() {
-        if (eventClasses.isEmpty()) {
+        if (eventClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
             final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(pmClass);
-            eventClasses.addAll(EventClass.setOf(classes));
+            eventClasses = EventClass.setOf(classes);
         }
-        return ImmutableSet.copyOf(eventClasses);
+        return eventClasses;
     }
 
     /**
