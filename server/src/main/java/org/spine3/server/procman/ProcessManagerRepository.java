@@ -183,6 +183,30 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p> The default implementation for a case when process manager does not handle any commands.
+     * Returns {@code null} because it is unused in this case.
+     */
+    @Override
+    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
+        // noinspection ReturnOfNull
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p> The default implementation for a case when process manager does not handle any events (though it is weird).
+     * Returns {@code null} because it is unused in this case.
+     */
+    @Override
+    public IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+        // noinspection ReturnOfNull
+        return null;
+    }
+
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
         final Set<CommandClass> classes = getCommandClasses();
         checkArgument(classes.contains(commandClass), "Unexpected command of class: " + commandClass.value().getName());
