@@ -49,11 +49,6 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
         return record;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Rewrites it if a record with the same ID already exists in the storage.
-     */
     @Override
     public void write(I id, EntityStorageRecord record) {
         checkNotNull(id);
@@ -79,7 +74,7 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     /**
      * Writes a record into the storage.
      *
-     * <p>Rewrites it if a record with the same ID already exists in the storage.
+     * <p>Rewrites it if a record with this ID already exists in the storage.
      *
      * @param id an ID of the record
      * @param record a record to store

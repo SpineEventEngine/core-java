@@ -50,6 +50,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     /**
      * Stores a command by a command ID from a command context.
      *
+     * <p>Rewrites it if a command with such command ID already exists in the storage.
+     *
      * @param command a command to store
      * @param aggregateId an aggregate ID to store
      */
