@@ -252,7 +252,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     }
 
     @Override
-    public <M extends Message> IdFunction<I, M, CommandContext> getIdFunction(CommandClass commandClass) {
+    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
         return AggregateIdFunction.newInstance();
     }
 }

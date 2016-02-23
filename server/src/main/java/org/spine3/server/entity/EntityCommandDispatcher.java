@@ -40,6 +40,6 @@ public interface EntityCommandDispatcher<I> extends CommandDispatcher {
      * @param commandClass a class of any command handled by the entity
      * @return an ID function
      */
-    <M extends Message> IdFunction<I, M, CommandContext> getIdFunction(CommandClass commandClass);
+    IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass);
 
 }

@@ -112,8 +112,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final CommandContext context = command.getContext();
         final CommandClass commandClass = CommandClass.of(message);
         checkCommandClass(commandClass);
-        final IdFunction<I, Message, CommandContext> idFunction = getIdFunction(commandClass);
-        final I id = idFunction.getId(message, context);
+        final IdFunction idFunction = getIdFunction(commandClass);
+        final I id = getId(idFunction, message, context);
         final PM manager = load(id);
         final List<Event> events = manager.dispatchCommand(message, context);
         store(manager);
@@ -136,8 +136,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final EventContext context = event.getContext();
         final EventClass eventClass = EventClass.of(message);
         checkEventClass(eventClass);
-        final IdFunction<I, Message, EventContext> idFunction = getIdFunction(eventClass);
-        final I id = idFunction.getId(message, context);
+        final IdFunction idFunction = getIdFunction(eventClass);
+        final I id = getId(idFunction, message, context);
         final PM manager = load(id);
         try {
             manager.dispatchEvent(message, context);
@@ -167,6 +167,19 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         }
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
+        return result;
+    }
+
+    /**
+     * Obtains a process manager ID from event/command message and context.
+     *
+     * @param message an event or command message to extract an ID from
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     */
+    private I getId(IdFunction idFunction, Message message, Message context) {
+        // All ID functions are supposed to return IDs of this type.
+        @SuppressWarnings("unchecked")
+        final I result = (I) idFunction.getId(message, context);
         return result;
     }
 

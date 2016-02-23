@@ -40,6 +40,6 @@ public interface EntityEventDispatcher<I> extends EventDispatcher {
      * @param eventClass a class of any event handled by the entity
      * @return an ID function
      */
-    <M extends Message> IdFunction<I, M, EventContext> getIdFunction(EventClass eventClass);
+    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
 
 }
