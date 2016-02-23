@@ -60,7 +60,6 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
                           extends EntityRepository<I, PM, S>
                           implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
 
-
     private ImmutableSet<CommandClass> commandClasses;
 
     private ImmutableSet<EventClass> eventClasses;
