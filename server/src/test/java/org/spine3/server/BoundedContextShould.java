@@ -60,6 +60,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestAggregateIdFactory;
 
 import java.util.List;
 
@@ -73,7 +74,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -84,7 +84,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
-    private final ProjectId projectId = createProjectId(newUuid());
+    private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
     private final EmptyHandler handler = new EmptyHandler();
 
     private StorageFactory storageFactory;

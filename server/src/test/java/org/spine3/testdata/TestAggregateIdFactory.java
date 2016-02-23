@@ -22,11 +22,14 @@ package org.spine3.testdata;
 
 import org.spine3.test.project.ProjectId;
 
+import static org.spine3.base.Identifiers.newUuid;
+
 /**
  * The utility class which is used for creating Aggregate Root Ids for tests.
  *
  * @author Mikhail Mikhaylov
  */
+@SuppressWarnings("UtilityClass")
 public class TestAggregateIdFactory {
 
     private TestAggregateIdFactory() {
@@ -35,10 +38,20 @@ public class TestAggregateIdFactory {
     /**
      * Generates a new ProjectId.
      *
-     * @param id the project id
      * @return ProjectId instance
      */
-    public static ProjectId createProjectId(String id) {
-        return ProjectId.newBuilder().setId(id).build();
+    public static ProjectId newProjectId() {
+        final String uuid = newUuid();
+        return ProjectId.newBuilder().setId(uuid).build();
+    }
+
+    /**
+     * Creates a new ProjectId with the given UUID value.
+     *
+     * @param uuid the project id
+     * @return ProjectId instance
+     */
+    public static ProjectId newProjectId(String uuid) {
+        return ProjectId.newBuilder().setId(uuid).build();
     }
 }
