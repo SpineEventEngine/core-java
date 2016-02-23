@@ -52,17 +52,16 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerShould {
 
-    private static final ProjectId ID = createProjectId(newUuid());
+    private static final ProjectId ID = newProjectId();
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 

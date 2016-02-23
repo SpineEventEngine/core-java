@@ -23,7 +23,6 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -38,16 +37,17 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class EventStorageShould {
+public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
 
     /**
      * Small positive delta in seconds or nanoseconds.
@@ -83,27 +83,21 @@ public abstract class EventStorageShould {
     private EventStorage storage;
 
     @Before
-    public void setUpTest() {
+    public void setUpEventStorageTest() {
         storage = getStorage();
     }
 
-    @After
-    public void tearDownTest() throws Exception {
-        storage.close();
-    }
-
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * @return an empty storage instance
-     */
+    @Override
     protected abstract EventStorage getStorage();
 
-    @Test
-    public void return_null_if_no_record_with_such_id() {
-        final Event event = storage.read(EventId.getDefaultInstance());
+    @Override
+    protected Event newStorageRecord() {
+        return TestEventFactory.projectCreated();
+    }
 
-        assertNull(event);
+    @Override
+    protected EventId newId() {
+        return generateId();
     }
 
     @Test
@@ -111,35 +105,6 @@ public abstract class EventStorageShould {
         final Iterator<Event> iterator = findAll();
 
         assertFalse(iterator.hasNext());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_with_null_id() {
-        //noinspection ConstantConditions
-        storage.read(null);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null() {
-        storage.write(generateId(), null);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_by_null_id() {
-        storage.write(null, Event.getDefaultInstance());
-    }
-
-    @Test
-    public void write_and_read_one_event() {
-        final Event expected = TestEventFactory.projectCreated();
-        final EventId id = generateId();
-
-        storage.write(id, expected);
-
-        final Event actual = storage.read(id);
-        assertEquals(expected, actual);
     }
 
     @Test
@@ -189,7 +154,7 @@ public abstract class EventStorageShould {
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = idToAny(createProjectId(record1.getProducerId()));
+        final Any id = idToAny(newProjectId(record1.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder().addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
         final List<Event> expected = toEventList(record1);
@@ -365,7 +330,7 @@ public abstract class EventStorageShould {
     public void filter_events_by_type_and_aggregate_id_and_time() {
         givenSequentialRecords();
         final String typeName = record2.getEventType();
-        final Any id = idToAny(createProjectId(record2.getProducerId()));
+        final Any id = idToAny(newProjectId(record2.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                 .addFilter(filter)

@@ -23,15 +23,22 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.ProjectionStorageShould;
 
+import static org.spine3.base.Identifiers.newUuid;
+
 /**
  * @author Alexander Litus
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
+public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
 
     @Override
     protected ProjectionStorage<String> getStorage() {
         final InMemoryEntityStorage<String> entityStorage = InMemoryEntityStorage.newInstance();
         final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(entityStorage);
         return storage;
+    }
+
+    @Override
+    protected String newId() {
+        return newUuid();
     }
 }

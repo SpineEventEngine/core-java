@@ -39,13 +39,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    @Nullable
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();
         checkNotNull(id);
 
         final EntityStorageRecord record = readInternal(checkNotNull(id));
+        if (record == null) {
+            return EntityStorageRecord.getDefaultInstance();
+        }
         return record;
     }
 

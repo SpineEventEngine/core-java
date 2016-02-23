@@ -39,7 +39,6 @@ import javax.annotation.Nullable;
 @SPI
 public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    @Nullable
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();

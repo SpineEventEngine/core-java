@@ -68,6 +68,51 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         }
     };
 
+    @Override
+    public void write(EventId id, Event event) {
+        checkNotClosed();
+        checkNotNull(event);
+
+        final EventStorageRecord record = toEventStorageRecord(id, event);
+        writeInternal(record);
+    }
+
+    @Override
+    public Event read(EventId id) {
+        checkNotClosed();
+        checkNotNull(id);
+
+        final EventStorageRecord record = readInternal(id);
+        if (record == null) {
+            return Event.getDefaultInstance();
+        }
+        final Event result = toEvent(record);
+        return result;
+    }
+
+    /**
+     * Returns iterator through events matching the passed query.
+     *
+     * @param query a filtering query
+     * @return iterator instance
+     */
+    public abstract Iterator<Event> iterator(EventStreamQuery query);
+
+    /**
+     * Writes record into the storage.
+     *
+     * @param record the record to write
+     */
+    protected abstract void writeInternal(EventStorageRecord record);
+
+    /**
+     * Reads storage format record.
+     * @param eventId the ID of the event to read
+     * @return the record instance of null if there's not record with such ID
+     */
+    @Nullable
+    protected abstract EventStorageRecord readInternal(EventId eventId);
+
     /**
      * Converts EventStorageRecord to Event.
      */
@@ -102,29 +147,6 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         return Iterators.transform(records, TO_EVENT);
     }
 
-    @Override
-    public void write(EventId id, Event event) {
-        checkNotClosed();
-        checkNotNull(event);
-
-        final EventStorageRecord record = toEventStorageRecord(id, event);
-        writeInternal(record);
-    }
-
-    @Nullable
-    @Override
-    public Event read(EventId id) {
-        checkNotClosed();
-        checkNotNull(id);
-
-        final EventStorageRecord record = readInternal(id);
-        if (record == null) {
-            return null;
-        }
-        final Event result = toEvent(record);
-        return result;
-    }
-
     /**
      * Creates storage record for the passed {@link Event}.
      */
@@ -147,29 +169,6 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 .setContext(context);
         return builder.build();
     }
-
-    /**
-     * Returns iterator through events matching the passed query.
-     *
-     * @param query a filtering query
-     * @return iterator instance
-     */
-    public abstract Iterator<Event> iterator(EventStreamQuery query);
-
-    /**
-     * Writes record into the storage.
-     *
-     * @param record the record to write
-     */
-    protected abstract void writeInternal(EventStorageRecord record);
-
-    /**
-     * Reads storage format record.
-     * @param eventId the ID of the event to read
-     * @return the record instance of null if there's not record with such ID
-     */
-    @Nullable
-    protected abstract EventStorageRecord readInternal(EventId eventId);
 
     /**
      * The predicate for filtering {@code Event} instances by

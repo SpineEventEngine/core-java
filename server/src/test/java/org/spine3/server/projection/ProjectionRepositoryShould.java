@@ -43,11 +43,8 @@ import org.spine3.type.EventClass;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.junit.Assert.*;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -57,7 +54,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionRepositoryShould {
 
-    private static final ProjectId ID = createProjectId(newUuid());
+    private static final ProjectId ID = newProjectId();
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
 

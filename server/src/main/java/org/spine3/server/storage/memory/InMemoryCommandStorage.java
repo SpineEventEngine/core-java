@@ -27,7 +27,6 @@ import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,12 +49,14 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
         put(id, record);
     }
 
-    @Nullable
     @Override
     public CommandStorageRecord read(CommandId id) {
         checkNotNull(id);
-        final CommandStorageRecord result = get(id);
-        return result;
+        final CommandStorageRecord record = get(id);
+        if (record == null) {
+            return CommandStorageRecord.getDefaultInstance();
+        }
+        return record;
     }
 
     @Override

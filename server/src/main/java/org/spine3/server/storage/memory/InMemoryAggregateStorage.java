@@ -73,7 +73,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
         storage.clear();
     }
 
-    /*
+    @Override
+    public void close() throws Exception {
+        storage.clear();
+        super.close();
+    }
+
+    /**
      * Used for sorting by timestamp descending (from newer to older)
      */
     private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord> {

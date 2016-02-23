@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * The base class for repositories managing entities.
@@ -81,7 +82,7 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
     public E load(I id) {
         final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = storage.read(id);
-        if (record == null) {
+        if (isDefault(record)) {
             return null;
         }
         final E entity = toEntity(id, record);
