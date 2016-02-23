@@ -108,9 +108,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     private MethodMap eventHandlers;
 
     /**
-     * {@inheritDoc}
+     * Creates a new instance.
+     *
+     * @param id an ID for the new instance
+     * @throws IllegalArgumentException if the ID type is unsupported. See {@link EntityId} for supported types
      */
-    protected ProcessManager(I id) {
+    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
+    public ProcessManager(I id) {
         super(id);
     }
 

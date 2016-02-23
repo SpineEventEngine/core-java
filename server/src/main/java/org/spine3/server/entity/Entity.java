@@ -73,6 +73,7 @@ public abstract class Entity<I, S extends Message> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
+    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived
         // classes. We require that entity constructors be public as they are called by repositories.

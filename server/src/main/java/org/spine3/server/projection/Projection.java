@@ -59,7 +59,8 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      * @see EntityId
      */
-    protected Projection(I id) {
+    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
+    public Projection(I id) {
         super(id);
     }
 
