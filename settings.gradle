@@ -8,3 +8,6 @@ project(':server').projectDir = "$rootDir/server" as File
 
 include ':examples'
 project(':examples').projectDir = "$rootDir/examples" as File
+
+include ':values'
+project(':values').projectDir = "$rootDir/values" as File
