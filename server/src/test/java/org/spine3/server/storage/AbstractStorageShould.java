@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Abstract storage tests.
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertEquals;
  * @param <R> the type of records kept in the storage
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AbstractStorageShould<I, R extends Message> {
 
     private AbstractStorage<I, R> storage;
@@ -46,7 +46,9 @@ public abstract class AbstractStorageShould<I, R extends Message> {
 
     @After
     public void tearDownAbstractStorageTest() throws Exception {
-        storage.close();
+        if (storage.isOpen()) {
+            storage.close();
+        }
     }
 
     /**
@@ -110,8 +112,6 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         writeAndReadRecordTest(id);
     }
 
-    // TODO:2016-02-23:alexander.litus: close() tests
-
     private void writeAndReadRecordTest(I id) {
         final R expected = newStorageRecord();
         storage.write(id, expected);
@@ -119,5 +119,70 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         final R actual = storage.read(id);
 
         assertEquals(expected, actual);
+    }
+    
+    @Test
+    public void throw_exception_if_it_is_closed_on_check() throws Exception {
+        storage.close();
+
+        try {
+            storage.checkNotClosed();
+            fail("An exception must be thrown.");
+        } catch (IllegalStateException e) {
+            // is OK because it is closed
+        }
+    }
+
+    @Test
+    public void not_throw_exception_if_it_is_not_closed_on_check() {
+        storage.checkNotClosed();
+    }
+
+    @Test
+    public void return_true_if_it_is_opened() {
+        assertTrue(storage.isOpen());
+    }
+
+    @Test
+    public void return_false_if_it_not_opened() throws Exception {
+        storage.close();
+
+        assertFalse(storage.isOpen());
+    }
+
+    @Test
+    public void return_true_if_it_is_closed() throws Exception {
+        storage.close();
+
+        assertTrue(storage.isClosed());
+    }
+
+    @Test
+    public void return_false_if_it_not_closed() throws Exception {
+        assertFalse(storage.isClosed());
+    }
+
+    @Test
+    public void close_itself_and_throw_exception_if_read_then() throws Exception {
+        storage.close();
+
+        try {
+            storage.read(newId());
+            fail("An exception must be thrown on attempt to read.");
+        } catch (IllegalStateException e) {
+            // is OK because storage is closed
+        }
+    }
+
+    @Test
+    public void close_itself_and_throw_exception_if_write_then() throws Exception {
+        storage.close();
+
+        try {
+            storage.write(newId(), newStorageRecord());
+            fail("An exception must be thrown on attempt to write.");
+        } catch (IllegalStateException e) {
+            // is OK because storage is closed
+        }
     }
 }

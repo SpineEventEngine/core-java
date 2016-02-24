@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.aggregate.AggregateId;
@@ -76,7 +77,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test
     public void override_read_method_and_do_not_throw_exception() {
         try {
-            storage.read(CommandId.getDefaultInstance());
+            storage.read(Commands.generateId());
         } catch (UnsupportedOperationException e) {
             fail("read() method must be overridden if you want to use these tests.");
         }
