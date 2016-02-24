@@ -196,7 +196,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     }
 
     /**
-     * <p>The default implementation (e.g., for a case when process manager does not handle any commands).
+     * The default implementation (e.g., for a case when process manager does not handle any commands).
      *
      * <p>Note that it is NOT used in this case.
      *
@@ -209,7 +209,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     }
 
     /**
-     * <p>The default implementation (e.g., for a case when process manager does not handle any events).
+     * The default implementation (e.g., for a case when process manager does not handle any events).
      *
      * <p>Note that it is NOT used in this case.
      *
