@@ -39,6 +39,7 @@ import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
@@ -60,8 +61,10 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
                           extends EntityRepository<I, PM, S>
                           implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
 
+    @Nullable
     private ImmutableSet<CommandClass> commandClasses;
 
+    @Nullable
     private ImmutableSet<EventClass> eventClasses;
 
     /**
@@ -214,7 +217,8 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
 
     private void checkEventClass(EventClass eventClass) throws IllegalArgumentException {
         final Set<EventClass> classes = getEventClasses();
-        checkArgument(classes.contains(eventClass), "Unexpected event of class: " + eventClass.value().getName());
+        checkArgument(classes.contains(eventClass), "Unexpected event of class: " + eventClass.value()
+                                                                                              .getName());
     }
 
     private enum LogSingleton {
