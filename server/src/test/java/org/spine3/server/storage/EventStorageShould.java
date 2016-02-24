@@ -360,13 +360,13 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         writeAll(record1, record2, record3);
     }
 
-    private void writeAll(EventStorageRecord... records) {
+    protected void writeAll(EventStorageRecord... records) {
         for (EventStorageRecord r : records) {
             storage.writeInternal(r);
         }
     }
 
-    private void assertStorageContainsOnly(List<Event> expectedRecords) {
+    protected void assertStorageContainsOnly(List<Event> expectedRecords) {
         final Iterator<Event> iterator = findAll();
         final List<Event> actual = newArrayList(iterator);
         assertEquals(expectedRecords, actual);

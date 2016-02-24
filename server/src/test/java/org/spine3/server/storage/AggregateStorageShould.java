@@ -189,7 +189,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void rewrite_record_if_write_by_the_same_id() {
     }
 
-    private void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
+    protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
         final List<AggregateStorageRecord> records = createSequentialRecords(id, firstRecordTime);
 
         writeAll(id, records);
@@ -200,13 +200,13 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         assertEquals(expectedEvents, actualEvents);
     }
 
-    private void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
+    protected void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
         for (AggregateStorageRecord record : records) {
             storage.writeInternal(id, record);
         }
     }
 
-    private static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
+    protected static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
         public Event apply(@Nullable AggregateStorageRecord input) {

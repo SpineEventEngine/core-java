@@ -112,7 +112,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
         writeAndReadRecordTest(id);
     }
 
-    private void writeAndReadRecordTest(I id) {
+    protected void writeAndReadRecordTest(I id) {
         final R expected = newStorageRecord();
         storage.write(id, expected);
 
@@ -120,7 +120,7 @@ public abstract class AbstractStorageShould<I, R extends Message> {
 
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void throw_exception_if_it_is_closed_on_check() throws Exception {
         storage.close();

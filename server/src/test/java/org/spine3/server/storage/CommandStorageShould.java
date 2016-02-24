@@ -66,7 +66,20 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        return newCommandStorageRecord();
+        final String aggregateIdString = newUuid();
+        final EntityId<String> id = EntityId.of(aggregateIdString);
+        final Any command = toAny(createProject());
+        final TypeName commandType = TypeName.ofEnclosed(command);
+        final CommandContext context = TestContextFactory.createCommandContext();
+        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
+                .setTimestamp(getCurrentTime())
+                .setCommandType(commandType.nameOnly())
+                .setCommandId(context.getCommandId().getUuid())
+                .setAggregateIdType(id.getShortTypeName())
+                .setAggregateId(aggregateIdString)
+                .setMessage(command)
+                .setContext(context);
+        return builder.build();
     }
 
     @Override
@@ -133,26 +146,9 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     private void givenNewRecord() {
-        record = newCommandStorageRecord();
+        record = newStorageRecord();
         id = record.getContext().getCommandId();
         storage.write(id, record);
-    }
-
-    private static CommandStorageRecord newCommandStorageRecord() {
-        final String aggregateIdString = newUuid();
-        final EntityId<String> id = EntityId.of(aggregateIdString);
-        final Any command = toAny(createProject());
-        final TypeName commandType = TypeName.ofEnclosed(command);
-        final CommandContext context = TestContextFactory.createCommandContext();
-        final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setTimestamp(getCurrentTime())
-                .setCommandType(commandType.nameOnly())
-                .setCommandId(context.getCommandId().getUuid())
-                .setAggregateIdType(id.getShortTypeName())
-                .setAggregateId(aggregateIdString)
-                .setMessage(command)
-                .setContext(context);
-        return builder.build();
     }
 
     private static Error newError() {
