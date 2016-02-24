@@ -21,20 +21,23 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.server.aggregate.AggregateIdFunction;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.EntityId;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.*;
 
 /**
@@ -52,10 +55,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
      * @param command a command to store
-     * @param aggregateId an aggregate ID to store
      */
-    public void store(Command command, EntityId aggregateId) {
-        checkNotNull(aggregateId);
+    public void store(Command command) {
         checkNotNull(command);
         checkNotClosed();
 
@@ -71,10 +72,12 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");
 
-        final String aggregateIdString = aggregateId.toString();
-        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+        final Message message = Commands.getMessage(command);
+        final Object id = AggregateIdFunction.newInstance().getId(message, CommandContext.getDefaultInstance());
+        final String aggregateId = idToString(id);
+        checkNotEmptyOrBlank(aggregateId, "aggregate id");
 
-        final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
+        final String aggregateIdType = id.getClass().getName();
         final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Command time");
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -84,7 +87,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setCommandId(commandIdString)
                 .setStatus(CommandStatus.RECEIVED)
                 .setAggregateIdType(aggregateIdType)
-                .setAggregateId(aggregateIdString)
+                .setAggregateId(aggregateId)
                 .setContext(context);
         write(commandId, builder.build());
     }

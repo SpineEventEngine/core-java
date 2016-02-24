@@ -29,14 +29,14 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
-import org.spine3.server.entity.EntityId;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
@@ -67,7 +67,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Override
     protected CommandStorageRecord newStorageRecord() {
         final String aggregateIdString = newUuid();
-        final EntityId<String> id = EntityId.of(aggregateIdString);
         final Any command = toAny(createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
@@ -75,7 +74,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(context.getCommandId().getUuid())
-                .setAggregateIdType(id.getShortTypeName())
+                .setAggregateIdType(String.class.getName())
                 .setAggregateId(aggregateIdString)
                 .setMessage(command)
                 .setContext(context);
@@ -101,7 +100,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     public void store_and_read_command() {
         final Command command = createProject();
         final CommandId commandId = command.getContext().getCommandId();
-        storage.store(command, EntityId.of("stub-id"));
+        storage.store(command);
 
         final CommandStorageRecord record = storage.read(commandId);
 

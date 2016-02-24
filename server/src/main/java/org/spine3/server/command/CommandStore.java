@@ -20,15 +20,10 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.server.entity.EntityId;
-import org.spine3.server.aggregate.AggregateIdFunction;
 import org.spine3.server.storage.CommandStorage;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -56,10 +51,7 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command) {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
-        final Message message = Commands.getMessage(command);
-        final Object idValue = AggregateIdFunction.newInstance().getId(message, CommandContext.getDefaultInstance());
-        final EntityId entityId = EntityId.of(idValue);
-        storage.store(command, entityId);
+        storage.store(command);
     }
 
     @Override
