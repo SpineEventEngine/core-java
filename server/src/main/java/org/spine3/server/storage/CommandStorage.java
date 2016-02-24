@@ -37,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -66,8 +67,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
 
-        final CommandId commandId = context.getCommandId();
-        final String commandIdString = checkNotEmptyOrBlank(commandId.getUuid(), "command ID");
+        final CommandId commandId = checkValid(context.getCommandId());
+        final String commandIdString = commandId.getUuid();
 
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");

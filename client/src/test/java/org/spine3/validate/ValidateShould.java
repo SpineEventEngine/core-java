@@ -25,6 +25,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
 
 import static org.junit.Assert.*;
 
@@ -105,5 +109,25 @@ public class ValidateShould {
     @Test
     public void do_not_throw_exception_if_checked_string_is_valid() {
         Validate.checkNotEmptyOrBlank("valid_string", "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_command_id_is_empty() {
+        Validate.checkValid(CommandId.getDefaultInstance());
+    }
+
+    @Test
+    public void not_throw_exception_if_checked_command_id_is_valid() {
+        Validate.checkValid(Commands.generateId());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_event_id_is_empty() {
+        Validate.checkValid(EventId.getDefaultInstance());
+    }
+
+    @Test
+    public void not_throw_exception_if_checked_event_id_is_valid() {
+        Validate.checkValid(Events.generateId());
     }
 }

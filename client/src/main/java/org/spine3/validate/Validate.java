@@ -22,6 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventId;
 
 import javax.annotation.Nullable;
 
@@ -154,7 +156,8 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim()
+                                   .length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 
@@ -170,5 +173,29 @@ public class Validate {
         final long seconds = timestamp.getSeconds();
         checkArgument(seconds > 0, fieldName + " is invalid.");
         return timestamp;
+    }
+
+    /**
+     * Ensures that the passed ID is valid.
+     *
+     * @param id an ID to check
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    public static EventId checkValid(EventId id) {
+        checkNotNull(id);
+        checkNotEmptyOrBlank(id.getUuid(), "event ID");
+        return id;
+    }
+
+    /**
+     * Ensures that the passed ID is valid.
+     *
+     * @param id an ID to check
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    public static CommandId checkValid(CommandId id) {
+        checkNotNull(id);
+        checkNotEmptyOrBlank(id.getUuid(), "command ID");
+        return id;
     }
 }

@@ -48,6 +48,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -152,7 +153,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      */
     @VisibleForTesting
     /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
-        final String eventIdString = checkNotEmptyOrBlank(eventId.getUuid(), "event ID");
+        final String eventIdString = checkValid(eventId).getUuid();
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
         final String eventType = TypeName.ofEnclosed(message).nameOnly();
