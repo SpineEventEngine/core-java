@@ -23,7 +23,6 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
@@ -32,7 +31,7 @@ import org.spine3.server.entity.GetIdByFieldIndex;
  * <p>An aggregate ID must be the first field in messages.
  * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
- * @param <I> the type of aggregate IDs. See {@link EntityId} for more info
+ * @param <I> the type of aggregate IDs
  * @author Alexander Litus
  */
 public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {

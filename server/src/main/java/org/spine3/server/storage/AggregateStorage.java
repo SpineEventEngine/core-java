@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
 
@@ -44,7 +43,7 @@ import static org.spine3.validate.Validate.checkTimestamp;
 /**
  * An event-sourced storage of aggregate root events and snapshots.
  *
- * @param <I> the type of IDs of aggregates managed by this storage. See {@link EntityId} for supported types
+ * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
 @SPI

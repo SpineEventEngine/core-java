@@ -27,7 +27,7 @@ import org.spine3.base.EventContext;
 /**
  * Obtains an entity ID based on an event/command message and context.
  *
- * @param <I> the type of entity IDs. See {@link EntityId} for more info
+ * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  */

@@ -21,7 +21,7 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
-import org.spine3.server.entity.EntityId;
+import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
 
@@ -31,10 +31,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An entity storage keeps messages with identity.
  *
- * <p>See {@link EntityId} for supported ID types.
- *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
+ * @see Entity
  */
 @SPI
 public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {

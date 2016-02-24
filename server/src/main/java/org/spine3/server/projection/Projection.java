@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
@@ -57,7 +56,6 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
-     * @see EntityId
      */
     @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public Projection(I id) {

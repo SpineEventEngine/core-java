@@ -36,9 +36,8 @@ import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.base.UserId;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.entity.EntityId;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
@@ -77,7 +76,7 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  *     <li><a href="https://msdn.microsoft.com/en-us/library/jj591569.aspx">CQRS Journey Guide: A Saga on Sagas</a></li>
  * </ul>
  *
- * @param <I> the type of the process manager IDs. See {@link EntityId} for supported types
+ * @param <I> the type of the process manager IDs
  * @param <M> the type of the process manager state
  * @author Alexander Litus
  */
@@ -111,7 +110,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * Creates a new instance.
      *
      * @param id an ID for the new instance
-     * @throws IllegalArgumentException if the ID type is unsupported. See {@link EntityId} for supported types
+     * @throws IllegalArgumentException if the ID type is unsupported
      */
     @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public ProcessManager(I id) {
