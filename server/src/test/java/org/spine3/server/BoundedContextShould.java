@@ -24,7 +24,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -43,8 +42,6 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.GetIdByFieldIndex;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
@@ -63,8 +60,6 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.type.CommandClass;
-import org.spine3.type.EventClass;
 
 import java.util.List;
 
@@ -391,16 +386,6 @@ public class BoundedContextShould {
 
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
-            return new GetIdByFieldIndex<>(0);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass messageClass) {
-            return new GetIdByFieldIndex<>(0);
         }
     }
 

@@ -36,9 +36,8 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.FailureThrowable;
-import org.spine3.server.entity.GetIdByFieldIndex;
-import org.spine3.server.entity.IdFunction;
 import org.spine3.server.Subscribe;
+import org.spine3.server.entity.IdFunction;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -153,8 +152,14 @@ public class ProcessManagerRepositoryShould {
     }
 
     @Test
-    public void return_id_function_for_message() {
-        final IdFunction function = repository.getIdFunction(EventClass.of(CreateProject.class));
+    public void return_id_function_for_event_class() {
+        final IdFunction function = repository.getIdFunction(EventClass.of(ProjectCreated.class));
+        assertNotNull(function);
+    }
+
+    @Test
+    public void return_id_function_for_command_class() {
+        final IdFunction function = repository.getIdFunction(CommandClass.of(CreateProject.class));
         assertNotNull(function);
     }
 
@@ -201,16 +206,6 @@ public class ProcessManagerRepositoryShould {
 
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, CommandContext> getIdFunction(CommandClass messageClass) {
-            return new GetIdByFieldIndex<>(0);
-        }
-
-        @Override
-        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass messageClass) {
-            return new GetIdByFieldIndex<>(0);
         }
     }
 
