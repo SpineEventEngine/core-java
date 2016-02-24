@@ -44,13 +44,13 @@ import static org.spine3.validate.Validate.isDefault;
  */
 public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
-    /**
-     * {@inheritDoc}
-     */
     public EntityRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected AutoCloseable createStorage(StorageFactory factory) {
         final AutoCloseable result = factory.createEntityStorage(getEntityClass());
@@ -70,6 +70,9 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return checkStorage(storage);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void store(E entity) {
         final EntityStorage<I> storage = entityStorage();
@@ -77,6 +80,9 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         storage.write(entity.getId(), record);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Nullable
     @Override
     public E load(I id) {

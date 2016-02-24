@@ -40,27 +40,29 @@ public class Validate {
 
 
     /**
-     * Verifies if the passed message object is its default state.
-     * @param object the message to inspect
+     * Verifies if the passed message object is its default state and is not {@code null}.
      *
+     * @param object the message to inspect
      * @return true if the message is in the default state, false otherwise
      */
     public static boolean isDefault(Message object) {
+        checkNotNull(object);
         return object.getDefaultInstanceForType().equals(object);
     }
 
     /**
-     * Verifies if the passed message object is not its default state.
-     * @param object the message to inspect
+     * Verifies if the passed message object is not its default state and is not {@code null}.
      *
+     * @param object the message to inspect
      * @return true if the message is not in the default state, false otherwise
      */
     public static boolean isNotDefault(Message object) {
+        checkNotNull(object);
         return !isDefault(object);
     }
 
     /**
-     * Ensures that the passed object is not in its default state.
+     * Ensures that the passed object is not in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @param errorMessage the message for the exception to be thrown;
@@ -68,12 +70,13 @@ public class Validate {
      * @throws IllegalStateException if the object is in its default state
      */
     public static <M extends Message> M checkNotDefault(M object, @Nullable Object errorMessage) {
+        checkNotNull(object);
         checkState(isNotDefault(object), errorMessage);
         return object;
     }
 
     /**
-     * Ensures that the passed object is not in its default state.
+     * Ensures that the passed object is not in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
@@ -82,23 +85,25 @@ public class Validate {
      */
     @SuppressWarnings("OverloadedVarargsMethod")
     public static <M extends Message> M checkNotDefault(M object, String errorMessageTemplate, Object... errorMessageArgs) {
+        checkNotNull(object);
         checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 
     /**
-     * Ensures that the passed object is not in its default state.
+     * Ensures that the passed object is not in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @throws IllegalStateException if the object is in its default state
      */
     public static <M extends Message> M checkNotDefault(M object) {
+        checkNotNull(object);
         checkNotDefault(object, "The message is in the default state: %s", object);
         return object;
     }
 
     /**
-     * Ensures that the passed object is in its default state.
+     * Ensures that the passed object is in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @param errorMessage the message for the exception to be thrown;
@@ -106,12 +111,13 @@ public class Validate {
      * @throws IllegalStateException if the object is not in its default state
      */
     public static <M extends Message> M checkDefault(M object, @Nullable Object errorMessage) {
+        checkNotNull(object);
         checkState(isDefault(object), errorMessage);
         return object;
     }
 
     /**
-     * Ensures that the passed object is in its default state.
+     * Ensures that the passed object is in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
@@ -119,19 +125,20 @@ public class Validate {
      * @throws IllegalStateException if the object is not in its default state
      */
     @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkDefault(M object, String errorMessageTemplate,
-                                                     Object... errorMessageArgs) {
+    public static <M extends Message> M checkDefault(M object, String errorMessageTemplate, Object... errorMessageArgs) {
+        checkNotNull(object);
         checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 
     /**
-     * Ensures that the passed object is in its default state.
+     * Ensures that the passed object is in its default state and is not {@code null}.
      *
      * @param object the {@code Message} instance to check
      * @throws IllegalStateException if the object is not in its default state
      */
     public static <M extends Message> M checkDefault(M object) {
+        checkNotNull(object);
         checkDefault(object, "The message is not in the default state: %s", object);
         return object;
     }
@@ -152,13 +159,14 @@ public class Validate {
     }
 
     /**
-     * Ensures that the passed timestamp have {@code seconds} value which is greater than zero.
+     * Ensures that the passed timestamp is not {@code null} and has {@code seconds} value which is greater than zero.
      *
      * @param timestamp the timestamp to check
      * @return the passed timestamp
      * @throws IllegalArgumentException if the timestamp {@code seconds} value is less or equal to zero
      */
     public static Timestamp checkTimestamp(Timestamp timestamp, String fieldName) {
+        checkNotNull(timestamp);
         final long seconds = timestamp.getSeconds();
         checkArgument(seconds > 0, fieldName + " is invalid.");
         return timestamp;

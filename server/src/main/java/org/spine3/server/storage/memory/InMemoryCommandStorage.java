@@ -40,9 +40,8 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public void write(CommandId id, CommandStorageRecord record) {
-        checkNotNull(id);
         checkNotDefault(id);
-        checkNotNull(record);
+        checkNotDefault(record);
         final String commandId = record.getCommandId();
         checkNotEmptyOrBlank(commandId, "Command ID");
 
