@@ -26,17 +26,16 @@ import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.entity.EntityId;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkTimestamp;
-import static org.spine3.validate.Validate.checkValid;
+import static org.spine3.validate.Validate.*;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -83,6 +82,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setTimestamp(timestamp)
                 .setCommandType(commandType)
                 .setCommandId(commandIdString)
+                .setStatus(CommandStatus.RECEIVED)
                 .setAggregateIdType(aggregateIdType)
                 .setAggregateId(aggregateIdString)
                 .setContext(context);
