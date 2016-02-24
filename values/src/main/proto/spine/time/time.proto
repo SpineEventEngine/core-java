@@ -1,0 +1,85 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.time;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TimeProto";
+option java_package = "org.spine3.time";
+
+import "spine/time/zone_offset.proto";
+
+// Enum representing the 12 months of the year.
+enum MonthOfYear {
+    UNDEFINED = 0;
+    JANUARY = 1;
+    FEBRUARY = 2;
+    MARCH = 3;
+    APRIL = 4;
+    MAY = 5;
+    JUNE = 6;
+    JULY = 7;
+    AUGUST = 8;
+    SEPTEMBER = 9;
+    OCTOBER = 10;
+    NOVEMBER = 11;
+    DECEMBER = 12;
+}
+
+// A date without a time-zone.
+//
+// Use this message for describing a date (e.g. a birthday).
+message LocalDate {
+    int32 year = 1;
+    MonthOfYear month = 2;
+    int32 day = 3;
+}
+
+// A time without time-zone.
+//
+// It is a description of a time, not an instant on a time-line.
+message LocalTime {
+    int32 hours = 1;
+    int32 minutes = 2;
+    int32 seconds = 3;
+    int32 millis = 4;
+    int64 nanos = 5;
+}
+
+// A time with an offset from UTC.
+message OffsetTime {
+    LocalTime time = 1;
+    ZoneOffset offset = 2;
+}
+
+// A date with an offset from UTC.
+message OffsetDate {
+    LocalDate date = 1;
+    ZoneOffset offset = 2;
+}
+
+// A date-time with an offset from UTC.
+message OffsetDateTime {
+    LocalDate date = 1;
+    LocalTime time = 2;
+    ZoneOffset offset = 3;
+}
