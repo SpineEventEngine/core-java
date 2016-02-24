@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -34,7 +34,7 @@ import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.EntityId.checkType;
+import static org.spine3.server.entity.EntityId.checkType;
 
 /**
  * A server-side wrapper for objects with an identity.
@@ -73,6 +73,7 @@ public abstract class Entity<I, S extends Message> {
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types for identifiers
      */
+    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived
         // classes. We require that entity constructors be public as they are called by repositories.

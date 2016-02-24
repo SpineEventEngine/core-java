@@ -24,8 +24,9 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.Repository;
+import org.spine3.server.entity.EntityCommandDispatcher;
+import org.spine3.server.entity.IdFunction;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -64,7 +65,8 @@ import static org.spine3.base.Commands.getMessage;
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
                           extends Repository<I, A>
-                          implements CommandDispatcher {
+                          implements EntityCommandDispatcher<I> {
+
     /**
      * Default number of events to be stored before a next snapshot is made.
      */
@@ -212,8 +214,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      */
     @Override
     @CheckReturnValue
-    public List<Event> dispatch(Command request)
-            throws IllegalStateException, InvocationTargetException {
+    public List<Event> dispatch(Command request) throws IllegalStateException, InvocationTargetException {
         final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
         final I aggregateId = getAggregateId(command);
@@ -244,12 +245,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
         return events;
     }
 
-    @SuppressWarnings("unchecked")
-    // We cast to this type because assume that all commands for our aggregate refer to ID of the same type <I>.
-    // If this assumption fails, we would get ClassCastException.
-    // To double check this we need to check all the aggregate commands for the presence of the ID field and
-    // correctness of the type on compile time.
     private I getAggregateId(Message command) {
-        return (I) AggregateId.fromCommandMessage(command).value();
+        final AggregateIdFunction<I, Message> idFunction = AggregateIdFunction.newInstance();
+        final I id = idFunction.getId(command, CommandContext.getDefaultInstance());
+        return id;
+    }
+
+    @Override
+    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
+        return AggregateIdFunction.newInstance();
     }
 }

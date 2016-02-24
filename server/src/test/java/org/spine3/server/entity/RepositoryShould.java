@@ -18,10 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
 

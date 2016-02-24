@@ -36,8 +36,8 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.Entity;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
@@ -100,7 +100,7 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  *
  * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link EntityId}
  * @param <M> the type of the state held by the aggregate
- *
+ * @see AggregateIdFunction
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */

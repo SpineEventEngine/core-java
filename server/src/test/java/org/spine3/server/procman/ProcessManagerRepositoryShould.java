@@ -37,7 +37,7 @@ import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.Subscribe;
-import org.spine3.server.procman.error.MissingProcessManagerIdException;
+import org.spine3.server.entity.IdFunction;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -65,7 +65,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
@@ -150,14 +150,26 @@ public class ProcessManagerRepositoryShould {
         assertEquals(ID, message.getProjectId());
     }
 
-    @Test(expected = MissingProcessManagerIdException.class)
+    @Test
+    public void return_id_function_for_event_class() {
+        final IdFunction function = repository.getIdFunction(EventClass.of(ProjectCreated.class));
+        assertNotNull(function);
+    }
+
+    @Test
+    public void return_id_function_for_command_class() {
+        final IdFunction function = repository.getIdFunction(CommandClass.of(CreateProject.class));
+        assertNotNull(function);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
         final Command request = Commands.create(unknownCommand, CommandContext.getDefaultInstance());
         repository.dispatch(request);
     }
 
-    @Test(expected = MissingProcessManagerIdException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
@@ -180,18 +192,6 @@ public class ProcessManagerRepositoryShould {
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
     }
 
-    @Test
-    public void return_id_from_command_message() {
-        final ProjectId actual = repository.getId(createProject(ID));
-        assertEquals(ID, actual);
-    }
-
-    @Test
-    public void return_id_from_event_message() {
-        final ProjectId actual = repository.getId(projectCreatedEvent(ID));
-        assertEquals(ID, actual);
-    }
-
     private static Project toState(Message status) {
         final String statusStr = status.getClass().getName();
         final Project.Builder project = Project.newBuilder()
@@ -202,13 +202,17 @@ public class ProcessManagerRepositoryShould {
 
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
+
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
+    @SuppressWarnings({"TypeMayBeWeakened", "UnusedParameters", "unused"})
     private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
+        // a ProcessManager constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public TestProcessManager(ProjectId id) {
             super(id);
         }

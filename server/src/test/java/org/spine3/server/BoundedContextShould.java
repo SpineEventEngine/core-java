@@ -267,7 +267,7 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "TypeMayBeWeakened"})
     private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "STATUS_NEW";
@@ -281,6 +281,8 @@ public class BoundedContextShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
+        // an aggregate constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -361,12 +363,14 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
+        // a ProcessManager constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("UnusedParameters") // OK for test method
         @Assign
+        @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
         public CommandRouted handle(CreateProject command, CommandContext ctx) {
             return CommandRouted.getDefaultInstance();
         }
@@ -379,6 +383,7 @@ public class BoundedContextShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }
