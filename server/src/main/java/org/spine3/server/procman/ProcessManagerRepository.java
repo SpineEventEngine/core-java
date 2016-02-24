@@ -64,6 +64,12 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
 
     private static final int FIRST_MESSAGE_FIELD_INDEX = 0;
 
+    private final IdFunction<I, ? extends Message, EventContext> getFirstFieldFromEventMessage =
+            new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
+
+    private final IdFunction<I, ? extends Message, CommandContext> getFirstFieldFromCommandMessage =
+            new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
+
     @Nullable
     private ImmutableSet<CommandClass> commandClasses;
 
@@ -190,7 +196,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     }
 
     /**
-     * <p> The default implementation for a case when process manager does not handle any commands.
+     * <p>The default implementation (e.g., for a case when process manager does not handle any commands).
      *
      * <p>Note that it is NOT used in this case.
      *
@@ -199,11 +205,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      */
     @Override
     public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
-        return new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
+        return getFirstFieldFromCommandMessage;
     }
 
     /**
-     * <p> The default implementation for a case when process manager does not handle any events.
+     * <p>The default implementation (e.g., for a case when process manager does not handle any events).
      *
      * <p>Note that it is NOT used in this case.
      *
@@ -212,7 +218,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      */
     @Override
     public IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
-        return new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
+        return getFirstFieldFromEventMessage;
     }
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
