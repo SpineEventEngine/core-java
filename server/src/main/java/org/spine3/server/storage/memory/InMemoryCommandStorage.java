@@ -40,6 +40,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public void write(CommandId id, CommandStorageRecord record) {
+        checkNotClosed();
         checkNotDefault(id);
         checkNotDefault(record);
         final String commandId = record.getCommandId();
@@ -50,7 +51,8 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public CommandStorageRecord read(CommandId id) {
-        checkNotNull(id);
+        checkNotClosed();
+        checkNotDefault(id);
         final CommandStorageRecord record = get(id);
         if (record == null) {
             return CommandStorageRecord.getDefaultInstance();
@@ -60,6 +62,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public void updateStatus(CommandId id, Error error) {
+        checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
 
@@ -73,6 +76,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public void updateStatus(CommandId id, Failure failure) {
+        checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
 
@@ -86,6 +90,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
     @Override
     public void setOkStatus(CommandId id) {
+        checkNotClosed();
         checkNotNull(id);
         final CommandStorageRecord updatedRecord = get(id)
                 .toBuilder()
