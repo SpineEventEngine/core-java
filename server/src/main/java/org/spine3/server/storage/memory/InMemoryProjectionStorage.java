@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 

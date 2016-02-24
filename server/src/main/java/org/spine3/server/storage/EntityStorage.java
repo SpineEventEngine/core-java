@@ -21,7 +21,7 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.EntityId;
 
 import javax.annotation.Nullable;
 

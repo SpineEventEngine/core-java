@@ -28,7 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
@@ -100,10 +100,10 @@ public abstract class CommandStorageShould {
     @SuppressWarnings("ConstantConditions")
     public void store_and_read_command() {
         final Command command = createProject();
-        final CommandId id = command.getContext().getCommandId();
-        storage.store(command, AggregateId.fromCommand(command));
+        final CommandId commandId = command.getContext().getCommandId();
+        storage.store(command, EntityId.of("stub-id"));
 
-        final CommandStorageRecord record = storage.read(id);
+        final CommandStorageRecord record = storage.read(commandId);
 
         assertEquals(command.getMessage(), record.getMessage());
     }
@@ -132,7 +132,7 @@ public abstract class CommandStorageShould {
 
     private static CommandStorageRecord newCommandStorageRecord() {
         final String aggregateIdString = newUuid();
-        final AggregateId<String> aggregateId = AggregateId.of(aggregateIdString);
+        final EntityId<String> id = EntityId.of(aggregateIdString);
         final Any command = toAny(createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
@@ -140,7 +140,7 @@ public abstract class CommandStorageShould {
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(context.getCommandId().getUuid())
-                .setAggregateIdType(aggregateId.getShortTypeName())
+                .setAggregateIdType(id.getShortTypeName())
                 .setAggregateId(aggregateIdString)
                 .setMessage(command)
                 .setContext(context);

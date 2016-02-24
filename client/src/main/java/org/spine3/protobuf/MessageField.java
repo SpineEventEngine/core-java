@@ -156,12 +156,12 @@ public abstract class MessageField {
 
         boolean nextUpperCase = false;
         for (int i = 1; i < fieldName.length(); i++) {
-            final char c = fieldName.charAt(i);
-            if (PROPERTY_NAME_SEPARATOR == c) {
+            final char ch = fieldName.charAt(i);
+            if (PROPERTY_NAME_SEPARATOR == ch) {
                 nextUpperCase = true;
                 continue;
             }
-            out.append(nextUpperCase ? Character.toUpperCase(c) : c);
+            out.append(nextUpperCase ? Character.toUpperCase(ch) : ch);
             nextUpperCase = false;
         }
 
@@ -175,10 +175,9 @@ public abstract class MessageField {
      * @param index a zero-based index of the field
      * @return name of the field
      */
-        public static String getFieldName(Message msg, int index) {
+    public static String getFieldName(Message msg, int index) {
         final Descriptors.FieldDescriptor fieldDescriptor = getFieldDescriptor(msg, index);
         final String fieldName = fieldDescriptor.getName();
         return fieldName;
     }
-
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 
 /**
- * A base for {@link Entity} ID value object.
+ * An {@link Entity} ID value object.
  *
  * <p>An entity ID value can be of one of the following types:
  *   <ul>
@@ -55,8 +55,7 @@ import static com.google.common.collect.Iterables.transform;
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // OK in this case
-public abstract class EntityId<I> {
+public class EntityId<I> {
 
     /**
      * The value of the id.
@@ -70,10 +69,17 @@ public abstract class EntityId<I> {
             .add(Message.class)
             .build();
 
-    protected EntityId(I value) {
+    private EntityId(I value) {
         checkNotNull(value);
         checkType(value);
         this.value = value;
+    }
+
+    /**
+     * Creates a new wrapper for an ID.
+     */
+    public static<I> EntityId<I> of(I id) {
+        return new EntityId<>(id);
     }
 
     /**

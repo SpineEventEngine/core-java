@@ -18,8 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
+import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.storage.StorageFactory;
 

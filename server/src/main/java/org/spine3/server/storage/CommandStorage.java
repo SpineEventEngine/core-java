@@ -28,13 +28,12 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.entity.EntityId;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkTimestamp;
 
@@ -49,11 +48,10 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
      * Stores a command by a command ID from a command context.
-     *
-     * @param command a command to store
+     *  @param command a command to store
      * @param aggregateId an aggregate ID to store
      */
-    public void store(Command command, AggregateId aggregateId) {
+    public void store(Command command, EntityId aggregateId) {
         checkNotNull(aggregateId);
         checkNotNull(command);
         checkNotClosed();
@@ -70,7 +68,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");
 
-        final String aggregateIdString = idToString(aggregateId.value());
+        final String aggregateIdString = aggregateId.toString();
         checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
 
         final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
