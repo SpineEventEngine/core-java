@@ -37,15 +37,33 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.server.entity.EntityId.checkType;
 
 /**
- * A server-side wrapper for objects with an identity.
+ * A server-side object with an identity.
  *
- * <p>See {@link EntityId} for supported ID types.
+ * <p>An entity identifier can be of one of the following types:
+ *   <ul>
+ *      <li>String</li>
+ *      <li>Long</li>
+ *      <li>Integer</li>
+ *      <li>A class implementing {@link Message}</li>
+ *   </ul>
+ *
+ * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ * if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *   <ul>
+ *      <li>EAN value used in bar codes</li>
+ *      <li>ISBN</li>
+ *      <li>Phone number</li>
+ *      <li>email address as a couple of local-part and domain</li>
+ *   </ul>
+ *
+ *
+ * <p>A state of an entity is defined as a protobuf message and basic versioning attributes.
+ * The entity keeps only its latest state and meta information associated with this state.
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
  * @author Alexander Yevsyikov
  * @author Alexander Litus
- * @see EntityId
  */
 public abstract class Entity<I, S extends Message> {
 
