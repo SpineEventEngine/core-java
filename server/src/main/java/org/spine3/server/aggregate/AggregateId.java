@@ -85,7 +85,7 @@ public final class AggregateId<I> extends EntityId<I> {
 
     /**
      * Accessor object for aggregate ID fields in commands.
-     * <p/>
+     *
      * <p>An aggregate ID must be the first field declared in a message and its
      * name must end with {@code "id"} suffix.
      */
