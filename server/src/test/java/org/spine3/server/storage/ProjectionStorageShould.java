@@ -21,7 +21,6 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Timestamp;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
@@ -30,62 +29,37 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**
+ * Projection storage tests.
+ *
+ * @param <I> the type of IDs of storage records
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class ProjectionStorageShould {
+public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
 
-    private ProjectionStorage<String> storage;
+    private ProjectionStorage<I> storage;
 
     @Before
-    public void setUpTest() {
+    public void setUpProjectionStorageTest() {
         storage = getStorage();
     }
 
-    @After
-    public void tearDownTest() throws Exception {
-        storage.close();
-    }
+    @Override
+    protected abstract ProjectionStorage<I> getStorage();
 
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * @return an empty storage instance
-     */
-    protected abstract ProjectionStorage<String> getStorage();
-
-    @Test
-    public void return_null_if_no_record_with_such_id() {
-        final EntityStorageRecord record = storage.read(newUuid());
-        assertNull(record);
+    @Override
+    protected EntityStorageRecord newStorageRecord() {
+        return newEntityStorageRecord();
     }
 
     @Test
     public void return_null_if_no_event_time_in_storage() {
         final Timestamp time = storage.readLastHandledEventTime();
+
         assertNull(time);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_by_null_id() {
-        //noinspection ConstantConditions
-        storage.read(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        //noinspection ConstantConditions
-        storage.write(null, EntityStorageRecord.getDefaultInstance());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        //noinspection ConstantConditions
-        storage.write(newUuid(), null);
     }
 
     @Test(expected = NullPointerException.class)
@@ -95,20 +69,8 @@ public abstract class ProjectionStorageShould {
     }
 
     @Test
-    public void write_and_read_record() {
-        writeAndReadRecordTest();
-    }
-
-    @Test
     public void write_and_read_last_event_time() {
         writeAndReadLastEventTimeTest(getCurrentTime());
-    }
-
-    @Test
-    public void write_and_read_several_records_by_different_ids() {
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
     }
 
     @Test
@@ -119,26 +81,6 @@ public abstract class ProjectionStorageShould {
         writeAndReadLastEventTimeTest(time2);
     }
 
-    @Test
-    public void rewrite_record_if_write_with_same_id() {
-        final String id = "testIdRewrite";
-        writeAndReadRecordTest(id);
-        writeAndReadRecordTest(id);
-    }
-
-    private void writeAndReadRecordTest() {
-        writeAndReadRecordTest(newUuid());
-    }
-
-    private void writeAndReadRecordTest(String id) {
-        final EntityStorageRecord expected = newEntityStorageRecord();
-        storage.write(id, expected);
-
-        final EntityStorageRecord actual = storage.read(id);
-
-        assertEquals(expected, actual);
-    }
-
     private void writeAndReadLastEventTimeTest(Timestamp expected) {
         storage.writeLastHandledEventTime(expected);
 
@@ -147,4 +89,3 @@ public abstract class ProjectionStorageShould {
         assertEquals(expected, actual);
     }
 }
-

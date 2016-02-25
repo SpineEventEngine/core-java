@@ -36,8 +36,8 @@ import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.base.UserId;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.Entity;
 import org.spine3.server.command.CommandBus;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
@@ -107,9 +107,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     private MethodMap eventHandlers;
 
     /**
-     * {@inheritDoc}
+     * Creates a new instance.
+     *
+     * @param id an ID for the new instance
+     * @throws IllegalArgumentException if the ID type is unsupported
      */
-    protected ProcessManager(I id) {
+    @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
+    public ProcessManager(I id) {
         super(id);
     }
 
@@ -150,8 +154,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @param command the command to be executed on the process manager
      * @param context of the command
      * @throws InvocationTargetException if an exception occurs during command dispatching
+     * @throws IllegalStateException if no command handler method found for a command
      */
-    protected List<Event> dispatchCommand(Message command, CommandContext context) throws InvocationTargetException {
+    protected List<Event> dispatchCommand(Message command, CommandContext context)
+            throws InvocationTargetException, IllegalStateException {
         checkNotNull(command);
         checkNotNull(context);
 

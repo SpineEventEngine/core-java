@@ -60,6 +60,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestAggregateIdFactory;
 
 import java.util.List;
 
@@ -73,7 +74,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -84,7 +84,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
-    private final ProjectId projectId = createProjectId(newUuid());
+    private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
     private final EmptyHandler handler = new EmptyHandler();
 
     private StorageFactory storageFactory;
@@ -267,7 +267,7 @@ public class BoundedContextShould {
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "TypeMayBeWeakened"})
     private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
 
         private static final String STATUS_NEW = "STATUS_NEW";
@@ -281,6 +281,8 @@ public class BoundedContextShould {
         private boolean isTaskAddedEventApplied = false;
         private boolean isProjectStartedEventApplied = false;
 
+        // an aggregate constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -361,12 +363,14 @@ public class BoundedContextShould {
 
     private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
 
+        // a ProcessManager constructor must be public because it is used via reflection
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
 
-        @SuppressWarnings("UnusedParameters") // OK for test method
         @Assign
+        @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
         public CommandRouted handle(CreateProject command, CommandContext ctx) {
             return CommandRouted.getDefaultInstance();
         }
@@ -379,6 +383,7 @@ public class BoundedContextShould {
     }
 
     private static class ProjectPmRepo extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
+
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
         }

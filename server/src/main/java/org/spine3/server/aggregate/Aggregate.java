@@ -36,9 +36,8 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.Entity;
-import org.spine3.server.EntityId;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
@@ -98,9 +97,10 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  *
  * <p>The {@code Aggregate} restores its state in {@link #restore(Snapshot)} method.
  *
- * @param <I> the type for IDs of this class of aggregates. For supported ID types see {@link EntityId}
+ * @param <I> the type for IDs of this class of aggregates
  * @param <M> the type of the state held by the aggregate
- *
+ * @see AggregateIdFunction
+ * @see EntityId
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -148,7 +148,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the supported types
-     * @see EntityId
      */
     public Aggregate(I id) {
         super(id);

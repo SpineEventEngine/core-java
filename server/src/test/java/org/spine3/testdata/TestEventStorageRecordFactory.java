@@ -29,8 +29,7 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -45,7 +44,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord projectCreated() {
         final Timestamp time = getCurrentTime();
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setMessage(projectCreatedEventAny())
                 .setTimestamp(time)
@@ -58,7 +57,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord taskAdded() {
         final Timestamp time = getCurrentTime();
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setMessage(taskAddedEventAny())
                 .setTimestamp(time)
@@ -71,7 +70,7 @@ public class TestEventStorageRecordFactory {
 
     public static EventStorageRecord projectStarted() {
         final Timestamp time = getCurrentTime();
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setMessage(projectStartedEventAny())
                 .setTimestamp(time)
@@ -83,7 +82,7 @@ public class TestEventStorageRecordFactory {
     }
 
     public static EventStorageRecord projectCreated(Timestamp when) {
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectCreatedEventAny())
                 .setTimestamp(when)
@@ -95,7 +94,7 @@ public class TestEventStorageRecordFactory {
     }
 
     public static EventStorageRecord taskAdded(Timestamp when) {
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(taskAddedEventAny())
                 .setTimestamp(when)
@@ -107,7 +106,7 @@ public class TestEventStorageRecordFactory {
     }
 
     public static EventStorageRecord projectStarted(Timestamp when) {
-        final ProjectId projectId = createProjectId(newUuid());
+        final ProjectId projectId = newProjectId();
         final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
                 .setMessage(projectStartedEventAny())
                 .setTimestamp(when)

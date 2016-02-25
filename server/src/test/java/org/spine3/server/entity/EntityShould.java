@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 /**
  * @author Alexander Litus
@@ -167,7 +167,7 @@ public class EntityShould {
 
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
-                .setProjectId(createProjectId(newUuid()))
+                .setProjectId(newProjectId())
                 .setStatus(newUuid());
         return project.build();
     }

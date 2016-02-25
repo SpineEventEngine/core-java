@@ -17,20 +17,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.error;
 
-package org.spine3.server.storage.memory;
+import org.spine3.base.Identifiers;
 
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
+ * This exception is thrown if the corresponding Protobuf command/event message definition does not have
+ * an entity ID field whose name ends with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ *
  * @author Alexander Litus
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+public class MissingEntityIdException extends RuntimeException {
 
-    @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return InMemoryAggregateStorage.newInstance();
+    public MissingEntityIdException(String messageClassName, String propertyName, int fieldIndex) {
+        super(createMessage(messageClassName, propertyName, fieldIndex));
     }
+
+    private static String createMessage(String messageClassName, String propertyName, int fieldIndex) {
+        final String message = "The property with the index '" + fieldIndex + "' of the entity message " + messageClassName +
+                " must define an entity ID with the name ending with '" + ID_PROPERTY_SUFFIX +
+                "'. Found property with the name: " + propertyName;
+        return message;
+    }
+
+    private static final long serialVersionUID = 348L;
 }

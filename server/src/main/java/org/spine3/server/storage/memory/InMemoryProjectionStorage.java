@@ -21,7 +21,6 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.server.EntityId;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 
@@ -30,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The in-memory implementation of {@link ProjectionStorage}.
  *
- * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
+ * @param <I> the type of stream projection IDs
  * @author Alexander Litus
  */
 /*package*/ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {

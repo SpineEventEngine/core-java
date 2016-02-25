@@ -21,118 +21,52 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import org.junit.After;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
-import org.spine3.server.aggregate.AggregateId;
+import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class CommandStorageShould {
+public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
 
     private CommandStorage storage;
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private CommandStorageRecord record;
+
+    private CommandId id;
+
     @Before
-    public void setUpTest() {
+    public void setUpCommandStorageTest() {
         storage = getStorage();
     }
 
-    @After
-    public void tearDownTest() throws Exception {
-        storage.close();
-    }
-
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * @return an empty storage instance
-     */
+    @Override
     protected abstract CommandStorage getStorage();
 
-    @Test
-    public void override_read_method_and_do_not_throw_exception() {
-        try {
-            storage.read(CommandId.getDefaultInstance());
-        } catch (UnsupportedOperationException e) {
-            fail("read() method must be overridden if you want to use these tests.");
-        }
-    }
-
-    @Test
-    public void return_null_if_no_record_with_such_id_exists() {
-        final CommandStorageRecord record = storage.read(CommandId.getDefaultInstance());
-        assertNull(record);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_by_null_id() {
-        //noinspection ConstantConditions
-        storage.read(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        //noinspection ConstantConditions
-        storage.write(null, newCommandStorageRecord());
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        storage.write(Commands.generateId(), null);
-    }
-
-    @Test
-    @SuppressWarnings("ConstantConditions")
-    public void store_and_read_command() {
-        final Command command = createProject();
-        final CommandId id = command.getContext().getCommandId();
-        storage.store(command, AggregateId.fromCommand(command));
-
-        final CommandStorageRecord record = storage.read(id);
-
-        assertEquals(command.getMessage(), record.getMessage());
-    }
-
-    @Test
-    public void write_and_read_record() {
-        writeAndReadRecordTest();
-    }
-
-    @Test
-    public void write_and_read_several_records_by_different_ids() {
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
-    }
-
-    private void writeAndReadRecordTest() {
-        final CommandStorageRecord expected = newCommandStorageRecord();
-        final CommandId id = expected.getContext().getCommandId();
-        storage.write(id, expected);
-
-        final CommandStorageRecord actual = storage.read(id);
-
-        assertEquals(expected, actual);
-    }
-
-    private static CommandStorageRecord newCommandStorageRecord() {
+    @Override
+    protected CommandStorageRecord newStorageRecord() {
         final String aggregateIdString = newUuid();
-        final AggregateId<String> aggregateId = AggregateId.of(aggregateIdString);
         final Any command = toAny(createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
@@ -140,10 +74,96 @@ public abstract class CommandStorageShould {
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(context.getCommandId().getUuid())
-                .setAggregateIdType(aggregateId.getShortTypeName())
+                .setAggregateIdType(String.class.getName())
                 .setAggregateId(aggregateIdString)
                 .setMessage(command)
                 .setContext(context);
         return builder.build();
+    }
+
+    @Override
+    protected CommandId newId() {
+        return generateId();
+    }
+
+    @Test
+    public void override_read_method_and_do_not_throw_exception() {
+        try {
+            storage.read(Commands.generateId());
+        } catch (UnsupportedOperationException e) {
+            fail("read() method must be overridden if you want to use these tests.");
+        }
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void store_and_read_command() {
+        final Command command = createProject();
+        final CommandId commandId = command.getContext().getCommandId();
+        storage.store(command);
+
+        final CommandStorageRecord record = storage.read(commandId);
+
+        assertEquals(command.getMessage(), record.getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_ok_command_status() {
+        givenNewRecord();
+
+        storage.setOkStatus(id);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.OK, actual.getStatus());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_error_command_status() {
+        givenNewRecord();
+        final Error error = newError();
+
+        storage.updateStatus(id, error);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.ERROR, actual.getStatus());
+        assertEquals(error, actual.getError());
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void set_failure_command_status() {
+        givenNewRecord();
+        final Failure failure = newFailure();
+
+        storage.updateStatus(id, failure);
+
+        final CommandStorageRecord actual = storage.read(id);
+        assertEquals(CommandStatus.FAILURE, actual.getStatus());
+        assertEquals(failure, actual.getFailure());
+    }
+
+    private void givenNewRecord() {
+        record = newStorageRecord();
+        id = record.getContext().getCommandId();
+        storage.write(id, record);
+    }
+
+    private static Error newError() {
+        return Error.newBuilder()
+                .setType("error type 123")
+                .setCode(5)
+                .setMessage("error message 123")
+                .setStacktrace("stacktrace")
+                .build();
+    }
+
+    private static Failure newFailure() {
+        return Failure.newBuilder()
+                .setInstance(projectCreatedEventAny())
+                .setStacktrace("failure stacktrace")
+                .setTimestamp(TimeUtil.getCurrentTime())
+                .build();
     }
 }

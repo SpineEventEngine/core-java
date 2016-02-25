@@ -18,65 +18,64 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.procman;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
+import org.spine3.base.Identifiers;
 import org.spine3.protobuf.MessageField;
-import org.spine3.server.EntityId;
-import org.spine3.server.procman.error.MissingProcessManagerIdException;
+import org.spine3.server.error.MissingEntityIdException;
 
 import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
 /**
- * A value object for process manager IDs.
+ * Obtains an entity ID based on an event/command message, context and message field index.
  *
- * @param <I> the type of process manager IDs
- * @author Alexander Litus
+ * <p>An entity ID field name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
-public class ProcessManagerId<I> extends EntityId<I> {
+public class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
+
+    private final EntityIdField idField;
 
     /**
-     * The process manager ID must be the first field in events/commands.
+     * Creates a new instance.
+     *
+     * @param idIndex a zero-based index of an ID field in this type of messages
      */
-    public static final int ID_FIELD_INDEX = 0;
-
-    private ProcessManagerId(I value) {
-        super(value);
+    public GetIdByFieldIndex(int idIndex) {
+        this.idField = new EntityIdField(idIndex);
     }
 
     /**
-     * Creates a new non-null ID of a process manager.
+     * {@inheritDoc}
      *
-     * @param value id value
-     * @return new manager instance
+     * @throws MissingEntityIdException if the field name does not end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+     * @throws ClassCastException if the field type is invalid
      */
-    public static <I> ProcessManagerId<I> of(I value) {
-        return new ProcessManagerId<>(value);
+    @Override
+    public I getId(M message, C context) throws MissingEntityIdException {
+        @SuppressWarnings("unchecked") // we expect that the field is of this type
+        final I id = (I) idField.getValue(message);
+        return id;
     }
 
     /**
-     * Obtains a process manager ID from the passed command/event instance.
-     *
-     * <p>The ID value must be the first field of the proto file. Its name must end with the "id" suffix.
-     *
-     * @param message the command/event to get id from
-     * @return value of the id
+     * Accessor object for entity ID fields.
      */
-    public static ProcessManagerId from(Message message) {
-        final Object value = FIELD.getValue(message);
-        return of(value);
-    }
+    private static class EntityIdField extends MessageField {
 
-    /**
-     * Accessor object for process manager ID fields.
-     *
-     * <p>A process manager ID must be the first field defined in a message type.
-     * Its name must end with {@code "id"} suffix.
-     */
-    private static final MessageField FIELD = new MessageField(ID_FIELD_INDEX) {
+        private EntityIdField(int index) {
+            super(index);
+        }
+
         @Override
         protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
-            return new MissingProcessManagerIdException(message.getClass().getName(), fieldName);
+            return new MissingEntityIdException(message.getClass().getName(), fieldName, getIndex());
         }
 
         @Override
@@ -85,5 +84,5 @@ public class ProcessManagerId<I> extends EntityId<I> {
             final boolean result = fieldName.endsWith(ID_PROPERTY_SUFFIX);
             return result;
         }
-    };
+    }
 }

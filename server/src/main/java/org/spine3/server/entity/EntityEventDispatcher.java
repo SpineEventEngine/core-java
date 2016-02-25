@@ -18,19 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity;
 
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
+import org.spine3.server.EventDispatcher;
+import org.spine3.type.EventClass;
 
 /**
+ * Delivers events to handlers (which are supposed to be entities).
+ *
+ * @param <I> the type of entity IDs
  * @author Alexander Litus
+ * @see EventDispatcher
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+public interface EntityEventDispatcher<I> extends EventDispatcher {
 
-    @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return InMemoryAggregateStorage.newInstance();
-    }
+    /**
+     * Returns a function which can obtain an ID using a message of the passed class.
+     *
+     * @param eventClass a class of any event handled by the entity
+     * @return an ID function
+     */
+    IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass);
+
 }

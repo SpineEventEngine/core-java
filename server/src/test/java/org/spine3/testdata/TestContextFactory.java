@@ -36,7 +36,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 
 /**
@@ -47,7 +47,7 @@ import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 @SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
 public class TestContextFactory {
 
-    private static final Any AGGREGATE_ID = toAny(createProjectId(newUuid()));
+    private static final Any AGGREGATE_ID = toAny(newProjectId());
 
     private TestContextFactory() {
     }

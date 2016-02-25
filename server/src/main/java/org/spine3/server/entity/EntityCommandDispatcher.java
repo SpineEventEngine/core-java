@@ -18,19 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity;
 
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.type.CommandClass;
 
 /**
+ * Delivers commands to handlers (which are supposed to be entities).
+ *
+ * @param <I> the type of entity IDs
  * @author Alexander Litus
+ * @see CommandDispatcher
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+public interface EntityCommandDispatcher<I> extends CommandDispatcher {
 
-    @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return InMemoryAggregateStorage.newInstance();
-    }
+    /**
+     * Returns a function which can obtain an ID using a message of the passed class.
+     *
+     * @param commandClass a class of any command handled by the entity
+     * @return an ID function
+     */
+    IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass);
+
 }

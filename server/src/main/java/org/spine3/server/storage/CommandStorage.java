@@ -21,22 +21,24 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.aggregate.AggregateId;
+import org.spine3.server.aggregate.AggregateIdFunction;
 import org.spine3.server.command.CommandStore;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.validate.Validate.*;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -50,11 +52,11 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     /**
      * Stores a command by a command ID from a command context.
      *
+     * <p>Rewrites it if a command with such command ID already exists in the storage.
+     *
      * @param command a command to store
-     * @param aggregateId an aggregate ID to store
      */
-    public void store(Command command, AggregateId aggregateId) {
-        checkNotNull(aggregateId);
+    public void store(Command command) {
         checkNotNull(command);
         checkNotClosed();
 
@@ -64,16 +66,18 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
 
-        final CommandId commandId = context.getCommandId();
-        final String commandIdString = checkNotEmptyOrBlank(commandId.getUuid(), "command ID");
+        final CommandId commandId = checkValid(context.getCommandId());
+        final String commandIdString = commandId.getUuid();
 
         final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");
 
-        final String aggregateIdString = idToString(aggregateId.value());
-        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+        final Message message = Commands.getMessage(command);
+        final Object id = AggregateIdFunction.newInstance().getId(message, CommandContext.getDefaultInstance());
+        final String aggregateId = idToString(id);
+        checkNotEmptyOrBlank(aggregateId, "aggregate id");
 
-        final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
+        final String aggregateIdType = id.getClass().getName();
         final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Command time");
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -81,8 +85,9 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setTimestamp(timestamp)
                 .setCommandType(commandType)
                 .setCommandId(commandIdString)
+                .setStatus(CommandStatus.RECEIVED)
                 .setAggregateIdType(aggregateIdType)
-                .setAggregateId(aggregateIdString)
+                .setAggregateId(aggregateId)
                 .setContext(context);
         write(commandId, builder.build());
     }

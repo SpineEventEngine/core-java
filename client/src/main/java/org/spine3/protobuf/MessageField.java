@@ -185,5 +185,4 @@ public abstract class MessageField {
         final String fieldName = fieldDescriptor.getName();
         return fieldName;
     }
-
 }

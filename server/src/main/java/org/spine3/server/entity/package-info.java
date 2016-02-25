@@ -18,19 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
-
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
-
 /**
- * @author Alexander Litus
+ * This package contains server-side exceptions related to commands.
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity;
 
-    @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return InMemoryAggregateStorage.newInstance();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

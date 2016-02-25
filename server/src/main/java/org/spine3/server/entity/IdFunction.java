@@ -18,19 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.entity;
 
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
 
 /**
- * @author Alexander Litus
+ * Obtains an entity ID based on an event/command message and context.
+ *
+ * @param <I> the type of entity IDs
+ * @param <M> the type of messages to get IDs from
+ * @param <C> either {@link EventContext} or {@link CommandContext} type
+ * @see Entity
  */
-public class InMemoryAggregateStorageShould extends AggregateStorageShould {
+public interface IdFunction<I, M extends Message, C extends Message> {
 
-    @Override
-    protected AggregateStorage<ProjectId> getStorage() {
-        return InMemoryAggregateStorage.newInstance();
-    }
+    /**
+     * Obtains an entity ID based on passed event/command message and context.
+     *
+     * @param message an event or command message to use to get an ID
+     * @param context either {@link EventContext} or {@link CommandContext} instance
+     * @return an entity ID
+     */
+    I getId(M message, C context);
 }

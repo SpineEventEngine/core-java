@@ -20,90 +20,21 @@
 
 package org.spine3.server.storage;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public abstract class EntityStorageShould {
+/**
+ * Entity storage tests.
+ *
+ * @param <I> the type of IDs of storage records
+ * @author Alexander Litus
+ */
+public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
 
-    private EntityStorage<String> storage;
+    @Override
+    protected abstract EntityStorage<I> getStorage();
 
-    @Before
-    public void setUpTest() {
-        storage = getStorage();
-    }
-
-    @After
-    public void tearDownTest() throws Exception {
-        storage.close();
-    }
-
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * @return an empty storage instance
-     */
-    protected abstract EntityStorage<String> getStorage();
-
-    @Test
-    public void return_null_if_no_record_with_such_id() {
-        final EntityStorageRecord record = storage.read("nothing");
-        assertNull(record);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_read_by_null_id() {
-        //noinspection ConstantConditions
-        storage.read(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_by_null_id() {
-        //noinspection ConstantConditions
-        storage.write(null, EntityStorageRecord.getDefaultInstance());
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_write_null_record() {
-        storage.write(newUuid(), null);
-    }
-
-    @Test
-    public void write_and_read_record() {
-        writeAndReadRecordTest();
-    }
-
-    @Test
-    public void write_and_read_several_records_by_different_ids() {
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
-        writeAndReadRecordTest();
-    }
-
-    @Test
-    public void rewrite_record_if_write_by_the_same_id() {
-        final String id = "test-id-rewrite";
-        writeAndReadRecordTest(id);
-        writeAndReadRecordTest(id);
-    }
-
-    private void writeAndReadRecordTest() {
-        writeAndReadRecordTest(newUuid());
-    }
-
-    private void writeAndReadRecordTest(String id) {
-        final EntityStorageRecord expected = newEntityStorageRecord();
-        storage.write(id, expected);
-
-        final EntityStorageRecord actual = storage.read(id);
-
-        assertEquals(expected, actual);
+    @Override
+    protected EntityStorageRecord newStorageRecord() {
+        return newEntityStorageRecord();
     }
 }

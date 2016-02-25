@@ -18,7 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@ParametersAreNonnullByDefault
-package org.spine3.server.procman.error;
+package org.spine3.server.aggregate;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Identifiers;
+import org.spine3.server.entity.GetIdByFieldIndex;
+
+/**
+ * Obtains an aggregate ID based on a command message and context.
+ *
+ * <p>An aggregate ID must be the first field in messages.
+ * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ *
+ * @param <I> the type of aggregate IDs
+ * @author Alexander Litus
+ */
+public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+
+    public static final int ID_FIELD_INDEX = 0;
+
+    private AggregateIdFunction() {
+        super(ID_FIELD_INDEX);
+    }
+
+    /**
+     * Creates a new ID function instance.
+     */
+    public static<I, M extends Message> AggregateIdFunction<I, M> newInstance() {
+        return new AggregateIdFunction<>();
+    }
+}

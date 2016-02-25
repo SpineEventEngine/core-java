@@ -21,7 +21,7 @@
 package org.spine3.server.storage;
 
 import org.spine3.SPI;
-import org.spine3.server.EntityId;
+import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
 
@@ -31,29 +31,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An entity storage keeps messages with identity.
  *
- * <p>See {@link EntityId} for supported ID types.
- *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
+ * @see Entity
  */
 @SPI
 public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    @Nullable
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();
         checkNotNull(id);
 
         final EntityStorageRecord record = readInternal(checkNotNull(id));
+        if (record == null) {
+            return EntityStorageRecord.getDefaultInstance();
+        }
         return record;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Rewrites it if a record with the same ID already exists in the storage.
-     */
     @Override
     public void write(I id, EntityStorageRecord record) {
         checkNotNull(id);
@@ -79,7 +75,7 @@ public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageR
     /**
      * Writes a record into the storage.
      *
-     * <p>Rewrites it if a record with the same ID already exists in the storage.
+     * <p>Rewrites it if a record with this ID already exists in the storage.
      *
      * @param id an ID of the record
      * @param record a record to store

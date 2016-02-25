@@ -23,8 +23,6 @@ package org.spine3.server.storage;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
 
-import javax.annotation.Nullable;
-
 /**
  * Abstract base for storages.
  *
@@ -44,18 +42,20 @@ public abstract class AbstractStorage<I, R extends Message> implements AutoClose
      * Reads a record from the storage by the passed ID.
      *
      * @param id the ID of the record to load
-     * @return a record instance or {@code null} if there is no record with this ID
+     * @return a record instance or the default record instance if there is no record with this ID
      * @throws IllegalStateException if the storage was closed before
+     * @see Message#getDefaultInstanceForType()
      */
-    @Nullable
     public abstract R read(I id);
 
     /**
      * Writes a record into the storage.
      *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
      * @param id the ID for the record
      * @param record a record to store
-     * @throws IllegalStateException if the storage was closed before
+     * @throws IllegalStateException if the storage is closed
      */
     public abstract void write(I id, R record);
 

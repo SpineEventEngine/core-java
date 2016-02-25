@@ -24,7 +24,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.server.aggregate.AggregateId;
 import org.spine3.server.storage.CommandStorage;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -52,8 +51,7 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command) {
         checkState(storage.isOpen(), "Unable to store to closed storage.");
 
-        final AggregateId aggregateId = AggregateId.fromCommand(command);
-        storage.store(command, aggregateId);
+        storage.store(command);
     }
 
     @Override

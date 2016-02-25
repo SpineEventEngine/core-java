@@ -27,9 +27,8 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -40,7 +39,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
  */
 public class TestEventFactory {
 
-    private static final ProjectId STUB_PROJECT_ID = createProjectId(newUuid());
+    private static final ProjectId STUB_PROJECT_ID = newProjectId();
     private static final EventContext STUB_EVENT_CONTEXT = createEventContext();
 
 

@@ -26,13 +26,13 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
-import org.spine3.validate.Validate;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /* package */ class InMemoryCommandStorage extends CommandStorage {
 
@@ -40,29 +40,29 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     public void write(CommandId id, CommandStorageRecord record) {
-        checkNotNull(id);
-        Validate.checkNotDefault(id);
-        checkNotNull(record);
-
+        checkNotClosed();
+        checkNotDefault(id);
+        checkNotDefault(record);
         final String commandId = record.getCommandId();
-        if (commandId.isEmpty() || commandId.trim()
-                                            .isEmpty()) {
-            throw new IllegalArgumentException("Command id in the record can not be empty or blank.");
-        }
+        checkNotEmptyOrBlank(commandId, "Command ID");
 
         put(id, record);
     }
 
-    @Nullable
     @Override
     public CommandStorageRecord read(CommandId id) {
-        checkNotNull(id);
-        final CommandStorageRecord result = get(id);
-        return result;
+        checkNotClosed();
+        checkNotDefault(id);
+        final CommandStorageRecord record = get(id);
+        if (record == null) {
+            return CommandStorageRecord.getDefaultInstance();
+        }
+        return record;
     }
 
     @Override
     public void updateStatus(CommandId id, Error error) {
+        checkNotClosed();
         checkNotNull(id);
         checkNotNull(error);
 
@@ -76,6 +76,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     public void updateStatus(CommandId id, Failure failure) {
+        checkNotClosed();
         checkNotNull(id);
         checkNotNull(failure);
 
@@ -89,6 +90,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     public void setOkStatus(CommandId id) {
+        checkNotClosed();
         checkNotNull(id);
         final CommandStorageRecord updatedRecord = get(id)
                 .toBuilder()
