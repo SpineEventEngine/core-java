@@ -24,6 +24,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.EntityCommandDispatcher;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.entity.Repository;
@@ -246,13 +247,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     }
 
     private I getAggregateId(Message command) {
-        final AggregateIdFunction<I, Message> idFunction = AggregateIdFunction.newInstance();
+        final GetTargetIdFromCommand<I, Message> idFunction = GetTargetIdFromCommand.newInstance();
         final I id = idFunction.getId(command, CommandContext.getDefaultInstance());
         return id;
     }
 
     @Override
     public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
-        return AggregateIdFunction.newInstance();
+        return GetTargetIdFromCommand.newInstance();
     }
 }

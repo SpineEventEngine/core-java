@@ -66,7 +66,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final String aggregateIdString = newUuid();
         final Any command = toAny(createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
@@ -74,8 +73,8 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(context.getCommandId().getUuid())
-                .setAggregateIdType(String.class.getName())
-                .setAggregateId(aggregateIdString)
+                .setTargetId(newUuid())
+                .setTargetIdType(String.class.getName())
                 .setMessage(command)
                 .setContext(context);
         return builder.build();
