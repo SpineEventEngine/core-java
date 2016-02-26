@@ -53,7 +53,7 @@ import static java.util.Collections.singletonList;
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     /**
-     * The instsance of the predicate to filter command handler methods of a class.
+     * The instance of the predicate to filter command handler methods of a class.
      */
     public static final Predicate<Method> PREDICATE = new MethodPredicate();
 

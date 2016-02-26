@@ -178,7 +178,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
         final Iterable<Event> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
 
         //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
-        // Now we're storing snapshot in a seria of uncommitted
+        // Now we're storing snapshot in a sequence of uncommitted
         // events, which isn't going to be the case. We need to read the number of events since the last
         // snapshot of the aggregate instead.
 
@@ -222,7 +222,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 
-        //noinspection OverlyBroadCatchBlock
         try {
             aggregate.dispatch(command, context);
         } catch (Throwable throwable) {

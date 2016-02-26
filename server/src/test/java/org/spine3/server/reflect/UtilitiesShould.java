@@ -46,8 +46,8 @@ import static org.junit.Assert.fail;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/,
-"OverlyCoupledClass"/*ok in this case*/})
+@SuppressWarnings({"InstanceMethodNamingConvention"/*we have another convention in tests*/
+/*ok in this case*/})
 public class UtilitiesShould {
 
     @Test

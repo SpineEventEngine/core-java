@@ -63,7 +63,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void undergisterAll() {
+    /* package */ void unregisterAll() {
         dispatchers.clear();
     }
 

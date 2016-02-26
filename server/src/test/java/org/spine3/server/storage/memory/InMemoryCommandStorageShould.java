@@ -23,7 +23,6 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageShould;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryCommandStorageShould extends CommandStorageShould {
 
     @Override

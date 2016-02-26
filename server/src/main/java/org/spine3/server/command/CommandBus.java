@@ -224,7 +224,6 @@ public class CommandBus implements AutoCloseable {
     /**
      * Convenience wrapper for logging errors and warnings.
      */
-    @SuppressWarnings("MethodMayBeStatic") // made non-static and package-visible for testing.
     /* package */ static class ProblemLog {
         /* package */ void errorDispatching(Exception exception, Command command) {
             final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);

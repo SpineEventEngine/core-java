@@ -84,7 +84,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void store_and_read_command() {
         final Command command = createProject();
         final CommandId commandId = command.getContext().getCommandId();
@@ -96,7 +95,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_ok_command_status() {
         givenNewRecord();
 
@@ -107,7 +105,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_error_command_status() {
         givenNewRecord();
         final Error error = newError();
@@ -120,7 +117,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_failure_command_status() {
         givenNewRecord();
         final Failure failure = newFailure();

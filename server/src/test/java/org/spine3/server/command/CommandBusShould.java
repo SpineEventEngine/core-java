@@ -55,7 +55,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class CommandBusShould {
 
     private CommandBus commandBus;
@@ -372,6 +372,7 @@ public class CommandBusShould {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class TestThrowable extends Throwable {
     }
 
@@ -443,6 +444,4 @@ public class CommandBusShould {
         // Verify we logged the failure.
         verify(log, atMost(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
-
-
 }
