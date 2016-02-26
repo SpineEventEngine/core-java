@@ -23,11 +23,14 @@ package org.spine3.server.storage;
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Snapshot;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 
 import javax.annotation.Nullable;
@@ -40,6 +43,7 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
@@ -63,6 +67,14 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Override
     protected abstract AggregateStorage<ProjectId> getStorage();
+
+    /**
+     * Used to get a storage in tests with different ID types.
+     *
+     * @param <Id> the type of aggregate IDs
+     * @return an empty storage instance
+     */
+    protected abstract <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message>> aggregateClass);
 
     @Override
     protected AggregateEvents newStorageRecord() {
@@ -115,16 +127,29 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test
-    public void write_and_read_one_event() {
-        final Event expected = projectCreated(id);
+    public void write_and_one_event_by_Message_id() {
+        writeAndReadEventTest(id, storage);
+    }
 
-        storage.writeEvent(id, expected);
+    @Test
+    public void write_and_read_event_by_String_id() {
+        final AggregateStorage<String> storage = getStorage(TestAggregateWithIdString.class);
+        final String id = newUuid();
+        writeAndReadEventTest(id, storage);
+    }
 
-        final Iterator<AggregateStorageRecord> iterator = storage.historyBackward(id);
-        assertTrue(iterator.hasNext());
-        final AggregateStorageRecord actual = iterator.next();
-        assertEquals(expected, actual.getEvent());
-        assertFalse(iterator.hasNext());
+    @Test
+    public void write_and_read_event_by_Long_id() {
+        final AggregateStorage<Long> storage = getStorage(TestAggregateWithIdLong.class);
+        final long id = 10L;
+        writeAndReadEventTest(id, storage);
+    }
+
+    @Test
+    public void write_and_read_event_by_Integer_id() {
+        final AggregateStorage<Integer> storage = getStorage(TestAggregateWithIdInteger.class);
+        final int id = 10;
+        writeAndReadEventTest(id, storage);
     }
 
     @Test
@@ -183,6 +208,17 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         testWriteRecordsAndLoadHistory(time3);
     }
 
+    protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
+        final Event expectedEvent = projectCreated();
+
+        storage.writeEvent(id, expectedEvent);
+
+        final AggregateEvents events = storage.read(id);
+        assertEquals(1, events.getEventCount());
+        final Event actualEvent = events.getEvent(0);
+        assertEquals(expectedEvent, actualEvent);
+    }
+
     // Ignore this test because several records can be stored by an aggregate ID.
     @Override
     @SuppressWarnings({"NoopMethodInAbstractClass", "RefusedBequest"})
@@ -219,5 +255,23 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
                 .setState(Any.getDefaultInstance())
                 .setTimestamp(time)
                 .build();
+    }
+
+    private static class TestAggregateWithIdString extends Aggregate<String, Project> {
+        private TestAggregateWithIdString(String id) {
+            super(id);
+        }
+    }
+
+    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project> {
+        private TestAggregateWithIdInteger(Integer id) {
+            super(id);
+        }
+    }
+
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project> {
+        private TestAggregateWithIdLong(Long id) {
+            super(id);
+        }
     }
 }
