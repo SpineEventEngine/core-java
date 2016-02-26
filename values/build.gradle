@@ -19,7 +19,7 @@ apply plugin: 'org.spine3.tools.protolookup';
 sourceSets {
     main {
         proto {
-            srcDirs += ["${project(":server").projectDir}/src/main/proto"]
+            srcDirs += ["${project(":values").projectDir}/src/main/proto"]
         }
         java {
             srcDir "$projectDir/generated/main/grpc"
@@ -42,16 +42,4 @@ protobuf {
             }
         }
     }
-}
-
-// required for usage of test classes from other modules
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
 }
