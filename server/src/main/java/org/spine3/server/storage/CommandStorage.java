@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
@@ -91,9 +92,10 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         }
     }
 
-    private static CommandStorageRecord toStorageRecord(Command command) {
+    @VisibleForTesting
+    /* package */ static CommandStorageRecord toStorageRecord(Command command) {
         final CommandContext context = command.getContext();
-        final CommandId commandId = checkValid(context.getCommandId());
+        final CommandId commandId = context.getCommandId();
         final String commandIdString = commandId.getUuid();
 
         final Any messageAny = command.getMessage();
@@ -131,7 +133,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      * throws an exception (in the case if the command is not for an entity)
      */
     @Nullable
-    private static Object tryToGetTargetId(Message commandMessage) {
+    @VisibleForTesting
+    /* package */ static Object tryToGetTargetId(Message commandMessage) {
         try {
             final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
             return id;
