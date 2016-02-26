@@ -20,26 +20,25 @@
 
 package org.spine3.server.storage.memory;
 
-import org.junit.After;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 
+import static org.spine3.base.Identifiers.newUuid;
+
 /**
- * In-memory implementation of {@link EntityStorage} tests.
+ * Tests of an in-memory {@link EntityStorage} implementation.
  *
  * @author Alexander Litus
  */
-public class InMemoryEntityStorageShould extends EntityStorageShould {
-
-    private final InMemoryEntityStorage<String> storage = InMemoryEntityStorage.newInstance();
+public class InMemoryEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
     protected EntityStorage<String> getStorage() {
-        return storage;
+        return InMemoryEntityStorage.newInstance();
     }
 
-    @After
-    public void tearDownTest() {
-        storage.clear();
+    @Override
+    protected String newId() {
+        return newUuid();
     }
 }

@@ -30,11 +30,11 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.CommandDispatcher;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.entity.EntityCommandDispatcher;
 import org.spine3.server.entity.EntityEventDispatcher;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.entity.GetIdByFieldIndex;
+import org.spine3.server.command.GetTargetIdFromCommand;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
@@ -60,9 +60,9 @@ import static org.spine3.base.Commands.getMessage;
  */
 public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S>, S extends Message>
                           extends EntityRepository<I, PM, S>
-                          implements EntityCommandDispatcher<I>, EntityEventDispatcher<I> {
+                          implements CommandDispatcher, EntityEventDispatcher<I> {
 
-    private static final int FIRST_MESSAGE_FIELD_INDEX = 0;
+    private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
 
     @Nullable
     private ImmutableSet<CommandClass> commandClasses;
@@ -114,14 +114,13 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     @Override
     public List<Event> dispatch(Command command)
             throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
-        final Message message = getMessage(checkNotNull(command));
+        final Message commandMessage = getMessage(checkNotNull(command));
         final CommandContext context = command.getContext();
-        final CommandClass commandClass = CommandClass.of(message);
+        final CommandClass commandClass = CommandClass.of(commandMessage);
         checkCommandClass(commandClass);
-        final IdFunction idFunction = getIdFunction(commandClass);
-        final I id = getId(idFunction, message, context);
+        final I id = getIdFromCommandMessage.getId(commandMessage, context);
         final PM manager = load(id);
-        final List<Event> events = manager.dispatchCommand(message, context);
+        final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         return events;
     }
@@ -143,7 +142,9 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final EventClass eventClass = EventClass.of(message);
         checkEventClass(eventClass);
         final IdFunction idFunction = getIdFunction(eventClass);
-        final I id = getId(idFunction, message, context);
+        // All ID functions are supposed to return IDs of this type.
+        @SuppressWarnings("unchecked")
+        final I id = (I) idFunction.getId(message, context);
         final PM manager = load(id);
         try {
             manager.dispatchEvent(message, context);
@@ -174,45 +175,6 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
-    }
-
-    /**
-     * Obtains a process manager ID from event/command message and context.
-     *
-     * @param message an event or command message to extract an ID from
-     * @param context either {@link EventContext} or {@link CommandContext} instance
-     */
-    private I getId(IdFunction idFunction, Message message, Message context) {
-        // All ID functions are supposed to return IDs of this type.
-        @SuppressWarnings("unchecked")
-        final I result = (I) idFunction.getId(message, context);
-        return result;
-    }
-
-    /**
-     * <p> The default implementation for a case when process manager does not handle any commands.
-     *
-     * <p>Note that it is NOT used in this case.
-     *
-     * @param commandClass a class of any command handled by the entity
-     * @return a function which obtains the first field from a message
-     */
-    @Override
-    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
-        return new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
-    }
-
-    /**
-     * <p> The default implementation for a case when process manager does not handle any events.
-     *
-     * <p>Note that it is NOT used in this case.
-     *
-     * @param eventClass a class of any event handled by the entity
-     * @return a function which obtains the first field from a message
-     */
-    @Override
-    public IdFunction<I, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
-        return new GetIdByFieldIndex<>(FIRST_MESSAGE_FIELD_INDEX);
     }
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {

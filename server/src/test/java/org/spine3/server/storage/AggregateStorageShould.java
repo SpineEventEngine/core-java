@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -41,36 +40,42 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.*;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
 import static org.spine3.testdata.TestEventFactory.projectCreated;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class AggregateStorageShould {
+public abstract class AggregateStorageShould extends AbstractStorageShould<ProjectId, AggregateEvents> {
 
-    private final ProjectId id = createProjectId(newUuid());
+    private final ProjectId id = newProjectId();
 
     private AggregateStorage<ProjectId> storage;
 
     @Before
-    public void setUpTest() {
+    public void setUpAggregateStorageTest() {
         storage = getStorage();
     }
 
-    @After
-    public void tearDownTest() throws Exception {
-        storage.close();
+    @Override
+    protected abstract AggregateStorage<ProjectId> getStorage();
+
+    @Override
+    protected AggregateEvents newStorageRecord() {
+        final List<AggregateStorageRecord> records = createSequentialRecords(id);
+        final List<Event> expectedEvents = transform(records, TO_EVENT);
+        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedEvents).build();
+        return aggregateEvents;
     }
 
-    /**
-     * Used to initialize the storage before each test.
-     *
-     * @return an empty storage instance
-     */
-    protected abstract AggregateStorage<ProjectId> getStorage();
+    @Override
+    protected ProjectId newId() {
+        return newProjectId();
+    }
 
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
@@ -80,27 +85,9 @@ public abstract class AggregateStorageShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_read_events_by_null_id() {
-        // noinspection ConstantConditions
-        storage.read(null);
-    }
-
-    @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_read_history_by_null_id() {
         // noinspection ConstantConditions
         storage.historyBackward(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_null_events() {
-        // noinspection ConstantConditions
-        storage.write(id, (AggregateEvents) null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_write_events_by_null_id() {
-        // noinspection ConstantConditions
-        storage.write(null, AggregateEvents.getDefaultInstance());
     }
 
     @Test(expected = NullPointerException.class)
@@ -166,20 +153,6 @@ public abstract class AggregateStorageShould {
     }
 
     @Test
-    public void write_and_read_aggregate_events() {
-        final List<AggregateStorageRecord> records = createSequentialRecords(id);
-        final List<Event> expectedEvents = transform(records, TO_EVENT);
-        final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedEvents).build();
-
-        storage.write(id, aggregateEvents);
-
-        final AggregateEvents events = storage.read(id);
-
-        final List<Event> actualEvents = events.getEventList();
-        assertEquals(expectedEvents, actualEvents);
-    }
-
-    @Test
     public void store_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
@@ -210,7 +183,13 @@ public abstract class AggregateStorageShould {
         testWriteRecordsAndLoadHistory(time3);
     }
 
-    private void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
+    // Ignore this test because several records can be stored by an aggregate ID.
+    @Override
+    @SuppressWarnings({"NoopMethodInAbstractClass", "RefusedBequest"})
+    public void rewrite_record_if_write_by_the_same_id() {
+    }
+
+    protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
         final List<AggregateStorageRecord> records = createSequentialRecords(id, firstRecordTime);
 
         writeAll(id, records);
@@ -221,13 +200,13 @@ public abstract class AggregateStorageShould {
         assertEquals(expectedEvents, actualEvents);
     }
 
-    private void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
+    protected void writeAll(ProjectId id, Iterable<AggregateStorageRecord> records) {
         for (AggregateStorageRecord record : records) {
             storage.writeInternal(id, record);
         }
     }
 
-    private static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
+    protected static final Function<AggregateStorageRecord, Event> TO_EVENT = new Function<AggregateStorageRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
         public Event apply(@Nullable AggregateStorageRecord input) {

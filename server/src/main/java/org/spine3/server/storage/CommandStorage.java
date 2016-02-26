@@ -21,21 +21,25 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.error.MissingEntityIdException;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.*;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -45,48 +49,99 @@ import static org.spine3.validate.Validate.checkTimestamp;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
+    private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = GetTargetIdFromCommand.newInstance();
+
     //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
      * Stores a command by a command ID from a command context.
-     *  @param command a command to store
-     * @param aggregateId an aggregate ID to store
+     *
+     * <p>Rewrites it if a command with such command ID already exists in the storage.
+     *
+     * @param command a command to store
      */
-    public void store(Command command, EntityId aggregateId) {
-        checkNotNull(aggregateId);
-        checkNotNull(command);
+    public void store(Command command) {
         checkNotClosed();
+        checkCommand(command);
 
+        final CommandStorageRecord record = toStorageRecord(command);
+        final CommandId commandId = command.getContext().getCommandId();
+        write(commandId, record);
+    }
+
+    private static void checkCommand(Command command) {
         checkArgument(command.hasMessage(), "Command message must be set.");
-        final Any wrappedMessage = command.getMessage();
 
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
 
-        final CommandId commandId = context.getCommandId();
-        final String commandIdString = checkNotEmptyOrBlank(commandId.getUuid(), "command ID");
+        checkValid(context.getCommandId());
 
-        final String commandType = TypeName.ofEnclosed(wrappedMessage).nameOnly();
+        checkTimestamp(context.getTimestamp(), "Command time");
+
+        final Message commandMessage = Commands.getMessage(command);
+        final String commandType = TypeName.of(commandMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");
 
-        final String aggregateIdString = aggregateId.toString();
-        checkNotEmptyOrBlank(aggregateIdString, "aggregate ID");
+        final Object targetId = tryToGetTargetId(commandMessage);
+        if (targetId != null) {
+            final String targetIdString = idToString(targetId);
+            checkNotEmptyOrBlank(targetIdString, "command target ID");
+            final String targetIdType = targetId.getClass().getName();
+            checkNotEmptyOrBlank(targetIdType, "command target ID type");
+        }
+    }
 
-        final String aggregateIdType = checkNotEmptyOrBlank(aggregateId.getShortTypeName(), "aggregate ID type");
-        final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "Command time");
+    private static CommandStorageRecord toStorageRecord(Command command) {
+        final CommandContext context = command.getContext();
+        final CommandId commandId = checkValid(context.getCommandId());
+        final String commandIdString = commandId.getUuid();
+
+        final Any messageAny = command.getMessage();
+
+        final Message commandMessage = Commands.getMessage(command);
+        final String commandType = TypeName.of(commandMessage).nameOnly();
+
+        final Object targetId = tryToGetTargetId(commandMessage);
+        final String targetIdString;
+        final String targetIdType;
+        if (targetId != null) {
+            targetIdString = idToString(targetId);
+            targetIdType = targetId.getClass().getName();
+        } else { // the command is not for an entity
+            targetIdString = "";
+            targetIdType = "";
+        }
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setMessage(wrappedMessage)
-                .setTimestamp(timestamp)
+                .setMessage(messageAny)
+                .setTimestamp(context.getTimestamp())
                 .setCommandType(commandType)
                 .setCommandId(commandIdString)
-                .setAggregateIdType(aggregateIdType)
-                .setAggregateId(aggregateIdString)
+                .setStatus(CommandStatus.RECEIVED)
+                .setTargetIdType(targetIdType)
+                .setTargetId(targetIdString)
                 .setContext(context);
-        write(commandId, builder.build());
+        return builder.build();
     }
 
     /**
-     * Updates the status of the command to {@link org.spine3.base.CommandStatus#OK}
+     * Tries to obtain a target ID.
+     *
+     * @return an ID or {@code null} if {@link GetTargetIdFromCommand#getId(Message, Message)}
+     * throws an exception (in the case if the command is not for an entity)
+     */
+    @Nullable
+    private static Object tryToGetTargetId(Message commandMessage) {
+        try {
+            final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
+            return id;
+        } catch (MissingEntityIdException | ClassCastException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Updates the status of the command to {@link CommandStatus#OK}
      */
     public abstract void setOkStatus(CommandId commandId);
 

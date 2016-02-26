@@ -28,7 +28,7 @@ import org.spine3.type.EventClass;
 /**
  * Delivers events to handlers (which are supposed to be entities).
  *
- * @param <I> the type of entity IDs. See {@link EntityId} for more info.
+ * @param <I> the type of entity IDs
  * @author Alexander Litus
  * @see EventDispatcher
  */

@@ -25,11 +25,9 @@ import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nonnull;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -45,7 +43,7 @@ import static org.spine3.validate.Validate.checkTimestamp;
 /**
  * An event-sourced storage of aggregate root events and snapshots.
  *
- * @param <I> the type of IDs of aggregates managed by this storage. See {@link EntityId} for supported types
+ * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
  */
 @SPI
@@ -53,7 +51,6 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
-    @Nonnull
     @Override
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();
@@ -92,12 +89,17 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
     }
 
     /**
-     * {@inheritDoc}
+     * Writes events into the storage.
      *
+     * <p>NOTE: does not rewrite any events. Several events can be associated with one aggregate ID.
+     *
+     * @param id the ID for the record
+     * @param events events to store
+     * @throws IllegalStateException if the storage is closed
      * @throws IllegalArgumentException if event list is empty
      */
     @Override
-    public void write(I id, AggregateEvents events) {
+    public void write(I id, AggregateEvents events) throws IllegalStateException, IllegalArgumentException {
         checkNotClosed();
         checkNotNull(id);
         checkNotNull(events);

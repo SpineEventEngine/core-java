@@ -18,35 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.command;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.EntityId;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
- * Obtains an aggregate ID based on a command message and context.
+ * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
  *
- * <p>An aggregate ID must be the first field in messages.
+ * <p>An entity ID must be the first field in command messages (in Protobuf definition).
  * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
- * @param <I> the type of aggregate IDs. See {@link EntityId} for more info
+ * @param <I> the type of target entity IDs
+ * @param <M> the type of command messages to get IDs from
  * @author Alexander Litus
  */
-public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
 
     public static final int ID_FIELD_INDEX = 0;
 
-    private AggregateIdFunction() {
+    private GetTargetIdFromCommand() {
         super(ID_FIELD_INDEX);
     }
 
     /**
      * Creates a new ID function instance.
      */
-    public static<I, M extends Message> AggregateIdFunction<I, M> newInstance() {
-        return new AggregateIdFunction<>();
+    public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
+        return new GetTargetIdFromCommand<>();
     }
 }

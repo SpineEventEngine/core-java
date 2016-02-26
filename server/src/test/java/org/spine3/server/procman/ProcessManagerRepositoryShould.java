@@ -38,6 +38,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.Subscribe;
 import org.spine3.server.entity.IdFunction;
+import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -47,6 +48,7 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.testdata.TestCommands;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
@@ -57,9 +59,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestAggregateIdFactory.createProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -69,7 +69,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould {
 
-    private static final ProjectId ID = createProjectId(newUuid());
+    private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
 
     private TestProcessManagerRepository repository;
 
@@ -157,12 +157,6 @@ public class ProcessManagerRepositoryShould {
         assertNotNull(function);
     }
 
-    @Test
-    public void return_id_function_for_command_class() {
-        final IdFunction function = repository.getIdFunction(CommandClass.of(CreateProject.class));
-        assertNotNull(function);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException, FailureThrowable {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
@@ -206,6 +200,11 @@ public class ProcessManagerRepositoryShould {
 
         private TestProcessManagerRepository(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @Override
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 

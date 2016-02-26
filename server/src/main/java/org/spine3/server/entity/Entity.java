@@ -20,6 +20,10 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.reflect.Classes;
@@ -32,20 +36,38 @@ import java.util.Map;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.server.entity.EntityId.checkType;
 
 /**
- * A server-side wrapper for objects with an identity.
+ * A server-side object with an identity.
  *
- * <p>See {@link EntityId} for supported ID types.
+ * <p>An entity identifier can be of one of the following types:
+ *   <ul>
+ *      <li>String</li>
+ *      <li>Long</li>
+ *      <li>Integer</li>
+ *      <li>A class implementing {@link Message}</li>
+ *   </ul>
+ *
+ * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
+ * if you need to have IDs with some structure inside. Examples of such structural IDs are:
+ *   <ul>
+ *      <li>EAN value used in bar codes</li>
+ *      <li>ISBN</li>
+ *      <li>Phone number</li>
+ *      <li>email address as a couple of local-part and domain</li>
+ *   </ul>
+ *
+ *
+ * <p>A state of an entity is defined as a protobuf message and basic versioning attributes.
+ * The entity keeps only its latest state and meta information associated with this state.
  *
  * @param <I> the type of the entity ID
  * @param <S> the type of the entity state
  * @author Alexander Yevsyikov
  * @author Alexander Litus
- * @see EntityId
  */
 public abstract class Entity<I, S extends Message> {
 
@@ -58,6 +80,13 @@ public abstract class Entity<I, S extends Message> {
      * The index of the declaration of the generic parameter type {@code State} in this class.
      */
     private static final int STATE_CLASS_GENERIC_INDEX = 1;
+
+    private static final ImmutableSet<Class<?>> SUPPORTED_ID_TYPES = ImmutableSet.<Class<?>>builder()
+            .add(String.class)
+            .add(Long.class)
+            .add(Integer.class)
+            .add(Message.class)
+            .build();
 
     private final I id;
 
@@ -77,7 +106,7 @@ public abstract class Entity<I, S extends Message> {
     public Entity(I id) {
         // We make the constructor public in the abstract class to avoid having protected constructors in derived
         // classes. We require that entity constructors be public as they are called by repositories.
-        checkType(id);
+        checkIdType(id);
         this.id = id;
     }
 
@@ -220,6 +249,62 @@ public abstract class Entity<I, S extends Message> {
     public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
         final Class<I> idClass = Classes.getGenericParameterType(entityClass, ID_CLASS_GENERIC_INDEX);
         return idClass;
+    }
+
+    /**
+     * Ensures that the type of the {@code entityId} is supported.
+     *
+     * @param entityId the ID of the entity to check
+     * @throws IllegalArgumentException if the ID is not of one of the supported types
+     */
+    public static <I> void checkIdType(I entityId) {
+        final Class<?> idClass = entityId.getClass();
+        if (SUPPORTED_ID_TYPES.contains(idClass)) {
+            return;
+        }
+        if (!Message.class.isAssignableFrom(idClass)){
+            throw unsupportedIdType(idClass);
+        }
+    }
+
+    /**
+     * Returns the short name of the ID type.
+     *
+     * @return
+     *  <ul>
+     *      <li>Short Protobuf type name if the value is {@link Message}.</li>
+     *      <li>Simple class name of the value, otherwise.</li>
+     *  </ul>
+     */
+    public String getShortIdTypeName() {
+        if (id instanceof Message) {
+            //noinspection TypeMayBeWeakened
+            final Message message = (Message) id;
+            final Descriptors.Descriptor descriptor = message.getDescriptorForType();
+            final String result = descriptor.getName();
+            return result;
+        } else {
+            final String result = id.getClass().getSimpleName();
+            return result;
+        }
+    }
+
+    private static IllegalArgumentException unsupportedIdType(Class<?> idClass) {
+        final String message = "Expected one of the following ID types: " + supportedTypesToString() +
+                "; found: " + idClass.getName();
+        throw new IllegalArgumentException(message);
+    }
+
+    private static String supportedTypesToString() {
+        final Iterable<String> classStrings = transform(SUPPORTED_ID_TYPES, new Function<Class<?>, String>() {
+            @Override
+            @SuppressWarnings("NullableProblems") // OK in this case
+            public String apply(Class<?> clazz) {
+                return clazz.getSimpleName();
+            }
+        });
+        final String result = Joiner.on(", ").join(classStrings);
+        return result;
     }
 
     /**

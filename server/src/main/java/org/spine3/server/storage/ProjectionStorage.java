@@ -22,7 +22,6 @@ package org.spine3.server.storage;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.SPI;
-import org.spine3.server.entity.EntityId;
 import org.spine3.server.projection.Projection;
 
 import javax.annotation.Nullable;
@@ -33,13 +32,12 @@ import javax.annotation.Nullable;
  *
  * <p>This timestamp is used for 'catch-up' operation of the projection repositories.
  *
- * @param <I> the type of stream projection IDs. See {@link EntityId} for supported types.
+ * @param <I> the type of stream projection IDs
  * @author Alexander Litus
  */
 @SPI
 public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
-    @Nullable
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();

@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * The base class for repositories managing entities.
@@ -44,13 +45,13 @@ import static org.spine3.protobuf.Messages.toAny;
  */
 public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Message> extends Repository<I, E> {
 
-    /**
-     * {@inheritDoc}
-     */
     public EntityRepository(BoundedContext boundedContext) {
         super(boundedContext);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected AutoCloseable createStorage(StorageFactory factory) {
         final AutoCloseable result = factory.createEntityStorage(getEntityClass());
@@ -70,6 +71,9 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         return checkStorage(storage);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void store(E entity) {
         final EntityStorage<I> storage = entityStorage();
@@ -77,12 +81,15 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
         storage.write(entity.getId(), record);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Nullable
     @Override
     public E load(I id) {
         final EntityStorage<I> storage = entityStorage();
         final EntityStorageRecord record = storage.read(id);
-        if (record == null) {
+        if (isDefault(record)) {
             return null;
         }
         final E entity = toEntity(id, record);

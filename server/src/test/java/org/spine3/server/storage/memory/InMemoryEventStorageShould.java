@@ -20,27 +20,19 @@
 
 package org.spine3.server.storage.memory;
 
-import org.junit.After;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.EventStorageShould;
 
 /**
- * In-memory implementation of {@link org.spine3.server.storage.EventStorage} tests.
+ * In-memory implementation of {@link EventStorage} tests.
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class InMemoryEventStorageShould extends EventStorageShould {
-
-    private final InMemoryEventStorage storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
 
     @Override
     protected EventStorage getStorage() {
+        final InMemoryEventStorage storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
         return storage;
-    }
-
-    @After
-    public void tearDownTest() {
-        storage.clear();
     }
 }
