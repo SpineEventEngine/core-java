@@ -38,7 +38,7 @@ import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext} or {@link CommandContext} type
  */
-public class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
+public abstract class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
 
     private final EntityIdField idField;
 

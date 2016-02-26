@@ -24,9 +24,8 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.server.entity.EntityCommandDispatcher;
-import org.spine3.server.entity.IdFunction;
+import org.spine3.server.CommandDispatcher;
+import org.spine3.server.command.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
@@ -66,7 +65,7 @@ import static org.spine3.base.Commands.getMessage;
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
                           extends Repository<I, A>
-                          implements EntityCommandDispatcher<I> {
+                          implements CommandDispatcher {
 
     /**
      * Default number of events to be stored before a next snapshot is made.
@@ -77,6 +76,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      * The number of events to store between snapshots.
      */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
+
+    private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
 
     /**
      * {@inheritDoc}
@@ -247,13 +248,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
     }
 
     private I getAggregateId(Message command) {
-        final GetTargetIdFromCommand<I, Message> idFunction = GetTargetIdFromCommand.newInstance();
-        final I id = idFunction.getId(command, CommandContext.getDefaultInstance());
+        final I id = getIdFunction.getId(command, CommandContext.getDefaultInstance());
         return id;
-    }
-
-    @Override
-    public IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass) {
-        return GetTargetIdFromCommand.newInstance();
     }
 }

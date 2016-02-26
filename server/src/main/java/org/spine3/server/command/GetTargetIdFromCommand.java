@@ -18,28 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.server.command;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.type.CommandClass;
+import org.spine3.base.Identifiers;
+import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
- * Delivers commands to handlers (which are supposed to be entities).
+ * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
  *
- * @param <I> the type of entity IDs
+ * <p>An entity ID must be the first field in command messages (in Protobuf definition).
+ * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ *
+ * @param <I> the type of target entity IDs
+ * @param <M> the type of command messages to get IDs from
  * @author Alexander Litus
- * @see CommandDispatcher
  */
-public interface EntityCommandDispatcher<I> extends CommandDispatcher {
+public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+
+    public static final int ID_FIELD_INDEX = 0;
+
+    private GetTargetIdFromCommand() {
+        super(ID_FIELD_INDEX);
+    }
 
     /**
-     * Returns a function which can obtain an ID using a message of the passed class.
-     *
-     * @param commandClass a class of any command handled by the entity
-     * @return an ID function
+     * Creates a new ID function instance.
      */
-    IdFunction<I, ? extends Message, CommandContext> getIdFunction(CommandClass commandClass);
-
+    public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
+        return new GetTargetIdFromCommand<>();
+    }
 }

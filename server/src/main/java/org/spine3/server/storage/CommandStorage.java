@@ -31,7 +31,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.entity.GetTargetIdFromCommand;
+import org.spine3.server.command.GetTargetIdFromCommand;
 import org.spine3.server.error.MissingEntityIdException;
 import org.spine3.type.TypeName;
 
@@ -48,6 +48,8 @@ import static org.spine3.validate.Validate.*;
  */
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
+
+    private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = GetTargetIdFromCommand.newInstance();
 
     //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
@@ -131,7 +133,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     @Nullable
     private static Object tryToGetTargetId(Message commandMessage) {
         try {
-            final Object id = GetTargetIdFromCommand.newInstance().getId(commandMessage, CommandContext.getDefaultInstance());
+            final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
             return id;
         } catch (MissingEntityIdException | ClassCastException ignored) {
             return null;
