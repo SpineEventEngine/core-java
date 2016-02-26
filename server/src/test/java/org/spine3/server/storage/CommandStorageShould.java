@@ -28,7 +28,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.testdata.TestContextFactory;
@@ -36,7 +35,6 @@ import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
@@ -83,15 +81,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Override
     protected CommandId newId() {
         return generateId();
-    }
-
-    @Test
-    public void override_read_method_and_do_not_throw_exception() {
-        try {
-            storage.read(Commands.generateId());
-        } catch (UnsupportedOperationException e) {
-            fail("read() method must be overridden if you want to use these tests.");
-        }
     }
 
     @Test
