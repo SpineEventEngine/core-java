@@ -77,7 +77,7 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  *     (which is recommended), you need to define a protobuf message for the ID type.</li>
  *     <li>Define aggregate state structure as a protobuf message.</li>
  *     <li>Generate Java code for ID and state types.</li>
- *     <li>Create new aggregate class derived from {@code Aggreate} passing ID and state types.</li>
+ *     <li>Create new aggregate class derived from {@code Aggregate} passing ID and state types.</li>
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
@@ -102,7 +102,6 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
     private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
@@ -288,7 +287,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #getStateNeutralEventClasses()
      */
     private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
-        //noinspection LocalVariableNamingConvention
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
         for (Message message : messages) {

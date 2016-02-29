@@ -31,6 +31,7 @@ import org.spine3.test.project.event.ProjectCreated;
 
 import static org.junit.Assert.assertFalse;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class MethodMapShould {
 
     /**

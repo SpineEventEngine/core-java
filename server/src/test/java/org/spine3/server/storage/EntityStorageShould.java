@@ -20,21 +20,99 @@
 
 package org.spine3.server.storage;
 
+import org.junit.Test;
+import org.spine3.server.entity.Entity;
+import org.spine3.test.project.Project;
+import org.spine3.test.project.ProjectId;
+
+import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**
  * Entity storage tests.
  *
- * @param <I> the type of IDs of storage records
+ * @param <I> the type of Entity IDs
  * @author Alexander Litus
  */
+@SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, EntityStorageRecord> {
 
     @Override
     protected abstract EntityStorage<I> getStorage();
 
+    /**
+     * Used to get a storage in tests with different ID types.
+     *
+     * @param <Id> the type of Entity IDs
+     * @return an empty storage instance
+     */
+    protected abstract <Id> EntityStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass);
+
     @Override
     protected EntityStorageRecord newStorageRecord() {
         return newEntityStorageRecord();
+    }
+
+    @Test
+    public void write_and_read_record_by_Message_id() {
+        final EntityStorage<ProjectId> storage = getStorage(TestEntityWithIdMessage.class);
+        final ProjectId id = newProjectId(newUuid());
+        writeAndReadRecordTest(id, storage);
+    }
+
+    @Test
+    public void write_and_read_record_by_String_id() {
+        final EntityStorage<String> storage = getStorage(TestEntityWithIdString.class);
+        final String id = newUuid();
+        writeAndReadRecordTest(id, storage);
+    }
+
+    @Test
+    public void write_and_read_record_by_Long_id() {
+        final EntityStorage<Long> storage = getStorage(TestEntityWithIdLong.class);
+        final long id = 10L;
+        writeAndReadRecordTest(id, storage);
+    }
+
+    @Test
+    public void write_and_read_record_by_Integer_id() {
+        final EntityStorage<Integer> storage = getStorage(TestEntityWithIdInteger.class);
+        final int id = 10;
+        writeAndReadRecordTest(id, storage);
+    }
+
+    protected <Id> void writeAndReadRecordTest(Id id, EntityStorage<Id> storage) {
+        final EntityStorageRecord expected = newStorageRecord();
+        storage.write(id, expected);
+
+        final EntityStorageRecord actual = storage.read(id);
+
+        assertEquals(expected, actual);
+    }
+
+    private static class TestEntityWithIdMessage extends Entity<ProjectId, Project> {
+        private TestEntityWithIdMessage(ProjectId id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdString extends Entity<String, Project> {
+        private TestEntityWithIdString(String id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdInteger extends Entity<Integer, Project> {
+        private TestEntityWithIdInteger(Integer id) {
+            super(id);
+        }
+    }
+
+    private static class TestEntityWithIdLong extends Entity<Long, Project> {
+        private TestEntityWithIdLong(Long id) {
+            super(id);
+        }
     }
 }

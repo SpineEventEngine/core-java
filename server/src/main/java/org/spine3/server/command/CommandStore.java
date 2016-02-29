@@ -94,7 +94,7 @@ public class CommandStore implements AutoCloseable {
      * Updates the status of the command with the passed error.
      *
      * @param commandId the ID of the command
-     * @param error the error, which ocurred during command processing
+     * @param error the error, which occurred during command processing
      */
     public void updateStatus(CommandId commandId, org.spine3.base.Error error) {
         storage.updateStatus(commandId, error);

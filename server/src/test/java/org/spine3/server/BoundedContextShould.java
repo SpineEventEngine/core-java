@@ -84,7 +84,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());

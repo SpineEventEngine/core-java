@@ -136,7 +136,6 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
             return RegistrySingleton.INSTANCE.value;
         }
 
-        @SuppressWarnings("InnerClassTooDeeplyNested")
         private enum RegistrySingleton {
             INSTANCE;
 

@@ -66,7 +66,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = TestAggregateIdFactory.newProjectId();

@@ -26,6 +26,7 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
+import org.spine3.test.project.ProjectId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -60,9 +61,9 @@ public class EntityShould {
     public void return_default_state_for_different_entities() {
         assertEquals(Project.getDefaultInstance(), entity.getDefaultState());
 
-        final EntityWithIntId entityWithIntId = new EntityWithIntId(5);
+        final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
         final StringValue expected = StringValue.getDefaultInstance();
-        assertEquals(expected, entityWithIntId.getDefaultState());
+        assertEquals(expected, entityWithMessageId.getDefaultState());
     }
 
     @Test
@@ -165,6 +166,21 @@ public class EntityShould {
         assertEquals(String.class, actual);
     }
 
+    @Test
+    public void return_id_simple_class_name() {
+        final String expected = entity.getId().getClass().getSimpleName();
+        final String actual = entity.getShortIdTypeName();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void return_id_protobuf_type_name() {
+        final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
+        final String expected = ProjectId.getDescriptor().getName();
+        final String actual = entityWithMessageId.getShortIdTypeName();
+        assertEquals(expected, actual);
+    }
+
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
                 .setProjectId(newProjectId())
@@ -194,10 +210,10 @@ public class EntityShould {
         }
     }
 
-    private static class EntityWithIntId extends Entity<Integer, StringValue> {
+    private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
 
-        protected EntityWithIntId(Integer id) {
-            super(id);
+        protected EntityWithMessageId() {
+            super(newProjectId());
         }
     }
 }

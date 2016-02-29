@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.server.entity.Entity;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageShould;
 
@@ -34,6 +35,11 @@ public class InMemoryEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
     protected EntityStorage<String> getStorage() {
+        return InMemoryEntityStorage.newInstance();
+    }
+
+    @Override
+    protected <Id> EntityStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass) {
         return InMemoryEntityStorage.newInstance();
     }
 

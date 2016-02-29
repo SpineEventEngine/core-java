@@ -40,7 +40,6 @@ public class Validate {
 
     private Validate() {}
 
-
     /**
      * Verifies if the passed message object is its default state and is not {@code null}.
      *
@@ -49,7 +48,8 @@ public class Validate {
      */
     public static boolean isDefault(Message object) {
         checkNotNull(object);
-        return object.getDefaultInstanceForType().equals(object);
+        final boolean result = object.getDefaultInstanceForType().equals(object);
+        return result;
     }
 
     /**
@@ -60,7 +60,8 @@ public class Validate {
      */
     public static boolean isNotDefault(Message object) {
         checkNotNull(object);
-        return !isDefault(object);
+        final boolean result = !isDefault(object);
+        return result;
     }
 
     /**
@@ -156,8 +157,7 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim()
-                                   .length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 

@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,12 +32,15 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.protobuf.Messages;
+import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.command.CreateProject;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
@@ -86,16 +90,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    public void override_read_method_and_do_not_throw_exception() {
-        try {
-            storage.read(Commands.generateId());
-        } catch (UnsupportedOperationException e) {
-            fail("read() method must be overridden if you want to use these tests.");
-        }
-    }
-
-    @Test
-    @SuppressWarnings("ConstantConditions")
     public void store_and_read_command() {
         final Command command = createProject();
         final CommandId commandId = command.getContext().getCommandId();
@@ -107,7 +101,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_ok_command_status() {
         givenNewRecord();
 
@@ -118,7 +111,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_error_command_status() {
         givenNewRecord();
         final Error error = newError();
@@ -131,7 +123,6 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void set_failure_command_status() {
         givenNewRecord();
         final Failure failure = newFailure();
@@ -141,6 +132,51 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         final CommandStorageRecord actual = storage.read(id);
         assertEquals(CommandStatus.FAILURE, actual.getStatus());
         assertEquals(failure, actual.getFailure());
+    }
+
+    @Test
+    public void convert_cmd_to_record() {
+        final Command command = createProject();
+        final CreateProject message = Messages.fromAny(command.getMessage());
+
+        final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
+
+        assertEquals(command.getMessage(), record.getMessage());
+        assertEquals(command.getContext().getTimestamp(), record.getTimestamp());
+        assertEquals(CreateProject.class.getSimpleName(), record.getCommandType());
+        assertEquals(command.getContext().getCommandId().getUuid(), record.getCommandId());
+        assertEquals(CommandStatus.RECEIVED, record.getStatus());
+        assertEquals(ProjectId.class.getName(), record.getTargetIdType());
+        assertEquals(message.getProjectId().getId(), record.getTargetId());
+        assertEquals(command.getContext(), record.getContext());
+    }
+
+    @Test
+    public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
+        final StringValue message = StringValue.getDefaultInstance();
+        final Command command = Commands.create(message, CommandContext.getDefaultInstance());
+        final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
+
+        assertEquals("", record.getTargetId());
+        assertEquals("", record.getTargetIdType());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void check_command_and_throw_exception_if_it_is_invalid() {
+        final Command command = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+        CommandStorage.checkCommand(command);
+    }
+
+    @Test
+    public void check_command_and_do_not_throw_exception_if_it_is_valid() {
+        final Command command = createProject();
+        CommandStorage.checkCommand(command);
+    }
+
+    @Test
+    public void return_null_when_fail_to_get_id_from_command_message_which_has_no_id_field() {
+        final Object id = CommandStorage.tryToGetTargetId(StringValue.getDefaultInstance());
+        assertNull(id);
     }
 
     private void givenNewRecord() {
