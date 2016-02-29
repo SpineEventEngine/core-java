@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
@@ -42,9 +43,11 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.entity.IdFunction;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -61,6 +64,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
+import org.spine3.type.EventClass;
 
 import java.util.List;
 
@@ -80,7 +84,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
@@ -386,6 +390,11 @@ public class BoundedContextShould {
 
         private ProjectPmRepo(BoundedContext boundedContext) {
             super(boundedContext);
+        }
+
+        @Override
+        public IdFunction<ProjectId, ? extends Message, EventContext> getIdFunction(EventClass eventClass) {
+            return GetProducerIdFromEvent.newInstance(0);
         }
     }
 

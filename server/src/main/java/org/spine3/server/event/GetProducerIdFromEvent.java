@@ -18,34 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.aggregate;
+package org.spine3.server.event;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
- * Obtains an aggregate ID based on a command message and context.
+ * Obtains an event producer ID based on an event {@link Message} and context.
  *
- * <p>An aggregate ID must be the first field in messages.
+ * <p>An ID must be the first field in event messages (in Protobuf definition).
  * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
- * @param <I> the type of aggregate IDs
+ * @param <I> the type of target entity IDs
+ * @param <M> the type of event messages to get IDs from
  * @author Alexander Litus
  */
-public class AggregateIdFunction<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+public class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
-    public static final int ID_FIELD_INDEX = 0;
-
-    private AggregateIdFunction() {
-        super(ID_FIELD_INDEX);
+    private GetProducerIdFromEvent(int idIndex) {
+        super(idIndex);
     }
 
     /**
-     * Creates a new ID function instance.
+     * Creates a new instance.
+     *
+     * @param idIndex a zero-based index of an ID field in this type of messages
      */
-    public static<I, M extends Message> AggregateIdFunction<I, M> newInstance() {
-        return new AggregateIdFunction<>();
+    public static<I, M extends Message> GetProducerIdFromEvent<I, M> newInstance(int idIndex) {
+        return new GetProducerIdFromEvent<>(idIndex);
     }
 }

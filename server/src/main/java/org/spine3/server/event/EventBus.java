@@ -295,7 +295,7 @@ public class EventBus implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        dispatcherRegistry.undergisterAll();
+        dispatcherRegistry.unregisterAll();
         handlerRegistry.unsubscribeAll();
         eventStore.close();
     }

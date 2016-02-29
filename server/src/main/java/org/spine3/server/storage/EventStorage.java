@@ -178,7 +178,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         private final EventStreamQuery query;
         private final Predicate<Event> timePredicate;
 
-        @SuppressWarnings({"MethodWithMoreThanThreeNegations", "IfMayBeConditional"})
+        @SuppressWarnings({"IfMayBeConditional"})
         public MatchesStreamQuery(EventStreamQuery query) {
             this.query = query;
 
@@ -235,7 +235,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         @Nullable
         private final List<Any> aggregateIds;
 
-        public MatchFilter(EventFilter filter) {
+        private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
             this.eventType = eventType.isEmpty() ? null :
                     TypeName.of(eventType);

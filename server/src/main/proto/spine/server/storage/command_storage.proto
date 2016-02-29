@@ -62,17 +62,17 @@ message CommandStorageRecord {
 
     reserved 7 to 9;
 
-    // A short Protobuf type name of the aggregate the command is for.
+    // A short Protobuf type name of the command target entity ID.
     //
-    // If the command is not for an aggregate, this field is empty.
-    // We store the type of aggregate ID, not the type of the aggregate itself,
+    // If the command is not for an entity, this field is an empty string.
+    // We store the type of entity ID, not the type of the entity itself,
     // because it is not available at the level of commands.
-    string aggregate_id_type = 10;
+    string target_id_type = 10;
 
-    // String representation of the ID of the aggregate for which the command is for.
+    // String representation of the command target entity ID.
     //
-    // This field is empty if the command is not for an aggregate.
-    string aggregate_id = 11;
+    // If the command is not for an entity, this field is an empty string.
+    string target_id = 11;
 
     reserved 12 to 19;
 
