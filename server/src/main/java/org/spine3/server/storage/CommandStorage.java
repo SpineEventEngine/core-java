@@ -69,7 +69,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         write(commandId, record);
     }
 
-    private static void checkCommand(Command command) {
+    @VisibleForTesting
+    /* package */ static void checkCommand(Command command) {
         checkArgument(command.hasMessage(), "Command message must be set.");
 
         checkArgument(command.hasContext(), "Command context must be set.");

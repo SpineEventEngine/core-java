@@ -161,6 +161,18 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         assertEquals("", record.getTargetIdType());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void check_command_and_throw_exception_if_it_is_invalid() {
+        final Command command = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+        CommandStorage.checkCommand(command);
+    }
+
+    @Test
+    public void check_command_and_do_not_throw_exception_if_it_is_valid() {
+        final Command command = createProject();
+        CommandStorage.checkCommand(command);
+    }
+
     @Test
     public void return_null_when_fail_to_get_id_from_command_message_which_has_no_id_field() {
         final Object id = CommandStorage.tryToGetTargetId(StringValue.getDefaultInstance());
