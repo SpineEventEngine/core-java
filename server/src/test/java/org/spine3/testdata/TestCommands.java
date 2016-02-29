@@ -35,7 +35,7 @@ import org.spine3.test.project.command.StartProject;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.testdata.TestAggregateIdFactory.*;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 /**
  * The utility class for creating the test data related to commands (command messages, Commands etc.).
