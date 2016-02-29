@@ -321,7 +321,7 @@ public abstract class Entity<I, S extends Message> {
          * @return {@code true} if there is a state for the passed class, {@code false} otherwise
          */
         @CheckReturnValue
-        public boolean contains(Class<? extends Entity> entityClass) {
+        private boolean contains(Class<? extends Entity> entityClass) {
             final boolean result = defaultStates.containsKey(entityClass);
             return result;
         }
@@ -333,7 +333,7 @@ public abstract class Entity<I, S extends Message> {
          * @param state a default state of the entity
          * @throws IllegalArgumentException if the state of this class is already registered
          */
-        public void put(Class<? extends Entity> entityClass, Message state) {
+        private void put(Class<? extends Entity> entityClass, Message state) {
             if (contains(entityClass)) {
                 throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
             }
@@ -346,12 +346,12 @@ public abstract class Entity<I, S extends Message> {
          * @param entityClass an entity class
          */
         @CheckReturnValue
-        public Message get(Class<? extends Entity> entityClass) {
+        private Message get(Class<? extends Entity> entityClass) {
             final Message state = defaultStates.get(entityClass);
             return state;
         }
 
-        public static DefaultStateRegistry getInstance() {
+        private static DefaultStateRegistry getInstance() {
             return Singleton.INSTANCE.value;
         }
 
