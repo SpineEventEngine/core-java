@@ -269,7 +269,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         /**
          * Sets command to be routed.
          */
-        protected CommandRouter of(Message source, CommandContext context) {
+        public CommandRouter of(Message source, CommandContext context) {
             this.source = checkNotNull(source);
             this.sourceContext = checkNotNull(context);
 
@@ -282,7 +282,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         /**
          * Adds {@code commandMessage} to be routed as a command.
          */
-        protected CommandRouter add(Message commandMessage) {
+        public CommandRouter add(Message commandMessage) {
             toRoute.add(commandMessage);
             return this;
         }
@@ -292,7 +292,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
          *
          * @return the event with source and produced commands
          */
-        protected CommandRouted route() {
+        public CommandRouted route() {
             final CommandRouted.Builder result = CommandRouted.newBuilder();
             result.setSource(Commands.create(this.source, this.sourceContext));
 
