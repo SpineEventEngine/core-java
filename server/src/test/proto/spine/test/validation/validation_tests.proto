@@ -1,0 +1,62 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.test;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.test.validation";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "spine/validation.proto";
+
+message RequiredMsgFieldValue {
+    google.protobuf.StringValue value = 1 [(required).is = true];
+}
+
+message MinIncNumberFieldValue {
+    double value = 1 [(min).is = 16.5, (min).inclusive = true, (max).ignore = true];
+}
+
+message MinNotIncNumberFieldValue {
+    double value = 1 [(min).is = 16.5, (min).inclusive = false, (max).ignore = true];
+}
+
+message MaxIncNumberFieldValue {
+    double value = 1 [(max).is = 64.5, (max).inclusive = true, (min).ignore = true];
+}
+
+message MaxNotIncNumberFieldValue {
+    double value = 1 [(max).is = 64.5, (max).inclusive = false, (min).ignore = true];
+}
+
+message DigitsCountNumberFieldValue {
+    double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+}
+
+message TimeInFutureFieldValue {
+    google.protobuf.Timestamp value = 1 [(when).in = FUTURE];
+}
+
+message TimeInPastFieldValue {
+    google.protobuf.Timestamp value = 1 [(when).in = PAST];
+}
