@@ -22,11 +22,11 @@ syntax = "proto3";
 // We do not define the package for this file to allow shorter options for user-defined types.
 // This would allow to write...
 //
-//     [(required).value = true];
+//     [(required).is = true];
 //
 // instead of
 //
-//     [(spine.base.required).value = true)];
+//     [(spine.base.required).is = true];
 //
 
 option java_generate_equals_and_hash = false;
@@ -57,38 +57,131 @@ extend google.protobuf.FieldOptions {
     ValidOption valid = 51009;
 }
 
-//TODO:2016-02-16:alexander.yevsyukov: Document each message option.
-
 //TODO:2016-02-16:alexander.yevsyukov: Take default messages from Hibernate Validator.
 //TODO:2016-02-16:alexander.yevsyukov: Have default texts formatted messages and document message format parameters as comment for `option (default_message)`.
 
+// If the field type is message, it must be set to a non-default instance;
+// if it is string, the value must not be null or empty.
+// Other field types are not applicable.
+//
+// Example:
+//
+// MyMessage field = 1 [(required).is = true];
+//
 message RequiredOption {
-    // The default format string for missing field. The parameter is the name of the missing field.
-    option (default_message) = "Field %s must be set";
+    // The default format string for the missing field. The parameter is the name of the missing field.
+    option (default_message) = "Field %s must be set.";
 
-    bool value = 1;
+    // Specifies if the field is required. Must be set to true. Otherwise, the field is not validated.
+    // The default value is false.
+    bool is = 1;
 
-    // User-defined validation error message format.
+    // User-defined validation error message format string. The parameter is the name of the missing field.
     string msg = 2;
 }
 
+// TODO:2016-03-14:alexander.litus: is this option really needed? Why not use min/max instead?
+// Applicable only to numbers.
 message DecimalOption {
     option (default_message) = "Field value must fit into range";
 
-    int32 min = 1;
-    int32 max = 2;
+    double min = 1;
+    double max = 2;
     bool inclusive = 3;
     string msg = 4;
 }
 
+// The field value must be greater than (or equal to, if the `inclusive` option is true) the given minimum number.
+// Is applicable only to numbers.
+// It is considered as not set only if both min and max options are not set, or if the `ignore` option is set to true.
+//
+// Example:
+//
+// double value = 1 [(min).is = 10.5, (min).inclusive = true, (max).ignore = true];
+//
+message MinOption {
+    option (default_message) = "Field must be larger than min value";
+
+    // The minimum value of the field.
+    // The default value is zero.
+    double is = 1;
+
+    // Specifies if the field can be equal to the minimum value.
+    // The default value is false.
+    bool inclusive = 2;
+
+    // Set this property to true if it is needed to use only the `max` option.
+    // The default value is false.
+    bool ignore = 3;
+
+    // User-defined validation error message format.
+    string msg = 4;
+}
+
+// The field value must be less than (or equal to, if the `inclusive` option is true) the given maximum number.
+// Is applicable only to numbers.
+// It is considered as not set only if both min and max options are not set, or if the `ignore` option is set to true.
+//
+// Example:
+//
+// double value = 1 [(max).is = 10.5, (max).inclusive = true, (min).ignore = true];
+//
+message MaxOption {
+    option (default_message) = "Field should be less than max value";
+
+    // The maximum value of the field.
+    // The default value is zero.
+    double is = 1;
+
+    // Specifies if the field can be equal to the maximum value.
+    // The default value is false.
+    bool inclusive = 2;
+
+    // Set this property to true if it is needed to use only the `min` option.
+    // The default value is false.
+    bool ignore = 3;
+
+    // User-defined validation error message format.
+    string msg = 4;
+}
+
+// The field value must be a number with the certain integral/fractional digits count.
+// Is applicable only to numbers.
+// Is considered as not set if either `integer_max` or `fraction_max` option is not set (is zero).
+//
+// Example:
+//
+// double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+//
 message DigitsOption {
     option (default_message) = "Field should have valid digital value";
 
-    int32 integer = 1;
-    int32 fraction = 2;
+    // Maximum count of integral digits of the number (inclusive).
+    // Must be greater than zero.
+    int32 integer_max = 1;
+
+    // Maximum count of fractional digits of the number (inclusive).
+    // Must be greater than zero.
+    int32 fraction_max = 2;
 
     // User-defined validation error message format.
     string msg = 3;
+}
+
+// The field value is a Timestamp which points to the moment in the future or the past.
+// Is applicable only to Timestamps.
+//
+// Example:
+//
+// google.protobuf.Timestamp field = 1 [(when).in = FUTURE];
+//
+message TimeOption {
+    option (default_message) = "Inappropriate time";
+
+    Time in = 1;
+
+    // User-defined validation error message format.
+    string msg = 2;
 }
 
 // This enumeration defines restriction for date/time values.
@@ -103,48 +196,34 @@ enum Time {
     FUTURE = 2;
 }
 
-message TimeOption {
-    option (default_message) = "Inappropriate time";
-
-    Time in = 1;
-
-    // User-defined validation error message format.
-    string msg = 2;
-}
-
-
+// A string field value must match the given regular expression.
+// Is applicable only to strings.
+//
+// Example:
+//
+// string field = 1 [(pattern).regex = FUTURE];
+//
 message PatternOption {
     option (default_message) = "Field should match pattern";
 
+    // The regular expression to match.
     string regex = 1;
+
+    // The regex flag.
     int32 flag = 2;
 
     // User-defined validation error message format.
     string msg = 3;
 }
 
-message MinOption {
-    option (default_message) = "Field must be larger than min value";
-
-    double value = 1;
-
-    // User-defined validation error message format.
-    string msg = 2;
-}
-
-message MaxOption {
-    option (default_message) = "Field should be less than max value";
-
-    double value = 1;
-
-    // User-defined validation error message format.
-    string msg = 2;
-}
-
+// Specifies if the message field value is validated.
+// Is applicable only to messages.
 message ValidOption {
     option (default_message) = "Field should be valid";
 
-    bool value = 1;
+    // If it is true, the message's fields are validated.
+    // The default value is false.
+    bool is = 1;
 
     // User-defined validation error message format.
     string msg = 2;
