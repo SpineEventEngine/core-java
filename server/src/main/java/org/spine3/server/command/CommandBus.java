@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
 import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
@@ -35,6 +36,7 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -124,27 +126,32 @@ public class CommandBus implements AutoCloseable {
      *
      * <p>If {@code Command} instance is passed, its message is extracted and validated.
      *
-     * @param command the command message to check
+     * @param commandOrMessage the command message to check
      * @return the result of {@link Responses#ok()} if the command is supported,
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
-    public Response validate(Message command) {
-        checkNotNull(command);
-        final CommandClass commandClass = CommandClass.of(command);
+    public Response validate(Message commandOrMessage) {
+        checkNotNull(commandOrMessage);
 
-        if (dispatcherRegistered(commandClass)) {
-            return Responses.ok();
+        final Message message = commandOrMessage instanceof Command ?
+                  Commands.getMessage((Command) commandOrMessage) :
+                  commandOrMessage;
+        final CommandClass commandClass = CommandClass.of(message);
+        if (isUnsupportedCommand(commandClass)) {
+            return CommandValidation.unsupportedCommand(message);
         }
-
-        if (handlerRegistered(commandClass)) {
-            return Responses.ok();
+        final MessageValidator validator = new MessageValidator();
+        validator.validate(message);
+        if (validator.isMessageInvalid()) {
+            final String errorMessage = validator.getErrorMessage();
+            return CommandValidation.invalidCommand(message, errorMessage);
         }
+        return Responses.ok();
+    }
 
-        //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
-        // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
-        // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
-
-        return CommandValidation.unsupportedCommand(command);
+    private boolean isUnsupportedCommand(CommandClass commandClass) {
+        final boolean isUnsupported = !isDispatcherRegistered(commandClass) && !isHandlerRegistered(commandClass);
+        return isUnsupported;
     }
 
     /**
@@ -165,11 +172,11 @@ public class CommandBus implements AutoCloseable {
 
         final CommandClass commandClass = CommandClass.of(request);
 
-        if (dispatcherRegistered(commandClass)) {
+        if (isDispatcherRegistered(commandClass)) {
             return dispatch(request);
         }
 
-        if (handlerRegistered(commandClass)) {
+        if (isHandlerRegistered(commandClass)) {
             final Message command = getMessage(request);
             final CommandContext context = request.getContext();
             return invokeHandler(command, context);
@@ -285,12 +292,12 @@ public class CommandBus implements AutoCloseable {
         commandStore.store(request);
     }
 
-    private boolean dispatcherRegistered(CommandClass cls) {
+    private boolean isDispatcherRegistered(CommandClass cls) {
         final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
         return result;
     }
 
-    private boolean handlerRegistered(CommandClass cls) {
+    private boolean isHandlerRegistered(CommandClass cls) {
         final boolean result = handlerRegistry.handlerRegistered(cls);
         return result;
     }

@@ -73,6 +73,20 @@ public class CommandValidation {
     }
 
     /**
+     * Creates a {@code Response} for getting a command with invalid fields (e.g., marked as "required" but not set).
+     */
+    public static Response invalidCommand(Message command, String errorMessage) {
+        final String commandType = command.getDescriptorForType().getFullName();
+        final Response response = Response.newBuilder()
+                .setError(Error.newBuilder()
+                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
+                .putAllAttributes(commandTypeAttribute(commandType))
+                .setMessage(errorMessage)).build();
+        return response;
+    }
+
+    /**
      * Creates a {@code Response} for a command with missing namespace attribute, which is required
      * in a multitenant application.
      */

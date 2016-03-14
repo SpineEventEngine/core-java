@@ -1,0 +1,87 @@
+/*
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.spine3.server.validate;
+
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.validate.Validate;
+import org.spine3.validation.options.RequiredOption;
+import org.spine3.validation.options.Time;
+import org.spine3.validation.options.TimeOption;
+import org.spine3.validation.options.ValidationProto;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Timestamps.isAfter;
+
+/**
+ * Validates fields of type {@link Message}.
+ *
+ * @author Alexander Litus
+ */
+/* package */ class MessageFieldValidator extends FieldValidator {
+
+    private final Message value;
+    private final TimeOption timeOption;
+    private final RequiredOption requiredOption;
+
+    /**
+     * Creates a new validator instance.
+     *
+     * @param descriptor a descriptor of the field to validate
+     * @param fieldValue a value of the field to validate
+     */
+    /* package */ MessageFieldValidator(FieldDescriptor descriptor, Message fieldValue) {
+        super(descriptor);
+        this.value = fieldValue;
+        this.requiredOption = getOption(ValidationProto.required);
+        this.timeOption = getOption(ValidationProto.when);
+    }
+
+    @Override
+    protected void validate() {
+        // TODO:2016-03-14:alexander.litus: check if message fields must be validated
+        checkIfRequiredAndNotSet();
+        if (value instanceof Timestamp) {
+            validateTimestamp((Timestamp) value);
+        }
+    }
+
+    private void checkIfRequiredAndNotSet() {
+        final boolean isRequired = requiredOption.getIs();
+        final boolean isValueNotSet = Validate.isDefault(value);
+        if (isRequired && isValueNotSet) {
+            setIsFieldInvalid(true);
+            addErrorMessage(requiredOption, requiredOption.getMsg());
+        }
+    }
+
+    private void validateTimestamp(Timestamp timestamp) {
+        final Timestamp now = getCurrentTime();
+        final Time when = timeOption.getIn();
+        final boolean mustBeInFutureButIsNot = (when == Time.FUTURE) && !isAfter(timestamp, /*than*/ now);
+        final boolean mustBeInPastButIsNot = (when == Time.PAST) && !isAfter(now, /*than*/ timestamp);
+        if (mustBeInFutureButIsNot || mustBeInPastButIsNot) {
+            setIsFieldInvalid(true);
+            addErrorMessage(timeOption, timeOption.getMsg());
+        }
+    }
+}
