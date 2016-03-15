@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 
@@ -48,18 +49,20 @@ public class MessageValidator {
     public void validate(Message message) {
         // TODO:2016-03-11:alexander.litus: check 1st field in commands
         final StringBuilder errMsgBuilder = newStringBuilder();
-        final List<FieldDescriptor> fields = message.getDescriptorForType().getFields();
+        final Descriptor msgDescriptor = message.getDescriptorForType();
+        final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
             final FieldValidator validator = FieldValidator.newInstance(field, value);
             if (validator.isFieldInvalid()) {
                 isMessageInvalid = true;
-                errMsgBuilder.append(format("Message %s is invalid: ", message.getClass().getName()));
                 final List<String> errorMessages = validator.getErrorMessages();
-                appendAll(errMsgBuilder, errorMessages);
+                appendErrorMessages(errMsgBuilder, errorMessages);
             }
         }
-        errorMessage = errMsgBuilder.toString();
+        if (isMessageInvalid) {
+            errorMessage = buildErrorMessage(errMsgBuilder, msgDescriptor);
+        }
         isValidated = true;
     }
 
@@ -68,9 +71,7 @@ public class MessageValidator {
      * {@link #validate(Message)} method must be called first.
      */
     public boolean isMessageInvalid() {
-        if (!isValidated) {
-            throw new IllegalStateException("'validate()' method was not called.");
-        }
+        checkValidated();
         return isMessageInvalid;
     }
 
@@ -78,12 +79,26 @@ public class MessageValidator {
      * Returns a validation error message constructed from error messages for different fields.
      */
     public String getErrorMessage() {
+        checkValidated();
         return errorMessage;
     }
 
-    private static void appendAll(StringBuilder builder, List<String> errorMessages) {
+    private static void appendErrorMessages(StringBuilder builder, List<String> errorMessages) {
         for (String msg : errorMessages) {
             builder.append(msg).append("; ");
+        }
+    }
+
+    private static String buildErrorMessage(StringBuilder errMsgBuilder, Descriptor msgDescriptor) {
+        errMsgBuilder.insert(0, format("Message %s is invalid: ", msgDescriptor.getFullName()));
+        // replace two last chars "; " with the dot
+        errMsgBuilder.replace(errMsgBuilder.length() - 2, errMsgBuilder.length(), ".");
+        return errMsgBuilder.toString();
+    }
+
+    private void checkValidated() {
+        if (!isValidated) {
+            throw new IllegalStateException("'validate()' method was not called.");
         }
     }
 

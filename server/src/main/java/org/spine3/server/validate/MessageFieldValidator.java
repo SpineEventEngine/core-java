@@ -29,8 +29,12 @@ import org.spine3.validation.options.Time;
 import org.spine3.validation.options.TimeOption;
 import org.spine3.validation.options.ValidationProto;
 
+import java.util.List;
+
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static java.lang.String.*;
 import static org.spine3.protobuf.Timestamps.isAfter;
+import static org.spine3.validation.options.Time.*;
 
 /**
  * Validates fields of type {@link Message}.
@@ -39,49 +43,88 @@ import static org.spine3.protobuf.Timestamps.isAfter;
  */
 /* package */ class MessageFieldValidator extends FieldValidator {
 
-    private final Message value;
-    private final TimeOption timeOption;
-    private final RequiredOption requiredOption;
+    private final List<Message> values;
 
     /**
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValue a value of the field to validate
+     * @param fieldValues field values to validate
      */
-    /* package */ MessageFieldValidator(FieldDescriptor descriptor, Message fieldValue) {
+    /* package */ MessageFieldValidator(FieldDescriptor descriptor, List<Message> fieldValues) {
         super(descriptor);
-        this.value = fieldValue;
-        this.requiredOption = getOption(ValidationProto.required);
-        this.timeOption = getOption(ValidationProto.when);
+        this.values = fieldValues;
     }
 
     @Override
     protected void validate() {
-        // TODO:2016-03-14:alexander.litus: check if message fields must be validated
+        // TODO:2016-03-14:alexander.litus: check if message's fields must be validated
         checkIfRequiredAndNotSet();
-        if (value instanceof Timestamp) {
-            validateTimestamp((Timestamp) value);
+        if (!values.isEmpty() && isTimestamp()) {
+            validateTimestamps();
         }
     }
 
     private void checkIfRequiredAndNotSet() {
-        final boolean isRequired = requiredOption.getIs();
-        final boolean isValueNotSet = Validate.isDefault(value);
-        if (isRequired && isValueNotSet) {
+        final RequiredOption option = getOption(ValidationProto.required);
+        if (!option.getIs()) {
+            return;
+        }
+        if (values.isEmpty()) {
             setIsFieldInvalid(true);
-            addErrorMessage(requiredOption, requiredOption.getMsg());
+            addErrorMessage(option);
+            return;
+        }
+        for (Message value : values) {
+            final boolean isValueNotSet = Validate.isDefault(value);
+            if (isValueNotSet) {
+                setIsFieldInvalid(true);
+                addErrorMessage(option);
+                return;
+            }
         }
     }
 
-    private void validateTimestamp(Timestamp timestamp) {
-        final Timestamp now = getCurrentTime();
-        final Time when = timeOption.getIn();
-        final boolean mustBeInFutureButIsNot = (when == Time.FUTURE) && !isAfter(timestamp, /*than*/ now);
-        final boolean mustBeInPastButIsNot = (when == Time.PAST) && !isAfter(now, /*than*/ timestamp);
-        if (mustBeInFutureButIsNot || mustBeInPastButIsNot) {
-            setIsFieldInvalid(true);
-            addErrorMessage(timeOption, timeOption.getMsg());
+    private boolean isTimestamp() {
+        final Message value = values.get(0);
+        final boolean isTimestamp = value instanceof Timestamp;
+        return isTimestamp;
+    }
+
+    private void validateTimestamps() {
+        final TimeOption option = getOption(ValidationProto.when);
+        final Time when = option.getIn();
+        if (when == UNDEFINED) {
+            return;
         }
+        final Timestamp now = getCurrentTime();
+        for (Message value : values) {
+            if (isTimeInvalid((Timestamp) value, when, now)) {
+                setIsFieldInvalid(true);
+                addErrorMessage(option);
+                return;
+            }
+        }
+    }
+
+    private static boolean isTimeInvalid(Timestamp time, Time when, Timestamp now) {
+        final boolean mustBeInFutureButIsNot = (when == FUTURE) && !isAfter(time, /*than*/ now);
+        final boolean mustBeInPastButIsNot = (when == PAST) && !isAfter(now, /*than*/ time);
+        final boolean isInvalid = mustBeInFutureButIsNot || mustBeInPastButIsNot;
+        return isInvalid;
+    }
+
+    private void addErrorMessage(RequiredOption option) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = format(format, getFieldDescriptor().getName());
+        addErrorMessage(msg);
+    }
+
+    private void addErrorMessage(TimeOption option) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String fieldName = getFieldDescriptor().getName();
+        final String when = option.getIn().toString().toLowerCase();
+        final String msg = format(format, fieldName, when);
+        addErrorMessage(msg);
     }
 }

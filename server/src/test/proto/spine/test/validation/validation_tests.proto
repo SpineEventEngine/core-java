@@ -33,6 +33,14 @@ message RequiredMsgFieldValue {
     google.protobuf.StringValue value = 1 [(required).is = true];
 }
 
+message RepeatedRequiredMsgFieldValue {
+    repeated google.protobuf.StringValue value = 1 [(required).is = true];
+}
+
+message NotRequiredMsgFieldValue {
+    google.protobuf.StringValue value = 1;
+}
+
 message MinIncNumberFieldValue {
     double value = 1 [(min).is = 16.5, (min).inclusive = true, (max).ignore = true];
 }
@@ -59,4 +67,8 @@ message TimeInFutureFieldValue {
 
 message TimeInPastFieldValue {
     google.protobuf.Timestamp value = 1 [(when).in = PAST];
+}
+
+message TimeWithoutOptsFieldValue {
+    google.protobuf.Timestamp value = 1;
 }

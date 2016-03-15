@@ -26,9 +26,11 @@ import org.spine3.validation.options.MaxOption;
 import org.spine3.validation.options.MinOption;
 import org.spine3.validation.options.ValidationProto;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
+import static java.lang.String.format;
 
 /**
  * Validates fields of number types (protobuf: int32, double, etc).
@@ -39,7 +41,7 @@ import static java.lang.Math.abs;
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
 
-    private final double value;
+    private final List<Number> fieldValues;
     private final MinOption minOption;
     private final MaxOption maxOption;
     private final DigitsOption digitsOption;
@@ -48,11 +50,11 @@ import static java.lang.Math.abs;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValue a value of the field to validate
+     * @param fieldValues field values to validate
      */
-    /* package */ NumberFieldValidator(FieldDescriptor descriptor, Number fieldValue) {
+    /* package */ NumberFieldValidator(FieldDescriptor descriptor, List<Number> fieldValues) {
         super(descriptor);
-        this.value = fieldValue.doubleValue();
+        this.fieldValues = fieldValues;
         this.minOption = getOption(ValidationProto.min);
         this.maxOption = getOption(ValidationProto.max);
         this.digitsOption = getOption(ValidationProto.digits);
@@ -60,44 +62,47 @@ import static java.lang.Math.abs;
 
     @Override
     protected void validate() {
-        validateRangeOptions();
-        validateDigitsOption();
+        for (Number value : fieldValues) {
+            final double doubleValue = value.doubleValue();
+            validateRangeOptions(doubleValue);
+            validateDigitsOption(doubleValue);
+        }
     }
 
-    private void validateRangeOptions() {
+    private void validateRangeOptions(double value) {
         if (rangeOptionsNotSet()) {
             return;
         }
-        if (isNotFitToMin()) {
+        if (isNotFitToMin(value)) {
             setIsFieldInvalid(true);
-            addErrorMessage(minOption, minOption.getMsg());
+            addErrorMessage(minOption, value);
         }
-        if (isNotFitToMax()) {
+        if (isNotFitToMax(value)) {
             setIsFieldInvalid(true);
-            addErrorMessage(maxOption, maxOption.getMsg());
+            addErrorMessage(maxOption, value);
         }
     }
 
-    private boolean isNotFitToMin() {
+    private boolean isNotFitToMin(double value) {
         if (minOption.getIgnore()) {
             return false;
         }
         final double min = minOption.getIs();
         final boolean isInclusive = minOption.getInclusive();
-        final boolean fitsAndIsInclusive = isInclusive && value >= min;
-        final boolean fitsAndNonInclusive = !isInclusive && value > min;
+        final boolean fitsAndIsInclusive = isInclusive && (value >= min);
+        final boolean fitsAndNonInclusive = !isInclusive && (value > min);
         final boolean isNotFit = !fitsAndIsInclusive && !fitsAndNonInclusive;
         return isNotFit;
     }
 
-    private boolean isNotFitToMax() {
+    private boolean isNotFitToMax(double value) {
         if (maxOption.getIgnore()) {
             return false;
         }
         final double max = maxOption.getIs();
         final boolean isInclusive = maxOption.getInclusive();
-        final boolean fitsAndIsInclusive = isInclusive && value <= max;
-        final boolean fitsAndNonInclusive = !isInclusive && value < max;
+        final boolean fitsAndIsInclusive = isInclusive && (value <= max);
+        final boolean fitsAndNonInclusive = !isInclusive && (value < max);
         final boolean isNotFit = !fitsAndIsInclusive && !fitsAndNonInclusive;
         return isNotFit;
     }
@@ -109,7 +114,7 @@ import static java.lang.Math.abs;
         return result;
     }
 
-    private void validateDigitsOption() {
+    private void validateDigitsOption(double value) {
         final int intDigitsMax = digitsOption.getIntegerMax();
         final int fractionDigitsMax = digitsOption.getFractionMax();
         if (intDigitsMax < 1 || fractionDigitsMax < 1) {
@@ -118,12 +123,43 @@ import static java.lang.Math.abs;
         final String valueStr = String.valueOf(abs(value));
         final String[] parts = PATTERN_DOT.split(valueStr);
         final int intDigitsCount = parts[0].length();
-        final int fractionalDigitsCount = parts[1].length();
-
-        final boolean isInvalid = (intDigitsCount > intDigitsMax) || (fractionalDigitsCount > fractionDigitsMax);
+        final int fractionDigitsCount = parts[1].length();
+        final boolean isInvalid = (intDigitsCount > intDigitsMax) || (fractionDigitsCount > fractionDigitsMax);
         if (isInvalid) {
             setIsFieldInvalid(true);
-            addErrorMessage(digitsOption, digitsOption.getMsg());
+            addErrorMessage(digitsOption, intDigitsCount, fractionDigitsCount);
         }
+    }
+
+    private void addErrorMessage(MinOption option, double value) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = formatErrorMessage(format, value, option.getInclusive(), option.getIs());
+        addErrorMessage(msg);
+    }
+
+    private void addErrorMessage(MaxOption option, double value) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = formatErrorMessage(format, value, option.getInclusive(), option.getIs());
+        addErrorMessage(msg);
+    }
+
+    private String formatErrorMessage(String format, double value, boolean inclusive, double minOrMax) {
+        final String msg = format(format,
+                getFieldDescriptor().getName(),
+                inclusive ? "or equal to " : "",
+                minOrMax,
+                value);
+        return msg;
+    }
+
+    private void addErrorMessage(DigitsOption option, int intDigitsCount, int fractionDigitsCount) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = format(format,
+                getFieldDescriptor().getName(),
+                option.getIntegerMax(),
+                option.getFractionMax(),
+                intDigitsCount,
+                fractionDigitsCount);
+        addErrorMessage(msg);
     }
 }

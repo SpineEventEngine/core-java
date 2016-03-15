@@ -31,9 +31,12 @@ import org.spine3.test.validation.MaxIncNumberFieldValue;
 import org.spine3.test.validation.MaxNotIncNumberFieldValue;
 import org.spine3.test.validation.MinIncNumberFieldValue;
 import org.spine3.test.validation.MinNotIncNumberFieldValue;
+import org.spine3.test.validation.NotRequiredMsgFieldValue;
+import org.spine3.test.validation.RepeatedRequiredMsgFieldValue;
 import org.spine3.test.validation.RequiredMsgFieldValue;
 import org.spine3.test.validation.TimeInFutureFieldValue;
 import org.spine3.test.validation.TimeInPastFieldValue;
+import org.spine3.test.validation.TimeWithoutOptsFieldValue;
 
 import static com.google.protobuf.util.TimeUtil.*;
 import static org.junit.Assert.assertFalse;
@@ -71,60 +74,97 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_required_message_field_is_set() {
         final RequiredMsgFieldValue validMsg = RequiredMsgFieldValue.newBuilder().setValue(newStringValue()).build();
-
         validator.validate(validMsg);
+        assertMessageIsValid(true);
+    }
 
+    @Test
+    public void find_out_that_repeated_required_message_field_has_valid_values() {
+        final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
+                .addValue(newStringValue())
+                .addValue(newStringValue())
+                .build();
+        validator.validate(invalidMsg);
         assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_required_message_field_is_NOT_set() {
         final RequiredMsgFieldValue invalidMsg = RequiredMsgFieldValue.getDefaultInstance();
-
         validator.validate(invalidMsg);
-
         assertMessageIsValid(false);
     }
 
     @Test
+    public void find_out_that_repeated_required_message_field_has_no_values() {
+        validator.validate(RepeatedRequiredMsgFieldValue.getDefaultInstance());
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_repeated_required_message_field_has_empty_value() {
+        final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
+                .addValue(newStringValue()) // valid value
+                .addValue(StringValue.getDefaultInstance()) // invalid value
+                .build();
+        validator.validate(invalidMsg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void consider_message_field_is_valid_if_no_required_option_set() {
+        validator.validate(NotRequiredMsgFieldValue.getDefaultInstance());
+        assertMessageIsValid(true);
+    }
+
+    /**
+     * Time option tests.
+     */
+
+    @Test
     public void find_out_that_time_is_in_future() {
         final TimeInFutureFieldValue validMsg = TimeInFutureFieldValue.newBuilder().setValue(getFuture()).build();
-
         validator.validate(validMsg);
-
         assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_time_is_NOT_in_future() {
         final TimeInFutureFieldValue invalidMsg = TimeInFutureFieldValue.newBuilder().setValue(getPast()).build();
-
         validator.validate(invalidMsg);
-
         assertMessageIsValid(false);
     }
 
     @Test
     public void find_out_that_time_is_in_past() {
         final TimeInPastFieldValue validMsg = TimeInPastFieldValue.newBuilder().setValue(getPast()).build();
-
         validator.validate(validMsg);
-
         assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_time_is_NOT_in_past() {
         final TimeInPastFieldValue invalidMsg = TimeInPastFieldValue.newBuilder().setValue(getFuture()).build();
-
         validator.validate(invalidMsg);
-
         assertMessageIsValid(false);
+    }
+
+    @Test
+    public void consider_timestamp_field_is_valid_if_no_time_option_set() {
+        validator.validate(TimeWithoutOptsFieldValue.getDefaultInstance());
+        assertMessageIsValid(true);
     }
 
     /**
      * Min value option tests.
      */
+
+    @Test
+    public void consider_number_field_is_valid_if_no_number_options_set() {
+        final Message nonZeroValue = DoubleValue.newBuilder().setValue(5).build();
+        validator.validate(nonZeroValue);
+        assertMessageIsValid(true);
+    }
 
     @Test
     public void find_out_that_number_is_bigger_than_min_inclusive() {
@@ -190,15 +230,6 @@ public class MessageValidatorShould {
         maxNumberTest(LESS_THAN_MAX, /*inclusive=*/false, /*valid=*/true);
     }
 
-    @Test
-    public void do_not_validate_number_field_if_no_max_and_min_options_set() {
-        final Message nonZeroValue = DoubleValue.newBuilder().setValue(5).build();
-
-        validator.validate(nonZeroValue);
-
-        assertMessageIsValid(true);
-    }
-
     /**
      * Digits option tests.
      */
@@ -233,13 +264,16 @@ public class MessageValidatorShould {
         digitsCountTest(FRACTIONAL_DIGITS_COUNT_LESS_THAN_MAX, /*valid=*/true);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_get_results_but_msg_is_not_validated() {
+        validator.isMessageInvalid();
+    }
+
     private void minNumberTest(double value, boolean inclusive, boolean isValid) {
         final Message msg = inclusive ?
                             MinIncNumberFieldValue.newBuilder().setValue(value).build() :
                             MinNotIncNumberFieldValue.newBuilder().setValue(value).build();
-
         validator.validate(msg);
-
         assertMessageIsValid(isValid);
     }
 
@@ -247,9 +281,7 @@ public class MessageValidatorShould {
         final Message msg = inclusive ?
                             MaxIncNumberFieldValue.newBuilder().setValue(value).build() :
                             MaxNotIncNumberFieldValue.newBuilder().setValue(value).build();
-
         validator.validate(msg);
-
         assertMessageIsValid(isValid);
     }
 
