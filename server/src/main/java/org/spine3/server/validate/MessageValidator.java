@@ -47,7 +47,7 @@ public class MessageValidator {
      */
     public void validate(Message message) {
         // TODO:2016-03-11:alexander.litus: check 1st field in commands
-        final StringBuilder errMsgBuilder = new StringBuilder(256);
+        final StringBuilder errMsgBuilder = newStringBuilder();
         final List<FieldDescriptor> fields = message.getDescriptorForType().getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
@@ -83,7 +83,12 @@ public class MessageValidator {
 
     private static void appendAll(StringBuilder builder, List<String> errorMessages) {
         for (String msg : errorMessages) {
-            builder.append(msg).append(' ');
+            builder.append(msg).append("; ");
         }
+    }
+
+    private static StringBuilder newStringBuilder() {
+        final int capacity = 256;
+        return new StringBuilder(capacity);
     }
 }
