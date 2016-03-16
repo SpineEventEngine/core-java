@@ -57,20 +57,20 @@ import static org.spine3.base.Identifiers.newUuid;
 public class MessageValidatorShould {
 
     private static final double EQUAL_MIN = 16.5;
-    private static final double BIGGER_THAN_MIN = EQUAL_MIN + 5;
+    private static final double GREATER_THAN_MIN = EQUAL_MIN + 5;
     private static final double LESS_THAN_MIN = EQUAL_MIN - 5;
 
     private static final double EQUAL_MAX = 64.5;
-    private static final double BIGGER_THAN_MAX = EQUAL_MAX + 5;
+    private static final double GREATER_THAN_MAX = EQUAL_MAX + 5;
     private static final double LESS_THAN_MAX = EQUAL_MAX - 5;
 
-    private static final double INT_DIGITS_COUNT_BIGGER_THAN_MAX = 123.5;
-    private static final double INT_DIGITS_COUNT_EQUAL_MAX = 12.5;
-    private static final double INT_DIGITS_COUNT_LESS_THAN_MAX = 1.5;
+    private static final double INT_DIGIT_COUNT_GREATER_THAN_MAX = 123.5;
+    private static final double INT_DIGIT_COUNT_EQUAL_MAX = 12.5;
+    private static final double INT_DIGIT_COUNT_LESS_THAN_MAX = 1.5;
 
-    private static final double FRACTIONAL_DIGITS_COUNT_BIGGER_THAN_MAX = 1.123;
-    private static final double FRACTIONAL_DIGITS_COUNT_EQUAL_MAX = 1.12;
-    private static final double FRACTIONAL_DIGITS_COUNT_LESS_THAN_MAX = 1.0;
+    private static final double FRACTIONAL_DIGIT_COUNT_GREATER_THAN_MAX = 1.123;
+    private static final double FRACTIONAL_DIGIT_COUNT_EQUAL_MAX = 1.12;
+    private static final double FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX = 1.0;
 
     private final MessageValidator validator = new MessageValidator();
 
@@ -153,6 +153,18 @@ public class MessageValidatorShould {
         assertMessageIsValid(true);
     }
 
+    @Test
+    public void provide_validation_error_message_if_required_field_is_not_set() {
+        final RequiredStringFieldValue invalidMsg = RequiredStringFieldValue.getDefaultInstance();
+
+        validator.validate(invalidMsg);
+
+        assertEquals(
+                "Message spine.test.RequiredStringFieldValue is invalid: 'value' must be set.",
+                validator.getErrorMessage()
+        );
+    }
+
     /*
      * Time option tests.
      */
@@ -191,6 +203,19 @@ public class MessageValidatorShould {
         assertMessageIsValid(true);
     }
 
+    @Test
+    public void provide_validation_error_message_if_time_is_invalid() {
+        final TimeInFutureFieldValue invalidMsg = TimeInFutureFieldValue.newBuilder().setValue(getPast()).build();
+
+        validator.validate(invalidMsg);
+
+        assertMessageIsValid(false);
+        assertEquals(
+                "Message spine.test.TimeInFutureFieldValue is invalid: 'value' must be a timestamp in the future.",
+                validator.getErrorMessage()
+        );
+    }
+
     /*
      * Min value option tests.
      */
@@ -203,8 +228,8 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_number_is_bigger_than_min_inclusive() {
-        minNumberTest(BIGGER_THAN_MIN, /*inclusive=*/true, /*valid=*/true);
+    public void find_out_that_number_is_greater_than_min_inclusive() {
+        minNumberTest(GREATER_THAN_MIN, /*inclusive=*/true, /*valid=*/true);
     }
 
     @Test
@@ -218,8 +243,8 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_number_is_bigger_than_min_NOT_inclusive() {
-        minNumberTest(BIGGER_THAN_MIN, /*inclusive=*/false, /*valid=*/true);
+    public void find_out_that_number_is_greater_than_min_NOT_inclusive() {
+        minNumberTest(GREATER_THAN_MIN, /*inclusive=*/false, /*valid=*/true);
     }
 
     @Test
@@ -232,13 +257,23 @@ public class MessageValidatorShould {
         minNumberTest(LESS_THAN_MIN, /*inclusive=*/false, /*valid=*/false);
     }
 
+    @Test
+    public void provide_validation_error_message_if_number_is_less_than_min() {
+        minNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
+        assertEquals(
+                "Message spine.test.MinIncNumberFieldValue is invalid: " +
+                "'value' must be greater than or equal to 16.5, actual: 11.5.",
+                validator.getErrorMessage()
+        );
+    }
+
     /*
      * Max value option tests.
      */
 
     @Test
-    public void find_out_that_number_is_bigger_than_max_inclusive() {
-        maxNumberTest(BIGGER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+    public void find_out_that_number_is_greater_than_max_inclusive() {
+        maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
     }
 
     @Test
@@ -252,8 +287,8 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_number_is_bigger_than_max_NOT_inclusive() {
-        maxNumberTest(BIGGER_THAN_MAX, /*inclusive=*/false, /*valid=*/false);
+    public void find_out_that_number_is_greater_than_max_NOT_inclusive() {
+        maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/false, /*valid=*/false);
     }
 
     @Test
@@ -266,38 +301,58 @@ public class MessageValidatorShould {
         maxNumberTest(LESS_THAN_MAX, /*inclusive=*/false, /*valid=*/true);
     }
 
+    @Test
+    public void provide_validation_error_message_if_number_is_greater_than_max() {
+        maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+        assertEquals(
+                "Message spine.test.MaxIncNumberFieldValue is invalid: " +
+                "'value' must be less than or equal to 64.5, actual: 69.5.",
+                validator.getErrorMessage()
+        );
+    }
+
     /*
      * Digits option tests.
      */
 
     @Test
-    public void find_out_that_integral_digits_count_is_bigger_than_max() {
-        digitsCountTest(INT_DIGITS_COUNT_BIGGER_THAN_MAX, /*valid=*/false);
+    public void find_out_that_integral_digit_count_is_greater_than_max() {
+        digitsCountTest(INT_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
     }
 
     @Test
     public void find_out_that_integral_digits_count_is_equal_to_max() {
-        digitsCountTest(INT_DIGITS_COUNT_EQUAL_MAX, /*valid=*/true);
+        digitsCountTest(INT_DIGIT_COUNT_EQUAL_MAX, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_integral_digits_count_is_less_than_max() {
-        digitsCountTest(INT_DIGITS_COUNT_LESS_THAN_MAX, /*valid=*/true);
+    public void find_out_that_integral_digit_count_is_less_than_max() {
+        digitsCountTest(INT_DIGIT_COUNT_LESS_THAN_MAX, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_fractional_digits_count_is_bigger_than_max() {
-        digitsCountTest(FRACTIONAL_DIGITS_COUNT_BIGGER_THAN_MAX, /*valid=*/false);
+    public void find_out_that_fractional_digit_count_is_greater_than_max() {
+        digitsCountTest(FRACTIONAL_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
     }
 
     @Test
-    public void find_out_that_fractional_digits_count_is_equal_to_max() {
-        digitsCountTest(FRACTIONAL_DIGITS_COUNT_EQUAL_MAX, /*valid=*/true);
+    public void find_out_that_fractional_digit_count_is_equal_to_max() {
+        digitsCountTest(FRACTIONAL_DIGIT_COUNT_EQUAL_MAX, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_fractional_digits_count_is_less_than_max() {
-        digitsCountTest(FRACTIONAL_DIGITS_COUNT_LESS_THAN_MAX, /*valid=*/true);
+    public void find_out_that_fractional_digit_count_is_less_than_max() {
+        digitsCountTest(FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX, /*valid=*/true);
+    }
+
+    @Test
+    public void provide_validation_error_message_if_integral_digit_count_is_greater_than_max() {
+        digitsCountTest(INT_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
+        assertEquals(
+                "Message spine.test.DigitsCountNumberFieldValue is invalid: 'value' number is out of bounds, " +
+                "expected: <2 max digits>.<2 max digits>, actual: <3 digits>.<1 digits>.",
+                validator.getErrorMessage()
+        );
     }
 
     /*
@@ -305,14 +360,14 @@ public class MessageValidatorShould {
      */
 
     @Test
-    public void find_out_that_string_matches_to_a_regex_pattern() {
+    public void find_out_that_string_matches_to_regex_pattern() {
         final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("valid.email@mail.com").build();
         validator.validate(msg);
         assertMessageIsValid(true);
     }
 
     @Test
-    public void find_out_that_string_does_not_match_to_a_regex_pattern() {
+    public void find_out_that_string_does_not_match_to_regex_pattern() {
         final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("invalid email").build();
         validator.validate(msg);
         assertMessageIsValid(false);
@@ -322,6 +377,20 @@ public class MessageValidatorShould {
     public void consider_field_is_valid_if_no_pattern_option_set() {
         validator.validate(StringValue.getDefaultInstance());
         assertMessageIsValid(true);
+    }
+
+    @Test
+    public void provide_validation_error_message_if_string_does_not_match_to_regex_pattern() {
+        final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("invalid.email").build();
+
+        validator.validate(msg);
+
+        assertEquals(
+                "Message spine.test.PatternStringFieldValue is invalid: 'email' must match the regular expression: " +
+                "'^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$', " +
+                "found: 'invalid.email'.",
+                validator.getErrorMessage()
+        );
     }
 
     /*
