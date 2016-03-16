@@ -36,6 +36,7 @@ import org.spine3.test.validation.NotRequiredMsgFieldValue;
 import org.spine3.test.validation.RepeatedRequiredMsgFieldValue;
 import org.spine3.test.validation.RequiredByteStringFieldValue;
 import org.spine3.test.validation.RequiredMsgFieldValue;
+import org.spine3.test.validation.RequiredStringFieldValue;
 import org.spine3.test.validation.TimeInFutureFieldValue;
 import org.spine3.test.validation.TimeInPastFieldValue;
 import org.spine3.test.validation.TimeWithoutOptsFieldValue;
@@ -74,14 +75,35 @@ public class MessageValidatorShould {
      */
 
     @Test
-    public void find_out_that_required_message_field_is_set() {
+    public void find_out_that_required_Message_field_is_set() {
         final RequiredMsgFieldValue validMsg = RequiredMsgFieldValue.newBuilder().setValue(newStringValue()).build();
         validator.validate(validMsg);
         assertMessageIsValid(true);
     }
 
     @Test
-    public void find_out_that_required_byte_string_field_is_set() {
+    public void find_out_that_required_Message_field_is_NOT_set() {
+        final RequiredMsgFieldValue invalidMsg = RequiredMsgFieldValue.getDefaultInstance();
+        validator.validate(invalidMsg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_required_String_field_is_set() {
+        final RequiredStringFieldValue validMsg = RequiredStringFieldValue.newBuilder().setValue(newUuid()).build();
+        validator.validate(validMsg);
+        assertMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_required_String_field_is_NOT_set() {
+        final RequiredStringFieldValue invalidMsg = RequiredStringFieldValue.getDefaultInstance();
+        validator.validate(invalidMsg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_required_ByteString_field_is_set() {
         final ByteString byteString = ByteString.copyFromUtf8(newUuid());
         final RequiredByteStringFieldValue validMsg = RequiredByteStringFieldValue.newBuilder().setValue(byteString).build();
         validator.validate(validMsg);
@@ -89,7 +111,14 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_repeated_required_message_field_has_valid_values() {
+    public void find_out_that_required_ByteString_field_is_NOT_set() {
+        final RequiredByteStringFieldValue invalidMsg = RequiredByteStringFieldValue.getDefaultInstance();
+        validator.validate(invalidMsg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_repeated_required_field_has_valid_values() {
         final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
                 .addValue(newStringValue())
                 .addValue(newStringValue())
@@ -99,26 +128,13 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_required_message_field_is_NOT_set() {
-        final RequiredMsgFieldValue invalidMsg = RequiredMsgFieldValue.getDefaultInstance();
-        validator.validate(invalidMsg);
-        assertMessageIsValid(false);
-    }
-
-    @Test
-    public void find_out_that_required_byte_string_field_is_NOT_set() {
-        validator.validate(RequiredByteStringFieldValue.getDefaultInstance());
-        assertMessageIsValid(false);
-    }
-
-    @Test
-    public void find_out_that_repeated_required_message_field_has_no_values() {
+    public void find_out_that_repeated_required_field_has_no_values() {
         validator.validate(RepeatedRequiredMsgFieldValue.getDefaultInstance());
         assertMessageIsValid(false);
     }
 
     @Test
-    public void find_out_that_repeated_required_message_field_has_empty_value() {
+    public void find_out_that_repeated_required_field_has_empty_value() {
         final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
                 .addValue(newStringValue()) // valid value
                 .addValue(StringValue.getDefaultInstance()) // invalid value
@@ -128,7 +144,7 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void consider_message_field_is_valid_if_no_required_option_set() {
+    public void consider_field_is_valid_if_no_required_option_set() {
         validator.validate(NotRequiredMsgFieldValue.getDefaultInstance());
         assertMessageIsValid(true);
     }
