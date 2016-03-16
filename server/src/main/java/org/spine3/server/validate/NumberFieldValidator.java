@@ -20,13 +20,13 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.validation.options.DigitsOption;
 import org.spine3.validation.options.MaxOption;
 import org.spine3.validation.options.MinOption;
 import org.spine3.validation.options.ValidationProto;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
@@ -37,11 +37,10 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-/* package */ class NumberFieldValidator extends FieldValidator {
+/* package */ class NumberFieldValidator extends FieldValidator<Number> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
 
-    private final List<Number> fieldValues;
     private final MinOption minOption;
     private final MaxOption maxOption;
     private final DigitsOption digitsOption;
@@ -52,9 +51,8 @@ import static java.lang.String.format;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ NumberFieldValidator(FieldDescriptor descriptor, List<Number> fieldValues) {
-        super(descriptor);
-        this.fieldValues = fieldValues;
+    /* package */ NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<Number> fieldValues) {
+        super(descriptor, fieldValues);
         this.minOption = getOption(ValidationProto.min);
         this.maxOption = getOption(ValidationProto.max);
         this.digitsOption = getOption(ValidationProto.digits);
@@ -62,7 +60,7 @@ import static java.lang.String.format;
 
     @Override
     protected void validate() {
-        for (Number value : fieldValues) {
+        for (Number value : getValues()) {
             final double doubleValue = value.doubleValue();
             validateRangeOptions(doubleValue);
             validateDigitsOption(doubleValue);

@@ -53,7 +53,7 @@ public class MessageValidator {
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator validator = FieldValidator.newInstance(field, value);
+            final FieldValidator<?> validator = FieldValidator.newInstance(field, value);
             if (validator.isFieldInvalid()) {
                 isMessageInvalid = true;
                 final List<String> errorMessages = validator.getErrorMessages();
@@ -85,7 +85,8 @@ public class MessageValidator {
 
     private static void appendErrorMessages(StringBuilder builder, List<String> errorMessages) {
         for (String msg : errorMessages) {
-            builder.append(msg).append("; ");
+            builder.append(msg)
+                   .append("; ");
         }
     }
 

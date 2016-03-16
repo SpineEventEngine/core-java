@@ -20,19 +20,17 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.validate.Validate;
-import org.spine3.validation.options.RequiredOption;
 import org.spine3.validation.options.Time;
 import org.spine3.validation.options.TimeOption;
 import org.spine3.validation.options.ValidationProto;
 
-import java.util.List;
-
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static org.spine3.protobuf.Timestamps.isAfter;
 import static org.spine3.validation.options.Time.*;
 
@@ -41,9 +39,7 @@ import static org.spine3.validation.options.Time.*;
  *
  * @author Alexander Litus
  */
-/* package */ class MessageFieldValidator extends FieldValidator {
-
-    private final List<Message> values;
+/* package */ class MessageFieldValidator extends FieldValidator<Message> {
 
     /**
      * Creates a new validator instance.
@@ -51,42 +47,28 @@ import static org.spine3.validation.options.Time.*;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ MessageFieldValidator(FieldDescriptor descriptor, List<Message> fieldValues) {
-        super(descriptor);
-        this.values = fieldValues;
+    /* package */ MessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues) {
+        super(descriptor, fieldValues);
     }
 
     @Override
     protected void validate() {
         // TODO:2016-03-14:alexander.litus: check if message's fields must be validated
         checkIfRequiredAndNotSet();
-        if (!values.isEmpty() && isTimestamp()) {
+        if (!getValues().isEmpty() && isTimestamp()) {
             validateTimestamps();
         }
     }
 
-    private void checkIfRequiredAndNotSet() {
-        final RequiredOption option = getOption(ValidationProto.required);
-        if (!option.getIs()) {
-            return;
-        }
-        if (values.isEmpty()) {
-            setIsFieldInvalid(true);
-            addErrorMessage(option);
-            return;
-        }
-        for (Message value : values) {
-            final boolean isValueNotSet = Validate.isDefault(value);
-            if (isValueNotSet) {
-                setIsFieldInvalid(true);
-                addErrorMessage(option);
-                return;
-            }
-        }
+    @Override
+    @SuppressWarnings("RefusedBequest") // the base method call is redundant
+    protected boolean isValueNotSet(Message value) {
+        final boolean isNotSet = Validate.isDefault(value);
+        return isNotSet;
     }
 
     private boolean isTimestamp() {
-        final Message value = values.get(0);
+        final Message value = getValues().get(0);
         final boolean isTimestamp = value instanceof Timestamp;
         return isTimestamp;
     }
@@ -98,7 +80,7 @@ import static org.spine3.validation.options.Time.*;
             return;
         }
         final Timestamp now = getCurrentTime();
-        for (Message value : values) {
+        for (Message value : getValues()) {
             if (isTimeInvalid((Timestamp) value, when, now)) {
                 setIsFieldInvalid(true);
                 addErrorMessage(option);
@@ -112,12 +94,6 @@ import static org.spine3.validation.options.Time.*;
         final boolean mustBeInPastButIsNot = (when == PAST) && !isAfter(now, /*than*/ time);
         final boolean isInvalid = mustBeInFutureButIsNot || mustBeInPastButIsNot;
         return isInvalid;
-    }
-
-    private void addErrorMessage(RequiredOption option) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = format(format, getFieldDescriptor().getName());
-        addErrorMessage(msg);
     }
 
     private void addErrorMessage(TimeOption option) {

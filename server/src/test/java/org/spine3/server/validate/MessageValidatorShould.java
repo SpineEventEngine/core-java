@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -33,6 +34,7 @@ import org.spine3.test.validation.MinIncNumberFieldValue;
 import org.spine3.test.validation.MinNotIncNumberFieldValue;
 import org.spine3.test.validation.NotRequiredMsgFieldValue;
 import org.spine3.test.validation.RepeatedRequiredMsgFieldValue;
+import org.spine3.test.validation.RequiredByteStringFieldValue;
 import org.spine3.test.validation.RequiredMsgFieldValue;
 import org.spine3.test.validation.TimeInFutureFieldValue;
 import org.spine3.test.validation.TimeInPastFieldValue;
@@ -79,6 +81,14 @@ public class MessageValidatorShould {
     }
 
     @Test
+    public void find_out_that_required_byte_string_field_is_set() {
+        final ByteString byteString = ByteString.copyFromUtf8(newUuid());
+        final RequiredByteStringFieldValue validMsg = RequiredByteStringFieldValue.newBuilder().setValue(byteString).build();
+        validator.validate(validMsg);
+        assertMessageIsValid(true);
+    }
+
+    @Test
     public void find_out_that_repeated_required_message_field_has_valid_values() {
         final RepeatedRequiredMsgFieldValue invalidMsg = RepeatedRequiredMsgFieldValue.newBuilder()
                 .addValue(newStringValue())
@@ -92,6 +102,12 @@ public class MessageValidatorShould {
     public void find_out_that_required_message_field_is_NOT_set() {
         final RequiredMsgFieldValue invalidMsg = RequiredMsgFieldValue.getDefaultInstance();
         validator.validate(invalidMsg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_required_byte_string_field_is_NOT_set() {
+        validator.validate(RequiredByteStringFieldValue.getDefaultInstance());
         assertMessageIsValid(false);
     }
 

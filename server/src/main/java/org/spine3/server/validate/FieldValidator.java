@@ -27,35 +27,35 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
+import org.spine3.validation.options.RequiredOption;
 import org.spine3.validation.options.ValidationProto;
 
-import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
-import static java.util.Collections.singletonList;
 
 /**
  * Validates a message field according to Spine custom protobuf options and provides validation error messages.
  *
+ * @param <V> a type of field values
  * @author Alexander Litus
  */
-/* package */ abstract class FieldValidator {
+/* package */ abstract class FieldValidator<V> {
 
     private boolean isFieldInvalid = false;
-
     private final List<String> errorMessages = newLinkedList();
-
     private final FieldDescriptor fieldDescriptor;
+    private final ImmutableList<V> values;
 
     /**
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
      */
-    protected FieldValidator(FieldDescriptor descriptor) {
+    protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values) {
         this.fieldDescriptor = descriptor;
+        this.values = values;
     }
 
     /**
@@ -64,28 +64,28 @@ import static java.util.Collections.singletonList;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValue a value of the field to validate
      */
-    /* package */ static FieldValidator newInstance(FieldDescriptor descriptor, Object fieldValue) {
-        final FieldValidator validator;
+    /* package */ static FieldValidator<?> newInstance(FieldDescriptor descriptor, Object fieldValue) {
+        final FieldValidator<?> validator;
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
-                final List<Message> messages = toValuesList(fieldValue);
+                final ImmutableList<Message> messages = toValuesList(fieldValue);
                 validator = new MessageFieldValidator(descriptor, messages);
                 break;
             case INT:
             case LONG:
             case FLOAT:
             case DOUBLE:
-                final List<Number> numbers = toValuesList(fieldValue);
+                final ImmutableList<Number> numbers = toValuesList(fieldValue);
                 validator = new NumberFieldValidator(descriptor, numbers);
                 break;
             case STRING:
-                final Collection<String> strings = toValuesList(fieldValue);
+                final ImmutableList<String> strings = toValuesList(fieldValue);
                 validator = null; // TODO:2016-03-15:alexander.litus: impl
                 break;
             case BYTE_STRING:
-                final Collection<ByteString> byteStrings = toValuesList(fieldValue);
-                validator = null; // TODO:2016-03-15:alexander.litus: impl
+                final ImmutableList<ByteString> byteStrings = toValuesList(fieldValue);
+                validator = new ByteStringFieldValidator(descriptor, byteStrings);
                 break;
             case BOOLEAN:
             case ENUM:
@@ -97,11 +97,11 @@ import static java.util.Collections.singletonList;
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})
-    private static <T> List<T> toValuesList(Object fieldValue) {
+    private static <T> ImmutableList<T> toValuesList(Object fieldValue) {
         if (fieldValue instanceof List) {
-            return (List<T>) fieldValue;
+            return ImmutableList.copyOf((List<T>) fieldValue);
         } else {
-            return singletonList((T) fieldValue);
+            return ImmutableList.of((T) fieldValue);
         }
     }
 
@@ -111,6 +111,55 @@ import static java.util.Collections.singletonList;
      * <p>Uses {@link #setIsFieldInvalid(boolean)} and {@link #addErrorMessage(String)} methods.
      */
     protected abstract void validate();
+
+    /**
+     * Returns an immutable list of the field values.
+     */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable list
+    protected ImmutableList<V> getValues() {
+        return values;
+    }
+
+    /**
+     * Checks if the field is required and not set.
+     *
+     * <p>If the field is repeated, it must have at least one value set, and all its values must be valid.
+     *
+     * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
+     */
+    protected void checkIfRequiredAndNotSet() {
+        final RequiredOption option = getOption(ValidationProto.required);
+        if (!option.getIs()) {
+            return;
+        }
+        if (values.isEmpty()) {
+            setIsFieldInvalid(true);
+            addErrorMessage(option);
+            return;
+        }
+        for (V value : values) {
+            if (isValueNotSet(value)) {
+                setIsFieldInvalid(true);
+                addErrorMessage(option);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Checks if the field value is not set.
+     *
+     * <p>If the field type is {@link Message}, it must be set to a non-default instance;
+     * if it is {@link String} or {@link ByteString}, it must be set to a non-empty string or array.
+     *
+     * <p>The default implementation returns {@code false}.
+     *
+     * @param value a field value to check
+     * @return {@code true} if the field is not set, {@code false} otherwise
+     */
+    protected boolean isValueNotSet(V value) {
+        return false;
+    }
 
     /**
      * Returns {@code true} if the validated field is invalid, {@code false} otherwise.
@@ -140,6 +189,12 @@ import static java.util.Collections.singletonList;
      */
     protected void addErrorMessage(String msg) {
         errorMessages.add(msg);
+    }
+
+    private void addErrorMessage(RequiredOption option) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = format(format, getFieldDescriptor().getName());
+        addErrorMessage(msg);
     }
 
     /**

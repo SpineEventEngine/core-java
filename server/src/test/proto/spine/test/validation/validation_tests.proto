@@ -33,6 +33,10 @@ message RequiredMsgFieldValue {
     google.protobuf.StringValue value = 1 [(required).is = true];
 }
 
+message RequiredByteStringFieldValue {
+    bytes value = 1 [(required).is = true];
+}
+
 message RepeatedRequiredMsgFieldValue {
     repeated google.protobuf.StringValue value = 1 [(required).is = true];
 }
