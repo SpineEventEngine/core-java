@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
 
 /**
@@ -48,7 +49,7 @@ public class MessageValidator {
      */
     public void validate(Message message) {
         // TODO:2016-03-11:alexander.litus: check 1st field in commands
-        final StringBuilder errMsgBuilder = newStringBuilder();
+        final List<String> errorMessages = newLinkedList();
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
@@ -56,12 +57,12 @@ public class MessageValidator {
             final FieldValidator<?> validator = FieldValidator.newInstance(field, value);
             if (validator.isFieldInvalid()) {
                 isMessageInvalid = true;
-                final List<String> errorMessages = validator.getErrorMessages();
-                appendErrorMessages(errMsgBuilder, errorMessages);
+                final List<String> messages = validator.getErrorMessages();
+                errorMessages.addAll(messages);
             }
         }
         if (isMessageInvalid) {
-            errorMessage = buildErrorMessage(errMsgBuilder, msgDescriptor);
+            errorMessage = buildErrorMessage(errorMessages, msgDescriptor);
         }
         isValidated = true;
     }
@@ -83,28 +84,26 @@ public class MessageValidator {
         return errorMessage;
     }
 
-    private static void appendErrorMessages(StringBuilder builder, List<String> errorMessages) {
-        for (String msg : errorMessages) {
-            builder.append(msg)
-                   .append("; ");
+    private static String buildErrorMessage(List<String> messages, Descriptor msgDescriptor) {
+        final int averageMsgLength = 32;
+        final StringBuilder builder = new StringBuilder(messages.size() * averageMsgLength);
+        builder.append(format("Message %s is invalid: ", msgDescriptor.getFullName()));
+        for (int i = 0; i < messages.size() ; i++) {
+            final String msg = messages.get(i);
+            builder.append(msg);
+            final boolean isLast = i == (messages.size() - 1);
+            if (isLast) {
+                builder.append('.');
+            } else {
+                builder.append("; ");
+            }
         }
-    }
-
-    private static String buildErrorMessage(StringBuilder errMsgBuilder, Descriptor msgDescriptor) {
-        errMsgBuilder.insert(0, format("Message %s is invalid: ", msgDescriptor.getFullName()));
-        // replace two last chars "; " with the dot
-        errMsgBuilder.replace(errMsgBuilder.length() - 2, errMsgBuilder.length(), ".");
-        return errMsgBuilder.toString();
+        return builder.toString();
     }
 
     private void checkValidated() {
         if (!isValidated) {
             throw new IllegalStateException("'validate()' method was not called.");
         }
-    }
-
-    private static StringBuilder newStringBuilder() {
-        final int capacity = 256;
-        return new StringBuilder(capacity);
     }
 }
