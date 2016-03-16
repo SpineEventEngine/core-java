@@ -106,9 +106,9 @@ import static java.lang.String.format;
     }
 
     private boolean rangeOptionsNotSet() {
-        final boolean minValuesAreDefault = (minOption.getIs() == 0.0) && !minOption.getInclusive();
-        final boolean maxValuesAreDefault = (maxOption.getIs() == 0.0) && !maxOption.getInclusive();
-        final boolean result = minValuesAreDefault && maxValuesAreDefault;
+        final boolean minOptionIsDefault = (minOption.getIs() == 0.0) && !minOption.getInclusive();
+        final boolean maxOptionIsDefault = (maxOption.getIs() == 0.0) && !maxOption.getInclusive();
+        final boolean result = minOptionIsDefault && maxOptionIsDefault;
         return result;
     }
 
