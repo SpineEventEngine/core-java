@@ -267,8 +267,9 @@ message PatternOption {
 //
 message ValidOption {
     // The default error message format string for the field.
-    // The format parameter is the simple name of the field.
-    option (default_message) = "'%s' message field value must have valid properties";
+    // 1) the simple name of the field;
+    // 2) an error message describing invalid field's properties.
+    option (default_message) = "'%s' message field value must have valid properties, error message: <%s>";
 
     // If it is true, the message's fields are validated.
     // The default value is false.

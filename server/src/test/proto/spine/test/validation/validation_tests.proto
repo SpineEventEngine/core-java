@@ -89,6 +89,16 @@ message PatternStringFieldValue {
     string email = 1 [(pattern).regex = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"];
 }
 
+// Messages for "valid" option tests.
+
+message EnclosedMessageFieldValue {
+    RequiredStringFieldValue value = 1 [(valid).is = true];
+}
+
+message EnclosedMessageWithoutAnnotationFieldValue {
+    RequiredStringFieldValue value = 1;
+}
+
 // Messages for exceptional conditions tests.
 
 message AnnotatedEnumFieldValue {

@@ -30,6 +30,8 @@ import org.spine3.protobuf.Durations;
 import org.spine3.test.validation.AnnotatedBooleanFieldValue;
 import org.spine3.test.validation.AnnotatedEnumFieldValue;
 import org.spine3.test.validation.DigitsCountNumberFieldValue;
+import org.spine3.test.validation.EnclosedMessageFieldValue;
+import org.spine3.test.validation.EnclosedMessageWithoutAnnotationFieldValue;
 import org.spine3.test.validation.MaxIncNumberFieldValue;
 import org.spine3.test.validation.MaxNotIncNumberFieldValue;
 import org.spine3.test.validation.MinIncNumberFieldValue;
@@ -45,9 +47,7 @@ import org.spine3.test.validation.TimeWithoutOptsFieldValue;
 
 import static com.google.protobuf.util.TimeUtil.*;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
@@ -389,6 +389,57 @@ public class MessageValidatorShould {
                 "Message spine.test.PatternStringFieldValue is invalid: 'email' must match the regular expression: " +
                 "'^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$', " +
                 "found: 'invalid.email'.",
+                validator.getErrorMessage()
+        );
+    }
+
+    /*
+     * Enclosed message field validation option tests.
+     */
+
+    @Test
+    public void find_out_that_enclosed_message_field_is_valid() {
+        final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.newBuilder().setValue(newUuid()).build();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+
+        validator.validate(msg);
+
+        assertMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_enclosed_message_field_is_NOT_valid() {
+        final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+
+        validator.validate(msg);
+
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void consider_field_is_valid_if_no_valid_option_set() {
+        final RequiredStringFieldValue invalidEnclosedMsg = RequiredStringFieldValue.getDefaultInstance();
+        final EnclosedMessageWithoutAnnotationFieldValue msg = EnclosedMessageWithoutAnnotationFieldValue.newBuilder()
+                .setValue(invalidEnclosedMsg)
+                .build();
+
+        validator.validate(msg);
+
+        assertMessageIsValid(true);
+    }
+
+    @Test
+    public void provide_validation_error_message_if_enclosed_message_field_is_not_valid() {
+        final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+
+        validator.validate(msg);
+
+        assertEquals(
+                "Message spine.test.EnclosedMessageFieldValue is invalid: " +
+                "'value' message field value must have valid properties, " +
+                "error message: <Message spine.test.RequiredStringFieldValue is invalid: 'value' must be set.>.",
                 validator.getErrorMessage()
         );
     }

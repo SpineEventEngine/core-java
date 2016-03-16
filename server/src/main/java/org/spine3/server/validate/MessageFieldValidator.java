@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.validate.Validate;
 import org.spine3.validation.options.Time;
 import org.spine3.validation.options.TimeOption;
+import org.spine3.validation.options.ValidOption;
 import org.spine3.validation.options.ValidationProto;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -53,10 +54,12 @@ import static org.spine3.validation.options.Time.*;
 
     @Override
     protected void validate() {
-        // TODO:2016-03-14:alexander.litus: check if message's fields must be validated
         checkIfRequiredAndNotSet();
-        if (!getValues().isEmpty() && isTimestamp()) {
-            validateTimestamps();
+        if (!getValues().isEmpty()) {
+            validateFieldsOfMessageIfNeeded();
+            if (isTimestamp()) {
+                validateTimestamps();
+            }
         }
     }
 
@@ -65,6 +68,22 @@ import static org.spine3.validation.options.Time.*;
     protected boolean isValueNotSet(Message value) {
         final boolean isNotSet = Validate.isDefault(value);
         return isNotSet;
+    }
+
+    private void validateFieldsOfMessageIfNeeded() {
+        final ValidOption option = getOption(ValidationProto.valid);
+        if (!option.getIs()) {
+            return;
+        }
+        for (Message value : getValues()) {
+            final MessageValidator validator = new MessageValidator();
+            validator.validate(value);
+            if (validator.isMessageInvalid()) {
+                setIsFieldInvalid(true);
+                final String errorMessage = validator.getErrorMessage();
+                addErrorMessage(option, errorMessage);
+            }
+        }
     }
 
     private boolean isTimestamp() {
@@ -101,6 +120,13 @@ import static org.spine3.validation.options.Time.*;
         final String fieldName = getFieldDescriptor().getName();
         final String when = option.getIn().toString().toLowerCase();
         final String msg = format(format, fieldName, when);
+        addErrorMessage(msg);
+    }
+
+    private void addErrorMessage(ValidOption option, String errorMessageForProps) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String fieldName = getFieldDescriptor().getName();
+        final String msg = format(format, fieldName, errorMessageForProps);
         addErrorMessage(msg);
     }
 }
