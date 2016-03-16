@@ -242,8 +242,9 @@ message PatternOption {
     // The default error message format string.
     // The format parameters are:
     // 1) the simple name of the field;
-    // 2) the regular expression to which the value must match.
-    option (default_message) = "'%s' must match the regular expression: %s";
+    // 2) the regular expression to which the value must match;
+    // 3) an actual field value.
+    option (default_message) = "'%s' must match the regular expression: '%s', found: '%s'";
 
     // The regular expression to match.
     string regex = 1;

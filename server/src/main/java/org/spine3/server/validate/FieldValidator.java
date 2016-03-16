@@ -81,7 +81,7 @@ import static java.lang.String.format;
                 break;
             case STRING:
                 final ImmutableList<String> strings = toValuesList(fieldValue);
-                validator = null; // TODO:2016-03-15:alexander.litus: impl
+                validator = new StringFieldValidator(descriptor, strings);
                 break;
             case BYTE_STRING:
                 final ImmutableList<ByteString> byteStrings = toValuesList(fieldValue);
@@ -141,7 +141,7 @@ import static java.lang.String.format;
             if (isValueNotSet(value)) {
                 setIsFieldInvalid(true);
                 addErrorMessage(option);
-                return;
+                return; // return because one error message is enough for the "required" option
             }
         }
     }

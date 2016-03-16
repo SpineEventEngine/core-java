@@ -84,7 +84,7 @@ import static org.spine3.validation.options.Time.*;
             if (isTimeInvalid((Timestamp) value, when, now)) {
                 setIsFieldInvalid(true);
                 addErrorMessage(option);
-                return;
+                return; // return because one error message is enough for the "time" option
             }
         }
     }

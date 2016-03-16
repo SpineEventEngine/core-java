@@ -29,8 +29,14 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "spine/validation.proto";
 
+// Messages for "required" option tests.
+
 message RequiredMsgFieldValue {
     google.protobuf.StringValue value = 1 [(required).is = true];
+}
+
+message RequiredStringFieldValue {
+    string value = 1 [(required).is = true];
 }
 
 message RequiredByteStringFieldValue {
@@ -41,9 +47,7 @@ message RepeatedRequiredMsgFieldValue {
     repeated google.protobuf.StringValue value = 1 [(required).is = true];
 }
 
-message NotRequiredMsgFieldValue {
-    google.protobuf.StringValue value = 1;
-}
+// Messages for "min", "max" and "digits" options tests.
 
 message MinIncNumberFieldValue {
     double value = 1 [(min).is = 16.5, (min).inclusive = true, (max).ignore = true];
@@ -65,6 +69,8 @@ message DigitsCountNumberFieldValue {
     double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
 }
 
+// Messages for "time" option tests.
+
 message TimeInFutureFieldValue {
     google.protobuf.Timestamp value = 1 [(when).in = FUTURE];
 }
@@ -75,4 +81,20 @@ message TimeInPastFieldValue {
 
 message TimeWithoutOptsFieldValue {
     google.protobuf.Timestamp value = 1;
+}
+
+// Messages for "pattern" option tests.
+
+message PatternStringFieldValue {
+    string email = 1 [(pattern).regex = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"];
+}
+
+// Messages for exceptional conditions tests.
+
+message AnnotatedEnumFieldValue {
+    Time value = 1 [(required).is = true];
+}
+
+message AnnotatedBooleanFieldValue {
+    bool value = 1 [(required).is = true];
 }

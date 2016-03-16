@@ -27,12 +27,14 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
+import org.spine3.test.validation.AnnotatedBooleanFieldValue;
+import org.spine3.test.validation.AnnotatedEnumFieldValue;
 import org.spine3.test.validation.DigitsCountNumberFieldValue;
 import org.spine3.test.validation.MaxIncNumberFieldValue;
 import org.spine3.test.validation.MaxNotIncNumberFieldValue;
 import org.spine3.test.validation.MinIncNumberFieldValue;
 import org.spine3.test.validation.MinNotIncNumberFieldValue;
-import org.spine3.test.validation.NotRequiredMsgFieldValue;
+import org.spine3.test.validation.PatternStringFieldValue;
 import org.spine3.test.validation.RepeatedRequiredMsgFieldValue;
 import org.spine3.test.validation.RequiredByteStringFieldValue;
 import org.spine3.test.validation.RequiredMsgFieldValue;
@@ -42,6 +44,8 @@ import org.spine3.test.validation.TimeInPastFieldValue;
 import org.spine3.test.validation.TimeWithoutOptsFieldValue;
 
 import static com.google.protobuf.util.TimeUtil.*;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
@@ -70,7 +74,7 @@ public class MessageValidatorShould {
 
     private final MessageValidator validator = new MessageValidator();
 
-    /**
+    /*
      * Required option tests.
      */
 
@@ -145,11 +149,11 @@ public class MessageValidatorShould {
 
     @Test
     public void consider_field_is_valid_if_no_required_option_set() {
-        validator.validate(NotRequiredMsgFieldValue.getDefaultInstance());
+        validator.validate(StringValue.getDefaultInstance());
         assertMessageIsValid(true);
     }
 
-    /**
+    /*
      * Time option tests.
      */
 
@@ -187,7 +191,7 @@ public class MessageValidatorShould {
         assertMessageIsValid(true);
     }
 
-    /**
+    /*
      * Min value option tests.
      */
 
@@ -228,7 +232,7 @@ public class MessageValidatorShould {
         minNumberTest(LESS_THAN_MIN, /*inclusive=*/false, /*valid=*/false);
     }
 
-    /**
+    /*
      * Max value option tests.
      */
 
@@ -262,7 +266,7 @@ public class MessageValidatorShould {
         maxNumberTest(LESS_THAN_MAX, /*inclusive=*/false, /*valid=*/true);
     }
 
-    /**
+    /*
      * Digits option tests.
      */
 
@@ -296,9 +300,57 @@ public class MessageValidatorShould {
         digitsCountTest(FRACTIONAL_DIGITS_COUNT_LESS_THAN_MAX, /*valid=*/true);
     }
 
+    /*
+     * String pattern option tests.
+     */
+
+    @Test
+    public void find_out_that_string_matches_to_a_regex_pattern() {
+        final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("valid.email@mail.com").build();
+        validator.validate(msg);
+        assertMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_string_does_not_match_to_a_regex_pattern() {
+        final PatternStringFieldValue msg = PatternStringFieldValue.newBuilder().setEmail("invalid email").build();
+        validator.validate(msg);
+        assertMessageIsValid(false);
+    }
+
+    @Test
+    public void consider_field_is_valid_if_no_pattern_option_set() {
+        validator.validate(StringValue.getDefaultInstance());
+        assertMessageIsValid(true);
+    }
+
+    /*
+     * Exceptional conditions tests.
+     */
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_get_results_but_msg_is_not_validated() {
         validator.isMessageInvalid();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_annotate_field_of_enum_type() {
+        validator.validate(AnnotatedEnumFieldValue.getDefaultInstance());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_annotate_field_of_boolean_type() {
+        validator.validate(AnnotatedBooleanFieldValue.getDefaultInstance());
+    }
+
+    /*
+     * Other tests.
+     */
+
+    @Test
+    public void build_validation_error_message() {
+        final String msg = MessageValidator.buildErrorMessage(asList("msg1", "msg2", "msg3"), StringValue.getDescriptor());
+        assertEquals("Message google.protobuf.StringValue is invalid: msg1; msg2; msg3.", msg);
     }
 
     private void minNumberTest(double value, boolean inclusive, boolean isValid) {

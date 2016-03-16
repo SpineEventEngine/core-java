@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
@@ -84,7 +85,8 @@ public class MessageValidator {
         return errorMessage;
     }
 
-    private static String buildErrorMessage(List<String> messages, Descriptor msgDescriptor) {
+    @VisibleForTesting
+    /* package */ static String buildErrorMessage(List<String> messages, Descriptor msgDescriptor) {
         final int averageMsgLength = 32;
         final StringBuilder builder = new StringBuilder(messages.size() * averageMsgLength);
         builder.append(format("Message %s is invalid: ", msgDescriptor.getFullName()));
