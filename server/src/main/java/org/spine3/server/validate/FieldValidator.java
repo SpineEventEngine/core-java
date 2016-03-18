@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.validation.options.RequiredOption;
@@ -56,53 +55,6 @@ import static java.lang.String.format;
     protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values) {
         this.fieldDescriptor = descriptor;
         this.values = values;
-    }
-
-    /**
-     * Creates a new validator instance according to the field type and validates the field.
-     *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValue a value of the field to validate
-     */
-    /* package */ static FieldValidator<?> newInstance(FieldDescriptor descriptor, Object fieldValue) {
-        final FieldValidator<?> validator;
-        final JavaType fieldType = descriptor.getJavaType();
-        switch (fieldType) {
-            case MESSAGE:
-                final ImmutableList<Message> messages = toValuesList(fieldValue);
-                validator = new MessageFieldValidator(descriptor, messages);
-                break;
-            case INT:
-            case LONG:
-            case FLOAT:
-            case DOUBLE:
-                final ImmutableList<Number> numbers = toValuesList(fieldValue);
-                validator = new NumberFieldValidator(descriptor, numbers);
-                break;
-            case STRING:
-                final ImmutableList<String> strings = toValuesList(fieldValue);
-                validator = new StringFieldValidator(descriptor, strings);
-                break;
-            case BYTE_STRING:
-                final ImmutableList<ByteString> byteStrings = toValuesList(fieldValue);
-                validator = new ByteStringFieldValidator(descriptor, byteStrings);
-                break;
-            case BOOLEAN:
-            case ENUM:
-            default:
-                throw fieldTypeIsNotSupported(descriptor);
-        }
-        validator.validate();
-        return validator;
-    }
-
-    @SuppressWarnings({"unchecked", "IfMayBeConditional"})
-    private static <T> ImmutableList<T> toValuesList(Object fieldValue) {
-        if (fieldValue instanceof List) {
-            return ImmutableList.copyOf((List<T>) fieldValue);
-        } else {
-            return ImmutableList.of((T) fieldValue);
-        }
     }
 
     /**
@@ -224,10 +176,5 @@ import static java.lang.String.format;
      */
     protected FieldDescriptor getFieldDescriptor() {
         return fieldDescriptor;
-    }
-
-    private static IllegalArgumentException fieldTypeIsNotSupported(FieldDescriptor descriptor) {
-        final String msg = format("The field type is not supported for validation: %s", descriptor.getType());
-        throw new IllegalArgumentException(msg);
     }
 }

@@ -37,10 +37,10 @@ import static java.lang.String.format;
  */
 public class MessageValidator {
 
+    private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
+
     private boolean isMessageInvalid = false;
-
     private boolean isValidated = false;
-
     private String errorMessage = "";
 
     /**
@@ -49,13 +49,13 @@ public class MessageValidator {
      * @param message a message to validate
      */
     public void validate(Message message) {
-        // TODO:2016-03-11:alexander.litus: check 1st field in commands
         final List<String> errorMessages = newLinkedList();
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> validator = FieldValidator.newInstance(field, value);
+            final FieldValidator<?> validator = fieldValidatorFactory.create(field, value);
+            validator.validate();
             if (validator.isFieldInvalid()) {
                 isMessageInvalid = true;
                 final List<String> messages = validator.getErrorMessages();

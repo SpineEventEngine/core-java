@@ -133,9 +133,7 @@ public class CommandBus implements AutoCloseable {
     public Response validate(Message commandOrMessage) {
         checkNotNull(commandOrMessage);
 
-        final Message message = commandOrMessage instanceof Command ?
-                  Commands.getMessage((Command) commandOrMessage) :
-                  commandOrMessage;
+        final Message message = toMessage(commandOrMessage);
         final CommandClass commandClass = CommandClass.of(message);
         if (isUnsupportedCommand(commandClass)) {
             return CommandValidation.unsupportedCommand(message);
@@ -147,6 +145,13 @@ public class CommandBus implements AutoCloseable {
             return CommandValidation.invalidCommand(message, errorMessage);
         }
         return Responses.ok();
+    }
+
+    private static Message toMessage(Message commandOrMessage) {
+        final Message msg = commandOrMessage instanceof Command ?
+                Commands.getMessage((Command) commandOrMessage) :
+                commandOrMessage;
+        return msg;
     }
 
     private boolean isUnsupportedCommand(CommandClass commandClass) {
