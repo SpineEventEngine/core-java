@@ -37,11 +37,20 @@ import static java.lang.String.format;
  */
 public class MessageValidator {
 
-    private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
+    private final FieldValidatorFactory fieldValidatorFactory;
 
     private boolean isMessageInvalid = false;
     private boolean isValidated = false;
     private String errorMessage = "";
+
+    /**
+     * Creates a new validator instance.
+     *
+     * @param validatorFactory a field validator factory to use
+     */
+    public MessageValidator(FieldValidatorFactory validatorFactory) {
+        this.fieldValidatorFactory = validatorFactory;
+    }
 
     /**
      * Validates messages according to Spine custom protobuf options and sets validation error messages.

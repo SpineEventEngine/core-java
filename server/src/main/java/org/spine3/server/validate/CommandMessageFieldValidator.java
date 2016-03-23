@@ -22,17 +22,14 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.validation.options.PatternOption;
-import org.spine3.validation.options.ValidationProto;
-
-import static java.lang.String.format;
+import com.google.protobuf.Message;
 
 /**
- * Validates fields of type {@link String}.
+ * Validates {@link Message} fields of commands.
  *
  * @author Alexander Litus
  */
-/* package */ class StringFieldValidator extends FieldValidator<String> {
+/* package */ class CommandMessageFieldValidator extends MessageFieldValidator {
 
     /**
      * Creates a new validator instance.
@@ -40,42 +37,15 @@ import static java.lang.String.format;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ StringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> fieldValues) {
+    /* package */ CommandMessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues) {
         super(descriptor, fieldValues);
     }
 
     @Override
     protected void validate() {
-        checkIfRequiredAndNotSet();
-        checkIfMatchesToRegexp();
-    }
-
-    private void checkIfMatchesToRegexp() {
-        final PatternOption option = getFieldOption(ValidationProto.pattern);
-        final String regex = option.getRegex();
-        if (regex.isEmpty()) {
-            return;
+        super.validate();
+        if (isRequiredEntityIdField()) {
+            validateEntityId();
         }
-        for (String value : getValues()) {
-            if (!value.matches(regex)) {
-                setIsFieldInvalid(true);
-                addErrorMessage(option, value);
-            }
-        }
-    }
-
-    private void addErrorMessage(PatternOption option, String value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldDescriptor().getName();
-        final String regex = option.getRegex();
-        final String msg = format(format, fieldName, regex, value);
-        addErrorMessage(msg);
-    }
-
-    @Override
-    @SuppressWarnings("RefusedBequest") // the base method call is redundant
-    protected boolean isValueNotSet(String value) {
-        final boolean isNotSet = value.isEmpty();
-        return isNotSet;
     }
 }

@@ -19,11 +19,11 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine.test.validation.cmd;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_package = "org.spine3.test.validation";
+option java_package = "org.spine3.test.validation.cmd";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";

@@ -27,23 +27,23 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
-import org.spine3.test.validation.AnnotatedBooleanFieldValue;
-import org.spine3.test.validation.AnnotatedEnumFieldValue;
-import org.spine3.test.validation.DigitsCountNumberFieldValue;
-import org.spine3.test.validation.EnclosedMessageFieldValue;
-import org.spine3.test.validation.EnclosedMessageWithoutAnnotationFieldValue;
-import org.spine3.test.validation.MaxIncNumberFieldValue;
-import org.spine3.test.validation.MaxNotIncNumberFieldValue;
-import org.spine3.test.validation.MinIncNumberFieldValue;
-import org.spine3.test.validation.MinNotIncNumberFieldValue;
-import org.spine3.test.validation.PatternStringFieldValue;
-import org.spine3.test.validation.RepeatedRequiredMsgFieldValue;
-import org.spine3.test.validation.RequiredByteStringFieldValue;
-import org.spine3.test.validation.RequiredMsgFieldValue;
-import org.spine3.test.validation.RequiredStringFieldValue;
-import org.spine3.test.validation.TimeInFutureFieldValue;
-import org.spine3.test.validation.TimeInPastFieldValue;
-import org.spine3.test.validation.TimeWithoutOptsFieldValue;
+import org.spine3.test.validation.cmd.AnnotatedBooleanFieldValue;
+import org.spine3.test.validation.cmd.AnnotatedEnumFieldValue;
+import org.spine3.test.validation.cmd.DigitsCountNumberFieldValue;
+import org.spine3.test.validation.cmd.EnclosedMessageFieldValue;
+import org.spine3.test.validation.cmd.EnclosedMessageWithoutAnnotationFieldValue;
+import org.spine3.test.validation.cmd.MaxIncNumberFieldValue;
+import org.spine3.test.validation.cmd.MaxNotIncNumberFieldValue;
+import org.spine3.test.validation.cmd.MinIncNumberFieldValue;
+import org.spine3.test.validation.cmd.MinNotIncNumberFieldValue;
+import org.spine3.test.validation.cmd.PatternStringFieldValue;
+import org.spine3.test.validation.cmd.RepeatedRequiredMsgFieldValue;
+import org.spine3.test.validation.cmd.RequiredByteStringFieldValue;
+import org.spine3.test.validation.cmd.RequiredMsgFieldValue;
+import org.spine3.test.validation.cmd.RequiredStringFieldValue;
+import org.spine3.test.validation.cmd.TimeInFutureFieldValue;
+import org.spine3.test.validation.cmd.TimeInPastFieldValue;
+import org.spine3.test.validation.cmd.TimeWithoutOptsFieldValue;
 
 import static com.google.protobuf.util.TimeUtil.*;
 import static java.util.Arrays.asList;
@@ -72,7 +72,7 @@ public class MessageValidatorShould {
     private static final double FRACTIONAL_DIGIT_COUNT_EQUAL_MAX = 1.12;
     private static final double FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX = 1.0;
 
-    private final MessageValidator validator = new MessageValidator();
+    private final MessageValidator validator = new MessageValidator(FieldValidatorFactory.newInstance());
 
     /*
      * Required option tests.
@@ -160,7 +160,7 @@ public class MessageValidatorShould {
         validator.validate(invalidMsg);
 
         assertEquals(
-                "Message spine.test.RequiredStringFieldValue is invalid: 'value' must be set.",
+                "Message spine.test.validation.cmd.RequiredStringFieldValue is invalid: 'value' must be set.",
                 validator.getErrorMessage()
         );
     }
@@ -211,7 +211,8 @@ public class MessageValidatorShould {
 
         assertMessageIsValid(false);
         assertEquals(
-                "Message spine.test.TimeInFutureFieldValue is invalid: 'value' must be a timestamp in the future.",
+                "Message spine.test.validation.cmd.TimeInFutureFieldValue is invalid: " +
+                "'value' must be a timestamp in the future.",
                 validator.getErrorMessage()
         );
     }
@@ -261,7 +262,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_less_than_min() {
         minNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.MinIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.cmd.MinIncNumberFieldValue is invalid: " +
                 "'value' must be greater than or equal to 16.5, actual: 11.5.",
                 validator.getErrorMessage()
         );
@@ -305,7 +306,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_greater_than_max() {
         maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.MaxIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.cmd.MaxIncNumberFieldValue is invalid: " +
                 "'value' must be less than or equal to 64.5, actual: 69.5.",
                 validator.getErrorMessage()
         );
@@ -349,7 +350,8 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_integral_digit_count_is_greater_than_max() {
         digitsCountTest(INT_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
         assertEquals(
-                "Message spine.test.DigitsCountNumberFieldValue is invalid: 'value' number is out of bounds, " +
+                "Message spine.test.validation.cmd.DigitsCountNumberFieldValue is invalid: " +
+                "'value' number is out of bounds, " +
                 "expected: <2 max digits>.<2 max digits>, actual: <3 digits>.<1 digits>.",
                 validator.getErrorMessage()
         );
@@ -386,7 +388,8 @@ public class MessageValidatorShould {
         validator.validate(msg);
 
         assertEquals(
-                "Message spine.test.PatternStringFieldValue is invalid: 'email' must match the regular expression: " +
+                "Message spine.test.validation.cmd.PatternStringFieldValue is invalid: " +
+                "'email' must match the regular expression: " +
                 "'^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$', " +
                 "found: 'invalid.email'.",
                 validator.getErrorMessage()
@@ -437,9 +440,9 @@ public class MessageValidatorShould {
         validator.validate(msg);
 
         assertEquals(
-                "Message spine.test.EnclosedMessageFieldValue is invalid: " +
-                "'value' message field value must have valid properties, " +
-                "error message: <Message spine.test.RequiredStringFieldValue is invalid: 'value' must be set.>.",
+                "Message spine.test.validation.cmd.EnclosedMessageFieldValue is invalid: " +
+                "'value' message field value must have valid properties, error message: " +
+                "<Message spine.test.validation.cmd.RequiredStringFieldValue is invalid: 'value' must be set.>.",
                 validator.getErrorMessage()
         );
     }

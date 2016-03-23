@@ -53,9 +53,9 @@ import static java.lang.String.format;
      */
     /* package */ NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<Number> fieldValues) {
         super(descriptor, fieldValues);
-        this.minOption = getOption(ValidationProto.min);
-        this.maxOption = getOption(ValidationProto.max);
-        this.digitsOption = getOption(ValidationProto.digits);
+        this.minOption = getFieldOption(ValidationProto.min);
+        this.maxOption = getFieldOption(ValidationProto.max);
+        this.digitsOption = getFieldOption(ValidationProto.digits);
     }
 
     @Override

@@ -71,12 +71,12 @@ import static org.spine3.validation.options.Time.*;
     }
 
     private void validateFieldsOfMessageIfNeeded() {
-        final ValidOption option = getOption(ValidationProto.valid);
+        final ValidOption option = getFieldOption(ValidationProto.valid);
         if (!option.getIs()) {
             return;
         }
         for (Message value : getValues()) {
-            final MessageValidator validator = new MessageValidator();
+            final MessageValidator validator = new MessageValidator(FieldValidatorFactory.newInstance());
             validator.validate(value);
             if (validator.isMessageInvalid()) {
                 setIsFieldInvalid(true);
@@ -93,7 +93,7 @@ import static org.spine3.validation.options.Time.*;
     }
 
     private void validateTimestamps() {
-        final TimeOption option = getOption(ValidationProto.when);
+        final TimeOption option = getFieldOption(ValidationProto.when);
         final Time when = option.getIn();
         if (when == UNDEFINED) {
             return;

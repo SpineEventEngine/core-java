@@ -23,7 +23,9 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
+import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.validation.options.RequiredOption;
@@ -80,7 +82,7 @@ import static java.lang.String.format;
      * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
      */
     protected void checkIfRequiredAndNotSet() {
-        final RequiredOption option = getOption(ValidationProto.required);
+        final RequiredOption option = getFieldOption(ValidationProto.required);
         if (!option.getIs()) {
             return;
         }
@@ -123,7 +125,7 @@ import static java.lang.String.format;
     /**
      * Sets {@code isFieldInvalid} field.
      */
-    protected void setIsFieldInvalid(boolean isFieldInvalid) {
+    protected void setIsFieldInvalid(boolean isFieldInvalid) { // TODO:2016-03-18:alexander.litus: assert method
         this.isFieldInvalid = isFieldInvalid;
     }
 
@@ -162,12 +164,23 @@ import static java.lang.String.format;
     }
 
     /**
-     * Returns a validation option.
+     * Returns a field validation option.
      *
      * @param extension an extension key used to obtain a validation option
      */
-    protected <Option extends Message> Option getOption(GeneratedExtension<FieldOptions, Option> extension) {
+    protected <Option> Option getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
         final Option option = fieldDescriptor.getOptions().getExtension(extension);
+        return option;
+    }
+
+    /**
+     * Returns a file validation option.
+     *
+     * @param extension an extension key used to obtain a validation option
+     */
+    protected <Option> Option getFileOption(GeneratedExtension<FileOptions, Option> extension) {
+        final FileDescriptor fileDescriptor = getFieldDescriptor().getFile();
+        final Option option = fileDescriptor.getOptions().getExtension(extension);
         return option;
     }
 
@@ -176,5 +189,38 @@ import static java.lang.String.format;
      */
     protected FieldDescriptor getFieldDescriptor() {
         return fieldDescriptor;
+    }
+
+    /**
+     * Validates the current field as it is an entity ID.
+     *
+     * <p>The field must not be repeated or not set.
+     */
+    protected void validateEntityId() {
+        final FieldDescriptor descriptor = getFieldDescriptor();
+        if (descriptor.isRepeated()) {
+            setIsFieldInvalid(true);
+            addErrorMessage(format("'%s' must not be a repeated field", descriptor.getName()));
+            return;
+        }
+        final V value = getValues().get(0);
+        if (isValueNotSet(value)) {
+            setIsFieldInvalid(true);
+            addErrorMessage(format("'%s' must be set", descriptor.getName()));
+        }
+    }
+
+    /**
+     * Returns {@code true} if the current field must be an entity ID
+     * (if it is the first in a message and {@code commands_for_entity} protobuf file option is set to {@code true});
+     * {@code false} otherwise.
+     */
+    protected boolean isRequiredEntityIdField() {
+        final int fieldNumber = getFieldDescriptor().getNumber();
+        final boolean isFirst = fieldNumber == 0;
+        // TODO:2016-03-23:alexander.litus: check if command is for entity
+        final boolean commandsForEntity = true;
+        final boolean result = isFirst && commandsForEntity;
+        return result;
     }
 }
