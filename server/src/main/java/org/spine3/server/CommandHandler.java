@@ -31,13 +31,14 @@ import org.spine3.base.CommandContext;
  *     <li>Producing corresponding events.</li>
  * </ol>
  *
- * Events are returned as values of command handling methods.
+ * <p>Events are returned as values of command handling methods.
  *
  * <h2>Command handling methods</h2>
  * <p>A command handling method is a {@code public} method that accepts two parameters.
  * The first parameter is a command message. The second parameter is {@link CommandContext}.
  *
- * <p>The method returns event message, or {@code List<Message>} if it produces more than one event.
+ * <p>The method returns an event message of the specific type, or {@code List<Message>}
+ * if it produces more than one event.
  *
  * @author Alexander Yevsyukov
  * @see CommandDispatcher

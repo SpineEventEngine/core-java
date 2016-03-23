@@ -32,14 +32,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Wraps a handler method on a specific object.
- *
- * <p>This class only verifies the suitability of the method and message type if
- * something fails.  Callers are expected to verify their uses of this class.
+ * An abstract base for wrappers over methods handling messages.
  *
  * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).   This property is used to ensure that no handler
- * method is registered more than once.
+ * same object (not class).
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -113,7 +109,6 @@ public abstract class MessageHandlerMethod<T, C> {
      *                                   {@code Error} instances are propagated as-is.
      */
     protected <R> R invoke(Message message, C context) throws InvocationTargetException {
-
         checkNotNull(message);
         checkNotNull(context);
         try {

@@ -56,21 +56,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
-     * A command must be the first parameter of a handling method.
-     */
-    private static final int MESSAGE_PARAM_INDEX = 0;
-
-    /**
-     * A {@code CommandContext} must be the second parameter of the handling method.
-     */
-    private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
-
-    /**
-     * A command handling method accepts two parameters.
-     */
-    private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
-
-    /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param target object to which the method applies
@@ -170,7 +155,25 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
     }
 
+    /**
+     * The predicate class that allows to filter command handling methods.
+     */
     private static class FilterPredicate implements Predicate<Method> {
+
+        /**
+         * A command must be the first parameter of a handling method.
+         */
+        private static final int MESSAGE_PARAM_INDEX = 0;
+
+        /**
+         * A {@code CommandContext} must be the second parameter of the handling method.
+         */
+        private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
+
+        /**
+         * A command handling method accepts two parameters.
+         */
+        private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
 
         private static boolean isAnnotatedCorrectly(Method method) {
             final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
