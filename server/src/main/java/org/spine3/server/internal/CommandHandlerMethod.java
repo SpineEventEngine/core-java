@@ -53,7 +53,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     /**
      * The instance of the predicate to filter command handler methods of a class.
      */
-    public static final Predicate<Method> PREDICATE = new MethodPredicate();
+    public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * A command must be the first parameter of a handling method.
@@ -78,37 +78,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     public CommandHandlerMethod(Object target, Method method) {
         super(target, method);
-    }
-
-    public static boolean isAnnotatedCorrectly(Method method) {
-        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-        return isAnnotated;
-    }
-
-    public static boolean acceptsCorrectParams(Method method) {
-        final Class<?>[] paramTypes = method.getParameterTypes();
-        final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
-        if (!paramCountIsCorrect) {
-            return false;
-        }
-        final boolean acceptsCorrectParams =
-                Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                        CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-        return acceptsCorrectParams;
-    }
-
-    public static boolean returnsMessageOrList(Method method) {
-        final Class<?> returnType = method.getReturnType();
-
-        if (Message.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        //noinspection RedundantIfStatement
-        if (List.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -162,8 +131,8 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(object);
-        result.putAll(regularHandlers);
+        final Map<CommandClass, CommandHandlerMethod> handlers = getHandlers(object);
+        result.putAll(handlers);
 
         return result.build();
     }
@@ -189,7 +158,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      *
      * <p>Logs warning for the methods with a non-public modifier.
      *
-     * @param methods methods to check
+     * @param methods the methods to check
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -201,7 +170,38 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         }
     }
 
-    private static class MethodPredicate implements Predicate<Method> {
+    private static class FilterPredicate implements Predicate<Method> {
+
+        private static boolean isAnnotatedCorrectly(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
+            return isAnnotated;
+        }
+
+        private static boolean acceptsCorrectParams(Method method) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
+            if (!paramCountIsCorrect) {
+                return false;
+            }
+            final boolean acceptsCorrectParams =
+                    Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
+                            CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+            return acceptsCorrectParams;
+        }
+
+        private static boolean returnsMessageOrList(Method method) {
+            final Class<?> returnType = method.getReturnType();
+
+            if (Message.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            //noinspection RedundantIfStatement
+            if (List.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+
+            return false;
+        }
 
         @Override
         public boolean apply(@Nullable Method method) {
