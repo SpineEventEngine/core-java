@@ -49,7 +49,6 @@ import static java.util.Collections.singletonList;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     /**
