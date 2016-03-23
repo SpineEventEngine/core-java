@@ -43,7 +43,6 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -107,7 +106,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
 
     @VisibleForTesting // otherwise would have been private.
-    protected static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
+    /* package */ static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -563,41 +562,4 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
                         eventClass.getName(), getClass().getName()));
     }
 
-    /**
-     * The predicate for filtering event applier methods.
-     */
-    private static class IsEventApplier implements Predicate<Method> {
-
-        private static final int EVENT_PARAM_INDEX = 0;
-
-        /**
-         * Checks if a method is an event applier.
-         *
-         * @param method to check
-         * @return {@code true} if the method is an event applier, {@code false} otherwise
-         */
-        public static boolean isEventApplier(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-            if (!isAnnotated) {
-                return false;
-            }
-
-            final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean hasOneParam = parameterTypes.length == 1;
-            if (!hasOneParam) {
-                return false;
-            }
-
-            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
-            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-
-            return firstParamIsMessage && returnsNothing;
-        }
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventApplier(method);
-        }
-    }
 }
