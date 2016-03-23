@@ -54,7 +54,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Collections2.filter;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
 //TODO:2016-02-17:alexander.yevsyukov: Define syntax of event applier methods.
 //TODO:2016-02-17:alexander.yevsyukov: Describe dealing with command validation and throwing Failures.
@@ -103,9 +102,9 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  */
 public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
 
-    private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
+    /* package */ static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
 
-    private static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
+    /* package */ static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -459,7 +458,11 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandContext commandContext, M currentState, Timestamp whenModified, int currentVersion, Message event) {
+    protected EventContext createEventContext(CommandContext commandContext,
+                                              M currentState,
+                                              Timestamp whenModified,
+                                              int currentVersion,
+                                              Message event) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder result = EventContext.newBuilder()
                 .setEventId(eventId)
@@ -508,56 +511,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return builder.build();
     }
 
-    /**
-     * The registry of method maps for all aggregate classes.
-     *
-     * <p>This registry is used for caching command handlers and event appliers.
-     * Aggregates register their classes in {@link Aggregate#init()} method.
-     */
-    private static class Registry {
-
-        private final MethodMap.Registry<Aggregate> commandHandlers = new MethodMap.Registry<>();
-
-        private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
-
-        /* package */ void register(Class<? extends Aggregate> clazz) {
-            commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
-            checkModifiers(commandHandlers.get(clazz).values());
-
-            eventAppliers.register(clazz, IS_EVENT_APPLIER);
-            EventApplier.checkModifiers(eventAppliers.get(clazz));
-        }
-
-        @CheckReturnValue
-        /* package */ boolean contains(Class<? extends Aggregate> clazz) {
-            final boolean result = commandHandlers.contains(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
-            final MethodMap result = commandHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
-            final MethodMap result = eventAppliers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ static Registry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-        }
-    }
-
     // Factory methods for exceptions
     //------------------------------------
 
@@ -572,5 +525,4 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
     }
-
 }

@@ -22,14 +22,12 @@ package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Set;
 
 /**
  * Utilities for working with classes.
@@ -70,20 +68,19 @@ public class Classes {
      * @return immutable set of message classes or an empty set
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<?> clazz, Predicate<Method> methodPredicate) {
-
-        final Set<Class<? extends Message>> result = Sets.newHashSet();
+    public static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(Class<?> clazz,
+                                                                                  Predicate<Method> predicate) {
+        final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
 
         for (Method method : clazz.getDeclaredMethods()) {
-
-            final boolean methodMatches = methodPredicate.apply(method);
-
+            final boolean methodMatches = predicate.apply(method);
             if (methodMatches) {
                 final Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
-                result.add(firstParamType);
+                builder.add(firstParamType);
             }
         }
-        return ImmutableSet.<Class<? extends Message>>builder().addAll(result).build();
+
+        return builder.build();
     }
 
     private Classes() {}
