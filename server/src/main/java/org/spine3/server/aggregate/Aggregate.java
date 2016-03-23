@@ -190,23 +190,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Dispatches commands, generates events and applies them to the aggregate.
+     * Dispatches the passed command to appropriate handler.
+     *
+     * <p>As the result of this method call, the aggregate generates events and applies them to the aggregate.
      *
      * @param command the command message to be executed on the aggregate.
      *                If this parameter is passed as {@link Any} the enclosing message will be unwrapped.
      * @param context the context of the command
-     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause.
+     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      */
-    @VisibleForTesting  // otherwise this method would have had package access.
-    protected final void dispatch(Message command, CommandContext context) {
+     /* package */ final void dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
 
         init();
 
         if (command instanceof Any) {
-            // We're likely getting the result of command.getMessage().
-            // Extract the wrapped message out of it.
+            // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
+            // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
+            // such a call especially from the testing code.
             final Any any = (Any) command;
             //noinspection AssignmentToMethodParameter
             command = Messages.fromAny(any);
@@ -218,6 +220,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         } catch (InvocationTargetException e) {
             propagate(e.getCause());
         }
+    }
+
+    /**
+     * This method is provided <em>only</em> for the purpose of testing command handling
+     * of an aggregate and must not be called from the production code.
+     *
+     * <p>The production code uses the method {@link #dispatch(Message, CommandContext)},
+     * which is called automatically by {@link AggregateRepository}.
+     */
+    @VisibleForTesting
+    protected final void testDispatch(Message command, CommandContext context) {
+        dispatch(command, context);
     }
 
     /**
