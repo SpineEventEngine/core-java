@@ -23,8 +23,6 @@ package org.spine3.server.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
@@ -144,6 +142,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the methods to check
+     * @see MessageHandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -216,15 +215,5 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
                     && acceptsCorrectParams(method)
                     && returnsMessageOrList(method);
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

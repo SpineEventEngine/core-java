@@ -23,8 +23,6 @@ package org.spine3.server.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.server.Subscribe;
 import org.spine3.server.reflect.MethodMap;
@@ -41,6 +39,8 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A wrapper for an event handling method.
+ *
  * @author Alexander Yevsyukov
  */
 public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
@@ -93,6 +93,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
+     * @see MessageHandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -112,15 +113,8 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return super.getTarget();
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventHandlerMethod.class);
-    }
-
     /**
-     * The predicate class alllowing to filter event handling methods.
+     * The predicate class allowing to filter event handling methods.
      *
      * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
      * have {@link EventContext} value as the second parameter, and return {@code void}.
@@ -167,10 +161,5 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
             checkNotNull(method);
             return isEventHandler(method);
         }
-    }
-
-    @CheckReturnValue
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

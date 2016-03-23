@@ -22,8 +22,6 @@ package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.server.internal.MessageHandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.reflect.Methods;
@@ -65,6 +63,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * <p>Logs warning for the methods with a non-private modifier.
      *
      * @param methods the map of methods to check
+     * @see MessageHandlerMethod#log()
      */
     public static void checkModifiers(MethodMap methods) {
         for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
@@ -75,17 +74,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
                         Methods.getFullMethodName(method)));
             }
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventApplier.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 
     /**

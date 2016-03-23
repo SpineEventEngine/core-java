@@ -20,6 +20,8 @@
 package org.spine3.server.internal;
 
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.reflect.Methods;
 
 import javax.annotation.Nullable;
@@ -195,5 +197,20 @@ public abstract class MessageHandlerMethod<T, C> {
         return (this.target == other.target)
                 && Objects.equals(this.method, other.method);
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(MessageHandlerMethod.class);
+    }
+
+    /**
+     * The common logger used by message handling method classes.
+     */
+    protected static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }
 
