@@ -37,7 +37,6 @@ import org.spine3.base.UserId;
 import org.spine3.client.UserUtil;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.Assign;
-import org.spine3.server.reflect.Classes;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -63,7 +62,6 @@ import static org.spine3.base.Commands.createContext;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.server.aggregate.Aggregate.IS_EVENT_APPLIER;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.newBuilder;
 import static org.spine3.testdata.TestCommands.createProject;
@@ -228,8 +226,8 @@ public class AggregateShould {
     }
 
     @Test
-    public void return_message_classes_which_are_handled_by_aggregate_case_event_classes() {
-        final Set<Class<? extends Message>> classes = Classes.getHandledMessageClasses(TestAggregate.class, IS_EVENT_APPLIER);
+    public void return_event_classes_which_represent_the_state_of_the_aggregate() {
+        final Set<Class<? extends Message>> classes = Aggregate.getEventClasses(TestAggregate.class);
 
         assertContains(classes,
                 ProjectCreated.class, TaskAdded.class, ProjectStarted.class);

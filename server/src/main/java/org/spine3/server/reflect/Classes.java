@@ -65,7 +65,7 @@ public class Classes {
     }
 
     /**
-     * Returns event/command types handled by given {@code Aggregate} class.
+     * Returns event/command types handled by the passed class.
      *
      * @return immutable set of message classes or an empty set
      */

@@ -105,8 +105,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
 
     private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
 
-    @VisibleForTesting // otherwise would have been private.
-    /* package */ static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
+    private static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -151,14 +150,26 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns set of the command types handled by a given aggregate.
+     * Returns the set of the command classes handled by the passed aggregate class.
      *
-     * @param clazz {@link Class} of the aggregate
-     * @return immutable set of classes of commands
+     * @param clazz the class of the aggregate
+     * @return immutable set of command classes
      */
     @CheckReturnValue
     public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
+        final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
+        return classes;
+    }
+
+    /**
+     * Returns the set of the event classes that comprise the state of the passed aggregate class.
+     *
+     * @param clazz the class of the aggregate
+     * @return immutable set of event classes
+     */
+    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
+        final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_EVENT_APPLIER);
+        return classes;
     }
 
     /**
