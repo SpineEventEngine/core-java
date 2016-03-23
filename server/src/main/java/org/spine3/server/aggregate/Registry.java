@@ -34,7 +34,7 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  *
  * @author Alexander Yevsyukov
  */
-class Registry {
+/* package */ class Registry {
 
     private final MethodMap.Registry<Aggregate> commandHandlers = new MethodMap.Registry<>();
 
