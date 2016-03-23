@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
@@ -159,7 +158,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @param object the object that keeps command handler methods
      * @return immutable map
      */
-    @Internal
     @CheckReturnValue
     public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
