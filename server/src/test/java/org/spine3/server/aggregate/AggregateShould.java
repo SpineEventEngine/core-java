@@ -23,7 +23,6 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -203,19 +202,6 @@ public class AggregateShould {
     }
 
     @Test
-    public void not_throw_exception_if_missing_event_applier_for_state_neutral_event() {
-        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(ID);
-        try {
-            aggregate.testDispatch(addTask, COMMAND_CONTEXT);
-            assertTrue(aggregate.isTaskAddedCommandHandled);
-        } catch (IllegalStateException e) {
-            fail("Method must not throw 'missing event applier exception' because this event is state neutral and " +
-                    "the applier is not required.");
-            throw e;
-        }
-    }
-
-    @Test
     public void return_command_classes_which_are_handled_by_aggregate() {
         final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(TestAggregate.class);
 
@@ -314,16 +300,6 @@ public class AggregateShould {
 
         assertContains(eventsToClasses(events),
                 ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
-    }
-
-    @Test
-    public void return_only_state_changing_uncommitted_event_records_after_dispatch() {
-        final TestAggregateWithStateNeutralEvents aggregate = new TestAggregateWithStateNeutralEvents(ID);
-
-        aggregate.dispatchCommands(createProject, addTask);
-
-        final Collection<Event> events = aggregate.getStateChangingUncommittedEvents();
-        assertContains(eventsToClasses(events), ProjectCreated.class);
     }
 
     @Test
@@ -514,52 +490,6 @@ public class AggregateShould {
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
             return projectCreatedEvent(cmd.getProjectId());
-        }
-    }
-
-    /*
-     * Class only for test case: applier is not required for state-neutral event.
-     */
-    private static class TestAggregateWithStateNeutralEvents extends Aggregate<ProjectId, Project> {
-
-        private static final ImmutableSet<Class<? extends Message>> STATE_NEUTRAL_EVENT_CLASSES =
-                ImmutableSet.<Class<? extends Message>>of(TaskAdded.class);
-
-        private boolean isTaskAddedCommandHandled = false;
-
-        public TestAggregateWithStateNeutralEvents(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreatedEvent(cmd.getProjectId());
-        }
-
-        @Apply
-        private void event(ProjectCreated event) {
-        }
-
-        /**
-         * There is no event applier for TaskAdded event because this event is state-neutral.
-         */
-        @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            isTaskAddedCommandHandled = true;
-            return taskAddedEvent(cmd.getProjectId());
-        }
-
-        @Override
-        @SuppressWarnings({"RefusedBequest", // OK as the default implementation returns empty set.
-                           "ReturnOfCollectionOrArrayField"}) // OK, as we return immutable implementation.
-        protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
-            return STATE_NEUTRAL_EVENT_CLASSES;
-        }
-
-        public void dispatchCommands(Message... commands) {
-            for (Message cmd : commands) {
-                testDispatch(cmd, COMMAND_CONTEXT);
-            }
         }
     }
 

@@ -45,14 +45,10 @@ import org.spine3.server.reflect.MethodMap;
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static com.google.common.collect.Collections2.filter;
 import static org.spine3.base.Identifiers.idToAny;
 
 //TODO:2016-02-17:alexander.yevsyukov: Define syntax of event applier methods.
@@ -307,10 +303,8 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
-     * @see #getStateNeutralEventClasses()
      */
     private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
-        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
         //TODO:2016-03-24:alexander.yevsyukov: Init the builder of the state. Add getBuilder() method.
         // Assume that the code of event appliers would call getBuilder() instead of getState().
@@ -318,11 +312,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         // the aggregate lifecycle.
 
         for (Message message : messages) {
-            final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
-            if (!isStateNeutral) {
-                apply(message);
-            }
-            //TODO:2016-03-24:alexander.yevsyukov: increment version
+            apply(message);
 
             final int currentVersion = getVersion();
             final M state = getState();
@@ -331,7 +321,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             putUncommitted(event);
         }
 
-        //TODO:2016-03-24:alexander.yevsyukov: set new date/time
 
         //TODO:2016-03-24:alexander.yevsyukov: set new state
         //TODO:2016-03-24:alexander.yevsyukov: Clean builder.
@@ -353,30 +342,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
             return;
         }
         invokeApplier(eventMessage);
-    }
 
-    /**
-     * Returns a set of classes of state-neutral events (an empty set by default).
-     *
-     * <p>An event is state-neutral if we do not modify the aggregate state when this event occurs.
-     *
-     * <p>Instead of creating empty applier methods for such events,
-     * override this method returning immutable set of event classes. For example:
-     *
-     * <pre>
-     * private static final ImmutableSet&lt;Class&lt;? extends Message&gt;&gt; STATE_NEUTRAL_EVENT_CLASSES =
-     *         ImmutableSet.&lt;Class&lt;? extends Message&gt;&gt;of(StateNeutralEvent.class);
-     *
-     * &#64;Override
-     * protected Set&lt;Class&lt;? extends Message&gt;&gt; getStateNeutralEventClasses() {
-     *     return STATE_NEUTRAL_EVENT_CLASSES;
-     * }
-     * </pre>
-     *
-     * @return a set of classes of state-neutral events
-     */
-    protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
-        return Collections.emptySet();
+        //TODO:2016-03-24:alexander.yevsyukov: increment version
+        //TODO:2016-03-24:alexander.yevsyukov: set new date/time
     }
 
     /**
@@ -395,52 +363,13 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns all uncommitted events (including state-neutral).
+     * Returns all uncommitted events.
      *
      * @return immutable view of records for all uncommitted events
-     * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
     public List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
-    }
-
-    /**
-     * Returns uncommitted events (excluding state-neutral).
-     *
-     * @return an immutable view of records for applicable uncommitted events
-     * @see #getStateNeutralEventClasses()
-     */
-    @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
-    protected Collection<Event> getStateChangingUncommittedEvents() {
-        final Predicate<Event> isStateChanging = isStateChangingEventRecord();
-        final Collection<Event> result = filter(uncommittedEvents, isStateChanging);
-        return result;
-    }
-
-    /**
-     * Creates the predicate that filters {@code EventRecord}s which modify the state
-     * of the aggregate.
-     *
-     * <p>The predicate uses passed event classes for the events that do not modify the
-     * state of the aggregate. As such, they are called <em>State Neutral.</em>
-     *
-     * @return new predicate instance
-     */
-    private Predicate<Event> isStateChangingEventRecord() {
-        final Collection<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
-        return new Predicate<Event>() {
-            @Override
-            public boolean apply(
-                    @SuppressWarnings("NullableProblems")
-                    /* The @Nullable annotation is removed to avoid checking for null input,
-                       which is not possible here. Having the null input doesn't allow to test
-                       that code branch. */ Event event) {
-                final Message message = Events.getMessage(event);
-                final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
-                return !isStateNeutral;
-            }
-        };
     }
 
     /**

@@ -20,12 +20,12 @@
 
 package org.spine3.server.aggregate;
 
-import com.google.protobuf.Message;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+//TODO:2016-03-24:alexander.yevsyukov: Update with description of new applier convention: getBuilder(), etc.
 
 /**
  * Marks a method of an aggregate as one that modifies the state of the aggregate with data from the passed event.
@@ -36,13 +36,6 @@ import java.lang.annotation.Target;
  * As such they should be declared {@code private}.
  *
  * <p>The type of the event will be indicated by the first (and only) parameter.
- *
- * <p>Event applier should call {@link Aggregate#incrementState(Message)},
- * which will advance the version and record the time of the modification.
- *
- * <p>It may turn that the event is state-neutral.
- * An event is state-neutral if we do not modify the aggregate state when this event occurs.
- * Please see {@link Aggregate#getStateNeutralEventClasses()} for more details and a sample.
  *
  * @author Alexander Yevsyukov
  */

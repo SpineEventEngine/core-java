@@ -175,7 +175,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      */
     @Override
     public void store(A aggregate) {
-        final Iterable<Event> uncommittedEvents = aggregate.getStateChangingUncommittedEvents();
+        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
 
         //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
         // Now we're storing snapshot in a sequence of uncommitted
