@@ -20,8 +20,6 @@
 
 package org.spine3.test;
 
-import org.spine3.Internal;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
@@ -32,7 +30,6 @@ import static java.lang.System.currentTimeMillis;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 public class Tests {
 
     private static final long MSEC_IN_SECOND = 1000L;

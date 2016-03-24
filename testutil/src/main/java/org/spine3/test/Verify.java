@@ -162,8 +162,7 @@ public final class Verify extends Assert {
     }
 
     public static void fail(String message, Throwable cause) {
-        final AssertionError failedException = new AssertionError(message);
-        failedException.initCause(cause);
+        final AssertionError failedException = new AssertionError(message, cause);
         throw mangledException(failedException);
     }
 
@@ -533,7 +532,7 @@ public final class Verify extends Assert {
     public static <T> void assertNotEmpty(String itemsName, T[] items) {
         try {
             assertObjectNotNull(itemsName, items);
-            assertNotEquals(itemsName, 0, items.length);
+            Assert.assertNotEquals(itemsName, 0, items.length);
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -872,7 +871,7 @@ public final class Verify extends Assert {
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
 
             for (Object item : items) {
-                assertTrue(fluentIterable.contains(item));
+                Assert.assertTrue(fluentIterable.contains(item));
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -930,7 +929,7 @@ public final class Verify extends Assert {
                 final Set<T> inActualOnlySet = newHashSet(actualSet);
                 inActualOnlySet.removeAll(expectedSet);
 
-                fail("Sets are not equal.");
+                Assert.fail("Sets are not equal.");
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1175,7 +1174,7 @@ public final class Verify extends Assert {
             List<T> actualList) {
         try {
             assertObjectNotNull(listName, actualList);
-            assertNotEquals(
+            Assert.assertNotEquals(
                     "Bad test, formerItem and latterItem are equal, listName:<" + listName + '>',
                     formerItem,
                     latterItem);
@@ -1399,8 +1398,8 @@ public final class Verify extends Assert {
                 Assert.fail("Neither item should be null: <" + objectA + "> <" + objectB + '>');
             }
 
-            assertNotEquals("Neither item should equal new Object()", objectA.equals(new Object()));
-            assertNotEquals("Neither item should equal new Object()", objectB.equals(new Object()));
+            Assert.assertNotEquals("Neither item should equal new Object()", objectA.equals(new Object()));
+            Assert.assertNotEquals("Neither item should equal new Object()", objectB.equals(new Object()));
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectA, objectA);
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectB, objectB);
             Assert.assertEquals("Expected " + itemNames + " to be equal.", objectA, objectB);
@@ -1424,6 +1423,7 @@ public final class Verify extends Assert {
 
     public static void assertShallowClone(String itemName, Cloneable object) {
         try {
+            //noinspection ConfusingArgumentToVarargsMethod
             final Method method = Object.class.getDeclaredMethod("clone", (Class<?>[]) null);
             method.setAccessible(true);
             final Object clone = method.invoke(object);
@@ -1444,7 +1444,7 @@ public final class Verify extends Assert {
                 Assert.fail("Expected class '" + aClass + "' to be non-instantiable");
             } catch (InstantiationException e) {
                 // pass
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException ignored) {
                 if (canInstantiateThroughReflection(aClass)) {
                     Assert.fail("Expected constructor of non-instantiable class '" + aClass + "' to throw an exception, but didn't");
                 }
@@ -1460,15 +1460,11 @@ public final class Verify extends Assert {
             declaredConstructor.setAccessible(true);
             declaredConstructor.newInstance();
             return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        } catch (InvocationTargetException e) {
-            return false;
-        } catch (InstantiationException e) {
-            return false;
-        } catch (IllegalAccessException e) {
-            return false;
-        } catch (AssertionError e) {
+        } catch (NoSuchMethodException |
+                InvocationTargetException |
+                InstantiationException |
+                IllegalAccessException |
+                AssertionError ignored) {
             return false;
         }
     }

@@ -10,6 +10,7 @@ buildscript {
 
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: '0.13.1'
+    testCompile project (path: ":testutil", configuration: 'testArtifacts')
 }
 
 apply plugin: 'org.spine3.tools.protolookup';
