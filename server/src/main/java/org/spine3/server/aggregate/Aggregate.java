@@ -29,7 +29,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -94,7 +93,6 @@ import static org.spine3.base.Identifiers.idToAny;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                             extends Entity<I, S>
                             implements CommandHandler {
@@ -366,10 +364,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         try {
             for (Message message : messages) {
                 apply(message);
-
-                final int currentVersion = getVersion();
-                final S state = getState();
-                final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
+                final EventContext eventContext = createEventContext(commandContext, message);
                 final Event event = Events.createEvent(message, eventContext);
                 putUncommitted(event);
             }
@@ -430,7 +425,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable view of records for all uncommitted events
      */
     @CheckReturnValue
-    public List<Event> getUncommittedEvents() {
+    /* package */ List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
 
@@ -439,7 +434,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @return the list of event records
      */
-    public List<Event> commitEvents() {
+    /* package */ List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
@@ -449,32 +444,25 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
-     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
      *
      * @param commandContext the context of the command, execution of which produced the event
-     * @param currentState   the state of the aggregated after the event was applied
-     * @param whenModified   the moment of the aggregate modification for this event
-     * @param currentVersion the version of the aggregate after the event was applied
      * @param event          the event for which to create the context
      * @return new instance of the {@code EventContext}
-     * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
+     * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandContext commandContext,
-                                              S currentState,
-                                              Timestamp whenModified,
-                                              int currentVersion,
-                                              Message event) {
+    protected EventContext createEventContext(CommandContext commandContext, Message event) {
         final EventId eventId = Events.generateId();
-        final EventContext.Builder result = EventContext.newBuilder()
+        final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setCommandContext(commandContext)
-                .setTimestamp(whenModified)
-                .setVersion(currentVersion)
+                .setTimestamp(whenModified())
+                .setVersion(getVersion())
                 .setProducerId(getIdAsAny());
-        addEventContextAttributes(result, commandContext.getCommandId(), event, currentState, currentVersion);
-        return result.build();
+        extendEventContext(event, builder, commandContext);
+        return builder.build();
     }
 
     /**
@@ -482,16 +470,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
-     * @param builder        a builder for the event context
-     * @param commandId      the id of the command, which cased the event
      * @param event          the event message
-     * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the aggregate after the event was applied
-     * @see #createEventContext(CommandContext, Message, Timestamp, int, Message)
+     * @param builder        a builder for the event context
+     * @see #createEventContext(CommandContext, Message)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId, Message event, S currentState, int currentVersion) {
+    protected void extendEventContext(Message event, EventContext.Builder builder, CommandContext commandContext) {
         // Do nothing.
     }
 
