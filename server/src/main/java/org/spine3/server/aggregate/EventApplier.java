@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventApplier(Aggregate target, Method method) {
+    /* package */ EventApplier(Aggregate target, Method method) {
         super(target, method);
     }
 
@@ -83,6 +83,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
         private static final int EVENT_PARAM_INDEX = 0;
 
+        private static final int NUMBER_OF_PARAMS = 1;
+
         /**
          * Checks if a method is an event applier.
          *
@@ -96,7 +98,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
             }
 
             final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean hasOneParam = parameterTypes.length == 1;
+            final boolean hasOneParam = parameterTypes.length == NUMBER_OF_PARAMS;
             if (!hasOneParam) {
                 return false;
             }

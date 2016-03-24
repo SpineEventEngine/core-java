@@ -302,7 +302,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Applies events to an aggregate unless they are state-neutral.
+     * Applies events to the aggregate unless they are state-neutral.
      *
      * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
