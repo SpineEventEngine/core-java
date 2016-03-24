@@ -43,6 +43,7 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -86,21 +87,34 @@ import static org.spine3.base.Identifiers.idToAny;
  * must have applier methods for <em>all</em> event types it produces.
  *
  * <h2>Handling snapshots</h2>
- * In order to optimise the restoration of aggregates, an {@link AggregateRepository} can periodically store
+ * <p>In order to optimise the restoration of aggregates, an {@link AggregateRepository} can periodically store
  * snapshots of aggregate state.
  *
  * <p>The {@code Aggregate} restores its state in {@link #restore(Snapshot)} method.
  *
  * @param <I> the type for IDs of this class of aggregates
- * @param <M> the type of the state held by the aggregate
+ * @param <S> the type of the state held by the aggregate
+ * @param <B> the type of the aggregate state builder
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
+@SuppressWarnings("ClassWithTooManyMethods")
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
+                            extends Entity<I, S>
+                            implements CommandHandler {
 
     /* package */ static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
 
     /* package */ static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
+
+    /**
+     * The builder for the aggregate state.
+     *
+     * <p>This field is non-null only in when the aggregate changes its state during the command handling,
+     * or during playing events.
+     */
+    @Nullable
+    private volatile B builder;
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -134,14 +148,24 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     private final List<Event> uncommittedEvents = Lists.newLinkedList();
 
     /**
-     * Creates a new instance.
+     * Creates a new aggregate instance.
      *
-     * @param id the ID for the new instance
+     * @param id the ID for the new aggregate
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
     public Aggregate(I id) {
         super(id);
         this.idAsAny = idToAny(id);
+    }
+
+    /**
+     * Check if the type of the builder passed as a generic parameter matches the type of the message.
+     *
+     * @throws ClassCastException if the builder type does not match the type of the state
+     */
+    private void checkBuilderType() {
+        @SuppressWarnings("unchecked")
+        final B ignored = (B) getState().toBuilder();
     }
 
     /**
@@ -179,8 +203,10 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         final Registry registry = Registry.getInstance();
         final Class<? extends Aggregate> thisClass = getClass();
 
-        // Register this aggregate root class if it wasn't.
+        // Register this aggregate class if it wasn't before.
         if (!registry.contains(thisClass)) {
+            // Check if the generic types of the class are compatible. Do it once per aggregate class.
+            checkBuilderType();
             registry.register(thisClass);
         }
 
@@ -192,6 +218,44 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
 
     private Any getIdAsAny() {
         return idAsAny;
+    }
+
+    /**
+     * This method starts the phase of updating the aggregate state.
+     *
+     * <p>The update phase is closed by the {@link #updateState()}.
+     */
+    private void createBuilder() {
+        @SuppressWarnings("unchecked") // It is safe as we checked the type on the construction.
+        final B builder = (B) getState().toBuilder();
+        this.builder = builder;
+    }
+
+    /**
+     * Obtains the instance of the state builder.
+     *
+     * <p>This method must be called only from within an event applier.
+     *
+     * @return the instance of the new state builder
+     * @throws IllegalStateException if the method is called from outside an event applier
+     */
+    protected B getBuilder() {
+        if (this.builder == null) {
+            throw new IllegalStateException(
+                    "Builder is not available. Make sure to call the method only from an event applier.");
+        }
+        return builder;
+    }
+
+    /**
+     * Updates the aggregate state and closes the update phase of the aggregate.
+     */
+    private void updateState() {
+        @SuppressWarnings("unchecked") // It is safe to cast as we checked compatibility in init();
+        final S newState = (S) getBuilder().build();
+        setState(newState, getVersion(), whenModified());
+
+        this.builder = null;
     }
 
     /**
@@ -286,44 +350,45 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     public void play(Iterable<Event> events) {
         init();
-
-        for (Event event : events) {
-            final Message message = Events.getMessage(event);
-            try {
-                apply(message);
-            } catch (InvocationTargetException e) {
-                propagate(e.getCause());
+        createBuilder();
+        try {
+            for (Event event : events) {
+                final Message message = Events.getMessage(event);
+                final EventContext context = event.getContext();
+                try {
+                    apply(message);
+                    setVersion(context.getVersion(), context.getTimestamp());
+                } catch (InvocationTargetException e) {
+                    propagate(e.getCause());
+                }
             }
+        } finally {
+            updateState();
         }
     }
 
     /**
-     * Applies events to the aggregate unless they are state-neutral.
+     * Applies events to the aggregate.
      *
      * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
     private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
+        createBuilder();
+        try {
+            for (Message message : messages) {
+                apply(message);
 
-        //TODO:2016-03-24:alexander.yevsyukov: Init the builder of the state. Add getBuilder() method.
-        // Assume that the code of event appliers would call getBuilder() instead of getState().
-        // Throw IllegalStateException in the getBuilder() method if it's called from other stages of
-        // the aggregate lifecycle.
-
-        for (Message message : messages) {
-            apply(message);
-
-            final int currentVersion = getVersion();
-            final M state = getState();
-            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
-            final Event event = Events.createEvent(message, eventContext);
-            putUncommitted(event);
+                final int currentVersion = getVersion();
+                final S state = getState();
+                final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
+                final Event event = Events.createEvent(message, eventContext);
+                putUncommitted(event);
+            }
+        } finally {
+            updateState();
         }
-
-
-        //TODO:2016-03-24:alexander.yevsyukov: set new state
-        //TODO:2016-03-24:alexander.yevsyukov: Clean builder.
     }
 
     /**
@@ -343,8 +408,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         }
         invokeApplier(eventMessage);
 
-        //TODO:2016-03-24:alexander.yevsyukov: increment version
-        //TODO:2016-03-24:alexander.yevsyukov: set new date/time
+        incrementVersion(); // This will also update whenModified field.
     }
 
     /**
@@ -352,10 +416,21 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param snapshot the snapshot with the state to restore
      */
-    public void restore(Snapshot snapshot) {
-        final M stateToRestore = Messages.fromAny(snapshot.getState());
+    /* package */ void restore(Snapshot snapshot) {
+        final S stateToRestore = Messages.fromAny(snapshot.getState());
 
-        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
+        // See if we're in the state update cycle.
+        final B builder = this.builder;
+
+        // If the call to restore() is made during a reply (because the snapshot event was encountered)
+        // use the currently initialized builder.
+        if (builder != null) {
+            builder.clear();
+            builder.mergeFrom(stateToRestore);
+            setVersion(snapshot.getVersion(), snapshot.getWhenModified());
+        } else {
+            setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
+        }
     }
 
     private void putUncommitted(Event record) {
@@ -400,7 +475,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @CheckReturnValue
     protected EventContext createEventContext(CommandContext commandContext,
-                                              M currentState,
+                                              S currentState,
                                               Timestamp whenModified,
                                               int currentVersion,
                                               Message event) {
@@ -429,7 +504,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
     protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId, Message event, M currentState, int currentVersion) {
+                                             CommandId commandId, Message event, S currentState, int currentVersion) {
         // Do nothing.
     }
 

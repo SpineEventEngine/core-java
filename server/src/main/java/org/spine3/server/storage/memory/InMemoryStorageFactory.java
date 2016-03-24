@@ -50,7 +50,7 @@ public class InMemoryStorageFactory implements StorageFactory {
      * NOTE: the parameter is unused.
      */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?>> unused) {
+    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> unused) {
         return new InMemoryAggregateStorage<>();
     }
 

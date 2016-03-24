@@ -34,7 +34,7 @@ import org.spine3.server.aggregate.Aggregate;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("unused")
-public class TaskAggregate extends Aggregate<TaskId, Task> {
+public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
     public TaskAggregate(TaskId id) {
         super(id);

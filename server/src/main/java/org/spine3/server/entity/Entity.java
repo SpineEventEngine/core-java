@@ -175,9 +175,20 @@ public abstract class Entity<I, S extends Message> {
     protected void setState(S state, int version, Timestamp whenLastModified) {
         validate(state);
         this.state = checkNotNull(state);
+        setVersion(version, whenLastModified);
+    }
+
+    /**
+     * Sets version information of the entity.
+     *
+     * @param version the version number of the entity
+     * @param whenLastModified the time of the last modification of the entity
+     */
+    protected void setVersion(int version, Timestamp whenLastModified) {
         this.version = version;
         this.whenModified = checkNotNull(whenLastModified);
     }
+
 
     /**
      * Updates the state incrementing the version number and recording time of the modification.

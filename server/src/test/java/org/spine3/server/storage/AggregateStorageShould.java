@@ -74,7 +74,8 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
      * @param <Id> the type of aggregate IDs
      * @return an empty storage instance
      */
-    protected abstract <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message>> aggregateClass);
+    protected abstract <Id> AggregateStorage<Id> getStorage(
+            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
 
     @Override
     protected AggregateEvents newStorageRecord() {
@@ -257,19 +258,19 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
                 .build();
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project> {
+    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project> {
+    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project> {
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

@@ -63,7 +63,7 @@ import static org.spine3.base.Commands.getMessage;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
+public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           extends Repository<I, A>
                           implements CommandDispatcher {
 
@@ -99,7 +99,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?>>
      *
      * @return the class of the aggregates
      */
-    public Class<? extends Aggregate<I, ?>> getAggregateClass() {
+    public Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
     }
 

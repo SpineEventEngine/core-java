@@ -272,7 +272,6 @@ public class AggregateShould {
 
     @Test
     public void play_snapshot_event_and_restore_state() {
-
         aggregate.testDispatch(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
@@ -343,7 +342,7 @@ public class AggregateShould {
     }
 
     @Test
-    public void restore_state_from_snapshot_event() {
+    public void restore_state_from_snapshot() {
 
         aggregate.testDispatch(createProject, COMMAND_CONTEXT);
 
@@ -393,7 +392,7 @@ public class AggregateShould {
         return Event.newBuilder().setContext(EVENT_CONTEXT).setMessage(toAny(snapshot)).build();
     }
 
-    private static class TestAggregate extends Aggregate<ProjectId, Project> {
+    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private static final String STATUS_NEW = "NEW";
         private static final String STATUS_STARTED = "STARTED";
@@ -436,12 +435,9 @@ public class AggregateShould {
 
         @Apply
         private void event(ProjectCreated event) {
-            final Project newState = newBuilder(getState())
+            getBuilder()
                     .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_NEW)
-                    .build();
-
-            incrementState(newState);
+                    .setStatus(STATUS_NEW);
 
             isProjectCreatedEventApplied = true;
         }
@@ -453,12 +449,9 @@ public class AggregateShould {
 
         @Apply
         private void event(ProjectStarted event) {
-            final Project newState = newBuilder(getState())
+            getBuilder()
                     .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_STARTED)
-                    .build();
-
-            incrementState(newState);
+                    .setStatus(STATUS_STARTED);
 
             isProjectStartedEventApplied = true;
         }
@@ -475,7 +468,7 @@ public class AggregateShould {
     /*
      * Class only for test cases: exception if missing command handler or missing event applier.
      */
-    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project> {
+    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -493,25 +486,25 @@ public class AggregateShould {
         }
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project> {
+    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project> {
+    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project> {
+    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project> {
+    private static class TestAggregateWithIdUnsupported extends Aggregate<UnsupportedClassVersionError, Project, Project.Builder> {
         private TestAggregateWithIdUnsupported(UnsupportedClassVersionError id) {
             super(id);
         }
@@ -547,7 +540,7 @@ public class AggregateShould {
     /**
      * The class to check raising and catching exceptions.
      */
-    private static class FaultyAggregate extends Aggregate<ProjectId, Project>  {
+    private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder>  {
 
         /* package */ static final String BROKEN_HANDLER = "broken_handler";
         /* package */ static final String BROKEN_APPLIER = "broken_applier";
