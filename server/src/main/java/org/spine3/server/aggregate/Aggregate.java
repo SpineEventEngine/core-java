@@ -312,17 +312,29 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
         final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
 
+        //TODO:2016-03-24:alexander.yevsyukov: Init the builder of the state. Add getBuilder() method.
+        // Assume that the code of event appliers would call getBuilder() instead of getState().
+        // Throw IllegalStateException in the getBuilder() method if it's called from other stages of
+        // the aggregate lifecycle.
+
         for (Message message : messages) {
             final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
             if (!isStateNeutral) {
                 apply(message);
             }
+            //TODO:2016-03-24:alexander.yevsyukov: increment version
+
             final int currentVersion = getVersion();
             final M state = getState();
             final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
             final Event event = Events.createEvent(message, eventContext);
             putUncommitted(event);
         }
+
+        //TODO:2016-03-24:alexander.yevsyukov: set new date/time
+
+        //TODO:2016-03-24:alexander.yevsyukov: set new state
+        //TODO:2016-03-24:alexander.yevsyukov: Clean builder.
     }
 
     /**
@@ -331,16 +343,16 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
-     * @param event the event to apply
+     * @param eventMessage the event to apply
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void apply(Message event) throws InvocationTargetException {
-        if (event instanceof Snapshot) {
-            restore((Snapshot) event);
+    private void apply(Message eventMessage) throws InvocationTargetException {
+        if (eventMessage instanceof Snapshot) {
+            restore((Snapshot) eventMessage);
             return;
         }
-        invokeApplier(event);
+        invokeApplier(eventMessage);
     }
 
     /**
