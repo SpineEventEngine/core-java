@@ -162,7 +162,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable set of command classes
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
+    /* package */ static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
         final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
         return classes;
     }
@@ -173,7 +173,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param clazz the class of the aggregate
      * @return immutable set of event classes
      */
-    public static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
+    /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
         final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_EVENT_APPLIER);
         return classes;
     }
@@ -333,7 +333,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
      *                          for the thrown {@code RuntimeException}
      */
-    public void play(Iterable<Event> events) {
+    /* package */ void play(Iterable<Event> events) {
         init();
         createBuilder();
         try {
