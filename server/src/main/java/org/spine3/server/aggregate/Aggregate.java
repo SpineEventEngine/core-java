@@ -52,7 +52,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToAny;
 
-//TODO:2016-02-17:alexander.yevsyukov: Define syntax of event applier methods.
 //TODO:2016-02-17:alexander.yevsyukov: Describe dealing with command validation and throwing Failures.
 //TODO:2016-02-17:alexander.yevsyukov: Describe (not) throwing exceptions.
 
@@ -84,19 +83,16 @@ import static org.spine3.base.Identifiers.idToAny;
  * <em>applier methods</em>.
  *
  * <p>An event applier is a method that changes the state of the aggregate in response to an event. The aggregate
- * must have applier methods for <em>all</em> event types it produces.
- *
- * <h2>Handling snapshots</h2>
- * <p>In order to optimise the restoration of aggregates, an {@link AggregateRepository} can periodically store
- * snapshots of aggregate state.
- *
- * <p>The {@code Aggregate} restores its state in {@link #restore(Snapshot)} method.
+ * must have applier methods for <em>all</em> event types it produces. An event applier takes a single parameter
+ * of the event message it handles and returns {@code void}. The modification of the state is done via a builder
+ * instance obtained from {@link #getBuilder()}.
  *
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
  * @param <B> the type of the aggregate state builder
- * @author Mikhail Melnik
+ *
  * @author Alexander Yevsyukov
+ * @author Mikhail Melnik
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
@@ -110,8 +106,11 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * The builder for the aggregate state.
      *
-     * <p>This field is non-null only in when the aggregate changes its state during the command handling,
-     * or during playing events.
+     * <p>This field is non-null only when the aggregate changes its state during command handling or playing events.
+     *
+     * @see #createBuilder()
+     * @see #getBuilder()
+     * @see #updateState()
      */
     @Nullable
     private volatile B builder;
@@ -159,16 +158,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Check if the type of the builder passed as a generic parameter matches the type of the message.
-     *
-     * @throws ClassCastException if the builder type does not match the type of the state
-     */
-    private void checkBuilderType() {
-        @SuppressWarnings("unchecked")
-        final B ignored = (B) getState().toBuilder();
-    }
-
-    /**
      * Returns the set of the command classes handled by the passed aggregate class.
      *
      * @param clazz the class of the aggregate
@@ -205,8 +194,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
         // Register this aggregate class if it wasn't before.
         if (!registry.contains(thisClass)) {
-            // Check if the generic types of the class are compatible. Do it once per aggregate class.
-            checkBuilderType();
             registry.register(thisClass);
         }
 
@@ -242,7 +229,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     protected B getBuilder() {
         if (this.builder == null) {
             throw new IllegalStateException(
-                    "Builder is not available. Make sure to call the method only from an event applier.");
+                    "Builder is not available. Make sure to call getBuilder() only from an event applier method.");
         }
         return builder;
     }
@@ -509,12 +496,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Transforms the current state of the aggregate into the snapshot event.
+     * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
      * @return new snapshot
      */
     @CheckReturnValue
-    public Snapshot toSnapshot() {
+    /* package */ Snapshot toSnapshot() {
         final Any state = Any.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();

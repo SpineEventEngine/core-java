@@ -618,4 +618,9 @@ public class AggregateShould {
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
         }
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
+        new TestAggregateWithIdInteger(100).getBuilder();
+    }
 }
