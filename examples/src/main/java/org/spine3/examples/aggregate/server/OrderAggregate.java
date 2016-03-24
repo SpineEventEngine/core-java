@@ -82,7 +82,6 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
                 .setStatus(Order.Status.NEW)
                 .build();
 
-        validate(newState);
         incrementState(newState);
     }
 
@@ -96,7 +95,6 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
                 .setTotal(currentState.getTotal() + orderLine.getTotal())
                 .build();
 
-        validate(newState);
         incrementState(newState);
     }
 
@@ -108,7 +106,6 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
                 .setStatus(Order.Status.PAID)
                 .build();
 
-        validate(newState);
         incrementState(newState);
     }
 

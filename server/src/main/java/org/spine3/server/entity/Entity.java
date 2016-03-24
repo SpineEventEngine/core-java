@@ -32,12 +32,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -120,7 +118,7 @@ public abstract class Entity<I, S extends Message> {
         final Class<? extends Entity> entityClass = getClass();
         final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
         if (!registry.contains(entityClass)) {
-            final S state = retrieveDefaultState();
+            final S state = createDefaultState();
             registry.put(entityClass, state);
         }
         @SuppressWarnings("unchecked") // cast is safe because this type of messages is saved to the map
@@ -128,7 +126,7 @@ public abstract class Entity<I, S extends Message> {
         return defaultState;
     }
 
-    private S retrieveDefaultState() {
+    private S createDefaultState() {
         final Class<S> stateClass = Classes.getGenericParameterType(getClass(), STATE_CLASS_GENERIC_INDEX);
         try {
             final Constructor<S> constructor = stateClass.getDeclaredConstructor();
@@ -154,8 +152,8 @@ public abstract class Entity<I, S extends Message> {
     /**
      * Validates the passed state.
      *
-     * <p>Does nothing by default. Aggregate roots may override this method to
-     * specify logic of validating initial or intermediate state of the root.
+     * <p>Does nothing by default. Aggregates may override this method to
+     * specify logic of validating initial or intermediate state.
      *
      * @param state a state object to replace the current state
      * @throws IllegalStateException if the state is not valid
@@ -307,58 +305,4 @@ public abstract class Entity<I, S extends Message> {
         return result;
     }
 
-    /**
-     * A wrapper for the map from entity classes to entity default states.
-     */
-    private static class DefaultStateRegistry {
-
-        private final Map<Class<? extends Entity>, Message> defaultStates = newHashMap();
-
-        /**
-         * Specifies if the entity state of this class is already registered.
-         *
-         * @param entityClass the class to check
-         * @return {@code true} if there is a state for the passed class, {@code false} otherwise
-         */
-        @CheckReturnValue
-        private boolean contains(Class<? extends Entity> entityClass) {
-            final boolean result = defaultStates.containsKey(entityClass);
-            return result;
-        }
-
-        /**
-         * Saves a state.
-         *
-         * @param entityClass an entity class
-         * @param state a default state of the entity
-         * @throws IllegalArgumentException if the state of this class is already registered
-         */
-        private void put(Class<? extends Entity> entityClass, Message state) {
-            if (contains(entityClass)) {
-                throw new IllegalArgumentException("This class is registered already: " + entityClass.getName());
-            }
-            defaultStates.put(entityClass, state);
-        }
-
-        /**
-         * Obtains a state for the passed class..
-         *
-         * @param entityClass an entity class
-         */
-        @CheckReturnValue
-        private Message get(Class<? extends Entity> entityClass) {
-            final Message state = defaultStates.get(entityClass);
-            return state;
-        }
-
-        private static DefaultStateRegistry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final DefaultStateRegistry value = new DefaultStateRegistry();
-        }
-    }
 }
