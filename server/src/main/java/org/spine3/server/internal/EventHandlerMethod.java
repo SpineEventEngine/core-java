@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.Subscribe;
 import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
@@ -99,8 +98,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                log().warn(String.format("Event handler %s must be declared 'public'",
-                        Methods.getFullMethodName(method)));
+                warnOnWrongModifier("Event handler {} must be declared 'public'", method);
             }
         }
     }

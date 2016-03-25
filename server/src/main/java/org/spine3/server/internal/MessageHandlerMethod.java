@@ -70,6 +70,10 @@ public abstract class MessageHandlerMethod<T, C> {
         method.setAccessible(true);
     }
 
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+        log().warn(messageFormat, Methods.getFullMethodName(method));
+    }
+
     /**
      * @return the target object on which the method call is made
      */

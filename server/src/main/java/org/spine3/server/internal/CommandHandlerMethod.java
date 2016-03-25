@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -148,8 +147,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                final String fullMethodName = Methods.getFullMethodName(method);
-                log().warn(String.format("Command handler method %s should be declared 'public'.", fullMethodName));
+                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
             }
         }
     }

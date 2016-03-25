@@ -20,7 +20,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -94,10 +93,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                             extends Entity<I, S>
                             implements CommandHandler {
 
-    /* package */ static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
-
-    /* package */ static final Predicate<Method> IS_EVENT_APPLIER = new EventApplier.FilterPredicate();
-
     /**
      * The builder for the aggregate state.
      *
@@ -160,8 +155,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     /* package */ static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
-        return classes;
+        return Classes.getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
     }
 
     /**
@@ -171,8 +165,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable set of event classes
      */
     /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
-        final ImmutableSet<Class<? extends Message>> classes = Classes.getHandledMessageClasses(clazz, IS_EVENT_APPLIER);
-        return classes;
+        return Classes.getHandledMessageClasses(clazz, EventApplier.PREDICATE);
     }
 
     /**
@@ -233,7 +226,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Updates the aggregate state and closes the update phase of the aggregate.
      */
     private void updateState() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we checked compatibility in init();
+        @SuppressWarnings("unchecked") // It is safe to assume that correct builder type is passed to aggregate,
+         // because otherwise it won't be possible to write the code of applier methods that make sense to the
+         // aggregate.
         final S newState = (S) getBuilder().build();
         setState(newState, getVersion(), whenModified());
 

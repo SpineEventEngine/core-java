@@ -23,14 +23,11 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.server.internal.MessageHandlerMethod;
-import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,6 +37,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 /* package */ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
+
+    /**
+     * The instance of the predicate to filter event applier methods of an aggregate class.
+     */
+    /* package */ static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -65,13 +67,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @param methods the map of methods to check
      * @see MessageHandlerMethod#log()
      */
-    public static void checkModifiers(MethodMap methods) {
-        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
-            final Method method = entry.getValue();
+    /* package */ static void checkModifiers(Iterable<Method> methods) {
+        for (Method method : methods) {
             final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
             if (!isPrivate) {
-                log().warn(String.format("Event applier method %s must be declared 'private'.",
-                        Methods.getFullMethodName(method)));
+                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
             }
         }
     }
@@ -79,7 +79,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * The predicate for filtering event applier methods.
      */
-    /* package */ static class FilterPredicate implements Predicate<Method> {
+    private static class FilterPredicate implements Predicate<Method> {
 
         private static final int EVENT_PARAM_INDEX = 0;
 
@@ -98,8 +98,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
             }
 
             final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean hasOneParam = parameterTypes.length == NUMBER_OF_PARAMS;
-            if (!hasOneParam) {
+            final boolean paramCountValid = parameterTypes.length == NUMBER_OF_PARAMS;
+            if (!paramCountValid) {
                 return false;
             }
 

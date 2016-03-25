@@ -20,11 +20,10 @@
 
 package org.spine3.server.aggregate;
 
+import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
-
-import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
 
 /**
  * The registry of method maps for all aggregate classes.
@@ -41,11 +40,11 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
     private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
 
     /* package */ void register(Class<? extends Aggregate> clazz) {
-        commandHandlers.register(clazz, Aggregate.IS_AGGREGATE_COMMAND_HANDLER);
-        checkModifiers(commandHandlers.get(clazz).values());
+        commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
+        CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
-        eventAppliers.register(clazz, Aggregate.IS_EVENT_APPLIER);
-        EventApplier.checkModifiers(eventAppliers.get(clazz));
+        eventAppliers.register(clazz, EventApplier.PREDICATE);
+        EventApplier.checkModifiers(eventAppliers.get(clazz).values());
     }
 
     @CheckReturnValue
