@@ -1,0 +1,46 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.server";
+option java_outer_classname = "EntityProto";
+
+import "google/protobuf/descriptor.proto";
+
+// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
+
+// Marks a message so that it is considered as a state of an entity (aggregate root, process manager, etc).
+// Then the current package is considered as one which contains files for this type of entity (commands.proto, etc).
+// A command for an entity must contain an entity ID as the first field.
+// The first fields of these commands are checked then to have a valid type and value:
+// for `message` type - a non-default message instance;
+// for `string` type - a non-empty string.
+extend google.protobuf.MessageOptions {
+    EntityType state_of = 51146;
+}
+
+// A type of an entity.
+enum EntityType {
+    AGGREGATE = 0;
+    PROCESS_MANAGER = 1;
+    PROJECTION = 2;
+}

@@ -37,10 +37,9 @@ option java_package = "org.spine3.validation.options";
 import "google/protobuf/descriptor.proto";
 
 
-// This option defines default format for validation error message text.
-//
-// The number of parameters and their types are determined by the type of field options.
 extend google.protobuf.MessageOptions {
+    // The default format string for validation error message text.
+    // The number of parameters and their types are determined by the type of field options.
     string default_message = 51001;
 }
 
@@ -56,6 +55,8 @@ extend google.protobuf.FieldOptions {
     PatternOption pattern = 51008;
     ValidOption valid = 51009;
 }
+
+// TODO:2016-03-25:alexander.litus: error messages format
 
 // If the field type is `message`, it must be set to a non-default instance;
 // if it is `string` or `bytes`, the value must not be an empty string or array.
@@ -99,8 +100,9 @@ message DecimalOption {
 //
 // Example:
 //
-// double value = 1 [(min).is = 10.5, (min).inclusive = true, (max).ignore = true];
+// double value = 1 [(min).is = 10.5, (min).inclusive = true];
 //
+// TODO:2016-03-25:alexander.litus: change options
 message MinOption {
     // The default error message format string.
     // The format parameters are:

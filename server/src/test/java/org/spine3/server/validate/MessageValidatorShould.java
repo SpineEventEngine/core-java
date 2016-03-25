@@ -32,6 +32,10 @@ import org.spine3.test.validation.cmd.AnnotatedEnumFieldValue;
 import org.spine3.test.validation.cmd.DigitsCountNumberFieldValue;
 import org.spine3.test.validation.cmd.EnclosedMessageFieldValue;
 import org.spine3.test.validation.cmd.EnclosedMessageWithoutAnnotationFieldValue;
+import org.spine3.test.validation.cmd.EntityIdIntFieldValue;
+import org.spine3.test.validation.cmd.EntityIdLongFieldValue;
+import org.spine3.test.validation.cmd.EntityIdMsgFieldValue;
+import org.spine3.test.validation.cmd.EntityIdStringFieldValue;
 import org.spine3.test.validation.cmd.MaxIncNumberFieldValue;
 import org.spine3.test.validation.cmd.MaxNotIncNumberFieldValue;
 import org.spine3.test.validation.cmd.MinIncNumberFieldValue;
@@ -73,6 +77,7 @@ public class MessageValidatorShould {
     private static final double FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX = 1.0;
 
     private final MessageValidator validator = new MessageValidator(FieldValidatorFactory.newInstance());
+    private final MessageValidator cmdValidator = new MessageValidator(CommandFieldValidatorFactory.newInstance());
 
     /*
      * Required option tests.
@@ -465,6 +470,67 @@ public class MessageValidatorShould {
     public void throw_exception_if_annotate_field_of_boolean_type() {
         validator.validate(AnnotatedBooleanFieldValue.getDefaultInstance());
     }
+    
+    /*
+     * Entity ID in command validation tests.
+     */
+
+    @Test
+    public void find_out_that_Message_entity_id_in_command_is_valid() {
+        final EntityIdMsgFieldValue msg = EntityIdMsgFieldValue.newBuilder().setValue(newStringValue()).build();
+        cmdValidator.validate(msg);
+        assertCmdMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_Message_entity_id_in_command_is_NOT_valid() {
+        cmdValidator.validate(EntityIdMsgFieldValue.getDefaultInstance());
+        assertCmdMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_String_entity_id_in_command_is_valid() {
+        final EntityIdStringFieldValue msg = EntityIdStringFieldValue.newBuilder().setValue(newUuid()).build();
+        cmdValidator.validate(msg);
+        assertCmdMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_String_entity_id_in_command_is_NOT_valid() {
+        cmdValidator.validate(EntityIdStringFieldValue.getDefaultInstance());
+        assertCmdMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_Integer_entity_id_in_command_is_valid() {
+        final EntityIdIntFieldValue msg = EntityIdIntFieldValue.newBuilder().setValue(5).build();
+        cmdValidator.validate(msg);
+        assertCmdMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_Integer_entity_id_in_command_is_NOT_valid() {
+        cmdValidator.validate(EntityIdIntFieldValue.getDefaultInstance());
+        assertCmdMessageIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_Long_entity_id_in_command_is_valid() {
+        final EntityIdLongFieldValue msg = EntityIdLongFieldValue.newBuilder().setValue(5).build();
+        cmdValidator.validate(msg);
+        assertCmdMessageIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_Long_entity_id_in_command_is_NOT_valid() {
+        cmdValidator.validate(EntityIdLongFieldValue.getDefaultInstance());
+        assertCmdMessageIsValid(false);
+    }
+
+    @Test
+    public void provide_validation_error_message_if_entity_id_in_command_is_not_valid() {
+        // TODO:2016-03-25:alexander.litus: impl
+    }
 
     /*
      * Other tests.
@@ -499,6 +565,14 @@ public class MessageValidatorShould {
     }
 
     private void assertMessageIsValid(boolean isValid) {
+        assertMessageIsValid(isValid, validator);
+    }
+
+    private void assertCmdMessageIsValid(boolean isValid) {
+        assertMessageIsValid(isValid, cmdValidator);
+    }
+
+    private static void assertMessageIsValid(boolean isValid, MessageValidator validator) {
         if (isValid) {
             assertFalse(validator.isMessageInvalid());
             assertTrue(validator.getErrorMessage().isEmpty());

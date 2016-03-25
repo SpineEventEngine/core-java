@@ -23,9 +23,7 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
-import com.google.protobuf.DescriptorProtos.FileOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.validation.options.RequiredOption;
@@ -106,13 +104,13 @@ import static java.lang.String.format;
      * <p>If the field type is {@link Message}, it must be set to a non-default instance;
      * if it is {@link String} or {@link ByteString}, it must be set to a non-empty string or array.
      *
-     * <p>The default implementation returns {@code false}.
+     * <p>The default implementation throws {@link UnsupportedOperationException}.
      *
      * @param value a field value to check
      * @return {@code true} if the field is not set, {@code false} otherwise
      */
     protected boolean isValueNotSet(V value) {
-        return false;
+        throw new UnsupportedOperationException("The method is not implemented.");
     }
 
     /**
@@ -174,17 +172,6 @@ import static java.lang.String.format;
     }
 
     /**
-     * Returns a file validation option.
-     *
-     * @param extension an extension key used to obtain a validation option
-     */
-    protected <Option> Option getFileOption(GeneratedExtension<FileOptions, Option> extension) {
-        final FileDescriptor fileDescriptor = getFieldDescriptor().getFile();
-        final Option option = fileDescriptor.getOptions().getExtension(extension);
-        return option;
-    }
-
-    /**
      * Returns a field descriptor.
      */
     protected FieldDescriptor getFieldDescriptor() {
@@ -208,19 +195,5 @@ import static java.lang.String.format;
             setIsFieldInvalid(true);
             addErrorMessage(format("'%s' must be set", descriptor.getName()));
         }
-    }
-
-    /**
-     * Returns {@code true} if the current field must be an entity ID
-     * (if it is the first in a message and {@code commands_for_entity} protobuf file option is set to {@code true});
-     * {@code false} otherwise.
-     */
-    protected boolean isRequiredEntityIdField() {
-        final int fieldNumber = getFieldDescriptor().getNumber();
-        final boolean isFirst = fieldNumber == 0;
-        // TODO:2016-03-23:alexander.litus: check if command is for entity
-        final boolean commandsForEntity = true;
-        final boolean result = isFirst && commandsForEntity;
-        return result;
     }
 }

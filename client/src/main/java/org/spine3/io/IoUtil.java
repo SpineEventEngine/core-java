@@ -21,27 +21,88 @@
 package org.spine3.io;
 
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
 
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Utility class working with I/O: streams etc.
+ * A utility class working with I/O: streams, resources, etc.
  *
  * @author Alexander Litus
  */
+@Internal
 public class IoUtil {
 
     private static final String ERROR_MESSAGE = "Exception while closing:";
 
     private IoUtil() {}
+
+    /**
+     * Loads all data from {@code .properties} file(s) into memory.
+     *
+     * <p>Logs {@link IOException} if it occurs.
+     *
+     * @param propsFilePath the path of the {@code .properties} file to load
+     */
+    public static ImmutableSet<Properties> loadAllProperties(String propsFilePath) {
+        final ImmutableSet.Builder<Properties> result = ImmutableSet.builder();
+        final Enumeration<URL> resources = getResources(propsFilePath);
+        if (resources == null) {
+            return result.build();
+        }
+        while (resources.hasMoreElements()) {
+            final URL resourceUrl = resources.nextElement();
+            final Properties properties = loadPropertiesFile(resourceUrl);
+            result.add(properties);
+        }
+        return result.build();
+    }
+
+    private static Enumeration<URL> getResources(String propsFilePath) {
+        final ClassLoader classLoader = getContextClassLoader();
+        Enumeration<URL> resources = null;
+        try {
+            resources = classLoader.getResources(propsFilePath);
+        } catch (IOException e) {
+            if (log().isWarnEnabled()) {
+                log().warn("Failed to load resources: " + propsFilePath, e);
+            }
+        }
+        return resources;
+    }
+
+    private static Properties loadPropertiesFile(URL resourceUrl) {
+        final Properties properties = new Properties();
+        InputStream inputStream = null;
+        try {
+            inputStream = resourceUrl.openStream();
+            properties.load(inputStream);
+        } catch (IOException e) {
+            if (log().isWarnEnabled()) {
+                log().warn("Failed to load properties file.", e);
+            }
+        } finally {
+            close(inputStream);
+        }
+        return properties;
+    }
+
+    private static ClassLoader getContextClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
 
     /**
      * Closes passed closeables one by one.

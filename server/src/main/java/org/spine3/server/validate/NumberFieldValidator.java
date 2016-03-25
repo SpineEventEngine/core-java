@@ -67,6 +67,14 @@ import static java.lang.String.format;
         }
     }
 
+    @Override
+    @SuppressWarnings("RefusedBequest")
+    protected boolean isValueNotSet(Number value) {
+        final double doubleValue = value.doubleValue();
+        final boolean isNotSet = doubleValue == 0.0;
+        return isNotSet;
+    }
+
     private void validateRangeOptions(double value) {
         if (rangeOptionsNotSet()) {
             return;

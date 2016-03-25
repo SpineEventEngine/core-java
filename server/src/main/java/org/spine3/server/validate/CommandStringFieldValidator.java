@@ -23,6 +23,8 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
+import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityIdField;
+
 /**
  * Validates command fields of type {@link String}.
  *
@@ -43,7 +45,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
     @Override
     protected void validate() {
         super.validate();
-        if (isRequiredEntityIdField()) {
+        if (isRequiredEntityIdField(getFieldDescriptor())) {
             validateEntityId();
         }
     }

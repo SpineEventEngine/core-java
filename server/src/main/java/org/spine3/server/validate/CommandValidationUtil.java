@@ -20,34 +20,31 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-
-import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityIdField;
+import org.spine3.server.entity.EntityPackagesMap;
 
 /**
- * Validates {@link Message} fields of commands.
+ * A utility class for command message fields validation.
  *
  * @author Alexander Litus
  */
-/* package */ class CommandMessageFieldValidator extends MessageFieldValidator {
+/* package */ class CommandValidationUtil {
+
+    private CommandValidationUtil() {}
 
     /**
-     * Creates a new validator instance.
+     * Returns {@code true} if the field must be an entity ID
+     * (if it is the first in a message and the current Protobuf package is for an entity);
+     * {@code false} otherwise.
      *
-     * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldDescriptor a descriptor of the field to check
      */
-    /* package */ CommandMessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues) {
-        super(descriptor, fieldValues);
-    }
-
-    @Override
-    protected void validate() {
-        super.validate();
-        if (isRequiredEntityIdField(getFieldDescriptor())) {
-            validateEntityId();
-        }
+    /* package */ static boolean isRequiredEntityIdField(FieldDescriptor fieldDescriptor) {
+        final int index = fieldDescriptor.getIndex();
+        final boolean isFirst = index == 0;
+        final String protoPackage = fieldDescriptor.getFile().getPackage();
+        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
+        final boolean result = isFirst && isCommandForEntity;
+        return result;
     }
 }

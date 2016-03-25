@@ -23,6 +23,8 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
+import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityIdField;
+
 /**
  * Validates command fields of number types (protobuf: int32, double, etc).
  *
@@ -44,7 +46,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
     protected void validate() {
         super.validate();
         // TODO:2016-03-18:alexander.litus: check type (long or int)
-        if (isRequiredEntityIdField()) {
+        if (isRequiredEntityIdField(getFieldDescriptor())) {
             validateEntityId();
         }
     }

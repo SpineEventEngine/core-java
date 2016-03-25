@@ -108,3 +108,25 @@ message AnnotatedEnumFieldValue {
 message AnnotatedBooleanFieldValue {
     bool value = 1 [(required).is = true];
 }
+
+// Messages for entity ID in commands validation tests.
+
+message EntityIdMsgFieldValue {
+    google.protobuf.StringValue value = 1;
+}
+
+message EntityIdStringFieldValue {
+    string value = 1;
+}
+
+message EntityIdIntFieldValue {
+    int32 value = 1;
+}
+
+message EntityIdLongFieldValue {
+    int64 value = 1;
+}
+
+message EntityIdRepeatedFieldValue {
+    string value = 1;
+}
