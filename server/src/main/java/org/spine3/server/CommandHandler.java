@@ -37,8 +37,12 @@ import org.spine3.base.CommandContext;
  * <p>A command handling method is a {@code public} method that accepts two parameters.
  * The first parameter is a command message. The second parameter is {@link CommandContext}.
  *
- * <p>The method returns an event message of the specific type, or {@code List<Message>}
+ * <p>The method returns an event message of the specific type, or {@code List} of messages
  * if it produces more than one event.
+ *
+ * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
+ * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
+ * because of a business failure.
  *
  * @author Alexander Yevsyukov
  * @see CommandDispatcher

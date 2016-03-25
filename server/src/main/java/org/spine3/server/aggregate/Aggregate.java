@@ -51,9 +51,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToAny;
 
-//TODO:2016-02-17:alexander.yevsyukov: Describe dealing with command validation and throwing Failures.
-//TODO:2016-02-17:alexander.yevsyukov: Describe (not) throwing exceptions.
-
 /**
  * Abstract base for aggregates.
  *
@@ -74,17 +71,17 @@ import static org.spine3.base.Identifiers.idToAny;
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
- * <p>Command handling methods in the  an aggregate are defined in the same was as described in {@link CommandHandler}.
+ * <p>Command handling methods of an aggregate are defined in the same way as described in {@link CommandHandler}.
  *
  * <h2>Adding event applier methods</h2>
- * <p>Aggregate data is stored as sequence of events it produces. In order to restore the state of the aggregate
- * these events are passed to the {@link #play(Iterable)} method, which invokes corresponding
- * <em>applier methods</em>.
+ * <p>Aggregate data is stored as sequence of events it produces. The state of the aggregate
+ * is restored by re-playing the history of events and invoking corresponding <em>event applier methods</em>.
  *
  * <p>An event applier is a method that changes the state of the aggregate in response to an event. The aggregate
  * must have applier methods for <em>all</em> event types it produces. An event applier takes a single parameter
- * of the event message it handles and returns {@code void}. The modification of the state is done via a builder
- * instance obtained from {@link #getBuilder()}.
+ * of the event message it handles and returns {@code void}.
+ *
+ * <p>The modification of the state is done via a builder instance obtained from {@link #getBuilder()}.
  *
  * @param <I> the type for IDs of this class of aggregates
  * @param <S> the type of the state held by the aggregate
