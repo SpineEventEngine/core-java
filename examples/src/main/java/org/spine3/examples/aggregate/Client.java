@@ -35,7 +35,7 @@ import org.spine3.protobuf.Messages;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
@@ -120,7 +120,7 @@ public class Client {
      * Creates several test requests.
      */
     public static List<Command> generateRequests() {
-        final List<Command> result = newArrayList();
+        final List<Command> result = newLinkedList();
 
         for (int i = 0; i < 10; i++) {
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
