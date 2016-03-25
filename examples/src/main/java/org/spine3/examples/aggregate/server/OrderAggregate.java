@@ -38,7 +38,7 @@ import org.spine3.server.aggregate.Apply;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("TypeMayBeWeakened" /* Use command and event classes for parameters as messages instead of SomethingOrBuilder */)
-public class OrderAggregate extends Aggregate<OrderId, Order> {
+public class OrderAggregate extends Aggregate<OrderId, Order, Order.Builder> {
 
     public OrderAggregate(OrderId id) {
         super(id);
@@ -77,39 +77,26 @@ public class OrderAggregate extends Aggregate<OrderId, Order> {
 
     @Apply
     private void event(OrderCreated event) {
-        final Order newState = Order.newBuilder(getState())
+        getBuilder()
                 .setOrderId(event.getOrderId())
-                .setStatus(Order.Status.NEW)
-                .build();
-
-        validate(newState);
-        incrementState(newState);
+                .setStatus(Order.Status.NEW);
     }
 
     @Apply
     private void event(OrderLineAdded event) {
         final OrderLine orderLine = event.getOrderLine();
         final Order currentState = getState();
-        final Order newState = Order.newBuilder(currentState)
+        getBuilder()
                 .setOrderId(event.getOrderId())
                 .addOrderLine(orderLine)
-                .setTotal(currentState.getTotal() + orderLine.getTotal())
-                .build();
-
-        validate(newState);
-        incrementState(newState);
+                .setTotal(currentState.getTotal() + orderLine.getTotal());
     }
 
     @Apply
     private void event(OrderPaid event) {
-        final Order currentState = getState();
-        final Order newState = Order.newBuilder(currentState)
+        getBuilder()
                 .setBillingInfo(event.getBillingInfo())
-                .setStatus(Order.Status.PAID)
-                .build();
-
-        validate(newState);
-        incrementState(newState);
+                .setStatus(Order.Status.PAID);
     }
 
     private static void validateCommand(AddOrderLine cmd) {

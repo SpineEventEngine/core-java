@@ -31,12 +31,12 @@ import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
+import org.spine3.client.test.TestCommandFactory;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.test.TestCommandFactory;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -72,7 +72,7 @@ public class CommandBusShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
-        //noinspection ConstantConditions
+        //noinspection ConstantConditions,ResultOfMethodCallIgnored
         CommandBus.create(null);
     }
 

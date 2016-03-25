@@ -58,7 +58,7 @@ public class AggregateRepositoryShould {
         repository = new ProjectAggregateRepository(boundedContext);
     }
 
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         public ProjectAggregate(ProjectId id) {
             super(id);

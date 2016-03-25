@@ -19,12 +19,9 @@
  */
 
 /**
- * Classes for framework testing.
+ * Utility classes for framework testing.
  */
-@Internal
 @ParametersAreNonnullByDefault
 package org.spine3.test;
-
-import org.spine3.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

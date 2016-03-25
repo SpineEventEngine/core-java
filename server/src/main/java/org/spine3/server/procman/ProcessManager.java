@@ -53,7 +53,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.internal.EventHandlerMethod.IS_EVENT_HANDLER;
+import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
 import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
 
 /**
@@ -373,7 +373,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * @return immutable set of event classes or an empty set if no events are handled
      */
     public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, IS_EVENT_HANDLER);
+        return Classes.getHandledMessageClasses(pmClass, PREDICATE);
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
@@ -401,7 +401,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
             CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
 
-            eventHandlers.register(clazz, IS_EVENT_HANDLER);
+            eventHandlers.register(clazz, PREDICATE);
             checkModifiers(eventHandlers.get(clazz).values());
         }
 

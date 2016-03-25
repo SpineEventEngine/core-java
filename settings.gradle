@@ -1,5 +1,8 @@
 rootProject.name = 'spine'
 
+include ':testutil'
+project(':testutil').projectDir = "$rootDir/testutil" as File
+
 include ':client'
 project(':client').projectDir = "$rootDir/client" as File
 

@@ -20,6 +20,8 @@
 package org.spine3.server.internal;
 
 import com.google.protobuf.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.reflect.Methods;
 
 import javax.annotation.Nullable;
@@ -32,14 +34,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Wraps a handler method on a specific object.
- *
- * <p>This class only verifies the suitability of the method and message type if
- * something fails.  Callers are expected to verify their uses of this class.
+ * An abstract base for wrappers over methods handling messages.
  *
  * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).   This property is used to ensure that no handler
- * method is registered more than once.
+ * same object (not class).
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -70,6 +68,10 @@ public abstract class MessageHandlerMethod<T, C> {
         this.target = checkNotNull(target);
         this.method = checkNotNull(method);
         method.setAccessible(true);
+    }
+
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+        log().warn(messageFormat, Methods.getFullMethodName(method));
     }
 
     /**
@@ -113,7 +115,6 @@ public abstract class MessageHandlerMethod<T, C> {
      *                                   {@code Error} instances are propagated as-is.
      */
     protected <R> R invoke(Message message, C context) throws InvocationTargetException {
-
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -200,5 +201,20 @@ public abstract class MessageHandlerMethod<T, C> {
         return (this.target == other.target)
                 && Objects.equals(this.method, other.method);
     }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(MessageHandlerMethod.class);
+    }
+
+    /**
+     * The common logger used by message handling method classes.
+     */
+    protected static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
 }
 

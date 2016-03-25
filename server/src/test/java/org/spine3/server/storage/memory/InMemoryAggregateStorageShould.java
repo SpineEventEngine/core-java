@@ -37,7 +37,8 @@ public class InMemoryAggregateStorageShould extends AggregateStorageShould {
     }
 
     @Override
-    protected <Id> AggregateStorage<Id> getStorage(Class<? extends Aggregate<Id, ? extends Message>> aggregateClass) {
+    protected <Id> AggregateStorage<Id> getStorage(
+            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass) {
         return InMemoryAggregateStorage.newInstance();
     }
 }

@@ -20,24 +20,28 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.server.internal.MessageHandlerMethod;
-import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
  *
  * @author Alexander Yevsyukov
  */
-class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
+/* package */ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
+
+    /**
+     * The instance of the predicate to filter event applier methods of an aggregate class.
+     */
+    /* package */ static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -45,7 +49,7 @@ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
      * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected EventApplier(Aggregate target, Method method) {
+    /* package */ EventApplier(Aggregate target, Method method) {
         super(target, method);
     }
 
@@ -61,27 +65,54 @@ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
      * <p>Logs warning for the methods with a non-private modifier.
      *
      * @param methods the map of methods to check
+     * @see MessageHandlerMethod#log()
      */
-    public static void checkModifiers(MethodMap methods) {
-        for (Map.Entry<Class<? extends Message>, Method> entry : methods.entrySet()) {
-            final Method method = entry.getValue();
+    /* package */ static void checkModifiers(Iterable<Method> methods) {
+        for (Method method : methods) {
             final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
             if (!isPrivate) {
-                log().warn(String.format("Event applier method %s must be declared 'private'.",
-                        Methods.getFullMethodName(method)));
+                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
             }
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
+    /**
+     * The predicate for filtering event applier methods.
+     */
+    private static class FilterPredicate implements Predicate<Method> {
 
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventApplier.class);
+        private static final int EVENT_PARAM_INDEX = 0;
+
+        private static final int NUMBER_OF_PARAMS = 1;
+
+        /**
+         * Checks if a method is an event applier.
+         *
+         * @param method to check
+         * @return {@code true} if the method is an event applier, {@code false} otherwise
+         */
+        public static boolean isEventApplier(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+            if (!isAnnotated) {
+                return false;
+            }
+
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+            final boolean paramCountValid = parameterTypes.length == NUMBER_OF_PARAMS;
+            if (!paramCountValid) {
+                return false;
+            }
+
+            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
+            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+
+            return firstParamIsMessage && returnsNothing;
+        }
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isEventApplier(method);
+        }
     }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
 }

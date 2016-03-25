@@ -46,9 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkTimestamp;
-import static org.spine3.validate.Validate.checkValid;
+import static org.spine3.validate.Validate.*;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
