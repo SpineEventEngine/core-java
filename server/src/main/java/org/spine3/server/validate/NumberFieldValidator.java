@@ -22,6 +22,8 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.validation.options.DecimalMaxOption;
+import org.spine3.validation.options.DecimalMinOption;
 import org.spine3.validation.options.DigitsOption;
 import org.spine3.validation.options.MaxOption;
 import org.spine3.validation.options.MinOption;
@@ -29,20 +31,27 @@ import org.spine3.validation.options.ValidationProto;
 
 import java.util.regex.Pattern;
 
-import static java.lang.Math.abs;
 import static java.lang.String.format;
 
 /**
  * Validates fields of number types (protobuf: int32, double, etc).
  *
+ * @param <V> the type of the field value
  * @author Alexander Litus
  */
-/* package */ class NumberFieldValidator extends FieldValidator<Number> {
+/* package */ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
 
+    private final DecimalMinOption minDecimalOption;
+    private final boolean isMinDecimalInclusive;
+
+    private final DecimalMaxOption maxDecimalOption;
+    private final boolean isMaxDecimalInclusive;
+
     private final MinOption minOption;
     private final MaxOption maxOption;
+
     private final DigitsOption digitsOption;
 
     /**
@@ -51,8 +60,12 @@ import static java.lang.String.format;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<Number> fieldValues) {
+    protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues) {
         super(descriptor, fieldValues);
+        this.minDecimalOption = getFieldOption(ValidationProto.decimalMin);
+        this.isMinDecimalInclusive = minDecimalOption.getInclusive();
+        this.maxDecimalOption = getFieldOption(ValidationProto.decimalMax);
+        this.isMaxDecimalInclusive = maxDecimalOption.getInclusive();
         this.minOption = getFieldOption(ValidationProto.min);
         this.maxOption = getFieldOption(ValidationProto.max);
         this.digitsOption = getFieldOption(ValidationProto.digits);
@@ -60,73 +73,102 @@ import static java.lang.String.format;
 
     @Override
     protected void validate() {
-        for (Number value : getValues()) {
-            final double doubleValue = value.doubleValue();
-            validateRangeOptions(doubleValue);
-            validateDigitsOption(doubleValue);
+        for (V value : getValues()) {
+            validateRangeOptions(value);
+            validateDigitsOption(value);
         }
     }
 
     @Override
     @SuppressWarnings("RefusedBequest")
-    protected boolean isValueNotSet(Number value) {
-        final double doubleValue = value.doubleValue();
-        final boolean isNotSet = doubleValue == 0.0;
+    protected boolean isValueNotSet(V value) {
+        final int intValue = value.intValue();
+        final boolean isNotSet = intValue == 0;
         return isNotSet;
     }
 
-    private void validateRangeOptions(double value) {
-        if (rangeOptionsNotSet()) {
-            return;
+    /**
+     * Converts a string representation to a number.
+     */
+    protected abstract V toNumber(String value);
+
+    /**
+     * Returns an absolute value of the number.
+     */
+    protected abstract V getAbs(V number);
+
+    private void validateRangeOptions(V value) {
+        if (!fitsToOptionDecimalMin(value)) {
+            setIsFieldInvalid(true);
+            addErrorMessage(minDecimalOption, value);
         }
-        if (isNotFitToMin(value)) {
+        if (!fitsToOptionDecimalMax(value)) {
+            setIsFieldInvalid(true);
+            addErrorMessage(maxDecimalOption, value);
+        }
+        if (!fitsToOptionMin(value)) {
             setIsFieldInvalid(true);
             addErrorMessage(minOption, value);
         }
-        if (isNotFitToMax(value)) {
+        if (!fitsToOptionMax(value)) {
             setIsFieldInvalid(true);
             addErrorMessage(maxOption, value);
         }
     }
 
-    private boolean isNotFitToMin(double value) {
-        if (minOption.getIgnore()) {
-            return false;
+    private boolean fitsToOptionDecimalMin(V value) {
+        final String minAsString = minDecimalOption.getValue();
+        if (minAsString.isEmpty()) {
+            return true;
         }
-        final double min = minOption.getIs();
-        final boolean isInclusive = minOption.getInclusive();
-        final boolean fitsAndIsInclusive = isInclusive && (value >= min);
-        final boolean fitsAndNonInclusive = !isInclusive && (value > min);
-        final boolean isNotFit = !fitsAndIsInclusive && !fitsAndNonInclusive;
-        return isNotFit;
+        final V min = toNumber(minAsString);
+        final int comparisonResult = value.compareTo(min);
+        final boolean fitsAndIsInclusive = isMinDecimalInclusive && comparisonResult >= 0;
+        final boolean fitsAndNonInclusive = !isMinDecimalInclusive && comparisonResult > 0;
+        final boolean fits = fitsAndIsInclusive || fitsAndNonInclusive;
+        return fits;
     }
 
-    private boolean isNotFitToMax(double value) {
-        if (maxOption.getIgnore()) {
-            return false;
+    private boolean fitsToOptionDecimalMax(V value) {
+        final String maxAsString = maxDecimalOption.getValue();
+        if (maxAsString.isEmpty()) {
+            return true;
         }
-        final double max = maxOption.getIs();
-        final boolean isInclusive = maxOption.getInclusive();
-        final boolean fitsAndIsInclusive = isInclusive && (value <= max);
-        final boolean fitsAndNonInclusive = !isInclusive && (value < max);
-        final boolean isNotFit = !fitsAndIsInclusive && !fitsAndNonInclusive;
-        return isNotFit;
+        final V max = toNumber(maxAsString);
+        final boolean fitsAndIsInclusive = isMaxDecimalInclusive && value.compareTo(max) <= 0;
+        final boolean fitsAndNonInclusive = !isMaxDecimalInclusive && value.compareTo(max) < 0;
+        final boolean fits = fitsAndIsInclusive || fitsAndNonInclusive;
+        return fits;
     }
 
-    private boolean rangeOptionsNotSet() {
-        final boolean minOptionIsDefault = (minOption.getIs() == 0.0) && !minOption.getInclusive();
-        final boolean maxOptionIsDefault = (maxOption.getIs() == 0.0) && !maxOption.getInclusive();
-        final boolean result = minOptionIsDefault && maxOptionIsDefault;
-        return result;
+    private boolean fitsToOptionMin(V value) {
+        final String minAsString = minOption.getValue();
+        if (minAsString.isEmpty()) {
+            return true;
+        }
+        final V min = toNumber(minAsString);
+        final boolean isGreaterThanOrEqualToMin = value.compareTo(min) >= 0;
+        return isGreaterThanOrEqualToMin;
     }
 
-    private void validateDigitsOption(double value) {
+    private boolean fitsToOptionMax(V value) {
+        final String maxAsString = maxOption.getValue();
+        if (maxAsString.isEmpty()) {
+            return true;
+        }
+        final V max = toNumber(maxAsString);
+        final boolean isLessThanOrEqualToMax = value.compareTo(max) <= 0;
+        return isLessThanOrEqualToMax;
+    }
+
+    private void validateDigitsOption(V value) {
         final int intDigitsMax = digitsOption.getIntegerMax();
         final int fractionDigitsMax = digitsOption.getFractionMax();
         if (intDigitsMax < 1 || fractionDigitsMax < 1) {
             return;
         }
-        final String valueStr = String.valueOf(abs(value));
+        final V abs = getAbs(value);
+        final String valueStr = String.valueOf(abs);
         final String[] parts = PATTERN_DOT.split(valueStr);
         final int intDigitsCount = parts[0].length();
         final int fractionDigitsCount = parts[1].length();
@@ -137,22 +179,42 @@ import static java.lang.String.format;
         }
     }
 
-    private void addErrorMessage(MinOption option, double value) {
+    private void addErrorMessage(DecimalMinOption option, V value) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatErrorMessage(format, value, option.getInclusive(), option.getIs());
+        final String msg = formatDecimalRangeErrorMessage(format, value, option.getInclusive(), option.getValue());
         addErrorMessage(msg);
     }
 
-    private void addErrorMessage(MaxOption option, double value) {
+    private void addErrorMessage(DecimalMaxOption option, V value) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatErrorMessage(format, value, option.getInclusive(), option.getIs());
+        final String msg = formatDecimalRangeErrorMessage(format, value, option.getInclusive(), option.getValue());
         addErrorMessage(msg);
     }
 
-    private String formatErrorMessage(String format, double value, boolean inclusive, double minOrMax) {
+    private void addErrorMessage(MinOption option, V value) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = formatRangeErrorMessage(format, value, option.getValue());
+        addErrorMessage(msg);
+    }
+
+    private void addErrorMessage(MaxOption option, V value) {
+        final String format = getErrorMessageFormat(option, option.getMsg());
+        final String msg = formatRangeErrorMessage(format, value, option.getValue());
+        addErrorMessage(msg);
+    }
+
+    private String formatDecimalRangeErrorMessage(String format, V value, boolean inclusive, String minOrMax) {
         final String msg = format(format,
                 getFieldDescriptor().getName(),
                 inclusive ? "or equal to " : "",
+                minOrMax,
+                value);
+        return msg;
+    }
+
+    private String formatRangeErrorMessage(String format, V value, String minOrMax) {
+        final String msg = format(format,
+                getFieldDescriptor().getName(),
                 minOrMax,
                 value);
         return msg;

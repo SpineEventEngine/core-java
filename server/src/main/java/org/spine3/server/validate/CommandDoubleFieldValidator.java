@@ -22,42 +22,34 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-import org.spine3.Internal;
+
+import static java.lang.String.*;
+import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityIdField;
 
 /**
- * Creates {@link FieldValidator}s for commands.
+ * Validates command fields of floating point number types.
  *
  * @author Alexander Litus
  */
-@Internal
-@SuppressWarnings("RefusedBequest")
-public class CommandFieldValidatorFactory extends FieldValidatorFactory {
+/* package */ class CommandDoubleFieldValidator extends DoubleFieldValidator {
 
     /**
-     * Creates a new factory instance.
+     * Creates a new validator instance.
+     *
+     * @param descriptor a descriptor of the field to validate
+     * @param fieldValues field values to validate
      */
-    public static CommandFieldValidatorFactory newInstance() {
-        return new CommandFieldValidatorFactory();
+    /* package */ CommandDoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues) {
+        super(descriptor, fieldValues);
     }
 
     @Override
-    protected MessageFieldValidator newMessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> messages) {
-        return new CommandMessageFieldValidator(descriptor, messages);
-    }
-
-    @Override
-    protected LongFieldValidator newLongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> numbers) {
-        return new CommandLongFieldValidator(descriptor, numbers);
-    }
-
-    @Override
-    protected DoubleFieldValidator newDoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> numbers) {
-        return new CommandDoubleFieldValidator(descriptor, numbers);
-    }
-
-    @Override
-    protected StringFieldValidator newStringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> strings) {
-        return new CommandStringFieldValidator(descriptor, strings);
+    protected void validate() {
+        super.validate();
+        final FieldDescriptor field = getFieldDescriptor();
+        if (isRequiredEntityIdField(field)) {
+            setIsFieldInvalid(true);
+            addErrorMessage(format("'%s' must not be a floating point number.", field.getName()));
+        }
     }
 }

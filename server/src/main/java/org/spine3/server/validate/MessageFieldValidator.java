@@ -72,7 +72,7 @@ import static org.spine3.validation.options.Time.*;
 
     private void validateFieldsOfMessageIfNeeded() {
         final ValidOption option = getFieldOption(ValidationProto.valid);
-        if (!option.getIs()) {
+        if (!option.getValue()) {
             return;
         }
         for (Message value : getValues()) {

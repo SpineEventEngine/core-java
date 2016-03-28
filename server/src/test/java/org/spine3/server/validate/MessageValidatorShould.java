@@ -29,17 +29,18 @@ import org.junit.Test;
 import org.spine3.protobuf.Durations;
 import org.spine3.test.validation.cmd.AnnotatedBooleanFieldValue;
 import org.spine3.test.validation.cmd.AnnotatedEnumFieldValue;
+import org.spine3.test.validation.cmd.DecimalMaxIncNumberFieldValue;
+import org.spine3.test.validation.cmd.DecimalMaxNotIncNumberFieldValue;
+import org.spine3.test.validation.cmd.DecimalMinIncNumberFieldValue;
+import org.spine3.test.validation.cmd.DecimalMinNotIncNumberFieldValue;
 import org.spine3.test.validation.cmd.DigitsCountNumberFieldValue;
 import org.spine3.test.validation.cmd.EnclosedMessageFieldValue;
 import org.spine3.test.validation.cmd.EnclosedMessageWithoutAnnotationFieldValue;
 import org.spine3.test.validation.cmd.EntityIdIntFieldValue;
 import org.spine3.test.validation.cmd.EntityIdLongFieldValue;
 import org.spine3.test.validation.cmd.EntityIdMsgFieldValue;
+import org.spine3.test.validation.cmd.EntityIdRepeatedFieldValue;
 import org.spine3.test.validation.cmd.EntityIdStringFieldValue;
-import org.spine3.test.validation.cmd.MaxIncNumberFieldValue;
-import org.spine3.test.validation.cmd.MaxNotIncNumberFieldValue;
-import org.spine3.test.validation.cmd.MinIncNumberFieldValue;
-import org.spine3.test.validation.cmd.MinNotIncNumberFieldValue;
 import org.spine3.test.validation.cmd.PatternStringFieldValue;
 import org.spine3.test.validation.cmd.RepeatedRequiredMsgFieldValue;
 import org.spine3.test.validation.cmd.RequiredByteStringFieldValue;
@@ -267,7 +268,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_less_than_min() {
         minNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.validation.cmd.MinIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.cmd.DecimalMinIncNumberFieldValue is invalid: " +
                 "'value' must be greater than or equal to 16.5, actual: 11.5.",
                 validator.getErrorMessage()
         );
@@ -311,7 +312,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_greater_than_max() {
         maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.validation.cmd.MaxIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.cmd.DecimalMaxIncNumberFieldValue is invalid: " +
                 "'value' must be less than or equal to 64.5, actual: 69.5.",
                 validator.getErrorMessage()
         );
@@ -528,6 +529,13 @@ public class MessageValidatorShould {
     }
 
     @Test
+    public void find_out_that_repeated_entity_id_in_command_is_not_valid() {
+        final EntityIdRepeatedFieldValue msg = EntityIdRepeatedFieldValue.newBuilder().addValue(newUuid()).build();
+        cmdValidator.validate(msg);
+        assertCmdMessageIsValid(false);
+    }
+
+    @Test
     public void provide_validation_error_message_if_entity_id_in_command_is_not_valid() {
         // TODO:2016-03-25:alexander.litus: impl
     }
@@ -544,16 +552,16 @@ public class MessageValidatorShould {
 
     private void minNumberTest(double value, boolean inclusive, boolean isValid) {
         final Message msg = inclusive ?
-                            MinIncNumberFieldValue.newBuilder().setValue(value).build() :
-                            MinNotIncNumberFieldValue.newBuilder().setValue(value).build();
+                            DecimalMinIncNumberFieldValue.newBuilder().setValue(value).build() :
+                            DecimalMinNotIncNumberFieldValue.newBuilder().setValue(value).build();
         validator.validate(msg);
         assertMessageIsValid(isValid);
     }
 
     private void maxNumberTest(double value, boolean inclusive, boolean isValid) {
         final Message msg = inclusive ?
-                            MaxIncNumberFieldValue.newBuilder().setValue(value).build() :
-                            MaxNotIncNumberFieldValue.newBuilder().setValue(value).build();
+                            DecimalMaxIncNumberFieldValue.newBuilder().setValue(value).build() :
+                            DecimalMaxNotIncNumberFieldValue.newBuilder().setValue(value).build();
         validator.validate(msg);
         assertMessageIsValid(isValid);
     }

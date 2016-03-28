@@ -62,10 +62,13 @@ public class FieldValidatorFactory {
                 break;
             case INT:
             case LONG:
+                final ImmutableList<Long> longs = toValuesList(fieldValue);
+                validator = newLongFieldValidator(descriptor, longs);
+                break;
             case FLOAT:
             case DOUBLE:
-                final ImmutableList<Number> numbers = toValuesList(fieldValue);
-                validator = newNumberFieldValidator(descriptor, numbers);
+                final ImmutableList<Double> doubles = toValuesList(fieldValue);
+                validator = newDoubleFieldValidator(descriptor, doubles);
                 break;
             case STRING:
                 final ImmutableList<String> strings = toValuesList(fieldValue);
@@ -101,8 +104,19 @@ public class FieldValidatorFactory {
      * @param numbers field values to validate
      * @return a new instance
      */
-    protected NumberFieldValidator newNumberFieldValidator(FieldDescriptor descriptor, ImmutableList<Number> numbers) {
-        return new NumberFieldValidator(descriptor, numbers);
+    protected LongFieldValidator newLongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> numbers) {
+        return new LongFieldValidator(descriptor, numbers);
+    }
+
+    /**
+     * Creates a new validator instance.
+     *
+     * @param descriptor a descriptor of the field to validate
+     * @param numbers field values to validate
+     * @return a new instance
+     */
+    protected DoubleFieldValidator newDoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> numbers) {
+        return new DoubleFieldValidator(descriptor, numbers);
     }
 
     /**

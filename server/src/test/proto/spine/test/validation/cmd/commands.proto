@@ -32,38 +32,44 @@ import "spine/validation.proto";
 // Messages for "required" option tests.
 
 message RequiredMsgFieldValue {
-    google.protobuf.StringValue value = 1 [(required).is = true];
+    google.protobuf.StringValue value = 1 [(required).value = true];
 }
 
 message RequiredStringFieldValue {
-    string value = 1 [(required).is = true];
+    string value = 1 [(required).value = true];
 }
 
 message RequiredByteStringFieldValue {
-    bytes value = 1 [(required).is = true];
+    bytes value = 1 [(required).value = true];
 }
 
 message RepeatedRequiredMsgFieldValue {
-    repeated google.protobuf.StringValue value = 1 [(required).is = true];
+    repeated google.protobuf.StringValue value = 1 [(required).value = true];
 }
 
-// Messages for "min", "max" and "digits" options tests.
+// Messages for "decimal_min", "decimal_max" options tests.
 
-message MinIncNumberFieldValue {
-    double value = 1 [(min).is = 16.5, (min).inclusive = true, (max).ignore = true];
+message DecimalMinIncNumberFieldValue {
+    double value = 1 [(decimal_min).value = "16.5", (decimal_min).inclusive = true];
 }
 
-message MinNotIncNumberFieldValue {
-    double value = 1 [(min).is = 16.5, (min).inclusive = false, (max).ignore = true];
+message DecimalMinNotIncNumberFieldValue {
+    double value = 1 [(decimal_min).value = "16.5", (decimal_min).inclusive = false];
 }
 
-message MaxIncNumberFieldValue {
-    double value = 1 [(max).is = 64.5, (max).inclusive = true, (min).ignore = true];
+message DecimalMaxIncNumberFieldValue {
+    double value = 1 [(decimal_max).value = "64.5", (decimal_max).inclusive = true];
 }
 
-message MaxNotIncNumberFieldValue {
-    double value = 1 [(max).is = 64.5, (max).inclusive = false, (min).ignore = true];
+message DecimalMaxNotIncNumberFieldValue {
+    double value = 1 [(decimal_max).value = "64.5", (decimal_max).inclusive = false];
 }
+
+// Messages for "min" and "max" options tests.
+
+// TODO:2016-03-28:alexander.litus:
+
+// Messages for "digits" option tests.
 
 message DigitsCountNumberFieldValue {
     double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
@@ -92,7 +98,7 @@ message PatternStringFieldValue {
 // Messages for "valid" option tests.
 
 message EnclosedMessageFieldValue {
-    RequiredStringFieldValue value = 1 [(valid).is = true];
+    RequiredStringFieldValue value = 1 [(valid).value = true];
 }
 
 message EnclosedMessageWithoutAnnotationFieldValue {
@@ -102,11 +108,11 @@ message EnclosedMessageWithoutAnnotationFieldValue {
 // Messages for exceptional conditions tests.
 
 message AnnotatedEnumFieldValue {
-    Time value = 1 [(required).is = true];
+    Time value = 1 [(required).value = true];
 }
 
 message AnnotatedBooleanFieldValue {
-    bool value = 1 [(required).is = true];
+    bool value = 1 [(required).value = true];
 }
 
 // Messages for entity ID in commands validation tests.
@@ -128,5 +134,5 @@ message EntityIdLongFieldValue {
 }
 
 message EntityIdRepeatedFieldValue {
-    string value = 1;
+    repeated string value = 1;
 }

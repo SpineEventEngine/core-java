@@ -22,11 +22,11 @@ syntax = "proto3";
 // We do not define the package for this file to allow shorter options for user-defined types.
 // This would allow to write...
 //
-//     [(required).is = true];
+//     [(required).value = true];
 //
 // instead of
 //
-//     [(spine.base.required).is = true];
+//     [(spine.base.required).value = true];
 //
 
 option java_generate_equals_and_hash = false;
@@ -47,11 +47,13 @@ extend google.protobuf.MessageOptions {
 
 extend google.protobuf.FieldOptions {
     RequiredOption required = 51002;
-    DecimalOption decimal = 51003;
-    DigitsOption digits = 51004;
-    TimeOption when = 51005;
+
+    DecimalMaxOption decimal_max = 51026;
+    DecimalMinOption decimal_min = 51037;
     MaxOption max = 51006;
     MinOption min = 51007;
+    DigitsOption digits = 51004;
+    TimeOption when = 51005;
     PatternOption pattern = 51008;
     ValidOption valid = 51009;
 }
@@ -65,7 +67,7 @@ extend google.protobuf.FieldOptions {
 //
 // Example:
 //
-// MyMessage field = 1 [(required).is = true];
+// MyMessage field = 1 [(required).value = true];
 //
 message RequiredOption {
     // The default error message format string.
@@ -74,72 +76,51 @@ message RequiredOption {
 
     // Specifies if the field is required. Must be set to true. Otherwise, the field is not validated.
     // The default value is false.
-    bool is = 1;
+    bool value = 1;
 
     // A user-defined validation error format message.
     // The format parameters are the same as for the default message.
     string msg = 2;
 }
 
-// TODO:2016-03-14:alexander.litus: is this option really needed? Why not use min/max instead?
-// Applicable only to numbers.
-message DecimalOption {
-    option (default_message) = "field value must fit into range";
-
-    double min = 1;
-    double max = 2;
-    bool inclusive = 3;
-    string msg = 4;
-}
-
 // The field value must be greater than (or equal to, if the `inclusive` parameter is true) the given minimum number.
 // Is applicable only to numbers.
 // Repeated fields are supported.
-// This option is considered as not set only if both min and max options are not set,
-// or if the `ignore` parameter is set to true.
 //
 // Example:
 //
-// double value = 1 [(min).is = 10.5, (min).inclusive = true];
+// double value = 1 [(decimal_min).value = "10.5", (decimal_min).inclusive = true];
 //
-// TODO:2016-03-25:alexander.litus: change options
-message MinOption {
+message DecimalMinOption {
     // The default error message format string.
     // The format parameters are:
     // 1) the simple name of the field;
     // 2) "or equal to " string (if the `inclusive` parameter is true);
     // 3) the minimum number;
-    // 4) an actual value of the field.
+    // 4) the actual value of the field.
     option (default_message) = "'%s' must be greater than %s%s, actual: %s";
 
-    // The minimum value of the field.
-    // The default value is zero.
-    double is = 1;
+    // The string representation of the minimum field value.
+    string value = 1;
 
     // Specifies if the field can be equal to the minimum value.
     // The default value is false.
     bool inclusive = 2;
 
-    // Set this property to true if it is needed to use only the `max` option.
-    // The default value is false.
-    bool ignore = 3;
-
     // A user-defined validation error format message.
     // The format parameters are the same as for the default message.
-    string msg = 4;
+    string msg = 3;
 }
 
 // The field value must be less than (or equal to, if the `inclusive` option is true) the given maximum number.
 // Is applicable only to numbers.
 // Repeated fields are supported.
-// This option is considered as not set only if both min and max options are not set,
-// or if the `ignore` parameter is set to true.
 //
 // Example:
 //
-// double value = 1 [(max).is = 10.5, (max).inclusive = true, (min).ignore = true];
+// double value = 1 [(decimal_max).value = "10.5", (decimal_max).inclusive = true];
 //
-message MaxOption {
+message DecimalMaxOption {
     // The default error message format string.
     // The format parameters are:
     // 1) the simple name of the field;
@@ -148,21 +129,64 @@ message MaxOption {
     // 4) an actual value of the field.
     option (default_message) = "'%s' must be less than %s%s, actual: %s";
 
-    // The maximum value of the field.
-    // The default value is zero.
-    double is = 1;
+    // The string representation of the maximum field value.
+    string value = 1;
 
     // Specifies if the field can be equal to the maximum value.
     // The default value is false.
     bool inclusive = 2;
 
-    // Set this property to true if it is needed to use only the `min` option.
-    // The default value is false.
-    bool ignore = 3;
+    // A user-defined validation error format message.
+    // The format parameters are the same as for the default message.
+    string msg = 3;
+}
+
+// The field value must be greater than or equal to the given minimum number.
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//
+// double value = 1 [(min).value = "10.5", (min).inclusive = true];
+//
+message MinOption {
+    // The default error message format string.
+    // The format parameters are:
+    // 1) the simple name of the field;
+    // 2) the minimum number;
+    // 3) an actual value of the field.
+    option (default_message) = "'%s' must be greater than %s, actual: %s";
+
+    // The string representation of the minimum field value.
+    string value = 1;
 
     // A user-defined validation error format message.
     // The format parameters are the same as for the default message.
-    string msg = 4;
+    string msg = 2;
+}
+
+// The field value must be less than or equal to the given maximum number.
+// Is applicable only to numbers.
+// Repeated fields are supported.
+//
+// Example:
+//
+// double value = 1 [(max).value = "10.5", (max).inclusive = true];
+//
+message MaxOption {
+    // The default error message format string.
+    // The format parameters are:
+    // 1) the simple name of the field;
+    // 2) the maximum number;
+    // 3) an actual value of the field.
+    option (default_message) = "'%s' must be less than %s, actual: %s";
+
+    // The string representation of the maximum field value.
+    string value = 1;
+
+    // A user-defined validation error format message.
+    // The format parameters are the same as for the default message.
+    string msg = 2;
 }
 
 // The field value must be a number with the certain integral/fractional digit count.
@@ -189,7 +213,7 @@ message DigitsOption {
     int32 integer_max = 1;
 
     // Maximum count of fractional digits of the number (inclusive).
-    // Must be greater than zero.
+    // Must be greater than or equal to zero.
     int32 fraction_max = 2;
 
     // A user-defined validation error format message.
@@ -238,7 +262,7 @@ enum Time {
 //
 // Example:
 //
-// string field = 1 [(pattern).regex = FUTURE];
+// string field = 1 [(pattern).regex = "^[A-Za-z0-9+]+$"];
 //
 message PatternOption {
     // The default error message format string.
@@ -265,7 +289,7 @@ message PatternOption {
 //
 // Example:
 //
-// MyMessage field = 1 [(valid).is = true];
+// MyMessage field = 1 [(valid).value = true];
 //
 message ValidOption {
     // The default error message format string for the field.
@@ -275,7 +299,7 @@ message ValidOption {
 
     // If it is true, the message's fields are validated.
     // The default value is false.
-    bool is = 1;
+    bool value = 1;
 
     // A user-defined validation error format message.
     // The format parameters are the same as for the default message.

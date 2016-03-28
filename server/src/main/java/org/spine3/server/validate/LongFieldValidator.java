@@ -22,42 +22,35 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-import org.spine3.Internal;
+
+import static java.lang.Math.abs;
 
 /**
- * Creates {@link FieldValidator}s for commands.
+ * Validates fields of integer number types.
  *
  * @author Alexander Litus
  */
-@Internal
-@SuppressWarnings("RefusedBequest")
-public class CommandFieldValidatorFactory extends FieldValidatorFactory {
+/* package */ class LongFieldValidator extends NumberFieldValidator<Long> {
 
     /**
-     * Creates a new factory instance.
+     * Creates a new validator instance.
+     *
+     * @param descriptor a descriptor of the field to validate
+     * @param fieldValues field values to validate
      */
-    public static CommandFieldValidatorFactory newInstance() {
-        return new CommandFieldValidatorFactory();
+    /* package */ LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues) {
+        super(descriptor, fieldValues);
     }
 
     @Override
-    protected MessageFieldValidator newMessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> messages) {
-        return new CommandMessageFieldValidator(descriptor, messages);
+    protected Long toNumber(String value) {
+        final Long number = Long.valueOf(value);
+        return number;
     }
 
     @Override
-    protected LongFieldValidator newLongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> numbers) {
-        return new CommandLongFieldValidator(descriptor, numbers);
-    }
-
-    @Override
-    protected DoubleFieldValidator newDoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> numbers) {
-        return new CommandDoubleFieldValidator(descriptor, numbers);
-    }
-
-    @Override
-    protected StringFieldValidator newStringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> strings) {
-        return new CommandStringFieldValidator(descriptor, strings);
+    protected Long getAbs(Long value) {
+        final Long abs = abs(value);
+        return abs;
     }
 }

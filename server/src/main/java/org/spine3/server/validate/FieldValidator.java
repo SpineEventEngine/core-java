@@ -81,7 +81,7 @@ import static java.lang.String.format;
      */
     protected void checkIfRequiredAndNotSet() {
         final RequiredOption option = getFieldOption(ValidationProto.required);
-        if (!option.getIs()) {
+        if (!option.getValue()) {
             return;
         }
         if (values.isEmpty()) {

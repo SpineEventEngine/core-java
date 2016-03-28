@@ -26,11 +26,11 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityIdField;
 
 /**
- * Validates command fields of number types (protobuf: int32, double, etc).
+ * Validates command fields of integer types.
  *
  * @author Alexander Litus
  */
-/* package */ class CommandNumberFieldValidator extends NumberFieldValidator {
+/* package */ class CommandLongFieldValidator extends LongFieldValidator {
 
     /**
      * Creates a new validator instance.
@@ -38,14 +38,13 @@ import static org.spine3.server.validate.CommandValidationUtil.isRequiredEntityI
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ CommandNumberFieldValidator(FieldDescriptor descriptor, ImmutableList<Number> fieldValues) {
+    /* package */ CommandLongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues) {
         super(descriptor, fieldValues);
     }
 
     @Override
     protected void validate() {
         super.validate();
-        // TODO:2016-03-18:alexander.litus: check type (long or int)
         if (isRequiredEntityIdField(getFieldDescriptor())) {
             validateEntityId();
         }
