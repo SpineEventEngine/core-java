@@ -27,28 +27,28 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
-import org.spine3.test.validation.cmd.AnnotatedBooleanFieldValue;
-import org.spine3.test.validation.cmd.AnnotatedEnumFieldValue;
-import org.spine3.test.validation.cmd.DecimalMaxIncNumberFieldValue;
-import org.spine3.test.validation.cmd.DecimalMaxNotIncNumberFieldValue;
-import org.spine3.test.validation.cmd.DecimalMinIncNumberFieldValue;
-import org.spine3.test.validation.cmd.DecimalMinNotIncNumberFieldValue;
-import org.spine3.test.validation.cmd.DigitsCountNumberFieldValue;
-import org.spine3.test.validation.cmd.EnclosedMessageFieldValue;
-import org.spine3.test.validation.cmd.EnclosedMessageWithoutAnnotationFieldValue;
-import org.spine3.test.validation.cmd.EntityIdIntFieldValue;
-import org.spine3.test.validation.cmd.EntityIdLongFieldValue;
-import org.spine3.test.validation.cmd.EntityIdMsgFieldValue;
-import org.spine3.test.validation.cmd.EntityIdRepeatedFieldValue;
-import org.spine3.test.validation.cmd.EntityIdStringFieldValue;
-import org.spine3.test.validation.cmd.PatternStringFieldValue;
-import org.spine3.test.validation.cmd.RepeatedRequiredMsgFieldValue;
-import org.spine3.test.validation.cmd.RequiredByteStringFieldValue;
-import org.spine3.test.validation.cmd.RequiredMsgFieldValue;
-import org.spine3.test.validation.cmd.RequiredStringFieldValue;
-import org.spine3.test.validation.cmd.TimeInFutureFieldValue;
-import org.spine3.test.validation.cmd.TimeInPastFieldValue;
-import org.spine3.test.validation.cmd.TimeWithoutOptsFieldValue;
+import org.spine3.test.validation.msg.AnnotatedBooleanFieldValue;
+import org.spine3.test.validation.msg.AnnotatedEnumFieldValue;
+import org.spine3.test.validation.msg.DecimalMaxIncNumberFieldValue;
+import org.spine3.test.validation.msg.DecimalMaxNotIncNumberFieldValue;
+import org.spine3.test.validation.msg.DecimalMinIncNumberFieldValue;
+import org.spine3.test.validation.msg.DecimalMinNotIncNumberFieldValue;
+import org.spine3.test.validation.msg.DigitsCountNumberFieldValue;
+import org.spine3.test.validation.msg.EnclosedMessageFieldValue;
+import org.spine3.test.validation.msg.EnclosedMessageWithoutAnnotationFieldValue;
+import org.spine3.test.validation.msg.EntityIdIntFieldValue;
+import org.spine3.test.validation.msg.EntityIdLongFieldValue;
+import org.spine3.test.validation.msg.EntityIdMsgFieldValue;
+import org.spine3.test.validation.msg.EntityIdRepeatedFieldValue;
+import org.spine3.test.validation.msg.EntityIdStringFieldValue;
+import org.spine3.test.validation.msg.PatternStringFieldValue;
+import org.spine3.test.validation.msg.RepeatedRequiredMsgFieldValue;
+import org.spine3.test.validation.msg.RequiredByteStringFieldValue;
+import org.spine3.test.validation.msg.RequiredMsgFieldValue;
+import org.spine3.test.validation.msg.RequiredStringFieldValue;
+import org.spine3.test.validation.msg.TimeInFutureFieldValue;
+import org.spine3.test.validation.msg.TimeInPastFieldValue;
+import org.spine3.test.validation.msg.TimeWithoutOptsFieldValue;
 
 import static com.google.protobuf.util.TimeUtil.*;
 import static java.util.Arrays.asList;
@@ -77,8 +77,7 @@ public class MessageValidatorShould {
     private static final double FRACTIONAL_DIGIT_COUNT_EQUAL_MAX = 1.12;
     private static final double FRACTIONAL_DIGIT_COUNT_LESS_THAN_MAX = 1.0;
 
-    private final MessageValidator validator = new MessageValidator(FieldValidatorFactory.newInstance());
-    private final MessageValidator cmdValidator = new MessageValidator(CommandFieldValidatorFactory.newInstance());
+    private final MessageValidator validator = new MessageValidator();
 
     /*
      * Required option tests.
@@ -166,7 +165,7 @@ public class MessageValidatorShould {
         validator.validate(invalidMsg);
 
         assertEquals(
-                "Message spine.test.validation.cmd.RequiredStringFieldValue is invalid: 'value' must be set.",
+                "Message spine.test.validation.msg.RequiredStringFieldValue is invalid: 'value' must be set.",
                 validator.getErrorMessage()
         );
     }
@@ -217,8 +216,8 @@ public class MessageValidatorShould {
 
         assertMessageIsValid(false);
         assertEquals(
-                "Message spine.test.validation.cmd.TimeInFutureFieldValue is invalid: " +
-                "'value' must be a timestamp in the future.",
+                "Message spine.test.validation.msg.TimeInFutureFieldValue is invalid: " +
+                        "'value' must be a timestamp in the future.",
                 validator.getErrorMessage()
         );
     }
@@ -268,7 +267,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_less_than_min() {
         minNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.validation.cmd.DecimalMinIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.msg.DecimalMinIncNumberFieldValue is invalid: " +
                 "'value' must be greater than or equal to 16.5, actual: 11.5.",
                 validator.getErrorMessage()
         );
@@ -312,7 +311,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_number_is_greater_than_max() {
         maxNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
         assertEquals(
-                "Message spine.test.validation.cmd.DecimalMaxIncNumberFieldValue is invalid: " +
+                "Message spine.test.validation.msg.DecimalMaxIncNumberFieldValue is invalid: " +
                 "'value' must be less than or equal to 64.5, actual: 69.5.",
                 validator.getErrorMessage()
         );
@@ -356,7 +355,7 @@ public class MessageValidatorShould {
     public void provide_validation_error_message_if_integral_digit_count_is_greater_than_max() {
         digitsCountTest(INT_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
         assertEquals(
-                "Message spine.test.validation.cmd.DigitsCountNumberFieldValue is invalid: " +
+                "Message spine.test.validation.msg.DigitsCountNumberFieldValue is invalid: " +
                 "'value' number is out of bounds, " +
                 "expected: <2 max digits>.<2 max digits>, actual: <3 digits>.<1 digits>.",
                 validator.getErrorMessage()
@@ -394,7 +393,7 @@ public class MessageValidatorShould {
         validator.validate(msg);
 
         assertEquals(
-                "Message spine.test.validation.cmd.PatternStringFieldValue is invalid: " +
+                "Message spine.test.validation.msg.PatternStringFieldValue is invalid: " +
                 "'email' must match the regular expression: " +
                 "'^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$', " +
                 "found: 'invalid.email'.",
@@ -446,9 +445,9 @@ public class MessageValidatorShould {
         validator.validate(msg);
 
         assertEquals(
-                "Message spine.test.validation.cmd.EnclosedMessageFieldValue is invalid: " +
+                "Message spine.test.validation.msg.EnclosedMessageFieldValue is invalid: " +
                 "'value' message field value must have valid properties, error message: " +
-                "<Message spine.test.validation.cmd.RequiredStringFieldValue is invalid: 'value' must be set.>.",
+                "<Message spine.test.validation.msg.RequiredStringFieldValue is invalid: 'value' must be set.>.",
                 validator.getErrorMessage()
         );
     }
@@ -479,60 +478,60 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_Message_entity_id_in_command_is_valid() {
         final EntityIdMsgFieldValue msg = EntityIdMsgFieldValue.newBuilder().setValue(newStringValue()).build();
-        cmdValidator.validate(msg);
-        assertCmdMessageIsValid(true);
+        validator.validate(msg);
+        assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_Message_entity_id_in_command_is_NOT_valid() {
-        cmdValidator.validate(EntityIdMsgFieldValue.getDefaultInstance());
-        assertCmdMessageIsValid(false);
+        validator.validate(EntityIdMsgFieldValue.getDefaultInstance());
+        assertMessageIsValid(false);
     }
 
     @Test
     public void find_out_that_String_entity_id_in_command_is_valid() {
         final EntityIdStringFieldValue msg = EntityIdStringFieldValue.newBuilder().setValue(newUuid()).build();
-        cmdValidator.validate(msg);
-        assertCmdMessageIsValid(true);
+        validator.validate(msg);
+        assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_String_entity_id_in_command_is_NOT_valid() {
-        cmdValidator.validate(EntityIdStringFieldValue.getDefaultInstance());
-        assertCmdMessageIsValid(false);
+        validator.validate(EntityIdStringFieldValue.getDefaultInstance());
+        assertMessageIsValid(false);
     }
 
     @Test
     public void find_out_that_Integer_entity_id_in_command_is_valid() {
         final EntityIdIntFieldValue msg = EntityIdIntFieldValue.newBuilder().setValue(5).build();
-        cmdValidator.validate(msg);
-        assertCmdMessageIsValid(true);
+        validator.validate(msg);
+        assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_Integer_entity_id_in_command_is_NOT_valid() {
-        cmdValidator.validate(EntityIdIntFieldValue.getDefaultInstance());
-        assertCmdMessageIsValid(false);
+        validator.validate(EntityIdIntFieldValue.getDefaultInstance());
+        assertMessageIsValid(false);
     }
 
     @Test
     public void find_out_that_Long_entity_id_in_command_is_valid() {
         final EntityIdLongFieldValue msg = EntityIdLongFieldValue.newBuilder().setValue(5).build();
-        cmdValidator.validate(msg);
-        assertCmdMessageIsValid(true);
+        validator.validate(msg);
+        assertMessageIsValid(true);
     }
 
     @Test
     public void find_out_that_Long_entity_id_in_command_is_NOT_valid() {
-        cmdValidator.validate(EntityIdLongFieldValue.getDefaultInstance());
-        assertCmdMessageIsValid(false);
+        validator.validate(EntityIdLongFieldValue.getDefaultInstance());
+        assertMessageIsValid(false);
     }
 
     @Test
     public void find_out_that_repeated_entity_id_in_command_is_not_valid() {
         final EntityIdRepeatedFieldValue msg = EntityIdRepeatedFieldValue.newBuilder().addValue(newUuid()).build();
-        cmdValidator.validate(msg);
-        assertCmdMessageIsValid(false);
+        validator.validate(msg);
+        assertMessageIsValid(false);
     }
 
     @Test
@@ -573,14 +572,6 @@ public class MessageValidatorShould {
     }
 
     private void assertMessageIsValid(boolean isValid) {
-        assertMessageIsValid(isValid, validator);
-    }
-
-    private void assertCmdMessageIsValid(boolean isValid) {
-        assertMessageIsValid(isValid, cmdValidator);
-    }
-
-    private static void assertMessageIsValid(boolean isValid, MessageValidator validator) {
         if (isValid) {
             assertFalse(validator.isMessageInvalid());
             assertTrue(validator.getErrorMessage().isEmpty());

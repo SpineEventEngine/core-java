@@ -36,7 +36,6 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.validate.CommandFieldValidatorFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
 
@@ -139,7 +138,7 @@ public class CommandBus implements AutoCloseable {
         if (isUnsupportedCommand(commandClass)) {
             return CommandValidation.unsupportedCommand(message);
         }
-        final MessageValidator validator = new MessageValidator(CommandFieldValidatorFactory.newInstance());
+        final MessageValidator validator = new MessageValidator();
         validator.validate(message);
         if (validator.isMessageInvalid()) {
             final String errorMessage = validator.getErrorMessage();

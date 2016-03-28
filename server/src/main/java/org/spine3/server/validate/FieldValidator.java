@@ -26,6 +26,7 @@ import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
+import org.spine3.server.entity.EntityPackagesMap;
 import org.spine3.validation.options.RequiredOption;
 import org.spine3.validation.options.ValidationProto;
 
@@ -176,6 +177,43 @@ import static java.lang.String.format;
      */
     protected FieldDescriptor getFieldDescriptor() {
         return fieldDescriptor;
+    }
+
+    /**
+     * Returns {@code true} if the field must be an entity ID
+     * (if it is the first in a command message and the current Protobuf package is for an entity);
+     * {@code false} otherwise.
+     */
+    @SuppressWarnings("RedundantIfStatement")
+    protected boolean isRequiredEntityIdField() {
+        if (!isCommand()) {
+            return false;
+        }
+        if (!isCommandForEntity()) {
+            return false;
+        }
+        if (!isFirstField()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isFirstField() {
+        final int index = getFieldDescriptor().getIndex();
+        final boolean isFirst = index == 0;
+        return isFirst;
+    }
+
+    private boolean isCommand() {
+        final String fileName = getFieldDescriptor().getFile().getName();
+        final boolean isCommandsFile = fileName.contains("commands");
+        return isCommandsFile;
+    }
+
+    private  boolean isCommandForEntity() {
+        final String protoPackage = getFieldDescriptor().getFile().getPackage();
+        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
+        return isCommandForEntity;
     }
 
     /**

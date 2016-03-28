@@ -61,6 +61,9 @@ import static org.spine3.validation.options.Time.*;
                 validateTimestamps();
             }
         }
+        if (isRequiredEntityIdField()) {
+            validateEntityId();
+        }
     }
 
     @Override
@@ -76,7 +79,7 @@ import static org.spine3.validation.options.Time.*;
             return;
         }
         for (Message value : getValues()) {
-            final MessageValidator validator = new MessageValidator(FieldValidatorFactory.newInstance());
+            final MessageValidator validator = new MessageValidator();
             validator.validate(value);
             if (validator.isMessageInvalid()) {
                 setIsFieldInvalid(true);

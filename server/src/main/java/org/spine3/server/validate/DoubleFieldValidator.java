@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import static java.lang.Math.abs;
+import static java.lang.String.format;
 
 /**
  * Validates fields of floating point number types.
@@ -40,6 +41,15 @@ import static java.lang.Math.abs;
      */
     /* package */ DoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues) {
         super(descriptor, fieldValues);
+    }
+
+    @Override
+    protected void validate() {
+        super.validate();
+        if (isRequiredEntityIdField()) {
+            setIsFieldInvalid(true);
+            addErrorMessage(format("'%s' must not be a floating point number", getFieldDescriptor().getName()));
+        }
     }
 
     @Override

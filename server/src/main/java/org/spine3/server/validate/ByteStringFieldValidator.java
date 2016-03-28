@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
+import static java.lang.String.format;
+
 /**
  * Validates fields of type {@link ByteString}.
  *
@@ -44,6 +46,10 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
     @Override
     protected void validate() {
         checkIfRequiredAndNotSet();
+        if (isRequiredEntityIdField()) {
+            setIsFieldInvalid(true);
+            addErrorMessage(format("'%s' must not be a ByteString", getFieldDescriptor().getName()));
+        }
     }
 
     @Override

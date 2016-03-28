@@ -43,6 +43,14 @@ import static java.lang.Math.abs;
     }
 
     @Override
+    protected void validate() {
+        super.validate();
+        if (isRequiredEntityIdField()) {
+            validateEntityId();
+        }
+    }
+
+    @Override
     protected Long toNumber(String value) {
         final Long number = Long.valueOf(value);
         return number;

@@ -48,6 +48,9 @@ import static java.lang.String.format;
     protected void validate() {
         checkIfRequiredAndNotSet();
         checkIfMatchesToRegexp();
+        if (isRequiredEntityIdField()) {
+            validateEntityId();
+        }
     }
 
     private void checkIfMatchesToRegexp() {

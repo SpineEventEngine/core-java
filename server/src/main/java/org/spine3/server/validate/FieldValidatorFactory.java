@@ -58,21 +58,21 @@ public class FieldValidatorFactory {
         switch (fieldType) {
             case MESSAGE:
                 final ImmutableList<Message> messages = toValuesList(fieldValue);
-                validator = newMessageFieldValidator(descriptor, messages);
+                validator = new MessageFieldValidator(descriptor, messages);
                 break;
             case INT:
             case LONG:
                 final ImmutableList<Long> longs = toValuesList(fieldValue);
-                validator = newLongFieldValidator(descriptor, longs);
+                validator = new LongFieldValidator(descriptor, longs);
                 break;
             case FLOAT:
             case DOUBLE:
                 final ImmutableList<Double> doubles = toValuesList(fieldValue);
-                validator = newDoubleFieldValidator(descriptor, doubles);
+                validator = new DoubleFieldValidator(descriptor, doubles);
                 break;
             case STRING:
                 final ImmutableList<String> strings = toValuesList(fieldValue);
-                validator = newStringFieldValidator(descriptor, strings);
+                validator = new StringFieldValidator(descriptor, strings);
                 break;
             case BYTE_STRING:
                 final ImmutableList<ByteString> byteStrings = toValuesList(fieldValue);
@@ -84,50 +84,6 @@ public class FieldValidatorFactory {
                 throw fieldTypeIsNotSupported(descriptor);
         }
         return validator;
-    }
-
-    /**
-     * Creates a new validator instance.
-     *
-     * @param descriptor a descriptor of the field to validate
-     * @param messages field values to validate
-     * @return a new instance
-     */
-    protected MessageFieldValidator newMessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> messages) {
-        return new MessageFieldValidator(descriptor, messages);
-    }
-
-    /**
-     * Creates a new validator instance.
-     *
-     * @param descriptor a descriptor of the field to validate
-     * @param numbers field values to validate
-     * @return a new instance
-     */
-    protected LongFieldValidator newLongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> numbers) {
-        return new LongFieldValidator(descriptor, numbers);
-    }
-
-    /**
-     * Creates a new validator instance.
-     *
-     * @param descriptor a descriptor of the field to validate
-     * @param numbers field values to validate
-     * @return a new instance
-     */
-    protected DoubleFieldValidator newDoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> numbers) {
-        return new DoubleFieldValidator(descriptor, numbers);
-    }
-
-    /**
-     * Creates a new validator instance.
-     *
-     * @param descriptor a descriptor of the field to validate
-     * @param strings field values to validate
-     * @return a new instance
-     */
-    protected StringFieldValidator newStringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> strings) {
-        return new StringFieldValidator(descriptor, strings);
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})
