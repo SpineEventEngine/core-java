@@ -29,6 +29,7 @@ option java_package = "org.spine3.base";
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
+import "spine/validation.proto";
 
 // A business failure is a condition in business, which does not allow to
 // satisfy a request or perform an operation.
@@ -49,4 +50,11 @@ message Failure {
 
     // Additional information on the failure.
     map<string, google.protobuf.Value> attributes = 4;
+}
+
+// A failure indicating that a message is invalid according to Spine custom Protobuf options.
+// Is wrapped to google.protobuf.Any and set as `instance` field of Failure message.
+message ValidationFailure {
+    // Validation constraint violations found by validator.
+    repeated ConstraintViolation constraint_violation = 1;
 }

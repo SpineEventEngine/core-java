@@ -35,6 +35,8 @@ option java_outer_classname = "ValidationProto";
 option java_package = "org.spine3.validation.options";
 
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/any.proto";
+import "spine/base/field_path.proto";
 
 
 extend google.protobuf.MessageOptions {
@@ -47,7 +49,6 @@ extend google.protobuf.MessageOptions {
 
 extend google.protobuf.FieldOptions {
     RequiredOption required = 51002;
-
     DecimalMaxOption decimal_max = 51026;
     DecimalMinOption decimal_min = 51037;
     MaxOption max = 51006;
@@ -56,6 +57,23 @@ extend google.protobuf.FieldOptions {
     TimeOption when = 51005;
     PatternOption pattern = 51008;
     ValidOption valid = 51009;
+}
+
+// A validation constraint violation for a message field.
+message ConstraintViolation {
+    // An interpolated error message for this constraint violation.
+    string message = 1;
+
+    // A non-interpolated error message for this constraint violation.
+    string message_template = 2;
+
+    // An invalid field path.
+    spine.base.FieldPath field_path = 3;
+
+    // An invalid field value.
+    // Contains a corresponding wrapper message for primitives
+    // (google.protobuf.StringValue for "string" field type and so on).
+    google.protobuf.Any field_value = 4;
 }
 
 // TODO:2016-03-25:alexander.litus: error messages format
