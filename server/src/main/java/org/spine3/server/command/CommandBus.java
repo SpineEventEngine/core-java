@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
@@ -126,32 +125,23 @@ public class CommandBus implements AutoCloseable {
      *
      * <p>If {@code Command} instance is passed, its message is extracted and validated.
      *
-     * @param commandOrMessage the command message to check
+     * @param command the command message to check
      * @return the result of {@link Responses#ok()} if the command is supported,
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
-    public Response validate(Message commandOrMessage) {
-        checkNotNull(commandOrMessage);
-
-        final Message message = toMessage(commandOrMessage);
-        final CommandClass commandClass = CommandClass.of(message);
+    public Response validate(Message command) {
+        checkNotNull(command);
+        final CommandClass commandClass = CommandClass.of(command);
         if (isUnsupportedCommand(commandClass)) {
-            return CommandValidation.unsupportedCommand(message);
+            return CommandValidation.unsupportedCommand(command);
         }
         final MessageValidator validator = new MessageValidator();
-        validator.validate(message);
+        validator.validate(command);
         if (validator.isMessageInvalid()) {
             final String errorMessage = validator.getErrorMessage();
-            return CommandValidation.invalidCommand(message, errorMessage);
+            return CommandValidation.invalidCommand(command, errorMessage);
         }
         return Responses.ok();
-    }
-
-    private static Message toMessage(Message commandOrMessage) {
-        final Message msg = commandOrMessage instanceof Command ?
-                Commands.getMessage((Command) commandOrMessage) :
-                commandOrMessage;
-        return msg;
     }
 
     private boolean isUnsupportedCommand(CommandClass commandClass) {
