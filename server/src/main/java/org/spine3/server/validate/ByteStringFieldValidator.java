@@ -48,7 +48,7 @@ import static java.lang.String.format;
         checkIfRequiredAndNotSet();
         if (isRequiredEntityIdField()) {
             setIsFieldInvalid(true);
-            addErrorMessage(format("'%s' must not be a ByteString", getFieldDescriptor().getName()));
+            addErrorMessage(format("'%s' must not be a ByteString", getFieldName()));
         }
     }
 

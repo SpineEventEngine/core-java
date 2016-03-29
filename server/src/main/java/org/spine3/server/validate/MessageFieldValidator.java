@@ -120,7 +120,7 @@ import static org.spine3.validation.options.Time.*;
 
     private void addErrorMessage(TimeOption option) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldDescriptor().getName();
+        final String fieldName = getFieldName();
         final String when = option.getIn().toString().toLowerCase();
         final String msg = format(format, fieldName, when);
         addErrorMessage(msg);
@@ -128,7 +128,7 @@ import static org.spine3.validation.options.Time.*;
 
     private void addErrorMessage(ValidOption option, String errorMessageForProps) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldDescriptor().getName();
+        final String fieldName = getFieldName();
         final String msg = format(format, fieldName, errorMessageForProps);
         addErrorMessage(msg);
     }

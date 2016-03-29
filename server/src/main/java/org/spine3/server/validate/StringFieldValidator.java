@@ -69,7 +69,7 @@ import static java.lang.String.format;
 
     private void addErrorMessage(PatternOption option, String value) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldDescriptor().getName();
+        final String fieldName = getFieldName();
         final String regex = option.getRegex();
         final String msg = format(format, fieldName, regex, value);
         addErrorMessage(msg);

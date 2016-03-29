@@ -205,7 +205,7 @@ import static java.lang.String.format;
 
     private String formatDecimalRangeErrorMessage(String format, V value, boolean inclusive, String minOrMax) {
         final String msg = format(format,
-                getFieldDescriptor().getName(),
+                getFieldName(),
                 inclusive ? "or equal to " : "",
                 minOrMax,
                 value);
@@ -214,7 +214,7 @@ import static java.lang.String.format;
 
     private String formatRangeErrorMessage(String format, V value, String minOrMax) {
         final String msg = format(format,
-                getFieldDescriptor().getName(),
+                getFieldName(),
                 minOrMax,
                 value);
         return msg;
@@ -223,7 +223,7 @@ import static java.lang.String.format;
     private void addErrorMessage(DigitsOption option, int intDigitsCount, int fractionDigitsCount) {
         final String format = getErrorMessageFormat(option, option.getMsg());
         final String msg = format(format,
-                getFieldDescriptor().getName(),
+                getFieldName(),
                 option.getIntegerMax(),
                 option.getFractionMax(),
                 intDigitsCount,

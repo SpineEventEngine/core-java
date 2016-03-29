@@ -47,6 +47,7 @@ import static java.lang.String.format;
     private final List<String> errorMessages = newLinkedList();
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
+    private final String fieldName;
 
     /**
      * Creates a new validator instance.
@@ -56,6 +57,7 @@ import static java.lang.String.format;
     protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values) {
         this.fieldDescriptor = descriptor;
         this.values = values;
+        this.fieldName = fieldDescriptor.getName();
     }
 
     /**
@@ -146,7 +148,7 @@ import static java.lang.String.format;
 
     private void addErrorMessage(RequiredOption option) {
         final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = format(format, getFieldDescriptor().getName());
+        final String msg = format(format, fieldName);
         addErrorMessage(msg);
     }
 
@@ -173,10 +175,10 @@ import static java.lang.String.format;
     }
 
     /**
-     * Returns a field descriptor.
+     * Returns a simple name of the field.
      */
-    protected FieldDescriptor getFieldDescriptor() {
-        return fieldDescriptor;
+    protected String getFieldName() {
+        return fieldName;
     }
 
     /**
@@ -199,19 +201,19 @@ import static java.lang.String.format;
     }
 
     private boolean isFirstField() {
-        final int index = getFieldDescriptor().getIndex();
+        final int index = fieldDescriptor.getIndex();
         final boolean isFirst = index == 0;
         return isFirst;
     }
 
     private boolean isCommand() {
-        final String fileName = getFieldDescriptor().getFile().getName();
+        final String fileName = fieldDescriptor.getFile().getName();
         final boolean isCommandsFile = fileName.contains("commands");
         return isCommandsFile;
     }
 
     private  boolean isCommandForEntity() {
-        final String protoPackage = getFieldDescriptor().getFile().getPackage();
+        final String protoPackage = fieldDescriptor.getFile().getPackage();
         final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
         return isCommandForEntity;
     }
@@ -222,16 +224,15 @@ import static java.lang.String.format;
      * <p>The field must not be repeated or not set.
      */
     protected void validateEntityId() {
-        final FieldDescriptor descriptor = getFieldDescriptor();
-        if (descriptor.isRepeated()) {
+        if (fieldDescriptor.isRepeated()) {
             setIsFieldInvalid(true);
-            addErrorMessage(format("'%s' must not be a repeated field", descriptor.getName()));
+            addErrorMessage(format("'%s' must not be a repeated field", fieldName));
             return;
         }
         final V value = getValues().get(0);
         if (isValueNotSet(value)) {
             setIsFieldInvalid(true);
-            addErrorMessage(format("'%s' must be set", descriptor.getName()));
+            addErrorMessage(format("'%s' must be set", fieldName));
         }
     }
 }
