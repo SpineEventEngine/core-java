@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;

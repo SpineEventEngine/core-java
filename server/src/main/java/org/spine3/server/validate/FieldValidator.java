@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
-import org.spine3.server.entity.EntityPackagesMap;
 import org.spine3.validation.options.RequiredOption;
 import org.spine3.validation.options.ValidationProto;
 
@@ -34,6 +34,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
+import static org.spine3.base.Commands.isCommandsFile;
+import static org.spine3.base.Commands.belongsToEntity;
 
 /**
  * Validates a message field according to Spine custom protobuf options and provides validation error messages.
@@ -48,6 +50,7 @@ import static java.lang.String.format;
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
     private final String fieldName;
+    private final FileDescriptor file;
 
     /**
      * Creates a new validator instance.
@@ -58,6 +61,7 @@ import static java.lang.String.format;
         this.fieldDescriptor = descriptor;
         this.values = values;
         this.fieldName = fieldDescriptor.getName();
+        this.file = fieldDescriptor.getFile();
     }
 
     /**
@@ -191,15 +195,15 @@ import static java.lang.String.format;
 
     /**
      * Returns {@code true} if the field must be an entity ID
-     * (if it is the first in a command message and the current Protobuf package is for an entity);
+     * (if the current Protobuf file is for entity commands and the field is the first in a command message);
      * {@code false} otherwise.
      */
     @SuppressWarnings("RedundantIfStatement")
     protected boolean isRequiredEntityIdField() {
-        if (!isCommand()) {
+        if (!belongsToEntity(file)) {
             return false;
         }
-        if (!isCommandForEntity()) {
+        if (!isCommandsFile(file)) {
             return false;
         }
         if (!isFirstField()) {
@@ -212,18 +216,6 @@ import static java.lang.String.format;
         final int index = fieldDescriptor.getIndex();
         final boolean isFirst = index == 0;
         return isFirst;
-    }
-
-    private boolean isCommand() {
-        final String fileName = fieldDescriptor.getFile().getName();
-        final boolean isCommandsFile = fileName.contains("commands");
-        return isCommandsFile;
-    }
-
-    private  boolean isCommandForEntity() {
-        final String protoPackage = fieldDescriptor.getFile().getPackage();
-        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
-        return isCommandForEntity;
     }
 
     /**

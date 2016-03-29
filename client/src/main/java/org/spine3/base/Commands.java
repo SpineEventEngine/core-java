@@ -21,8 +21,10 @@
 package org.spine3.base;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.EntityPackagesMap;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
@@ -44,6 +46,13 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  * @author Alexander Yevsyukov
  */
 public class Commands {
+
+    /**
+     * A substring which the {@code .proto} file containing commands must have in its name.
+     */
+    public static final String COMMANDS_FILE_SUBSTRING = "commands";
+
+    private static final char PROTO_FILE_SEPARATOR = '/';
 
     private Commands() {}
 
@@ -178,5 +187,35 @@ public class Commands {
         final String id = commandId.getUuid();
         final String result = String.format(format, commandType, id);
         return result;
+    }
+
+    /**
+     * Checks if the file is for commands.
+     *
+     * @param file a descriptor of a {@code .proto} file to check
+     * @return {@code true} if the file name contains {@link #COMMANDS_FILE_SUBSTRING} substring, {@code false} otherwise
+     */
+    public static boolean isCommandsFile(FileDescriptor file) {
+        final String fqn = file.getName();
+        final int startIndexOfFileName = fqn.lastIndexOf(PROTO_FILE_SEPARATOR) + 1;
+        final String fileName = fqn.substring(startIndexOfFileName);
+        final boolean isCommandsFile = fileName.contains(COMMANDS_FILE_SUBSTRING);
+        return isCommandsFile;
+    }
+
+    /**
+     * Checks if the file belongs to an entity.
+     *
+     * <p>If there is a {@code state_of} option in the entity state Protobuf message definition,
+     * all files in the current package are considered belonging to the specified type of the entity
+     * (containing entity state, commands, events, etc).
+     *
+     * @param file a descriptor of a {@code .proto} file to check
+     * @return {@code true} if the file belongs to an entity, {@code false} otherwise
+     */
+    public static  boolean belongsToEntity(FileDescriptor file) {
+        final String protoPackage = file.getPackage();
+        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
+        return isCommandForEntity;
     }
 }
