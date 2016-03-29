@@ -178,19 +178,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         // all entities in the repository.
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
-
         repositories.add(repository);
-
-        final CommandBus commandBus = getCommandBus();
-
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
-
         if (repository instanceof CommandHandler) {
             commandBus.register((CommandHandler) repository);
         }
-
         if (repository instanceof EventDispatcher) {
             getEventBus().register((EventDispatcher)repository);
         }
@@ -207,11 +201,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         // See comments for register(Repository<?, ?> repository).
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
-            getCommandBus().unregister((CommandDispatcher) repository);
+            commandBus.unregister((CommandDispatcher) repository);
         }
 
         if (repository instanceof CommandHandler) {
-            getCommandBus().unregister((CommandHandler)repository);
+            commandBus.unregister((CommandHandler)repository);
         }
 
         if (repository instanceof EventDispatcher) {
@@ -278,8 +272,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *          with {@link org.spine3.base.Error} value otherwise
      */
     protected Response validate(Message message) {
-        final CommandBus dispatcher = getCommandBus();
-        final Response result = dispatcher.validate(message);
+        final Response result = commandBus.validate(message);
         return result;
     }
 
