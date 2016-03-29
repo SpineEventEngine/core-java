@@ -206,14 +206,12 @@ public class Commands {
     /**
      * Checks if the file belongs to an entity.
      *
-     * <p>If there is a {@code state_of} option in the entity state Protobuf message definition,
-     * all files in the current package are considered belonging to the specified type of the entity
-     * (containing entity state, commands, events, etc).
+     * <p>See {@link EntityPackagesMap} for more info.
      *
      * @param file a descriptor of a {@code .proto} file to check
      * @return {@code true} if the file belongs to an entity, {@code false} otherwise
      */
-    public static  boolean belongsToEntity(FileDescriptor file) {
+    public static boolean belongsToEntity(FileDescriptor file) {
         final String protoPackage = file.getPackage();
         final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
         return isCommandForEntity;

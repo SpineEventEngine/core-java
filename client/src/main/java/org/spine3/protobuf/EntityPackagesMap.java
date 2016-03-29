@@ -35,8 +35,14 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * A map from Protobuf package to {@link EntityType}.
- * The package contains files for this type of entity (aggregate, etc).
+ * A map from Protobuf package to {@link EntityType} (the package contains files for this entity type (aggregate, etc)).
+ *
+ * <p>If there is a {@code state_of} option in the entity state Protobuf message definition,
+ * all files in the current package are considered belonging to the specified type of the entity
+ * (containing entity state, commands, events, etc).
+ *
+ * <p>This information is needed when validating a command to check if it is sent to an entity
+ * (to check entity ID field in the command message).
  *
  * @author Alexander Litus
  */
