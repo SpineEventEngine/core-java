@@ -54,15 +54,13 @@ import static org.spine3.validation.options.Time.*;
 
     @Override
     protected void validate() {
+        super.validate();
         checkIfRequiredAndNotSet();
         if (!getValues().isEmpty()) {
             validateFieldsOfMessageIfNeeded();
             if (isTimestamp()) {
                 validateTimestamps();
             }
-        }
-        if (isRequiredEntityIdField()) {
-            validateEntityId();
         }
     }
 

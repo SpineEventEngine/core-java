@@ -45,11 +45,15 @@ import static java.lang.String.format;
 
     @Override
     protected void validate() {
+        super.validate();
         checkIfRequiredAndNotSet();
-        if (isRequiredEntityIdField()) {
-            assertFieldIsInvalid();
-            addErrorMessage(format("'%s' must not be a ByteString", getFieldName()));
-        }
+    }
+
+    @Override
+    @SuppressWarnings("RefusedBequest")
+    protected void validateEntityId() {
+        assertFieldIsInvalid();
+        addErrorMessage(format("'%s' must not be a ByteString", getFieldName()));
     }
 
     @Override

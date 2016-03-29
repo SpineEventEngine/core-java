@@ -73,6 +73,7 @@ import static java.lang.String.format;
 
     @Override
     protected void validate() {
+        super.validate();
         for (V value : getValues()) {
             validateRangeOptions(value);
             validateDigitsOption(value);

@@ -67,9 +67,15 @@ import static org.spine3.base.Commands.belongsToEntity;
     /**
      * Validates a message field according to Spine custom protobuf options and sets validation error messages.
      *
-     * <p>Uses {@link #assertFieldIsInvalid()} and {@link #addErrorMessage(String)} methods.
+     * <p>The default implementation calls {@link #validateEntityId()} method if needed.
+     *
+     * <p>Use {@link #assertFieldIsInvalid()} and {@link #addErrorMessage(String)} methods in custom implementations.
      */
-    protected abstract void validate();
+    protected void validate() {
+        if (isRequiredEntityIdField()) {
+            validateEntityId();
+        }
+    }
 
     /**
      * Returns an immutable list of the field values.
@@ -199,7 +205,7 @@ import static org.spine3.base.Commands.belongsToEntity;
      * {@code false} otherwise.
      */
     @SuppressWarnings("RedundantIfStatement")
-    protected boolean isRequiredEntityIdField() {
+    private boolean isRequiredEntityIdField() {
         if (!belongsToEntity(file)) {
             return false;
         }
@@ -219,9 +225,11 @@ import static org.spine3.base.Commands.belongsToEntity;
     }
 
     /**
-     * Validates the current field as it is an entity ID.
+     * Validates the current field as it is a required entity ID.
      *
      * <p>The field must not be repeated or not set.
+     *
+     * @see #isRequiredEntityIdField()
      */
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
