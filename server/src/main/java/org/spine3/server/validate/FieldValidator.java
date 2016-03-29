@@ -43,7 +43,7 @@ import static java.lang.String.format;
  */
 /* package */ abstract class FieldValidator<V> {
 
-    private boolean isFieldInvalid = false;
+    private boolean isValid = true;
     private final List<String> errorMessages = newLinkedList();
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
@@ -63,7 +63,7 @@ import static java.lang.String.format;
     /**
      * Validates a message field according to Spine custom protobuf options and sets validation error messages.
      *
-     * <p>Uses {@link #setIsFieldInvalid(boolean)} and {@link #addErrorMessage(String)} methods.
+     * <p>Uses {@link #assertFieldIsInvalid()} and {@link #addErrorMessage(String)} methods.
      */
     protected abstract void validate();
 
@@ -88,13 +88,13 @@ import static java.lang.String.format;
             return;
         }
         if (values.isEmpty()) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(option);
             return;
         }
         for (V value : values) {
             if (isValueNotSet(value)) {
-                setIsFieldInvalid(true);
+                assertFieldIsInvalid();
                 addErrorMessage(option);
                 return; // return because one error message is enough for the "required" option
             }
@@ -117,17 +117,25 @@ import static java.lang.String.format;
     }
 
     /**
-     * Returns {@code true} if the validated field is invalid, {@code false} otherwise.
+     * Returns {@code true} if the validated field is valid, {@code false} otherwise.
      */
-    protected boolean isFieldInvalid() {
-        return isFieldInvalid;
+    protected boolean isValid() {
+        return isValid;
     }
 
     /**
-     * Sets {@code isFieldInvalid} field.
+     * Returns {@code true} if the validated field is invalid, {@code false} otherwise.
      */
-    protected void setIsFieldInvalid(boolean isFieldInvalid) { // TODO:2016-03-18:alexander.litus: assert method
-        this.isFieldInvalid = isFieldInvalid;
+    protected boolean isInvalid() {
+        final boolean isInvalid = !isValid;
+        return isInvalid;
+    }
+
+    /**
+     * Sets {@code isValid} field to {@code false}.
+     */
+    protected void assertFieldIsInvalid() {
+        this.isValid = false;
     }
 
     /**
@@ -225,13 +233,13 @@ import static java.lang.String.format;
      */
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(format("'%s' must not be a repeated field", fieldName));
             return;
         }
         final V value = getValues().get(0);
         if (isValueNotSet(value)) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(format("'%s' must be set", fieldName));
         }
     }

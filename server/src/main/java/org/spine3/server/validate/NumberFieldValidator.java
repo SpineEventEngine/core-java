@@ -99,19 +99,19 @@ import static java.lang.String.format;
 
     private void validateRangeOptions(V value) {
         if (!fitsToOptionDecimalMin(value)) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(minDecimalOption, value);
         }
         if (!fitsToOptionDecimalMax(value)) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(maxDecimalOption, value);
         }
         if (!fitsToOptionMin(value)) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(minOption, value);
         }
         if (!fitsToOptionMax(value)) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(maxOption, value);
         }
     }
@@ -123,9 +123,9 @@ import static java.lang.String.format;
         }
         final V min = toNumber(minAsString);
         final int comparisonResult = value.compareTo(min);
-        final boolean fitsAndIsInclusive = isMinDecimalInclusive && comparisonResult >= 0;
-        final boolean fitsAndNonInclusive = !isMinDecimalInclusive && comparisonResult > 0;
-        final boolean fits = fitsAndIsInclusive || fitsAndNonInclusive;
+        final boolean fits = isMinDecimalInclusive ?
+                             comparisonResult >= 0 :
+                             comparisonResult > 0;
         return fits;
     }
 
@@ -135,9 +135,9 @@ import static java.lang.String.format;
             return true;
         }
         final V max = toNumber(maxAsString);
-        final boolean fitsAndIsInclusive = isMaxDecimalInclusive && value.compareTo(max) <= 0;
-        final boolean fitsAndNonInclusive = !isMaxDecimalInclusive && value.compareTo(max) < 0;
-        final boolean fits = fitsAndIsInclusive || fitsAndNonInclusive;
+        final boolean fits = isMaxDecimalInclusive ?
+                             value.compareTo(max) <= 0 :
+                             value.compareTo(max) < 0;
         return fits;
     }
 
@@ -174,7 +174,7 @@ import static java.lang.String.format;
         final int fractionDigitsCount = parts[1].length();
         final boolean isInvalid = (intDigitsCount > intDigitsMax) || (fractionDigitsCount > fractionDigitsMax);
         if (isInvalid) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(digitsOption, intDigitsCount, fractionDigitsCount);
         }
     }

@@ -47,7 +47,7 @@ import static java.lang.String.format;
     protected void validate() {
         super.validate();
         if (isRequiredEntityIdField()) {
-            setIsFieldInvalid(true);
+            assertFieldIsInvalid();
             addErrorMessage(format("'%s' must not be a floating point number", getFieldName()));
         }
     }

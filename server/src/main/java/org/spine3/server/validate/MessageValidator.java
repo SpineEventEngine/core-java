@@ -39,7 +39,7 @@ public class MessageValidator {
 
     private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
 
-    private boolean isMessageInvalid = false;
+    private boolean isMessageValid = true;
     private boolean isValidated = false;
     private String errorMessage = "";
 
@@ -56,25 +56,35 @@ public class MessageValidator {
             final Object value = message.getField(field);
             final FieldValidator<?> validator = fieldValidatorFactory.create(field, value);
             validator.validate();
-            if (validator.isFieldInvalid()) {
-                isMessageInvalid = true;
+            if (validator.isInvalid()) {
+                isMessageValid = false;
                 final List<String> messages = validator.getErrorMessages();
                 errorMessages.addAll(messages);
             }
         }
-        if (isMessageInvalid) {
+        if (!isMessageValid) {
             errorMessage = buildErrorMessage(errorMessages, msgDescriptor);
         }
         isValidated = true;
     }
 
     /**
-     * Returns false if the validated {@link Message} is invalid.
+     * Returns {@code true} if the validated {@link Message} is valid, {@code false} otherwise.
+     * {@link #validate(Message)} method must be called first.
+     */
+    public boolean isMessageValid() {
+        checkValidated();
+        return isMessageValid;
+    }
+
+    /**
+     * Returns {@code true} if the validated {@link Message} is invalid, {@code false} otherwise.
      * {@link #validate(Message)} method must be called first.
      */
     public boolean isMessageInvalid() {
         checkValidated();
-        return isMessageInvalid;
+        final boolean isInvalid = !isMessageValid;
+        return isInvalid;
     }
 
     /**

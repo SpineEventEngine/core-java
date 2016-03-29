@@ -79,10 +79,10 @@ public class CommandValidation {
         final String commandType = command.getDescriptorForType().getFullName();
         final Response response = Response.newBuilder()
                 .setError(Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
-                .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
-                .putAllAttributes(commandTypeAttribute(commandType))
-                .setMessage(errorMessage)).build();
+                    .setType(CommandValidationError.getDescriptor().getFullName())
+                    .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
+                    .putAllAttributes(commandTypeAttribute(commandType))
+                    .setMessage(errorMessage)).build();
         return response;
     }
 

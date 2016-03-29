@@ -82,7 +82,7 @@ import static org.spine3.validation.options.Time.*;
             final MessageValidator validator = new MessageValidator();
             validator.validate(value);
             if (validator.isMessageInvalid()) {
-                setIsFieldInvalid(true);
+                assertFieldIsInvalid();
                 final String errorMessage = validator.getErrorMessage();
                 addErrorMessage(option, errorMessage);
             }
@@ -104,7 +104,7 @@ import static org.spine3.validation.options.Time.*;
         final Timestamp now = getCurrentTime();
         for (Message value : getValues()) {
             if (isTimeInvalid((Timestamp) value, when, now)) {
-                setIsFieldInvalid(true);
+                assertFieldIsInvalid();
                 addErrorMessage(option);
                 return; // return because one error message is enough for the "time" option
             }

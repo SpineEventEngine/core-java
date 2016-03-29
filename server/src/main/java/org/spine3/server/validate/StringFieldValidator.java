@@ -61,7 +61,7 @@ import static java.lang.String.format;
         }
         for (String value : getValues()) {
             if (!value.matches(regex)) {
-                setIsFieldInvalid(true);
+                assertFieldIsInvalid();
                 addErrorMessage(option, value);
             }
         }

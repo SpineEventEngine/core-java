@@ -457,8 +457,18 @@ public class MessageValidatorShould {
      */
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_get_results_but_msg_is_not_validated() {
+    public void throw_exception_if_try_to_check_if_msg_is_valid_but_msg_is_not_validated() {
+        validator.isMessageValid();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_check_if_msg_is_NOT_valid_but_msg_is_not_validated() {
         validator.isMessageInvalid();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_get_error_messages_but_msg_is_not_validated() {
+        validator.getErrorMessage();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -572,13 +582,9 @@ public class MessageValidatorShould {
     }
 
     private void assertMessageIsValid(boolean isValid) {
-        if (isValid) {
-            assertFalse(validator.isMessageInvalid());
-            assertTrue(validator.getErrorMessage().isEmpty());
-        } else {
-            assertTrue(validator.isMessageInvalid());
-            assertFalse(validator.getErrorMessage().isEmpty());
-        }
+        assertEquals(isValid, validator.isMessageValid());
+        assertEquals(!isValid, validator.isMessageInvalid());
+        assertEquals(isValid, validator.getErrorMessage().isEmpty());
     }
 
     private static Timestamp getFuture() {
