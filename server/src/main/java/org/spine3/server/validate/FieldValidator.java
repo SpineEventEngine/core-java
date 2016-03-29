@@ -34,8 +34,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
-import static org.spine3.base.Commands.isCommandsFile;
 import static org.spine3.base.Commands.belongsToEntity;
+import static org.spine3.base.Commands.isCommandsFile;
 
 /**
  * Validates a message field according to Spine custom protobuf options and provides validation error messages.
@@ -50,7 +50,9 @@ import static org.spine3.base.Commands.belongsToEntity;
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
     private final String fieldName;
-    private final FileDescriptor file;
+    private final boolean isFileBelongsToEntity;
+    private final boolean isCommandsFile;
+    private final boolean isFirstField;
 
     /**
      * Creates a new validator instance.
@@ -61,7 +63,10 @@ import static org.spine3.base.Commands.belongsToEntity;
         this.fieldDescriptor = descriptor;
         this.values = values;
         this.fieldName = fieldDescriptor.getName();
-        this.file = fieldDescriptor.getFile();
+        final FileDescriptor file = fieldDescriptor.getFile();
+        this.isFileBelongsToEntity = belongsToEntity(file);
+        this.isCommandsFile = isCommandsFile(file);
+        this.isFirstField = fieldDescriptor.getIndex() == 0;
     }
 
     /**
@@ -78,11 +83,23 @@ import static org.spine3.base.Commands.belongsToEntity;
     }
 
     /**
-     * Returns an immutable list of the field values.
+     * Validates the current field as it is a required entity ID.
+     *
+     * <p>The field must not be repeated or not set.
+     *
+     * @see #isRequiredEntityIdField()
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable list
-    protected ImmutableList<V> getValues() {
-        return values;
+    protected void validateEntityId() {
+        if (fieldDescriptor.isRepeated()) {
+            assertFieldIsInvalid();
+            addErrorMessage(format("'%s' must not be a repeated field", fieldName));
+            return;
+        }
+        final V value = getValues().get(0);
+        if (isValueNotSet(value)) {
+            assertFieldIsInvalid();
+            addErrorMessage(format("'%s' must be set", fieldName));
+        }
     }
 
     /**
@@ -124,6 +141,14 @@ import static org.spine3.base.Commands.belongsToEntity;
      */
     protected boolean isValueNotSet(V value) {
         throw new UnsupportedOperationException("The method is not implemented.");
+    }
+
+    /**
+     * Returns an immutable list of the field values.
+     */
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable list
+    protected ImmutableList<V> getValues() {
+        return values;
     }
 
     /**
@@ -206,41 +231,7 @@ import static org.spine3.base.Commands.belongsToEntity;
      */
     @SuppressWarnings("RedundantIfStatement")
     private boolean isRequiredEntityIdField() {
-        if (!belongsToEntity(file)) {
-            return false;
-        }
-        if (!isCommandsFile(file)) {
-            return false;
-        }
-        if (!isFirstField()) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isFirstField() {
-        final int index = fieldDescriptor.getIndex();
-        final boolean isFirst = index == 0;
-        return isFirst;
-    }
-
-    /**
-     * Validates the current field as it is a required entity ID.
-     *
-     * <p>The field must not be repeated or not set.
-     *
-     * @see #isRequiredEntityIdField()
-     */
-    protected void validateEntityId() {
-        if (fieldDescriptor.isRepeated()) {
-            assertFieldIsInvalid();
-            addErrorMessage(format("'%s' must not be a repeated field", fieldName));
-            return;
-        }
-        final V value = getValues().get(0);
-        if (isValueNotSet(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(format("'%s' must be set", fieldName));
-        }
+        final boolean result = isFileBelongsToEntity && isCommandsFile && isFirstField;
+        return result;
     }
 }
