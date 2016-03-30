@@ -61,19 +61,23 @@ extend google.protobuf.FieldOptions {
 
 // A validation constraint violation for a message field.
 message ConstraintViolation {
-    // An interpolated error message for this constraint violation.
+    // An error message for this constraint violation
+    // (or a template which contains `%s` format specifiers).
     string message = 1;
 
-    // A non-interpolated error message for this constraint violation.
-    string message_template = 2;
+    // Parameters (as strings) referenced by the format specifiers in the error message format string.
+    repeated string format_param = 2;
 
-    // An invalid field path.
+    // A path of an invalid field.
     spine.base.FieldPath field_path = 3;
 
-    // An invalid field value.
+    // A value of an invalid field.
     // Contains a corresponding wrapper message for primitives
     // (google.protobuf.StringValue for "string" field type and so on).
     google.protobuf.Any field_value = 4;
+
+    // Constraint violations for fields of this message field.
+    repeated ConstraintViolation violations = 5;
 }
 
 // TODO:2016-03-25:alexander.litus: error messages format
@@ -88,16 +92,14 @@ message ConstraintViolation {
 // MyMessage field = 1 [(required).value = true];
 //
 message RequiredOption {
-    // The default error message format string.
-    // The format parameter is the simple name of the missing field.
-    option (default_message) = "'%s' must be set";
+    // The default error message.
+    option (default_message) = "Value must be set.";
 
     // Specifies if the field is required. Must be set to true. Otherwise, the field is not validated.
     // The default value is false.
     bool value = 1;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 2;
 }
 
@@ -112,11 +114,9 @@ message RequiredOption {
 message DecimalMinOption {
     // The default error message format string.
     // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) "or equal to " string (if the `inclusive` parameter is true);
-    // 3) the minimum number;
-    // 4) the actual value of the field.
-    option (default_message) = "'%s' must be greater than %s%s, actual: %s";
+    // 1) "or equal to " string (if the `inclusive` parameter is true);
+    // 2) the minimum number.
+    option (default_message) = "Number must be greater than %s%s.";
 
     // The string representation of the minimum field value.
     string value = 1;
@@ -126,7 +126,6 @@ message DecimalMinOption {
     bool inclusive = 2;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 3;
 }
 
@@ -141,11 +140,9 @@ message DecimalMinOption {
 message DecimalMaxOption {
     // The default error message format string.
     // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) "or equal to " string (if the `inclusive` parameter is true);
-    // 3) the maximum number;
-    // 4) an actual value of the field.
-    option (default_message) = "'%s' must be less than %s%s, actual: %s";
+    // 1) "or equal to " string (if the `inclusive` parameter is true);
+    // 2) the maximum number.
+    option (default_message) = "Number must be less than %s%s.";
 
     // The string representation of the maximum field value.
     string value = 1;
@@ -155,7 +152,6 @@ message DecimalMaxOption {
     bool inclusive = 2;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 3;
 }
 
@@ -169,17 +165,13 @@ message DecimalMaxOption {
 //
 message MinOption {
     // The default error message format string.
-    // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) the minimum number;
-    // 3) an actual value of the field.
-    option (default_message) = "'%s' must be greater than %s, actual: %s";
+    // The format parameter is the minimum number.
+    option (default_message) = "Number must be greater than or equal to %s.";
 
     // The string representation of the minimum field value.
     string value = 1;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 2;
 }
 
@@ -193,17 +185,13 @@ message MinOption {
 //
 message MaxOption {
     // The default error message format string.
-    // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) the maximum number;
-    // 3) an actual value of the field.
-    option (default_message) = "'%s' must be less than %s, actual: %s";
+    // The format parameter is the maximum number.
+    option (default_message) = "Number must be less than or equal to %s.";
 
     // The string representation of the maximum field value.
     string value = 1;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 2;
 }
 
@@ -219,12 +207,9 @@ message MaxOption {
 message DigitsOption {
     // The default error message format string.
     // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) max integral digit count;
-    // 3) max fractional digit count;
-    // 4) actual integral digit count;
-    // 5) actual fractional digit count;
-    option (default_message) = "'%s' number is out of bounds, expected: <%s max digits>.<%s max digits>, actual: <%s digits>.<%s digits>";
+    // 1) max integral digit count;
+    // 2) max fractional digit count;
+    option (default_message) = "Number value is out of bounds, expected: <%s max digits>.<%s max digits>.";
 
     // Maximum count of integral digits of the number (inclusive).
     // Must be greater than zero.
@@ -235,7 +220,6 @@ message DigitsOption {
     int32 fraction_max = 2;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 3;
 }
 
@@ -249,16 +233,13 @@ message DigitsOption {
 //
 message TimeOption {
     // The default error message format string.
-    // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) "past" or "future" string, depending on the restriction.
-    option (default_message) = "'%s' must be a timestamp in the %s";
+    // The format parameter is "past" or "future" string, depending on the restriction.
+    option (default_message) = "Timestamp value must be in the %s.";
 
     // Defines a restriction for the timestamp.
     Time in = 1;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 2;
 }
 
@@ -284,11 +265,8 @@ enum Time {
 //
 message PatternOption {
     // The default error message format string.
-    // The format parameters are:
-    // 1) the simple name of the field;
-    // 2) the regular expression to which the value must match;
-    // 3) an actual field value.
-    option (default_message) = "'%s' must match the regular expression: '%s', found: '%s'";
+    // The format parameter is the regular expression to which the value must match.
+    option (default_message) = "String must match the regular expression '%s'.";
 
     // The regular expression to match.
     string regex = 1;
@@ -297,7 +275,6 @@ message PatternOption {
     int32 flag = 2;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 3;
 }
 
@@ -310,16 +287,13 @@ message PatternOption {
 // MyMessage field = 1 [(valid).value = true];
 //
 message ValidOption {
-    // The default error message format string for the field.
-    // 1) the simple name of the field;
-    // 2) an error message describing invalid field's properties.
-    option (default_message) = "'%s' message field value must have valid properties, error message: <%s>";
+    // The default error message for the field.
+    option (default_message) = "Message must have valid properties.";
 
     // If it is true, the message's fields are validated.
     // The default value is false.
     bool value = 1;
 
     // A user-defined validation error format message.
-    // The format parameters are the same as for the default message.
     string msg = 2;
 }
