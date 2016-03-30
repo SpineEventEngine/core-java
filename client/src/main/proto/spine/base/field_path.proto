@@ -27,8 +27,22 @@ option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
 
-// A field path, which consists of simple message field names, e.g. ["field1", "field2", ...].
-// "field1" is a name of a field in some message, "field2" is a name of a field in "field1" message, and so on.
+// Field path is a set of message field names.
+// For example, consider the following message declarations:
+//
+//     message CustomerAccount {
+//       User user = 1;
+//     }
+//
+//     message User {
+//       string name = 1;
+//     }
+//
+// The field path for `name` field of the User message is ["user", "name"] set.
+//
+// So, the first entry in the names set is a name of a field in some root message,
+// the next one is a field found in the first one, and so on.
+//
 message FieldPath {
     // Unqualified message field names.
     repeated string field_name = 1;

@@ -59,7 +59,7 @@ public class CommandValidation {
                     .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
                     .putAllAttributes(commandTypeAttribute(commandType))
                     .setMessage(errMsg))
-                    .build();
+                .build();
         return response;
     }
 
@@ -68,7 +68,6 @@ public class CommandValidation {
             final Error error = response.getError();
             return error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
         }
-
         return false;
     }
 
@@ -82,7 +81,8 @@ public class CommandValidation {
                     .setType(CommandValidationError.getDescriptor().getFullName())
                     .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
                     .putAllAttributes(commandTypeAttribute(commandType))
-                    .setMessage(errorMessage)).build();
+                    .setMessage(errorMessage))
+                .build();
         return response;
     }
 
@@ -101,7 +101,7 @@ public class CommandValidation {
                     .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
                     .setMessage(errMsg)
                     .putAllAttributes(commandTypeAttribute(commandType)))
-                    .build();
+                .build();
         return response;
     }
 
