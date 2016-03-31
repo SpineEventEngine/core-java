@@ -201,13 +201,6 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
-     * Returns a simple name of the field.
-     */
-    protected String getFieldName() {
-        return fieldName;
-    }
-
-    /**
      * Returns {@code true} if the field must be an entity ID
      * (if the current Protobuf file is for entity commands and the field is the first in a command message);
      * {@code false} otherwise.
