@@ -411,7 +411,7 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_enclosed_message_field_is_valid() {
         final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.newBuilder().setValue(newUuid()).build();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setInnerValue(enclosedMsg).build();
 
         validate(msg);
 
@@ -421,7 +421,7 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_enclosed_message_field_is_NOT_valid() {
         final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setInnerValue(enclosedMsg).build();
 
         validate(msg);
 
@@ -432,7 +432,7 @@ public class MessageValidatorShould {
     public void consider_field_is_valid_if_no_valid_option_set() {
         final RequiredStringFieldValue invalidEnclosedMsg = RequiredStringFieldValue.getDefaultInstance();
         final EnclosedMessageWithoutAnnotationFieldValue msg = EnclosedMessageWithoutAnnotationFieldValue.newBuilder()
-                .setValue(invalidEnclosedMsg)
+                .setInnerValue(invalidEnclosedMsg)
                 .build();
 
         validate(msg);
@@ -443,7 +443,7 @@ public class MessageValidatorShould {
     @Test
     public void provide_validation_error_message_if_enclosed_message_field_is_not_valid() {
         final RequiredStringFieldValue enclosedMsg = RequiredStringFieldValue.getDefaultInstance();
-        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setValue(enclosedMsg).build();
+        final EnclosedMessageFieldValue msg = EnclosedMessageFieldValue.newBuilder().setInnerValue(enclosedMsg).build();
 
         validate(msg);
 
