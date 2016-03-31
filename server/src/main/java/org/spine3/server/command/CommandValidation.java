@@ -26,9 +26,16 @@ import com.google.protobuf.Value;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
+import org.spine3.base.Failure;
 import org.spine3.base.Response;
+import org.spine3.base.ValidationFailure;
+import org.spine3.validation.options.ConstraintViolation;
 
+import java.util.List;
 import java.util.Map;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Utility class for working with command validation.
@@ -73,15 +80,21 @@ public class CommandValidation {
 
     /**
      * Creates a {@code Response} for getting a command with invalid fields (e.g., marked as "required" but not set).
+     *
+     * @param command an invalid command
+     * @param violations constraint violations found in command message
      */
-    public static Response invalidCommand(Message command, String errorMessage) {
+    public static Response invalidCommand(Message command, List<ConstraintViolation> violations) {
         final String commandType = command.getDescriptorForType().getFullName();
+        final ValidationFailure failureInstance = ValidationFailure.newBuilder()
+                .addAllConstraintViolation(violations)
+                .build();
+        final Failure.Builder failure = Failure.newBuilder()
+                .setInstance(toAny(failureInstance))
+                .setTimestamp(getCurrentTime())
+                .putAllAttributes(commandTypeAttribute(commandType));
         final Response response = Response.newBuilder()
-                .setError(Error.newBuilder()
-                    .setType(CommandValidationError.getDescriptor().getFullName())
-                    .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
-                    .putAllAttributes(commandTypeAttribute(commandType))
-                    .setMessage(errorMessage))
+                .setFailure(failure)
                 .build();
         return response;
     }

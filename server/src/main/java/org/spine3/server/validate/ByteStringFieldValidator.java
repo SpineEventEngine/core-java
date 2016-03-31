@@ -23,8 +23,9 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.validation.options.ConstraintViolation;
 
-import static java.lang.String.format;
+import java.util.List;
 
 /**
  * Validates fields of type {@link ByteString}.
@@ -32,6 +33,8 @@ import static java.lang.String.format;
  * @author Alexander Litus
  */
 /* package */ class ByteStringFieldValidator extends FieldValidator<ByteString> {
+
+    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a ByteString.";
 
     /**
      * Creates a new validator instance.
@@ -44,16 +47,20 @@ import static java.lang.String.format;
     }
 
     @Override
-    protected void validate() {
-        super.validate();
+    protected List<ConstraintViolation> validate() {
         checkIfRequiredAndNotSet();
+        final List<ConstraintViolation> violations = super.validate();
+        return violations;
     }
 
     @Override
     @SuppressWarnings("RefusedBequest")
     protected void validateEntityId() {
-        assertFieldIsInvalid();
-        addErrorMessage(format("'%s' must not be a ByteString", getFieldName()));
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(INVALID_ID_TYPE_MSG)
+                .setFieldPath(getFieldPath())
+                .build();
+        addViolation(violation);
     }
 
     @Override

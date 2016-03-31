@@ -37,6 +37,7 @@ import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
+import org.spine3.validation.options.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -45,6 +46,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
+import static org.spine3.server.command.CommandValidation.*;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -133,13 +135,12 @@ public class CommandBus implements AutoCloseable {
         checkNotNull(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (isUnsupportedCommand(commandClass)) {
-            return CommandValidation.unsupportedCommand(command);
+            return unsupportedCommand(command);
         }
         final MessageValidator validator = new MessageValidator();
-        validator.validate(command);
-        if (validator.isMessageInvalid()) {
-            final String errorMessage = validator.getErrorMessage();
-            return CommandValidation.invalidCommand(command, errorMessage);
+        final List<ConstraintViolation> violations = validator.validate(command);
+        if (!violations.isEmpty()) {
+            return invalidCommand(command, violations);
         }
         return Responses.ok();
     }

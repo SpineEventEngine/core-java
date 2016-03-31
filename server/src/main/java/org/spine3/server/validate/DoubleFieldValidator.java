@@ -21,10 +21,13 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.validation.options.ConstraintViolation;
 
 import static java.lang.Math.abs;
-import static java.lang.String.format;
+import static org.spine3.protobuf.Messages.newDoubleValue;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Validates fields of floating point number types.
@@ -32,6 +35,8 @@ import static java.lang.String.format;
  * @author Alexander Litus
  */
 /* package */ class DoubleFieldValidator extends NumberFieldValidator<Double> {
+
+    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.
@@ -46,8 +51,13 @@ import static java.lang.String.format;
     @Override
     @SuppressWarnings("RefusedBequest")
     protected void validateEntityId() {
-        assertFieldIsInvalid();
-        addErrorMessage(format("'%s' must not be a floating point number", getFieldName()));
+        final Double value = getValues().get(0);
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(INVALID_ID_TYPE_MSG)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value))
+                .build();
+        addViolation(violation);
     }
 
     @Override
@@ -60,5 +70,11 @@ import static java.lang.String.format;
     protected Double getAbs(Double value) {
         final Double abs = abs(value);
         return abs;
+    }
+
+    @Override
+    protected Any wrapToMsgAndAny(Double value) {
+        final Any any = toAny(newDoubleValue(value));
+        return any;
     }
 }

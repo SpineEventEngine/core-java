@@ -22,10 +22,14 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.PatternOption;
 import org.spine3.validation.options.ValidationProto;
 
-import static java.lang.String.format;
+import java.util.List;
+
+import static org.spine3.protobuf.Messages.newStringValue;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Validates fields of type {@link String}.
@@ -33,6 +37,9 @@ import static java.lang.String.format;
  * @author Alexander Litus
  */
 /* package */ class StringFieldValidator extends FieldValidator<String> {
+
+    private final PatternOption patternOption;
+    private final String regex;
 
     /**
      * Creates a new validator instance.
@@ -42,35 +49,38 @@ import static java.lang.String.format;
      */
     /* package */ StringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> fieldValues) {
         super(descriptor, fieldValues);
+        this.patternOption = getFieldOption(ValidationProto.pattern);
+        this.regex = patternOption.getRegex();
     }
 
     @Override
-    protected void validate() {
-        super.validate();
+    protected List<ConstraintViolation> validate() {
         checkIfRequiredAndNotSet();
         checkIfMatchesToRegexp();
+        final List<ConstraintViolation> violations = super.validate();
+        return violations;
     }
 
     private void checkIfMatchesToRegexp() {
-        final PatternOption option = getFieldOption(ValidationProto.pattern);
-        final String regex = option.getRegex();
         if (regex.isEmpty()) {
             return;
         }
         for (String value : getValues()) {
             if (!value.matches(regex)) {
-                assertFieldIsInvalid();
-                addErrorMessage(option, value);
+                addViolation(newViolation(value));
             }
         }
     }
 
-    private void addErrorMessage(PatternOption option, String value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldName();
-        final String regex = option.getRegex();
-        final String msg = format(format, fieldName, regex, value);
-        addErrorMessage(msg);
+    private ConstraintViolation newViolation(String fieldValue) {
+        final String msg = getErrorMessage(patternOption, patternOption.getMsg());
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(regex)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(toAny(newStringValue(fieldValue)))
+                .build();
+        return violation;
     }
 
     @Override

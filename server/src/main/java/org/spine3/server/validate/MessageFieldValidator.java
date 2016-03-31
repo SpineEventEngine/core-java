@@ -24,15 +24,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.validate.Validate;
+import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.Time;
 import org.spine3.validation.options.TimeOption;
 import org.spine3.validation.options.ValidOption;
 import org.spine3.validation.options.ValidationProto;
 
+import java.util.List;
+
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static java.lang.String.format;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isAfter;
+import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validation.options.Time.*;
 
 /**
@@ -42,6 +45,10 @@ import static org.spine3.validation.options.Time.*;
  */
 /* package */ class MessageFieldValidator extends FieldValidator<Message> {
 
+    private final TimeOption timeOption;
+    private final ValidOption validOption;
+    private final boolean isFieldTimestamp;
+
     /**
      * Creates a new validator instance.
      *
@@ -50,60 +57,61 @@ import static org.spine3.validation.options.Time.*;
      */
     /* package */ MessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues) {
         super(descriptor, fieldValues);
+        this.timeOption = getFieldOption(ValidationProto.when);
+        this.validOption = getFieldOption(ValidationProto.valid);
+        this.isFieldTimestamp = isTimestamp();
     }
 
     @Override
-    protected void validate() {
-        super.validate();
+    protected List<ConstraintViolation> validate() {
         checkIfRequiredAndNotSet();
         if (!getValues().isEmpty()) {
             validateFieldsOfMessageIfNeeded();
-            if (isTimestamp()) {
+            if (isFieldTimestamp) {
                 validateTimestamps();
             }
         }
+        final List<ConstraintViolation> violations = super.validate();
+        return violations;
     }
 
     @Override
     @SuppressWarnings("RefusedBequest") // the base method call is redundant
     protected boolean isValueNotSet(Message value) {
-        final boolean isNotSet = Validate.isDefault(value);
+        final boolean isNotSet = isDefault(value);
         return isNotSet;
     }
 
     private void validateFieldsOfMessageIfNeeded() {
-        final ValidOption option = getFieldOption(ValidationProto.valid);
-        if (!option.getValue()) {
+        if (!validOption.getValue()) {
             return;
         }
         for (Message value : getValues()) {
             final MessageValidator validator = new MessageValidator();
-            validator.validate(value);
-            if (validator.isMessageInvalid()) {
-                assertFieldIsInvalid();
-                final String errorMessage = validator.getErrorMessage();
-                addErrorMessage(option, errorMessage);
+            final List<ConstraintViolation> violations = validator.validate(value);
+            if (!violations.isEmpty()) {
+                addViolation(newValidViolation(value, violations));
             }
         }
     }
 
     private boolean isTimestamp() {
-        final Message value = getValues().get(0);
+        final ImmutableList<Message> values = getValues();
+        final Message value = values.isEmpty() ? null : values.get(0);
         final boolean isTimestamp = value instanceof Timestamp;
         return isTimestamp;
     }
 
     private void validateTimestamps() {
-        final TimeOption option = getFieldOption(ValidationProto.when);
-        final Time when = option.getIn();
+        final Time when = timeOption.getIn();
         if (when == UNDEFINED) {
             return;
         }
         final Timestamp now = getCurrentTime();
         for (Message value : getValues()) {
-            if (isTimeInvalid((Timestamp) value, when, now)) {
-                assertFieldIsInvalid();
-                addErrorMessage(option);
+            final Timestamp time = (Timestamp) value;
+            if (isTimeInvalid(time, when, now)) {
+                addViolation(newTimeViolation(time));
                 return; // return because one error message is enough for the "time" option
             }
         }
@@ -116,18 +124,26 @@ import static org.spine3.validation.options.Time.*;
         return isInvalid;
     }
 
-    private void addErrorMessage(TimeOption option) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldName();
-        final String when = option.getIn().toString().toLowerCase();
-        final String msg = format(format, fieldName, when);
-        addErrorMessage(msg);
+    private ConstraintViolation newTimeViolation(Timestamp fieldValue) {
+        final String msg = getErrorMessage(timeOption, timeOption.getMsg());
+        final String when = timeOption.getIn().toString().toLowerCase();
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(when)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(toAny(fieldValue))
+                .build();
+        return violation;
     }
 
-    private void addErrorMessage(ValidOption option, String errorMessageForProps) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String fieldName = getFieldName();
-        final String msg = format(format, fieldName, errorMessageForProps);
-        addErrorMessage(msg);
+    private ConstraintViolation newValidViolation(Message fieldValue, List<ConstraintViolation> violations) {
+        final String msg = getErrorMessage(validOption, validOption.getMsg());
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(toAny(fieldValue))
+                .addAllViolations(violations)
+                .build();
+        return violation;
     }
 }

@@ -21,9 +21,12 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import static java.lang.Math.abs;
+import static org.spine3.protobuf.Messages.newLongValue;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Validates fields of integer number types.
@@ -52,5 +55,11 @@ import static java.lang.Math.abs;
     protected Long getAbs(Long value) {
         final Long abs = abs(value);
         return abs;
+    }
+
+    @Override
+    protected Any wrapToMsgAndAny(Long value) {
+        final Any any = toAny(newLongValue(value));
+        return any;
     }
 }

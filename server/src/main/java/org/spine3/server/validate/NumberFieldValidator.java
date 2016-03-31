@@ -21,7 +21,11 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.Int32Value;
+import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.DecimalMaxOption;
 import org.spine3.validation.options.DecimalMinOption;
 import org.spine3.validation.options.DigitsOption;
@@ -29,9 +33,8 @@ import org.spine3.validation.options.MaxOption;
 import org.spine3.validation.options.MinOption;
 import org.spine3.validation.options.ValidationProto;
 
+import java.util.List;
 import java.util.regex.Pattern;
-
-import static java.lang.String.format;
 
 /**
  * Validates fields of number types (protobuf: int32, double, etc).
@@ -42,6 +45,7 @@ import static java.lang.String.format;
 /* package */ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
+    private static final String OR_EQUAL_TO = "or equal to ";
 
     private final DecimalMinOption minDecimalOption;
     private final boolean isMinDecimalInclusive;
@@ -72,12 +76,13 @@ import static java.lang.String.format;
     }
 
     @Override
-    protected void validate() {
-        super.validate();
+    protected List<ConstraintViolation> validate() {
         for (V value : getValues()) {
             validateRangeOptions(value);
             validateDigitsOption(value);
         }
+        final List<ConstraintViolation> violations = super.validate();
+        return violations;
     }
 
     @Override
@@ -98,22 +103,23 @@ import static java.lang.String.format;
      */
     protected abstract V getAbs(V number);
 
+    /**
+     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
+     */
+    protected abstract Any wrapToMsgAndAny(V value);
+
     private void validateRangeOptions(V value) {
         if (!fitsToOptionDecimalMin(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(minDecimalOption, value);
+            addViolation(newDecimalMinViolation(value));
         }
         if (!fitsToOptionDecimalMax(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(maxDecimalOption, value);
+            addViolation(newDecimalMaxViolation(value));
         }
         if (!fitsToOptionMin(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(minOption, value);
+            addViolation(newMinViolation(value));
         }
         if (!fitsToOptionMax(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(maxOption, value);
+            addViolation(newMaxViolation(value));
         }
     }
 
@@ -169,66 +175,67 @@ import static java.lang.String.format;
             return;
         }
         final V abs = getAbs(value);
-        final String valueStr = String.valueOf(abs);
-        final String[] parts = PATTERN_DOT.split(valueStr);
+        final String[] parts = PATTERN_DOT.split(String.valueOf(abs));
         final int intDigitsCount = parts[0].length();
         final int fractionDigitsCount = parts[1].length();
         final boolean isInvalid = (intDigitsCount > intDigitsMax) || (fractionDigitsCount > fractionDigitsMax);
         if (isInvalid) {
-            assertFieldIsInvalid();
-            addErrorMessage(digitsOption, intDigitsCount, fractionDigitsCount);
+            addViolation(newDigitsViolation(value));
         }
     }
 
-    private void addErrorMessage(DecimalMinOption option, V value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatDecimalRangeErrorMessage(format, value, option.getInclusive(), option.getValue());
-        addErrorMessage(msg);
+    private ConstraintViolation newDecimalMinViolation(V value) {
+        final String msg = getErrorMessage(minDecimalOption, minDecimalOption.getMsg());
+        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(minDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
+                .addFormatParam(minDecimalOption.getValue())
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value));
+        return violation.build();
     }
 
-    private void addErrorMessage(DecimalMaxOption option, V value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatDecimalRangeErrorMessage(format, value, option.getInclusive(), option.getValue());
-        addErrorMessage(msg);
+    private ConstraintViolation newDecimalMaxViolation(V value) {
+        final String msg = getErrorMessage(maxDecimalOption, maxDecimalOption.getMsg());
+        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
+                 .setMessage(msg)
+                 .addFormatParam(maxDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
+                 .addFormatParam(maxDecimalOption.getValue())
+                 .setFieldPath(getFieldPath())
+                 .setFieldValue(wrapToMsgAndAny(value));
+        return violation.build();
     }
 
-    private void addErrorMessage(MinOption option, V value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatRangeErrorMessage(format, value, option.getValue());
-        addErrorMessage(msg);
+    private ConstraintViolation newMinViolation(V value) {
+        final String msg = getErrorMessage(minOption, minOption.getMsg());
+        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(minOption.getValue())
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value));
+        return violation.build();
     }
 
-    private void addErrorMessage(MaxOption option, V value) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = formatRangeErrorMessage(format, value, option.getValue());
-        addErrorMessage(msg);
+    private ConstraintViolation newMaxViolation(V value) {
+        final String msg = getErrorMessage(maxOption, maxOption.getMsg());
+        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(maxOption.getValue())
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value));
+        return violation.build();
     }
 
-    private String formatDecimalRangeErrorMessage(String format, V value, boolean inclusive, String minOrMax) {
-        final String msg = format(format,
-                getFieldName(),
-                inclusive ? "or equal to " : "",
-                minOrMax,
-                value);
-        return msg;
-    }
-
-    private String formatRangeErrorMessage(String format, V value, String minOrMax) {
-        final String msg = format(format,
-                getFieldName(),
-                minOrMax,
-                value);
-        return msg;
-    }
-
-    private void addErrorMessage(DigitsOption option, int intDigitsCount, int fractionDigitsCount) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = format(format,
-                getFieldName(),
-                option.getIntegerMax(),
-                option.getFractionMax(),
-                intDigitsCount,
-                fractionDigitsCount);
-        addErrorMessage(msg);
+    private ConstraintViolation newDigitsViolation(V value) {
+        final String msg = getErrorMessage(digitsOption, digitsOption.getMsg());
+        final String intMax = String.valueOf(digitsOption.getIntegerMax());
+        final String fractionMax = String.valueOf(digitsOption.getFractionMax());
+        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .addFormatParam(intMax)
+                .addFormatParam(fractionMax)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value));
+        return violation.build();
     }
 }

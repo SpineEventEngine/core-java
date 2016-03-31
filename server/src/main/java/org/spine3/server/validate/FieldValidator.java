@@ -27,13 +27,14 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
+import org.spine3.base.FieldPath;
+import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.RequiredOption;
 import org.spine3.validation.options.ValidationProto;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.String.format;
 import static org.spine3.base.Commands.belongsToEntity;
 import static org.spine3.base.Commands.isCommandsFile;
 
@@ -45,14 +46,17 @@ import static org.spine3.base.Commands.isCommandsFile;
  */
 /* package */ abstract class FieldValidator<V> {
 
-    private boolean isValid = true;
-    private final List<String> errorMessages = newLinkedList();
+    private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
+
+    private final List<ConstraintViolation> violations = newLinkedList();
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
     private final String fieldName;
     private final boolean isFileBelongsToEntity;
     private final boolean isCommandsFile;
     private final boolean isFirstField;
+    private final FieldPath fieldPath;
+    private final RequiredOption requiredOption;
 
     /**
      * Creates a new validator instance.
@@ -67,19 +71,25 @@ import static org.spine3.base.Commands.isCommandsFile;
         this.isFileBelongsToEntity = belongsToEntity(file);
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
+        // TODO:2016-03-30:alexander.litus: add full field path (if this field is nested)
+        this.fieldPath = FieldPath.newBuilder()
+                                  .addFieldName(fieldName)
+                                  .build();
+        requiredOption = getFieldOption(ValidationProto.required);
     }
 
     /**
-     * Validates a message field according to Spine custom protobuf options and sets validation error messages.
+     * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
      *
      * <p>The default implementation calls {@link #validateEntityId()} method if needed.
      *
-     * <p>Use {@link #assertFieldIsInvalid()} and {@link #addErrorMessage(String)} methods in custom implementations.
+     * <p>Use {@link #addViolation(ConstraintViolation)} method in custom implementations.
      */
-    protected void validate() {
+    protected List<ConstraintViolation> validate() {
         if (isRequiredEntityIdField()) {
             validateEntityId();
         }
+        return ImmutableList.copyOf(violations);
     }
 
     /**
@@ -91,38 +101,37 @@ import static org.spine3.base.Commands.isCommandsFile;
      */
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
-            assertFieldIsInvalid();
-            addErrorMessage(format("'%s' must not be a repeated field", fieldName));
+            final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                    .setMessage(ENTITY_ID_REPEATED_FIELD_MSG)
+                    .setFieldPath(fieldPath)
+                    .build();
+            addViolation(violation);
             return;
         }
         final V value = getValues().get(0);
         if (isValueNotSet(value)) {
-            assertFieldIsInvalid();
-            addErrorMessage(format("'%s' must be set", fieldName));
+            addViolation(newViolation(requiredOption));
         }
     }
 
     /**
-     * Checks if the field is required and not set.
+     * Checks if the field is required and not set and adds violations found.
      *
      * <p>If the field is repeated, it must have at least one value set, and all its values must be valid.
      *
      * <p>It is required to override {@link #isValueNotSet(Object)} method to use this one.
      */
     protected void checkIfRequiredAndNotSet() {
-        final RequiredOption option = getFieldOption(ValidationProto.required);
-        if (!option.getValue()) {
+        if (!requiredOption.getValue()) {
             return;
         }
         if (values.isEmpty()) {
-            assertFieldIsInvalid();
-            addErrorMessage(option);
+            addViolation(newViolation(requiredOption));
             return;
         }
         for (V value : values) {
             if (isValueNotSet(value)) {
-                assertFieldIsInvalid();
-                addErrorMessage(option);
+                addViolation(newViolation(requiredOption));
                 return; // return because one error message is enough for the "required" option
             }
         }
@@ -152,56 +161,30 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
-     * Returns {@code true} if the validated field is valid, {@code false} otherwise.
-     */
-    protected boolean isValid() {
-        return isValid;
-    }
-
-    /**
-     * Returns {@code true} if the validated field is invalid, {@code false} otherwise.
-     */
-    protected boolean isInvalid() {
-        final boolean isInvalid = !isValid;
-        return isInvalid;
-    }
-
-    /**
-     * Sets {@code isValid} field to {@code false}.
-     */
-    protected void assertFieldIsInvalid() {
-        this.isValid = false;
-    }
-
-    /**
-     * Returns validation error messages.
-     */
-    protected List<String> getErrorMessages() {
-        return ImmutableList.copyOf(errorMessages);
-    }
-
-    /**
-     * Adds a validation error message to the collection of messages.
+     * Adds a validation constraint validation to the collection of violations.
      *
-     * @param msg an error message to add
+     * @param violation a violation to add
      */
-    protected void addErrorMessage(String msg) {
-        errorMessages.add(msg);
+    protected void addViolation(ConstraintViolation violation) {
+        violations.add(violation);
     }
 
-    private void addErrorMessage(RequiredOption option) {
-        final String format = getErrorMessageFormat(option, option.getMsg());
-        final String msg = format(format, fieldName);
-        addErrorMessage(msg);
+    private ConstraintViolation newViolation(RequiredOption option) {
+        final String msg = getErrorMessage(option, option.getMsg());
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(msg)
+                .setFieldPath(fieldPath)
+                .build();
+        return violation;
     }
 
     /**
-     * Returns a validation error message format string (a custom one (if present) or the default one).
+     * Returns a validation error message (a custom one (if present) or the default one).
      *
      * @param option a validation option used to get the default message
      * @param customMsg a user-defined error message
      */
-    protected String getErrorMessageFormat(Message option, String customMsg) {
+    protected String getErrorMessage(Message option, String customMsg) {
         final String defaultMsg = option.getDescriptorForType().getOptions().getExtension(ValidationProto.defaultMessage);
         final String msg = customMsg.isEmpty() ? defaultMsg : customMsg;
         return msg;
@@ -212,7 +195,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      *
      * @param extension an extension key used to obtain a validation option
      */
-    protected <Option> Option getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
+    protected final <Option> Option getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
         final Option option = fieldDescriptor.getOptions().getExtension(extension);
         return option;
     }
@@ -233,5 +216,9 @@ import static org.spine3.base.Commands.isCommandsFile;
     private boolean isRequiredEntityIdField() {
         final boolean result = isFileBelongsToEntity && isCommandsFile && isFirstField;
         return result;
+    }
+
+    protected FieldPath getFieldPath() {
+        return fieldPath;
     }
 }

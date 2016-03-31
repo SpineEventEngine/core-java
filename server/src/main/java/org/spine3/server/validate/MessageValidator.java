@@ -20,102 +20,41 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.Internal;
+import org.spine3.validation.options.ConstraintViolation;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.String.format;
 
 /**
  * Validates messages according to Spine custom protobuf options and provides validation error messages.
  *
  * @author Alexander Litus
  */
+@Internal
 public class MessageValidator {
 
     private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
 
-    private boolean isMessageValid = true;
-    private boolean isValidated = false;
-    private String errorMessage = "";
-
     /**
-     * Validates messages according to Spine custom protobuf options and sets validation error messages.
+     * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
      *
      * @param message a message to validate
      */
-    public void validate(Message message) {
-        final List<String> errorMessages = newLinkedList();
+    public List<ConstraintViolation> validate(Message message) {
+        final List<ConstraintViolation> result = newLinkedList();
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
             final FieldValidator<?> validator = fieldValidatorFactory.create(field, value);
-            validator.validate();
-            if (validator.isInvalid()) {
-                isMessageValid = false;
-                final List<String> messages = validator.getErrorMessages();
-                errorMessages.addAll(messages);
-            }
+            final List<ConstraintViolation> violations = validator.validate();
+            result.addAll(violations);
         }
-        if (!isMessageValid) {
-            errorMessage = buildErrorMessage(errorMessages, msgDescriptor);
-        }
-        isValidated = true;
-    }
-
-    /**
-     * Returns {@code true} if the validated {@link Message} is valid, {@code false} otherwise.
-     * {@link #validate(Message)} method must be called first.
-     */
-    public boolean isMessageValid() {
-        checkValidated();
-        return isMessageValid;
-    }
-
-    /**
-     * Returns {@code true} if the validated {@link Message} is invalid, {@code false} otherwise.
-     * {@link #validate(Message)} method must be called first.
-     */
-    public boolean isMessageInvalid() {
-        checkValidated();
-        final boolean isInvalid = !isMessageValid;
-        return isInvalid;
-    }
-
-    /**
-     * Returns a validation error message constructed from error messages for different fields.
-     */
-    public String getErrorMessage() {
-        checkValidated();
-        return errorMessage;
-    }
-
-    @VisibleForTesting
-    /* package */ static String buildErrorMessage(List<String> messages, Descriptor msgDescriptor) {
-        final int averageMsgLength = 32;
-        final StringBuilder builder = new StringBuilder(messages.size() * averageMsgLength);
-        builder.append(format("Message %s is invalid: ", msgDescriptor.getFullName()));
-        for (int i = 0; i < messages.size() ; i++) {
-            final String msg = messages.get(i);
-            builder.append(msg);
-            final boolean isLast = i == (messages.size() - 1);
-            if (isLast) {
-                builder.append('.');
-            } else {
-                builder.append("; ");
-            }
-        }
-        return builder.toString();
-    }
-
-    private void checkValidated() {
-        if (!isValidated) {
-            throw new IllegalStateException("'validate()' method was not called.");
-        }
+        return result;
     }
 }
