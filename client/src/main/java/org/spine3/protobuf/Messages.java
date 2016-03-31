@@ -22,8 +22,12 @@ package org.spine3.protobuf;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
@@ -209,4 +213,55 @@ public class Messages {
         }
     }
 
+    /**
+     * Creates a new StringValue wrapping the passed string.
+     *
+     * @param value the value to wrap
+     * @return a new StringValue instance
+     */
+    public static StringValue newStringValue(String value) {
+        final StringValue result = StringValue.newBuilder()
+                .setValue(value)
+                .build();
+        return result;
+    }
+
+    /**
+     * Creates a new DoubleValue wrapping the passed number.
+     *
+     * @param value the value to wrap
+     * @return a new DoubleValue instance
+     */
+    public static DoubleValue newDoubleValue(double value) {
+        final DoubleValue result = DoubleValue.newBuilder()
+                .setValue(value)
+                .build();
+        return result;
+    }
+
+    /**
+     * Creates a new Int32Value wrapping the passed number.
+     *
+     * @param value the value to wrap
+     * @return a new Int32Value instance
+     */
+    public static Int32Value newIntegerValue(int value) {
+        final Int32Value result = Int32Value.newBuilder()
+                .setValue(value)
+                .build();
+        return result;
+    }
+
+    /**
+     * Creates a new Int64Value wrapping the passed number.
+     *
+     * @param value the value to wrap
+     * @return a new Int64Value instance
+     */
+    public static Int64Value newLongValue(long value) {
+        final Int64Value result = Int64Value.newBuilder()
+                .setValue(value)
+                .build();
+        return result;
+    }
 }
