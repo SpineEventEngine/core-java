@@ -80,8 +80,6 @@ message ConstraintViolation {
     repeated ConstraintViolation violations = 5;
 }
 
-// TODO:2016-03-25:alexander.litus: error messages format
-
 // If the field type is `message`, it must be set to a non-default instance;
 // if it is `string` or `bytes`, the value must not be an empty string or array.
 // Other field types are not applicable.
