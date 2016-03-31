@@ -118,9 +118,10 @@ import static org.spine3.validation.options.Time.*;
     }
 
     private static boolean isTimeInvalid(Timestamp time, Time when, Timestamp now) {
-        final boolean mustBeInFutureButIsNot = (when == FUTURE) && !isAfter(time, /*than*/ now);
-        final boolean mustBeInPastButIsNot = (when == PAST) && !isAfter(now, /*than*/ time);
-        final boolean isInvalid = mustBeInFutureButIsNot || mustBeInPastButIsNot;
+        final boolean isValid = (when == FUTURE) ?
+                                isAfter(time, /*than*/ now) :
+                                isAfter(now, /*than*/ time);
+        final boolean isInvalid = !isValid;
         return isInvalid;
     }
 
