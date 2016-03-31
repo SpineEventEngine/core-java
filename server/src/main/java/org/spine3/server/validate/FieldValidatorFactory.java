@@ -25,7 +25,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
-import org.spine3.Internal;
 
 import java.util.List;
 
@@ -36,13 +35,12 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-@Internal
-public class FieldValidatorFactory {
+/* package */ class FieldValidatorFactory {
 
     /**
      * Creates a new factory instance.
      */
-    public static FieldValidatorFactory newInstance() {
+    /* package */ static FieldValidatorFactory newInstance() {
         return new FieldValidatorFactory();
     }
 
@@ -57,25 +55,25 @@ public class FieldValidatorFactory {
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
-                final ImmutableList<Message> messages = toValuesList(fieldValue);
+                final ImmutableList<Message> messages = toValueList(fieldValue);
                 validator = new MessageFieldValidator(descriptor, messages);
                 break;
-            case INT:
+            case INT: // TODO:2016-03-30:alexander.litus: add int and float validators for correct value wrapping
             case LONG:
-                final ImmutableList<Long> longs = toValuesList(fieldValue);
+                final ImmutableList<Long> longs = toValueList(fieldValue);
                 validator = new LongFieldValidator(descriptor, longs);
                 break;
             case FLOAT:
             case DOUBLE:
-                final ImmutableList<Double> doubles = toValuesList(fieldValue);
+                final ImmutableList<Double> doubles = toValueList(fieldValue);
                 validator = new DoubleFieldValidator(descriptor, doubles);
                 break;
             case STRING:
-                final ImmutableList<String> strings = toValuesList(fieldValue);
+                final ImmutableList<String> strings = toValueList(fieldValue);
                 validator = new StringFieldValidator(descriptor, strings);
                 break;
             case BYTE_STRING:
-                final ImmutableList<ByteString> byteStrings = toValuesList(fieldValue);
+                final ImmutableList<ByteString> byteStrings = toValueList(fieldValue);
                 validator = new ByteStringFieldValidator(descriptor, byteStrings);
                 break;
             case BOOLEAN:
@@ -87,7 +85,7 @@ public class FieldValidatorFactory {
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})
-    private static <T> ImmutableList<T> toValuesList(Object fieldValue) {
+    private static <T> ImmutableList<T> toValueList(Object fieldValue) {
         if (fieldValue instanceof List) {
             return ImmutableList.copyOf((List<T>) fieldValue);
         } else {
