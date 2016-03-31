@@ -23,20 +23,17 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.validation.options.ConstraintViolation;
 
 import static java.lang.Math.abs;
 import static org.spine3.protobuf.Messages.newDoubleValue;
 import static org.spine3.protobuf.Messages.toAny;
 
 /**
- * Validates fields of floating point number types.
+ * Validates fields of {@link Double} types.
  *
  * @author Alexander Litus
  */
-/* package */ class DoubleFieldValidator extends NumberFieldValidator<Double> {
-
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
+/* package */ class DoubleFieldValidator extends FloatFieldValidatorBase<Double> {
 
     /**
      * Creates a new validator instance.
@@ -46,18 +43,6 @@ import static org.spine3.protobuf.Messages.toAny;
      */
     /* package */ DoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues) {
         super(descriptor, fieldValues);
-    }
-
-    @Override
-    @SuppressWarnings("RefusedBequest")
-    protected void validateEntityId() {
-        final Double value = getValues().get(0);
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(INVALID_ID_TYPE_MSG)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value))
-                .build();
-        addViolation(violation);
     }
 
     @Override

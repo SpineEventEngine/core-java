@@ -51,37 +51,34 @@ import static java.lang.String.format;
      * @param fieldValue a value of the field to validate
      */
     /* package */ FieldValidator<?> create(FieldDescriptor descriptor, Object fieldValue) {
-        final FieldValidator<?> validator;
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
                 final ImmutableList<Message> messages = toValueList(fieldValue);
-                validator = new MessageFieldValidator(descriptor, messages);
-                break;
-            case INT: // TODO:2016-03-30:alexander.litus: add int and float validators for correct value wrapping
+                return new MessageFieldValidator(descriptor, messages);
+            case INT:
+                final ImmutableList<Integer> ints = toValueList(fieldValue);
+                return new IntegerFieldValidator(descriptor, ints);
             case LONG:
                 final ImmutableList<Long> longs = toValueList(fieldValue);
-                validator = new LongFieldValidator(descriptor, longs);
-                break;
+                return new LongFieldValidator(descriptor, longs);
             case FLOAT:
+                final ImmutableList<Float> floats = toValueList(fieldValue);
+                return new FloatFieldValidator(descriptor, floats);
             case DOUBLE:
                 final ImmutableList<Double> doubles = toValueList(fieldValue);
-                validator = new DoubleFieldValidator(descriptor, doubles);
-                break;
+                return new DoubleFieldValidator(descriptor, doubles);
             case STRING:
                 final ImmutableList<String> strings = toValueList(fieldValue);
-                validator = new StringFieldValidator(descriptor, strings);
-                break;
+                return new StringFieldValidator(descriptor, strings);
             case BYTE_STRING:
                 final ImmutableList<ByteString> byteStrings = toValueList(fieldValue);
-                validator = new ByteStringFieldValidator(descriptor, byteStrings);
-                break;
+                return new ByteStringFieldValidator(descriptor, byteStrings);
             case BOOLEAN:
             case ENUM:
             default:
                 throw fieldTypeIsNotSupported(descriptor);
         }
-        return validator;
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})

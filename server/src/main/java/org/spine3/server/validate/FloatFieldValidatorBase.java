@@ -21,19 +21,17 @@
 package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-
-import static java.lang.Math.abs;
-import static org.spine3.protobuf.Messages.newLongValue;
-import static org.spine3.protobuf.Messages.toAny;
+import org.spine3.validation.options.ConstraintViolation;
 
 /**
- * Validates fields of {@link Long} number types.
+ * A base for floating point number field validators.
  *
  * @author Alexander Litus
  */
-/* package */ class LongFieldValidator extends NumberFieldValidator<Long> {
+/* package */ abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
+
+    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.
@@ -41,25 +39,19 @@ import static org.spine3.protobuf.Messages.toAny;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues) {
+    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues) {
         super(descriptor, fieldValues);
     }
 
     @Override
-    protected Long toNumber(String value) {
-        final Long number = Long.valueOf(value);
-        return number;
-    }
-
-    @Override
-    protected Long getAbs(Long value) {
-        final Long abs = abs(value);
-        return abs;
-    }
-
-    @Override
-    protected Any wrapToMsgAndAny(Long value) {
-        final Any any = toAny(newLongValue(value));
-        return any;
+    @SuppressWarnings("RefusedBequest")
+    protected void validateEntityId() {
+        final V value = getValues().get(0);
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMessage(INVALID_ID_TYPE_MSG)
+                .setFieldPath(getFieldPath())
+                .setFieldValue(wrapToMsgAndAny(value))
+                .build();
+        addViolation(violation);
     }
 }

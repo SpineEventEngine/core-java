@@ -25,15 +25,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Messages.newLongValue;
+import static org.spine3.protobuf.Messages.newIntegerValue;
 import static org.spine3.protobuf.Messages.toAny;
 
 /**
- * Validates fields of {@link Long} number types.
+ * Validates fields of {@link Integer} number types.
  *
  * @author Alexander Litus
  */
-/* package */ class LongFieldValidator extends NumberFieldValidator<Long> {
+/* package */ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     /**
      * Creates a new validator instance.
@@ -41,25 +41,25 @@ import static org.spine3.protobuf.Messages.toAny;
      * @param descriptor a descriptor of the field to validate
      * @param fieldValues field values to validate
      */
-    /* package */ LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues) {
+    /* package */ IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues) {
         super(descriptor, fieldValues);
     }
 
     @Override
-    protected Long toNumber(String value) {
-        final Long number = Long.valueOf(value);
+    protected Integer toNumber(String value) {
+        final Integer number = Integer.valueOf(value);
         return number;
     }
 
     @Override
-    protected Long getAbs(Long value) {
-        final Long abs = abs(value);
+    protected Integer getAbs(Integer value) {
+        final Integer abs = abs(value);
         return abs;
     }
 
     @Override
-    protected Any wrapToMsgAndAny(Long value) {
-        final Any any = toAny(newLongValue(value));
+    protected Any wrapToMsgAndAny(Integer value) {
+        final Any any = toAny(newIntegerValue(value));
         return any;
     }
 }
