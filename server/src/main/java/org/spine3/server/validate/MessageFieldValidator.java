@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.Time;
 import org.spine3.validation.options.TimeOption;
@@ -36,7 +37,8 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isAfter;
 import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validation.options.Time.*;
+import static org.spine3.validation.options.Time.FUTURE;
+import static org.spine3.validation.options.Time.UNDEFINED;
 
 /**
  * Validates fields of type {@link Message}.
@@ -53,10 +55,11 @@ import static org.spine3.validation.options.Time.*;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldValues values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ MessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues) {
-        super(descriptor, fieldValues);
+    /* package */ MessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validOption = getFieldOption(ValidationProto.valid);
         this.isFieldTimestamp = isTimestamp();
@@ -87,7 +90,7 @@ import static org.spine3.validation.options.Time.*;
             return;
         }
         for (Message value : getValues()) {
-            final MessageValidator validator = new MessageValidator();
+            final MessageValidator validator = new MessageValidator(getFieldPath());
             final List<ConstraintViolation> violations = validator.validate(value);
             if (!violations.isEmpty()) {
                 addViolation(newValidViolation(value, violations));
@@ -143,7 +146,7 @@ import static org.spine3.validation.options.Time.*;
                 .setMessage(msg)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(toAny(fieldValue))
-                .addAllViolations(violations)
+                .addAllViolation(violations)
                 .build();
         return violation;
     }

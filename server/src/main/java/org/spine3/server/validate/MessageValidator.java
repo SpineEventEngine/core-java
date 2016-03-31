@@ -24,6 +24,7 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
+import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 
 import java.util.List;
@@ -40,6 +41,25 @@ public class MessageValidator {
 
     private final FieldValidatorFactory fieldValidatorFactory = FieldValidatorFactory.newInstance();
 
+    private final FieldPath rootFieldPath;
+
+    /**
+     * Creates a new validator instance.
+     */
+    public MessageValidator() {
+        this.rootFieldPath = FieldPath.getDefaultInstance();
+    }
+
+    /**
+     * Creates a new validator instance.
+     * Use this constructor for inner messages (which are marked with "valid" option in Protobuf).
+     *
+     * @param rootFieldPath the path to the message field which is the root for this message
+     */
+    /* package */ MessageValidator(FieldPath rootFieldPath) {
+        this.rootFieldPath = rootFieldPath;
+    }
+
     /**
      * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
      *
@@ -51,7 +71,7 @@ public class MessageValidator {
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> validator = fieldValidatorFactory.create(field, value);
+            final FieldValidator<?> validator = fieldValidatorFactory.create(field, value, rootFieldPath);
             final List<ConstraintViolation> violations = validator.validate();
             result.addAll(violations);
         }

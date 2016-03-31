@@ -23,6 +23,7 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.base.FieldPath;
 
 import static java.lang.Math.abs;
 import static org.spine3.protobuf.Messages.newFloatValue;
@@ -39,10 +40,11 @@ import static org.spine3.protobuf.Messages.toAny;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldValues values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues) {
-        super(descriptor, fieldValues);
+    /* package */ FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
     @Override

@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Int32Value;
+import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.DecimalMaxOption;
 import org.spine3.validation.options.DecimalMinOption;
@@ -62,10 +63,11 @@ import java.util.regex.Pattern;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldValues values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues) {
-        super(descriptor, fieldValues);
+    protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
         this.minDecimalOption = getFieldOption(ValidationProto.decimalMin);
         this.isMinDecimalInclusive = minDecimalOption.getInclusive();
         this.maxDecimalOption = getFieldOption(ValidationProto.decimalMax);

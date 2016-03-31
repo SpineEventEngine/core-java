@@ -22,6 +22,7 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.PatternOption;
 import org.spine3.validation.options.ValidationProto;
@@ -45,10 +46,11 @@ import static org.spine3.protobuf.Messages.toAny;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldValues values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ StringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> fieldValues) {
-        super(descriptor, fieldValues);
+    /* package */ StringFieldValidator(FieldDescriptor descriptor, ImmutableList<String> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
         this.patternOption = getFieldOption(ValidationProto.pattern);
         this.regex = patternOption.getRegex();
     }

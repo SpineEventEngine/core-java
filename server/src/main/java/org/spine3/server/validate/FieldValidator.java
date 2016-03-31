@@ -48,32 +48,35 @@ import static org.spine3.base.Commands.isCommandsFile;
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
 
-    private final List<ConstraintViolation> violations = newLinkedList();
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
+    private final FieldPath fieldPath;
+
+    private final List<ConstraintViolation> violations = newLinkedList();
+
     private final boolean isFileBelongsToEntity;
     private final boolean isCommandsFile;
     private final boolean isFirstField;
-    private final FieldPath fieldPath;
     private final RequiredOption requiredOption;
 
     /**
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
+     * @param values values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values) {
+    protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values, FieldPath rootFieldPath) {
         this.fieldDescriptor = descriptor;
         this.values = values;
+        this.fieldPath = rootFieldPath.toBuilder()
+                .addFieldName(fieldDescriptor.getName())
+                .build();
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isFileBelongsToEntity = belongsToEntity(file);
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
-        // TODO:2016-03-30:alexander.litus: add full field path (if this field is nested)
-        this.fieldPath = FieldPath.newBuilder()
-                                  .addFieldName(fieldDescriptor.getName())
-                                  .build();
-        requiredOption = getFieldOption(ValidationProto.required);
+        this.requiredOption = getFieldOption(ValidationProto.required);
     }
 
     /**
@@ -101,7 +104,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         if (fieldDescriptor.isRepeated()) {
             final ConstraintViolation violation = ConstraintViolation.newBuilder()
                     .setMessage(ENTITY_ID_REPEATED_FIELD_MSG)
-                    .setFieldPath(fieldPath)
+                    .setFieldPath(getFieldPath())
                     .build();
             addViolation(violation);
             return;
@@ -171,7 +174,7 @@ import static org.spine3.base.Commands.isCommandsFile;
         final String msg = getErrorMessage(option, option.getMsg());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMessage(msg)
-                .setFieldPath(fieldPath)
+                .setFieldPath(getFieldPath())
                 .build();
         return violation;
     }
@@ -209,6 +212,9 @@ import static org.spine3.base.Commands.isCommandsFile;
         return result;
     }
 
+    /**
+     * Returns a path to the current field.
+     */
     protected FieldPath getFieldPath() {
         return fieldPath;
     }

@@ -22,6 +22,7 @@ package org.spine3.server.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 
 /**
@@ -37,10 +38,11 @@ import org.spine3.validation.options.ConstraintViolation;
      * Creates a new validator instance.
      *
      * @param descriptor a descriptor of the field to validate
-     * @param fieldValues field values to validate
+     * @param fieldValues values to validate
+     * @param rootFieldPath a path to the root field (if present)
      */
-    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues) {
-        super(descriptor, fieldValues);
+    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
     @Override

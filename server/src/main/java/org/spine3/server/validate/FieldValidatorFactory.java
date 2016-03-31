@@ -25,6 +25,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
+import org.spine3.base.FieldPath;
 
 import java.util.List;
 
@@ -46,34 +47,34 @@ import static java.lang.String.format;
 
     /**
      * Creates a new validator instance according to the field type and validates the field.
-     *
-     * @param descriptor a descriptor of the field to validate
+     *  @param descriptor a descriptor of the field to validate
      * @param fieldValue a value of the field to validate
+     * @param rootFieldPath a path to the root field
      */
-    /* package */ FieldValidator<?> create(FieldDescriptor descriptor, Object fieldValue) {
+    /* package */ FieldValidator<?> create(FieldDescriptor descriptor, Object fieldValue, FieldPath rootFieldPath) {
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
                 final ImmutableList<Message> messages = toValueList(fieldValue);
-                return new MessageFieldValidator(descriptor, messages);
+                return new MessageFieldValidator(descriptor, messages, rootFieldPath);
             case INT:
                 final ImmutableList<Integer> ints = toValueList(fieldValue);
-                return new IntegerFieldValidator(descriptor, ints);
+                return new IntegerFieldValidator(descriptor, ints, rootFieldPath);
             case LONG:
                 final ImmutableList<Long> longs = toValueList(fieldValue);
-                return new LongFieldValidator(descriptor, longs);
+                return new LongFieldValidator(descriptor, longs, rootFieldPath);
             case FLOAT:
                 final ImmutableList<Float> floats = toValueList(fieldValue);
-                return new FloatFieldValidator(descriptor, floats);
+                return new FloatFieldValidator(descriptor, floats, rootFieldPath);
             case DOUBLE:
                 final ImmutableList<Double> doubles = toValueList(fieldValue);
-                return new DoubleFieldValidator(descriptor, doubles);
+                return new DoubleFieldValidator(descriptor, doubles, rootFieldPath);
             case STRING:
                 final ImmutableList<String> strings = toValueList(fieldValue);
-                return new StringFieldValidator(descriptor, strings);
+                return new StringFieldValidator(descriptor, strings, rootFieldPath);
             case BYTE_STRING:
                 final ImmutableList<ByteString> byteStrings = toValueList(fieldValue);
-                return new ByteStringFieldValidator(descriptor, byteStrings);
+                return new ByteStringFieldValidator(descriptor, byteStrings, rootFieldPath);
             case BOOLEAN:
             case ENUM:
             default:

@@ -77,7 +77,7 @@ message ConstraintViolation {
     google.protobuf.Any field_value = 4;
 
     // Constraint violations for fields of this message field.
-    repeated ConstraintViolation violations = 5;
+    repeated ConstraintViolation violation = 5;
 }
 
 // If the field type is `message`, it must be set to a non-default instance;
