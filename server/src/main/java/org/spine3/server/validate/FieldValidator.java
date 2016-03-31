@@ -51,7 +51,6 @@ import static org.spine3.base.Commands.isCommandsFile;
     private final List<ConstraintViolation> violations = newLinkedList();
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
-    private final String fieldName;
     private final boolean isFileBelongsToEntity;
     private final boolean isCommandsFile;
     private final boolean isFirstField;
@@ -66,14 +65,13 @@ import static org.spine3.base.Commands.isCommandsFile;
     protected FieldValidator(FieldDescriptor descriptor, ImmutableList<V> values) {
         this.fieldDescriptor = descriptor;
         this.values = values;
-        this.fieldName = fieldDescriptor.getName();
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isFileBelongsToEntity = belongsToEntity(file);
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
         // TODO:2016-03-30:alexander.litus: add full field path (if this field is nested)
         this.fieldPath = FieldPath.newBuilder()
-                                  .addFieldName(fieldName)
+                                  .addFieldName(fieldDescriptor.getName())
                                   .build();
         requiredOption = getFieldOption(ValidationProto.required);
     }
