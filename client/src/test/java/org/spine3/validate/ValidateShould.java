@@ -29,6 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.validation.options.ConstraintViolation;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -126,5 +127,28 @@ public class ValidateShould {
     @Test
     public void not_throw_exception_if_checked_event_id_is_valid() {
         Validate.checkValid(Events.generateId());
+    }
+
+    @Test
+    public void format_message_from_constraint_violation() {
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMsgFormat("test %s test %s")
+                .addParam("1")
+                .addParam("2")
+                .build();
+        final String formatted = Validate.toText(violation);
+
+        assertEquals("test 1 test 2", formatted);
+    }
+
+    @Test
+    public void format_message_using_params_from_constraint_violation() {
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .addParam("1")
+                .addParam("2")
+                .build();
+        final String formatted = Validate.toText("abc %s abc %s", violation);
+
+        assertEquals("abc 1 abc 2", formatted);
     }
 }

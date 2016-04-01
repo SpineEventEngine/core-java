@@ -24,12 +24,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.validation.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * This class provides general validation routines.
@@ -157,7 +157,8 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim()
+                                   .length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 
@@ -197,5 +198,34 @@ public class Validate {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getUuid(), "command ID");
         return id;
+    }
+
+    /**
+     * Returns a formatted string using the format string and parameters from the violation.
+     *
+     * @param violation violation which contains the format string and
+     *                  arguments referenced by the format specifiers in it
+     * @return a formatted string
+     * @see String#format(String, Object...)
+     */
+    public static String toText(ConstraintViolation violation) {
+        final String format = violation.getMsgFormat();
+        final List<String> params = violation.getParamList();
+        final String result = String.format(format, params.toArray());
+        return result;
+    }
+
+    /**
+     * Returns a formatted string using the specified format string and parameters from the violation.
+     *
+     * @param format a format string
+     * @param violation violation which contains arguments referenced by the format specifiers in the format string
+     * @return a formatted string
+     * @see String#format(String, Object...)
+     */
+    public static String toText(String format, ConstraintViolation violation) {
+        final List<String> params = violation.getParamList();
+        final String result = String.format(format, params.toArray());
+        return result;
     }
 }
