@@ -44,6 +44,8 @@ import org.spine3.test.validation.msg.EntityIdLongFieldValue;
 import org.spine3.test.validation.msg.EntityIdMsgFieldValue;
 import org.spine3.test.validation.msg.EntityIdRepeatedFieldValue;
 import org.spine3.test.validation.msg.EntityIdStringFieldValue;
+import org.spine3.test.validation.msg.MaxNumberFieldValue;
+import org.spine3.test.validation.msg.MinNumberFieldValue;
 import org.spine3.test.validation.msg.PatternStringFieldValue;
 import org.spine3.test.validation.msg.RepeatedRequiredMsgFieldValue;
 import org.spine3.test.validation.msg.RequiredByteStringFieldValue;
@@ -65,7 +67,7 @@ import static org.spine3.base.Identifiers.newUuid;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
 public class MessageValidatorShould {
 
     private static final double EQUAL_MIN = 16.5;
@@ -86,7 +88,10 @@ public class MessageValidatorShould {
 
     private static final String VALUE = "value";
     private static final String OUTER_MSG_FIELD = "outer_msg_field";
+
     private static final String NO_VALUE_MSG = "Value must be set.";
+    private static final String LESS_THAN_MIN_MSG = "Number must be greater than or equal to 16.5.";
+    private static final String GREATER_MAX_MSG = "Number must be less than or equal to 64.5.";
 
     private final MessageValidator validator = new MessageValidator();
 
@@ -181,7 +186,8 @@ public class MessageValidatorShould {
         final ConstraintViolation violation = firstViolation();
         assertEquals(NO_VALUE_MSG, violation.getMsgFormat());
         assertFieldPathIs(violation, VALUE);
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
@@ -235,11 +241,12 @@ public class MessageValidatorShould {
                 format(firstViolation().getMsgFormat(), firstViolation().getParam(0))
         );
         assertFieldPathIs(violation, VALUE);
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
-     * Decimal min value option tests.
+     * Decimal min option tests.
      */
 
     @Test
@@ -250,93 +257,165 @@ public class MessageValidatorShould {
     }
 
     @Test
-    public void find_out_that_number_is_greater_than_min_inclusive() {
+    public void find_out_that_number_is_greater_than_decimal_min_inclusive() {
         minDecimalNumberTest(GREATER_THAN_MIN, /*inclusive=*/true, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_number_is_equal_to_min_inclusive() {
+    public void find_out_that_number_is_equal_to_decimal_min_inclusive() {
         minDecimalNumberTest(EQUAL_MIN, /*inclusive=*/true, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_number_is_less_than_min_inclusive() {
+    public void find_out_that_number_is_less_than_decimal_min_inclusive() {
         minDecimalNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
     }
 
     @Test
-    public void find_out_that_number_is_greater_than_min_NOT_inclusive() {
+    public void find_out_that_number_is_greater_than_decimal_min_NOT_inclusive() {
         minDecimalNumberTest(GREATER_THAN_MIN, /*inclusive=*/false, /*valid=*/true);
     }
 
     @Test
-    public void find_out_that_number_is_equal_to_min_NOT_inclusive() {
+    public void find_out_that_number_is_equal_to_decimal_min_NOT_inclusive() {
         minDecimalNumberTest(EQUAL_MIN, /*inclusive=*/false, /*valid=*/false);
     }
 
     @Test
-    public void find_out_that_number_is_less_than_min_NOT_inclusive() {
+    public void find_out_that_number_is_less_than_decimal_min_NOT_inclusive() {
         minDecimalNumberTest(LESS_THAN_MIN, /*inclusive=*/false, /*valid=*/false);
     }
 
     @Test
-    public void provide_one_valid_violation_if_number_is_less_than_min() {
+    public void provide_one_valid_violation_if_number_is_less_than_decimal_min() {
         minDecimalNumberTest(LESS_THAN_MIN, /*inclusive=*/true, /*valid=*/false);
 
         assertEquals(1, violations.size());
         final ConstraintViolation violation = firstViolation();
-        assertEquals(
-                "Number must be greater than or equal to 16.5.",
-                format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1))
-        );
+        assertEquals(LESS_THAN_MIN_MSG, format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1)));
+        assertFieldPathIs(violation, VALUE);
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
+    }
+
+    /*
+     * Decimal max option tests.
+     */
+
+    @Test
+    public void find_out_that_number_is_greater_than_decimal_max_inclusive() {
+        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+    }
+
+    @Test
+    public void find_out_that_number_is_equal_to_decimal_max_inclusive() {
+        maxDecimalNumberTest(EQUAL_MAX, /*inclusive=*/true, /*valid=*/true);
+    }
+
+    @Test
+    public void find_out_that_number_is_less_than_decimal_max_inclusive() {
+        maxDecimalNumberTest(LESS_THAN_MAX, /*inclusive=*/true, /*valid=*/true);
+    }
+
+    @Test
+    public void find_out_that_number_is_greater_than_decimal_max_NOT_inclusive() {
+        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/false, /*valid=*/false);
+    }
+
+    @Test
+    public void find_out_that_number_is_equal_to_decimal_max_NOT_inclusive() {
+        maxDecimalNumberTest(EQUAL_MAX, /*inclusive=*/false, /*valid=*/false);
+    }
+
+    @Test
+    public void find_out_that_number_is_less_than_decimal_max_NOT_inclusive() {
+        maxDecimalNumberTest(LESS_THAN_MAX, /*inclusive=*/false, /*valid=*/true);
+    }
+
+    @Test
+    public void provide_one_valid_violation_if_number_is_greater_than_decimal_max() {
+        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+
+        assertEquals(1, violations.size());
+        final ConstraintViolation violation = firstViolation();
+        assertEquals(GREATER_MAX_MSG, format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1)));
         assertFieldPathIs(violation, VALUE);
         assertTrue(violation.getViolationList().isEmpty());
     }
 
     /*
-     * Decimal max value option tests.
+     * Min option tests.
+     */
+
+    @Test
+    public void find_out_that_number_is_greater_than_min() {
+        final MinNumberFieldValue msg = MinNumberFieldValue.newBuilder().setValue(GREATER_THAN_MIN).build();
+        validate(msg);
+        assertIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_number_is_equal_to_min() {
+        final MinNumberFieldValue msg = MinNumberFieldValue.newBuilder().setValue(EQUAL_MIN).build();
+        validate(msg);
+        assertIsValid(true);
+    }
+
+    @Test
+    public void find_out_that_number_is_less_than_min() {
+        final MinNumberFieldValue msg = MinNumberFieldValue.newBuilder().setValue(LESS_THAN_MIN).build();
+        validate(msg);
+        assertIsValid(false);
+    }
+
+    @Test
+    public void provide_one_valid_violation_if_number_is_less_than_min() {
+        final MinNumberFieldValue msg = MinNumberFieldValue.newBuilder().setValue(LESS_THAN_MIN).build();
+
+        validate(msg);
+
+        assertEquals(1, violations.size());
+        final ConstraintViolation violation = firstViolation();
+        assertEquals(LESS_THAN_MIN_MSG, format(violation.getMsgFormat(), violation.getParam(0)));
+        assertFieldPathIs(violation, VALUE);
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
+    }
+
+    /*
+     * Max option tests.
      */
 
     @Test
     public void find_out_that_number_is_greater_than_max_inclusive() {
-        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+        final MaxNumberFieldValue msg = MaxNumberFieldValue.newBuilder().setValue(GREATER_THAN_MAX).build();
+        validate(msg);
+        assertIsValid(false);
     }
 
     @Test
     public void find_out_that_number_is_equal_to_max_inclusive() {
-        maxDecimalNumberTest(EQUAL_MAX, /*inclusive=*/true, /*valid=*/true);
+        final MaxNumberFieldValue msg = MaxNumberFieldValue.newBuilder().setValue(EQUAL_MAX).build();
+        validate(msg);
+        assertIsValid(true);
     }
 
     @Test
     public void find_out_that_number_is_less_than_max_inclusive() {
-        maxDecimalNumberTest(LESS_THAN_MAX, /*inclusive=*/true, /*valid=*/true);
-    }
-
-    @Test
-    public void find_out_that_number_is_greater_than_max_NOT_inclusive() {
-        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/false, /*valid=*/false);
-    }
-
-    @Test
-    public void find_out_that_number_is_equal_to_max_NOT_inclusive() {
-        maxDecimalNumberTest(EQUAL_MAX, /*inclusive=*/false, /*valid=*/false);
-    }
-
-    @Test
-    public void find_out_that_number_is_less_than_max_NOT_inclusive() {
-        maxDecimalNumberTest(LESS_THAN_MAX, /*inclusive=*/false, /*valid=*/true);
+        final MaxNumberFieldValue msg = MaxNumberFieldValue.newBuilder().setValue(LESS_THAN_MAX).build();
+        validate(msg);
+        assertIsValid(true);
     }
 
     @Test
     public void provide_one_valid_violation_if_number_is_greater_than_max() {
-        maxDecimalNumberTest(GREATER_THAN_MAX, /*inclusive=*/true, /*valid=*/false);
+        final MaxNumberFieldValue msg = MaxNumberFieldValue.newBuilder().setValue(GREATER_THAN_MAX).build();
+
+        validate(msg);
 
         assertEquals(1, violations.size());
         final ConstraintViolation violation = firstViolation();
-        assertEquals(
-                "Number must be less than or equal to 64.5.",
-                format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1))
-        );
+        assertEquals(GREATER_MAX_MSG, format(violation.getMsgFormat(), violation.getParam(0)));
         assertFieldPathIs(violation, VALUE);
         assertTrue(violation.getViolationList().isEmpty());
     }
