@@ -133,8 +133,6 @@ public class MessagesShould {
 
     @Test
     public void return_descriptor_by_message_class() {
-        assertEquals(StringValue.getDefaultInstance().getDescriptorForType(),
-                     Messages.getClassDescriptor(StringValue.class));
+        assertEquals(StringValue.getDescriptor(), Messages.getClassDescriptor(StringValue.class));
     }
-
 }
