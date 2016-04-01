@@ -30,7 +30,7 @@ import static org.spine3.protobuf.Values.newIntegerValue;
 import static org.spine3.protobuf.Messages.toAny;
 
 /**
- * Validates fields of {@link Integer} number types.
+ * Validates fields of {@link Integer} types.
  *
  * @author Alexander Litus
  */
