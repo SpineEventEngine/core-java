@@ -79,7 +79,6 @@ import static org.spine3.validation.options.Time.UNDEFINED;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest") // the base method call is redundant
     protected boolean isValueNotSet(Message value) {
         final boolean isNotSet = isDefault(value);
         return isNotSet;
@@ -140,7 +139,7 @@ import static org.spine3.validation.options.Time.UNDEFINED;
         return violation;
     }
 
-    private ConstraintViolation newValidViolation(Message fieldValue, List<ConstraintViolation> violations) {
+    private ConstraintViolation newValidViolation(Message fieldValue, Iterable<ConstraintViolation> violations) {
         final String msg = getErrorMsgFormat(validOption, validOption.getMsg());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)

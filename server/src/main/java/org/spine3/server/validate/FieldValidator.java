@@ -202,7 +202,6 @@ import static org.spine3.base.Commands.isCommandsFile;
      * (if the current Protobuf file is for entity commands and the field is the first in a command message);
      * {@code false} otherwise.
      */
-    @SuppressWarnings("RedundantIfStatement")
     private boolean isRequiredEntityIdField() {
         final boolean result = isFileBelongsToEntity && isCommandsFile && isFirstField;
         return result;

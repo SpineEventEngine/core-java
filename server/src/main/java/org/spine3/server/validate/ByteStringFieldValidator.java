@@ -66,7 +66,6 @@ import java.util.List;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest") // the base method call is redundant
     protected boolean isValueNotSet(ByteString value) {
         final boolean isNotSet = value.isEmpty();
         return isNotSet;

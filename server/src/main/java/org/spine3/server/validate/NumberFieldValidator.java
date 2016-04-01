@@ -103,7 +103,6 @@ import java.util.regex.Pattern;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest")
     protected boolean isValueNotSet(V value) {
         final int intValue = value.intValue();
         final boolean isNotSet = intValue == 0;

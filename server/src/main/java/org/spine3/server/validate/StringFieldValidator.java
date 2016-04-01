@@ -86,7 +86,6 @@ import static org.spine3.protobuf.Messages.toAny;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest") // the base method call is redundant
     protected boolean isValueNotSet(String value) {
         final boolean isNotSet = value.isEmpty();
         return isNotSet;
