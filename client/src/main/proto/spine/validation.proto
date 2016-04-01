@@ -159,7 +159,7 @@ message DecimalMaxOption {
 //
 // Example:
 //
-// double value = 1 [(min).value = "10.5", (min).inclusive = true];
+// double value = 1 [(min).value = "10.5"];
 //
 message MinOption {
     // The default error message format string.
@@ -179,7 +179,7 @@ message MinOption {
 //
 // Example:
 //
-// double value = 1 [(max).value = "10.5", (max).inclusive = true];
+// double value = 1 [(max).value = "10.5"];
 //
 message MaxOption {
     // The default error message format string.
