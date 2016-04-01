@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Int32Value;
+import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
 import org.spine3.validation.options.ConstraintViolation;
 import org.spine3.validation.options.DecimalMaxOption;
@@ -46,12 +47,11 @@ import java.util.regex.Pattern;
 /* package */ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
-    private static final String OR_EQUAL_TO = "or equal to ";
 
-    private final DecimalMinOption minDecimalOption;
+    private final DecimalMinOption minDecimalOpt;
     private final boolean isMinDecimalInclusive;
 
-    private final DecimalMaxOption maxDecimalOption;
+    private final DecimalMaxOption maxDecimalOpt;
     private final boolean isMaxDecimalInclusive;
 
     private final MinOption minOption;
@@ -68,14 +68,29 @@ import java.util.regex.Pattern;
      */
     protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
-        this.minDecimalOption = getFieldOption(ValidationProto.decimalMin);
-        this.isMinDecimalInclusive = minDecimalOption.getInclusive();
-        this.maxDecimalOption = getFieldOption(ValidationProto.decimalMax);
-        this.isMaxDecimalInclusive = maxDecimalOption.getInclusive();
+        this.minDecimalOpt = getFieldOption(ValidationProto.decimalMin);
+        this.isMinDecimalInclusive = minDecimalOpt.getInclusive();
+        this.maxDecimalOpt = getFieldOption(ValidationProto.decimalMax);
+        this.isMaxDecimalInclusive = maxDecimalOpt.getInclusive();
         this.minOption = getFieldOption(ValidationProto.min);
         this.maxOption = getFieldOption(ValidationProto.max);
         this.digitsOption = getFieldOption(ValidationProto.digits);
     }
+
+    /**
+     * Converts a string representation to a number.
+     */
+    protected abstract V toNumber(String value);
+
+    /**
+     * Returns an absolute value of the number.
+     */
+    protected abstract V getAbs(V number);
+
+    /**
+     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
+     */
+    protected abstract Any wrap(V value);
 
     @Override
     protected List<ConstraintViolation> validate() {
@@ -95,79 +110,72 @@ import java.util.regex.Pattern;
         return isNotSet;
     }
 
-    /**
-     * Converts a string representation to a number.
-     */
-    protected abstract V toNumber(String value);
-
-    /**
-     * Returns an absolute value of the number.
-     */
-    protected abstract V getAbs(V number);
-
-    /**
-     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
-     */
-    protected abstract Any wrap(V value);
-
     private void validateRangeOptions(V value) {
-        if (!fitsToOptionDecimalMin(value)) {
-            addViolation(newDecimalMinViolation(value));
+        if (notFitToDecimalMin(value)) {
+            addViolation(
+                    newDecimalViolation(value, minDecimalOpt, minDecimalOpt.getMsg(),
+                            minDecimalOpt.getInclusive(), minDecimalOpt.getValue()));
         }
-        if (!fitsToOptionDecimalMax(value)) {
-            addViolation(newDecimalMaxViolation(value));
+        if (notFitToDecimalMax(value)) {
+            addViolation(
+                    newDecimalViolation(value, maxDecimalOpt, maxDecimalOpt.getMsg(),
+                            maxDecimalOpt.getInclusive(), maxDecimalOpt.getValue()));
         }
-        if (!fitsToOptionMin(value)) {
-            addViolation(newMinViolation(value));
+        if (notFitToMin(value)) {
+            addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsg(), minOption.getValue()));
         }
-        if (!fitsToOptionMax(value)) {
-            addViolation(newMaxViolation(value));
+        if (notFitToMax(value)) {
+            addViolation(newMinOrMaxViolation(value, maxOption, maxOption.getMsg(), maxOption.getValue()));
         }
     }
 
-    private boolean fitsToOptionDecimalMin(V value) {
-        final String minAsString = minDecimalOption.getValue();
+    private boolean notFitToDecimalMin(V value) {
+        final String minAsString = minDecimalOpt.getValue();
         if (minAsString.isEmpty()) {
-            return true;
+            return false;
         }
         final V min = toNumber(minAsString);
         final int comparisonResult = value.compareTo(min);
         final boolean fits = isMinDecimalInclusive ?
                              comparisonResult >= 0 :
                              comparisonResult > 0;
-        return fits;
+        final boolean notFit = !fits;
+        return notFit;
     }
 
-    private boolean fitsToOptionDecimalMax(V value) {
-        final String maxAsString = maxDecimalOption.getValue();
+    private boolean notFitToDecimalMax(V value) {
+        final String maxAsString = maxDecimalOpt.getValue();
         if (maxAsString.isEmpty()) {
-            return true;
+            return false;
         }
         final V max = toNumber(maxAsString);
         final boolean fits = isMaxDecimalInclusive ?
                              value.compareTo(max) <= 0 :
                              value.compareTo(max) < 0;
-        return fits;
+        final boolean notFit = !fits;
+        return notFit;
     }
 
-    private boolean fitsToOptionMin(V value) {
+    private boolean notFitToMin(V value) {
         final String minAsString = minOption.getValue();
         if (minAsString.isEmpty()) {
-            return true;
+            return false;
         }
         final V min = toNumber(minAsString);
         final boolean isGreaterThanOrEqualToMin = value.compareTo(min) >= 0;
-        return isGreaterThanOrEqualToMin;
+        final boolean notFits = !isGreaterThanOrEqualToMin;
+        return notFits;
     }
 
-    private boolean fitsToOptionMax(V value) {
+    private boolean notFitToMax(V value) {
         final String maxAsString = maxOption.getValue();
         if (maxAsString.isEmpty()) {
-            return true;
+            return false;
         }
         final V max = toNumber(maxAsString);
         final boolean isLessThanOrEqualToMax = value.compareTo(max) <= 0;
-        return isLessThanOrEqualToMax;
+        final boolean notFit = !isLessThanOrEqualToMax;
+        return notFit;
     }
 
     private void validateDigitsOption(V value) {
@@ -186,43 +194,26 @@ import java.util.regex.Pattern;
         }
     }
 
-    private ConstraintViolation newDecimalMinViolation(V value) {
-        final String msg = getErrorMsgFormat(minDecimalOption, minDecimalOption.getMsg());
+    private ConstraintViolation newDecimalViolation(V value,
+                                                    Message option,
+                                                    String customMsg,
+                                                    boolean isInclusive,
+                                                    String minOrMax) {
+        final String msg = getErrorMsgFormat(option, customMsg);
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
-                .addParam(minDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
-                .addParam(minDecimalOption.getValue())
+                .addParam(isInclusive ? "or equal to " : "")
+                .addParam(minOrMax)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();
     }
 
-    private ConstraintViolation newDecimalMaxViolation(V value) {
-        final String msg = getErrorMsgFormat(maxDecimalOption, maxDecimalOption.getMsg());
-        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                 .setMsgFormat(msg)
-                 .addParam(maxDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
-                 .addParam(maxDecimalOption.getValue())
-                                                                         .setFieldPath(getFieldPath())
-                 .setFieldValue(wrap(value));
-        return violation.build();
-    }
-
-    private ConstraintViolation newMinViolation(V value) {
-        final String msg = getErrorMsgFormat(minOption, minOption.getMsg());
+    private ConstraintViolation newMinOrMaxViolation(V value, Message option, String customMsg, String minOrMax) {
+        final String msg = getErrorMsgFormat(option, customMsg);
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
-                .addParam(minOption.getValue())
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrap(value));
-        return violation.build();
-    }
-
-    private ConstraintViolation newMaxViolation(V value) {
-        final String msg = getErrorMsgFormat(maxOption, maxOption.getMsg());
-        final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(maxOption.getValue())
+                .addParam(minOrMax)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();
