@@ -108,7 +108,7 @@ import java.util.regex.Pattern;
     /**
      * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
      */
-    protected abstract Any wrapToMsgAndAny(V value);
+    protected abstract Any wrap(V value);
 
     private void validateRangeOptions(V value) {
         if (!fitsToOptionDecimalMin(value)) {
@@ -193,7 +193,7 @@ import java.util.regex.Pattern;
                 .addFormatParam(minDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
                 .addFormatParam(minDecimalOption.getValue())
                 .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value));
+                .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -204,7 +204,7 @@ import java.util.regex.Pattern;
                  .addFormatParam(maxDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
                  .addFormatParam(maxDecimalOption.getValue())
                  .setFieldPath(getFieldPath())
-                 .setFieldValue(wrapToMsgAndAny(value));
+                 .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -214,7 +214,7 @@ import java.util.regex.Pattern;
                 .setMessage(msg)
                 .addFormatParam(minOption.getValue())
                 .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value));
+                .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -224,7 +224,7 @@ import java.util.regex.Pattern;
                 .setMessage(msg)
                 .addFormatParam(maxOption.getValue())
                 .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value));
+                .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -237,7 +237,7 @@ import java.util.regex.Pattern;
                 .addFormatParam(intMax)
                 .addFormatParam(fractionMax)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value));
+                .setFieldValue(wrap(value));
         return violation.build();
     }
 }

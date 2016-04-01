@@ -60,7 +60,7 @@ import static org.spine3.protobuf.Messages.toAny;
     }
 
     @Override
-    protected Any wrapToMsgAndAny(Double value) {
+    protected Any wrap(Double value) {
         final Any any = toAny(newDoubleValue(value));
         return any;
     }

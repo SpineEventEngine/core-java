@@ -52,7 +52,7 @@ import org.spine3.validation.options.ConstraintViolation;
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMessage(INVALID_ID_TYPE_MSG)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(wrapToMsgAndAny(value))
+                .setFieldValue(wrap(value))
                 .build();
         addViolation(violation);
     }
