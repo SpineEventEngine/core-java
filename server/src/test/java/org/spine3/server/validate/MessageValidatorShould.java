@@ -39,6 +39,8 @@ import org.spine3.test.validation.msg.DecimalMinNotIncNumberFieldValue;
 import org.spine3.test.validation.msg.DigitsCountNumberFieldValue;
 import org.spine3.test.validation.msg.EnclosedMessageFieldValue;
 import org.spine3.test.validation.msg.EnclosedMessageWithoutAnnotationFieldValue;
+import org.spine3.test.validation.msg.EntityIdByteStringFieldValue;
+import org.spine3.test.validation.msg.EntityIdDoubleFieldValue;
 import org.spine3.test.validation.msg.EntityIdIntFieldValue;
 import org.spine3.test.validation.msg.EntityIdLongFieldValue;
 import org.spine3.test.validation.msg.EntityIdMsgFieldValue;
@@ -131,8 +133,7 @@ public class MessageValidatorShould {
 
     @Test
     public void find_out_that_required_ByteString_field_is_set() {
-        final ByteString byteString = ByteString.copyFromUtf8(newUuid());
-        final RequiredByteStringFieldValue validMsg = RequiredByteStringFieldValue.newBuilder().setValue(byteString).build();
+        final RequiredByteStringFieldValue validMsg = RequiredByteStringFieldValue.newBuilder().setValue(newByteString()).build();
         validate(validMsg);
         assertIsValid(true);
     }
@@ -340,7 +341,8 @@ public class MessageValidatorShould {
         final ConstraintViolation violation = firstViolation();
         assertEquals(GREATER_MAX_MSG, format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1)));
         assertFieldPathIs(violation, VALUE);
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
@@ -417,7 +419,8 @@ public class MessageValidatorShould {
         final ConstraintViolation violation = firstViolation();
         assertEquals(GREATER_MAX_MSG, format(violation.getMsgFormat(), violation.getParam(0)));
         assertFieldPathIs(violation, VALUE);
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
@@ -465,7 +468,8 @@ public class MessageValidatorShould {
                 format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1))
         );
         assertFieldPathIs(violation, VALUE);
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
@@ -505,7 +509,8 @@ public class MessageValidatorShould {
                 "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
                 firstViolation().getParam(0));
         assertFieldPathIs(violation, "email");
-        assertTrue(violation.getViolationList().isEmpty());
+        assertTrue(violation.getViolationList()
+                            .isEmpty());
     }
 
     /*
@@ -561,7 +566,8 @@ public class MessageValidatorShould {
         final ConstraintViolation innerViolation = innerViolations.get(0);
         assertEquals(NO_VALUE_MSG, innerViolation.getMsgFormat());
         assertFieldPathIs(innerViolation, OUTER_MSG_FIELD, VALUE);
-        assertTrue(innerViolation.getViolationList().isEmpty());
+        assertTrue(innerViolation.getViolationList()
+                                 .isEmpty());
     }
 
     /*
@@ -591,6 +597,21 @@ public class MessageValidatorShould {
     @Test
     public void find_out_that_String_entity_id_in_command_is_NOT_valid() {
         validate(EntityIdStringFieldValue.getDefaultInstance());
+        assertIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_entity_id_in_command_cannot_be_ByteString() {
+        final EntityIdByteStringFieldValue msg = EntityIdByteStringFieldValue.newBuilder().setValue(newByteString()).build();
+        validate(msg);
+        assertIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_entity_id_in_command_cannot_be_float_number() {
+        @SuppressWarnings("MagicNumber")
+        final EntityIdDoubleFieldValue msg = EntityIdDoubleFieldValue.newBuilder().setValue(1.1).build();
+        validate(msg);
         assertIsValid(false);
     }
 
@@ -724,5 +745,10 @@ public class MessageValidatorShould {
 
     private static StringValue newStringValue() {
         return Values.newStringValue(newUuid());
+    }
+
+    private static ByteString newByteString() {
+        final ByteString bytes = ByteString.copyFromUtf8(newUuid());
+        return bytes;
     }
 }

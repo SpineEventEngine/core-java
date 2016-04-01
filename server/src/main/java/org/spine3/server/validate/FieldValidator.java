@@ -80,6 +80,17 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     /**
+     * Checks if the field value is not set.
+     *
+     * <p>If the field type is {@link Message}, it must be set to a non-default instance;
+     * if it is {@link String} or {@link ByteString}, it must be set to a non-empty string or array.
+     *
+     * @param value a field value to check
+     * @return {@code true} if the field is not set, {@code false} otherwise
+     */
+    protected abstract boolean isValueNotSet(V value);
+
+    /**
      * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
      *
      * <p>The default implementation calls {@link #validateEntityId()} method if needed.
@@ -136,21 +147,6 @@ import static org.spine3.base.Commands.isCommandsFile;
                 return; // return because one error message is enough for the "required" option
             }
         }
-    }
-
-    /**
-     * Checks if the field value is not set.
-     *
-     * <p>If the field type is {@link Message}, it must be set to a non-default instance;
-     * if it is {@link String} or {@link ByteString}, it must be set to a non-empty string or array.
-     *
-     * <p>The default implementation throws {@link UnsupportedOperationException}.
-     *
-     * @param value a field value to check
-     * @return {@code true} if the field is not set, {@code false} otherwise
-     */
-    protected boolean isValueNotSet(V value) {
-        throw new UnsupportedOperationException("The method is not implemented.");
     }
 
     /**

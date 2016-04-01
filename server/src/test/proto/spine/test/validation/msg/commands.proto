@@ -50,3 +50,13 @@ message EntityIdLongFieldValue {
 message EntityIdRepeatedFieldValue {
     repeated string value = 1;
 }
+
+// Unsupported ID types.
+
+message EntityIdByteStringFieldValue {
+    bytes value = 1;
+}
+
+message EntityIdDoubleFieldValue {
+    double value = 1;
+}
