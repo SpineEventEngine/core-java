@@ -26,7 +26,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Messages.newDoubleValue;
+import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Messages.toAny;
 
 /**

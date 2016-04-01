@@ -26,8 +26,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Messages.newFloatValue;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newFloatValue;
 
 /**
  * Validates fields of {@link Float} types.

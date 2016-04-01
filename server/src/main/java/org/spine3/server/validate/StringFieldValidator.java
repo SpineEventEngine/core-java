@@ -29,7 +29,7 @@ import org.spine3.validation.options.ValidationProto;
 
 import java.util.List;
 
-import static org.spine3.protobuf.Messages.newStringValue;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.protobuf.Messages.toAny;
 
 /**

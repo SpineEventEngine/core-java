@@ -31,13 +31,14 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ValidateShould {
 
     @Test
     public void verify_that_message_is_not_in_default_state() {
-        final Message msg = StringValue.newBuilder().setValue("check_if_message_is_not_in_default_state").build();
+        final Message msg = newStringValue("check_if_message_is_not_in_default_state");
 
         assertTrue(Validate.isNotDefault(msg));
         assertFalse(Validate.isNotDefault(StringValue.getDefaultInstance()));
@@ -45,7 +46,7 @@ public class ValidateShould {
 
     @Test
     public void verify_that_message_is_in_default_state() {
-        final Message nonDefault = StringValue.newBuilder().setValue("check_if_message_is_in_default_state").build();
+        final Message nonDefault = newStringValue("check_if_message_is_in_default_state");
 
         assertTrue(Validate.isDefault(StringValue.getDefaultInstance()));
         assertFalse(Validate.isDefault(nonDefault));
@@ -53,9 +54,7 @@ public class ValidateShould {
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default_state_throwing_exception_if_not() {
-        final StringValue nonDefault = StringValue.newBuilder()
-                                                  .setValue("check_if_message_is_in_default_state_throwing_exception_if_not")
-                                                  .build();
+        final StringValue nonDefault = newStringValue("check_if_message_is_in_default_state_throwing_exception_if_not");
         Validate.checkDefault(nonDefault);
     }
 
@@ -73,9 +72,7 @@ public class ValidateShould {
 
     @Test
     public void return_non_default_value_on_check() {
-        final StringValue nonDefault = StringValue.newBuilder()
-                                                  .setValue("return_non_default_value_on_check")
-                                                  .build();
+        final StringValue nonDefault = newStringValue("return_non_default_value_on_check");
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault));
         assertEquals(nonDefault, Validate.checkNotDefault(nonDefault, "with error message"));
     }

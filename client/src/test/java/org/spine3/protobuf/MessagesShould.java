@@ -36,6 +36,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * @author Mikhail Melnik
@@ -72,9 +73,7 @@ public class MessagesShould {
 
     @Test
     public void convert_ByteString_to_Any() {
-        final StringValue message = StringValue.newBuilder()
-                .setValue("convert_ByteString_to_Any")
-                .build();
+        final StringValue message = newStringValue("convert_ByteString_to_Any");
         final ByteString byteString = message.toByteString();
 
         assertEquals(Any.pack(message), Messages.toAny(TypeName.of(message), byteString));
@@ -89,7 +88,7 @@ public class MessagesShould {
     @Test
     public void convert_from_Any_to_protobuf_class() {
 
-        final StringValue expected = StringValue.newBuilder().setValue("test_value").build();
+        final StringValue expected = newStringValue("test_value");
         final Any expectedAny = Any.pack(expected);
         final Message actual = Messages.fromAny(expectedAny);
         assertEquals(expected, actual);
@@ -111,7 +110,7 @@ public class MessagesShould {
     @Ignore
     @Test
     public void print_to_json() {
-        final StringValue value = StringValue.newBuilder().setValue("print_to_json").build();
+        final StringValue value = newStringValue("print_to_json");
         assertFalse(Messages.toJson(value).isEmpty());
     }
 

@@ -39,6 +39,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -76,9 +77,7 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = StringValue.newBuilder()
-                                               .setValue("extract_message_from_command")
-                                               .build();
+        final StringValue message = newStringValue("extract_message_from_command");
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
         assertEquals(message, Commands.getMessage(command));
     }

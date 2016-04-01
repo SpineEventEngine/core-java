@@ -28,6 +28,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Values;
 import org.spine3.test.validation.msg.AnnotatedBooleanFieldValue;
 import org.spine3.test.validation.msg.AnnotatedEnumFieldValue;
 import org.spine3.test.validation.msg.DecimalMaxIncNumberFieldValue;
@@ -55,7 +56,7 @@ import org.spine3.validation.options.ConstraintViolation;
 import java.util.List;
 
 import static com.google.protobuf.util.TimeUtil.*;
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
@@ -589,6 +590,6 @@ public class MessageValidatorShould {
     }
 
     private static StringValue newStringValue() {
-        return StringValue.newBuilder().setValue(newUuid()).build();
+        return Values.newStringValue(newUuid());
     }
 }
