@@ -103,7 +103,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     protected void validateEntityId() {
         if (fieldDescriptor.isRepeated()) {
             final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                    .setMessage(ENTITY_ID_REPEATED_FIELD_MSG)
+                    .setMsgFormat(ENTITY_ID_REPEATED_FIELD_MSG)
                     .setFieldPath(getFieldPath())
                     .build();
             addViolation(violation);
@@ -171,9 +171,9 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     private ConstraintViolation newViolation(RequiredOption option) {
-        final String msg = getErrorMessage(option, option.getMsg());
+        final String msg = getErrorMsgFormat(option, option.getMsg());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
+                .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
                 .build();
         return violation;
@@ -185,7 +185,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      * @param option a validation option used to get the default message
      * @param customMsg a user-defined error message
      */
-    protected String getErrorMessage(Message option, String customMsg) {
+    protected String getErrorMsgFormat(Message option, String customMsg) {
         final String defaultMsg = option.getDescriptorForType().getOptions().getExtension(ValidationProto.defaultMessage);
         final String msg = customMsg.isEmpty() ? defaultMsg : customMsg;
         return msg;

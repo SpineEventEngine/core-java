@@ -129,11 +129,11 @@ import static org.spine3.validation.options.Time.UNDEFINED;
     }
 
     private ConstraintViolation newTimeViolation(Timestamp fieldValue) {
-        final String msg = getErrorMessage(timeOption, timeOption.getMsg());
+        final String msg = getErrorMsgFormat(timeOption, timeOption.getMsg());
         final String when = timeOption.getIn().toString().toLowerCase();
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
-                .addFormatParam(when)
+                .setMsgFormat(msg)
+                .addParam(when)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(toAny(fieldValue))
                 .build();
@@ -141,9 +141,9 @@ import static org.spine3.validation.options.Time.UNDEFINED;
     }
 
     private ConstraintViolation newValidViolation(Message fieldValue, List<ConstraintViolation> violations) {
-        final String msg = getErrorMessage(validOption, validOption.getMsg());
+        final String msg = getErrorMsgFormat(validOption, validOption.getMsg());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
+                .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(toAny(fieldValue))
                 .addAllViolation(violations)

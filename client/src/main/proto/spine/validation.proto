@@ -61,14 +61,14 @@ extend google.protobuf.FieldOptions {
 
 // A validation constraint violation for a message field.
 message ConstraintViolation {
-    // An error message for this constraint violation
-    // (or a template which contains `%s` format specifiers).
-    string message = 1;
+    // An error message format string for this constraint violation.
+    // Contains `%s` format specifiers (or no ones).
+    string msg_format = 1;
 
     // Parameters (as strings) referenced by the format specifiers in the error message format string.
-    repeated string format_param = 2;
+    repeated string param = 2;
 
-    // A path of an invalid field.
+    // A path to an invalid field.
     spine.base.FieldPath field_path = 3;
 
     // A value of an invalid field.
@@ -112,7 +112,7 @@ message RequiredOption {
 message DecimalMinOption {
     // The default error message format string.
     // The format parameters are:
-    // 1) "or equal to " string (if the `inclusive` parameter is true);
+    // 1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
     // 2) the minimum number.
     option (default_message) = "Number must be greater than %s%s.";
 
@@ -138,7 +138,7 @@ message DecimalMinOption {
 message DecimalMaxOption {
     // The default error message format string.
     // The format parameters are:
-    // 1) "or equal to " string (if the `inclusive` parameter is true);
+    // 1) "or equal to " string (if the `inclusive` parameter is true) or an empty one;
     // 2) the maximum number.
     option (default_message) = "Number must be less than %s%s.";
 

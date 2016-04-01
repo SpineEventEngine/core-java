@@ -171,7 +171,7 @@ public class MessageValidatorShould {
 
         validate(invalidMsg);
 
-        assertEquals("Value must be set.", firstViolation().getMessage());
+        assertEquals("Value must be set.", firstViolation().getMsgFormat());
     }
 
     /*
@@ -221,7 +221,7 @@ public class MessageValidatorShould {
         assertMessageIsValid(false);
         assertEquals(
                 "Timestamp value must be in the future.",
-                format(firstViolation().getMessage(), firstViolation().getFormatParam(0))
+                format(firstViolation().getMsgFormat(), firstViolation().getParam(0))
         );
     }
 
@@ -272,7 +272,7 @@ public class MessageValidatorShould {
         final ConstraintViolation violation = firstViolation();
         assertEquals(
                 "Number must be greater than or equal to 16.5.",
-                format(violation.getMessage(), violation.getFormatParam(0), violation.getFormatParam(1))
+                format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1))
         );
     }
 
@@ -316,7 +316,7 @@ public class MessageValidatorShould {
         final ConstraintViolation violation = firstViolation();
         assertEquals(
                 "Number must be less than or equal to 64.5.",
-                format(violation.getMessage(), violation.getFormatParam(0), violation.getFormatParam(1))
+                format(violation.getMsgFormat(), violation.getParam(0), violation.getParam(1))
         );
     }
 
@@ -359,9 +359,9 @@ public class MessageValidatorShould {
         digitsCountTest(INT_DIGIT_COUNT_GREATER_THAN_MAX, /*valid=*/false);
         assertEquals(
                 "Number value is out of bounds, expected: <%s max digits>.<%s max digits>.",
-                firstViolation().getMessage()
+                firstViolation().getMsgFormat()
         );
-        final ProtocolStringList formatParams = firstViolation().getFormatParamList();
+        final ProtocolStringList formatParams = firstViolation().getParamList();
         assertEquals(2, formatParams.size());
         assertEquals("2", formatParams.get(0));
         assertEquals("2", formatParams.get(1));
@@ -397,10 +397,10 @@ public class MessageValidatorShould {
 
         validate(msg);
 
-        assertEquals("String must match the regular expression '%s'.", firstViolation().getMessage());
+        assertEquals("String must match the regular expression '%s'.", firstViolation().getMsgFormat());
         assertEquals(
                 "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
-                firstViolation().getFormatParam(0)
+                firstViolation().getParam(0)
         );
     }
 
@@ -447,7 +447,7 @@ public class MessageValidatorShould {
 
         validate(msg);
 
-        assertEquals("Message must have valid properties.", firstViolation().getMessage());
+        assertEquals("Message must have valid properties.", firstViolation().getMsgFormat());
     }
 
     /*
@@ -572,7 +572,7 @@ public class MessageValidatorShould {
         } else {
             assertTrue(!violations.isEmpty());
             for (ConstraintViolation violation : violations) {
-                assertTrue(!violation.getMessage().isEmpty());
+                assertTrue(!violation.getMsgFormat().isEmpty());
                 assertTrue(!violation.getFieldPath().getFieldNameList().isEmpty());
             }
         }

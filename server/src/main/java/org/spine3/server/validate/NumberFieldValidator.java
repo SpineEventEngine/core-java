@@ -187,55 +187,55 @@ import java.util.regex.Pattern;
     }
 
     private ConstraintViolation newDecimalMinViolation(V value) {
-        final String msg = getErrorMessage(minDecimalOption, minDecimalOption.getMsg());
+        final String msg = getErrorMsgFormat(minDecimalOption, minDecimalOption.getMsg());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
-                .addFormatParam(minDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
-                .addFormatParam(minDecimalOption.getValue())
+                .setMsgFormat(msg)
+                .addParam(minDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
+                .addParam(minDecimalOption.getValue())
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();
     }
 
     private ConstraintViolation newDecimalMaxViolation(V value) {
-        final String msg = getErrorMessage(maxDecimalOption, maxDecimalOption.getMsg());
+        final String msg = getErrorMsgFormat(maxDecimalOption, maxDecimalOption.getMsg());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                 .setMessage(msg)
-                 .addFormatParam(maxDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
-                 .addFormatParam(maxDecimalOption.getValue())
-                 .setFieldPath(getFieldPath())
+                 .setMsgFormat(msg)
+                 .addParam(maxDecimalOption.getInclusive() ? OR_EQUAL_TO : "")
+                 .addParam(maxDecimalOption.getValue())
+                                                                         .setFieldPath(getFieldPath())
                  .setFieldValue(wrap(value));
         return violation.build();
     }
 
     private ConstraintViolation newMinViolation(V value) {
-        final String msg = getErrorMessage(minOption, minOption.getMsg());
+        final String msg = getErrorMsgFormat(minOption, minOption.getMsg());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
-                .addFormatParam(minOption.getValue())
+                .setMsgFormat(msg)
+                .addParam(minOption.getValue())
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();
     }
 
     private ConstraintViolation newMaxViolation(V value) {
-        final String msg = getErrorMessage(maxOption, maxOption.getMsg());
+        final String msg = getErrorMsgFormat(maxOption, maxOption.getMsg());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
-                .addFormatParam(maxOption.getValue())
+                .setMsgFormat(msg)
+                .addParam(maxOption.getValue())
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();
     }
 
     private ConstraintViolation newDigitsViolation(V value) {
-        final String msg = getErrorMessage(digitsOption, digitsOption.getMsg());
+        final String msg = getErrorMsgFormat(digitsOption, digitsOption.getMsg());
         final String intMax = String.valueOf(digitsOption.getIntegerMax());
         final String fractionMax = String.valueOf(digitsOption.getFractionMax());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMessage(msg)
-                .addFormatParam(intMax)
-                .addFormatParam(fractionMax)
+                .setMsgFormat(msg)
+                .addParam(intMax)
+                .addParam(fractionMax)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value));
         return violation.build();

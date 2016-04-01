@@ -50,7 +50,7 @@ import org.spine3.validation.options.ConstraintViolation;
     protected void validateEntityId() {
         final V value = getValues().get(0);
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(INVALID_ID_TYPE_MSG)
+                .setMsgFormat(INVALID_ID_TYPE_MSG)
                 .setFieldPath(getFieldPath())
                 .setFieldValue(wrap(value))
                 .build();

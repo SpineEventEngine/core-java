@@ -59,7 +59,7 @@ import java.util.List;
     @SuppressWarnings("RefusedBequest")
     protected void validateEntityId() {
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMessage(INVALID_ID_TYPE_MSG)
+                .setMsgFormat(INVALID_ID_TYPE_MSG)
                 .setFieldPath(getFieldPath())
                 .build();
         addViolation(violation);
