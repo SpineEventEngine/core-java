@@ -40,7 +40,12 @@ extend google.protobuf.MessageOptions {
 
 // A type of an entity.
 enum EntityType {
-    AGGREGATE = 0;
-    PROCESS_MANAGER = 1;
-    PROJECTION = 2;
+    // The default value (if the option value is not set).
+    NOT_SET = 0;
+
+    AGGREGATE = 1;
+
+    PROCESS_MANAGER = 2;
+
+    PROJECTION = 3;
 }
