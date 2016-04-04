@@ -32,7 +32,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
- * Validates messages according to Spine custom protobuf options and provides validation error messages.
+ * Validates messages according to Spine custom protobuf options and provides constraint violations found.
  *
  * @author Alexander Litus
  */
@@ -61,7 +61,7 @@ public class MessageValidator {
     }
 
     /**
-     * Validates messages according to Spine custom protobuf options and returns validation constraint violations found.
+     * Validates messages according to Spine custom protobuf options and returns constraint violations found.
      *
      * @param message a message to validate
      */

@@ -39,7 +39,7 @@ import static org.spine3.base.Commands.belongsToEntity;
 import static org.spine3.base.Commands.isCommandsFile;
 
 /**
- * Validates a message field according to Spine custom protobuf options and provides validation error messages.
+ * Validates messages according to Spine custom protobuf options and provides constraint violations found.
  *
  * @param <V> a type of field values
  * @author Alexander Litus
