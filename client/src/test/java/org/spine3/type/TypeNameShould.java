@@ -28,8 +28,8 @@ import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
+import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.RunTest;
-import org.spine3.test.TestCommandFactory;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Values.newStringValue;

@@ -23,12 +23,9 @@ package org.spine3.server.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.EventContext;
 import org.spine3.server.Subscribe;
 import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
@@ -41,22 +38,16 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A wrapper for an event handling method.
+ *
  * @author Alexander Yevsyukov
  */
 public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
 
-    public static final Predicate<Method> IS_EVENT_HANDLER = new Predicate<Method>() {
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventHandler(method);
-        }
-    };
-
-    private static final int MESSAGE_PARAM_INDEX = 0;
-    private static final int EVENT_CONTEXT_PARAM_INDEX = 1;
-
-    private static final int EVENT_HANDLER_PARAM_COUNT = 2;
+    /**
+     * The instance of the predicate to filter event handler methods of a class.
+     */
+    public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -66,44 +57,6 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      */
     public EventHandlerMethod(Object target, Method method) {
         super(target, method);
-    }
-
-    /**
-     * Checks if the passed method is an event handlers.
-     * <p/>
-     * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
-     * have {@link EventContext} value as the second parameter, and return {@code void}.
-     *
-     * @param method a method to check
-     * @return {@code true} if the method matches event handler conventions, {@code false} otherwise
-     */
-    @CheckReturnValue
-    public static boolean isEventHandler(Method method) {
-        if (!isAnnotatedCorrectly(method)) {
-            return false;
-        }
-        if (!acceptsCorrectParams(method)) {
-            return false;
-        }
-        final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-        return returnsNothing;
-    }
-
-    private static boolean acceptsCorrectParams(Method method) {
-        final Class<?>[] parameterTypes = method.getParameterTypes();
-
-        if (parameterTypes.length != EVENT_HANDLER_PARAM_COUNT) {
-            return false;
-        }
-        final boolean acceptsCorrectParams =
-                Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
-                        EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
-        return acceptsCorrectParams;
-    }
-
-    private static boolean isAnnotatedCorrectly(Method method) {
-        final boolean result = method.isAnnotationPresent(Subscribe.class);
-        return result;
     }
 
     /**
@@ -117,7 +70,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         final ImmutableMap.Builder<EventClass, EventHandlerMethod> result = ImmutableMap.builder();
 
         // Scan for declared event handler methods.
-        final MethodMap handlers = new MethodMap(target.getClass(), IS_EVENT_HANDLER);
+        final MethodMap handlers = new MethodMap(target.getClass(), PREDICATE);
         checkModifiers(handlers.values());
 
         for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
@@ -139,13 +92,13 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
+     * @see MessageHandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                log().warn(String.format("Event handler %s must be declared 'public'",
-                        Methods.getFullMethodName(method)));
+                warnOnWrongModifier("Event handler {} must be declared 'public'", method);
             }
         }
     }
@@ -158,16 +111,53 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
         return super.getTarget();
     }
 
-    private enum LogSingleton {
-        INSTANCE;
+    /**
+     * The predicate class allowing to filter event handling methods.
+     *
+     * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
+     * have {@link EventContext} value as the second parameter, and return {@code void}.
+     */
+    private static class FilterPredicate implements Predicate<Method> {
 
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventHandlerMethod.class);
+        private static final int MESSAGE_PARAM_INDEX = 0;
+        private static final int EVENT_CONTEXT_PARAM_INDEX = 1;
+        private static final int EVENT_HANDLER_PARAM_COUNT = 2;
+
+        /**
+         * Checks if the passed method is an event handler.
+         */
+        private static boolean isEventHandler(Method method) {
+            if (!isAnnotatedCorrectly(method)) {
+                return false;
+            }
+            if (!acceptsCorrectParams(method)) {
+                return false;
+            }
+            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
+            return returnsNothing;
+        }
+
+        private static boolean acceptsCorrectParams(Method method) {
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+
+            if (parameterTypes.length != EVENT_HANDLER_PARAM_COUNT) {
+                return false;
+            }
+            final boolean acceptsCorrectParams =
+                    Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
+                            EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
+            return acceptsCorrectParams;
+        }
+
+        private static boolean isAnnotatedCorrectly(Method method) {
+            final boolean result = method.isAnnotationPresent(Subscribe.class);
+            return result;
+        }
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isEventHandler(method);
+        }
     }
-
-    @CheckReturnValue
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
 }

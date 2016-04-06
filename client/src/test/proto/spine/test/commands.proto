@@ -25,6 +25,7 @@ option java_package="org.spine3.test";
 option java_multiple_files = true;
 option java_outer_classname = "TestCommands";
 
+// A test command to run a test by the method name.
 message RunTest {
     string method_name = 1;
 }

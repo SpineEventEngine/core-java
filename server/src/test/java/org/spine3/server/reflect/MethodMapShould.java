@@ -37,7 +37,7 @@ public class MethodMapShould {
     /**
      * Test aggregate in which methods are scanned.
      */
-    private static final class TestAggregate extends Aggregate<Long, Project> {
+    private static final class TestAggregate extends Aggregate<Long, Project, Project.Builder> {
 
         public TestAggregate(Long id) {
             super(id);

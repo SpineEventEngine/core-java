@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 
 /**
- * Utility class for working with message fields.
+ * Abstract base for classes working with message fields.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
@@ -59,6 +59,11 @@ public abstract class MessageField {
      */
     private static final Map<Class<? extends Message>, Method> accessors = Maps.newConcurrentMap();
 
+    /**
+     * Creates an instance for the field with the passed number.
+     *
+     * @param index the zero-based index of the field
+     */
     protected MessageField(int index) {
         this.index = index;
     }

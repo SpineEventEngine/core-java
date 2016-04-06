@@ -272,7 +272,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings({"unused", "TypeMayBeWeakened"})
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project> {
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private static final String STATUS_NEW = "STATUS_NEW";
         private static final String STATUS_STARTED = "STATUS_STARTED";

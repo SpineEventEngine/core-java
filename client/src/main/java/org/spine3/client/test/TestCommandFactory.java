@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.test;
+package org.spine3.client.test;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.UserId;
@@ -35,6 +36,7 @@ import org.spine3.time.ZoneOffsets;
  *
  * @author Alexaner Yevsyukov
  */
+@Internal
 public class TestCommandFactory extends CommandFactory {
 
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {

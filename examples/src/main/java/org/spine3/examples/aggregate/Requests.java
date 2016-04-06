@@ -19,7 +19,6 @@
  */
 package org.spine3.examples.aggregate;
 
-import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -35,14 +34,15 @@ import org.spine3.time.ZoneOffset;
  *
  * @author Mikhail Melnik
  */
-class Requests {
+/*package*/ class Requests {
 
     public static Command createOrder(UserId userId, OrderId orderId) {
-        final CreateOrder command = CreateOrder.newBuilder()
+        final CreateOrder msg = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        final Command request = newCommand(userId, command);
-        return request;
+        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final Command cmd = Commands.create(msg, context);
+        return cmd;
     }
 
     public static Command addOrderLine(UserId userId, OrderId orderId) {
@@ -60,39 +60,24 @@ class Requests {
                 .setQuantity(quantity)
                 .setTotal(totalPrice)
                 .build();
-        final AddOrderLine command = AddOrderLine.newBuilder()
+        final AddOrderLine msg = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        final Command result = newCommand(userId, command);
-        return result;
+        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final Command cmd = Commands.create(msg, context);
+        return cmd;
     }
 
     public static Command payForOrder(UserId userId, OrderId orderId) {
         final BillingInfo billingInfo = BillingInfo.newBuilder().setInfo("Payment info is here.").build();
-        final PayForOrder command = PayForOrder.newBuilder()
+        final PayForOrder msg = PayForOrder.newBuilder()
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        final Command result = newCommand(userId, command);
-        return result;
+        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final Command cmd = Commands.create(msg, context);
+        return cmd;
     }
 
-    //TODO:2016-01-14:alexander.yevsyukov: Use real utility method.
-    public static Command newCommand(UserId userId, Message command) {
-        final CommandContext context = createCommandContext(userId);
-        final Command request = Commands.create(command, context);
-        return request;
-    }
-
-    //TODO:2016-01-14:alexander.yevsyukov: Use real method, which obtains TimeZone.
-    public static CommandContext createCommandContext(UserId userId) {
-        final CommandContext.Builder context = CommandContext.newBuilder()
-                .setCommandId(Commands.generateId())
-                .setActor(userId)
-                .setZoneOffset(ZoneOffset.getDefaultInstance());
-        return context.build();
-    }
-
-    private Requests() {
-    }
+    private Requests() {}
 }

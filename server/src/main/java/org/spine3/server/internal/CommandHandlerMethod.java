@@ -23,14 +23,10 @@ package org.spine3.server.internal;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.reflect.MethodMap;
-import org.spine3.server.reflect.Methods;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -49,28 +45,12 @@ import static java.util.Collections.singletonList;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
 
     /**
      * The instance of the predicate to filter command handler methods of a class.
      */
-    public static final Predicate<Method> PREDICATE = new MethodPredicate();
-
-    /**
-     * A command must be the first parameter of a handling method.
-     */
-    private static final int MESSAGE_PARAM_INDEX = 0;
-
-    /**
-     * A {@code CommandContext} must be the second parameter of the handling method.
-     */
-    private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
-
-    /**
-     * A command handling method accepts two parameters.
-     */
-    private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
+    public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -80,37 +60,6 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      */
     public CommandHandlerMethod(Object target, Method method) {
         super(target, method);
-    }
-
-    public static boolean isAnnotatedCorrectly(Method method) {
-        final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
-        return isAnnotated;
-    }
-
-    public static boolean acceptsCorrectParams(Method method) {
-        final Class<?>[] paramTypes = method.getParameterTypes();
-        final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
-        if (!paramCountIsCorrect) {
-            return false;
-        }
-        final boolean acceptsCorrectParams =
-                Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                        CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-        return acceptsCorrectParams;
-    }
-
-    public static boolean returnsMessageOrList(Method method) {
-        final Class<?> returnType = method.getReturnType();
-
-        if (Message.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-        //noinspection RedundantIfStatement
-        if (List.class.isAssignableFrom(returnType)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -160,13 +109,12 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @param object the object that keeps command handler methods
      * @return immutable map
      */
-    @Internal
     @CheckReturnValue
     public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandler object) {
         final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
 
-        final Map<CommandClass, CommandHandlerMethod> regularHandlers = getHandlers(object);
-        result.putAll(regularHandlers);
+        final Map<CommandClass, CommandHandlerMethod> handlers = getHandlers(object);
+        result.putAll(handlers);
 
         return result.build();
     }
@@ -192,19 +140,68 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      *
      * <p>Logs warning for the methods with a non-public modifier.
      *
-     * @param methods methods to check
+     * @param methods the methods to check
+     * @see MessageHandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
             final boolean isPublic = Modifier.isPublic(method.getModifiers());
             if (!isPublic) {
-                final String fullMethodName = Methods.getFullMethodName(method);
-                log().warn(String.format("Command handler method %s should be declared 'public'.", fullMethodName));
+                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
             }
         }
     }
 
-    private static class MethodPredicate implements Predicate<Method> {
+    /**
+     * The predicate class that allows to filter command handling methods.
+     */
+    private static class FilterPredicate implements Predicate<Method> {
+
+        /**
+         * A command must be the first parameter of a handling method.
+         */
+        private static final int MESSAGE_PARAM_INDEX = 0;
+
+        /**
+         * A {@code CommandContext} must be the second parameter of the handling method.
+         */
+        private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
+
+        /**
+         * A command handling method accepts two parameters.
+         */
+        private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
+
+        private static boolean isAnnotatedCorrectly(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
+            return isAnnotated;
+        }
+
+        private static boolean acceptsCorrectParams(Method method) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
+            if (!paramCountIsCorrect) {
+                return false;
+            }
+            final boolean acceptsCorrectParams =
+                    Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
+                            CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+            return acceptsCorrectParams;
+        }
+
+        private static boolean returnsMessageOrList(Method method) {
+            final Class<?> returnType = method.getReturnType();
+
+            if (Message.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+            //noinspection RedundantIfStatement
+            if (List.class.isAssignableFrom(returnType)) {
+                return true;
+            }
+
+            return false;
+        }
 
         @Override
         public boolean apply(@Nullable Method method) {
@@ -216,15 +213,5 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
                     && acceptsCorrectParams(method)
                     && returnsMessageOrList(method);
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandHandlerMethod.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

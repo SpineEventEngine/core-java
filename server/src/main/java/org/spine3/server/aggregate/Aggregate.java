@@ -20,7 +20,6 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -29,7 +28,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -46,20 +44,11 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static com.google.common.collect.Collections2.filter;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
-
-//TODO:2016-02-17:alexander.yevsyukov: Define syntax of event applier methods.
-//TODO:2016-02-17:alexander.yevsyukov: Describe dealing with command validation and throwing Failures.
-//TODO:2016-02-17:alexander.yevsyukov: Describe (not) throwing exceptions.
 
 /**
  * Abstract base for aggregates.
@@ -81,33 +70,40 @@ import static org.spine3.server.internal.CommandHandlerMethod.checkModifiers;
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
- * <p>Command handling methods in the  an aggregate are defined in the same was as described in {@link CommandHandler}.
+ * <p>Command handling methods of an aggregate are defined in the same way as described in {@link CommandHandler}.
  *
  * <h2>Adding event applier methods</h2>
- * <p>Aggregate data is stored as sequence of events it produces. In order to restore the state of the aggregate
- * these events are passed to the {@link #play(Iterable)} method, which invokes corresponding
- * <em>applier methods</em>.
+ * <p>Aggregate data is stored as sequence of events it produces. The state of the aggregate
+ * is restored by re-playing the history of events and invoking corresponding <em>event applier methods</em>.
  *
  * <p>An event applier is a method that changes the state of the aggregate in response to an event. The aggregate
- * must have applier methods for <em>all</em> event types it produces.
+ * must have applier methods for <em>all</em> event types it produces. An event applier takes a single parameter
+ * of the event message it handles and returns {@code void}.
  *
- * <h2>Handling snapshots</h2>
- * In order to optimise the restoration of aggregates, an {@link AggregateRepository} can periodically store
- * snapshots of aggregate state.
- *
- * <p>The {@code Aggregate} restores its state in {@link #restore(Snapshot)} method.
+ * <p>The modification of the state is done via a builder instance obtained from {@link #getBuilder()}.
  *
  * @param <I> the type for IDs of this class of aggregates
- * @param <M> the type of the state held by the aggregate
- * @author Mikhail Melnik
+ * @param <S> the type of the state held by the aggregate
+ * @param <B> the type of the aggregate state builder
+ *
  * @author Alexander Yevsyukov
+ * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, M extends Message> extends Entity<I, M> implements CommandHandler {
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
+                            extends Entity<I, S>
+                            implements CommandHandler {
 
-    private static final Predicate<Method> IS_AGGREGATE_COMMAND_HANDLER = CommandHandlerMethod.PREDICATE;
-
-    @VisibleForTesting // otherwise would have been private.
-    protected static final Predicate<Method> IS_EVENT_APPLIER = new IsEventApplier();
+    /**
+     * The builder for the aggregate state.
+     *
+     * <p>This field is non-null only when the aggregate changes its state during command handling or playing events.
+     *
+     * @see #createBuilder()
+     * @see #getBuilder()
+     * @see #updateState()
+     */
+    @Nullable
+    private volatile B builder;
 
     /**
      * Cached value of the ID in the form of Any instance.
@@ -141,9 +137,9 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     private final List<Event> uncommittedEvents = Lists.newLinkedList();
 
     /**
-     * Creates a new instance.
+     * Creates a new aggregate instance.
      *
-     * @param id the ID for the new instance
+     * @param id the ID for the new aggregate
      * @throws IllegalArgumentException if the ID is not of one of the supported types
      */
     public Aggregate(I id) {
@@ -152,14 +148,24 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns set of the command types handled by a given aggregate.
+     * Returns the set of the command classes handled by the passed aggregate class.
      *
-     * @param clazz {@link Class} of the aggregate
-     * @return immutable set of classes of commands
+     * @param clazz the class of the aggregate
+     * @return immutable set of command classes
      */
     @CheckReturnValue
-    public static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, IS_AGGREGATE_COMMAND_HANDLER);
+    /* package */ static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
+        return Classes.getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
+    }
+
+    /**
+     * Returns the set of the event classes that comprise the state of the passed aggregate class.
+     *
+     * @param clazz the class of the aggregate
+     * @return immutable set of event classes
+     */
+    /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
+        return Classes.getHandledMessageClasses(clazz, EventApplier.PREDICATE);
     }
 
     /**
@@ -174,7 +180,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         final Registry registry = Registry.getInstance();
         final Class<? extends Aggregate> thisClass = getClass();
 
-        // Register this aggregate root class if it wasn't.
+        // Register this aggregate class if it wasn't before.
         if (!registry.contains(thisClass)) {
             registry.register(thisClass);
         }
@@ -190,23 +196,65 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Dispatches commands, generates events and applies them to the aggregate.
+     * This method starts the phase of updating the aggregate state.
+     *
+     * <p>The update phase is closed by the {@link #updateState()}.
+     */
+    private void createBuilder() {
+        @SuppressWarnings("unchecked") // It is safe as we checked the type on the construction.
+        final B builder = (B) getState().toBuilder();
+        this.builder = builder;
+    }
+
+    /**
+     * Obtains the instance of the state builder.
+     *
+     * <p>This method must be called only from within an event applier.
+     *
+     * @return the instance of the new state builder
+     * @throws IllegalStateException if the method is called from outside an event applier
+     */
+    protected B getBuilder() {
+        if (this.builder == null) {
+            throw new IllegalStateException(
+                    "Builder is not available. Make sure to call getBuilder() only from an event applier method.");
+        }
+        return builder;
+    }
+
+    /**
+     * Updates the aggregate state and closes the update phase of the aggregate.
+     */
+    private void updateState() {
+        @SuppressWarnings("unchecked") // It is safe to assume that correct builder type is passed to aggregate,
+         // because otherwise it won't be possible to write the code of applier methods that make sense to the
+         // aggregate.
+        final S newState = (S) getBuilder().build();
+        setState(newState, getVersion(), whenModified());
+
+        this.builder = null;
+    }
+
+    /**
+     * Dispatches the passed command to appropriate handler.
+     *
+     * <p>As the result of this method call, the aggregate generates events and applies them to the aggregate.
      *
      * @param command the command message to be executed on the aggregate.
      *                If this parameter is passed as {@link Any} the enclosing message will be unwrapped.
      * @param context the context of the command
-     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause.
+     * @throws RuntimeException if an exception occurred during command dispatching with this exception as the cause
      */
-    @VisibleForTesting  // otherwise this method would have had package access.
-    protected final void dispatch(Message command, CommandContext context) {
+     /* package */ final void dispatch(Message command, CommandContext context) {
         checkNotNull(command);
         checkNotNull(context);
 
         init();
 
         if (command instanceof Any) {
-            // We're likely getting the result of command.getMessage().
-            // Extract the wrapped message out of it.
+            // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
+            // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
+            // such a call especially from the testing code.
             final Any any = (Any) command;
             //noinspection AssignmentToMethodParameter
             command = Messages.fromAny(any);
@@ -218,6 +266,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         } catch (InvocationTargetException e) {
             propagate(e.getCause());
         }
+    }
+
+    /**
+     * This method is provided <em>only</em> for the purpose of testing command handling
+     * of an aggregate and must not be called from the production code.
+     *
+     * <p>The production code uses the method {@link #dispatch(Message, CommandContext)},
+     * which is called automatically by {@link AggregateRepository}.
+     */
+    @VisibleForTesting
+    protected final void testDispatch(Message command, CommandContext context) {
+        dispatch(command, context);
     }
 
     /**
@@ -265,40 +325,43 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
      *                          for the thrown {@code RuntimeException}
      */
-    public void play(Iterable<Event> events) {
+    /* package */ void play(Iterable<Event> events) {
         init();
-
-        for (Event event : events) {
-            final Message message = Events.getMessage(event);
-            try {
-                apply(message);
-            } catch (InvocationTargetException e) {
-                propagate(e.getCause());
+        createBuilder();
+        try {
+            for (Event event : events) {
+                final Message message = Events.getMessage(event);
+                final EventContext context = event.getContext();
+                try {
+                    apply(message);
+                    setVersion(context.getVersion(), context.getTimestamp());
+                } catch (InvocationTargetException e) {
+                    propagate(e.getCause());
+                }
             }
+        } finally {
+            updateState();
         }
     }
 
     /**
-     * Applies events to an aggregate unless they are state-neutral.
+     * Applies events to the aggregate.
      *
      * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
-     * @see #getStateNeutralEventClasses()
      */
     private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
-        final Set<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
-
-        for (Message message : messages) {
-            final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
-            if (!isStateNeutral) {
+        createBuilder();
+        try {
+            for (Message message : messages) {
                 apply(message);
+                final EventContext eventContext = createEventContext(commandContext, message);
+                final Event event = Events.createEvent(message, eventContext);
+                putUncommitted(event);
             }
-            final int currentVersion = getVersion();
-            final M state = getState();
-            final EventContext eventContext = createEventContext(commandContext, state, whenModified(), currentVersion, message);
-            final Event event = Events.createEvent(message, eventContext);
-            putUncommitted(event);
+        } finally {
+            updateState();
         }
     }
 
@@ -308,40 +371,18 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
      * is dispatched to corresponding applier method.
      *
-     * @param event the event to apply
+     * @param eventMessage the event to apply
      * @throws MissingEventApplierException if there is no applier method defined for this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void apply(Message event) throws InvocationTargetException {
-        if (event instanceof Snapshot) {
-            restore((Snapshot) event);
+    private void apply(Message eventMessage) throws InvocationTargetException {
+        if (eventMessage instanceof Snapshot) {
+            restore((Snapshot) eventMessage);
             return;
         }
-        invokeApplier(event);
-    }
+        invokeApplier(eventMessage);
 
-    /**
-     * Returns a set of classes of state-neutral events (an empty set by default).
-     *
-     * <p>An event is state-neutral if we do not modify the aggregate state when this event occurs.
-     *
-     * <p>Instead of creating empty applier methods for such events,
-     * override this method returning immutable set of event classes. For example:
-     *
-     * <pre>
-     * private static final ImmutableSet&lt;Class&lt;? extends Message&gt;&gt; STATE_NEUTRAL_EVENT_CLASSES =
-     *         ImmutableSet.&lt;Class&lt;? extends Message&gt;&gt;of(StateNeutralEvent.class);
-     *
-     * &#64;Override
-     * protected Set&lt;Class&lt;? extends Message&gt;&gt; getStateNeutralEventClasses() {
-     *     return STATE_NEUTRAL_EVENT_CLASSES;
-     * }
-     * </pre>
-     *
-     * @return a set of classes of state-neutral events
-     */
-    protected Set<Class<? extends Message>> getStateNeutralEventClasses() {
-        return Collections.emptySet();
+        incrementVersion(); // This will also update whenModified field.
     }
 
     /**
@@ -349,10 +390,21 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @param snapshot the snapshot with the state to restore
      */
-    public void restore(Snapshot snapshot) {
-        final M stateToRestore = Messages.fromAny(snapshot.getState());
+    /* package */ void restore(Snapshot snapshot) {
+        final S stateToRestore = Messages.fromAny(snapshot.getState());
 
-        setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
+        // See if we're in the state update cycle.
+        final B builder = this.builder;
+
+        // If the call to restore() is made during a reply (because the snapshot event was encountered)
+        // use the currently initialized builder.
+        if (builder != null) {
+            builder.clear();
+            builder.mergeFrom(stateToRestore);
+            setVersion(snapshot.getVersion(), snapshot.getWhenModified());
+        } else {
+            setState(stateToRestore, snapshot.getVersion(), snapshot.getWhenModified());
+        }
     }
 
     private void putUncommitted(Event record) {
@@ -360,52 +412,13 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
     }
 
     /**
-     * Returns all uncommitted events (including state-neutral).
+     * Returns all uncommitted events.
      *
      * @return immutable view of records for all uncommitted events
-     * @see #getStateNeutralEventClasses()
      */
     @CheckReturnValue
-    public List<Event> getUncommittedEvents() {
+    /* package */ List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
-    }
-
-    /**
-     * Returns uncommitted events (excluding state-neutral).
-     *
-     * @return an immutable view of records for applicable uncommitted events
-     * @see #getStateNeutralEventClasses()
-     */
-    @SuppressWarnings("InstanceMethodNamingConvention") // Prefer longer name here for clarity.
-    protected Collection<Event> getStateChangingUncommittedEvents() {
-        final Predicate<Event> isStateChanging = isStateChangingEventRecord();
-        final Collection<Event> result = filter(uncommittedEvents, isStateChanging);
-        return result;
-    }
-
-    /**
-     * Creates the predicate that filters {@code EventRecord}s which modify the state
-     * of the aggregate.
-     *
-     * <p>The predicate uses passed event classes for the events that do not modify the
-     * state of the aggregate. As such, they are called <em>State Neutral.</em>
-     *
-     * @return new predicate instance
-     */
-    private Predicate<Event> isStateChangingEventRecord() {
-        final Collection<Class<? extends Message>> stateNeutralEventClasses = getStateNeutralEventClasses();
-        return new Predicate<Event>() {
-            @Override
-            public boolean apply(
-                    @SuppressWarnings("NullableProblems")
-                    /* The @Nullable annotation is removed to avoid checking for null input,
-                       which is not possible here. Having the null input doesn't allow to test
-                       that code branch. */ Event event) {
-                final Message message = Events.getMessage(event);
-                final boolean isStateNeutral = stateNeutralEventClasses.contains(message.getClass());
-                return !isStateNeutral;
-            }
-        };
     }
 
     /**
@@ -413,7 +426,7 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * @return the list of event records
      */
-    public List<Event> commitEvents() {
+    /* package */ List<Event> commitEvents() {
         final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         return result;
@@ -423,28 +436,25 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      * Creates a context for an event.
      *
      * <p>The context may optionally have custom attributes added by
-     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.
      *
      *
      * @param commandContext the context of the command, execution of which produced the event
-     * @param currentState   the state of the aggregated after the event was applied
-     * @param whenModified   the moment of the aggregate modification for this event
-     * @param currentVersion the version of the aggregate after the event was applied
      * @param event          the event for which to create the context
      * @return new instance of the {@code EventContext}
-     * @see #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)
+     * @see #extendEventContext(Message, EventContext.Builder, CommandContext)
      */
     @CheckReturnValue
-    protected EventContext createEventContext(CommandContext commandContext, M currentState, Timestamp whenModified, int currentVersion, Message event) {
+    protected EventContext createEventContext(CommandContext commandContext, Message event) {
         final EventId eventId = Events.generateId();
-        final EventContext.Builder result = EventContext.newBuilder()
+        final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setCommandContext(commandContext)
-                .setTimestamp(whenModified)
-                .setVersion(currentVersion)
+                .setTimestamp(whenModified())
+                .setVersion(getVersion())
                 .setProducerId(getIdAsAny());
-        addEventContextAttributes(result, commandContext.getCommandId(), event, currentState, currentVersion);
-        return result.build();
+        extendEventContext(event, builder, commandContext);
+        return builder.build();
     }
 
     /**
@@ -452,26 +462,22 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
      *
      * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
      *
-     * @param builder        a builder for the event context
-     * @param commandId      the id of the command, which cased the event
      * @param event          the event message
-     * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the aggregate after the event was applied
-     * @see #createEventContext(CommandContext, Message, Timestamp, int, Message)
+     * @param builder        a builder for the event context
+     * @see #createEventContext(CommandContext, Message)
      */
     @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId, Message event, M currentState, int currentVersion) {
+    protected void extendEventContext(Message event, EventContext.Builder builder, CommandContext commandContext) {
         // Do nothing.
     }
 
     /**
-     * Transforms the current state of the aggregate into the snapshot event.
+     * Transforms the current state of the aggregate into the {@link Snapshot} instance.
      *
      * @return new snapshot
      */
     @CheckReturnValue
-    public Snapshot toSnapshot() {
+    /* package */ Snapshot toSnapshot() {
         final Any state = Any.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();
@@ -482,56 +488,6 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
                 .setTimestamp(TimeUtil.getCurrentTime());
 
         return builder.build();
-    }
-
-    /**
-     * The registry of method maps for all aggregate classes.
-     *
-     * <p>This registry is used for caching command handlers and event appliers.
-     * Aggregates register their classes in {@link Aggregate#init()} method.
-     */
-    private static class Registry {
-
-        private final MethodMap.Registry<Aggregate> commandHandlers = new MethodMap.Registry<>();
-
-        private final MethodMap.Registry<Aggregate> eventAppliers = new MethodMap.Registry<>();
-
-        /* package */ void register(Class<? extends Aggregate> clazz) {
-            commandHandlers.register(clazz, IS_AGGREGATE_COMMAND_HANDLER);
-            checkModifiers(commandHandlers.get(clazz).values());
-
-            eventAppliers.register(clazz, IS_EVENT_APPLIER);
-            EventApplier.checkModifiers(eventAppliers.get(clazz));
-        }
-
-        @CheckReturnValue
-        /* package */ boolean contains(Class<? extends Aggregate> clazz) {
-            final boolean result = commandHandlers.contains(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getCommandHandlers(Class<? extends Aggregate> clazz) {
-            final MethodMap result = commandHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getEventAppliers(Class<? extends Aggregate> clazz) {
-            final MethodMap result = eventAppliers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ static Registry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-        }
     }
 
     // Factory methods for exceptions
@@ -547,43 +503,5 @@ public abstract class Aggregate<I, M extends Message> extends Entity<I, M> imple
         return new IllegalStateException(
                 String.format("Missing event applier for event class %s in aggregate class %s.",
                         eventClass.getName(), getClass().getName()));
-    }
-
-    /**
-     * The predicate for filtering event applier methods.
-     */
-    private static class IsEventApplier implements Predicate<Method> {
-
-        private static final int EVENT_PARAM_INDEX = 0;
-
-        /**
-         * Checks if a method is an event applier.
-         *
-         * @param method to check
-         * @return {@code true} if the method is an event applier, {@code false} otherwise
-         */
-        public static boolean isEventApplier(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-            if (!isAnnotated) {
-                return false;
-            }
-
-            final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean hasOneParam = parameterTypes.length == 1;
-            if (!hasOneParam) {
-                return false;
-            }
-
-            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
-            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-
-            return firstParamIsMessage && returnsNothing;
-        }
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventApplier(method);
-        }
     }
 }
