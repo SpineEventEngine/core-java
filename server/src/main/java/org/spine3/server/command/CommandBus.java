@@ -131,19 +131,15 @@ public class CommandBus implements AutoCloseable {
     public Response validate(Message command) {
         checkNotNull(command);
         final CommandClass commandClass = CommandClass.of(command);
-
         if (dispatcherRegistered(commandClass)) {
             return Responses.ok();
         }
-
         if (handlerRegistered(commandClass)) {
             return Responses.ok();
         }
-
         //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
         // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
         // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
-
         return CommandValidation.unsupportedCommand(command);
     }
 
@@ -156,25 +152,18 @@ public class CommandBus implements AutoCloseable {
      *                                     the class of the passed command
      */
     public List<Event> post(Command request) {
-
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
-
         checkNotNull(request);
-
         store(request);
-
         final CommandClass commandClass = CommandClass.of(request);
-
         if (dispatcherRegistered(commandClass)) {
             return dispatch(request);
         }
-
         if (handlerRegistered(commandClass)) {
             final Message command = getMessage(request);
             final CommandContext context = request.getContext();
             return invokeHandler(command, context);
         }
-
         throw new UnsupportedCommandException(getMessage(request));
     }
 
@@ -197,9 +186,7 @@ public class CommandBus implements AutoCloseable {
         List<Event> result = Collections.emptyList();
         try {
             result = method.invoke(msg, context);
-
             commandStatus.setOk(context.getCommandId());
-
         } catch (InvocationTargetException e) {
             final CommandId commandId = context.getCommandId();
             final Throwable cause = e.getCause();
@@ -217,7 +204,6 @@ public class CommandBus implements AutoCloseable {
                 commandStatus.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
-
         return result;
     }
 
@@ -258,6 +244,7 @@ public class CommandBus implements AutoCloseable {
      * The helper class for updating command status.
      */
     private static class CommandStatusHelper {
+
         private final CommandStore commandStore;
 
         private CommandStatusHelper(CommandStore commandStore) {
@@ -312,7 +299,6 @@ public class CommandBus implements AutoCloseable {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
