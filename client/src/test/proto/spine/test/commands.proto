@@ -28,3 +28,7 @@ option java_outer_classname = "TestCommands";
 message RunTest {
     string method_name = 1;
 }
+
+message TestCommand {
+    string value = 1;
+}
