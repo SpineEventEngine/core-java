@@ -44,6 +44,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
+import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -129,7 +130,7 @@ public class CommandBus implements AutoCloseable {
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
-        checkNotNull(command);
+        checkNotDefault(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (dispatcherRegistered(commandClass)) {
             return Responses.ok();
@@ -153,7 +154,9 @@ public class CommandBus implements AutoCloseable {
      */
     public List<Event> post(Command request) {
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
-        checkNotNull(request);
+        checkNotDefault(request);
+
+
         store(request);
         final CommandClass commandClass = CommandClass.of(request);
         if (dispatcherRegistered(commandClass)) {
