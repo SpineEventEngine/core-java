@@ -35,7 +35,7 @@ import org.spine3.validation.options.ValidationProto;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.base.Commands.belongsToEntity;
+import static org.spine3.base.Commands.isEntityFile;
 import static org.spine3.base.Commands.isCommandsFile;
 
 /**
@@ -54,7 +54,7 @@ import static org.spine3.base.Commands.isCommandsFile;
 
     private final List<ConstraintViolation> violations = newLinkedList();
 
-    private final boolean isFileBelongsToEntity;
+    private final boolean isEntityFile;
     private final boolean isCommandsFile;
     private final boolean isFirstField;
     private final RequiredOption requiredOption;
@@ -73,7 +73,7 @@ import static org.spine3.base.Commands.isCommandsFile;
                 .addFieldName(fieldDescriptor.getName())
                 .build();
         final FileDescriptor file = fieldDescriptor.getFile();
-        this.isFileBelongsToEntity = belongsToEntity(file);
+        this.isEntityFile = isEntityFile(file);
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
         this.requiredOption = getFieldOption(ValidationProto.required);
@@ -203,7 +203,7 @@ import static org.spine3.base.Commands.isCommandsFile;
      * {@code false} otherwise.
      */
     private boolean isRequiredEntityIdField() {
-        final boolean result = isFileBelongsToEntity && isCommandsFile && isFirstField;
+        final boolean result = isEntityFile && isCommandsFile && isFirstField;
         return result;
     }
 

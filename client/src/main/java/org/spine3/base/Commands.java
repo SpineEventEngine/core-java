@@ -211,7 +211,7 @@ public class Commands {
      * @param file a descriptor of a {@code .proto} file to check
      * @return {@code true} if the file belongs to an entity, {@code false} otherwise
      */
-    public static boolean belongsToEntity(FileDescriptor file) {
+    public static boolean isEntityFile(FileDescriptor file) {
         final String protoPackage = file.getPackage();
         final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
         return isCommandForEntity;
