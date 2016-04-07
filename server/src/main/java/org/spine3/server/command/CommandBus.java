@@ -60,7 +60,7 @@ public class CommandBus implements AutoCloseable {
     private final CommandStore commandStore;
 
     private final CommandStatusHelper commandStatus;
-    private final ProblemLog problemLog = new ProblemLog();
+    private ProblemLog problemLog = new ProblemLog();
     private CommandScheduler scheduler;
 
     @CheckReturnValue
@@ -251,8 +251,8 @@ public class CommandBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ ProblemLog getProblemLog() {
-        return problemLog;
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
     }
 
     /**

@@ -65,13 +65,16 @@ public class CommandBusShould {
     private CommandStore commandStore;
     private CommandFactory commandFactory;
     private DefaultCommandScheduler scheduler;
+    private CommandBus.ProblemLog log;
 
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
-        scheduler = mock(DefaultCommandScheduler.class);
         commandBus = CommandBus.create(commandStore);
+        scheduler = mock(DefaultCommandScheduler.class);
         commandBus.setScheduler(scheduler);
+        log = mock(CommandBus.ProblemLog.class);
+        commandBus.setProblemLog(log);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
@@ -216,8 +219,7 @@ public class CommandBusShould {
         private boolean handlerInvoked = false;
 
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ctx)
-                throws TestFailure, TestThrowable {
+        public ProjectCreated handle(CreateProject command, CommandContext ctx) throws TestFailure, TestThrowable {
             handlerInvoked = true;
             return ProjectCreated.getDefaultInstance();
         }
@@ -242,7 +244,7 @@ public class CommandBusShould {
 
     @Test
     public void unregister_handler() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CommandHandler handler = new CreateProjectHandler();
         commandBus.register(handler);
         commandBus.unregister(handler);
         final String projectId = newUuid();
@@ -251,8 +253,8 @@ public class CommandBusShould {
 
     @Test
     public void validate_commands_both_dispatched_and_handled() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
-        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        final CommandHandler handler = new CreateProjectHandler();
+        final CommandDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(handler);
         commandBus.register(dispatcher);
 
@@ -291,12 +293,19 @@ public class CommandBusShould {
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
 
-        verify(commandStore, atMost(1)).close();
+        verify(commandStore, times(1)).close();
+    }
+
+    @Test
+    public void shutdown_CommandScheduler_when_closed() throws Exception {
+        commandBus.close();
+
+        verify(scheduler, times(1)).shutdown();
     }
 
     @Test
     public void remove_all_handlers_on_close() throws Exception {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CommandHandler handler = new CreateProjectHandler();
         commandBus.register(handler);
 
         commandBus.close();
@@ -342,112 +351,92 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, atMost(1)).setCommandStatusOk(command.getContext()
-                                                                  .getCommandId());
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
+                                                                 .getCommandId());
     }
 
     @Test
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
-        final CommandDispatcher throwingDispatcher = mock(CommandDispatcher.class);
-        when(throwingDispatcher.getCommandClasses()).thenReturn(CommandClass.setOf(CreateProject.class));
-        final IOException exception = new IOException("Unable to dispatch");
-        doThrow(exception).when(throwingDispatcher)
-                          .dispatch(any(Command.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
-
-        commandBus.register(throwingDispatcher);
+        final IOException exception = givenThrowingDispatcher();
         final Command command = commandFactory.create(createProject(newUuid()));
 
         commandBus.post(command);
 
         // Verify we updated the status.
-        verify(commandStore, atMost(1)).updateStatus(eq(command.getContext()
-                                                               .getCommandId()), eq(exception));
+        verify(commandStore, times(1)).updateStatus(eq(command.getContext()
+                                                              .getCommandId()), eq(exception));
         // Verify we logged the error.
         verify(log, atMost(1)).errorDispatching(eq(exception), eq(command));
     }
 
-    private static class TestFailure extends FailureThrowable {
-        private static final long serialVersionUID = 1L;
-
-        private TestFailure() {
-            super(Failures.UnableToHandle.newBuilder()
-                                         .setMessage(TestFailure.class.getName())
-                                         .build());
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class TestThrowable extends Throwable {
-    }
-
     @Test
     public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
-        final FailureThrowable failure = new TestFailure();
-        doThrow(failure).when(handler)
-                        .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
-
-        commandBus.register(handler);
+        final TestFailure failure = new TestFailure();
+        givenThrowingHandler(failure);
         final Command command = commandFactory.create(createProject(newUuid()));
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
         commandBus.post(command);
 
         // Verify we updated the status.
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
         // Verify we logged the failure.
-        verify(log, atMost(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
-// TODO:2016-04-07:alexander.litus: check all atMost()
+
     @Test
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final RuntimeException exception = new IllegalStateException("handler throws");
-        doThrow(exception).when(handler)
-                          .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
-
-        commandBus.register(handler);
+        givenThrowingHandler(exception);
         final Command command = commandFactory.create(createProject(newUuid()));
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
         commandBus.post(command);
 
         // Verify we updated the status.
-
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(exception));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(exception));
         // Verify we logged the failure.
-        verify(log, atMost(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
     }
 
     @Test
     public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final Throwable throwable = new TestThrowable();
-        doThrow(throwable).when(handler)
-                          .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
-
-        commandBus.register(handler);
+        givenThrowingHandler(throwable);
         final Command command = commandFactory.create(createProject(newUuid()));
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
         commandBus.post(command);
 
         // Verify we updated the status.
-
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
         // Verify we logged the failure.
-        verify(log, atMost(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
+    }
+
+    private <E extends Throwable> void givenThrowingHandler(E throwable) throws TestThrowable, TestFailure {
+        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
+        doThrow(throwable)
+                .when(handler)
+                .handle(any(CreateProject.class), any(CommandContext.class));
+        commandBus.register(handler);
+    }
+
+    private <E extends Exception> E givenThrowingDispatcher() throws Exception {
+        final CommandDispatcher throwingDispatcher = mock(CommandDispatcher.class);
+        when(throwingDispatcher.getCommandClasses()).thenReturn(CommandClass.setOf(CreateProject.class));
+        final IOException exception = new IOException("Unable to dispatch");
+        doThrow(exception)
+                .when(throwingDispatcher)
+                .dispatch(any(Command.class));
+        commandBus.register(throwingDispatcher);
+        @SuppressWarnings("unchecked")
+        final E throwable = (E) exception;
+        return throwable;
     }
 
     @Test
@@ -480,5 +469,19 @@ public class CommandBusShould {
         commandBus.post(cmd);
 
         verify(scheduler, times(0)).schedule(cmd);
+    }
+
+    private static class TestFailure extends FailureThrowable {
+        private static final long serialVersionUID = 1L;
+
+        private TestFailure() {
+            super(Failures.UnableToHandle.newBuilder()
+                                         .setMessage(TestFailure.class.getName())
+                                         .build());
+        }
+    }
+
+    @SuppressWarnings("serial")
+    private static class TestThrowable extends Throwable {
     }
 }
