@@ -31,6 +31,7 @@ import org.spine3.test.project.command.CreateProject;
 
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -91,5 +92,17 @@ public class DefaultCommandSchedulerShould {
         Thread.sleep((delay.getSeconds() * 1000) + CHECK_OFFSET_MS);
 
         verify(commandBus, times(1)).post(cmd);
+    }
+
+    @Test
+    public void throw_exception_if_is_shutdown() {
+        scheduler.shutdown();
+        try {
+            scheduler.schedule(createProject());
+        } catch (IllegalStateException expected) {
+            // is OK as it is shutdown
+            return;
+        }
+        fail("Must throw an exception as it is shutdown.");
     }
 }

@@ -29,6 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.RunTest;
 import org.spine3.type.TypeName;
 
@@ -127,8 +128,8 @@ public class CommandsShould {
     @Test
     public void when_command_delay_is_set_then_return_true() {
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
-                .setDelay(seconds(10))
-                .build());
+                                                                                            .setDelay(seconds(10))
+                                                                                            .build());
 
         assertTrue(Commands.isScheduled(cmd));
     }
@@ -147,5 +148,23 @@ public class CommandsShould {
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
 
         assertFalse(Commands.isScheduled(cmd));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void when_set_negative_delay_then_throw_exception() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
+                .setDelay(seconds(-10))
+                .build());
+
+        Commands.isScheduled(cmd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void when_set_past_sending_time_then_throw_exception() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
+                .setSendingTime(Timestamps.secondsAgo(10))
+                .build());
+
+        Commands.isScheduled(cmd);
     }
 }
