@@ -19,17 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine.base;
 
-option java_package="org.spine3.test";
+option java_package = "org.spine3.base";
+option java_outer_classname = "FieldPathProto";
 option java_multiple_files = true;
-option java_outer_classname = "TestCommands";
+option java_generate_equals_and_hash = true;
 
-// A test command to run a test by the method name.
-message RunTest {
-    string method_name = 1;
-}
 
-message TestCommand {
-    string value = 1;
+// Field path is a set of message field names.
+// For example, consider the following message declarations:
+//
+//     message CustomerAccount {
+//       User user = 1;
+//     }
+//
+//     message User {
+//       string name = 1;
+//     }
+//
+// The field path for `name` field of the User message is ["user", "name"] set.
+//
+// So, the first entry in the names set is a name of a field in some root message,
+// the next one is a field found in the first one, and so on.
+//
+message FieldPath {
+    // Unqualified message field names.
+    repeated string field_name = 1;
 }

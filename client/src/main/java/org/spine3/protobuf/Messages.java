@@ -208,5 +208,4 @@ public class Messages {
             throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
-
 }

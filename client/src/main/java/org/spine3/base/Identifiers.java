@@ -31,7 +31,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.TimeUtil;
-import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -45,6 +44,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * This class manages conversion of identifies to/from string.
@@ -189,16 +190,16 @@ public class Identifiers {
         //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
         if (id instanceof Message) {
             final Message message = (Message) id;
-            anyId = Messages.toAny(message);
+            anyId = toAny(message);
         } else if (id instanceof String) {
             final String strValue = (String) id;
-            anyId = Messages.toAny(StringValue.newBuilder().setValue(strValue).build());
+            anyId = toAny(newStringValue(strValue));
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
-            anyId = Messages.toAny(UInt32Value.newBuilder().setValue(intValue).build());
+            anyId = toAny(UInt32Value.newBuilder().setValue(intValue).build());
         } else if (id instanceof Long) {
             final Long longValue = (Long) id;
-            anyId = Messages.toAny(UInt64Value.newBuilder().setValue(longValue).build());
+            anyId = toAny(UInt64Value.newBuilder().setValue(longValue).build());
         } else {
             throw unsupportedIdType(id);
         }

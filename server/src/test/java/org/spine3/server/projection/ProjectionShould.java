@@ -29,6 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.server.Subscribe;
 
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionShould {
@@ -55,7 +56,7 @@ public class ProjectionShould {
             final String currentState = getState().getValue();
             final String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
-            return StringValue.newBuilder().setValue(result).build();
+            return newStringValue(result);
         }
 
         /**
@@ -80,7 +81,7 @@ public class ProjectionShould {
     @Test
     public void handle_events() {
         final String stringValue = "something new";
-        test.handle(StringValue.newBuilder().setValue(stringValue).build(), EventContext.getDefaultInstance());
+        test.handle(newStringValue(stringValue), EventContext.getDefaultInstance());
         assertTrue(test.getState().getValue().contains(stringValue));
 
         final Integer integerValue = 1024;

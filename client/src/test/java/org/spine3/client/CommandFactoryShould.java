@@ -64,7 +64,7 @@ public class CommandFactoryShould {
         // into this range. The purpose of this test is to make sure it works with this precision
         // and to add coverage.
         final Timestamp beforeCall = Timestamps.secondsAgo(1);
-        final Command command = commandFactory.create(StringValue.newBuilder().build());
+        final Command command = commandFactory.create(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(1));
 
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));

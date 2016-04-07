@@ -19,17 +19,18 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine.test.validation.msg;
 
-option java_package="org.spine3.test";
+option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "TestCommands";
+option java_package = "org.spine3.test.validation.msg";
 
-// A test command to run a test by the method name.
-message RunTest {
-    string method_name = 1;
-}
+import "spine/entity.proto";
 
-message TestCommand {
+// A state of the stub aggregate.
+// Is annotated so that Spine considers commands from `commands.proto` file from this package as commands for an aggregate.
+message StubAggregate {
+    option (state_of) = AGGREGATE;
+
     string value = 1;
 }

@@ -18,33 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.testdata;
-
-import org.spine3.server.storage.EntityStorageRecord;
-
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Values.newStringValue;
-
 /**
- * Creates {@link EntityStorageRecord}s for tests.
- *
- * @author Alexander Litus
+ * This package provides validation classes.
  */
-public class TestEntityStorageRecordFactory {
+@ParametersAreNonnullByDefault
+package org.spine3.server.validate;
 
-    private TestEntityStorageRecordFactory() {
-    }
-
-    /**
-     * Creates a new record with all fields set.
-     */
-    public static EntityStorageRecord newEntityStorageRecord() {
-        final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(toAny(newStringValue(newUuid())))
-                .setWhenModified(getCurrentTime())
-                .setVersion(5); // set any non-default (non-zero) value
-        return builder.build();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
