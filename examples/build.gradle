@@ -1,6 +1,6 @@
 buildscript {
     dependencies {
-        classpath "org.spine3.tools:proto-lookup-plugin:1.1"
+        classpath "org.spine3.tools:protobuf-plugin:1.2"
     }
 }
 
@@ -13,5 +13,5 @@ dependencies {
     compile project(path: ':server');
 }
 
-apply plugin: 'org.spine3.tools.protolookup'
+apply plugin: 'org.spine3.tools.protobuf-plugin'
 

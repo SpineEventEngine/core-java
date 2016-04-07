@@ -4,7 +4,7 @@ buildscript {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
     dependencies {
-        classpath group: 'org.spine3.tools', name: 'proto-lookup-plugin', version: '1.1', changing: true
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.2', changing: true
     }
 }
 
@@ -14,7 +14,7 @@ dependencies {
     compile project(path: ':client');
 }
 
-apply plugin: 'org.spine3.tools.protolookup';
+apply plugin: 'org.spine3.tools.protobuf-plugin';
 
 sourceSets {
     main {
