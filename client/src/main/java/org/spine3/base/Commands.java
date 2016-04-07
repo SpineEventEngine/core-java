@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
@@ -37,6 +38,8 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.protobuf.Timestamps.isAfter;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.
@@ -178,5 +181,31 @@ public class Commands {
         final String id = commandId.getUuid();
         final String result = String.format(format, commandType, id);
         return result;
+    }
+
+    /**
+     * Checks if the command is scheduled to be sent later.
+     *
+     * @param command a command to check
+     * @return {@code true} if the command context has valid delay or sending time set, {@code false} otherwise
+     */
+    public static boolean isScheduled(Command command) {
+        final CommandContext context = command.getContext();
+        final Duration delay = context.getDelay();
+        if (isNotDefault(delay)) {
+            checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
+            return true;
+        }
+        final Timestamp sendingTime = context.getSendingTime();
+        if (isNotDefault(sendingTime)) {
+            checkIsAfterNow(sendingTime);
+            return true;
+        }
+        return false;
+    }
+
+    private static void checkIsAfterNow(Timestamp sendingTime) {
+        final Timestamp now = getCurrentTime();
+        checkArgument(isAfter(sendingTime, /*than*/ now), "Sending time must be after the current time.");
     }
 }

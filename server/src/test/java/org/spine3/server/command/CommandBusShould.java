@@ -49,9 +49,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 
@@ -61,12 +64,14 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
+    private DefaultCommandScheduler scheduler;
 
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
-
+        scheduler = mock(DefaultCommandScheduler.class);
         commandBus = CommandBus.create(commandStore);
+        commandBus.setScheduler(scheduler);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
@@ -398,7 +403,7 @@ public class CommandBusShould {
         // Verify we logged the failure.
         verify(log, atMost(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
-
+// TODO:2016-04-07:alexander.litus: check all atMost()
     @Test
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
         final CreateProjectHandler handler = mock(CreateProjectHandler.class);
@@ -443,5 +448,37 @@ public class CommandBusShould {
         verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
         // Verify we logged the failure.
         verify(log, atMost(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
+    }
+
+    @Test
+    public void schedule_command_if_delay_is_set() {
+        final Command cmd = Commands.create(createProject(newUuid()), CommandContext.newBuilder()
+                .setDelay(minutes(1))
+                .build());
+
+        commandBus.post(cmd);
+
+        verify(scheduler, times(1)).schedule(cmd);
+    }
+
+    @Test
+    public void schedule_command_if_sending_time_is_set() {
+        final Command cmd = Commands.create(createProject(newUuid()), CommandContext.newBuilder()
+                .setSendingTime(add(getCurrentTime(), minutes(1)))
+                .build());
+
+        commandBus.post(cmd);
+
+        verify(scheduler, times(1)).schedule(cmd);
+    }
+
+    @Test
+    public void do_not_schedule_command_if_no_scheduling_options_are_set() {
+        commandBus.register(new CreateProjectHandler());
+        final Command cmd = commandFactory.create(createProject(newUuid()));
+
+        commandBus.post(cmd);
+
+        verify(scheduler, times(0)).schedule(cmd);
     }
 }

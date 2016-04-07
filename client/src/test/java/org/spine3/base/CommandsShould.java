@@ -36,7 +36,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -119,5 +122,30 @@ public class CommandsShould {
 
         assertTrue(string.contains(typeName));
         assertTrue(string.contains(commandId));
+    }
+
+    @Test
+    public void when_command_delay_is_set_then_return_true() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
+                .setDelay(seconds(10))
+                .build());
+
+        assertTrue(Commands.isScheduled(cmd));
+    }
+
+    @Test
+    public void when_command_sending_time_is_set_then_return_true() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
+                .setSendingTime(add(getCurrentTime(), seconds(10)))
+                .build());
+
+        assertTrue(Commands.isScheduled(cmd));
+    }
+
+    @Test
+    public void when_command_is_not_scheduled_then_return_false() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        assertFalse(Commands.isScheduled(cmd));
     }
 }

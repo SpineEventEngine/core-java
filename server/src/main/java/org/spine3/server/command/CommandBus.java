@@ -39,10 +39,10 @@ import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyList;
 import static org.spine3.base.Commands.*;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -61,10 +61,13 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStatusHelper commandStatus;
     private final ProblemLog problemLog = new ProblemLog();
+    private CommandScheduler scheduler;
 
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
-        return new CommandBus(checkNotNull(store));
+        final CommandBus commandBus = new CommandBus(checkNotNull(store));
+        commandBus.setScheduler(new DefaultCommandScheduler(commandBus));
+        return commandBus;
     }
 
     protected CommandBus(CommandStore commandStore) {
@@ -116,6 +119,13 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
+     * Sets a command scheduler.
+     */
+    public void setScheduler(CommandScheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    /**
      * Verifies if the command can be posted to this {@code CommandBus}.
      *
      * <p>The command can be posted if it has either dispatcher or handler registered with
@@ -147,33 +157,35 @@ public class CommandBus implements AutoCloseable {
     /**
      * Directs a command request to the corresponding handler.
      *
-     * @param request the command request to be processed
+     * @param command the command request to be processed
      * @return a list of the events as the result of handling the command
      * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
-    public List<Event> post(Command request) {
+    public List<Event> post(Command command) {
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
-        checkNotDefault(request);
-
-
-        store(request);
-        final CommandClass commandClass = CommandClass.of(request);
+        checkNotDefault(command);
+        store(command);
+        if (isScheduled(command)) {
+            scheduler.schedule(command);
+            return emptyList();
+        }
+        final CommandClass commandClass = CommandClass.of(command);
         if (dispatcherRegistered(commandClass)) {
-            return dispatch(request);
+            return dispatch(command);
         }
         if (handlerRegistered(commandClass)) {
-            final Message command = getMessage(request);
-            final CommandContext context = request.getContext();
-            return invokeHandler(command, context);
+            final Message message = getMessage(command);
+            final CommandContext context = command.getContext();
+            return invokeHandler(message, context);
         }
-        throw new UnsupportedCommandException(getMessage(request));
+        throw new UnsupportedCommandException(getMessage(command));
     }
 
     private List<Event> dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        List<Event> result = Collections.emptyList();
+        List<Event> result = emptyList();
         try {
             result = dispatcher.dispatch(command);
         } catch (Exception e) {
@@ -186,7 +198,7 @@ public class CommandBus implements AutoCloseable {
     private List<Event> invokeHandler(Message msg, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(msg);
         final CommandHandlerMethod method = getHandler(commandClass);
-        List<Event> result = Collections.emptyList();
+        List<Event> result = emptyList();
         try {
             result = method.invoke(msg, context);
             commandStatus.setOk(context.getCommandId());
@@ -298,6 +310,7 @@ public class CommandBus implements AutoCloseable {
         dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
+        scheduler.shutdown();
     }
 
     private enum LogSingleton {
