@@ -1,0 +1,130 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.test.validation.msg;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "ValidationTestMessagesProto";
+option java_package = "org.spine3.test.validation.msg";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "spine/validation.proto";
+
+// Messages for "required" option tests.
+
+message RequiredMsgFieldValue {
+    google.protobuf.StringValue value = 1 [(required).value = true];
+}
+
+message RequiredStringFieldValue {
+    string value = 1 [(required).value = true];
+}
+
+message RequiredByteStringFieldValue {
+    bytes value = 1 [(required).value = true];
+}
+
+message RepeatedRequiredMsgFieldValue {
+    repeated google.protobuf.StringValue value = 1 [(required).value = true];
+}
+
+
+// Messages for "decimal_min", "decimal_max" options tests.
+
+message DecimalMinIncNumberFieldValue {
+    double value = 1 [(decimal_min).value = "16.5", (decimal_min).inclusive = true];
+}
+
+message DecimalMinNotIncNumberFieldValue {
+    double value = 1 [(decimal_min).value = "16.5", (decimal_min).inclusive = false];
+}
+
+message DecimalMaxIncNumberFieldValue {
+    double value = 1 [(decimal_max).value = "64.5", (decimal_max).inclusive = true];
+}
+
+message DecimalMaxNotIncNumberFieldValue {
+    double value = 1 [(decimal_max).value = "64.5", (decimal_max).inclusive = false];
+}
+
+
+// Messages for "min" and "max" options tests.
+
+message MinNumberFieldValue {
+    double value = 1 [(min).value = "16.5"];
+}
+
+message MaxNumberFieldValue {
+    double value = 1 [(max).value = "64.5"];
+}
+
+
+// Messages for "digits" option tests.
+
+message DigitsCountNumberFieldValue {
+    double value = 1 [(digits).integer_max = 2, (digits).fraction_max = 2];
+}
+
+
+// Messages for "time" option tests.
+
+message TimeInFutureFieldValue {
+    google.protobuf.Timestamp value = 1 [(when).in = FUTURE];
+}
+
+message TimeInPastFieldValue {
+    google.protobuf.Timestamp value = 1 [(when).in = PAST];
+}
+
+message TimeWithoutOptsFieldValue {
+    google.protobuf.Timestamp value = 1;
+}
+
+
+// Messages for "pattern" option tests.
+
+message PatternStringFieldValue {
+    string email = 1 [(pattern).regex = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"];
+}
+
+
+// Messages for "valid" option tests.
+
+message EnclosedMessageFieldValue {
+    RequiredStringFieldValue outer_msg_field = 1 [(valid).value = true];
+}
+
+message EnclosedMessageWithoutAnnotationFieldValue {
+    RequiredStringFieldValue outer_msg_field = 1;
+}
+
+
+// Messages for exceptional conditions tests.
+
+message AnnotatedEnumFieldValue {
+    Time value = 1 [(required).value = true];
+}
+
+message AnnotatedBooleanFieldValue {
+    bool value = 1 [(required).value = true];
+}

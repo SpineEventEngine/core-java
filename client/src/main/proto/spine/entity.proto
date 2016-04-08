@@ -19,17 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test;
-
-option java_package="org.spine3.test";
+option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "TestCommands";
+option java_package = "org.spine3.client";
+option java_outer_classname = "EntityProto";
 
-// A test command to run a test by the method name.
-message RunTest {
-    string method_name = 1;
+import "google/protobuf/descriptor.proto";
+
+// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
+
+// Marks a message so that it is considered as a state of an entity (aggregate root, process manager, etc).
+// Then the current package is considered as one which contains files for this type of entity (commands.proto, etc).
+// A command for an entity must contain an entity ID as the first field.
+// The first fields of these commands are checked then to have a valid type and value:
+// for `message` type - a non-default message instance;
+// for `string` type - a non-empty string.
+extend google.protobuf.MessageOptions {
+    EntityType state_of = 51146;
 }
 
-message TestCommand {
-    string value = 1;
+// A type of an entity.
+enum EntityType {
+    // The default value (if the option value is not set).
+    NOT_SET = 0;
+
+    AGGREGATE = 1;
+
+    PROCESS_MANAGER = 2;
+
+    PROJECTION = 3;
 }

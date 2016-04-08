@@ -39,23 +39,19 @@ import com.google.protobuf.UInt64Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
-import org.spine3.io.IoUtil;
 import org.spine3.protobuf.error.UnknownTypeInAnyException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * Utility class for reading real proto class names from properties file.
+ * A utility class for reading real proto class names from properties file.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
@@ -70,7 +66,7 @@ public class TypeToClassMap {
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      * Is generated with Gradle during build process.
      */
-    private static final String PROPERTIES_FILE_PATH = "proto_to_java_class.properties";
+    private static final String PROPS_FILE_PATH = "proto_to_java_class.properties";
 
     /**
      * A map from Protobuf type name to Java class name.
@@ -80,9 +76,7 @@ public class TypeToClassMap {
      */
     private static final Map<TypeName, ClassName> NAMES_MAP = buildNamesMap();
 
-
-    private TypeToClassMap() {
-    }
+    private TypeToClassMap() {}
 
     /**
      * Retrieves Protobuf types known to the application.
@@ -90,7 +84,6 @@ public class TypeToClassMap {
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> knownTypes() {
-
         final Set<TypeName> result = NAMES_MAP.keySet();
         return ImmutableSet.copyOf(result);
     }
@@ -104,13 +97,62 @@ public class TypeToClassMap {
      * @throws UnknownTypeInAnyException if there is no such type known to the application
      */
     public static ClassName get(TypeName protoType) {
-
         if (!NAMES_MAP.containsKey(protoType)) {
-            final ClassName className = searchInnerMessageClass(protoType);
+            final ClassName className = findInnerMessageClass(protoType);
             NAMES_MAP.put(protoType, className);
         }
         final ClassName result = NAMES_MAP.get(protoType);
         return result;
+    }
+
+    private static Map<TypeName, ClassName> buildNamesMap() {
+        final Map<TypeName, ClassName> result = loadNamesFromProperties();
+        final ImmutableMap<TypeName, ClassName> protobufNames = buildProtobufNamesMap();
+        result.putAll(protobufNames);
+        if (log().isDebugEnabled()) {
+            log().debug("Total classes in TypeToClassMap: " + result.size());
+        }
+        return result;
+    }
+
+    private static Map<TypeName, ClassName> loadNamesFromProperties() {
+        final Map<TypeName, ClassName> result = newHashMap();
+        final Set<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
+        for (Properties properties : propertiesSet) {
+            putTo(result, properties);
+        }
+        return result;
+    }
+
+    private static void putTo(Map<TypeName, ClassName> result, Properties properties) {
+        final Set<String> typeNames = properties.stringPropertyNames();
+        for (String name : typeNames) {
+            final TypeName typeName = TypeName.of(name);
+            final ClassName className = ClassName.of(properties.getProperty(name));
+            result.put(typeName, className);
+        }
+    }
+
+    /**
+     * Returns needed classes from the {@code com.google.protobuf} package.
+     * Every class name ends with {@code Value} (except {@link Duration} class).
+     * Other classes from this package are unnecessary.
+     */
+    private static ImmutableMap<TypeName, ClassName> buildProtobufNamesMap() {
+        return ImmutableMap.<TypeName, ClassName>builder()
+                .put(TypeName.of(ListValue.getDescriptor()), ClassName.of(ListValue.class))
+                .put(TypeName.of(Int64Value.getDescriptor()), ClassName.of(Int64Value.class))
+                .put(TypeName.of(Int32Value.getDescriptor()), ClassName.of(Int32Value.class))
+                .put(TypeName.of(UInt64Value.getDescriptor()), ClassName.of(UInt64Value.class))
+                .put(TypeName.of(UInt32Value.getDescriptor()), ClassName.of(UInt32Value.class))
+                .put(TypeName.of(BytesValue.getDescriptor()), ClassName.of(BytesValue.class))
+                .put(TypeName.of(StringValue.getDescriptor()), ClassName.of(StringValue.class))
+                .put(TypeName.of(DoubleValue.getDescriptor()), ClassName.of(DoubleValue.class))
+                .put(TypeName.of(BoolValue.getDescriptor()), ClassName.of(BoolValue.class))
+                .put(TypeName.of(EnumValue.getDescriptor()), ClassName.of(EnumValue.class))
+                .put(TypeName.of(FloatValue.getDescriptor()), ClassName.of(FloatValue.class))
+                .put(TypeName.of(Duration.getDescriptor()), ClassName.of(Duration.class))
+                .build();
     }
 
     /**
@@ -122,8 +164,7 @@ public class TypeToClassMap {
      * @return the found class name
      * @throws UnknownTypeInAnyException if there is no such type known to the application
      */
-    private static ClassName searchInnerMessageClass(TypeName type) {
-
+    private static ClassName findInnerMessageClass(TypeName type) {
         String lookupType = type.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
@@ -146,112 +187,6 @@ public class TypeToClassMap {
             throw new UnknownTypeInAnyException(type.value());
         }
         return className;
-    }
-
-    private static Map<TypeName, ClassName> buildNamesMap() {
-
-        final Map<TypeName, ClassName> result = loadNamesFromProperties();
-        final ImmutableMap<TypeName, ClassName> protobufNames = buildProtobufNamesMap();
-        result.putAll(protobufNames);
-        if (log().isDebugEnabled()) {
-            log().debug("Total classes in TypeToClassMap: " + result.size());
-        }
-        return result;
-    }
-
-    /**
-     * Returns needed classes from the {@code com.google.protobuf} package.
-     * Every class name ends with {@code Value} (except {@link Duration} class).
-     * Other classes from this package are unnecessary.
-     */
-    private static ImmutableMap<TypeName, ClassName> buildProtobufNamesMap() {
-
-        return ImmutableMap.<TypeName, ClassName>builder()
-                .put(TypeName.of(ListValue.getDescriptor()), ClassName.of(ListValue.class))
-                .put(TypeName.of(Int64Value.getDescriptor()), ClassName.of(Int64Value.class))
-                .put(TypeName.of(Int32Value.getDescriptor()), ClassName.of(Int32Value.class))
-                .put(TypeName.of(UInt64Value.getDescriptor()), ClassName.of(UInt64Value.class))
-                .put(TypeName.of(UInt32Value.getDescriptor()), ClassName.of(UInt32Value.class))
-                .put(TypeName.of(BytesValue.getDescriptor()), ClassName.of(BytesValue.class))
-                .put(TypeName.of(StringValue.getDescriptor()), ClassName.of(StringValue.class))
-                .put(TypeName.of(DoubleValue.getDescriptor()), ClassName.of(DoubleValue.class))
-                .put(TypeName.of(BoolValue.getDescriptor()), ClassName.of(BoolValue.class))
-                .put(TypeName.of(EnumValue.getDescriptor()), ClassName.of(EnumValue.class))
-                .put(TypeName.of(FloatValue.getDescriptor()), ClassName.of(FloatValue.class))
-                .put(TypeName.of(Duration.getDescriptor()), ClassName.of(Duration.class))
-                .build();
-    }
-
-    private static Map<TypeName, ClassName> loadNamesFromProperties() {
-
-        final Map<TypeName, ClassName> result = newHashMap();
-        final Set<Properties> propertiesSet = loadAllProperties();
-        for (Properties properties : propertiesSet) {
-            putTo(result, properties);
-        }
-        return result;
-    }
-
-    private static void putTo(Map<TypeName, ClassName> result, Properties properties) {
-
-        for (String key : properties.stringPropertyNames()) {
-            final TypeName typeName = TypeName.of(key);
-            final ClassName className = ClassName.of(properties.getProperty(key));
-            result.put(typeName, className);
-        }
-    }
-
-    /**
-     * Loads all data from property file(s) into memory. The property file should contain proto type urls and
-     * appropriate java class names.
-     */
-    private static ImmutableSet<Properties> loadAllProperties() {
-
-        final Enumeration<URL> resources = getResources();
-        if (resources == null) {
-            return ImmutableSet.<Properties>builder().build();
-        }
-        final ImmutableSet.Builder<Properties> result = ImmutableSet.builder();
-        while (resources.hasMoreElements()) {
-            final URL resourceUrl = resources.nextElement();
-            final Properties properties = loadPropertiesFile(resourceUrl);
-            result.add(properties);
-        }
-        return result.build();
-    }
-
-    private static Enumeration<URL> getResources() {
-
-        Enumeration<URL> resources = null;
-        try {
-            resources = getContextClassLoader().getResources(PROPERTIES_FILE_PATH);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to load resources: " + PROPERTIES_FILE_PATH, e);
-            }
-        }
-        return resources;
-    }
-
-    private static Properties loadPropertiesFile(URL resourceUrl) {
-
-        final Properties properties = new Properties();
-        InputStream inputStream = null;
-        try {
-            inputStream = resourceUrl.openStream();
-            properties.load(inputStream);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to load properties file.", e);
-            }
-        } finally {
-            IoUtil.close(inputStream);
-        }
-        return properties;
-    }
-
-    private static ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
     }
 
     private enum LogSingleton {

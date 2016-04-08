@@ -35,7 +35,9 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
+import org.spine3.validation.options.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +46,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 import static org.spine3.base.Commands.*;
+import static org.spine3.server.command.CommandValidation.invalidCommand;
+import static org.spine3.server.command.CommandValidation.unsupportedCommand;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
@@ -142,16 +146,20 @@ public class CommandBus implements AutoCloseable {
     public Response validate(Message command) {
         checkNotDefault(command);
         final CommandClass commandClass = CommandClass.of(command);
-        if (dispatcherRegistered(commandClass)) {
-            return Responses.ok();
+        if (isUnsupportedCommand(commandClass)) {
+            return unsupportedCommand(command);
         }
-        if (handlerRegistered(commandClass)) {
-            return Responses.ok();
+        final MessageValidator validator = new MessageValidator();
+        final List<ConstraintViolation> violations = validator.validate(command);
+        if (!violations.isEmpty()) {
+            return invalidCommand(command, violations);
         }
-        //TODO:2015-12-16:alexander.yevsyukov: Implement command validation for completeness of commands.
-        // Presumably, it would be CommandValidator<Class<? extends Message> which would be exposed by
-        // corresponding Aggregates or ProcessManagers, and then contributed to validator registry.
-        return CommandValidation.unsupportedCommand(command);
+        return Responses.ok();
+    }
+
+    private boolean isUnsupportedCommand(CommandClass commandClass) {
+        final boolean isUnsupported = !isDispatcherRegistered(commandClass) && !isHandlerRegistered(commandClass);
+        return isUnsupported;
     }
 
     /**
@@ -171,10 +179,10 @@ public class CommandBus implements AutoCloseable {
             return emptyList();
         }
         final CommandClass commandClass = CommandClass.of(command);
-        if (dispatcherRegistered(commandClass)) {
+        if (isDispatcherRegistered(commandClass)) {
             return dispatch(command);
         }
-        if (handlerRegistered(commandClass)) {
+        if (isHandlerRegistered(commandClass)) {
             final Message message = getMessage(command);
             final CommandContext context = command.getContext();
             return invokeHandler(message, context);
@@ -287,12 +295,12 @@ public class CommandBus implements AutoCloseable {
         commandStore.store(request);
     }
 
-    private boolean dispatcherRegistered(CommandClass cls) {
+    private boolean isDispatcherRegistered(CommandClass cls) {
         final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
         return result;
     }
 
-    private boolean handlerRegistered(CommandClass cls) {
+    private boolean isHandlerRegistered(CommandClass cls) {
         final boolean result = handlerRegistry.handlerRegistered(cls);
         return result;
     }

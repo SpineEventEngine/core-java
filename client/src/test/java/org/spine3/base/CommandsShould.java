@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.test.RunTest;
+import org.spine3.test.TestCommand;
 import org.spine3.type.TypeName;
 
 import java.util.ArrayList;
@@ -39,13 +40,15 @@ import java.util.List;
 
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
@@ -80,9 +83,7 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = StringValue.newBuilder()
-                                               .setValue("extract_message_from_command")
-                                               .build();
+        final StringValue message = newStringValue("extract_message_from_command");
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
         assertEquals(message, Commands.getMessage(command));
     }
@@ -123,6 +124,31 @@ public class CommandsShould {
 
         assertTrue(string.contains(typeName));
         assertTrue(string.contains(commandId));
+    }
+    
+    @Test
+    public void return_true_if_file_is_for_commands() {
+        final FileDescriptor file = TestCommand.getDescriptor().getFile();
+
+        assertTrue(Commands.isCommandsFile(file));
+    }
+
+    @Test
+    public void return_false_if_file_is_not_for_commands() {
+        final FileDescriptor file = StringValue.getDescriptor().getFile();
+
+        assertFalse(Commands.isCommandsFile(file));
+    }
+
+    // TODO:2016-04-06:alexander.litus: implement (find out how to use entity.proto in test .proto files)
+    public void return_true_if_file_belongs_to_entity() {
+    }
+
+    @Test
+    public void return_false_if_file_does_not_belong_to_entity() {
+        final FileDescriptor file = StringValue.getDescriptor().getFile();
+
+        assertFalse(Commands.isEntityFile(file));
     }
 
     @Test

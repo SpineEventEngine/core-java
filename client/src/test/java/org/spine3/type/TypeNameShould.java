@@ -32,6 +32,7 @@ import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.RunTest;
 
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeNameShould {
@@ -49,7 +50,7 @@ public class TypeNameShould {
 
     @Test
     public void return_type_url() {
-        final TypeName test = TypeName.of(StringValue.newBuilder().setValue("return_type_url").build());
+        final TypeName test = TypeName.of(newStringValue("return_type_url"));
 
         assertFalse(test.toTypeUrl().isEmpty());
     }

@@ -18,33 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.server.validate;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
+import com.google.protobuf.FloatValue;
 import org.junit.Test;
+import org.spine3.base.FieldPath;
+import org.spine3.protobuf.Messages;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Alexander Litus
+ */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ErrorsShould {
+public class FloatFieldValidatorShould {
+
+    private static final Float VALUE = 0.5F;
+    private static final Float NEGATIVE_VALUE = -0.5F;
+
+    private final FloatFieldValidator validator =
+            new FloatFieldValidator(Any.getDescriptor().getFields().get(0), ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
 
     @Test
-    public void create_Error_by_Exception() {
-        final String msg = "create_error_by_exception";
-        final Exception exception = new NullPointerException(msg);
-        final Error error = Errors.fromException(exception);
-
-        assertEquals(msg, error.getMessage());
-        assertEquals(exception.getClass().getName(), error.getType());
+    public void convert_string_to_number() {
+        assertEquals(VALUE, validator.toNumber(VALUE.toString()));
     }
 
     @Test
-    public void create_Error_by_Throwable() {
-        final String msg = "create_Error_by_Throwable";
-        @SuppressWarnings("ThrowableInstanceNeverThrown")
-        final Throwable throwable = new IllegalStateException(msg);
+    public void return_absolute_number_value() {
+        assertEquals(VALUE, validator.getAbs(NEGATIVE_VALUE));
+    }
 
-        final Error error = Errors.fromThrowable(throwable);
-        assertEquals(msg, error.getMessage());
-        assertEquals(throwable.getClass().getName(), error.getType());
+    @Test
+    public void wrap_to_any() {
+        final Any any = validator.wrap(VALUE);
+        final FloatValue msg = Messages.fromAny(any);
+        assertEquals(VALUE, (Float) msg.getValue());
     }
 }
