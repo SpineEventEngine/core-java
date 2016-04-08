@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +58,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class CommandBusShould {
@@ -64,15 +66,17 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private DefaultCommandScheduler scheduler;
+    private ExecutorCommandScheduler scheduler;
     private CommandBus.ProblemLog log;
 
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
-        commandBus = CommandBus.create(commandStore);
-        scheduler = mock(DefaultCommandScheduler.class);
-        commandBus.setScheduler(scheduler);
+        scheduler = mock(ExecutorCommandScheduler.class);
+        commandBus = CommandBus.newBuilder()
+                               .setCommandStore(commandStore)
+                               .setScheduler(scheduler)
+                               .build();
         log = mock(CommandBus.ProblemLog.class);
         commandBus.setProblemLog(log);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
@@ -81,7 +85,9 @@ public class CommandBusShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
         //noinspection ConstantConditions,ResultOfMethodCallIgnored
-        CommandBus.create(null);
+        CommandBus.newBuilder()
+                  .setCommandStore(null)
+                  .build();
     }
 
     //
@@ -441,9 +447,7 @@ public class CommandBusShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmd = Commands.create(createProject(newUuid()), CommandContext.newBuilder()
-                .setDelay(minutes(1))
-                .build());
+        final Command cmd = newCommand(/*delay=*/minutes(1));
 
         commandBus.post(cmd);
 
@@ -452,9 +456,8 @@ public class CommandBusShould {
 
     @Test
     public void schedule_command_if_sending_time_is_set() {
-        final Command cmd = Commands.create(createProject(newUuid()), CommandContext.newBuilder()
-                .setSendingTime(add(getCurrentTime(), minutes(1)))
-                .build());
+        final CommandContext context = createCommandContext(/*delivery time=*/add(getCurrentTime(), minutes(1)));
+        final Command cmd = Commands.create(createProject(newUuid()), context);
 
         commandBus.post(cmd);
 
@@ -468,7 +471,31 @@ public class CommandBusShould {
 
         commandBus.post(cmd);
 
-        verify(scheduler, times(0)).schedule(cmd);
+        verify(scheduler, never()).schedule(cmd);
+    }
+
+    @Test
+    public void do_not_store_command_if_command_is_scheduled() {
+        final Command cmd = newCommand(/*delay=*/minutes(1));
+
+        commandBus.post(cmd);
+
+        verify(commandStore, never()).store(cmd);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_post_scheduled_cmd_and_no_scheduler_is_set() {
+        final CommandBus commandBus = CommandBus.newBuilder()
+                .setCommandStore(commandStore)
+                .build();
+        final Command cmd = newCommand(/*delay=*/minutes(1));
+
+        commandBus.post(cmd);
+    }
+
+    private static Command newCommand(Duration delay) {
+        final CommandContext context = createCommandContext(delay);
+        return Commands.create(createProject(newUuid()), context);
     }
 
     private static class TestFailure extends FailureThrowable {

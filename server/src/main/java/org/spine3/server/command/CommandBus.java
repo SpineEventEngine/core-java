@@ -39,7 +39,7 @@ import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
 import org.spine3.validation.options.ConstraintViolation;
 
-import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -55,6 +55,7 @@ import static org.spine3.validate.Validate.checkNotDefault;
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
+ * @author Alexander Litus
  */
 public class CommandBus implements AutoCloseable {
 
@@ -63,20 +64,23 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
+    @Nullable
+    private final CommandScheduler scheduler;
+
     private final CommandStatusHelper commandStatus;
     private ProblemLog problemLog = new ProblemLog();
-    private CommandScheduler scheduler;
 
-    @CheckReturnValue
-    public static CommandBus create(CommandStore store) {
-        final CommandBus commandBus = new CommandBus(checkNotNull(store));
-        commandBus.setScheduler(new DefaultCommandScheduler(commandBus));
-        return commandBus;
+    private CommandBus(Builder builder) {
+        this.commandStore = builder.getCommandStore();
+        this.scheduler = builder.getScheduler();
+        this.commandStatus = new CommandStatusHelper(commandStore);
     }
 
-    protected CommandBus(CommandStore commandStore) {
-        this.commandStore = commandStore;
-        this.commandStatus = new CommandStatusHelper(commandStore);
+    /**
+     * Creates a new builder for command bus.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -123,13 +127,6 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Sets a command scheduler.
-     */
-    public void setScheduler(CommandScheduler scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    /**
      * Verifies if the command can be posted to this {@code CommandBus}.
      *
      * <p>The command can be posted if it has either dispatcher or handler registered with
@@ -173,11 +170,11 @@ public class CommandBus implements AutoCloseable {
     public List<Event> post(Command command) {
         //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
         checkNotDefault(command);
-        store(command);
         if (isScheduled(command)) {
-            scheduler.schedule(command);
+            schedule(command);
             return emptyList();
         }
+        store(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (isDispatcherRegistered(commandClass)) {
             return dispatch(command);
@@ -228,6 +225,15 @@ public class CommandBus implements AutoCloseable {
             }
         }
         return result;
+    }
+
+    private void schedule(Command command) {
+        if (scheduler != null) {
+            scheduler.schedule(command);
+        } else {
+            throw new IllegalStateException(
+                    "Scheduled commands are not supported by this command bus (scheduler is not set).");
+        }
     }
 
     /**
@@ -318,7 +324,9 @@ public class CommandBus implements AutoCloseable {
         dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
-        scheduler.shutdown();
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
     }
 
     private enum LogSingleton {
@@ -333,5 +341,38 @@ public class CommandBus implements AutoCloseable {
     @VisibleForTesting
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    /**
+     * Constructs a command bus.
+     */
+    public static class Builder {
+
+        private CommandStore commandStore;
+        private CommandScheduler scheduler;
+
+        public CommandBus build() {
+            checkNotNull(commandStore, "Command store must be set.");
+            final CommandBus commandBus = new CommandBus(this);
+            return commandBus;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            this.commandStore = commandStore;
+            return this;
+        }
+
+        public CommandStore getCommandStore() {
+            return commandStore;
+        }
+
+        public Builder setScheduler(CommandScheduler scheduler) {
+            this.scheduler = scheduler;
+            return this;
+        }
+
+        public CommandScheduler getScheduler() {
+            return scheduler;
+        }
     }
 }

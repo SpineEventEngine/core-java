@@ -79,13 +79,23 @@ message CommandContext {
     // The `namespace` attribute must be defined for commands in multitenant applications.
     Namespace namespace = 5;
 
-    oneof time_opts {
-        // The delay to wait before sending the command.
-        google.protobuf.Duration delay = 6;
+    // The command scheduling options.
+    Schedule schedule = 6;
+}
 
-        // The time when the command should be sent.
-        google.protobuf.Timestamp sending_time = 7;
+message Schedule {
+    oneof options {
+        // The amount of time between the current moment and a command delivering to the target.
+        google.protobuf.Duration delay = 1;
+
+        // The time when the command should be delivered to the target.
+        google.protobuf.Timestamp delivery_time = 2;
     }
+
+    // `true` if the command should be delivered to the target right now, despite the scheduling options set;
+    // `false` otherwise.
+    // This flag is needed to specify that a scheduled command arrived in time, and to retain the scheduling options.
+    bool in_time = 3;
 }
 
 // Enumeration of possible failures when validating a command.

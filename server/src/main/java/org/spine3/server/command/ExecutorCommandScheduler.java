@@ -23,81 +23,68 @@ package org.spine3.server.command;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
+import org.spine3.base.Schedule;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
- * The default command scheduler implementation.
+ * The command scheduler implementation which uses basic Java task scheduling features.
  *
+ * <p><b>NOTE:</b> please use <a href="https://github.com/SpineEventEngine/gae-java">another implementation</a>
+ * in applications running under the Google App Engine.
+ *
+ * @see ScheduledExecutorService
  * @author Alexander Litus
  */
-public class DefaultCommandScheduler implements CommandScheduler {
+public class ExecutorCommandScheduler extends CommandScheduler {
 
     private static final int MIN_THEAD_POOL_SIZE = 5;
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THEAD_POOL_SIZE);
-
-    private boolean isShutdown = false;
-
-    private final CommandBus commandBus;
 
     /**
      * Creates a new instance.
      *
      * @param commandBus a command bus used to send scheduled commands
      */
-    public DefaultCommandScheduler(CommandBus commandBus) {
-        this.commandBus = commandBus;
+    public ExecutorCommandScheduler(CommandBus commandBus) {
+        super(commandBus);
     }
 
     @Override
-    public void schedule(Command command) {
-        checkState(!isShutdown, "Scheduler is shut down.");
+    public void schedule(final Command command) {
+        super.schedule(command);
         final long delaySec = getDelaySeconds(command);
-        final Command commandUpdated = removeSchedulingOptions(command);
         executorService.schedule(new Runnable() {
             @Override
             public void run() {
-                commandBus.post(commandUpdated);
+                post(command);
             }
         }, delaySec, SECONDS);
     }
 
     private static long getDelaySeconds(Command command) {
-        final CommandContext context = command.getContext();
+        final Schedule schedule = command.getContext().getSchedule();
         final long delaySec;
-        final Duration delay = context.getDelay();
+        final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             delaySec = delay.getSeconds();
         } else {
-            final Timestamp sendingTime = context.getSendingTime();
+            final Timestamp deliveryTime = schedule.getDeliveryTime();
             final Timestamp now = getCurrentTime();
-            delaySec = sendingTime.getSeconds() - now.getSeconds();
+            delaySec = deliveryTime.getSeconds() - now.getSeconds();
         }
         return delaySec;
     }
 
-    private static Command removeSchedulingOptions(Command command) {
-        final CommandContext contextUpdated = command.getContext().toBuilder()
-                .clearDelay()
-                .clearSendingTime()
-                .build();
-        final Command result = command.toBuilder()
-                .setContext(contextUpdated)
-                .build();
-        return result;
-    }
-
     @Override
     public void shutdown() {
+        super.shutdown();
         executorService.shutdown();
-        isShutdown = true;
     }
 }

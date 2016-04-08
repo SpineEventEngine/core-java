@@ -27,21 +27,23 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.test.project.command.CreateProject;
 
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class DefaultCommandSchedulerShould {
+public class ExecutorCommandSchedulerShould {
 
     private static final Duration DELAY = seconds(1);
     private static final int CHECK_OFFSET_MS = 50;
@@ -52,7 +54,7 @@ public class DefaultCommandSchedulerShould {
     @Before
     public void setUpTest() {
         this.commandBus = mock(CommandBus.class);
-        this.scheduler = new DefaultCommandScheduler(commandBus);
+        this.scheduler = new ExecutorCommandScheduler(commandBus);
     }
 
     @After
@@ -62,36 +64,45 @@ public class DefaultCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() throws InterruptedException {
-        final CreateProject msg = createProject(newUuid());
-        final Command cmdPrimary = Commands.create(msg, CommandContext.newBuilder()
-                .setDelay(DELAY)
-                .build());
-        final Command cmdExpected = Commands.create(msg, CommandContext.getDefaultInstance());
+        final CommandContext context = createCommandContext(DELAY);
+        final Command cmd = Commands.create(createProject(newUuid()), context);
 
-        scheduler.schedule(cmdPrimary);
+        scheduler.schedule(cmd);
 
-        assertCommandSent(cmdExpected, DELAY);
+        assertCommandSent(cmd, DELAY);
     }
 
     @Test
     public void schedule_command_if_sending_time_is_set() throws InterruptedException {
-        final CreateProject msg = createProject(newUuid());
-        final Command cmdPrimary = Commands.create(msg, CommandContext.newBuilder()
-                .setSendingTime(add(getCurrentTime(), DELAY))
-                .build());
-        final Command cmdExpected = Commands.create(msg, CommandContext.getDefaultInstance());
+        final CommandContext context = createCommandContext(/*delivery time=*/add(getCurrentTime(), DELAY));
+        final Command cmd = Commands.create(createProject(newUuid()), context);
 
-        scheduler.schedule(cmdPrimary);
+        scheduler.schedule(cmd);
 
-        assertCommandSent(cmdExpected, DELAY);
+        assertCommandSent(cmd, DELAY);
+    }
+
+    @Test
+    public void set_command_is_in_time() {
+        final Command cmd = createProject();
+        assertFalse(cmd.getContext()
+                       .getSchedule()
+                       .getInTime());
+
+        final Command updatedCmd = CommandScheduler.setIsInTime(cmd);
+        assertTrue(updatedCmd.getContext()
+                             .getSchedule()
+                             .getInTime());
     }
 
     private void assertCommandSent(Command cmd, Duration delay) throws InterruptedException {
-        verify(commandBus, never()).post(any(Command.class));
+        verify(commandBus, times(0)).post(any(Command.class));
 
-        Thread.sleep((delay.getSeconds() * 1000) + CHECK_OFFSET_MS);
+        final long delayMs = delay.getSeconds() * 1000;
+        Thread.sleep(delayMs + CHECK_OFFSET_MS);
 
-        verify(commandBus, times(1)).post(cmd);
+        final Command updatedCmd = CommandScheduler.setIsInTime(cmd);
+        verify(commandBus, times(1)).post(updatedCmd);
     }
 
     @Test

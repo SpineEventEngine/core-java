@@ -221,28 +221,31 @@ public class Commands {
     }
 
     /**
-     * Checks if the command is scheduled to be sent later.
+     * Checks if the command is scheduled to be delivered later.
      *
      * @param command a command to check
-     * @return {@code true} if the command context has valid delay or sending time set, {@code false} otherwise
+     * @return {@code true} if the command context has scheduling options set, {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
-        final CommandContext context = command.getContext();
-        final Duration delay = context.getDelay();
+        final Schedule schedule = command.getContext().getSchedule();
+        if (schedule.getInTime()) {
+            return false;
+        }
+        final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
             return true;
         }
-        final Timestamp sendingTime = context.getSendingTime();
-        if (isNotDefault(sendingTime)) {
-            checkIsAfterNow(sendingTime);
+        final Timestamp deliveryTime = schedule.getDeliveryTime();
+        if (isNotDefault(deliveryTime)) {
+            checkIsAfterNow(deliveryTime);
             return true;
         }
         return false;
     }
 
-    private static void checkIsAfterNow(Timestamp sendingTime) {
+    private static void checkIsAfterNow(Timestamp deliveryTime) {
         final Timestamp now = getCurrentTime();
-        checkArgument(isAfter(sendingTime, /*than*/ now), "Sending time must be after the current time.");
+        checkArgument(isAfter(deliveryTime, /*than*/ now), "Delivery time must be after the current time.");
     }
 }

@@ -41,8 +41,6 @@ import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
@@ -106,10 +104,6 @@ public class BoundedContextShould {
                                               .setStreamExecutor(MoreExecutors.directExecutor())
                                               .setStorage(storageFactory.createEventStorage())
                                               .build());
-    }
-
-    private static CommandBus newCommandBus(StorageFactory storageFactory) {
-        return CommandBus.create(new CommandStore(storageFactory.createCommandStorage()));
     }
 
     @After

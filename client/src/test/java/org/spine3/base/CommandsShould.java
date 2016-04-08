@@ -27,9 +27,9 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.protobuf.Timestamps;
 import org.spine3.test.RunTest;
 import org.spine3.test.TestCommand;
 import org.spine3.type.TypeName;
@@ -38,15 +38,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.protobuf.Descriptors.FileDescriptor;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
@@ -152,44 +153,48 @@ public class CommandsShould {
     }
 
     @Test
-    public void when_command_delay_is_set_then_return_true() {
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
-                                                                                            .setDelay(seconds(10))
-                                                                                            .build());
+    public void when_command_delay_is_set_then_consider_it_scheduled() {
+        final CommandContext context = createCommandContext(/*delay=*/seconds(10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
-    public void when_command_sending_time_is_set_then_return_true() {
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
-                .setSendingTime(add(getCurrentTime(), seconds(10)))
-                .build());
+    public void when_command_sending_time_is_set_then_consider_it_scheduled() {
+        final Timestamp deliveryTime = add(getCurrentTime(), seconds(10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), createCommandContext(deliveryTime));
 
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
-    public void when_command_is_not_scheduled_then_return_false() {
+    public void when_no_scheduling_options_then_consider_command_not_scheduled() {
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        assertFalse(Commands.isScheduled(cmd));
+    }
+
+    @Test
+    public void when_command_is_in_time_then_consider_it_not_scheduled() {
+        final CommandContext context = createCommandContext(/*delay=*/seconds(10), /*in time=*/true);
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         assertFalse(Commands.isScheduled(cmd));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
-                .setDelay(seconds(-10))
-                .build());
+        final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void when_set_past_sending_time_then_throw_exception() {
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.newBuilder()
-                .setSendingTime(Timestamps.secondsAgo(10))
-                .build());
+        final CommandContext context = createCommandContext(/*delivery time=*/secondsAgo(10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
     }

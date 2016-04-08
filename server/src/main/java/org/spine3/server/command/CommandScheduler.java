@@ -20,28 +20,77 @@
 
 package org.spine3.server.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Schedule;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Schedules commands sending them after the given delay (or at the given time).
+ * Schedules commands delivering them to the target according to the scheduling options.
  *
  * @author Alexander Litus
  */
-public interface CommandScheduler {
+public abstract class CommandScheduler {
+
+    private final CommandBus commandBus;
+
+    private boolean isActive = true;
 
     /**
-     * Schedule a command and send it after the given delay (or at the given time).
+     * Creates a new instance.
      *
-     * @param command a command to send later
-     * @throws IllegalStateException if the scheduler is shut down
+     * @param commandBus a command bus used to send scheduled commands
      */
-    void schedule(Command command);
+    protected CommandScheduler(CommandBus commandBus) {
+        this.commandBus = commandBus;
+    }
 
     /**
-     * Initiates an orderly shutdown in which previously scheduled commands will be sent later,
+     * Schedule a command and deliver it to the target according to the scheduling options.
+     *
+     * @param command a command to deliver later
+     * @throws IllegalStateException if the scheduler is shut down
+     * @see #post(Command)
+     */
+    public void schedule(Command command) {
+        checkState(isActive, "Scheduler is shut down.");
+    }
+
+    /**
+     * Initiates an orderly shutdown in which previously scheduled commands will be delivered later,
      * but no new commands will be accepted.
      *
      * <p>Invocation has no effect if the scheduler is already shut down.
      */
-    void shutdown();
+    public void shutdown() {
+        isActive = false;
+    }
+
+    /**
+     * Delivers a scheduled command to a target.
+     *
+     * @param command a command to deliver
+     */
+    protected void post(Command command) {
+        final Command commandUpdated = setIsInTime(command);
+        commandBus.post(commandUpdated);
+    }
+
+    @VisibleForTesting
+    /* package */ static Command setIsInTime(Command command) {
+        final CommandContext contextPrimary = command.getContext();
+        final Schedule scheduleUpdated = contextPrimary.getSchedule()
+                .toBuilder()
+                .setInTime(true)
+                .build();
+        final CommandContext contextUpdated = contextPrimary.toBuilder()
+                .setSchedule(scheduleUpdated)
+                .build();
+        final Command cmdUpdated = command.toBuilder()
+                .setContext(contextUpdated)
+                .build();
+        return cmdUpdated;
+    }
 }

@@ -25,13 +25,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.*;
+import static org.spine3.testdata.TestCommands.newCommandBus;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextBuilderShould {
@@ -46,17 +46,6 @@ public class BoundedContextBuilderShould {
     @After
     public void tearDown() throws Exception {
         storageFactory.close();
-    }
-
-    private static CommandBus newCommandDispatcher(StorageFactory storageFactory) {
-        return CommandBus.create(new CommandStore(storageFactory.createCommandStorage()));
-    }
-
-    private static EventBus newEventBus(StorageFactory storageFactory) {
-        return EventBus.newInstance(EventStore.newBuilder()
-                                              .setStreamExecutor(MoreExecutors.directExecutor())
-                                              .setStorage(storageFactory.createEventStorage())
-                                              .build());
     }
 
     @Test(expected = NullPointerException.class)
@@ -80,7 +69,7 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_CommandDispatcher_from_builder() {
-        final CommandBus expected = newCommandDispatcher(storageFactory);
+        final CommandBus expected = newCommandBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
     }
@@ -101,12 +90,20 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void be_not_multitenant_by_default() {
-        assertFalse(BoundedContext.newBuilder().isMultitenant());
+        assertFalse(BoundedContext.newBuilder()
+                                  .isMultitenant());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
         //noinspection ConstantConditions
         BoundedContext.newBuilder().setEventBus(null);
+    }
+
+    private static EventBus newEventBus(StorageFactory storageFactory) {
+        return EventBus.newInstance(EventStore.newBuilder()
+                                              .setStreamExecutor(MoreExecutors.directExecutor())
+                                              .setStorage(storageFactory.createEventStorage())
+                                              .build());
     }
 }

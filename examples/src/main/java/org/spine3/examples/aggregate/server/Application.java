@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.EventHandler;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
@@ -53,7 +54,7 @@ public class Application implements AutoCloseable {
 
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
-    private final EventLogger eventLogger = new EventLogger();
+    private final EventHandler eventLogger = new EventLogger();
 
     /**
      * Creates a new sample with the specified storage factory.
@@ -70,7 +71,11 @@ public class Application implements AutoCloseable {
     }
 
     private static CommandBus createCommandBus() {
-        return CommandBus.create(new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage()));
+        final CommandStore store = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
+        final CommandBus commandBus = CommandBus.newBuilder()
+                .setCommandStore(store)
+                .build();
+        return commandBus;
     }
 
     private static EventBus createEventBus(StorageFactory storageFactory) {
@@ -79,7 +84,6 @@ public class Application implements AutoCloseable {
                 .setStorage(storageFactory.createEventStorage())
                 .setLogger(EventStore.log())
                 .build();
-
         return EventBus.newInstance(eventStore);
     }
 
