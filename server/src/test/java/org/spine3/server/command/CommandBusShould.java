@@ -340,8 +340,20 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
-                                                                  .getCommandId());
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
+    }
+
+    @Test
+    public void set_command_status_to_OK_when_dispatcher_returns() {
+        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        commandBus.register(dispatcher);
+
+        final Command command = commandFactory.create(addTask(newUuid()));
+
+        commandBus.post(command);
+
+        // See that we called CommandStore only once with the right command ID.
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
     }
 
     @Test
