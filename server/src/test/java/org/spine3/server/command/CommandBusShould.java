@@ -61,12 +61,15 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
+    private CommandBus.ProblemLog log;
 
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
 
         commandBus = CommandBus.create(commandStore);
+        log = mock(CommandBus.ProblemLog.class);
+        commandBus.setProblemLog(log);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
@@ -286,7 +289,7 @@ public class CommandBusShould {
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
 
-        verify(commandStore, atMost(1)).close();
+        verify(commandStore, times(1)).close();
     }
 
     @Test
@@ -337,7 +340,7 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, atMost(1)).setCommandStatusOk(command.getContext()
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
                                                                   .getCommandId());
     }
 
@@ -348,7 +351,6 @@ public class CommandBusShould {
         final IOException exception = new IOException("Unable to dispatch");
         doThrow(exception).when(throwingDispatcher)
                           .dispatch(any(Command.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
 
         commandBus.register(throwingDispatcher);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -356,10 +358,10 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // Verify we updated the status.
-        verify(commandStore, atMost(1)).updateStatus(eq(command.getContext()
-                                                               .getCommandId()), eq(exception));
+        verify(commandStore, times(1)).updateStatus(eq(command.getContext()
+                                                              .getCommandId()), eq(exception));
         // Verify we logged the error.
-        verify(log, atMost(1)).errorDispatching(eq(exception), eq(command));
+        verify(log, times(1)).errorDispatching(eq(exception), eq(command));
     }
 
     private static class TestFailure extends FailureThrowable {
@@ -382,7 +384,6 @@ public class CommandBusShould {
         final FailureThrowable failure = new TestFailure();
         doThrow(failure).when(handler)
                         .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -394,9 +395,9 @@ public class CommandBusShould {
 
         // Verify we updated the status.
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
         // Verify we logged the failure.
-        verify(log, atMost(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
     @Test
@@ -405,7 +406,6 @@ public class CommandBusShould {
         final RuntimeException exception = new IllegalStateException("handler throws");
         doThrow(exception).when(handler)
                           .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -417,9 +417,9 @@ public class CommandBusShould {
 
         // Verify we updated the status.
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(exception));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(exception));
         // Verify we logged the failure.
-        verify(log, atMost(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
     }
 
     @Test
@@ -428,7 +428,6 @@ public class CommandBusShould {
         final Throwable throwable = new TestThrowable();
         doThrow(throwable).when(handler)
                           .handle(any(CreateProject.class), any(CommandContext.class));
-        final CommandBus.ProblemLog log = spy(commandBus.getProblemLog());
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -440,8 +439,8 @@ public class CommandBusShould {
 
         // Verify we updated the status.
 
-        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
+        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
         // Verify we logged the failure.
-        verify(log, atMost(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
+        verify(log, times(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
 }

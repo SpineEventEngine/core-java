@@ -46,7 +46,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
-import static org.spine3.server.command.CommandValidation.*;
+import static org.spine3.server.command.CommandValidation.invalidCommand;
+import static org.spine3.server.command.CommandValidation.unsupportedCommand;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -62,7 +63,8 @@ public class CommandBus implements AutoCloseable {
     private final CommandStore commandStore;
 
     private final CommandStatusHelper commandStatus;
-    private final ProblemLog problemLog = new ProblemLog();
+
+    private ProblemLog problemLog = new ProblemLog();
 
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
@@ -187,6 +189,7 @@ public class CommandBus implements AutoCloseable {
         List<Event> result = Collections.emptyList();
         try {
             result = dispatcher.dispatch(command);
+            commandStatus.setOk(command.getContext().getCommandId());
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
             commandStatus.setToError(command.getContext().getCommandId(), e);
@@ -222,6 +225,11 @@ public class CommandBus implements AutoCloseable {
         }
 
         return result;
+    }
+
+    @VisibleForTesting
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
     }
 
     /**
