@@ -231,11 +231,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         postEvents(eventRecords);
 
-        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
-
         return result;
     }
 
+    //TODO:2016-04-11:alexander.yevsyukov: Hide this from public API. Callers should observe Response.
     public void post(Command request)  {
         commandBus.post(request);
     }
@@ -247,7 +246,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         Response reply = null;
 
-        // Ensure `namespace` is defined in a multitenant app.
+        // Ensure `namespace` context attribute is defined in a multitenant app.
         if (isMultitenant() && !commandContext.hasNamespace()) {
             reply = CommandValidation.unknownNamespace(message, request.getContext());
         }
@@ -267,12 +266,12 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     /**
      * Validates the incoming command message.
      *
-     * @param message the command message to validate
+     * @param commandMessage the command message to validate
      * @return {@link Response} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    protected Response validate(Message message) {
-        final Response result = commandBus.validate(message);
+    protected Response validate(Message commandMessage) {
+        final Response result = commandBus.validate(commandMessage);
         return result;
     }
 

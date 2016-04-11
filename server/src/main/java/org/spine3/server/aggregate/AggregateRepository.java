@@ -25,7 +25,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.CommandDispatcher;
-import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;

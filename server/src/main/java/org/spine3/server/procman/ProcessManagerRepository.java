@@ -34,7 +34,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.EntityEventDispatcher;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;

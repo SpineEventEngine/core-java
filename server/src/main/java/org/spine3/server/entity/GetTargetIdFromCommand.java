@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.GetIdByFieldIndex;
 
 /**
  * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.

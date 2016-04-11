@@ -190,6 +190,13 @@ public class CommandBus implements AutoCloseable {
         final CommandId commandId = command.getContext().getCommandId();
         try {
             result = dispatcher.dispatch(command);
+
+            //TODO:2016-04-11:alexander.yevsyukov: The dispatcher just passes the command. The actual handler
+            // of the command is to post the resulting events to EventBus. How do we make this code common
+            // to repositories and AbstractCommandHandler?  Can a repository delegate the call and storage
+            // to an ancestor of AbstractCommandHandler, which invokes an aggregate method, similarly to how
+            // it's done in invokeHandler() below?
+
             commandStatus.setOk(commandId);
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
@@ -204,6 +211,7 @@ public class CommandBus implements AutoCloseable {
         List<Event> result = Collections.emptyList();
         try {
             result = method.invoke(msg, context);
+            //TODO:2016-04-11:alexander.yevsyukov: The command handler is to post events to EventBus on its own. How?
 
             commandStatus.setOk(context.getCommandId());
 

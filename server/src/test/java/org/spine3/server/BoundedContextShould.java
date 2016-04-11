@@ -22,7 +22,6 @@ package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -69,16 +68,13 @@ import org.spine3.type.EventClass;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
@@ -129,32 +125,6 @@ public class BoundedContextShould {
         boundedContext.register(repository);
         boundedContext.getEventBus().subscribe(handler);
         handlersRegistered = true;
-    }
-
-    //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
-
-    private List<CommandResult> processRequests(Iterable<Command> requests) {
-
-        final List<CommandResult> results = newLinkedList();
-        for (Command request : requests) {
-            final CommandResult result = boundedContext.process(request);
-            results.add(result);
-        }
-        return results;
-    }
-
-    private List<Command> generateRequests() {
-
-        final Duration delta = seconds(10);
-        final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, delta);
-        final Timestamp time3 = add(time2, delta);
-
-        final Command createProject = createProject(userId, projectId, time1);
-        final Command addTask = addTask(userId, projectId, time2);
-        final Command startProject = startProject(userId, projectId, time3);
-
-        return newArrayList(createProject, addTask, startProject);
     }
 
     @Test
