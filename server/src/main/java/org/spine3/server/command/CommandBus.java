@@ -187,12 +187,13 @@ public class CommandBus implements AutoCloseable {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         List<Event> result = Collections.emptyList();
+        final CommandId commandId = command.getContext().getCommandId();
         try {
             result = dispatcher.dispatch(command);
-            commandStatus.setOk(command.getContext().getCommandId());
+            commandStatus.setOk(commandId);
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
-            commandStatus.setToError(command.getContext().getCommandId(), e);
+            commandStatus.setToError(commandId, e);
         }
         return result;
     }
