@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.testdata.TestEntity;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -87,7 +88,7 @@ public class EntityShould {
     @Test
     public void validate_state_when_set_it() {
         entity.setState(state, 0, TimeUtil.getCurrentTime());
-        assertTrue(entity.isValidateMethodCalled);
+        assertTrue(entity.isValidateMethodCalled());
     }
 
     @Test(expected = NullPointerException.class)
@@ -115,7 +116,8 @@ public class EntityShould {
         final long expectedTimeSec = currentTimeSeconds();
 
         assertEquals(entity.getDefaultState(), entity.getState());
-        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified()
+                                            .getSeconds());
         assertEquals(0, entity.getVersion());
     }
 
@@ -135,7 +137,8 @@ public class EntityShould {
         entity.incrementVersion();
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified()
+                                            .getSeconds());
     }
 
     @Test
@@ -156,7 +159,8 @@ public class EntityShould {
         entity.incrementState(state);
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entity.whenModified().getSeconds());
+        assertEquals(expectedTimeSec, entity.whenModified()
+                                            .getSeconds());
     }
 
     @Test
@@ -168,7 +172,9 @@ public class EntityShould {
 
     @Test
     public void return_id_simple_class_name() {
-        final String expected = entity.getId().getClass().getSimpleName();
+        final String expected = entity.getId()
+                                      .getClass()
+                                      .getSimpleName();
         final String actual = entity.getShortIdTypeName();
         assertEquals(expected, actual);
     }
@@ -176,31 +182,17 @@ public class EntityShould {
     @Test
     public void return_id_protobuf_type_name() {
         final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-        final String expected = ProjectId.getDescriptor().getName();
+        final String expected = ProjectId.getDescriptor()
+                                         .getName();
         final String actual = entityWithMessageId.getShortIdTypeName();
         assertEquals(expected, actual);
     }
 
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
-                .setProjectId(newProjectId())
-                .setStatus(newUuid());
+                                               .setProjectId(newProjectId())
+                                               .setStatus(newUuid());
         return project.build();
-    }
-
-    private static class TestEntity extends Entity<String, Project> {
-
-        private boolean isValidateMethodCalled = false;
-
-        protected TestEntity(String id) {
-            super(id);
-        }
-
-        @Override
-        protected void validate(Project state) throws IllegalStateException {
-            super.validate(state);
-            isValidateMethodCalled = true;
-        }
     }
 
     private static class EntityWithUnsupportedId extends Entity<Exception, Project> {

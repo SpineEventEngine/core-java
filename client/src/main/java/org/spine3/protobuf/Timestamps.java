@@ -83,8 +83,8 @@ public class Timestamps {
         }
         int result = Long.compare(t1.getSeconds(), t2.getSeconds());
         result = (result == 0) ?
-                Integer.compare(t1.getNanos(), t2.getNanos()) :
-                result;
+                 Integer.compare(t1.getNanos(), t2.getNanos()) :
+                 result;
         return result;
     }
 
@@ -92,8 +92,8 @@ public class Timestamps {
      * Calculates if the {@code timestamp} is between the {@code start} and {@code finish} timestamps.
      *
      * @param timestamp the timestamp to check if it is between the {@code start} and {@code finish}
-     * @param start the first point in time, must be before the {@code finish} timestamp
-     * @param finish the second point in time, must be after the {@code start} timestamp
+     * @param start     the first point in time, must be before the {@code finish} timestamp
+     * @param finish    the second point in time, must be after the {@code start} timestamp
      * @return true if the {@code timestamp} is after the {@code start} and before the {@code finish} timestamps,
      * false otherwise
      */
@@ -138,6 +138,17 @@ public class Timestamps {
         return date;
     }
 
+    /**
+     * Retrieves total nanoseconds from {@link Timestamp}.
+     *
+     * @return long value
+     */
+    public static long convertToNanos(TimestampOrBuilder timestamp) {
+        final long nanosFromSeconds = timestamp.getSeconds() * MILLIS_PER_SECOND * NANOS_PER_MILLISECOND;
+        final long totalNanos = nanosFromSeconds + timestamp.getNanos();
+        return totalNanos;
+    }
+
     private static class TimestampComparator implements Comparator<Timestamp>, Serializable {
         @Override
         public int compare(Timestamp t1, Timestamp t2) {
@@ -164,7 +175,6 @@ public class Timestamps {
     }
 
     /**
-     *
      * @param value a positive number of minutes
      * @return the moment `value` seconds ago
      */
