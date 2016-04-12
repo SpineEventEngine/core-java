@@ -30,10 +30,13 @@ import static com.google.protobuf.util.TimeUtil.*;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.convertToDate;
+import static org.spine3.protobuf.Timestamps.convertToNanos;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TimestampsShould {
+
+    private static final int NANOS_IN_SECOND = 1000000000;
 
     private static final Duration TEN_SECONDS = Durations.ofSeconds(10);
 
@@ -77,8 +80,14 @@ public class TimestampsShould {
     public void compare_two_timestamps_return_zero_if_timestamps_are_equal() {
         final int secs = 256;
         final int nanos = 512;
-        final Timestamp time1 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
-        final Timestamp time2 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+        final Timestamp time1 = Timestamp.newBuilder()
+                                         .setSeconds(secs)
+                                         .setNanos(nanos)
+                                         .build();
+        final Timestamp time2 = Timestamp.newBuilder()
+                                         .setSeconds(secs)
+                                         .setNanos(nanos)
+                                         .build();
 
         final int result = Timestamps.compare(time1, time2);
 
@@ -158,7 +167,8 @@ public class TimestampsShould {
         final Timestamp time1 = getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
-        final int result = Timestamps.comparator().compare(time1, time2);
+        final int result = Timestamps.comparator()
+                                     .compare(time1, time2);
 
         assertTrue(result < 0);
     }
@@ -167,10 +177,17 @@ public class TimestampsShould {
     public void compare_two_timestamps_using_comparator_return_zero_if_timestamps_are_equal() {
         final int secs = 256;
         final int nanos = 512;
-        final Timestamp time1 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
-        final Timestamp time2 = Timestamp.newBuilder().setSeconds(secs).setNanos(nanos).build();
+        final Timestamp time1 = Timestamp.newBuilder()
+                                         .setSeconds(secs)
+                                         .setNanos(nanos)
+                                         .build();
+        final Timestamp time2 = Timestamp.newBuilder()
+                                         .setSeconds(secs)
+                                         .setNanos(nanos)
+                                         .build();
 
-        final int result = Timestamps.comparator().compare(time1, time2);
+        final int result = Timestamps.comparator()
+                                     .compare(time1, time2);
 
         assertEquals(0, result);
     }
@@ -180,7 +197,8 @@ public class TimestampsShould {
         final Timestamp currentTime = getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
-        final int result = Timestamps.comparator().compare(timeAfterCurrent, currentTime);
+        final int result = Timestamps.comparator()
+                                     .compare(timeAfterCurrent, currentTime);
 
         assertTrue(result > 0);
     }
@@ -194,5 +212,15 @@ public class TimestampsShould {
         final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
 
         assertEquals(expectedTime.getSeconds(), actualSeconds);
+    }
+
+    @Test
+    public void convert_timestamp_to_nanos() {
+        final Timestamp expectedTime = getCurrentTime();
+
+        final long nanos = convertToNanos(expectedTime);
+        final long expectedNanos = expectedTime.getSeconds() * NANOS_IN_SECOND + expectedTime.getNanos();
+
+        assertEquals(expectedNanos, nanos);
     }
 }
