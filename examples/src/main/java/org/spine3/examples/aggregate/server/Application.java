@@ -22,9 +22,11 @@ package org.spine3.examples.aggregate.server;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.MoreExecutors;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
+import org.spine3.base.Response;
 import org.spine3.examples.aggregate.Client;
 import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
@@ -105,9 +107,23 @@ public class Application implements AutoCloseable {
         // Generate test requests
         final List<Command> requests = Client.generateRequests();
 
+        final StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
+            @Override
+            public void onNext(Response response) {
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        };
+
         // Process requests
         for (Command request : requests) {
-            boundedContext.process(request);
+            boundedContext.post(request, responseObserver);
         }
 
         log().info("All the requests were handled.");

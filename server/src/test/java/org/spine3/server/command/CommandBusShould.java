@@ -28,7 +28,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Errors;
-import org.spine3.base.Event;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
@@ -46,7 +45,6 @@ import org.spine3.type.CommandClass;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -90,9 +88,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
@@ -122,9 +118,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
@@ -146,9 +140,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<Event> dispatch(Command request) throws Exception {
-                //noinspection ReturnOfNull
-                return null;
+            public void dispatch(Command request) throws Exception {
             }
         });
 
@@ -170,9 +162,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<Event> dispatch(Command request) throws Exception {
-                //noinspection ReturnOfNull
-                return null;
+            public void dispatch(Command request) throws Exception {
             }
         };
 
@@ -234,9 +224,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
@@ -271,10 +259,8 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
+        public void dispatch(Command request) throws Exception {
             dispatcherInvoked = true;
-            //noinspection ReturnOfNull
-            return null;
         }
 
         public boolean wasDispatcherInvoked() {
@@ -338,19 +324,6 @@ public class CommandBusShould {
         final CreateProjectHandler handler = new CreateProjectHandler();
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
-
-        commandBus.post(command);
-
-        // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
-    }
-
-    @Test
-    public void set_command_status_to_OK_when_dispatcher_returns() {
-        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
-        commandBus.register(dispatcher);
-
-        final Command command = commandFactory.create(addTask(newUuid()));
 
         commandBus.post(command);
 

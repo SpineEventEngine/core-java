@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -54,11 +55,11 @@ import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -66,16 +67,17 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
 
+    private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContextTestStubs.create();
+        boundedContext = BoundedContextTestStubs.create();
 
         boundedContext.getCommandBus().register(new CommandDispatcher() {
             @Override
@@ -84,10 +86,9 @@ public class ProcessManagerRepositoryShould {
             }
 
             @Override
-            public List<Event> dispatch(Command request) throws Exception {
+            public void dispatch(Command request) throws Exception {
                 // Simply swallow the command. We need this dispatcher for allowing Process Manager
                 // under test to route the AddTask command.
-                return Collections.emptyList();
             }
         });
 
@@ -132,20 +133,23 @@ public class ProcessManagerRepositoryShould {
         testDispatchCommand(startProject(ID));
     }
 
-    private List<Event> testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
+    private void testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
         final Command request = Commands.create(command, CommandContext.getDefaultInstance());
-        final List<Event> events = repository.dispatch(request);
+        repository.dispatch(request);
         final TestProcessManager manager = repository.load(ID);
         assertEquals(toState(command), manager.getState());
-        return events;
     }
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        final List<Event> events = testDispatchCommand(addTask(ID));
+        testDispatchCommand(addTask(ID));
 
-        assertEquals(1, events.size());
-        final Event event = events.get(0);
+        final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
+
+        verify(boundedContext.getEventBus(), times(1)).post(argumentCaptor.capture());
+
+        final Event event = argumentCaptor.getValue();
+
         assertNotNull(event);
         final TaskAdded message = fromAny(event.getMessage());
         assertEquals(ID, message.getProjectId());

@@ -42,7 +42,7 @@ import org.spine3.base.CommandContext;
  *
  * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a business failure.
+ * because of a business failure, which can be obtained via {@link FailureThrowable#getFailure()}.
  *
  * @author Alexander Yevsyukov
  * @see CommandDispatcher

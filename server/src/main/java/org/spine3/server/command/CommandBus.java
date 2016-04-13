@@ -62,7 +62,7 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
-    private final CommandStatusHelper commandStatus;
+    private final CommandStatusService commandStatusService;
 
     private ProblemLog problemLog = new ProblemLog();
 
@@ -73,7 +73,7 @@ public class CommandBus implements AutoCloseable {
 
     protected CommandBus(CommandStore commandStore) {
         this.commandStore = commandStore;
-        this.commandStatus = new CommandStatusHelper(commandStore);
+        this.commandStatusService = new CommandStatusService(commandStore);
     }
 
     /**
@@ -156,14 +156,10 @@ public class CommandBus implements AutoCloseable {
      * Directs a command request to the corresponding handler.
      *
      * @param request the command request to be processed
-     * @return a list of the events as the result of handling the command
      * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
-    public List<Event> post(Command request) {
-
-        //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
-
+    public void post(Command request) {
         checkNotNull(request);
 
         store(request);
@@ -171,38 +167,38 @@ public class CommandBus implements AutoCloseable {
         final CommandClass commandClass = CommandClass.of(request);
 
         if (isDispatcherRegistered(commandClass)) {
-            return dispatch(request);
+            dispatch(request);
+            return;
         }
 
         if (isHandlerRegistered(commandClass)) {
             final Message command = getMessage(request);
             final CommandContext context = request.getContext();
-            return invokeHandler(command, context);
+            invokeHandler(command, context);
+            return;
         }
 
         throw new UnsupportedCommandException(getMessage(request));
     }
 
-    private List<Event> dispatch(Command command) {
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    public CommandStatusService getCommandStatusService() {
+        return commandStatusService;
+    }
+
+    private void dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        List<Event> result = Collections.emptyList();
         final CommandId commandId = command.getContext().getCommandId();
+
         try {
-            result = dispatcher.dispatch(command);
-
-            //TODO:2016-04-11:alexander.yevsyukov: The dispatcher just passes the command. The actual handler
-            // of the command is to post the resulting events to EventBus. How do we make this code common
-            // to repositories and AbstractCommandHandler?  Can a repository delegate the call and storage
-            // to an ancestor of AbstractCommandHandler, which invokes an aggregate method, similarly to how
-            // it's done in invokeHandler() below?
-
-            commandStatus.setOk(commandId);
+            dispatcher.dispatch(command);
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
-            commandStatus.setToError(commandId, e);
+            commandStatusService.setToError(commandId, e);
         }
-        return result;
     }
 
     private List<Event> invokeHandler(Message msg, CommandContext context) {
@@ -213,7 +209,7 @@ public class CommandBus implements AutoCloseable {
             result = method.invoke(msg, context);
             //TODO:2016-04-11:alexander.yevsyukov: The command handler is to post events to EventBus on its own. How?
 
-            commandStatus.setOk(context.getCommandId());
+            commandStatusService.setOk(context.getCommandId());
 
         } catch (InvocationTargetException e) {
             final CommandId commandId = context.getCommandId();
@@ -222,14 +218,14 @@ public class CommandBus implements AutoCloseable {
             if (cause instanceof Exception) {
                 final Exception exception = (Exception) cause;
                 problemLog.errorHandling(exception, msg, commandId);
-                commandStatus.setToError(commandId, exception);
+                commandStatusService.setToError(commandId, exception);
             } else if (cause instanceof FailureThrowable){
                 final FailureThrowable failure = (FailureThrowable) cause;
                 problemLog.failureHandling(failure, msg, commandId);
-                commandStatus.setToFailure(commandId, failure);
+                commandStatusService.setToFailure(commandId, failure);
             } else {
                 problemLog.errorHandlingUnknown(cause, msg, commandId);
-                commandStatus.setToError(commandId, Errors.fromThrowable(cause));
+                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
 
@@ -272,33 +268,6 @@ public class CommandBus implements AutoCloseable {
     @VisibleForTesting
     /* package */ ProblemLog getProblemLog() {
         return problemLog;
-    }
-
-    /**
-     * The helper class for updating command status.
-     */
-    private static class CommandStatusHelper {
-        private final CommandStore commandStore;
-
-        private CommandStatusHelper(CommandStore commandStore) {
-            this.commandStore = commandStore;
-        }
-
-        private void setOk(CommandId commandId) {
-            commandStore.setCommandStatusOk(commandId);
-        }
-
-        private void setToError(CommandId commandId, Exception exception) {
-            commandStore.updateStatus(commandId, exception);
-        }
-
-        private void setToFailure(CommandId commandId, FailureThrowable failure) {
-            commandStore.updateStatus(commandId, failure.toMessage());
-        }
-
-        private void setToError(CommandId commandId, org.spine3.base.Error error) {
-            commandStore.updateStatus(commandId, error);
-        }
     }
 
     private void store(Command request) {

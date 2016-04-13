@@ -147,12 +147,6 @@ public class BoundedContextShould {
         assertNotNull(boundedContext.getCommandBus());
     }
 
-    @SuppressWarnings("ConstantConditions") // Passing null is the purpose of this method.
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_on_null_Command() {
-        boundedContext.process(null);
-    }
-
     @Test
     public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
         boundedContext.post(createProject(), new StreamObserver<Response>() {

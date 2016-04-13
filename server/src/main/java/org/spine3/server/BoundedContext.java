@@ -20,7 +20,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -46,11 +45,9 @@ import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * This class is a facade for configuration and entry point for handling commands.
@@ -215,25 +212,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         repository.close();
     }
 
-    public CommandResult process(Command request) {
-        checkNotNull(request);
-
-        //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
-
-        CommandResult result = CommandResult.getDefaultInstance();
-        try {
-            result = dispatch(request);
-        } catch (RuntimeException e) {
-            log().error("", e);
-        }
-
-        final List<Event> eventRecords = result.getEventList();
-
-        postEvents(eventRecords);
-
-        return result;
-    }
-
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final Message message = Messages.fromAny(request.getMessage());
@@ -272,34 +250,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     protected Response validate(Message commandMessage) {
         final Response result = commandBus.validate(commandMessage);
         return result;
-    }
-
-    private CommandResult dispatch(Command request) {
-        try {
-            final List<Event> eventRecords = this.commandBus.post(request);
-
-            final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
-            return result;
-        } catch (RuntimeException e) {
-            throw propagate(e);
-        }
-    }
-
-    private static CommandResult toCommandResult(Iterable<Event> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEvent(eventRecords)
-                .addAllError(errors)
-                .build();
-    }
-
-    /**
-     * Posts passed events to {@link EventBus}.
-     */
-    private void postEvents(Iterable<Event> events) {
-        final EventBus eventBus = getEventBus();
-        for (Event event : events) {
-            eventBus.post(event);
-        }
     }
 
     @Override
