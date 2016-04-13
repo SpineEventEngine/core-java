@@ -70,14 +70,6 @@ public class CommandValidation {
         return response;
     }
 
-    public static boolean isUnsupportedCommand(Response response) {
-        if (response.getStatusCase() == Response.StatusCase.ERROR) {
-            final Error error = response.getError();
-            return error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
-        }
-        return false;
-    }
-
     /**
      * Creates a {@code Response} for getting a command with invalid fields (e.g., marked as "required" but not set).
      *

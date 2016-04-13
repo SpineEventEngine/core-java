@@ -234,11 +234,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         return result;
     }
 
-    //TODO:2016-04-11:alexander.yevsyukov: Hide this from public API. Callers should observe Response.
-    public void post(Command request)  {
-        commandBus.post(request);
-    }
-
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final Message message = Messages.fromAny(request.getMessage());
@@ -261,6 +256,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         if (Responses.isOk(reply)) {
             post(request);
         }
+    }
+
+    private void post(Command request)  {
+        commandBus.post(request);
     }
 
     /**

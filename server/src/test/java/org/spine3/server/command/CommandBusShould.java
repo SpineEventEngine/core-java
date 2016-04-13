@@ -52,7 +52,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
+import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
@@ -196,6 +196,7 @@ public class CommandBusShould {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectHandler);
+
         commandBus.register(createProjectDispatcher);
     }
 
@@ -206,6 +207,7 @@ public class CommandBusShould {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectDispatcher);
+
         commandBus.register(createProjectHandler);
     }
 
