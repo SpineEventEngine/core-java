@@ -71,14 +71,11 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
     @Nullable
     private ImmutableSet<EventClass> eventClasses;
 
-    private final EventBus eventBus;
-
     /**
      * {@inheritDoc}
      */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
         super(boundedContext);
-        this.eventBus = boundedContext.getEventBus();
     }
 
     @Override
@@ -133,6 +130,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      * Posts passed events to {@link EventBus}.
      */
     private void postEvents(Iterable<Event> events) {
+        final EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {
             eventBus.post(event);
         }

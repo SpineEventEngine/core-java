@@ -36,6 +36,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.event.EventBus;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -60,7 +61,7 @@ public class CommandBusShould {
     private CommandStore commandStore;
     private CommandFactory commandFactory;
     private CommandBus.ProblemLog log;
-
+    private EventBus eventBus;
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
@@ -68,6 +69,8 @@ public class CommandBusShould {
         commandBus = CommandBus.create(commandStore);
         log = mock(CommandBus.ProblemLog.class);
         commandBus.setProblemLog(log);
+        eventBus = mock(EventBus.class);
+        commandBus.setEventBus(eventBus);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
