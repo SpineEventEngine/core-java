@@ -20,7 +20,6 @@
 
 package org.spine3.examples.aggregate.server;
 
-import com.google.common.base.Function;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.examples.aggregate.Client;
-import org.spine3.examples.aggregate.OrderId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
@@ -37,13 +35,8 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.base.Identifiers.ConverterRegistry;
-import static org.spine3.base.Identifiers.NULL_ID_OR_FIELD;
 
 /**
  * A sample application showing basic usage of the framework.
@@ -141,10 +134,6 @@ public class Application implements AutoCloseable {
 
         // Register event handlers.
         boundedContext.getEventBus().subscribe(eventLogger);
-
-        //TODO:2015-11-10:alexander.yevsyukov: This must be called by the repository or something belonging to business logic.
-        // Register id converters
-        ConverterRegistry.getInstance().register(OrderId.class, new OrderIdToStringConverter());
     }
 
     /**
@@ -157,21 +146,6 @@ public class Application implements AutoCloseable {
 
     public BoundedContext getBoundedContext() {
         return boundedContext;
-    }
-
-    private static class OrderIdToStringConverter implements Function<OrderId, String> {
-
-        @Override
-        public String apply(@Nullable OrderId orderId) {
-            if (orderId == null) {
-                return NULL_ID_OR_FIELD;
-            }
-            final String value = orderId.getValue();
-            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
-                return NULL_ID_OR_FIELD;
-            }
-            return value;
-        }
     }
 
     private static Logger log() {
