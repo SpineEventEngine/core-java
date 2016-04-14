@@ -62,6 +62,7 @@ public class CommandBusShould {
     private CommandFactory commandFactory;
     private CommandBus.ProblemLog log;
     private EventBus eventBus;
+
     @Before
     public void setUp() {
         commandStore = mock(CommandStore.class);
@@ -102,11 +103,14 @@ public class CommandBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_command_handlers_without_methods() {
-        commandBus.register(new EmptyCommandHandler());
+        commandBus.register(new EmptyCommandHandler(eventBus));
     }
 
     @SuppressWarnings("EmptyClass")
-    private static class EmptyCommandHandler implements CommandHandler {
+    private static class EmptyCommandHandler extends CommandHandler {
+        private EmptyCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
     }
 
     //
@@ -185,7 +189,7 @@ public class CommandBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
 
-        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandHandler createProjectHandler = new CreateProjectHandler(eventBus);
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectHandler);
@@ -196,7 +200,7 @@ public class CommandBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
 
-        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandHandler createProjectHandler = new CreateProjectHandler(eventBus);
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectDispatcher);
@@ -204,9 +208,13 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
     }
 
-    private static class CreateProjectHandler implements CommandHandler {
+    private static class CreateProjectHandler extends CommandHandler {
 
         private boolean handlerInvoked = false;
+
+        private CreateProjectHandler(EventBus eventBus) {
+            super(eventBus);
+        }
 
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ctx)
@@ -233,7 +241,7 @@ public class CommandBusShould {
 
     @Test
     public void unregister_handler() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
         commandBus.unregister(handler);
         final String projectId = newUuid();
@@ -242,7 +250,7 @@ public class CommandBusShould {
 
     @Test
     public void validate_commands_both_dispatched_and_handled() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(handler);
         commandBus.register(dispatcher);
@@ -285,7 +293,7 @@ public class CommandBusShould {
 
     @Test
     public void remove_all_handlers_on_close() throws Exception {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
 
         commandBus.close();
@@ -294,7 +302,7 @@ public class CommandBusShould {
 
     @Test
     public void invoke_handler_when_command_posted() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
 
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -324,7 +332,7 @@ public class CommandBusShould {
 
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
 

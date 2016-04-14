@@ -176,12 +176,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
+
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
-        if (repository instanceof CommandHandler) {
-            commandBus.register((CommandHandler) repository);
-        }
+
         if (repository instanceof EventDispatcher) {
             getEventBus().register((EventDispatcher)repository);
         }
@@ -199,10 +198,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
             commandBus.unregister((CommandDispatcher) repository);
-        }
-
-        if (repository instanceof CommandHandler) {
-            commandBus.unregister((CommandHandler)repository);
         }
 
         if (repository instanceof EventDispatcher) {

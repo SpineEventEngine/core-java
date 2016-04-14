@@ -21,17 +21,20 @@
 package org.spine3.server;
 
 import org.spine3.base.CommandContext;
+import org.spine3.server.event.EventBus;
 
 /**
- * The marker interface for classes that expose command handling methods.
+ * The abstract base for classes that expose command handling methods
+ * and post their results to {@link EventBus}.
  *
  * <p>A command handler is responsible for:
  * <ol>
  *     <li>Changing the state of the business model</li>
  *     <li>Producing corresponding events.</li>
+ *     <li>Posting events to {@code EventBus}.</li>
  * </ol>
  *
- * <p>Events are returned as values of command handling methods.
+ * <p>Event messages are returned as values of command handling methods.
  *
  * <h2>Command handling methods</h2>
  * <p>A command handling method is a {@code public} method that accepts two parameters.
@@ -47,5 +50,11 @@ import org.spine3.base.CommandContext;
  * @author Alexander Yevsyukov
  * @see CommandDispatcher
  */
-public interface CommandHandler {
+public abstract class CommandHandler {
+
+    private final EventBus eventBus;
+
+    protected CommandHandler(EventBus eventBus) {
+        this.eventBus = eventBus;
+    }
 }
