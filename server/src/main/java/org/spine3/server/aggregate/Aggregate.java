@@ -89,9 +89,7 @@ import static org.spine3.base.Identifiers.idToAny;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
-                            extends Entity<I, S>
-                            implements CommandHandler {
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder> extends Entity<I, S> {
 
     /**
      * The builder for the aggregate state.
