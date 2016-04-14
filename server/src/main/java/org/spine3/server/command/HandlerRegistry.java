@@ -80,7 +80,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
             final CommandClass commandClass = entry.getKey();
             if (handlerRegistered(commandClass)) {
-                final CommandHandlerMethod registered = getHandler(commandClass);
+                final CommandHandlerMethod registered = getHandlerMethod(commandClass);
                 final CommandHandlerMethod passed = entry.getValue();
                 if (registered.equals(passed)) {
                     removeFor(commandClass);
@@ -98,7 +98,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
             final CommandClass commandClass = entry.getKey();
 
             if (handlerRegistered(commandClass)) {
-                final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
+                final MessageHandlerMethod alreadyRegistered = getHandlerMethod(commandClass);
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
                         alreadyRegistered.getFullName(),
                         entry.getValue().getFullName());
@@ -111,7 +111,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return handlersByClass.containsKey(cls);
     }
 
-    /* package */ CommandHandlerMethod getHandler(CommandClass cls) {
+    /* package */ CommandHandlerMethod getHandlerMethod(CommandClass cls) {
         return handlersByClass.get(cls);
     }
 
@@ -126,7 +126,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     /* package */ boolean hasHandlerFor(Message command) {
-        final CommandHandlerMethod method = getHandler(CommandClass.of(command));
+        final CommandHandlerMethod method = getHandlerMethod(CommandClass.of(command));
         return method != null;
     }
 

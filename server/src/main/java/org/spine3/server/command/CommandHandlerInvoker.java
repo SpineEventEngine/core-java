@@ -70,6 +70,7 @@ import java.util.List;
                                                          .setEventId(eventId)
                                                          .setCommandContext(commandContext)
                                                          .setTimestamp(TimeUtil.getCurrentTime());
+        //TODO:2016-04-14:alexander.yevsyukov: Populate other fields.
         return builder.build();
     }
 

@@ -289,7 +289,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     private CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlerRegistry.getHandler(cls);
+        return handlerRegistry.getHandlerMethod(cls);
     }
 
     @Override
