@@ -45,6 +45,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.type.CommandClass;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -71,7 +72,6 @@ public class CommandBusShould {
         log = mock(CommandBus.ProblemLog.class);
         commandBus.setProblemLog(log);
         eventBus = mock(EventBus.class);
-        commandBus.setEventBus(eventBus);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
@@ -376,12 +376,33 @@ public class CommandBusShould {
     private static class TestThrowable extends Throwable {
     }
 
+    /**
+     * A stub handler that throws passed `Throwable` in the command handler method.
+     *
+     * @see #set_command_status_to_failure_when_handler_throws_failure
+     * @see #set_command_status_to_failure_when_handler_throws_exception
+     * @see #set_command_status_to_failure_when_handler_throws_unknown_Throwable
+     */
+    private static class ThrowingCreateProjectHandler extends CommandHandler {
+
+        private final Throwable throwable;
+
+        protected ThrowingCreateProjectHandler(EventBus eventBus, Throwable throwable) {
+            super(eventBus);
+            this.throwable = throwable;
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject msg, CommandContext context) throws Throwable {
+            //noinspection ProhibitedExceptionThrown
+            throw throwable;
+        }
+    }
+
     @Test
-    public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
+    public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable, InvocationTargetException {
         final FailureThrowable failure = new TestFailure();
-        doThrow(failure).when(handler)
-                        .handle(any(CreateProject.class), any(CommandContext.class));
+        final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, failure);
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -392,18 +413,16 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // Verify we updated the status.
-
         verify(commandStore, times(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+
         // Verify we logged the failure.
         verify(log, times(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
     @Test
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final RuntimeException exception = new IllegalStateException("handler throws");
-        doThrow(exception).when(handler)
-                          .handle(any(CreateProject.class), any(CommandContext.class));
+        final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, exception);
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -422,10 +441,8 @@ public class CommandBusShould {
 
     @Test
     public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
-        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final Throwable throwable = new TestThrowable();
-        doThrow(throwable).when(handler)
-                          .handle(any(CreateProject.class), any(CommandContext.class));
+        final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, throwable);
 
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));

@@ -350,8 +350,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             checkNotNull(eventBus, "eventBus must be set");
 
             final BoundedContext result = new BoundedContext(this);
-            // Inject EventBus into CommandBus so that it can post events from command handlers.
-            commandBus.setEventBus(eventBus);
 
             log().info(result.nameForLogging() + " created.");
             return result;

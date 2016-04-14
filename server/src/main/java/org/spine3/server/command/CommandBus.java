@@ -33,7 +33,6 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
@@ -64,8 +63,6 @@ public class CommandBus implements AutoCloseable {
     private final CommandStatusService commandStatusService;
 
     private ProblemLog problemLog = new ProblemLog();
-
-    private CommandHandlerInvoker commandHandlerInvoker;
 
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
@@ -204,13 +201,19 @@ public class CommandBus implements AutoCloseable {
 
     private void invokeHandler(Message msg, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandlerMethod method = getHandler(commandClass);
+        final CommandHandlerMethod method = getHandlerMethod(commandClass);
+        final CommandId commandId = context.getCommandId();
         try {
-            commandHandlerInvoker.call(method, msg, context);
-            commandStatusService.setOk(context.getCommandId());
+            //TODO:2016-04-14:alexander.yevsyukov: Keep handlers, not methods in handler registry.
+            //TODO:2016-04-14:alexander.yevsyukov: Store methods inside the handler (and corresponding registry of method maps).
+            //TODO:2016-04-14:alexander.yevsyukov: Rename the `call` method to `handle`.
+
+            final CommandHandler handler = (CommandHandler)method.getTarget();
+            handler.call(method, msg, context);
+
+            commandStatusService.setOk(commandId);
 
         } catch (InvocationTargetException e) {
-            final CommandId commandId = context.getCommandId();
             final Throwable cause = e.getCause();
             //noinspection ChainOfInstanceofChecks
             if (cause instanceof Exception) {
@@ -226,10 +229,6 @@ public class CommandBus implements AutoCloseable {
                 commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
-    }
-
-    public void setEventBus(EventBus eventBus) {
-        this.commandHandlerInvoker = new CommandHandlerInvoker(eventBus);
     }
 
     @VisibleForTesting
@@ -288,7 +287,7 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
-    private CommandHandlerMethod getHandler(CommandClass cls) {
+    private CommandHandlerMethod getHandlerMethod(CommandClass cls) {
         return handlerRegistry.getHandlerMethod(cls);
     }
 

@@ -62,6 +62,12 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
         super(target, method);
     }
 
+    //TODO:2016-04-14:alexander.yevsyukov: Hide after CommandHandler stores its methods inside itself.
+    @Override
+    public Object getTarget() {
+        return super.getTarget();
+    }
+
     /**
      * {@inheritDoc}
      *

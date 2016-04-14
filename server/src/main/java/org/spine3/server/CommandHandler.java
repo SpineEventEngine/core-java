@@ -20,8 +20,19 @@
 
 package org.spine3.server;
 
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
+import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.internal.CommandHandlerMethod;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * The abstract base for classes that expose command handling methods
@@ -56,5 +67,41 @@ public abstract class CommandHandler {
 
     protected CommandHandler(EventBus eventBus) {
         this.eventBus = eventBus;
+    }
+
+    public void call(CommandHandlerMethod method, Message msg, CommandContext context)
+            throws InvocationTargetException {
+        final List<? extends Message> eventMessages = method.invoke(msg, context);
+        final List<Event> events = toEvents(eventMessages, context);
+        postEvents(events);
+    }
+
+    private static List<Event> toEvents(Iterable<? extends Message> eventMessages, CommandContext context) {
+        final ImmutableList.Builder<Event> builder = ImmutableList.builder();
+        for (Message eventMessage : eventMessages) {
+            final EventContext eventContext = createEventContext(context);
+            final Event event = Events.createEvent(eventMessage, eventContext);
+            builder.add(event);
+        }
+        return builder.build();
+    }
+
+    private static EventContext createEventContext(CommandContext commandContext) {
+        final EventId eventId = Events.generateId();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(eventId)
+                                                         .setCommandContext(commandContext)
+                                                         .setTimestamp(TimeUtil.getCurrentTime());
+        //TODO:2016-04-14:alexander.yevsyukov: Populate other fields.
+        return builder.build();
+    }
+
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
+    private void postEvents(Iterable<Event> events) {
+        for (Event event : events) {
+            eventBus.post(event);
+        }
     }
 }
