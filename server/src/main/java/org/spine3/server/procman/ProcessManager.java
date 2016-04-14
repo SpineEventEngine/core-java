@@ -35,7 +35,6 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.base.UserId;
-import org.spine3.server.CommandHandler;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
@@ -80,7 +79,7 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  * @param <M> the type of the process manager state
  * @author Alexander Litus
  */
-public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandler {
+public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
 
     /**
      * Keeps initialization state of the process manager.
