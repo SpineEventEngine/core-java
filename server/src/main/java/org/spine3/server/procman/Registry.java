@@ -36,7 +36,7 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  *
  * @author Alexander Litus
  */
-/* package */  class Registry {
+/* package */ class Registry {
 
     private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
     private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();

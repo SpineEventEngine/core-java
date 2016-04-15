@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Message;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
@@ -123,11 +122,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
         for (CommandClass commandClass : handlersByClass.keySet()) {
             removeFor(commandClass);
         }
-    }
-
-    /* package */ boolean hasHandlerFor(Message command) {
-        final CommandHandlerMethod method = getHandlerMethod(CommandClass.of(command));
-        return method != null;
     }
 
     /**
