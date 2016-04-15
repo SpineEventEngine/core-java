@@ -53,7 +53,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
-import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -385,52 +384,4 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                 eventClass, this.getClass()));
     }
 
-    /**
-     * The registry of method maps for all process manager classes.
-     *
-     * <p>This registry is used for caching command/event handlers.
-     * Process managers register their classes in {@link ProcessManager#init()} method.
-     */
-    private static class Registry {
-
-        private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
-        private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
-
-        /* package */ void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
-            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
-
-            eventHandlers.register(clazz, PREDICATE);
-            checkModifiers(eventHandlers.get(clazz).values());
-        }
-
-        @CheckReturnValue
-        /* package */ boolean contains(Class<? extends ProcessManager> clazz) {
-            final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
-            final MethodMap result = commandHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
-            final MethodMap result = eventHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ static Registry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-        }
-    }
 }
