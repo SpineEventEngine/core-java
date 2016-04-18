@@ -36,7 +36,7 @@ import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
-import org.spine3.validation.options.ConstraintViolation;
+import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

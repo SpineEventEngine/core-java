@@ -27,13 +27,13 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.validation.options.ConstraintViolation;
-import org.spine3.validation.options.DecimalMaxOption;
-import org.spine3.validation.options.DecimalMinOption;
-import org.spine3.validation.options.DigitsOption;
-import org.spine3.validation.options.MaxOption;
-import org.spine3.validation.options.MinOption;
-import org.spine3.validation.options.ValidationProto;
+import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.options.DecimalMaxOption;
+import org.spine3.validate.options.DecimalMinOption;
+import org.spine3.validate.options.DigitsOption;
+import org.spine3.validate.options.MaxOption;
+import org.spine3.validate.options.MinOption;
+import org.spine3.validate.options.ValidationProto;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -112,19 +112,19 @@ import java.util.regex.Pattern;
     private void validateRangeOptions(V value) {
         if (notFitToDecimalMin(value)) {
             addViolation(
-                    newDecimalViolation(value, minDecimalOpt, minDecimalOpt.getMsg(),
+                    newDecimalViolation(value, minDecimalOpt, minDecimalOpt.getMsgFormat(),
                             minDecimalOpt.getInclusive(), minDecimalOpt.getValue()));
         }
         if (notFitToDecimalMax(value)) {
             addViolation(
-                    newDecimalViolation(value, maxDecimalOpt, maxDecimalOpt.getMsg(),
+                    newDecimalViolation(value, maxDecimalOpt, maxDecimalOpt.getMsgFormat(),
                             maxDecimalOpt.getInclusive(), maxDecimalOpt.getValue()));
         }
         if (notFitToMin(value)) {
-            addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsg(), minOption.getValue()));
+            addViolation(newMinOrMaxViolation(value, minOption, minOption.getMsgFormat(), minOption.getValue()));
         }
         if (notFitToMax(value)) {
-            addViolation(newMinOrMaxViolation(value, maxOption, maxOption.getMsg(), maxOption.getValue()));
+            addViolation(newMinOrMaxViolation(value, maxOption, maxOption.getMsgFormat(), maxOption.getValue()));
         }
     }
 
@@ -219,7 +219,7 @@ import java.util.regex.Pattern;
     }
 
     private ConstraintViolation newDigitsViolation(V value) {
-        final String msg = getErrorMsgFormat(digitsOption, digitsOption.getMsg());
+        final String msg = getErrorMsgFormat(digitsOption, digitsOption.getMsgFormat());
         final String intMax = String.valueOf(digitsOption.getIntegerMax());
         final String fractionMax = String.valueOf(digitsOption.getFractionMax());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()

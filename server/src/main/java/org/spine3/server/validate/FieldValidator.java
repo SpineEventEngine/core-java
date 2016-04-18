@@ -28,9 +28,9 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.validation.options.ConstraintViolation;
-import org.spine3.validation.options.RequiredOption;
-import org.spine3.validation.options.ValidationProto;
+import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.options.RequiredOption;
+import org.spine3.validate.options.ValidationProto;
 
 import java.util.List;
 
@@ -167,7 +167,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     private ConstraintViolation newViolation(RequiredOption option) {
-        final String msg = getErrorMsgFormat(option, option.getMsg());
+        final String msg = getErrorMsgFormat(option, option.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
