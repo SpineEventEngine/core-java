@@ -50,8 +50,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
@@ -77,7 +75,7 @@ public class CommandBusShould {
                                .setCommandStore(commandStore)
                                .setScheduler(scheduler)
                                .build();
-        log = mock(CommandBus.ProblemLog.class);
+        log = spy(CommandBus.ProblemLog.class);
         commandBus.setProblemLog(log);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
@@ -372,7 +370,7 @@ public class CommandBusShould {
         verify(commandStore, times(1)).updateStatus(eq(command.getContext()
                                                               .getCommandId()), eq(exception));
         // Verify we logged the error.
-        verify(log, atMost(1)).errorDispatching(eq(exception), eq(command));
+        verify(log, times(1)).errorDispatching(eq(exception), eq(command));
     }
 
     @Test
