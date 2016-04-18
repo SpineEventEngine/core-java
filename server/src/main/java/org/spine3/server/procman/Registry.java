@@ -51,6 +51,10 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
 
     @CheckReturnValue
     /* package */ boolean contains(Class<? extends ProcessManager> clazz) {
+
+        //TODO:2016-04-15:alexander.yevsyukov: Should not we have OR instead of AND here?
+        // Can there be a case when a process manager handles and posts only events?
+
         final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
         return result;
     }
