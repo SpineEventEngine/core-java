@@ -52,7 +52,7 @@ public class Commands {
     /**
      * A substring which the {@code .proto} file containing commands must have in its name.
      */
-    public static final String COMMANDS_FILE_SUBSTRING = "commands";
+    public static final String COMMANDS = "commands";
 
     private static final char PROTO_FILE_SEPARATOR = '/';
 
@@ -195,13 +195,13 @@ public class Commands {
      * Checks if the file is for commands.
      *
      * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name contains {@link #COMMANDS_FILE_SUBSTRING} substring, {@code false} otherwise
+     * @return {@code true} if the file name contains {@link #COMMANDS} substring, {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         final String fqn = file.getName();
         final int startIndexOfFileName = fqn.lastIndexOf(PROTO_FILE_SEPARATOR) + 1;
         final String fileName = fqn.substring(startIndexOfFileName);
-        final boolean isCommandsFile = fileName.contains(COMMANDS_FILE_SUBSTRING);
+        final boolean isCommandsFile = fileName.contains(COMMANDS);
         return isCommandsFile;
     }
 
