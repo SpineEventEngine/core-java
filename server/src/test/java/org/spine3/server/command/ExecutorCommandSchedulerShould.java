@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -28,8 +29,9 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 
+import javax.annotation.Nullable;
+
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.testdata.TestCommands.createProject;
@@ -44,13 +46,21 @@ public class ExecutorCommandSchedulerShould {
     private static final Duration DELAY = seconds(1);
     private static final int CHECK_OFFSET_MS = 50;
 
-    private CommandBus commandBus;
     private CommandScheduler scheduler;
+
+    private Command postedCommand;
 
     @Before
     public void setUpTest() {
-        this.commandBus = mock(CommandBus.class);
-        this.scheduler = new ExecutorCommandScheduler(commandBus);
+        this.scheduler = new ExecutorCommandScheduler();
+        scheduler.setPostFunction(new Function<Command, Command>() {
+            @Nullable
+            @Override
+            public Command apply(@Nullable Command input) {
+                postedCommand = input;
+                return input;
+            }
+        });
     }
 
     @After
@@ -82,13 +92,13 @@ public class ExecutorCommandSchedulerShould {
     }
 
     private void assertCommandSent(Command cmd, Duration delay) throws InterruptedException {
-        verify(commandBus, times(0)).post(any(Command.class));
+        assertNull(postedCommand);
 
         final long delayMs = delay.getSeconds() * 1000;
         Thread.sleep(delayMs + CHECK_OFFSET_MS);
 
-        final Command updatedCmd = CommandScheduler.setIgnoreDelay(cmd);
-        verify(commandBus, times(1)).post(updatedCmd);
+        final Command expectedCommand = CommandScheduler.setIgnoreDelay(cmd);
+        assertEquals(expectedCommand, postedCommand);
     }
 
     @Test

@@ -21,6 +21,7 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Schedule;
@@ -34,18 +35,9 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public abstract class CommandScheduler {
 
-    private final CommandBus commandBus;
-
     private boolean isActive = true;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param commandBus a command bus used to send scheduled commands
-     */
-    protected CommandScheduler(CommandBus commandBus) {
-        this.commandBus = commandBus;
-    }
+    private Function<Command, Command> postFunction;
 
     /**
      * Schedule a command and deliver it to the target according to the scheduling options.
@@ -75,7 +67,14 @@ public abstract class CommandScheduler {
      */
     protected void post(Command command) {
         final Command commandUpdated = setIgnoreDelay(command);
-        commandBus.post(commandUpdated);
+        postFunction.apply(commandUpdated);
+    }
+
+    /**
+     * Sets a function used to post scheduled commands.
+     */
+    /* package */ void setPostFunction(Function<Command, Command> postFunction) {
+        this.postFunction = postFunction;
     }
 
     /**

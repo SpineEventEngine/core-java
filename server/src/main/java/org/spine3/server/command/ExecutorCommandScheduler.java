@@ -43,15 +43,6 @@ public class ExecutorCommandScheduler extends CommandScheduler {
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THEAD_POOL_SIZE);
 
-    /**
-     * Creates a new instance.
-     *
-     * @param commandBus a command bus used to send scheduled commands
-     */
-    public ExecutorCommandScheduler(CommandBus commandBus) {
-        super(commandBus);
-    }
-
     @Override
     public void schedule(final Command command) {
         super.schedule(command);

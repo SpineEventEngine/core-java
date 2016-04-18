@@ -20,6 +20,7 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +72,12 @@ public class CommandBus implements AutoCloseable {
     private ProblemLog problemLog = new ProblemLog();
 
     private CommandBus(Builder builder) {
-        this.commandStore = builder.getCommandStore();
-        this.scheduler = builder.getScheduler();
-        this.commandStatus = new CommandStatusHelper(commandStore);
+        commandStore = builder.getCommandStore();
+        scheduler = builder.getScheduler();
+        if (scheduler != null) {
+            scheduler.setPostFunction(newPostFunction());
+        }
+        commandStatus = new CommandStatusHelper(commandStore);
     }
 
     /**
@@ -319,6 +323,21 @@ public class CommandBus implements AutoCloseable {
         return handlerRegistry.getHandler(cls);
     }
 
+    private Function<Command, Command> newPostFunction() {
+        final Function<Command, Command> function = new Function<Command, Command>() {
+            @Nullable
+            @Override
+            public Command apply(@Nullable Command command) {
+                if (command == null) {
+                    return null;
+                }
+                post(command);
+                return command;
+            }
+        };
+        return function;
+    }
+
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
@@ -371,6 +390,7 @@ public class CommandBus implements AutoCloseable {
             return this;
         }
 
+        @Nullable
         public CommandScheduler getScheduler() {
             return scheduler;
         }
