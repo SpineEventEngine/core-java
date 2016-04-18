@@ -28,11 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -73,26 +69,16 @@ public class ExecutorCommandSchedulerShould {
     }
 
     @Test
-    public void schedule_command_if_sending_time_is_set() throws InterruptedException {
-        final CommandContext context = createCommandContext(/*delivery time=*/add(getCurrentTime(), DELAY));
-        final Command cmd = Commands.create(createProject(newUuid()), context);
-
-        scheduler.schedule(cmd);
-
-        assertCommandSent(cmd, DELAY);
-    }
-
-    @Test
-    public void set_command_is_in_time() {
+    public void set_ignore_command_delay_to_true() {
         final Command cmd = createProject();
         assertFalse(cmd.getContext()
                        .getSchedule()
-                       .getInTime());
+                       .getIgnoreDelay());
 
-        final Command updatedCmd = CommandScheduler.setIsInTime(cmd);
+        final Command updatedCmd = CommandScheduler.setIgnoreDelay(cmd);
         assertTrue(updatedCmd.getContext()
                              .getSchedule()
-                             .getInTime());
+                             .getIgnoreDelay());
     }
 
     private void assertCommandSent(Command cmd, Duration delay) throws InterruptedException {
@@ -101,7 +87,7 @@ public class ExecutorCommandSchedulerShould {
         final long delayMs = delay.getSeconds() * 1000;
         Thread.sleep(delayMs + CHECK_OFFSET_MS);
 
-        final Command updatedCmd = CommandScheduler.setIsInTime(cmd);
+        final Command updatedCmd = CommandScheduler.setIgnoreDelay(cmd);
         verify(commandBus, times(1)).post(updatedCmd);
     }
 

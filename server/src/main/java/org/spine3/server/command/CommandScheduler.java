@@ -74,16 +74,22 @@ public abstract class CommandScheduler {
      * @param command a command to deliver
      */
     protected void post(Command command) {
-        final Command commandUpdated = setIsInTime(command);
+        final Command commandUpdated = setIgnoreDelay(command);
         commandBus.post(commandUpdated);
     }
 
+    /**
+     * Sets {@code ignoreDelay} option to true in {@link Schedule} command option.
+     *
+     * @param command the command to update
+     * @return the updated command
+     */
     @VisibleForTesting
-    /* package */ static Command setIsInTime(Command command) {
+    /* package */ static Command setIgnoreDelay(Command command) {
         final CommandContext contextPrimary = command.getContext();
         final Schedule scheduleUpdated = contextPrimary.getSchedule()
                 .toBuilder()
-                .setInTime(true)
+                .setIgnoreDelay(true)
                 .build();
         final CommandContext contextUpdated = contextPrimary.toBuilder()
                 .setSchedule(scheduleUpdated)

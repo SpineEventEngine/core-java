@@ -27,7 +27,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.RunTest;
@@ -39,8 +38,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static com.google.protobuf.util.TimeUtil.add;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
@@ -161,14 +158,6 @@ public class CommandsShould {
     }
 
     @Test
-    public void when_command_sending_time_is_set_then_consider_it_scheduled() {
-        final Timestamp deliveryTime = add(getCurrentTime(), seconds(10));
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), createCommandContext(deliveryTime));
-
-        assertTrue(Commands.isScheduled(cmd));
-    }
-
-    @Test
     public void when_no_scheduling_options_then_consider_command_not_scheduled() {
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
 
@@ -186,14 +175,6 @@ public class CommandsShould {
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
-
-        Commands.isScheduled(cmd);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void when_set_past_sending_time_then_throw_exception() {
-        final CommandContext context = createCommandContext(/*delivery time=*/secondsAgo(10));
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);

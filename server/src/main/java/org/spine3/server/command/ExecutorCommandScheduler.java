@@ -20,17 +20,13 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.Schedule;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * The command scheduler implementation which uses basic Java task scheduling features.
@@ -70,15 +66,7 @@ public class ExecutorCommandScheduler extends CommandScheduler {
 
     private static long getDelaySeconds(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        final long delaySec;
-        final Duration delay = schedule.getDelay();
-        if (isNotDefault(delay)) {
-            delaySec = delay.getSeconds();
-        } else {
-            final Timestamp deliveryTime = schedule.getDeliveryTime();
-            final Timestamp now = getCurrentTime();
-            delaySec = deliveryTime.getSeconds() - now.getSeconds();
-        }
+        final long delaySec = schedule.getAfter().getSeconds();
         return delaySec;
     }
 

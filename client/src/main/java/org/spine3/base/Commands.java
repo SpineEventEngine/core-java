@@ -21,8 +21,8 @@
 package org.spine3.base;
 
 import com.google.common.base.Predicate;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Descriptors.FileDescriptor;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.EntityPackagesMap;
@@ -40,7 +40,6 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.protobuf.Timestamps.isAfter;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -228,24 +227,14 @@ public class Commands {
      */
     public static boolean isScheduled(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        if (schedule.getInTime()) {
+        if (schedule.getIgnoreDelay()) {
             return false;
         }
-        final Duration delay = schedule.getDelay();
+        final Duration delay = schedule.getAfter();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
             return true;
         }
-        final Timestamp deliveryTime = schedule.getDeliveryTime();
-        if (isNotDefault(deliveryTime)) {
-            checkIsAfterNow(deliveryTime);
-            return true;
-        }
         return false;
-    }
-
-    private static void checkIsAfterNow(Timestamp deliveryTime) {
-        final Timestamp now = getCurrentTime();
-        checkArgument(isAfter(deliveryTime, /*than*/ now), "Delivery time must be after the current time.");
     }
 }

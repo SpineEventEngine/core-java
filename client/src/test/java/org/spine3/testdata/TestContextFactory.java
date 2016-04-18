@@ -81,7 +81,7 @@ public class TestContextFactory {
      */
     public static CommandContext createCommandContext(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
-                                          .setDelay(delay)
+                                          .setAfter(delay)
                                           .build();
         return createCommandContext(schedule);
     }
@@ -89,20 +89,10 @@ public class TestContextFactory {
     /**
      * Creates a new context with the given scheduling options.
      */
-    public static CommandContext createCommandContext(Duration delay, boolean isInTime) {
+    public static CommandContext createCommandContext(Duration delay, boolean ignoreDelay) {
         final Schedule schedule = Schedule.newBuilder()
-                                          .setDelay(delay)
-                                          .setInTime(isInTime)
-                                          .build();
-        return createCommandContext(schedule);
-    }
-
-    /**
-     * Creates a new context with the given delivery time.
-     */
-    public static CommandContext createCommandContext(Timestamp deliveryTime) {
-        final Schedule schedule = Schedule.newBuilder()
-                                          .setDeliveryTime(deliveryTime)
+                                          .setAfter(delay)
+                                          .setIgnoreDelay(ignoreDelay)
                                           .build();
         return createCommandContext(schedule);
     }

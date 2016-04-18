@@ -455,16 +455,6 @@ public class CommandBusShould {
     }
 
     @Test
-    public void schedule_command_if_sending_time_is_set() {
-        final CommandContext context = createCommandContext(/*delivery time=*/add(getCurrentTime(), minutes(1)));
-        final Command cmd = Commands.create(createProject(newUuid()), context);
-
-        commandBus.post(cmd);
-
-        verify(scheduler, times(1)).schedule(cmd);
-    }
-
-    @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler());
         final Command cmd = commandFactory.create(createProject(newUuid()));

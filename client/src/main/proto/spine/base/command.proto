@@ -84,18 +84,13 @@ message CommandContext {
 }
 
 message Schedule {
-    oneof options {
-        // The amount of time between the current moment and a command delivering to the target.
-        google.protobuf.Duration delay = 1;
+    // The delay between the moment of receiving a command at the server and its delivery to the target.
+    google.protobuf.Duration after = 1;
 
-        // The time when the command should be delivered to the target.
-        google.protobuf.Timestamp delivery_time = 2;
-    }
-
-    // `true` if the command should be delivered to the target right now, despite the scheduling options set;
+    // `true` if the command should be delivered to the target right now, despite the delay set;
     // `false` otherwise.
-    // This flag is needed to specify that a scheduled command arrived in time, and to retain the scheduling options.
-    bool in_time = 3;
+    // This flag is needed to specify that the delay is passed, and to retain the info about the delay.
+    bool ignore_delay = 2;
 }
 
 // Enumeration of possible failures when validating a command.
