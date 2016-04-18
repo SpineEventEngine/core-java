@@ -34,6 +34,7 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.ProjectAggregate;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.Validate;
 
@@ -56,23 +57,6 @@ public class AggregateRepositoryShould {
         storageFactory = InMemoryStorageFactory.getInstance();
         final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new ProjectAggregateRepository(boundedContext);
-    }
-
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
-
-        public ProjectAggregate(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreatedEvent(cmd.getProjectId());
-        }
-
-        @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return taskAddedEvent(cmd.getProjectId());
-        }
     }
 
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
