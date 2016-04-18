@@ -29,7 +29,7 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.base.ValidationFailure;
-import org.spine3.validation.options.ConstraintViolation;
+import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
 import java.util.Map;

@@ -25,11 +25,11 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.FieldPath;
-import org.spine3.validation.options.ConstraintViolation;
-import org.spine3.validation.options.Time;
-import org.spine3.validation.options.TimeOption;
-import org.spine3.validation.options.ValidOption;
-import org.spine3.validation.options.ValidationProto;
+import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.options.Time;
+import org.spine3.validate.options.TimeOption;
+import org.spine3.validate.options.ValidOption;
+import org.spine3.validate.options.ValidationProto;
 
 import java.util.List;
 
@@ -37,8 +37,8 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isAfter;
 import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validation.options.Time.FUTURE;
-import static org.spine3.validation.options.Time.UNDEFINED;
+import static org.spine3.validate.options.Time.FUTURE;
+import static org.spine3.validate.options.Time.UNDEFINED;
 
 /**
  * Validates fields of type {@link Message}.

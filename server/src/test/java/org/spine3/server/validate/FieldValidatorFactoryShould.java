@@ -28,9 +28,9 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.test.validation.msg.AnnotatedEnumFieldValue;
-import org.spine3.test.validation.msg.RequiredByteStringFieldValue;
-import org.spine3.test.validation.msg.RequiredMsgFieldValue;
+import org.spine3.test.validate.msg.AnnotatedEnumFieldValue;
+import org.spine3.test.validate.msg.RequiredByteStringFieldValue;
+import org.spine3.test.validate.msg.RequiredMsgFieldValue;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.junit.Assert.assertTrue;

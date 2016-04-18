@@ -23,9 +23,9 @@ package org.spine3.server.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.validation.options.ConstraintViolation;
-import org.spine3.validation.options.PatternOption;
-import org.spine3.validation.options.ValidationProto;
+import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.options.PatternOption;
+import org.spine3.validate.options.ValidationProto;
 
 import java.util.List;
 
