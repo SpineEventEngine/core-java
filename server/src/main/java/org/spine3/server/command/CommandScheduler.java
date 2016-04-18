@@ -20,11 +20,8 @@
 
 package org.spine3.server.command;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Schedule;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -41,6 +38,8 @@ public abstract class CommandScheduler {
 
     /**
      * Schedule a command and deliver it to the target according to the scheduling options.
+     *
+     * <p>NOTE: check if the command is scheduled already.
      *
      * @param command a command to deliver later
      * @throws IllegalStateException if the scheduler is shut down
@@ -66,8 +65,7 @@ public abstract class CommandScheduler {
      * @param command a command to deliver
      */
     protected void post(Command command) {
-        final Command commandUpdated = setIgnoreDelay(command);
-        postFunction.apply(commandUpdated);
+        postFunction.apply(command);
     }
 
     /**
@@ -75,27 +73,5 @@ public abstract class CommandScheduler {
      */
     /* package */ void setPostFunction(Function<Command, Command> postFunction) {
         this.postFunction = postFunction;
-    }
-
-    /**
-     * Sets {@code ignoreDelay} option to true in {@link Schedule} command option.
-     *
-     * @param command the command to update
-     * @return the updated command
-     */
-    @VisibleForTesting
-    /* package */ static Command setIgnoreDelay(Command command) {
-        final CommandContext contextPrimary = command.getContext();
-        final Schedule scheduleUpdated = contextPrimary.getSchedule()
-                .toBuilder()
-                .setIgnoreDelay(true)
-                .build();
-        final CommandContext contextUpdated = contextPrimary.toBuilder()
-                .setSchedule(scheduleUpdated)
-                .build();
-        final Command cmdUpdated = command.toBuilder()
-                .setContext(contextUpdated)
-                .build();
-        return cmdUpdated;
     }
 }

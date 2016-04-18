@@ -89,17 +89,9 @@ public class TestContextFactory {
     /**
      * Creates a new context with the given scheduling options.
      */
-    public static CommandContext createCommandContext(Duration delay, boolean ignoreDelay) {
-        final Schedule schedule = Schedule.newBuilder()
-                                          .setAfter(delay)
-                                          .setIgnoreDelay(ignoreDelay)
-                                          .build();
-        return createCommandContext(schedule);
-    }
-
     public static CommandContext createCommandContext(Schedule schedule) {
-        final CommandContext.Builder builder = TestContextFactory.createCommandContext().toBuilder()
-                                                                 .setSchedule(schedule);
+        final CommandContext.Builder builder = createCommandContext().toBuilder()
+                                                                     .setSchedule(schedule);
         return builder.build();
     }
 

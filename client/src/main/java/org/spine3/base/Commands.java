@@ -50,11 +50,12 @@ import static org.spine3.validate.Validate.isNotDefault;
 public class Commands {
 
     /**
-     * A substring which the {@code .proto} file containing commands must have in its name.
+     * A suffix which the {@code .proto} file containing commands must have in its name.
      */
-    public static final String COMMANDS = "commands";
+    public static final String FILE_NAME_SUFFIX = "commands";
 
-    private static final char PROTO_FILE_SEPARATOR = '/';
+    private static final char FILE_PATH_SEPARATOR = '/';
+    private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private Commands() {}
 
@@ -195,13 +196,14 @@ public class Commands {
      * Checks if the file is for commands.
      *
      * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name contains {@link #COMMANDS} substring, {@code false} otherwise
+     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         final String fqn = file.getName();
-        final int startIndexOfFileName = fqn.lastIndexOf(PROTO_FILE_SEPARATOR) + 1;
-        final String fileName = fqn.substring(startIndexOfFileName);
-        final boolean isCommandsFile = fileName.contains(COMMANDS);
+        final int startIndexOfFileName = fqn.lastIndexOf(FILE_PATH_SEPARATOR) + 1;
+        final int endIndexOfFileName = fqn.lastIndexOf(FILE_EXTENSION_SEPARATOR);
+        final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
+        final boolean isCommandsFile = fileName.endsWith(FILE_NAME_SUFFIX);
         return isCommandsFile;
     }
 
@@ -223,13 +225,10 @@ public class Commands {
      * Checks if the command is scheduled to be delivered later.
      *
      * @param command a command to check
-     * @return {@code true} if the command context has scheduling options set, {@code false} otherwise
+     * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        if (schedule.getIgnoreDelay()) {
-            return false;
-        }
         final Duration delay = schedule.getAfter();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");

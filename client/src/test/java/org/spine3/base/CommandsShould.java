@@ -164,14 +164,6 @@ public class CommandsShould {
         assertFalse(Commands.isScheduled(cmd));
     }
 
-    @Test
-    public void when_command_is_in_time_then_consider_it_not_scheduled() {
-        final CommandContext context = createCommandContext(/*delay=*/seconds(10), /*in time=*/true);
-        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
-
-        assertFalse(Commands.isScheduled(cmd));
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(-10));

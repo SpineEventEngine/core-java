@@ -31,9 +31,11 @@ import org.spine3.base.Commands;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.testdata.TestCommands.addTask;
 import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
@@ -44,6 +46,7 @@ import static org.spine3.testdata.TestContextFactory.createCommandContext;
 public class ExecutorCommandSchedulerShould {
 
     private static final Duration DELAY = seconds(1);
+    private static final long DELAY_MS = DELAY.getSeconds() * 1000;
     private static final int CHECK_OFFSET_MS = 50;
 
     private CommandScheduler scheduler;
@@ -69,36 +72,29 @@ public class ExecutorCommandSchedulerShould {
     }
 
     @Test
-    public void schedule_command_if_delay_is_set() throws InterruptedException {
+    public void schedule_command_if_delay_is_set() {
         final CommandContext context = createCommandContext(DELAY);
         final Command cmd = Commands.create(createProject(newUuid()), context);
 
         scheduler.schedule(cmd);
 
-        assertCommandSent(cmd, DELAY);
+        assertNull(postedCommand);
+        sleep(DELAY_MS + CHECK_OFFSET_MS);
+        assertEquals(cmd, postedCommand);
     }
 
     @Test
-    public void set_ignore_command_delay_to_true() {
-        final Command cmd = createProject();
-        assertFalse(cmd.getContext()
-                       .getSchedule()
-                       .getIgnoreDelay());
+    public void not_schedule_command_with_same_id_twice() {
+        final CommandContext context = createCommandContext(DELAY);
+        final String id = newUuid();
+        final Command expectedCmd = Commands.create(createProject(id), context);
+        final Command extraCmd = Commands.create(addTask(id), context);
 
-        final Command updatedCmd = CommandScheduler.setIgnoreDelay(cmd);
-        assertTrue(updatedCmd.getContext()
-                             .getSchedule()
-                             .getIgnoreDelay());
-    }
+        scheduler.schedule(expectedCmd);
+        scheduler.schedule(extraCmd);
 
-    private void assertCommandSent(Command cmd, Duration delay) throws InterruptedException {
-        assertNull(postedCommand);
-
-        final long delayMs = delay.getSeconds() * 1000;
-        Thread.sleep(delayMs + CHECK_OFFSET_MS);
-
-        final Command expectedCommand = CommandScheduler.setIgnoreDelay(cmd);
-        assertEquals(expectedCommand, postedCommand);
+        sleep(DELAY_MS + CHECK_OFFSET_MS);
+        assertEquals(expectedCmd, postedCommand);
     }
 
     @Test
@@ -111,5 +107,13 @@ public class ExecutorCommandSchedulerShould {
             return;
         }
         fail("Must throw an exception as it is shutdown.");
+    }
+
+    private static void sleep(long delayMs) {
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException e) {
+            throw propagate(e);
+        }
     }
 }
