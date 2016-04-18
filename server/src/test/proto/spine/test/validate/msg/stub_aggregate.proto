@@ -19,44 +19,18 @@
 //
 syntax = "proto3";
 
-package spine.test.validation.msg;
+package spine.test.validate.msg;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "ValidationTestCommandsProto";
-option java_package = "org.spine3.test.validation.msg";
+option java_package = "org.spine3.test.validate.msg";
 
-import "google/protobuf/wrappers.proto";
-import "spine/validation.proto";
+import "spine/entity.proto";
 
-// Messages for entity ID in commands validation tests.
+// A state of the stub aggregate.
+// Is annotated so that Spine considers commands from `commands.proto` file from this package as commands for an aggregate.
+message StubAggregate {
+    option (state_of) = AGGREGATE;
 
-message EntityIdMsgFieldValue {
-    google.protobuf.StringValue value = 1;
-}
-
-message EntityIdStringFieldValue {
     string value = 1;
-}
-
-message EntityIdIntFieldValue {
-    int32 value = 1;
-}
-
-message EntityIdLongFieldValue {
-    int64 value = 1;
-}
-
-message EntityIdRepeatedFieldValue {
-    repeated string value = 1;
-}
-
-// Unsupported ID types.
-
-message EntityIdByteStringFieldValue {
-    bytes value = 1;
-}
-
-message EntityIdDoubleFieldValue {
-    double value = 1;
 }
