@@ -48,6 +48,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static java.util.Collections.singletonList;
 import static org.spine3.base.Identifiers.idToAny;
 
 /**
@@ -276,7 +277,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * which is called automatically by {@link AggregateRepository}.
      */
     @VisibleForTesting
-    protected final void testDispatch(Message command, CommandContext context) {
+    public final void testDispatch(Message command, CommandContext context) {
         dispatch(command, context);
     }
 
@@ -363,6 +364,33 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         } finally {
             updateState();
         }
+    }
+
+    /**
+     * This method is provided <em>only</em> for the purpose of testing event appliers
+     * of an aggregate and must not be called from the production code.
+     *
+     * <p>Calls {@link #apply(Iterable, CommandContext)}.
+     */
+    @VisibleForTesting
+    public final void testApply(Message message, CommandContext commandContext) {
+        init();
+        try {
+            apply(singletonList(message), commandContext);
+        } catch (InvocationTargetException e) {
+            throw propagate(e);
+        }
+    }
+
+    /**
+     * This method is provided <em>only</em> for the purpose of testing an aggregate and
+     * must not be called from the production code.
+     *
+     * <p>Calls {@link #incrementState(Message)}.
+     */
+    @VisibleForTesting
+    public final void testIncrementState(S newState) {
+        incrementState(newState);
     }
 
     /**
