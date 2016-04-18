@@ -75,7 +75,7 @@ import static org.spine3.protobuf.Messages.toAny;
     }
 
     private ConstraintViolation newViolation(String fieldValue) {
-        final String msg = getErrorMsgFormat(patternOption, patternOption.getMsg());
+        final String msg = getErrorMsgFormat(patternOption, patternOption.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
                 .addParam(regex)

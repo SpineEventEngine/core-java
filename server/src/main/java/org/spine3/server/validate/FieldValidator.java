@@ -167,7 +167,7 @@ import static org.spine3.base.Commands.isCommandsFile;
     }
 
     private ConstraintViolation newViolation(RequiredOption option) {
-        final String msg = getErrorMsgFormat(option, option.getMsg());
+        final String msg = getErrorMsgFormat(option, option.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
