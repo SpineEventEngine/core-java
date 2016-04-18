@@ -232,7 +232,7 @@ public class CommandBus implements AutoCloseable {
             scheduler.schedule(command);
         } else {
             throw new IllegalStateException(
-                    "Scheduled commands are not supported by this command bus (scheduler is not set).");
+                    "Scheduled commands are not supported by this command bus: scheduler is not set.");
         }
     }
 
