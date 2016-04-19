@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +28,8 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+
+import javax.annotation.Nullable;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -51,8 +54,9 @@ public class ExecutorCommandSchedulerShould {
 
     @Before
     public void setUpTest() {
-        this.scheduler = spy(ExecutorCommandScheduler.class);
-        this.context = createCommandContext(DELAY);
+        scheduler = spy(ExecutorCommandScheduler.class);
+        scheduler.setPostFunction(newStubPostFunction());
+        context = createCommandContext(DELAY);
     }
 
     @After
@@ -93,5 +97,15 @@ public class ExecutorCommandSchedulerShould {
             return;
         }
         fail("Must throw an exception as it is shutdown.");
+    }
+
+    private static Function<Command, Command> newStubPostFunction() {
+        return new Function<Command, Command>() {
+            @Nullable
+            @Override
+            public Command apply(@Nullable Command input) {
+                return input;
+            }
+        };
     }
 }
