@@ -29,9 +29,9 @@ import org.spine3.base.EventContext;
 import org.spine3.server.EventDispatcher;
 import org.spine3.server.EventHandler;
 import org.spine3.server.Subscribe;
-import org.spine3.server.reflect.EventClass;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.type.EventClass;
 import org.spine3.test.project.event.ProjectCreated;
 
 import java.util.Collection;

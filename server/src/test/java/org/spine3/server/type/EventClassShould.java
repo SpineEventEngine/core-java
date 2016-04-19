@@ -18,36 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.type;
 
-import org.spine3.base.Command;
-import org.spine3.server.type.CommandClass;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-import java.util.Set;
+import static org.junit.Assert.assertEquals;
 
-/**
- * {@code CommandDispatcher} delivers commands to their handlers.
- *
- * <p>A dispatcher can deliver more than one class of commands.
- *
- * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the business model, neither it
- * produces events.
- *
- * @author Alexander Yevsyukov
- * @see CommandHandler
- */
-public interface CommandDispatcher {
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventClassShould {
 
-    /**
-     * Returns the set of command classes that can be processed by this dispatcher.
-     *
-     * @return non-empty set of command classes
-     */
-    Set<CommandClass> getCommandClasses();
-
-    /**
-     * Dispatches the command to its handler.
-     */
-    void dispatch(Command request) throws Exception;
-
+    @Test
+    public void create_set_on_varargs() {
+        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+    }
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.server.type;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;

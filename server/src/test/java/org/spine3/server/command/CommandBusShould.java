@@ -37,7 +37,7 @@ import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.reflect.CommandClass;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
