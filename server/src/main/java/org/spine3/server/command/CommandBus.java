@@ -33,8 +33,8 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.reflect.CommandClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.type.CommandClass;
 import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;

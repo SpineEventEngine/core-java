@@ -19,7 +19,7 @@
  */
 package org.spine3.server.aggregate.error;
 
-import org.spine3.type.EventClass;
+import org.spine3.server.reflect.EventClass;
 
 /**
  * Exception that is thrown when more than one applier

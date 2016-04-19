@@ -18,21 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.type;
+package org.spine3.server.reflect;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class ClassTypeValueShould {
+public class MessageClassShould {
 
     @Test
     public void return_enclosed_value() {
         final Class<? extends Message> expected = StringValue.class;
-        assertEquals(expected, new  MessageClass(expected) {}.value());
+        Assert.assertEquals(expected, new  MessageClass(expected) {}.value());
     }
 
     @Test

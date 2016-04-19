@@ -50,6 +50,7 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.server.reflect.EventClass;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
@@ -61,7 +62,6 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.type.EventClass;
 
 import java.util.List;
 

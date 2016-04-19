@@ -21,7 +21,7 @@
 package org.spine3.server;
 
 import org.spine3.base.Event;
-import org.spine3.type.EventClass;
+import org.spine3.server.reflect.EventClass;
 
 import java.util.Set;
 

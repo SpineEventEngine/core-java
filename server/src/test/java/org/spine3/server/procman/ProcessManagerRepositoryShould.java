@@ -40,6 +40,8 @@ import org.spine3.server.FailureThrowable;
 import org.spine3.server.Subscribe;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.GetProducerIdFromEvent;
+import org.spine3.server.reflect.CommandClass;
+import org.spine3.server.reflect.EventClass;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
@@ -51,8 +53,6 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.testdata.TestCommands;
-import org.spine3.type.CommandClass;
-import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;

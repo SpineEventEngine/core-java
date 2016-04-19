@@ -32,7 +32,7 @@ import org.spine3.server.EventHandler;
 import org.spine3.server.Subscribe;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.procman.ProcessManager;
-import org.spine3.type.EventClass;
+import org.spine3.server.reflect.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -130,6 +130,15 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
+     * Determines the class of the event from the passed event record.
+     */
+    public static EventClass getEventClass(Event event) {
+        final Message message = Events.getMessage(event);
+        final EventClass result = EventClass.of(message);
+        return result;
+    }
+
+    /**
      * Subscribes the event handler to receive events from the bus.
      *
      * <p>The event handler must expose at least one event subscriber method. If it is not the
@@ -215,7 +224,7 @@ public class EventBus implements AutoCloseable {
     }
 
     private void callDispatchers(Event event) {
-        final EventClass eventClass = Events.getEventClass(event);
+        final EventClass eventClass = getEventClass(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
             dispatcher.dispatch(event);

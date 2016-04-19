@@ -21,7 +21,7 @@
 package org.spine3.server.command;
 
 import com.google.common.base.Joiner;
-import org.spine3.type.CommandClass;
+import org.spine3.server.reflect.CommandClass;
 
 import java.util.Set;
 

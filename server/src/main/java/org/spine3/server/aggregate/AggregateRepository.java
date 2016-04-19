@@ -32,10 +32,10 @@ import org.spine3.server.command.CommandStatusService;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.reflect.CommandClass;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

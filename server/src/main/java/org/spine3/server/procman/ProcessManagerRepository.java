@@ -37,8 +37,8 @@ import org.spine3.server.entity.EntityRepository;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.type.CommandClass;
-import org.spine3.type.EventClass;
+import org.spine3.server.reflect.CommandClass;
+import org.spine3.server.reflect.EventClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

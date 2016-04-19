@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.type;
+package org.spine3.server.reflect;
 
 import com.google.protobuf.Message;
 
@@ -30,7 +30,6 @@ import java.util.Objects;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
 public abstract class MessageClass {
 
     private final Class<? extends Message> value;

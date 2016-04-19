@@ -28,7 +28,7 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.type.CommandClass;
+import org.spine3.server.reflect.CommandClass;
 
 import java.util.Map;
 import java.util.Set;

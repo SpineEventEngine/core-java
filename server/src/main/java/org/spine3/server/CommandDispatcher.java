@@ -21,7 +21,7 @@
 package org.spine3.server;
 
 import org.spine3.base.Command;
-import org.spine3.type.CommandClass;
+import org.spine3.server.reflect.CommandClass;
 
 import java.util.Set;
 

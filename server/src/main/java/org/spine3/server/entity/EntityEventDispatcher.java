@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.EventDispatcher;
-import org.spine3.type.EventClass;
+import org.spine3.server.reflect.EventClass;
 
 /**
  * Delivers events to handlers (which are supposed to be entities).
