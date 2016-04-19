@@ -243,10 +243,11 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
+        final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
-                        .get(getClass(), commandMessage.getClass(), CommandHandlerMethod.factory());
+                                                          .get(getClass(), commandClass, CommandHandlerMethod.factory());
         if (method == null) {
-            throw missingCommandHandler(commandMessage.getClass());
+            throw missingCommandHandler(commandClass);
         }
         final List<? extends Message> result = method.invoke(this, commandMessage, context);
         return result;

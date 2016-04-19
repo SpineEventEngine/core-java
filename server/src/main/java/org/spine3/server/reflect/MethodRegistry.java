@@ -36,6 +36,20 @@ public class MethodRegistry {
 
     private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
 
+    /**
+     * Obtains a handler method, which handles the passed message class.
+     *
+     * <p>If the registry does not have the data structures ready for the target class,
+     * they are created using the passed {@code factory} of the handler methods.
+     * Then the method is obtained.
+     *
+     * @param targetClass the class of the target object
+     * @param messageClass the class of the message to handle
+     * @param factory the handler method factory for getting methods from the target class
+     * @param <T> the type of the target object class
+     * @param <H> the type of the message handler method
+     * @return a handler method
+     */
     public <T, H extends HandlerMethod> H get(Class<T> targetClass,
                                               Class<? extends Message> messageClass,
                                               HandlerMethod.Factory<H> factory) {
