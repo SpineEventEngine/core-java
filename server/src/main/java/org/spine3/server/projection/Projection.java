@@ -24,15 +24,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
+import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -49,8 +48,6 @@ import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
  */
 public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
-    private MethodMap handlers;
-
     /**
      * Creates a new instance.
      *
@@ -63,41 +60,20 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
     }
 
     protected void handle(Message event, EventContext ctx) {
-        init();
         dispatch(event, ctx);
     }
 
     private void dispatch(Message event, EventContext ctx) {
         final Class<? extends Message> eventClass = event.getClass();
-        final Method method = handlers.get(eventClass);
+        final EventHandlerMethod method = MethodRegistry.getInstance()
+                                                        .get(getClass(), eventClass, EventHandlerMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
-        final EventHandlerMethod handler = new EventHandlerMethod(this, method);
         try {
-            handler.invoke(event, ctx);
+            method.invoke(this, event, ctx);
         } catch (InvocationTargetException e) {
             propagate(e);
-        }
-    }
-
-    protected boolean isInitialized() {
-        return handlers != null;
-    }
-
-    /**
-     * Performs initialization of the instance.
-     */
-    protected void init() {
-        if (!isInitialized()) {
-            final Registry registry = Registry.getInstance();
-            final Class<? extends Projection> thisClass = getClass();
-
-            if (!registry.contains(thisClass)) {
-                registry.register(thisClass);
-            }
-
-            handlers = registry.getEventHandlers(thisClass);
         }
     }
 
@@ -116,31 +92,4 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
                 eventClass, this.getClass()));
     }
 
-    private static class Registry {
-        private final MethodMap.Registry<Projection> eventHandlers = new MethodMap.Registry<>();
-
-        boolean contains(Class<? extends Projection> clazz) {
-            return eventHandlers.contains(clazz);
-        }
-
-        void register(Class<? extends Projection> clazz) {
-            eventHandlers.register(clazz, PREDICATE);
-        }
-
-        MethodMap getEventHandlers(Class<? extends Projection> clazz) {
-            final MethodMap result = eventHandlers.get(clazz);
-            return result;
-        }
-
-        static Registry getInstance() {
-            return RegistrySingleton.INSTANCE.value;
-        }
-
-        private enum RegistrySingleton {
-            INSTANCE;
-
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-        }
-    }
 }

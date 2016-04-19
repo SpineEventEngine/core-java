@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.type;
+package org.spine3.server.type;
 
 import com.google.protobuf.Message;
 
@@ -30,13 +30,11 @@ import java.util.Objects;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for value object base.
-// NOTE: this class is named using 'Type' infix to prevent the name clash with java.lang.ClassValue.
-abstract class ClassTypeValue {
+public abstract class MessageClass {
 
     private final Class<? extends Message> value;
 
-    protected ClassTypeValue(Class<? extends Message> value) {
+    protected MessageClass(Class<? extends Message> value) {
         this.value = value;
     }
 
@@ -72,7 +70,7 @@ abstract class ClassTypeValue {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final ClassTypeValue other = (ClassTypeValue) obj;
+        final MessageClass other = (MessageClass) obj;
         return Objects.equals(this.value, other.value);
     }
 

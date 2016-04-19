@@ -29,32 +29,28 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Errors;
-import org.spine3.base.Event;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.server.Assign;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.CommandHandler;
-import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.failure.FailureThrowable;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.type.CommandClass;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.server.command.CommandValidation.isUnsupportedCommand;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
@@ -64,8 +60,9 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private ExecutorCommandScheduler scheduler;
     private CommandBus.ProblemLog log;
+    private EventBus eventBus;
+    private ExecutorCommandScheduler scheduler;
 
     @Before
     public void setUp() {
@@ -77,6 +74,7 @@ public class CommandBusShould {
                                .build();
         log = spy(CommandBus.ProblemLog.class);
         commandBus.setProblemLog(log);
+        eventBus = mock(EventBus.class);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
     }
 
@@ -99,9 +97,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
@@ -112,11 +108,14 @@ public class CommandBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_command_handlers_without_methods() {
-        commandBus.register(new EmptyCommandHandler());
+        commandBus.register(new EmptyCommandHandler(eventBus));
     }
 
     @SuppressWarnings("EmptyClass")
-    private static class EmptyCommandHandler implements CommandHandler {
+    private static class EmptyCommandHandler extends CommandHandler {
+        private EmptyCommandHandler(EventBus eventBus) {
+            super(newUuid(), eventBus);
+        }
     }
 
     //
@@ -131,9 +130,7 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
@@ -155,9 +152,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<Event> dispatch(Command request) throws Exception {
-                //noinspection ReturnOfNull
-                return null;
+            public void dispatch(Command request) throws Exception {
             }
         });
 
@@ -179,9 +174,7 @@ public class CommandBusShould {
             }
 
             @Override
-            public List<Event> dispatch(Command request) throws Exception {
-                //noinspection ReturnOfNull
-                return null;
+            public void dispatch(Command request) throws Exception {
             }
         };
 
@@ -201,26 +194,32 @@ public class CommandBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
 
-        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandHandler createProjectHandler = new CreateProjectHandler(eventBus);
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectHandler);
+
         commandBus.register(createProjectDispatcher);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
 
-        final CommandHandler createProjectHandler = new CreateProjectHandler();
+        final CommandHandler createProjectHandler = new CreateProjectHandler(eventBus);
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
 
         commandBus.register(createProjectDispatcher);
+
         commandBus.register(createProjectHandler);
     }
 
-    private static class CreateProjectHandler implements CommandHandler {
+    private static class CreateProjectHandler extends CommandHandler {
 
         private boolean handlerInvoked = false;
+
+        private CreateProjectHandler(EventBus eventBus) {
+            super(newUuid(), eventBus);
+        }
 
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ctx) throws TestFailure, TestThrowable {
@@ -240,15 +239,13 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
-            //noinspection ReturnOfNull
-            return null;
+        public void dispatch(Command request) throws Exception {
         }
     }
 
     @Test
     public void unregister_handler() {
-        final CommandHandler handler = new CreateProjectHandler();
+        final CommandHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
         commandBus.unregister(handler);
         final String projectId = newUuid();
@@ -257,7 +254,7 @@ public class CommandBusShould {
 
     @Test
     public void validate_commands_both_dispatched_and_handled() {
-        final CommandHandler handler = new CreateProjectHandler();
+        final CommandHandler handler = new CreateProjectHandler(eventBus);
         final CommandDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(handler);
         commandBus.register(dispatcher);
@@ -277,10 +274,8 @@ public class CommandBusShould {
         }
 
         @Override
-        public List<Event> dispatch(Command request) throws Exception {
+        public void dispatch(Command request) throws Exception {
             dispatcherInvoked = true;
-            //noinspection ReturnOfNull
-            return null;
         }
 
         public boolean wasDispatcherInvoked() {
@@ -309,7 +304,7 @@ public class CommandBusShould {
 
     @Test
     public void remove_all_handlers_on_close() throws Exception {
-        final CommandHandler handler = new CreateProjectHandler();
+        final CommandHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
 
         commandBus.close();
@@ -318,7 +313,7 @@ public class CommandBusShould {
 
     @Test
     public void invoke_handler_when_command_posted() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
 
         final Command command = commandFactory.create(createProject(newUuid()));
@@ -348,15 +343,14 @@ public class CommandBusShould {
 
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
-        final CreateProjectHandler handler = new CreateProjectHandler();
+        final CreateProjectHandler handler = new CreateProjectHandler(eventBus);
         commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
 
         commandBus.post(command);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
-                                                                 .getCommandId());
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
     }
 
     @Test
@@ -384,16 +378,19 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // Verify we updated the status.
-
-        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(failure.toMessage()));
         // Verify we logged the failure.
-        verify(log, times(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
+        verify(log, atMost(1)).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
     }
 
     @Test
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
+        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final RuntimeException exception = new IllegalStateException("handler throws");
-        givenThrowingHandler(exception);
+        doThrow(exception).when(handler)
+                          .handle(any(CreateProject.class), any(CommandContext.class));
+
+        commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
         final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = Commands.getMessage(command);
@@ -401,15 +398,19 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // Verify we updated the status.
-        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(exception));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(exception));
         // Verify we logged the failure.
-        verify(log, times(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
+        verify(log, atMost(1)).errorHandling(eq(exception), eq(commandMessage), eq(commandId));
     }
 
     @Test
     public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
+        final CreateProjectHandler handler = mock(CreateProjectHandler.class);
         final Throwable throwable = new TestThrowable();
-        givenThrowingHandler(throwable);
+        doThrow(throwable).when(handler)
+                          .handle(any(CreateProject.class), any(CommandContext.class));
+
+        commandBus.register(handler);
         final Command command = commandFactory.create(createProject(newUuid()));
         final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = Commands.getMessage(command);
@@ -417,10 +418,11 @@ public class CommandBusShould {
         commandBus.post(command);
 
         // Verify we updated the status.
-        verify(commandStore, times(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
+        verify(commandStore, atMost(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
         // Verify we logged the failure.
-        verify(log, times(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
+        verify(log, atMost(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
+
 
     private <E extends Throwable> void givenThrowingHandler(E throwable) throws TestThrowable, TestFailure {
         final CreateProjectHandler handler = mock(CreateProjectHandler.class);
@@ -454,7 +456,7 @@ public class CommandBusShould {
 
     @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
-        commandBus.register(new CreateProjectHandler());
+        commandBus.register(new CreateProjectHandler(eventBus));
         final Command cmd = commandFactory.create(createProject(newUuid()));
 
         commandBus.post(cmd);

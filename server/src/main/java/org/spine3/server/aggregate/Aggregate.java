@@ -33,17 +33,16 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.CommandHandler;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
+import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -90,9 +89,7 @@ import static org.spine3.base.Identifiers.idToAny;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
-                            extends Entity<I, S>
-                            implements CommandHandler {
+public abstract class Aggregate<I, S extends Message, B extends Message.Builder> extends Entity<I, S> {
 
     /**
      * The builder for the aggregate state.
@@ -110,25 +107,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Cached value of the ID in the form of Any instance.
      */
     private final Any idAsAny;
-
-    /**
-     * Keeps initialization state of the aggregate.
-     */
-    private volatile boolean initialized = false;
-
-    /**
-     * The map of command handling methods for this class.
-     *
-     * @see Registry
-     */
-    private MethodMap commandHandlers;
-
-    /**
-     * The map of event appliers for this class.
-     *
-     * @see Registry
-     */
-    private MethodMap eventAppliers;
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -167,29 +145,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
         return Classes.getHandledMessageClasses(clazz, EventApplier.PREDICATE);
-    }
-
-    /**
-     * Performs initialization of the instance and registers this class of aggregates
-     * in the {@link Registry} if it is not registered yet.
-     */
-    private void init() {
-        if (this.initialized) {
-            return;
-        }
-
-        final Registry registry = Registry.getInstance();
-        final Class<? extends Aggregate> thisClass = getClass();
-
-        // Register this aggregate class if it wasn't before.
-        if (!registry.contains(thisClass)) {
-            registry.register(thisClass);
-        }
-
-        commandHandlers = registry.getCommandHandlers(thisClass);
-        eventAppliers = registry.getEventAppliers(thisClass);
-
-        this.initialized = true;
     }
 
     private Any getIdAsAny() {
@@ -250,8 +205,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         checkNotNull(command);
         checkNotNull(context);
 
-        init();
-
         if (command instanceof Any) {
             // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
             // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
@@ -292,13 +245,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
         final Class<? extends Message> commandClass = commandMessage.getClass();
-        final Method method = commandHandlers.get(commandClass);
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                                                          .get(getClass(), commandClass, CommandHandlerMethod.factory());
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final List<? extends Message> result = commandHandler.invoke(commandMessage, context);
+        final List<? extends Message> result = method.invoke(this, commandMessage, context);
         return result;
     }
 
@@ -309,14 +261,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final Class<? extends Message> eventClass = eventMessage.getClass();
-        final Method method = eventAppliers.get(eventClass);
+        final EventApplier method = MethodRegistry.getInstance()
+                .get(getClass(), eventMessage.getClass(), EventApplier.factory());
         if (method == null) {
-            throw missingEventApplier(eventClass);
+            throw missingEventApplier(eventMessage.getClass());
         }
-
-        final EventApplier applier = new EventApplier(this, method);
-        applier.invoke(eventMessage);
+        method.invoke(this, eventMessage);
     }
 
     /**
@@ -327,7 +277,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *                          for the thrown {@code RuntimeException}
      */
     /* package */ void play(Iterable<Event> events) {
-        init();
         createBuilder();
         try {
             for (Event event : events) {
@@ -374,7 +323,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @VisibleForTesting
     public final void applyForTest(Message message, CommandContext commandContext) {
-        init();
         try {
             apply(singletonList(message), commandContext);
         } catch (InvocationTargetException e) {

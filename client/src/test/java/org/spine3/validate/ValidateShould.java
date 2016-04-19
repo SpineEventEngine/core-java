@@ -29,7 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.validation.options.ConstraintViolation;
+import org.spine3.validate.options.ConstraintViolation;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Values.newStringValue;

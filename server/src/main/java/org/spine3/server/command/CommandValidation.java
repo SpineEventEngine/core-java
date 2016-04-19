@@ -29,7 +29,7 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.base.ValidationFailure;
-import org.spine3.validation.options.ConstraintViolation;
+import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
 import java.util.Map;
@@ -68,14 +68,6 @@ public class CommandValidation {
                     .setMessage(errMsg))
                 .build();
         return response;
-    }
-
-    public static boolean isUnsupportedCommand(Response response) {
-        if (response.getStatusCase() == Response.StatusCase.ERROR) {
-            final Error error = response.getError();
-            return error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
-        }
-        return false;
     }
 
     /**

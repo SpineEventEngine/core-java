@@ -22,19 +22,23 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Errors;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandStatusService;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.type.CommandClass;
+import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -78,12 +82,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
+    private final CommandStatusService commandStatusService;
+    private final EventBus eventBus;
 
     /**
      * {@inheritDoc}
      */
     public AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
+        this.commandStatusService = boundedContext.getCommandBus().getCommandStatusService();
+        this.eventBus = boundedContext.getEventBus();
     }
 
     @Override
@@ -203,6 +211,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
+     * Posts passed events to {@link EventBus}.
+     */
+    private void postEvents(Iterable<Event> events) {
+        for (Event event : events) {
+            eventBus.post(event);
+        }
+    }
+
+    /**
      * Processes the command by dispatching it to a method of an aggregate.
      *
      * <p>The aggregate ID is obtained from the passed command.
@@ -212,23 +229,30 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param request the request to dispatch
      * @throws IllegalStateException if storage for the repository was not initialized
-     * @throws InvocationTargetException if an exception occurs during command dispatching
      */
     @Override
     @CheckReturnValue
-    public List<Event> dispatch(Command request) throws IllegalStateException, InvocationTargetException {
+    public void dispatch(Command request) throws IllegalStateException {
         final Message command = getMessage(checkNotNull(request));
         final CommandContext context = request.getContext();
+        final CommandId commandId = context.getCommandId();
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
 
         try {
             aggregate.dispatch(command, context);
-        } catch (Throwable throwable) {
-            //TODO:2016-01-25:alexander.yevsyukov: Store error status into the Command Store.
-            //TODO:2016-01-25:alexander.yevsyukov: How do we tell the client that the command caused the
-            // error or (which is more important) business failure?
-            return null;
+        } catch (RuntimeException e) {
+            final Throwable cause = e.getCause();
+            //noinspection ChainOfInstanceofChecks
+            if (cause instanceof Exception) {
+                final Exception exception = (Exception) cause;
+                commandStatusService.setToError(commandId, exception);
+            } else if (cause instanceof FailureThrowable){
+                final FailureThrowable failure = (FailureThrowable) cause;
+                commandStatusService.setToFailure(commandId, failure);
+            } else {
+                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
+            }
         }
 
         final List<Event> events = aggregate.getUncommittedEvents();
@@ -237,13 +261,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         try {
             store(aggregate);
         } catch (Exception e) {
-            //TODO:2016-01-25:alexander.yevsyukov: Store error into the Command Store.
-            return null;
+            commandStatusService.setToError(commandId, e);
         }
 
-        //TODO:2016-01-25:alexander.yevsyukov: Post events to EventBus.
-
-        return events;
+        postEvents(events);
+        commandStatusService.setOk(commandId);
     }
 
     private I getAggregateId(Message command) {

@@ -28,24 +28,19 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
-import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.CommandHandler;
-import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.failure.FailureThrowable;
+import org.spine3.server.type.CommandClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.type.CommandClass;
-import org.spine3.validation.options.ConstraintViolation;
+import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptyList;
 import static org.spine3.base.Commands.*;
 import static org.spine3.server.command.CommandValidation.invalidCommand;
 import static org.spine3.server.command.CommandValidation.unsupportedCommand;
@@ -67,9 +62,9 @@ public class CommandBus implements AutoCloseable {
 
     @Nullable
     private final CommandScheduler scheduler;
-
-    private final CommandStatusHelper commandStatus;
+    
     private ProblemLog problemLog = new ProblemLog();
+    private final CommandStatusService commandStatusService;
 
     private CommandBus(Builder builder) {
         commandStore = builder.getCommandStore();
@@ -77,7 +72,7 @@ public class CommandBus implements AutoCloseable {
         if (scheduler != null) {
             scheduler.setPostFunction(newPostFunction());
         }
-        commandStatus = new CommandStatusHelper(commandStore);
+        commandStatusService = new CommandStatusService(commandStore);
     }
 
     /**
@@ -166,69 +161,78 @@ public class CommandBus implements AutoCloseable {
     /**
      * Directs a command request to the corresponding handler.
      *
-     * @param command the command request to be processed
-     * @return a list of the events as the result of handling the command
+     * @param command the command to be processed
      * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
-    public List<Event> post(Command command) {
-        //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
+    public void post(Command command) {
         checkNotDefault(command);
         if (isScheduled(command)) {
             schedule(command);
-            return emptyList();
+            return;
         }
         store(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (isDispatcherRegistered(commandClass)) {
-            return dispatch(command);
+            dispatch(command);
+            return;
         }
         if (isHandlerRegistered(commandClass)) {
             final Message message = getMessage(command);
             final CommandContext context = command.getContext();
-            return invokeHandler(message, context);
+            invokeHandler(message, context);
+            return;
         }
         throw new UnsupportedCommandException(getMessage(command));
     }
 
-    private List<Event> dispatch(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        List<Event> result = emptyList();
-        try {
-            result = dispatcher.dispatch(command);
-        } catch (Exception e) {
-            problemLog.errorDispatching(e, command);
-            commandStatus.setToError(command.getContext().getCommandId(), e);
-        }
-        return result;
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    public CommandStatusService getCommandStatusService() {
+        return commandStatusService;
     }
 
-    private List<Event> invokeHandler(Message msg, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandlerMethod method = getHandler(commandClass);
-        List<Event> result = emptyList();
+    private void dispatch(Command command) {
+        final CommandClass commandClass = CommandClass.of(command);
+        final CommandDispatcher dispatcher = getDispatcher(commandClass);
+        final CommandId commandId = command.getContext().getCommandId();
         try {
-            result = method.invoke(msg, context);
-            commandStatus.setOk(context.getCommandId());
+            dispatcher.dispatch(command);
+        } catch (Exception e) {
+            problemLog.errorDispatching(e, command);
+            commandStatusService.setToError(commandId, e);
+        }
+    }
+
+    private void invokeHandler(Message msg, CommandContext context) {
+        final CommandClass commandClass = CommandClass.of(msg);
+        final CommandHandler handler = getHandler(commandClass);
+        final CommandId commandId = context.getCommandId();
+        try {
+            handler.handle(msg, context);
+            commandStatusService.setOk(commandId);
         } catch (InvocationTargetException e) {
-            final CommandId commandId = context.getCommandId();
             final Throwable cause = e.getCause();
             //noinspection ChainOfInstanceofChecks
             if (cause instanceof Exception) {
                 final Exception exception = (Exception) cause;
                 problemLog.errorHandling(exception, msg, commandId);
-                commandStatus.setToError(commandId, exception);
+                commandStatusService.setToError(commandId, exception);
             } else if (cause instanceof FailureThrowable){
                 final FailureThrowable failure = (FailureThrowable) cause;
                 problemLog.failureHandling(failure, msg, commandId);
-                commandStatus.setToFailure(commandId, failure);
+                commandStatusService.setToFailure(commandId, failure);
             } else {
                 problemLog.errorHandlingUnknown(cause, msg, commandId);
-                commandStatus.setToError(commandId, Errors.fromThrowable(cause));
+                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
-        return result;
+    }
+
+    private CommandHandler getHandler(CommandClass commandClass) {
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        return handler;
     }
 
     private void schedule(Command command) {
@@ -273,34 +277,6 @@ public class CommandBus implements AutoCloseable {
         this.problemLog = problemLog;
     }
 
-    /**
-     * The helper class for updating command status.
-     */
-    private static class CommandStatusHelper {
-
-        private final CommandStore commandStore;
-
-        private CommandStatusHelper(CommandStore commandStore) {
-            this.commandStore = commandStore;
-        }
-
-        private void setOk(CommandId commandId) {
-            commandStore.setCommandStatusOk(commandId);
-        }
-
-        private void setToError(CommandId commandId, Exception exception) {
-            commandStore.updateStatus(commandId, exception);
-        }
-
-        private void setToFailure(CommandId commandId, FailureThrowable failure) {
-            commandStore.updateStatus(commandId, failure.toMessage());
-        }
-
-        private void setToError(CommandId commandId, org.spine3.base.Error error) {
-            commandStore.updateStatus(commandId, error);
-        }
-    }
-
     private void store(Command request) {
         commandStore.store(request);
     }
@@ -317,10 +293,6 @@ public class CommandBus implements AutoCloseable {
 
     private CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatcherRegistry.getDispatcher(commandClass);
-    }
-
-    private CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlerRegistry.getHandler(cls);
     }
 
     private Function<Command, Command> newPostFunction() {

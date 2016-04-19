@@ -20,7 +20,6 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -35,22 +34,22 @@ import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.command.CommandValidation;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * This class is a facade for configuration and entry point for handling commands.
@@ -179,12 +178,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
+
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
-        if (repository instanceof CommandHandler) {
-            commandBus.register((CommandHandler) repository);
-        }
+
         if (repository instanceof EventDispatcher) {
             getEventBus().register((EventDispatcher)repository);
         }
@@ -204,40 +202,11 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
             commandBus.unregister((CommandDispatcher) repository);
         }
 
-        if (repository instanceof CommandHandler) {
-            commandBus.unregister((CommandHandler)repository);
-        }
-
         if (repository instanceof EventDispatcher) {
             getEventBus().unregister((EventDispatcher) repository);
         }
 
         repository.close();
-    }
-
-    public CommandResult process(Command request) {
-        checkNotNull(request);
-
-        //TODO:2016-01-24:alexander.yevsyukov: Transform to dispatch commands without returning results.
-
-        CommandResult result = CommandResult.getDefaultInstance();
-        try {
-            result = dispatch(request);
-        } catch (RuntimeException e) {
-            log().error("", e);
-        }
-
-        final List<Event> eventRecords = result.getEventList();
-
-        postEvents(eventRecords);
-
-        //TODO:2015-12-16:alexander.yevsyukov: Notify clients via EventBus subscriptions to events filtered by aggregate IDs.
-
-        return result;
-    }
-
-    public void post(Command request)  {
-        commandBus.post(request);
     }
 
     @Override
@@ -247,7 +216,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
         Response reply = null;
 
-        // Ensure `namespace` is defined in a multitenant app.
+        // Ensure `namespace` context attribute is defined in a multitenant app.
         if (isMultitenant() && !commandContext.hasNamespace()) {
             reply = CommandValidation.unknownNamespace(message, request.getContext());
         }
@@ -264,44 +233,20 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
+    private void post(Command request)  {
+        commandBus.post(request);
+    }
+
     /**
      * Validates the incoming command message.
      *
-     * @param message the command message to validate
+     * @param commandMessage the command message to validate
      * @return {@link Response} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    protected Response validate(Message message) {
-        final Response result = commandBus.validate(message);
+    protected Response validate(Message commandMessage) {
+        final Response result = commandBus.validate(commandMessage);
         return result;
-    }
-
-    private CommandResult dispatch(Command request) {
-        try {
-            final List<Event> eventRecords = this.commandBus.post(request);
-
-            final CommandResult result = toCommandResult(eventRecords, Collections.<Any>emptyList());
-            return result;
-        } catch (RuntimeException e) {
-            throw propagate(e);
-        }
-    }
-
-    private static CommandResult toCommandResult(Iterable<Event> eventRecords, Iterable<Any> errors) {
-        return CommandResult.newBuilder()
-                .addAllEvent(eventRecords)
-                .addAllError(errors)
-                .build();
-    }
-
-    /**
-     * Posts passed events to {@link EventBus}.
-     */
-    private void postEvents(Iterable<Event> events) {
-        final EventBus eventBus = getEventBus();
-        for (Event event : events) {
-            eventBus.post(event);
-        }
     }
 
     @Override

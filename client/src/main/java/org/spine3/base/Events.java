@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.type.EventClass;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -102,15 +101,6 @@ public class Events {
     public static Message getMessage(Event event) {
         final Any any = event.getMessage();
         final Message result = Messages.fromAny(any);
-        return result;
-    }
-
-    /**
-     * Determines the class of the event from the passed event record.
-     */
-    public static EventClass getEventClass(Event event) {
-        final Message message = getMessage(event);
-        final EventClass result = EventClass.of(message);
         return result;
     }
 

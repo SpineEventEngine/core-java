@@ -29,16 +29,16 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
-import org.spine3.server.Subscribe;
+import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.type.EventClass;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;

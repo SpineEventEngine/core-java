@@ -26,12 +26,12 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.EventDispatcher;
 import org.spine3.server.entity.EntityRepository;
+import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.type.EventClass;
+import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

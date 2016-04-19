@@ -29,9 +29,9 @@ import org.spine3.examples.aggregate.command.PayForOrder;
 import org.spine3.examples.aggregate.event.OrderCreated;
 import org.spine3.examples.aggregate.event.OrderLineAdded;
 import org.spine3.examples.aggregate.event.OrderPaid;
-import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
+import org.spine3.server.command.Assign;
 
 /**
  * @author Mikhail Melnik

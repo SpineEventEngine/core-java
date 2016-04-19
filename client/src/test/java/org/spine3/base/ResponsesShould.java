@@ -23,11 +23,17 @@ package org.spine3.base;
 import org.junit.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ResponsesShould {
+
+    private static final Response RESPONSE_UNSUPPORTED_COMMAND = Response.newBuilder()
+            .setError(Error.newBuilder()
+                           .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber()))
+            .build();
 
     @Test
     public void have_private_constructor() {
@@ -35,13 +41,27 @@ public class ResponsesShould {
     }
 
     @Test
-    public void return_ok_response() {
+    public void return_OK_response() {
         checkNotNull(Responses.ok());
     }
 
     @Test
-    public void recognize_ok_response() {
+    public void recognize_OK_response() {
         assertTrue(Responses.isOk(Responses.ok()));
     }
 
+    @Test
+    public void return_false_if_not_OK_response() {
+        assertFalse(Responses.isOk(RESPONSE_UNSUPPORTED_COMMAND));
+    }
+
+    @Test
+    public void recognize_UNSUPPORTED_COMMAND_response() {
+        assertTrue(Responses.isUnsupportedCommand(RESPONSE_UNSUPPORTED_COMMAND));
+    }
+
+    @Test
+    public void return_false_if_not_UNSUPPORTED_COMMAND_response() {
+        assertFalse(Responses.isUnsupportedCommand(Responses.ok()));
+    }
 }

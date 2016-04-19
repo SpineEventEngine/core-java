@@ -47,10 +47,24 @@ public class Responses {
     }
 
     /**
-     * @return {@code true} if the passed response represents `ok` status.
+     * @return {@code true} if the passed response represents `ok` status,
+     *         {@code false} otherwise
      */
     public static boolean isOk(Response response) {
         final boolean result = response.getStatusCase() == Response.StatusCase.OK;
         return result;
+    }
+
+    /**
+     * @return {@code true} if the passed response represents `unsupported command` error,
+     *         {@code false} otherwise
+     */
+    public static boolean isUnsupportedCommand(Response response) {
+        if (response.getStatusCase() == Response.StatusCase.ERROR) {
+            final Error error = response.getError();
+            final boolean isUnsupported = error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
+            return isUnsupported;
+        }
+        return false;
     }
 }

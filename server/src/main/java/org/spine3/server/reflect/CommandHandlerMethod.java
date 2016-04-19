@@ -18,16 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.Assign;
-import org.spine3.server.CommandHandler;
-import org.spine3.server.reflect.MethodMap;
-import org.spine3.type.CommandClass;
+import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -35,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -45,7 +41,7 @@ import static java.util.Collections.singletonList;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandContext> {
+public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     /**
      * The instance of the predicate to filter command handler methods of a class.
@@ -55,23 +51,22 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param target object to which the method applies
      * @param method subscriber method
      */
-    public CommandHandlerMethod(Object target, Method method) {
-        super(target, method);
+    public CommandHandlerMethod(Method method) {
+        super(method);
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return the list of event messages/records (or an empty list if the handler returns nothing)
+     * @return the list of event messages (or an empty list if the handler returns nothing)
      */
     @Override
-    public <R> R invoke(Message message, CommandContext context) throws InvocationTargetException {
-        final R handlingResult = super.invoke(message, context);
+    public <R> R invoke(Object target, Message message, CommandContext context) throws InvocationTargetException {
+        final R handlingResult = super.invoke(target, message, context);
 
-        final List<? extends Message> events = commandHandlingResultToEvents(handlingResult);
+        final List<? extends Message> events = toList(handlingResult);
         // The list of event messages/records is the return type expected.
         @SuppressWarnings("unchecked")
         final R result = (R) events;
@@ -85,7 +80,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      *                       or {@code null}.
      * @return the list of event messages or an empty list if {@code null} is passed
      */
-    protected <R> List<? extends Message> commandHandlingResultToEvents(@Nullable R handlingResult) {
+    private static <R> List<? extends Message> toList(@Nullable R handlingResult) {
         if (handlingResult == null) {
             return emptyList();
         }
@@ -110,29 +105,9 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * @return immutable map
      */
     @CheckReturnValue
-    public static Map<CommandClass, CommandHandlerMethod> scan(CommandHandler object) {
-        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
-
-        final Map<CommandClass, CommandHandlerMethod> handlers = getHandlers(object);
-        result.putAll(handlers);
-
-        return result.build();
-    }
-
-    private static Map<CommandClass, CommandHandlerMethod> getHandlers(CommandHandler object) {
-        final ImmutableMap.Builder<CommandClass, CommandHandlerMethod> result = ImmutableMap.builder();
-
-        final Predicate<Method> methodPredicate = PREDICATE;
-        final MethodMap handlers = new MethodMap(object.getClass(), methodPredicate);
-
-        checkModifiers(handlers.values());
-
-        for (Map.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
-            final CommandClass commandClass = CommandClass.of(entry.getKey());
-            final CommandHandlerMethod handler = new CommandHandlerMethod(object, entry.getValue());
-            result.put(commandClass, handler);
-        }
-        return result.build();
+    public static MethodMap<CommandHandlerMethod> scan(CommandHandler object) {
+        final MethodMap<CommandHandlerMethod> handlers = MethodMap.create(object.getClass(), factory());
+        return handlers;
     }
 
     /**
@@ -141,7 +116,7 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the methods to check
-     * @see MessageHandlerMethod#log()
+     * @see HandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -149,6 +124,41 @@ public class CommandHandlerMethod extends MessageHandlerMethod<Object, CommandCo
             if (!isPublic) {
                 warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
             }
+        }
+    }
+
+    public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+        return Factory.instance();
+    }
+
+    /**
+     * The factory for filtering methods that match {@code CommandHandlerMethod} specification.
+     */
+    private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
+
+        @Override
+        public Class<CommandHandlerMethod> getMethodClass() {
+            return CommandHandlerMethod.class;
+        }
+
+        @Override
+        public CommandHandlerMethod create(Method method) {
+            return new CommandHandlerMethod(method);
+        }
+
+        @Override
+        public Predicate<Method> getPredicate() {
+            return PREDICATE;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Factory value = new Factory();
+        }
+
+        private static Factory instance() {
+            return Singleton.INSTANCE.value;
         }
     }
 

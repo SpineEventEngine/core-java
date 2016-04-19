@@ -18,35 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.examples.failure;
+package org.spine3.server.event;
 
-import org.spine3.base.CommandContext;
-import org.spine3.examples.failure.commands.CancelTask;
-import org.spine3.examples.failure.events.TaskCancelled;
-import org.spine3.examples.failure.failures.CannotCancelTaskInProgress;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.command.Assign;
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
+import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
- * A sample of the aggregate that throws a business failure on a command, which cannot be
- * performed.
+ * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
+ *
+ * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
+ * @see EventBus#subscribe(EventHandler)
+ * @see EventBus#register(EventDispatcher)
  */
-@SuppressWarnings("unused")
-public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
+public abstract class EventHandler {
 
-    public TaskAggregate(TaskId id) {
-        super(id);
+    public void handle(Message eventMessage, EventContext commandContext) throws InvocationTargetException {
+        final EventHandlerMethod method = getHandlerMethod(eventMessage.getClass());
+
+        method.invoke(this, eventMessage, commandContext);
     }
 
-    @Assign
-    public TaskCancelled handle(CancelTask command, CommandContext context) throws CannotCancelTaskInProgress {
-        final Task task = getState();
-        if (task.getStatus() == Task.Status.IN_PROGRESS) {
-            throw new CannotCancelTaskInProgress(task.getId());
-        }
-
-        return TaskCancelled.newBuilder().setId(task.getId()).build();
+    private EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
+        return MethodRegistry.getInstance().get(getClass(), eventClass, EventHandlerMethod.factory());
     }
 }

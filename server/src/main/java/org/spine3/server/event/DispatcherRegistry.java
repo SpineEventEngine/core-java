@@ -21,8 +21,7 @@
 package org.spine3.server.event;
 
 import com.google.common.collect.HashMultimap;
-import org.spine3.server.EventDispatcher;
-import org.spine3.type.EventClass;
+import org.spine3.server.type.EventClass;
 
 import java.util.Set;
 

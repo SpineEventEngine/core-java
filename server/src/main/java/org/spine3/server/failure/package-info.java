@@ -18,30 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import org.spine3.base.Event;
-import org.spine3.type.EventClass;
-
-import java.util.Set;
-
 /**
- * {@code EventDispatcher} delivers events to handlers.
- *
- * @author Alexander Yevsyukov
+ * This package provides classes for working with business failures.
  */
-public interface EventDispatcher {
 
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
+@ParametersAreNonnullByDefault
+package org.spine3.server.failure;
 
-    /**
-     * Dispatches the event.
-     */
-    void dispatch(Event event);
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -32,7 +32,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.error.MissingEntityIdException;
 import org.spine3.type.TypeName;
 
@@ -52,7 +52,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
 
     private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = GetTargetIdFromCommand.newInstance();
 
-    //TODO:2016-02-18:alexander.yevsyukov: Define constraints the command declaration and use our validation to check the passed parameter.
     /**
      * Stores a command by a command ID from a command context.
      *

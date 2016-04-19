@@ -26,14 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.server.EventDispatcher;
-import org.spine3.server.EventHandler;
-import org.spine3.server.Subscribe;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.type.EventClass;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.type.EventClass;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
@@ -83,7 +81,7 @@ public class EventBusShould {
     /**
      * A simple one subscriber method handler class used in tests below.
      */
-    private static class ProjectCreatedHandler implements EventHandler {
+    private static class ProjectCreatedHandler extends EventHandler {
 
         private boolean methodCalled = false;
 
@@ -109,7 +107,7 @@ public class EventBusShould {
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         assertTrue(eventBus.hasSubscribers(eventClass));
 
-        final Set<Object> subscribers = eventBus.getHandlers(eventClass);
+        final Collection<EventHandler> subscribers = eventBus.getHandlers(eventClass);
         assertTrue(subscribers.contains(handlerOne));
         assertTrue(subscribers.contains(handlerTwo));
     }
@@ -126,7 +124,7 @@ public class EventBusShould {
 
         // Check that the 2nd subscriber with the same event handling method remains
         // after the 1st subscriber unregisters.
-        final Set<Object> subscribers = eventBus.getHandlers(eventClass);
+        final Collection<EventHandler> subscribers = eventBus.getHandlers(eventClass);
         assertFalse(subscribers.contains(handlerOne));
         assertTrue(subscribers.contains(handlerTwo));
 
@@ -221,7 +219,7 @@ public class EventBusShould {
     /**
      * The handler which throws exception from the subscriber method.
      */
-    private static class FaultyHandler implements EventHandler {
+    private static class FaultyHandler extends EventHandler {
 
         private boolean methodCalled = false;
 
