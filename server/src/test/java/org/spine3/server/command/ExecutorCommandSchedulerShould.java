@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -29,12 +28,10 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Throwables.propagate;
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.testdata.TestCommands.addTask;
 import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestContextFactory.createCommandContext;
@@ -45,25 +42,17 @@ import static org.spine3.testdata.TestContextFactory.createCommandContext;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ExecutorCommandSchedulerShould {
 
-    private static final Duration DELAY = seconds(1);
-    private static final long DELAY_MS = DELAY.getSeconds() * 1000;
-    private static final int CHECK_OFFSET_MS = 50;
+    private static final long DELAY_MS = 1100;
+
+    private static final Duration DELAY = milliseconds(DELAY_MS);
 
     private CommandScheduler scheduler;
-
-    private Command postedCommand;
+    private CommandContext context;
 
     @Before
     public void setUpTest() {
-        this.scheduler = new ExecutorCommandScheduler();
-        scheduler.setPostFunction(new Function<Command, Command>() {
-            @Nullable
-            @Override
-            public Command apply(@Nullable Command input) {
-                postedCommand = input;
-                return input;
-            }
-        });
+        this.scheduler = spy(ExecutorCommandScheduler.class);
+        this.context = createCommandContext(DELAY);
     }
 
     @After
@@ -73,19 +62,16 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final CommandContext context = createCommandContext(DELAY);
         final Command cmd = Commands.create(createProject(newUuid()), context);
 
         scheduler.schedule(cmd);
 
-        assertNull(postedCommand);
-        sleep(DELAY_MS + CHECK_OFFSET_MS);
-        assertEquals(cmd, postedCommand);
+        verify(scheduler, never()).post(cmd);
+        verify(scheduler, after(DELAY_MS).times(1)).post(cmd);
     }
 
     @Test
     public void not_schedule_command_with_same_id_twice() {
-        final CommandContext context = createCommandContext(DELAY);
         final String id = newUuid();
         final Command expectedCmd = Commands.create(createProject(id), context);
         final Command extraCmd = Commands.create(addTask(id), context);
@@ -93,8 +79,8 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
 
-        sleep(DELAY_MS + CHECK_OFFSET_MS);
-        assertEquals(expectedCmd, postedCommand);
+        verify(scheduler, after(DELAY_MS).times(1)).post(expectedCmd);
+        verify(scheduler, never()).post(extraCmd);
     }
 
     @Test
@@ -107,13 +93,5 @@ public class ExecutorCommandSchedulerShould {
             return;
         }
         fail("Must throw an exception as it is shutdown.");
-    }
-
-    private static void sleep(long delayMs) {
-        try {
-            Thread.sleep(delayMs);
-        } catch (InterruptedException e) {
-            throw propagate(e);
-        }
     }
 }

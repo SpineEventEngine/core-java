@@ -21,9 +21,9 @@ package org.spine3.protobuf;
 
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 
-import static com.google.protobuf.Duration.newBuilder;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Durations.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -43,6 +43,25 @@ public class DurationsShould {
     @Test
     public void have_ZERO_constant() {
         assertEquals(0, toNanos(ZERO));
+    }
+
+
+    @Test
+    public void convert_milliseconds_to_duration() {
+        convertMillisecondsToDurationTest(0);
+        convertMillisecondsToDurationTest(27);
+        convertMillisecondsToDurationTest(-384);
+    }
+
+    private static void convertMillisecondsToDurationTest(long millis) {
+        final Duration expected = TimeUtil.createDurationFromMillis(millis);
+        assertEquals(expected, ofMilliseconds(millis));
+        assertEquals(expected, milliseconds(millis));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_convert_milliseconds_to_duration_if_input_is_too_big() {
+        ofMilliseconds(Long.MAX_VALUE);
     }
 
 
@@ -384,6 +403,6 @@ public class DurationsShould {
     }
 
     private static Duration durationFromSec(long seconds) {
-        return newBuilder().setSeconds(seconds).build();
+        return Duration.newBuilder().setSeconds(seconds).build();
     }
 }
