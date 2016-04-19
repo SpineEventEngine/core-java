@@ -31,6 +31,8 @@ import static org.mockito.Mockito.spy;
 
 import static org.spine3.testdata.TestCommands.newCommandBus;
 
+import static org.mockito.Mockito.spy;
+
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
  *
