@@ -88,6 +88,9 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
         }
     }
 
+    /**
+     * @return the factory for filtering and creating event handler methods
+     */
     public static HandlerMethod.Factory<EventHandlerMethod> factory() {
         return Factory.instance();
     }
