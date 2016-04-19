@@ -93,9 +93,8 @@ public class MethodMap<H extends HandlerMethod> {
                 tempMap.put(messageClass, method);
             }
         }
-        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
-        builder.putAll(tempMap);
-        return builder.build();
+        final ImmutableMap<Class<? extends Message>, Method> result = ImmutableMap.copyOf(tempMap);
+        return result;
     }
 
     /**
