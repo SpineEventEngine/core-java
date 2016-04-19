@@ -245,10 +245,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             throws InvocationTargetException {
         final CommandHandlerMethod method = MethodRegistry.getInstance()
                         .get(getClass(), commandMessage.getClass(), CommandHandlerMethod.factory());
-
-        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast.
-        final List<? extends Message> result =
-                (List<? extends Message>) method.invoke(this, commandMessage, context);
+        if (method == null) {
+            throw missingCommandHandler(commandMessage.getClass());
+        }
+        final List<? extends Message> result = method.invoke(this, commandMessage, context);
         return result;
     }
 
@@ -261,7 +261,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
         final EventApplier method = MethodRegistry.getInstance()
                 .get(getClass(), eventMessage.getClass(), EventApplier.factory());
-
+        if (method == null) {
+            throw missingEventApplier(eventMessage.getClass());
+        }
         method.invoke(this, eventMessage);
     }
 
@@ -436,7 +438,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder.build();
     }
 
-    //TODO:2016-04-19:alexander.yevsyukov: See why these are not used.
     // Factory methods for exceptions
     //------------------------------------
 

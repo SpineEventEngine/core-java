@@ -36,31 +36,34 @@ public class MethodRegistry {
 
     private final Map<Key<?, ?>, MethodMap> items = Maps.newConcurrentMap();
 
-    public <TargetType,
-            MethodType extends HandlerMethod,
-            MessageType extends Class<? extends Message>>
+    public <T, H extends HandlerMethod> H get(Class<T> targetClass,
+                                              Class<? extends Message> messageClass,
+                                              HandlerMethod.Factory<H> factory) {
 
-    MethodType get(Class<TargetType> targetClass,
-            MessageType messageClass,
-            HandlerMethod.Factory<MethodType> factory) {
-
-        final Key<?, MethodType> key = new Key<>(targetClass, factory.getMethodClass());
-
-        MethodMap<MethodType> methods = items.get(key);
+        final Key<?, H> key = new Key<>(targetClass, factory.getMethodClass());
+        @SuppressWarnings("unchecked") /* We can cast as the map type is the same as one of the passed factory,
+                                          which is used in creating the entry in the `if` block below. */
+        MethodMap<H> methods = items.get(key);
         if (methods == null) {
             methods = MethodMap.create(targetClass, factory);
             items.put(key, methods);
         }
 
-        final MethodType handlerMethod = methods.get(messageClass);
+        final H handlerMethod = methods.get(messageClass);
         return handlerMethod;
     }
 
-    private static class Key<TT, MT extends HandlerMethod> {
-        private final Class<TT> targetClass;
-        private final Class<MT> methodClass;
+    /**
+     * The map entry key which consists of target object class and method class.
+     *
+     * @param <T> the type of the target class
+     * @param <H> the type of the method handler class
+     */
+    private static class Key<T, H extends HandlerMethod> {
+        private final Class<T> targetClass;
+        private final Class<H> methodClass;
 
-        private Key(Class<TT> targetClass, Class<MT> methodClass) {
+        private Key(Class<T> targetClass, Class<H> methodClass) {
             this.targetClass = targetClass;
             this.methodClass = methodClass;
         }
