@@ -28,8 +28,8 @@ import org.spine3.examples.aggregate.event.OrderCreated;
 import org.spine3.examples.aggregate.event.OrderLineAdded;
 import org.spine3.examples.aggregate.event.OrderPaid;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.EventHandler;
-import org.spine3.server.Subscribe;
+import org.spine3.server.event.EventHandler;
+import org.spine3.server.event.Subscribe;
 
 /**
  * A sample of event handler class that logs some of the events.

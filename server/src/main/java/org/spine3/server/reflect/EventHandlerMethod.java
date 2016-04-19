@@ -23,7 +23,7 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.Subscribe;
+import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

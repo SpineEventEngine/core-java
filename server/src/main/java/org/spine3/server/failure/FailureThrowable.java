@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.failure;
 
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
@@ -32,7 +32,6 @@ import org.spine3.base.Failure;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
 public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;

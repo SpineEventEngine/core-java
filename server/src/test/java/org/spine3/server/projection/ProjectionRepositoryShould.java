@@ -29,7 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
-import org.spine3.server.Subscribe;
+import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

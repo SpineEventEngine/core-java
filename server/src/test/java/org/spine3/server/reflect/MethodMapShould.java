@@ -22,8 +22,8 @@ package org.spine3.server.reflect;
 
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.command.Assign;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;

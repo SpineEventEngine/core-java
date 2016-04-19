@@ -35,7 +35,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.UserId;
 import org.spine3.client.UserUtil;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.server.Assign;
+import org.spine3.server.command.Assign;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;

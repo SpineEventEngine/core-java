@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Empty;
@@ -32,6 +32,7 @@ import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -89,7 +90,7 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         postEvents(events);
     }
 
-    public CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
+    /* package */ CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
         return MethodRegistry.getInstance().get(getClass(), commandClass, CommandHandlerMethod.factory());
     }
 

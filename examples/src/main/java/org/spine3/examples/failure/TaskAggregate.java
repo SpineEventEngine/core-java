@@ -24,8 +24,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.examples.failure.commands.CancelTask;
 import org.spine3.examples.failure.events.TaskCancelled;
 import org.spine3.examples.failure.failures.CannotCancelTaskInProgress;
-import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.command.Assign;
 
 /**
  * A sample of the aggregate that throws a business failure on a command, which cannot be

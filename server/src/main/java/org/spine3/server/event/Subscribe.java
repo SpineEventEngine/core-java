@@ -18,30 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.event;
 
-import org.spine3.base.Event;
-import org.spine3.server.type.EventClass;
-
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * {@code EventDispatcher} delivers events to handlers.
+ * Marks a method as an event subscriber.
+ *
+ * <p>An event subscriber method must have two parameters. The class of the event will be
+ * indicated by the first parameter.
+ *
+ * <p>The second parameter must be {@link org.spine3.base.EventContext}. If the annotation
+ * is applied to a method with less or more than two parameters, the method will not be
+ * registered for event delivery from {@link EventBus}.
  *
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher {
-
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
-
-    /**
-     * Dispatches the event.
-     */
-    void dispatch(Event event);
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Subscribe {
 }

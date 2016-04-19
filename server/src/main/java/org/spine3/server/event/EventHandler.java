@@ -18,11 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.event;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.EventHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 

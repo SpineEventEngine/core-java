@@ -18,37 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.event;
 
-import org.spine3.base.CommandId;
-import org.spine3.server.failure.FailureThrowable;
+import org.spine3.base.Event;
+import org.spine3.server.type.EventClass;
+
+import java.util.Set;
 
 /**
- * The service for updating a status of a command.
+ * {@code EventDispatcher} delivers events to handlers.
  *
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+public interface EventDispatcher {
 
-    private final CommandStore commandStore;
+    /**
+     * Provides the set of classes of events forwarded by the dispatcher
+     *
+     * @return non-empty set
+     */
+    Set<EventClass> getEventClasses();
 
-    /* package */ CommandStatusService(CommandStore commandStore) {
-        this.commandStore = commandStore;
-    }
+    /**
+     * Dispatches the event.
+     */
+    void dispatch(Event event);
 
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
-    }
-
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
-    }
-
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toMessage());
-    }
-
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
-    }
 }

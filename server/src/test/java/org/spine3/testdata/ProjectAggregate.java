@@ -21,8 +21,8 @@
 package org.spine3.testdata;
 
 import org.spine3.base.CommandContext;
-import org.spine3.server.Assign;
 import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.command.Assign;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;

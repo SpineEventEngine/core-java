@@ -22,7 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.EventDispatcher;
+import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.type.EventClass;
 
 /**

@@ -23,8 +23,8 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.server.Assign;
-import org.spine3.server.CommandHandler;
+import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandHandler;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
