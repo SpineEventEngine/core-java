@@ -29,7 +29,7 @@ import org.spine3.server.reflect.MethodRegistry;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
+ * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
  *
  * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
  *
@@ -45,7 +45,7 @@ public abstract class EventHandler {
         method.invoke(this, eventMessage, commandContext);
     }
 
-    public EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
+    private EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
         return MethodRegistry.getInstance().get(getClass(), eventClass, EventHandlerMethod.factory());
     }
 }
