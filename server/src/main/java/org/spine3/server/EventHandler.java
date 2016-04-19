@@ -20,7 +20,13 @@
 
 package org.spine3.server;
 
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.internal.EventHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
@@ -31,5 +37,17 @@ import org.spine3.server.event.EventBus;
  * @see EventBus#subscribe(EventHandler)
  * @see EventBus#register(EventDispatcher)
  */
-public interface EventHandler {
+public abstract class EventHandler {
+
+    public void handle(Message eventMessage, EventContext commandContext) throws InvocationTargetException {
+        final EventHandlerMethod method = getHandlerMethod(eventMessage.getClass());
+
+        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast warning.
+        method.invoke(this, eventMessage, commandContext);
+    }
+
+    public EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
+        return MethodRegistry.getInstance().get(getClass(), eventClass, EventHandlerMethod.factory());
+    }
+
 }

@@ -37,7 +37,7 @@ import org.spine3.server.Subscribe;
  * @author Mikhail Melnik
  */
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened", "UnusedParameters"})
-class EventLogger implements EventHandler {
+class EventLogger extends EventHandler {
 
     private static final String NEW_LINE = System.lineSeparator();
 

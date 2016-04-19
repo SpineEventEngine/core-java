@@ -32,25 +32,25 @@ public class ClassTypeValueShould {
     @Test
     public void return_enclosed_value() {
         final Class<? extends Message> expected = StringValue.class;
-        assertEquals(expected, new  ClassTypeValue(expected) {}.value());
+        assertEquals(expected, new  MessageClass(expected) {}.value());
     }
 
     @Test
     public void be_not_equal_to_null() {
         //noinspection ObjectEqualsNull
-        assertFalse(new ClassTypeValue(UInt32Value.class){}.equals(null));
+        assertFalse(new MessageClass(UInt32Value.class){}.equals(null));
     }
 
     @Test
     public void be_not_equal_to_object_of_another_class() {
         // Notice that we're creating new inner classes here with the same value passed.
         //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(new ClassTypeValue(StringValue.class){}.equals(new ClassTypeValue(StringValue.class){}));
+        assertFalse(new MessageClass(StringValue.class){}.equals(new MessageClass(StringValue.class){}));
     }
 
     @Test
     public void be_equal_to_self() {
-        final ClassTypeValue test = new ClassTypeValue(UInt32Value.class){};
+        final MessageClass test = new MessageClass(UInt32Value.class){};
         //noinspection EqualsWithItself
         assertTrue(test.equals(test));
     }

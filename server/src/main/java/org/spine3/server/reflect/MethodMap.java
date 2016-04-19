@@ -20,7 +20,6 @@
 
 package org.spine3.server.reflect;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -37,20 +36,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A map for storing methods handling messages.
  *
+ * @param <H> the type of the handler method instances stored in the map
  * @author Alexander Yevsyukov
  */
-public class MethodMap {
+public class MethodMap<H extends HandlerMethod> {
 
-    private final ImmutableMap<Class<? extends Message>, Method> map;
+    private final ImmutableMap<Class<? extends Message>, H> map;
 
-    public MethodMap(Class<?> clazz, Predicate<Method> filter) {
-        this(Methods.scan(clazz, filter));
+    private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
+        final Map<Class<? extends Message>, Method> rawMethods = Methods.scan(clazz, factory.getPredicate());
+
+        final ImmutableMap.Builder<Class<? extends Message>, H> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
+            final H value = factory.create(entry.getValue());
+            builder.put(entry.getKey(), value);
+        }
+
+        this.map = builder.build();
     }
 
-    private MethodMap(Map<Class<? extends Message>, Method> map) {
-        this.map = ImmutableMap.<Class<? extends Message>, Method>builder()
-                .putAll(map)
-                .build();
+    /**
+     * Creates a new method map for the passed class using the passed factory.
+     *
+     * @param clazz the class to inspect
+     * @param factory the factory for handler methods
+     * @param <H> the type of the handler methods
+     * @return new method map
+     */
+    public static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz, HandlerMethod.Factory<H> factory) {
+        return new MethodMap<>(clazz, factory);
     }
 
     /**
@@ -67,18 +81,18 @@ public class MethodMap {
     }
 
     @CheckReturnValue
-    public ImmutableSet<Map.Entry<Class<? extends Message>, Method>> entrySet() {
+    public ImmutableSet<Map.Entry<Class<? extends Message>, H>> entrySet() {
         return map.entrySet();
     }
 
     @CheckReturnValue
-    public ImmutableCollection<Method> values() {
+    public ImmutableCollection<H> values() {
         return map.values();
     }
 
     @CheckReturnValue
     @Nullable
-    public Method get(Class<? extends Message> messageClass) {
+    public H get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
     }
 
@@ -107,16 +121,16 @@ public class MethodMap {
          * Registers methods of the class in the registry.
          *
          * @param clazz the class to register
-         * @param filter a filter for selecting methods to register
+         * @param factory a filter for selecting methods to register
          * @throws IllegalArgumentException if the class was already registered
          * @see #contains(Class)
          */
-        public void register(Class<? extends T> clazz, Predicate<Method> filter) {
+        public <H extends HandlerMethod> void register(Class<? extends T> clazz, HandlerMethod.Factory<H> factory) {
             if (contains(clazz)) {
                 throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
             }
 
-            final MethodMap entry = new MethodMap(clazz, filter);
+            final MethodMap<H> entry = create(clazz, factory);
             entries.put(clazz, entry);
         }
 

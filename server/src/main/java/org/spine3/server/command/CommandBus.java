@@ -33,7 +33,6 @@ import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.options.ConstraintViolation;
@@ -201,15 +200,14 @@ public class CommandBus implements AutoCloseable {
 
     private void invokeHandler(Message msg, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandlerMethod method = getHandlerMethod(commandClass);
+        final CommandHandler handler = getHandler(commandClass);
         final CommandId commandId = context.getCommandId();
         try {
             //TODO:2016-04-14:alexander.yevsyukov: Store methods inside the handler (and corresponding registry of method maps).
             //TODO:2016-04-14:alexander.yevsyukov: Keep handlers, not methods in handler registry.
             //TODO:2016-04-14:alexander.yevsyukov: Rename the `call` method to `handle`.
 
-            final CommandHandler handler = (CommandHandler)method.getTarget();
-            handler.call(method, msg, context);
+            handler.handle(msg, context);
 
             commandStatusService.setOk(commandId);
 
@@ -229,6 +227,11 @@ public class CommandBus implements AutoCloseable {
                 commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
+    }
+
+    private CommandHandler getHandler(CommandClass commandClass) {
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        return handler;
     }
 
     @VisibleForTesting
@@ -285,10 +288,6 @@ public class CommandBus implements AutoCloseable {
 
     private CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatcherRegistry.getDispatcher(commandClass);
-    }
-
-    private CommandHandlerMethod getHandlerMethod(CommandClass cls) {
-        return handlerRegistry.getHandlerMethod(cls);
     }
 
     @Override

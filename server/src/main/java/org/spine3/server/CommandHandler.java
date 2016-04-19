@@ -30,6 +30,7 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -69,11 +70,18 @@ public abstract class CommandHandler {
         this.eventBus = eventBus;
     }
 
-    public void call(CommandHandlerMethod method, Message msg, CommandContext context)
-            throws InvocationTargetException {
-        final List<? extends Message> eventMessages = method.invoke(msg, context);
+    public void handle(Message commandMessage, CommandContext context) throws InvocationTargetException {
+        final CommandHandlerMethod method = getHandlerMethod(commandMessage.getClass());
+
+        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast.
+        final List<? extends Message> eventMessages = (List<? extends Message>) method.invoke(this, commandMessage, context);
+
         final List<Event> events = toEvents(eventMessages, context);
         postEvents(events);
+    }
+
+    public CommandHandlerMethod getHandlerMethod(Class<? extends Message> commandClass) {
+        return MethodRegistry.getInstance().get(getClass(), commandClass, CommandHandlerMethod.factory());
     }
 
     private static List<Event> toEvents(Iterable<? extends Message> eventMessages, CommandContext context) {

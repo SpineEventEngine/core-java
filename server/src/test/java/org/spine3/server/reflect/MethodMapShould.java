@@ -51,7 +51,7 @@ public class MethodMapShould {
 
     @Test
     public void expose_key_set() {
-        final MethodMap methodMap = new MethodMap(TestAggregate.class, CommandHandlerMethod.PREDICATE);
+        final MethodMap methodMap = MethodMap.create(TestAggregate.class, CommandHandlerMethod.factory());
         assertFalse(methodMap.keySet().isEmpty());
     }
 }

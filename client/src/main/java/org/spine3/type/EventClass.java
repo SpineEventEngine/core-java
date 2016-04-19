@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class EventClass extends ClassTypeValue {
+public final class EventClass extends MessageClass {
 
     private EventClass(Class<? extends Message> value) {
         super(value);

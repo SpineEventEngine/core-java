@@ -40,13 +40,12 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.time.ZoneOffset;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
@@ -81,28 +80,9 @@ import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
 public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
 
     /**
-     * Keeps initialization state of the process manager.
-     */
-    private volatile boolean initialized = false;
-
-    /**
      * The Command Bus to post routed commands.
      */
     private volatile CommandBus commandBus;
-
-    /**
-     * The map of command handler methods of this process manager.
-     *
-     * @see Registry
-     */
-    private MethodMap commandHandlers;
-
-    /**
-     * The map of event handler methods of this process manager.
-     *
-     * @see Registry
-     */
-    private MethodMap eventHandlers;
 
     /**
      * Creates a new instance.
@@ -113,23 +93,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public ProcessManager(I id) {
         super(id);
-    }
-
-    /**
-     * Performs initialization of the instance and registers this class of process managers
-     * in the {@link Registry} if it is not registered yet.
-     */
-    private void init() {
-        if (!this.initialized) {
-            final Registry registry = Registry.getInstance();
-            final Class<? extends ProcessManager> pmClass = getClass();
-            if (!registry.contains(pmClass)) {
-                registry.register(pmClass);
-            }
-            commandHandlers = registry.getCommandHandlers(pmClass);
-            eventHandlers = registry.getEventHandlers(pmClass);
-            this.initialized = true;
-        }
     }
 
     /**
@@ -159,14 +122,17 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         checkNotNull(command);
         checkNotNull(context);
 
-        init();
         final Class<? extends Message> commandClass = command.getClass();
-        final Method method = commandHandlers.get(commandClass);
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                                                          .get(getClass(),
+                                                               commandClass,
+                                                               CommandHandlerMethod.factory());
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final List<? extends Message> events = commandHandler.invoke(command, context);
+
+        //TODO:2016-04-19:alexander.yevsyukov: Address warning on cast
+        final List<? extends Message> events = (List<? extends Message>) method.invoke(this, command, context);
         final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
     }
@@ -197,14 +163,15 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         checkNotNull(context);
         checkNotNull(event);
 
-        init();
         final Class<? extends Message> eventClass = event.getClass();
-        final Method method = eventHandlers.get(eventClass);
+        final EventHandlerMethod method = MethodRegistry.getInstance()
+                                                        .get(getClass(), eventClass, EventHandlerMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
-        final EventHandlerMethod handler = new EventHandlerMethod(this, method);
-        handler.invoke(event, context);
+
+        //TODO:2016-04-19:alexander.yevsyukov: Address warning on cast
+        method.invoke(this, event, context);
     }
 
     /**

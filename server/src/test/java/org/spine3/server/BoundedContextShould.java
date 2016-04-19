@@ -322,7 +322,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler implements EventHandler {
+    private static class EmptyHandler extends EventHandler {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {

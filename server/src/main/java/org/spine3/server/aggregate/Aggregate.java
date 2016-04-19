@@ -38,12 +38,11 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -109,25 +108,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     private final Any idAsAny;
 
     /**
-     * Keeps initialization state of the aggregate.
-     */
-    private volatile boolean initialized = false;
-
-    /**
-     * The map of command handling methods for this class.
-     *
-     * @see Registry
-     */
-    private MethodMap commandHandlers;
-
-    /**
-     * The map of event appliers for this class.
-     *
-     * @see Registry
-     */
-    private MethodMap eventAppliers;
-
-    /**
      * Events generated in the process of handling commands that were not yet committed.
      *
      * @see #commitEvents()
@@ -164,29 +144,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
         return Classes.getHandledMessageClasses(clazz, EventApplier.PREDICATE);
-    }
-
-    /**
-     * Performs initialization of the instance and registers this class of aggregates
-     * in the {@link Registry} if it is not registered yet.
-     */
-    private void init() {
-        if (this.initialized) {
-            return;
-        }
-
-        final Registry registry = Registry.getInstance();
-        final Class<? extends Aggregate> thisClass = getClass();
-
-        // Register this aggregate class if it wasn't before.
-        if (!registry.contains(thisClass)) {
-            registry.register(thisClass);
-        }
-
-        commandHandlers = registry.getCommandHandlers(thisClass);
-        eventAppliers = registry.getEventAppliers(thisClass);
-
-        this.initialized = true;
     }
 
     private Any getIdAsAny() {
@@ -247,8 +204,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         checkNotNull(command);
         checkNotNull(context);
 
-        init();
-
         if (command instanceof Any) {
             // We're likely getting the result of command.getMessage(), and the called did not bother to unwrap it.
             // Extract the wrapped message (instead of treating this as an error). There may be many occasions of
@@ -288,14 +243,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     private List<? extends Message> invokeHandler(Message commandMessage, CommandContext context)
             throws InvocationTargetException {
-        final Class<? extends Message> commandClass = commandMessage.getClass();
-        final Method method = commandHandlers.get(commandClass);
-        if (method == null) {
-            throw missingCommandHandler(commandClass);
-        }
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                        .get(getClass(), commandMessage.getClass(), CommandHandlerMethod.factory());
 
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final List<? extends Message> result = commandHandler.invoke(commandMessage, context);
+        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast.
+        final List<? extends Message> result =
+                (List<? extends Message>) method.invoke(this, commandMessage, context);
         return result;
     }
 
@@ -306,14 +259,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final Class<? extends Message> eventClass = eventMessage.getClass();
-        final Method method = eventAppliers.get(eventClass);
-        if (method == null) {
-            throw missingEventApplier(eventClass);
-        }
+        final EventApplier method = MethodRegistry.getInstance()
+                .get(getClass(), eventMessage.getClass(), EventApplier.factory());
 
-        final EventApplier applier = new EventApplier(this, method);
-        applier.invoke(eventMessage);
+        method.invoke(this, eventMessage);
     }
 
     /**
@@ -324,7 +273,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *                          for the thrown {@code RuntimeException}
      */
     /* package */ void play(Iterable<Event> events) {
-        init();
         createBuilder();
         try {
             for (Event event : events) {
@@ -488,6 +436,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return builder.build();
     }
 
+    //TODO:2016-04-19:alexander.yevsyukov: See why these are not used.
     // Factory methods for exceptions
     //------------------------------------
 

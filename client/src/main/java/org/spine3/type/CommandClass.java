@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandClass extends ClassTypeValue {
+public final class CommandClass extends MessageClass {
 
     private CommandClass(Class<? extends Message> value) {
         super(value);
