@@ -19,7 +19,7 @@ import static org.spine3.util.Math.safeMultiply;
 
 /**
  * Utility class for working with durations in addition to those available from {@link TimeUtil}.
- * <p/>
+ *
  * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
  * <pre>
  *      Duration d = add(hours(2), minutes(30));
@@ -87,6 +87,7 @@ public class Durations {
 
     // Methods for brief computations with Durations like
     //       add(hours(2), minutes(30));
+    /////////////////////////////////////////////////////
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of nanoseconds.
