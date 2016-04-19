@@ -146,7 +146,7 @@ public class AggregateShould {
 
     @Test
     public void handle_one_command_and_apply_appropriate_event() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -154,7 +154,7 @@ public class AggregateShould {
 
     @Test
     public void handle_only_appropriate_command() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
@@ -168,15 +168,15 @@ public class AggregateShould {
 
     @Test
     public void handle_appropriate_commands_sequentially() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
         assertTrue(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
 
-        aggregate.testDispatch(addTask, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(addTask, COMMAND_CONTEXT);
         assertTrue(aggregate.isAddTaskCommandHandled);
         assertTrue(aggregate.isTaskAddedEventApplied);
 
-        aggregate.testDispatch(startProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
         assertTrue(aggregate.isStartProjectCommandHandled);
         assertTrue(aggregate.isProjectStartedEventApplied);
     }
@@ -186,7 +186,7 @@ public class AggregateShould {
         final TestAggregateForCaseMissingHandlerOrApplier aggregate =
                 new TestAggregateForCaseMissingHandlerOrApplier(ID);
         
-        aggregate.testDispatch(addTask, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(addTask, COMMAND_CONTEXT);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -194,7 +194,7 @@ public class AggregateShould {
         final TestAggregateForCaseMissingHandlerOrApplier aggregate =
                 new TestAggregateForCaseMissingHandlerOrApplier(ID);
         try {
-            aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+            aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
         } catch (IllegalStateException e) { // expected exception
             assertTrue(aggregate.isCreateProjectCommandHandled);
             throw e;
@@ -228,7 +228,7 @@ public class AggregateShould {
 
     @Test
     public void return_current_state_after_dispatch() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         final Project state = aggregate.getState();
 
@@ -238,10 +238,10 @@ public class AggregateShould {
 
     @Test
     public void return_current_state_after_several_dispatches() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
 
-        aggregate.testDispatch(startProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
     }
 
@@ -253,7 +253,7 @@ public class AggregateShould {
 
     @Test
     public void return_time_when_was_last_modified() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
         final long expectedTimeSec = currentTimeSeconds();
 
         final Timestamp whenLastModified = aggregate.whenModified();
@@ -272,11 +272,11 @@ public class AggregateShould {
 
     @Test
     public void play_snapshot_event_and_restore_state() {
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
-        aggregate.testDispatch(startProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
 
         final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
@@ -332,7 +332,7 @@ public class AggregateShould {
     @Test
     public void transform_current_state_to_snapshot_event() {
 
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshot = aggregate.toSnapshot();
         final Project state = fromAny(snapshot.getState());
@@ -344,11 +344,11 @@ public class AggregateShould {
     @Test
     public void restore_state_from_snapshot() {
 
-        aggregate.testDispatch(createProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
 
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
-        aggregate.testDispatch(startProject, COMMAND_CONTEXT);
+        aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
         assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
 
         aggregate.restore(snapshotNewProject);
@@ -460,7 +460,7 @@ public class AggregateShould {
             final UserId userId = UserUtil.newUserId("aggregate_should@spine3.org");
             for (Message cmd : commands) {
                 final CommandContext ctx = Commands.createContext(userId, ZoneOffsets.UTC);
-                testDispatch(cmd, ctx);
+                dispatchForTest(cmd, ctx);
             }
         }
     }
@@ -582,7 +582,7 @@ public class AggregateShould {
 
         final Command command = createProject();
         try {
-            faultyAggregate.testDispatch(command.getMessage(), command.getContext());
+            faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // We need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
@@ -597,7 +597,7 @@ public class AggregateShould {
 
         final Command command = createProject();
         try {
-            faultyAggregate.testDispatch(command.getMessage(), command.getContext());
+            faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);

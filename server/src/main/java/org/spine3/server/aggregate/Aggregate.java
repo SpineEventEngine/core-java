@@ -277,7 +277,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * which is called automatically by {@link AggregateRepository}.
      */
     @VisibleForTesting
-    public final void testDispatch(Message command, CommandContext context) {
+    public final void dispatchForTest(Message command, CommandContext context) {
         dispatch(command, context);
     }
 
@@ -373,7 +373,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>Calls {@link #apply(Iterable, CommandContext)}.
      */
     @VisibleForTesting
-    public final void testApply(Message message, CommandContext commandContext) {
+    public final void applyForTest(Message message, CommandContext commandContext) {
         init();
         try {
             apply(singletonList(message), commandContext);
@@ -389,7 +389,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>Calls {@link #incrementState(Message)}.
      */
     @VisibleForTesting
-    public final void testIncrementState(S newState) {
+    public final void incrementStateForTest(S newState) {
         incrementState(newState);
     }
 
