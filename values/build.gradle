@@ -28,15 +28,9 @@ sourceSets {
 }
 
 protobuf {
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:0.13.1'
-        }
-    }
     generateProtoTasks {
         all().each { final task ->
             task.plugins {
-                grpc {}
                 task.generateDescriptorSet = true
                 task.descriptorSetOptions.path = "${projectDir}/build/descriptors/${task.sourceSet.name}.desc"
                 task.descriptorSetOptions.includeImports = true
