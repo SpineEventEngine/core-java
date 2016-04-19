@@ -42,12 +42,10 @@ public abstract class EventHandler {
     public void handle(Message eventMessage, EventContext commandContext) throws InvocationTargetException {
         final EventHandlerMethod method = getHandlerMethod(eventMessage.getClass());
 
-        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast warning.
         method.invoke(this, eventMessage, commandContext);
     }
 
     public EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
         return MethodRegistry.getInstance().get(getClass(), eventClass, EventHandlerMethod.factory());
     }
-
 }

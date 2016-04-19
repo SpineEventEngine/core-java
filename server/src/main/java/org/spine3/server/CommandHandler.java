@@ -73,8 +73,7 @@ public abstract class CommandHandler {
     public void handle(Message commandMessage, CommandContext context) throws InvocationTargetException {
         final CommandHandlerMethod method = getHandlerMethod(commandMessage.getClass());
 
-        //TODO:2016-04-19:alexander.yevsyukov: Resolve the cast.
-        final List<? extends Message> eventMessages = (List<? extends Message>) method.invoke(this, commandMessage, context);
+        final List<? extends Message> eventMessages = method.invoke(this, commandMessage, context);
 
         final List<Event> events = toEvents(eventMessages, context);
         postEvents(events);

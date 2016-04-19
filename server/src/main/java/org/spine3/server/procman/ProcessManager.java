@@ -131,8 +131,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             throw missingCommandHandler(commandClass);
         }
 
-        //TODO:2016-04-19:alexander.yevsyukov: Address warning on cast
-        final List<? extends Message> events = (List<? extends Message>) method.invoke(this, command, context);
+        final List<? extends Message> events = method.invoke(this, command, context);
         final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
     }
@@ -170,7 +169,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             throw missingEventHandler(eventClass);
         }
 
-        //TODO:2016-04-19:alexander.yevsyukov: Address warning on cast
         method.invoke(this, event, context);
     }
 

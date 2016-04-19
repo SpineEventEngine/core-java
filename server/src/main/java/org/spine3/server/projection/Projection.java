@@ -71,7 +71,6 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
             throw missingEventHandler(eventClass);
         }
         try {
-            //TODO:2016-04-19:alexander.yevsyukov: Resolve unchecked cast.
             method.invoke(this, event, ctx);
         } catch (InvocationTargetException e) {
             propagate(e);
