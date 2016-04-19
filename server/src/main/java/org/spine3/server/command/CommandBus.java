@@ -35,7 +35,6 @@ import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.options.ConstraintViolation;
-import org.spine3.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
