@@ -49,7 +49,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /* package */ void subscribe(EventHandler object) {
         checkNotNull(object);
         final MethodMap<EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-
+        final boolean handlersEmpty = handlers.isEmpty();
+        checkHandlersNotEmpty(object, handlersEmpty);
         for (Map.Entry<Class<? extends Message>, EventHandlerMethod> entry : handlers.entrySet()) {
             handlersByEventClass.put(EventClass.of(entry.getKey()), object);
         }
