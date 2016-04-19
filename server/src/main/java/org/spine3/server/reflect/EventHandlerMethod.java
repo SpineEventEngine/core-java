@@ -18,22 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.Subscribe;
-import org.spine3.server.reflect.MethodMap;
-import org.spine3.type.EventClass;
+import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContext> {
+public class EventHandlerMethod extends HandlerMethod<EventContext> {
 
     /**
      * The instance of the predicate to filter event handler methods of a class.
@@ -52,11 +48,10 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param target object to which the method applies
      * @param method subscriber method
      */
-    public EventHandlerMethod(Object target, Method method) {
-        super(target, method);
+    public EventHandlerMethod(Method method) {
+        super(method);
     }
 
     /**
@@ -66,24 +61,14 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * @return immutable map of event handling methods
      */
     @CheckReturnValue
-    public static Map<EventClass, EventHandlerMethod> scan(Object target) {
-        final ImmutableMap.Builder<EventClass, EventHandlerMethod> result = ImmutableMap.builder();
-
-        // Scan for declared event handler methods.
-        final MethodMap handlers = new MethodMap(target.getClass(), PREDICATE);
-        checkModifiers(handlers.values());
-
-        for (ImmutableMap.Entry<Class<? extends Message>, Method> entry : handlers.entrySet()) {
-            final EventClass eventClass = EventClass.of(entry.getKey());
-            final EventHandlerMethod handler = new EventHandlerMethod(target, entry.getValue());
-            result.put(eventClass, handler);
-        }
-        return result.build();
+    public static MethodMap<EventHandlerMethod> scan(Object target) {
+        final MethodMap<EventHandlerMethod> result = MethodMap.create(target.getClass(), factory());
+        return result;
     }
 
     @Override
-    public <R> R invoke(Message message, EventContext context) throws InvocationTargetException {
-        return super.invoke(message, context);
+    public <R> R invoke(Object target, Message message, EventContext context) throws InvocationTargetException {
+        return super.invoke(target, message, context);
     }
 
     /**
@@ -92,7 +77,7 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
-     * @see MessageHandlerMethod#log()
+     * @see HandlerMethod#log()
      */
     public static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -104,13 +89,42 @@ public class EventHandlerMethod extends MessageHandlerMethod<Object, EventContex
     }
 
     /**
-     * {@inheritDoc}
+     * @return the factory for filtering and creating event handler methods
      */
-    @Override // Promote to public to make it visible to routines inspecting EventBus.
-    public Object getTarget() {
-        return super.getTarget();
+    public static HandlerMethod.Factory<EventHandlerMethod> factory() {
+        return Factory.instance();
     }
 
+    /**
+     * The factory for filtering methods that match {@code EventHandlerMethod} specification.
+     */
+    private static class Factory implements HandlerMethod.Factory<EventHandlerMethod> {
+
+        @Override
+        public Class<EventHandlerMethod> getMethodClass() {
+            return EventHandlerMethod.class;
+        }
+
+        @Override
+        public EventHandlerMethod create(Method method) {
+            return new EventHandlerMethod(method);
+        }
+
+        @Override
+        public Predicate<Method> getPredicate() {
+            return PREDICATE;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Factory value = new Factory();
+        }
+
+        private static Factory instance() {
+            return Singleton.INSTANCE.value;
+        }
+    }
     /**
      * The predicate class allowing to filter event handling methods.
      *

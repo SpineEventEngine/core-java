@@ -21,7 +21,7 @@
 package org.spine3.examples.failure.failures;
 
 import org.spine3.examples.failure.TaskId;
-import org.spine3.server.FailureThrowable;
+import org.spine3.server.failure.FailureThrowable;
 
 /**
  * @author Alexander Yevsyukov

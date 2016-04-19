@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.reflect;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
@@ -35,30 +35,30 @@ import static org.junit.Assert.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MessageHandlerMethodShould {
 
-    private static class TwoParamMethod extends MessageHandlerMethod<Object, EventContext> {
+    private static class TwoParamMethod extends HandlerMethod<EventContext> {
 
-        protected TwoParamMethod(Object target, Method method) {
-            super(target, method);
+        protected TwoParamMethod(Method method) {
+            super(method);
         }
     }
 
-    private static class OneParamMethod extends MessageHandlerMethod<Object, Void> {
+    private static class OneParamMethod extends HandlerMethod<Void> {
 
-        protected OneParamMethod(Object target, Method method) {
-            super(target, method);
+        protected OneParamMethod(Method method) {
+            super(method);
         }
     }
 
-    private MessageHandlerMethod<Object, EventContext> twoParamMethod;
-    private MessageHandlerMethod<Object, Void> oneParamMethod;
+    private HandlerMethod<EventContext> twoParamMethod;
+    private HandlerMethod<Void> oneParamMethod;
 
     private Object target;
 
     @Before
     public void setUp() {
         target = new StubHandler();
-        twoParamMethod = new TwoParamMethod(target, StubHandler.getTwoParameterMethod());
-        oneParamMethod = new OneParamMethod(target, StubHandler.getOneParameterMethod());
+        twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
+        oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
     }
 
     @SuppressWarnings("UnusedParameters") // OK for test methods.
@@ -108,20 +108,9 @@ public class MessageHandlerMethodShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_target() {
-        //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
-        new TwoParamMethod(null, StubHandler.getTwoParameterMethod());
-    }
-
-    @Test(expected = NullPointerException.class)
     public void do_not_accept_null_method() {
         //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
-        new TwoParamMethod(new StubHandler(), null);
-    }
-
-    @Test
-    public void return_target() {
-        assertEquals(target, twoParamMethod.getTarget());
+        new TwoParamMethod(null);
     }
 
     @Test
@@ -141,14 +130,14 @@ public class MessageHandlerMethodShould {
 
     @Test
     public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
-        twoParamMethod.invoke(StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
+        twoParamMethod.invoke(target, StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
 
         assertTrue(((StubHandler)target).wasOnInvoked());
     }
 
     @Test
     public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
-        oneParamMethod.invoke(BoolValue.getDefaultInstance());
+        oneParamMethod.invoke(target, BoolValue.getDefaultInstance());
 
         assertTrue(((StubHandler)target).wasHandleInvoked());
     }
@@ -178,8 +167,8 @@ public class MessageHandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final MessageHandlerMethod<Object, EventContext> anotherMethod =
-                new TwoParamMethod(target, StubHandler.getTwoParameterMethod());
+        final HandlerMethod<EventContext> anotherMethod =
+                new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
     }

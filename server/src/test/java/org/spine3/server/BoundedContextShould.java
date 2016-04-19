@@ -22,11 +22,9 @@ package org.spine3.server;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
@@ -34,20 +32,22 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
+import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.IdFunction;
-import org.spine3.server.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventHandler;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.GetProducerIdFromEvent;
+import org.spine3.server.event.Subscribe;
 import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -55,6 +55,7 @@ import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.type.EventClass;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
@@ -64,21 +65,15 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.type.EventClass;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
@@ -94,6 +89,20 @@ public class BoundedContextShould {
     private StorageFactory storageFactory;
     private BoundedContext boundedContext;
     private boolean handlersRegistered = false;
+
+    private final StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
+        @Override
+        public void onNext(Response response) {
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+    };
 
     @Before
     public void setUp() {
@@ -131,32 +140,6 @@ public class BoundedContextShould {
         handlersRegistered = true;
     }
 
-    //TODO:2016-01-25:alexander.yevsyukov: Move the command result verification tests into AggregateRepositoryShould.
-
-    private List<CommandResult> processRequests(Iterable<Command> requests) {
-
-        final List<CommandResult> results = newLinkedList();
-        for (Command request : requests) {
-            final CommandResult result = boundedContext.process(request);
-            results.add(result);
-        }
-        return results;
-    }
-
-    private List<Command> generateRequests() {
-
-        final Duration delta = seconds(10);
-        final Timestamp time1 = getCurrentTime();
-        final Timestamp time2 = add(time1, delta);
-        final Timestamp time3 = add(time2, delta);
-
-        final Command createProject = createProject(userId, projectId, time1);
-        final Command addTask = addTask(userId, projectId, time2);
-        final Command startProject = startProject(userId, projectId, time3);
-
-        return newArrayList(createProject, addTask, startProject);
-    }
-
     @Test
     public void return_EventBus() {
         assertNotNull(boundedContext.getEventBus());
@@ -167,15 +150,20 @@ public class BoundedContextShould {
         assertNotNull(boundedContext.getCommandBus());
     }
 
-    @SuppressWarnings("ConstantConditions") // Passing null is the purpose of this method.
-    @Test(expected = NullPointerException.class)
-    public void throw_NPE_on_null_Command() {
-        boundedContext.process(null);
-    }
+    @Test
+    public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
+        boundedContext.post(createProject(), new StreamObserver<Response>() {
+            @Override
+            public void onNext(Response response) {
+                assertTrue(Responses.isUnsupportedCommand(response));
+            }
 
-    @Test(expected = UnsupportedCommandException.class)
-    public void throw_exception_if_not_register_any_repositories_and_try_to_process_command() {
-        boundedContext.post(createProject());
+            @Override
+            public void onError(Throwable throwable) {}
+
+            @Override
+            public void onCompleted() {}
+        });
     }
 
     @Test
@@ -204,30 +192,17 @@ public class BoundedContextShould {
         registerAll();
         final Command request = createProject(userId, projectId, getCurrentTime());
 
-        boundedContext.post(request);
+        boundedContext.post(request, new StreamObserver<Response>() {
+            @Override
+            public void onNext(Response response) {}
+
+            @Override
+            public void onError(Throwable throwable) {}
+
+            @Override
+            public void onCompleted() {}
+        });
     }
-
-    private void assertCommandResultsAreValid(List<Command> requests, List<CommandResult> results) {
-        assertEquals(requests.size(), results.size());
-
-        for (int i = 0; i < requests.size(); i++) {
-            assertRequestAndResultMatch(requests.get(i), results.get(i));
-        }
-    }
-
-    private void assertRequestAndResultMatch(Command request, CommandResult result) {
-        final Timestamp expectedTime = request.getContext().getTimestamp();
-
-        final List<Event> events = result.getEventList();
-        assertEquals(1, events.size());
-        final Event actualRecord = events.get(0);
-        final ProjectId actualProjectId = fromAny(actualRecord.getContext().getProducerId());
-
-        assertEquals(projectId, actualProjectId);
-        assertEquals(userId, actualRecord.getContext().getCommandContext().getActor());
-        assertEquals(expectedTime, actualRecord.getContext().getCommandContext().getTimestamp());
-    }
-
 
     private static class ResponseObserver implements StreamObserver<Response> {
 
@@ -350,7 +325,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler implements EventHandler {
+    private static class EmptyHandler extends EventHandler {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {

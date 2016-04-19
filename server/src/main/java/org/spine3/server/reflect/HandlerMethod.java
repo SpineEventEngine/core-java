@@ -17,12 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.internal;
+package org.spine3.server.reflect;
 
+import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.server.reflect.Methods;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -41,44 +41,43 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
-
- * @param <T> the type of the target object
  * @param <C> the type of the message context or {@code Void} if context is not used
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods")
-public abstract class MessageHandlerMethod<T, C> {
+public abstract class HandlerMethod<C> {
 
     /**
-     * Object sporting the handler method.
-     */
-    private final T target;
-
-    /**
-     * Handler method.
+     * The method to be called.
      */
     private final Method method;
 
     /**
+     * The number of parameters the method has.
+     */
+    private final int paramCount;
+
+    /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param target object to which the method applies
      * @param method subscriber method
      */
-    protected MessageHandlerMethod(T target, Method method) {
-        this.target = checkNotNull(target);
+    protected HandlerMethod(Method method) {
         this.method = checkNotNull(method);
+        this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
     }
 
     protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, Methods.getFullMethodName(method));
+        log().warn(messageFormat, getFullMethodName(method));
     }
 
     /**
-     * @return the target object on which the method call is made
+     * Returns a full method name without parameters.
+     *
+     * @param method a method to get name for
+     * @return full method name
      */
-    protected T getTarget() {
-        return target;
+    private static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
     /**
@@ -104,17 +103,25 @@ public abstract class MessageHandlerMethod<T, C> {
         return result;
     }
 
+    //TODO:2016-04-19:alexander.yevsyukov: Check the value returned by this method in the invoke() methods below.
+    // See if we can have a common internal method that accepts null as the context parameter and ignores it
+    // if the underlying method accepts only one parameter.
+
+    protected int getParamCount() {
+        return paramCount;
+    }
+
     /**
      * Invokes the wrapped subscriber method to handle {@code message} with the {@code context}.
      *
      * @param <R>     the type of the expected handler invocation result
-     * @param message the message to handle
+     * @param target  the target object on which call the method
+     * @param message the message to handle   @return the result of message handling
      * @param context the context of the message
-     * @return the result of message handling
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R invoke(Message message, C context) throws InvocationTargetException {
+    protected <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
         checkNotNull(message);
         checkNotNull(context);
         try {
@@ -136,12 +143,13 @@ public abstract class MessageHandlerMethod<T, C> {
      * Invokes the wrapped subscriber method to handle {@code message}.
      *
      * @param <R>     the type of the expected handler invocation result
-     * @param message a message to handle
+     * @param target  the target object on which call the method
+     * @param message  a message to handle
      * @return the result of message handling
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
-     *                                   {@code Error} instances are propagated as-is.
+     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not
+     *                                   an {@link Error}. {@code Error} instances are propagated as-is.
      */
-    protected <R> R invoke(Message message) throws InvocationTargetException {
+    protected <R> R invoke(Object target, Message message) throws InvocationTargetException {
         checkNotNull(message);
         try {
             @SuppressWarnings("unchecked")
@@ -167,7 +175,7 @@ public abstract class MessageHandlerMethod<T, C> {
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return Methods.getFullMethodName(method);
+        return getFullMethodName(method);
     }
 
     /**
@@ -182,8 +190,7 @@ public abstract class MessageHandlerMethod<T, C> {
     @Override
     public int hashCode() {
         final int prime = 31;
-        return (prime + method.hashCode()) * prime
-                + System.identityHashCode(target);
+        return (prime + method.hashCode());
     }
 
     @Override
@@ -194,19 +201,48 @@ public abstract class MessageHandlerMethod<T, C> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final MessageHandlerMethod other = (MessageHandlerMethod) obj;
+        final HandlerMethod other = (HandlerMethod) obj;
 
-        // Use == to verify that the instances of the target objects are the same.
-        // This way we'd allow having handlers for target objects that are otherwise equal.
-        return (this.target == other.target)
-                && Objects.equals(this.method, other.method);
+        return Objects.equals(this.method, other.method);
+    }
+
+    /**
+     * Returns the class of the first parameter of the passed handler method object.
+     *
+     * <p>It is expected that the first parameter of the passed method is always of
+     * a class implementing {@link Message}.
+     *
+     * @param handler the method object to take first parameter type from
+     * @return the class of the first method parameter
+     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     */
+    /* package */ static Class<? extends Message> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
+        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        return result;
+    }
+
+    /**
+     * The interface for factory objects that can filter {@link Method} objects
+     * that represent handler methods and create corresponding {@code HandlerMethod} instances
+     * that wrap those methods.
+     *
+     * @param <H> the type of the handler method objects to create
+     */
+    public interface Factory<H extends HandlerMethod> {
+
+        Class<H> getMethodClass();
+
+        H create(Method method);
+
+        Predicate<Method> getPredicate();
     }
 
     private enum LogSingleton {
         INSTANCE;
 
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(MessageHandlerMethod.class);
+        private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
     }
 
     /**

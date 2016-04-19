@@ -75,7 +75,7 @@ public class Classes {
         for (Method method : clazz.getDeclaredMethods()) {
             final boolean methodMatches = predicate.apply(method);
             if (methodMatches) {
-                final Class<? extends Message> firstParamType = Methods.getFirstParamType(method);
+                final Class<? extends Message> firstParamType = HandlerMethod.getFirstParamType(method);
                 builder.add(firstParamType);
             }
         }

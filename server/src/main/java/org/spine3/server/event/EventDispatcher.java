@@ -18,35 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.examples.failure;
+package org.spine3.server.event;
 
-import org.spine3.base.CommandContext;
-import org.spine3.examples.failure.commands.CancelTask;
-import org.spine3.examples.failure.events.TaskCancelled;
-import org.spine3.examples.failure.failures.CannotCancelTaskInProgress;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.command.Assign;
+import org.spine3.base.Event;
+import org.spine3.server.type.EventClass;
+
+import java.util.Set;
 
 /**
- * A sample of the aggregate that throws a business failure on a command, which cannot be
- * performed.
+ * {@code EventDispatcher} delivers events to handlers.
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("unused")
-public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
+public interface EventDispatcher {
 
-    public TaskAggregate(TaskId id) {
-        super(id);
-    }
+    /**
+     * Provides the set of classes of events forwarded by the dispatcher
+     *
+     * @return non-empty set
+     */
+    Set<EventClass> getEventClasses();
 
-    @Assign
-    public TaskCancelled handle(CancelTask command, CommandContext context) throws CannotCancelTaskInProgress {
-        final Task task = getState();
-        if (task.getStatus() == Task.Status.IN_PROGRESS) {
-            throw new CannotCancelTaskInProgress(task.getId());
-        }
+    /**
+     * Dispatches the event.
+     */
+    void dispatch(Event event);
 
-        return TaskCancelled.newBuilder().setId(task.getId()).build();
-    }
 }

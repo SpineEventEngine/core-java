@@ -18,41 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.command;
 
-import org.spine3.base.Command;
-import org.spine3.base.Event;
-import org.spine3.type.CommandClass;
-
-import java.util.List;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * {@code CommandDispatcher} delivers commands to their handlers.
+ * Marks a method as command handler.
  *
- * <p>A dispatcher can deliver more than one class of commands.
+ * <p>A command handler method must have two parameters. The class of the command will be
+ * indicated by the first parameter.
  *
- * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the business model, neither it
- * produces events.
+ * <p>The second parameter of the method must be {@link org.spine3.base.CommandContext}.
+ * If the annotation is applied to a method with less or more than two parameters,
+ * the method will not be registered for command dispatching.
+ *
+ * <p>Objects handing commands are registered using {@link CommandBus#register(CommandHandler)}.
+ *
+ * <p><b>IMPORTANT:</b> an application must have one and only one handler per command class.
+ * Declaring two methods that handle the same command class will result in run-time error.
  *
  * @author Alexander Yevsyukov
- * @see CommandHandler
  */
-public interface CommandDispatcher {
-
-    /**
-     * Returns the set of command classes that can be processed by this dispatcher.
-     *
-     * @return non-empty set of command classes
-     */
-    Set<CommandClass> getCommandClasses();
-
-    /**
-     * Dispatches the command to its handler.
-     */
-    List<Event> dispatch(Command request) throws Exception;
-    //TODO:2016-01-24:alexander.yevsyukov: Do not return results to the CommandBus.
-
-    //TODO:2016-01-24:alexander.yevsyukov: Do handle exceptions that can be thrown at CommandBus side.
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Assign {
 }
+

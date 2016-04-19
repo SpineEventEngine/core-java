@@ -20,34 +20,34 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.GetIdByFieldIndex;
+import org.spine3.base.Command;
+import org.spine3.server.type.CommandClass;
+
+import java.util.Set;
 
 /**
- * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
+ * {@code CommandDispatcher} delivers commands to their handlers.
  *
- * <p>An entity ID must be the first field in command messages (in Protobuf definition).
- * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ * <p>A dispatcher can deliver more than one class of commands.
  *
- * @param <I> the type of target entity IDs
- * @param <M> the type of command messages to get IDs from
- * @author Alexander Litus
+ * <p>Unlike {@link CommandHandler} the dispatcher does not change the state of the business model, neither it
+ * produces events.
+ *
+ * @author Alexander Yevsyukov
+ * @see CommandHandler
  */
-public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
-
-    public static final int ID_FIELD_INDEX = 0;
-
-    private GetTargetIdFromCommand() {
-        super(ID_FIELD_INDEX);
-    }
+public interface CommandDispatcher {
 
     /**
-     * Creates a new ID function instance.
+     * Returns the set of command classes that can be processed by this dispatcher.
+     *
+     * @return non-empty set of command classes
      */
-    public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
-        return new GetTargetIdFromCommand<>();
-    }
+    Set<CommandClass> getCommandClasses();
+
+    /**
+     * Dispatches the command to its handler.
+     */
+    void dispatch(Command request) throws Exception;
+
 }

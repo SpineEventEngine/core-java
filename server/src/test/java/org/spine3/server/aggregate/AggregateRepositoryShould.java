@@ -22,20 +22,13 @@ package org.spine3.server.aggregate;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
-import org.spine3.server.Assign;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.project.Project;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.ProjectAggregate;
-import org.spine3.type.CommandClass;
 import org.spine3.validate.Validate;
 
 import java.util.Set;
@@ -43,8 +36,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
-import static org.spine3.testdata.TestEventMessageFactory.taskAddedEvent;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class AggregateRepositoryShould {

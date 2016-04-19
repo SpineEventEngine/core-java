@@ -23,12 +23,11 @@ package org.spine3.server.command;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.CommandHandler;
 import org.spine3.server.error.CommandHandlerAlreadyRegisteredException;
-import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.MessageHandlerMethod;
-import org.spine3.type.CommandClass;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.reflect.HandlerMethod;
+import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
@@ -45,42 +44,43 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 /* package */ class HandlerRegistry {
 
-    private final Map<CommandClass, CommandHandlerMethod> handlersByClass = Maps.newConcurrentMap();
+    private final Map<CommandClass, CommandHandler> handlersByClass = Maps.newConcurrentMap();
 
     /* package */ void register(CommandHandler object) {
         checkNotNull(object);
 
-        final Map<CommandClass, CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+        final MethodMap<CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
 
         if (handlers.isEmpty()) {
             throw new IllegalArgumentException("No command handler methods found in :" + object);
         }
 
-        registerMap(handlers);
+        registerMap(object, handlers);
     }
 
     /* package */ void unregister(CommandHandler object) {
         checkNotNull(object);
 
-        final Map<CommandClass, CommandHandlerMethod> subscribers = CommandHandlerMethod.scan(object);
-        unregisterMap(subscribers);
+        final MethodMap<CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
+        unregisterMap(handlers);
     }
 
     /**
      * Registers the passed handlers with the dispatcher.
      *
-     * @param handlers map from command classes to corresponding handlers
+     * @param object the command handler
+     * @param methods map from command classes to corresponding handlers
      */
-    private void registerMap(Map<CommandClass, CommandHandlerMethod> handlers) {
-        checkDuplicates(handlers);
-        putAll(handlers);
+    private void registerMap(CommandHandler object, MethodMap<CommandHandlerMethod> methods) {
+        checkDuplicates(methods);
+        putAll(object, methods);
     }
 
-    private void unregisterMap(Map<CommandClass, CommandHandlerMethod> handlers) {
-        for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
-            final CommandClass commandClass = entry.getKey();
+    private void unregisterMap(MethodMap<CommandHandlerMethod> methods) {
+        for (Map.Entry<Class<? extends Message>, CommandHandlerMethod> entry : methods.entrySet()) {
+            final CommandClass commandClass = CommandClass.of(entry.getKey());
             if (handlerRegistered(commandClass)) {
-                final CommandHandlerMethod registered = getHandler(commandClass);
+                final CommandHandlerMethod registered = getHandler(commandClass).getHandlerMethod(commandClass.value());
                 final CommandHandlerMethod passed = entry.getValue();
                 if (registered.equals(passed)) {
                     removeFor(commandClass);
@@ -93,12 +93,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
         handlersByClass.remove(commandClass);
     }
 
-    private void checkDuplicates(Map<CommandClass, CommandHandlerMethod> handlers) {
-        for (Map.Entry<CommandClass, CommandHandlerMethod> entry : handlers.entrySet()) {
-            final CommandClass commandClass = entry.getKey();
+    private void checkDuplicates(MethodMap<CommandHandlerMethod> handlers) {
+        for (Map.Entry<Class<? extends Message>, CommandHandlerMethod> entry : handlers.entrySet()) {
+            final CommandClass commandClass = CommandClass.of(entry.getKey());
 
             if (handlerRegistered(commandClass)) {
-                final MessageHandlerMethod alreadyRegistered = getHandler(commandClass);
+                final HandlerMethod alreadyRegistered = getHandler(commandClass).getHandlerMethod(commandClass.value());
                 throw new CommandHandlerAlreadyRegisteredException(commandClass,
                         alreadyRegistered.getFullName(),
                         entry.getValue().getFullName());
@@ -111,23 +111,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return handlersByClass.containsKey(cls);
     }
 
-    /* package */ CommandHandlerMethod getHandler(CommandClass cls) {
+    /* package */ CommandHandler getHandler(CommandClass cls) {
         return handlersByClass.get(cls);
     }
 
-    private void putAll(Map<CommandClass, CommandHandlerMethod> subscribers) {
-        handlersByClass.putAll(subscribers);
+    private void putAll(CommandHandler object, MethodMap<CommandHandlerMethod> methods) {
+        for (Class<? extends Message> commandClass : methods.keySet()) {
+            handlersByClass.put(CommandClass.of(commandClass), object);
+        }
     }
 
     /* package */ void unregisterAll() {
         for (CommandClass commandClass : handlersByClass.keySet()) {
             removeFor(commandClass);
         }
-    }
-
-    /* package */ boolean hasHandlerFor(Message command) {
-        final CommandHandlerMethod method = getHandler(CommandClass.of(command));
-        return method != null;
     }
 
     /**

@@ -23,11 +23,16 @@ package org.spine3.server.event;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import org.spine3.server.internal.EventHandlerMethod;
-import org.spine3.type.EventClass;
+import com.google.protobuf.Message;
+import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The registry of event handling methods by event class.
@@ -38,48 +43,44 @@ import java.util.Map;
  */
 /* package */ class HandlerRegistry {
 
-    private final Multimap<EventClass, EventHandlerMethod> handlersByClass = HashMultimap.create();
+    private final Multimap<EventClass, EventHandler> handlersByEventClass = HashMultimap.create();
 
-    /* package */ void subscribe(Map<EventClass, EventHandlerMethod> handlers) {
-        for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
-            handlersByClass.put(entry.getKey(), entry.getValue());
+    /* package */ void subscribe(EventHandler object) {
+        checkNotNull(object);
+        final MethodMap<EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final boolean handlersEmpty = handlers.isEmpty();
+        checkHandlersNotEmpty(object, handlersEmpty);
+        for (Map.Entry<Class<? extends Message>, EventHandlerMethod> entry : handlers.entrySet()) {
+            handlersByEventClass.put(EventClass.of(entry.getKey()), object);
         }
     }
 
-    /* package */ void unsubscribe(Map<EventClass, EventHandlerMethod> handlers) {
-        for (Map.Entry<EventClass, EventHandlerMethod> entry : handlers.entrySet()) {
-
-            final EventClass eventClass = entry.getKey();
-            final EventHandlerMethod handler = entry.getValue();
-
-            unsubscribe(eventClass, handler);
+    /* package */ void usubscribe(EventHandler object) {
+        final MethodMap<EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final boolean handlersEmpty = handlers.isEmpty();
+        checkHandlersNotEmpty(object, handlersEmpty);
+        if (!handlersEmpty) {
+            for (Class<? extends Message> eventClass : handlers.keySet()) {
+                handlersByEventClass.remove(EventClass.of(eventClass), object);
+            }
         }
-    }
-
-    private void unsubscribe(EventClass c, EventHandlerMethod handler) {
-        final Collection<EventHandlerMethod> currentSubscribers = handlersByClass.get(c);
-        if (!currentSubscribers.contains(handler)) {
-            throw handlerMethodWasNotRegistered(handler);
-        }
-        currentSubscribers.remove(handler);
     }
 
     /* package */ void unsubscribeAll() {
-        handlersByClass.clear();
+        handlersByEventClass.clear();
         EventBus.log().info("All subscribers cleared.");
     }
 
-    private static IllegalArgumentException handlerMethodWasNotRegistered(EventHandlerMethod handler) {
-        return new IllegalArgumentException(
-                "Cannot un-subscribe the event handler, which was not subscribed before:" + handler.getFullName());
-    }
-
-    /* package */ Collection<EventHandlerMethod> getSubscribers(EventClass c) {
-        return ImmutableList.copyOf(handlersByClass.get(c));
+    /* package */ Collection<EventHandler> getSubscribers(EventClass c) {
+        return ImmutableList.copyOf(handlersByEventClass.get(c));
     }
 
     /* package */ boolean hasSubscribers(EventClass eventClass) {
-        final Collection<EventHandlerMethod> handlers = getSubscribers(eventClass);
+        final Collection<EventHandler> handlers = getSubscribers(eventClass);
         return !handlers.isEmpty();
+    }
+
+    private static void checkHandlersNotEmpty(Object object, boolean handlersEmpty) {
+        checkArgument(!handlersEmpty, "No event subscriber methods found in %s", object);
     }
 }

@@ -27,26 +27,22 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
-import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.CommandDispatcher;
-import org.spine3.server.CommandHandler;
-import org.spine3.server.FailureThrowable;
 import org.spine3.server.error.UnsupportedCommandException;
-import org.spine3.server.internal.CommandHandlerMethod;
+import org.spine3.server.failure.FailureThrowable;
+import org.spine3.server.type.CommandClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.type.CommandClass;
 import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
-import static org.spine3.server.command.CommandValidation.*;
+import static org.spine3.server.command.CommandValidation.invalidCommand;
+import static org.spine3.server.command.CommandValidation.unsupportedCommand;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -61,8 +57,9 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
-    private final CommandStatusHelper commandStatus;
-    private final ProblemLog problemLog = new ProblemLog();
+    private final CommandStatusService commandStatusService;
+
+    private ProblemLog problemLog = new ProblemLog();
 
     @CheckReturnValue
     public static CommandBus create(CommandStore store) {
@@ -71,7 +68,7 @@ public class CommandBus implements AutoCloseable {
 
     protected CommandBus(CommandStore commandStore) {
         this.commandStore = commandStore;
-        this.commandStatus = new CommandStatusHelper(commandStore);
+        this.commandStatusService = new CommandStatusService(commandStore);
     }
 
     /**
@@ -154,14 +151,10 @@ public class CommandBus implements AutoCloseable {
      * Directs a command request to the corresponding handler.
      *
      * @param request the command request to be processed
-     * @return a list of the events as the result of handling the command
      * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
-    public List<Event> post(Command request) {
-
-        //TODO:2016-01-24:alexander.yevsyukov: Do not return value.
-
+    public void post(Command request) {
         checkNotNull(request);
 
         store(request);
@@ -169,59 +162,75 @@ public class CommandBus implements AutoCloseable {
         final CommandClass commandClass = CommandClass.of(request);
 
         if (isDispatcherRegistered(commandClass)) {
-            return dispatch(request);
+            dispatch(request);
+            return;
         }
 
         if (isHandlerRegistered(commandClass)) {
             final Message command = getMessage(request);
             final CommandContext context = request.getContext();
-            return invokeHandler(command, context);
+            invokeHandler(command, context);
+            return;
         }
 
         throw new UnsupportedCommandException(getMessage(request));
     }
 
-    private List<Event> dispatch(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        List<Event> result = Collections.emptyList();
-        try {
-            result = dispatcher.dispatch(command);
-        } catch (Exception e) {
-            problemLog.errorDispatching(e, command);
-            commandStatus.setToError(command.getContext().getCommandId(), e);
-        }
-        return result;
+    /**
+     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
+     */
+    public CommandStatusService getCommandStatusService() {
+        return commandStatusService;
     }
 
-    private List<Event> invokeHandler(Message msg, CommandContext context) {
-        final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandlerMethod method = getHandler(commandClass);
-        List<Event> result = Collections.emptyList();
-        try {
-            result = method.invoke(msg, context);
+    private void dispatch(Command command) {
+        final CommandClass commandClass = CommandClass.of(command);
+        final CommandDispatcher dispatcher = getDispatcher(commandClass);
+        final CommandId commandId = command.getContext().getCommandId();
 
-            commandStatus.setOk(context.getCommandId());
+        try {
+            dispatcher.dispatch(command);
+        } catch (Exception e) {
+            problemLog.errorDispatching(e, command);
+            commandStatusService.setToError(commandId, e);
+        }
+    }
+
+    private void invokeHandler(Message msg, CommandContext context) {
+        final CommandClass commandClass = CommandClass.of(msg);
+        final CommandHandler handler = getHandler(commandClass);
+        final CommandId commandId = context.getCommandId();
+        try {
+            handler.handle(msg, context);
+
+            commandStatusService.setOk(commandId);
 
         } catch (InvocationTargetException e) {
-            final CommandId commandId = context.getCommandId();
             final Throwable cause = e.getCause();
             //noinspection ChainOfInstanceofChecks
             if (cause instanceof Exception) {
                 final Exception exception = (Exception) cause;
                 problemLog.errorHandling(exception, msg, commandId);
-                commandStatus.setToError(commandId, exception);
+                commandStatusService.setToError(commandId, exception);
             } else if (cause instanceof FailureThrowable){
                 final FailureThrowable failure = (FailureThrowable) cause;
                 problemLog.failureHandling(failure, msg, commandId);
-                commandStatus.setToFailure(commandId, failure);
+                commandStatusService.setToFailure(commandId, failure);
             } else {
                 problemLog.errorHandlingUnknown(cause, msg, commandId);
-                commandStatus.setToError(commandId, Errors.fromThrowable(cause));
+                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
+    }
 
-        return result;
+    private CommandHandler getHandler(CommandClass commandClass) {
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
+        return handler;
+    }
+
+    @VisibleForTesting
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
     }
 
     /**
@@ -257,33 +266,6 @@ public class CommandBus implements AutoCloseable {
         return problemLog;
     }
 
-    /**
-     * The helper class for updating command status.
-     */
-    private static class CommandStatusHelper {
-        private final CommandStore commandStore;
-
-        private CommandStatusHelper(CommandStore commandStore) {
-            this.commandStore = commandStore;
-        }
-
-        private void setOk(CommandId commandId) {
-            commandStore.setCommandStatusOk(commandId);
-        }
-
-        private void setToError(CommandId commandId, Exception exception) {
-            commandStore.updateStatus(commandId, exception);
-        }
-
-        private void setToFailure(CommandId commandId, FailureThrowable failure) {
-            commandStore.updateStatus(commandId, failure.toMessage());
-        }
-
-        private void setToError(CommandId commandId, org.spine3.base.Error error) {
-            commandStore.updateStatus(commandId, error);
-        }
-    }
-
     private void store(Command request) {
         commandStore.store(request);
     }
@@ -300,10 +282,6 @@ public class CommandBus implements AutoCloseable {
 
     private CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatcherRegistry.getDispatcher(commandClass);
-    }
-
-    private CommandHandlerMethod getHandler(CommandClass cls) {
-        return handlerRegistry.getHandler(cls);
     }
 
     @Override

@@ -35,26 +35,23 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.base.UserId;
-import org.spine3.server.CommandHandler;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.MethodMap;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.time.ZoneOffset;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
-import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
+import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -80,31 +77,12 @@ import static org.spine3.server.internal.EventHandlerMethod.checkModifiers;
  * @param <M> the type of the process manager state
  * @author Alexander Litus
  */
-public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> implements CommandHandler {
-
-    /**
-     * Keeps initialization state of the process manager.
-     */
-    private volatile boolean initialized = false;
+public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
 
     /**
      * The Command Bus to post routed commands.
      */
     private volatile CommandBus commandBus;
-
-    /**
-     * The map of command handler methods of this process manager.
-     *
-     * @see Registry
-     */
-    private MethodMap commandHandlers;
-
-    /**
-     * The map of event handler methods of this process manager.
-     *
-     * @see Registry
-     */
-    private MethodMap eventHandlers;
 
     /**
      * Creates a new instance.
@@ -115,23 +93,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     @SuppressWarnings("ConstructorNotProtectedInAbstractClass")
     public ProcessManager(I id) {
         super(id);
-    }
-
-    /**
-     * Performs initialization of the instance and registers this class of process managers
-     * in the {@link Registry} if it is not registered yet.
-     */
-    private void init() {
-        if (!this.initialized) {
-            final Registry registry = Registry.getInstance();
-            final Class<? extends ProcessManager> pmClass = getClass();
-            if (!registry.contains(pmClass)) {
-                registry.register(pmClass);
-            }
-            commandHandlers = registry.getCommandHandlers(pmClass);
-            eventHandlers = registry.getEventHandlers(pmClass);
-            this.initialized = true;
-        }
     }
 
     /**
@@ -161,14 +122,16 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         checkNotNull(command);
         checkNotNull(context);
 
-        init();
         final Class<? extends Message> commandClass = command.getClass();
-        final Method method = commandHandlers.get(commandClass);
+        final CommandHandlerMethod method = MethodRegistry.getInstance()
+                                                          .get(getClass(),
+                                                               commandClass,
+                                                               CommandHandlerMethod.factory());
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
-        final CommandHandlerMethod commandHandler = new CommandHandlerMethod(this, method);
-        final List<? extends Message> events = commandHandler.invoke(command, context);
+
+        final List<? extends Message> events = method.invoke(this, command, context);
         final List<Event> eventRecords = toEvents(events, context.getCommandId());
         return eventRecords;
     }
@@ -199,14 +162,14 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         checkNotNull(context);
         checkNotNull(event);
 
-        init();
         final Class<? extends Message> eventClass = event.getClass();
-        final Method method = eventHandlers.get(eventClass);
+        final EventHandlerMethod method = MethodRegistry.getInstance()
+                                                        .get(getClass(), eventClass, EventHandlerMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }
-        final EventHandlerMethod handler = new EventHandlerMethod(this, method);
-        handler.invoke(event, context);
+
+        method.invoke(this, event, context);
     }
 
     /**
@@ -386,52 +349,4 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                 eventClass, this.getClass()));
     }
 
-    /**
-     * The registry of method maps for all process manager classes.
-     *
-     * <p>This registry is used for caching command/event handlers.
-     * Process managers register their classes in {@link ProcessManager#init()} method.
-     */
-    private static class Registry {
-
-        private final MethodMap.Registry<ProcessManager> commandHandlers = new MethodMap.Registry<>();
-        private final MethodMap.Registry<ProcessManager> eventHandlers = new MethodMap.Registry<>();
-
-        /* package */ void register(Class<? extends ProcessManager> clazz) {
-            commandHandlers.register(clazz, CommandHandlerMethod.PREDICATE);
-            CommandHandlerMethod.checkModifiers(commandHandlers.get(clazz).values());
-
-            eventHandlers.register(clazz, PREDICATE);
-            checkModifiers(eventHandlers.get(clazz).values());
-        }
-
-        @CheckReturnValue
-        /* package */ boolean contains(Class<? extends ProcessManager> clazz) {
-            final boolean result = commandHandlers.contains(clazz) && eventHandlers.contains(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getCommandHandlers(Class<? extends ProcessManager> clazz) {
-            final MethodMap result = commandHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ MethodMap getEventHandlers(Class<? extends ProcessManager> clazz) {
-            final MethodMap result = eventHandlers.get(clazz);
-            return result;
-        }
-
-        @CheckReturnValue
-        /* package */ static Registry getInstance() {
-            return Singleton.INSTANCE.value;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Registry value = new Registry();
-        }
-    }
 }

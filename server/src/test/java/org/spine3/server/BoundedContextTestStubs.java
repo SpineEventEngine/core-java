@@ -28,6 +28,8 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
+import static org.mockito.Mockito.spy;
+
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
  *
@@ -52,7 +54,7 @@ public class BoundedContextTestStubs {
         return BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
                 .setCommandBus(commandBus)
-                .setEventBus(eventBus)
+                .setEventBus(spy(eventBus))
                 .build();
     }
 

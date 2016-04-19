@@ -18,34 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Identifiers;
 
 /**
- * The marker interface for classes that expose command handling methods.
+ * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
  *
- * <p>A command handler is responsible for:
- * <ol>
- *     <li>Changing the state of the business model</li>
- *     <li>Producing corresponding events.</li>
- * </ol>
+ * <p>An entity ID must be the first field in command messages (in Protobuf definition).
+ * Its name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
  *
- * <p>Events are returned as values of command handling methods.
- *
- * <h2>Command handling methods</h2>
- * <p>A command handling method is a {@code public} method that accepts two parameters.
- * The first parameter is a command message. The second parameter is {@link CommandContext}.
- *
- * <p>The method returns an event message of the specific type, or {@code List} of messages
- * if it produces more than one event.
- *
- * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
- * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
- * because of a business failure.
- *
- * @author Alexander Yevsyukov
- * @see CommandDispatcher
+ * @param <I> the type of target entity IDs
+ * @param <M> the type of command messages to get IDs from
+ * @author Alexander Litus
  */
-public interface CommandHandler {
+public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
+
+    public static final int ID_FIELD_INDEX = 0;
+
+    private GetTargetIdFromCommand() {
+        super(ID_FIELD_INDEX);
+    }
+
+    /**
+     * Creates a new ID function instance.
+     */
+    public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
+        return new GetTargetIdFromCommand<>();
+    }
 }

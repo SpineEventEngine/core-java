@@ -18,49 +18,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.type;
+package org.spine3.server.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
+import org.spine3.base.Commands;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of events.
+ * A value object for class type references.
  *
  * @author Alexander Yevsyukov
  */
-public final class EventClass extends ClassTypeValue {
+public final class CommandClass extends MessageClass {
 
-    private EventClass(Class<? extends Message> value) {
+    private CommandClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
-     * Creates a new instance of the event class.
-     * @param value a value to hold
+     * Creates a new instance for the passed class value.
+     *
+     * @param value class reference
      * @return new instance
      */
-    public static EventClass of(Class<? extends Message> value) {
-        return new EventClass(checkNotNull(value));
+    public static CommandClass of(Class<? extends Message> value) {
+        return new CommandClass(checkNotNull(value));
     }
 
     /**
-     * Creates a new instance of the event class by passed event instance.
-     * @param event an event instance
+     * Creates a new instance for the class of the passed command.
+     *
+     * @param command a command for which to get the class
      * @return new instance
      */
-    public static EventClass of(Message event) {
-        return of(checkNotNull(event).getClass());
+    public static CommandClass of(Message command) {
+        checkNotNull(command);
+        if (command instanceof Command) {
+            final Command commandRequest = (Command) command;
+            final Message enclosed = Commands.getMessage(commandRequest);
+            return of(enclosed.getClass());
+        }
+        return of(command.getClass());
     }
 
     /**
-     * Creates immutable set of {@code EventClass} from the passed set.
+     * Creates immutable set of {@code CommandClass} from the passed set.
      */
-    public static ImmutableSet<EventClass> setOf(Set<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
+    public static ImmutableSet<CommandClass> setOf(Set<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }
@@ -68,15 +78,14 @@ public final class EventClass extends ClassTypeValue {
     }
 
     /**
-     * Creates immutable set of {@code EventClass} from the passed classes.
+     * Creates immutable set of {@code CommandClass} from the passed classes.
      */
     @SafeVarargs
-    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
-        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
+    public static ImmutableSet<CommandClass> setOf(Class<? extends Message>... classes) {
+        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }
         return builder.build();
     }
-
 }

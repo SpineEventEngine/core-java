@@ -30,14 +30,15 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.CommandDispatcher;
 import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.EntityEventDispatcher;
 import org.spine3.server.entity.EntityRepository;
-import org.spine3.server.command.GetTargetIdFromCommand;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.entity.IdFunction;
-import org.spine3.type.CommandClass;
-import org.spine3.type.EventClass;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.type.CommandClass;
+import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -112,7 +113,7 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
      * @throws IllegalArgumentException if commands of this type are not handled by the process manager
      */
     @Override
-    public List<Event> dispatch(Command command)
+    public void dispatch(Command command)
             throws InvocationTargetException, IllegalStateException, IllegalArgumentException {
         final Message commandMessage = getMessage(checkNotNull(command));
         final CommandContext context = command.getContext();
@@ -122,7 +123,17 @@ public abstract class ProcessManagerRepository<I, PM extends ProcessManager<I, S
         final PM manager = load(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
-        return events;
+        postEvents(events);
+    }
+
+    /**
+     * Posts passed events to {@link EventBus}.
+     */
+    private void postEvents(Iterable<Event> events) {
+        final EventBus eventBus = getBoundedContext().getEventBus();
+        for (Event event : events) {
+            eventBus.post(event);
+        }
     }
 
     /**

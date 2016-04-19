@@ -18,18 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
-
-import org.spine3.server.event.EventBus;
-
 /**
- * The marker interface for objects that can be subscribed to receive events from {@link EventBus}.
- *
- * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
- *
- * @author Alexander Yevsyukov
- * @see EventBus#subscribe(EventHandler)
- * @see EventBus#register(EventDispatcher)
+ * This package contains commonly used server-side data classes.
  */
-public interface EventHandler {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.server.type;
+
+import javax.annotation.ParametersAreNonnullByDefault;

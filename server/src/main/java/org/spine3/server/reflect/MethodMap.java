@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
+import org.spine3.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -37,20 +38,64 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A map for storing methods handling messages.
  *
+ * @param <H> the type of the handler method instances stored in the map
  * @author Alexander Yevsyukov
  */
-public class MethodMap {
+public class MethodMap<H extends HandlerMethod> {
 
-    private final ImmutableMap<Class<? extends Message>, Method> map;
+    private final ImmutableMap<Class<? extends Message>, H> map;
 
-    public MethodMap(Class<?> clazz, Predicate<Method> filter) {
-        this(Methods.scan(clazz, filter));
+    private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
+        final Map<Class<? extends Message>, Method> rawMethods = scan(clazz, factory.getPredicate());
+
+        final ImmutableMap.Builder<Class<? extends Message>, H> builder = ImmutableMap.builder();
+        for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
+            final H value = factory.create(entry.getValue());
+            builder.put(entry.getKey(), value);
+        }
+
+        this.map = builder.build();
     }
 
-    private MethodMap(Map<Class<? extends Message>, Method> map) {
-        this.map = ImmutableMap.<Class<? extends Message>, Method>builder()
-                .putAll(map)
-                .build();
+    /**
+     * Creates a new method map for the passed class using the passed factory.
+     *
+     * @param clazz the class to inspect
+     * @param factory the factory for handler methods
+     * @param <H> the type of the handler methods
+     * @return new method map
+     */
+    public static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz, HandlerMethod.Factory<H> factory) {
+        return new MethodMap<>(clazz, factory);
+    }
+
+    /**
+     * Returns a map of the {@link HandlerMethod} objects to the corresponding message class.
+     *
+     * @param declaringClass   the class that declares methods to scan
+     * @param filter the predicate that defines rules for subscriber scanning
+     * @return the map of message subscribers
+     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
+     */
+    private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass, Predicate<Method> filter) {
+        final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
+        for (Method method : declaringClass.getDeclaredMethods()) {
+            if (filter.apply(method)) {
+                final Class<? extends Message> messageClass = HandlerMethod.getFirstParamType(method);
+                if (tempMap.containsKey(messageClass)) {
+                    final Method alreadyPresent = tempMap.get(messageClass);
+                    throw new DuplicateHandlerMethodException(
+                            declaringClass,
+                            messageClass,
+                            alreadyPresent.getName(),
+                            method.getName());
+                }
+                tempMap.put(messageClass, method);
+            }
+        }
+        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
+        builder.putAll(tempMap);
+        return builder.build();
     }
 
     /**
@@ -67,66 +112,18 @@ public class MethodMap {
     }
 
     @CheckReturnValue
-    public ImmutableSet<Map.Entry<Class<? extends Message>, Method>> entrySet() {
+    public ImmutableSet<Map.Entry<Class<? extends Message>, H>> entrySet() {
         return map.entrySet();
     }
 
     @CheckReturnValue
-    public ImmutableCollection<Method> values() {
+    public ImmutableCollection<H> values() {
         return map.values();
     }
 
     @CheckReturnValue
     @Nullable
-    public Method get(Class<? extends Message> messageClass) {
+    public H get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
-    }
-
-    /**
-     * The registry of message maps by class.
-     *
-     * @param <T> the type of objects tracked by the registry
-     */
-    public static class Registry<T> {
-
-        private final Map<Class<? extends T>, MethodMap> entries = Maps.newConcurrentMap();
-
-        /**
-         * Verifies if the class is already registered.
-         *
-         * @param clazz the class to check
-         * @return {@code true} if there is a message map for the passed class, {@code false} otherwise
-         */
-        @CheckReturnValue
-        public boolean contains(Class<? extends T> clazz) {
-            final boolean result = entries.containsKey(clazz);
-            return result;
-        }
-
-        /**
-         * Registers methods of the class in the registry.
-         *
-         * @param clazz the class to register
-         * @param filter a filter for selecting methods to register
-         * @throws IllegalArgumentException if the class was already registered
-         * @see #contains(Class)
-         */
-        public void register(Class<? extends T> clazz, Predicate<Method> filter) {
-            if (contains(clazz)) {
-                throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
-            }
-
-            final MethodMap entry = new MethodMap(clazz, filter);
-            entries.put(clazz, entry);
-        }
-
-        /**
-         * Obtains method map for the passed class.
-         */
-        @CheckReturnValue
-        public MethodMap get(Class<? extends T> clazz) {
-            final MethodMap result = entries.get(clazz);
-            return result;
-        }
     }
 }

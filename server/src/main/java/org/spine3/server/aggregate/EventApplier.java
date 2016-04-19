@@ -22,7 +22,7 @@ package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
-import org.spine3.server.internal.MessageHandlerMethod;
+import org.spine3.server.reflect.HandlerMethod;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplier extends MessageHandlerMethod<Aggregate, Void> {
+/* package */ class EventApplier extends HandlerMethod<Void> {
 
     /**
      * The instance of the predicate to filter event applier methods of an aggregate class.
@@ -46,17 +46,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param target object to which the method applies
      * @param method subscriber method
      */
-    /* package */ EventApplier(Aggregate target, Method method) {
-        super(target, method);
+    /* package */ EventApplier(Method method) {
+        super(method);
     }
 
     @Override
-    protected <R> R invoke(Message message) throws InvocationTargetException {
+    protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
-        return super.invoke(message);
+        return super.invoke(aggregate, message);
     }
 
     /**
@@ -65,7 +64,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * <p>Logs warning for the methods with a non-private modifier.
      *
      * @param methods the map of methods to check
-     * @see MessageHandlerMethod#log()
+     * @see HandlerMethod#log()
      */
     /* package */ static void checkModifiers(Iterable<Method> methods) {
         for (Method method : methods) {
@@ -73,6 +72,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
             if (!isPrivate) {
                 warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
             }
+        }
+    }
+
+    public static HandlerMethod.Factory<EventApplier> factory() {
+        return Factory.instance();
+    }
+
+    /**
+     * The factory for filtering methods that match {@code EventApplier} specification.
+     */
+    private static class Factory implements HandlerMethod.Factory<EventApplier> {
+
+        @Override
+        public Class<EventApplier> getMethodClass() {
+            return EventApplier.class;
+        }
+
+        @Override
+        public EventApplier create(Method method) {
+            return new EventApplier(method);
+        }
+
+        @Override
+        public Predicate<Method> getPredicate() {
+            return PREDICATE;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final Factory value = new Factory();
+        }
+
+        private static Factory instance() {
+            return Singleton.INSTANCE.value;
         }
     }
 

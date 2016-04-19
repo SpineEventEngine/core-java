@@ -20,7 +20,6 @@
 package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
@@ -28,21 +27,15 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.server.EventDispatcher;
-import org.spine3.server.EventHandler;
-import org.spine3.server.Subscribe;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.procman.ProcessManager;
-import org.spine3.type.EventClass;
+import org.spine3.server.type.EventClass;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -134,6 +127,15 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
+     * Determines the class of the event from the passed event record.
+     */
+    public static EventClass getEventClass(Event event) {
+        final Message message = Events.getMessage(event);
+        final EventClass result = EventClass.of(message);
+        return result;
+    }
+
+    /**
      * Subscribes the event handler to receive events from the bus.
      *
      * <p>The event handler must expose at least one event subscriber method. If it is not the
@@ -144,17 +146,7 @@ public class EventBus implements AutoCloseable {
      */
     public void subscribe(EventHandler object) {
         checkNotNull(object);
-
-        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-        final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersNotEmpty(object, handlersEmpty);
-        if (!handlersEmpty) {
-            handlerRegistry.subscribe(handlers);
-        }
-    }
-
-    private static void checkHandlersNotEmpty(Object object, boolean handlersEmpty) {
-        checkArgument(!handlersEmpty, "No event subscriber methods found in %s", object);
+        handlerRegistry.subscribe(object);
     }
 
     /**
@@ -171,13 +163,9 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ Set<Object> getHandlers(EventClass eventClass) {
-        final Collection<EventHandlerMethod> handlers = handlerRegistry.getSubscribers(eventClass);
-        final ImmutableSet.Builder<Object> result = ImmutableSet.builder();
-        for (EventHandlerMethod handler : handlers) {
-            result.add(handler.getTarget());
-        }
-        return result.build();
+    /* package */ Collection<EventHandler> getHandlers(EventClass eventClass) {
+        final Collection<EventHandler> result = handlerRegistry.getSubscribers(eventClass);
+        return result;
     }
 
     @VisibleForTesting
@@ -191,15 +179,9 @@ public class EventBus implements AutoCloseable {
      * @param object the object whose methods should be unregistered
      * @throws IllegalArgumentException if the object was not previously registered
      */
-    public void unsubscribe(Object object) {
+    public void unsubscribe(EventHandler object) {
         checkNotNull(object);
-
-        final Map<EventClass, EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
-        final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersNotEmpty(object, handlersEmpty);
-        if (!handlersEmpty) {
-            unsubscribeMap(handlers);
-        }
+        handlerRegistry.usubscribe(object);
     }
 
     /**
@@ -209,16 +191,7 @@ public class EventBus implements AutoCloseable {
         dispatcherRegistry.unregister(dispatcher);
     }
 
-    /**
-     * Removes passed event handlers from the bus.
-     *
-     * @param handlers a map of the event handlers to remove
-     */
-    private void unsubscribeMap(Map<EventClass, EventHandlerMethod> handlers) {
-        handlerRegistry.unsubscribe(handlers);
-    }
-
-    private Collection<EventHandlerMethod> getSubscribers(EventClass c) {
+    private Collection<EventHandler> getSubscribers(EventClass c) {
         return handlerRegistry.getSubscribers(c);
     }
 
@@ -248,7 +221,7 @@ public class EventBus implements AutoCloseable {
     }
 
     private void callDispatchers(Event event) {
-        final EventClass eventClass = Events.getEventClass(event);
+        final EventClass eventClass = getEventClass(event);
         final Collection<EventDispatcher> dispatchers = dispatcherRegistry.getDispatchers(eventClass);
         for (EventDispatcher dispatcher : dispatchers) {
             dispatcher.dispatch(event);
@@ -256,14 +229,14 @@ public class EventBus implements AutoCloseable {
     }
 
     private void invokeHandlers(Message event, EventContext context) {
-        final Collection<EventHandlerMethod> handlers = getSubscribers(EventClass.of(event));
+        final Collection<EventHandler> handlers = getSubscribers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             handleDeadEvent(event);
             return;
         }
 
-        for (EventHandlerMethod handler : handlers) {
+        for (EventHandler handler : handlers) {
             invokeHandler(handler, event, context);
         }
     }
@@ -272,14 +245,14 @@ public class EventBus implements AutoCloseable {
         eventStore.append(event);
     }
 
-    private void invokeHandler(final EventHandlerMethod handler, final Message event, final EventContext context) {
+    private void invokeHandler(final EventHandler target, final Message event, final EventContext context) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    handler.invoke(event, context);
+                    target.handle(event, context);
                 } catch (InvocationTargetException e) {
-                    processHandlerException(handler, e);
+                    processHandlerException(e, event, context);
                 }
             }
         });
@@ -289,8 +262,11 @@ public class EventBus implements AutoCloseable {
         log().warn("No handler defined for event class: " + event.getClass().getName());
     }
 
-    private static void processHandlerException(EventHandlerMethod handler, InvocationTargetException e) {
-        log().error("Exception invoking method: " + handler.getFullName(), e);
+    private static void processHandlerException(InvocationTargetException e,
+                                                Message eventMessage,
+                                                EventContext eventContext) {
+        log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
+                                                              eventMessage, eventContext, e.getCause());
     }
 
     @Override
