@@ -67,7 +67,17 @@ public abstract class HandlerMethod<C> {
     }
 
     protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, Methods.getFullMethodName(method));
+        log().warn(messageFormat, getFullMethodName(method));
+    }
+
+    /**
+     * Returns a full method name without parameters.
+     *
+     * @param method a method to get name for
+     * @return full method name
+     */
+    private static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
     /**
@@ -165,7 +175,7 @@ public abstract class HandlerMethod<C> {
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return Methods.getFullMethodName(method);
+        return getFullMethodName(method);
     }
 
     /**
@@ -194,6 +204,22 @@ public abstract class HandlerMethod<C> {
         final HandlerMethod other = (HandlerMethod) obj;
 
         return Objects.equals(this.method, other.method);
+    }
+
+    /**
+     * Returns the class of the first parameter of the passed handler method object.
+     *
+     * <p>It is expected that the first parameter of the passed method is always of
+     * a class implementing {@link Message}.
+     *
+     * @param handler the method object to take first parameter type from
+     * @return the class of the first method parameter
+     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     */
+    /* package */ static Class<? extends Message> getFirstParamType(Method handler) {
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
+        final Class<? extends Message> result = (Class<? extends Message>) handler.getParameterTypes()[0];
+        return result;
     }
 
     /**

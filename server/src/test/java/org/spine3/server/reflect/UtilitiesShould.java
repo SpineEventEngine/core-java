@@ -61,7 +61,6 @@ public class UtilitiesShould {
         checkPrivateConstructor(Identifiers.class);
         checkPrivateConstructor(IoUtil.class);
         checkPrivateConstructor(Math.class);
-        checkPrivateConstructor(Methods.class);
         checkPrivateConstructor(Tests.class);
 
         // testutil package

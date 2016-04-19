@@ -20,11 +20,13 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
+import org.spine3.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -44,7 +46,7 @@ public class MethodMap<H extends HandlerMethod> {
     private final ImmutableMap<Class<? extends Message>, H> map;
 
     private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
-        final Map<Class<? extends Message>, Method> rawMethods = Methods.scan(clazz, factory.getPredicate());
+        final Map<Class<? extends Message>, Method> rawMethods = scan(clazz, factory.getPredicate());
 
         final ImmutableMap.Builder<Class<? extends Message>, H> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
@@ -65,6 +67,35 @@ public class MethodMap<H extends HandlerMethod> {
      */
     public static <H extends HandlerMethod> MethodMap<H> create(Class<?> clazz, HandlerMethod.Factory<H> factory) {
         return new MethodMap<>(clazz, factory);
+    }
+
+    /**
+     * Returns a map of the {@link HandlerMethod} objects to the corresponding message class.
+     *
+     * @param declaringClass   the class that declares methods to scan
+     * @param filter the predicate that defines rules for subscriber scanning
+     * @return the map of message subscribers
+     * @throws DuplicateHandlerMethodException if there are more than one handler for the same message class are encountered
+     */
+    private static Map<Class<? extends Message>, Method> scan(Class<?> declaringClass, Predicate<Method> filter) {
+        final Map<Class<? extends Message>, Method> tempMap = Maps.newHashMap();
+        for (Method method : declaringClass.getDeclaredMethods()) {
+            if (filter.apply(method)) {
+                final Class<? extends Message> messageClass = HandlerMethod.getFirstParamType(method);
+                if (tempMap.containsKey(messageClass)) {
+                    final Method alreadyPresent = tempMap.get(messageClass);
+                    throw new DuplicateHandlerMethodException(
+                            declaringClass,
+                            messageClass,
+                            alreadyPresent.getName(),
+                            method.getName());
+                }
+                tempMap.put(messageClass, method);
+            }
+        }
+        final ImmutableMap.Builder<Class<? extends Message>, Method> builder = ImmutableMap.builder();
+        builder.putAll(tempMap);
+        return builder.build();
     }
 
     /**
@@ -94,53 +125,5 @@ public class MethodMap<H extends HandlerMethod> {
     @Nullable
     public H get(Class<? extends Message> messageClass) {
         return map.get(checkNotNull(messageClass));
-    }
-
-    /**
-     * The registry of message maps by class.
-     *
-     * @param <T> the type of objects tracked by the registry
-     */
-    public static class Registry<T> {
-
-        private final Map<Class<? extends T>, MethodMap> entries = Maps.newConcurrentMap();
-
-        /**
-         * Verifies if the class is already registered.
-         *
-         * @param clazz the class to check
-         * @return {@code true} if there is a message map for the passed class, {@code false} otherwise
-         */
-        @CheckReturnValue
-        public boolean contains(Class<? extends T> clazz) {
-            final boolean result = entries.containsKey(clazz);
-            return result;
-        }
-
-        /**
-         * Registers methods of the class in the registry.
-         *
-         * @param clazz the class to register
-         * @param factory a filter for selecting methods to register
-         * @throws IllegalArgumentException if the class was already registered
-         * @see #contains(Class)
-         */
-        public <H extends HandlerMethod> void register(Class<? extends T> clazz, HandlerMethod.Factory<H> factory) {
-            if (contains(clazz)) {
-                throw new IllegalArgumentException("The class is already registered: " + clazz.getName());
-            }
-
-            final MethodMap<H> entry = create(clazz, factory);
-            entries.put(clazz, entry);
-        }
-
-        /**
-         * Obtains method map for the passed class.
-         */
-        @CheckReturnValue
-        public MethodMap get(Class<? extends T> clazz) {
-            final MethodMap result = entries.get(clazz);
-            return result;
-        }
     }
 }
