@@ -109,7 +109,7 @@ public class CommandBusShould {
     @SuppressWarnings("EmptyClass")
     private static class EmptyCommandHandler extends CommandHandler {
         private EmptyCommandHandler(EventBus eventBus) {
-            super(eventBus);
+            super(newUuid(), eventBus);
         }
     }
 
@@ -213,7 +213,7 @@ public class CommandBusShould {
         private boolean handlerInvoked = false;
 
         private CreateProjectHandler(EventBus eventBus) {
-            super(eventBus);
+            super(newUuid(), eventBus);
         }
 
         @Assign
@@ -388,7 +388,7 @@ public class CommandBusShould {
         private final Throwable throwable;
 
         protected ThrowingCreateProjectHandler(EventBus eventBus, Throwable throwable) {
-            super(eventBus);
+            super(newUuid(), eventBus);
             this.throwable = throwable;
         }
 
