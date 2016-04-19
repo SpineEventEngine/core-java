@@ -18,15 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.internal;
+package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.server.Assign;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.reflect.HandlerMethod;
-import org.spine3.server.reflect.MethodMap;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import org.spine3.server.EventHandler;
-import org.spine3.server.internal.EventHandlerMethod;
+import org.spine3.server.reflect.EventHandlerMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.type.EventClass;
 

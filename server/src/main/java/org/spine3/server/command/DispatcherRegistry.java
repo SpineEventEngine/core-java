@@ -26,8 +26,8 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.spine3.server.CommandDispatcher;
 import org.spine3.server.CommandHandler;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.type.CommandClass;
 
 import java.util.Map;

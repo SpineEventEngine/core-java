@@ -23,7 +23,7 @@ package org.spine3.server;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.internal.EventHandlerMethod;
+import org.spine3.server.reflect.EventHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;

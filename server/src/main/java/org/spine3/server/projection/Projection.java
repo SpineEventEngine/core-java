@@ -24,14 +24,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.EventHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
+import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.

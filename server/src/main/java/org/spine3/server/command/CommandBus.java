@@ -203,10 +203,6 @@ public class CommandBus implements AutoCloseable {
         final CommandHandler handler = getHandler(commandClass);
         final CommandId commandId = context.getCommandId();
         try {
-            //TODO:2016-04-14:alexander.yevsyukov: Store methods inside the handler (and corresponding registry of method maps).
-            //TODO:2016-04-14:alexander.yevsyukov: Keep handlers, not methods in handler registry.
-            //TODO:2016-04-14:alexander.yevsyukov: Rename the `call` method to `handle`.
-
             handler.handle(msg, context);
 
             commandStatusService.setOk(commandId);

@@ -36,8 +36,8 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.CommandHandler;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.CommandHandlerMethod;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import javax.annotation.CheckReturnValue;

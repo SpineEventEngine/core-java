@@ -37,9 +37,9 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.UserId;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.internal.CommandHandlerMethod;
-import org.spine3.server.internal.EventHandlerMethod;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.reflect.EventHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.time.ZoneOffset;
 
@@ -51,7 +51,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.internal.EventHandlerMethod.PREDICATE;
+import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
