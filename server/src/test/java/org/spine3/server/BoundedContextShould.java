@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -40,13 +39,8 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.entity.IdFunction;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventHandler;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.procman.CommandRouted;
@@ -75,8 +69,8 @@ import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestCommands.createProject;
-import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestCommands.newCommandBus;
+import static org.spine3.testdata.TestEventFactory.newEventBus;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
@@ -111,13 +105,6 @@ public class BoundedContextShould {
     public void setUp() {
         storageFactory = InMemoryStorageFactory.getInstance();
         boundedContext = BoundedContextTestStubs.create(storageFactory);
-    }
-
-    private static EventBus newEventBus(StorageFactory storageFactory) {
-        return EventBus.newInstance(EventStore.newBuilder()
-                                              .setStreamExecutor(MoreExecutors.directExecutor())
-                                              .setStorage(storageFactory.createEventStorage())
-                                              .build());
     }
 
     @After

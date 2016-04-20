@@ -20,18 +20,17 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.junit.Assert.*;
 import static org.spine3.testdata.TestCommands.newCommandBus;
+import static org.spine3.testdata.TestEventFactory.newEventBus;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextBuilderShould {
@@ -98,12 +97,5 @@ public class BoundedContextBuilderShould {
     public void do_not_accept_null_EventBus() {
         //noinspection ConstantConditions
         BoundedContext.newBuilder().setEventBus(null);
-    }
-
-    private static EventBus newEventBus(StorageFactory storageFactory) {
-        return EventBus.newInstance(EventStore.newBuilder()
-                                              .setStreamExecutor(MoreExecutors.directExecutor())
-                                              .setStorage(storageFactory.createEventStorage())
-                                              .build());
     }
 }

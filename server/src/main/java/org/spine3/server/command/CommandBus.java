@@ -65,6 +65,7 @@ public class CommandBus implements AutoCloseable {
     
     private ProblemLog problemLog = new ProblemLog();
     private final CommandStatusService commandStatusService;
+    private MessageValidator messageValidator;
 
     private CommandBus(Builder builder) {
         commandStore = builder.getCommandStore();
@@ -73,6 +74,7 @@ public class CommandBus implements AutoCloseable {
             scheduler.setPostFunction(newPostFunction());
         }
         commandStatusService = new CommandStatusService(commandStore);
+        messageValidator = new MessageValidator();
     }
 
     /**
@@ -145,8 +147,7 @@ public class CommandBus implements AutoCloseable {
         if (isUnsupportedCommand(commandClass)) {
             return unsupportedCommand(command);
         }
-        final MessageValidator validator = new MessageValidator();
-        final List<ConstraintViolation> violations = validator.validate(command);
+        final List<ConstraintViolation> violations = messageValidator.validate(command);
         if (!violations.isEmpty()) {
             return invalidCommand(command, violations);
         }
@@ -277,6 +278,11 @@ public class CommandBus implements AutoCloseable {
         this.problemLog = problemLog;
     }
 
+    @VisibleForTesting
+    /* package */ void setMessageValidator(MessageValidator messageValidator) {
+        this.messageValidator = messageValidator;
+    }
+
     private void store(Command request) {
         commandStore.store(request);
     }
@@ -300,9 +306,7 @@ public class CommandBus implements AutoCloseable {
             @Nullable
             @Override
             public Command apply(@Nullable Command command) {
-                if (command == null) {
-                    return null;
-                }
+                //noinspection ConstantConditions
                 post(command);
                 return command;
             }
