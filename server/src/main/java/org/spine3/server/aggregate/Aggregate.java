@@ -36,6 +36,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
@@ -60,6 +61,7 @@ import static org.spine3.base.Identifiers.idToAny;
  * These events are used later to restore the state of the aggregate.
  *
  * <h2>Creating aggregate class</h2>
+ *
  * <p>In order to create a new aggregate class you need to:
  * <ol>
  *     <li>Select a type for identifiers of the aggregates. If you select to use a typed identifier
@@ -70,9 +72,13 @@ import static org.spine3.base.Identifiers.idToAny;
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
+ *
  * <p>Command handling methods of an aggregate are defined in the same way as described in {@link CommandHandler}.
  *
+ * <p>Event(s) returned by command handler methods are posted to the {@link EventBus} automatically.
+ *
  * <h2>Adding event applier methods</h2>
+ *
  * <p>Aggregate data is stored as sequence of events it produces. The state of the aggregate
  * is restored by re-playing the history of events and invoking corresponding <em>event applier methods</em>.
  *

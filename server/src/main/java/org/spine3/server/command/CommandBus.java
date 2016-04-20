@@ -344,6 +344,7 @@ public class CommandBus implements AutoCloseable {
     public static class Builder {
 
         private CommandStore commandStore;
+        @Nullable
         private CommandScheduler scheduler;
 
         public CommandBus build() {
@@ -352,6 +353,9 @@ public class CommandBus implements AutoCloseable {
             return commandBus;
         }
 
+        /**
+         * Sets a command store, which is required.
+         */
         public Builder setCommandStore(CommandStore commandStore) {
             this.commandStore = commandStore;
             return this;
@@ -361,6 +365,9 @@ public class CommandBus implements AutoCloseable {
             return commandStore;
         }
 
+        /**
+         * Sets a command scheduler, which is not required.
+         */
         public Builder setScheduler(CommandScheduler scheduler) {
             this.scheduler = scheduler;
             return this;
