@@ -27,6 +27,7 @@ option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 import "google/protobuf/any.proto";
 
 import "spine/base/user_id.proto";
@@ -77,6 +78,14 @@ message CommandContext {
 
     // The `namespace` attribute must be defined for commands in multitenant applications.
     Namespace namespace = 5;
+
+    // The command scheduling options.
+    Schedule schedule = 6;
+}
+
+message Schedule {
+    // The delay between the moment of receiving a command at the server and its delivery to the target.
+    google.protobuf.Duration after = 1;
 }
 
 // Enumeration of possible failures when validating a command.

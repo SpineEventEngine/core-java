@@ -21,6 +21,7 @@
 package org.spine3.testdata;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
@@ -29,6 +30,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.Schedule;
 import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
 
@@ -36,7 +38,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.protobuf.Values.newStringValue;
 
 
 /**
@@ -47,7 +49,7 @@ import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 @SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
 public class TestContextFactory {
 
-    private static final Any AGGREGATE_ID = toAny(newProjectId());
+    private static final Any AGGREGATE_ID = toAny(newStringValue(newUuid()));
 
     private TestContextFactory() {
     }
@@ -73,6 +75,29 @@ public class TestContextFactory {
                 .setZoneOffset(ZoneOffset.getDefaultInstance());
         return builder.build();
     }
+
+    /**
+     * Creates a new context with the given delay before the delivery time.
+     */
+    public static CommandContext createCommandContext(Duration delay) {
+        final Schedule schedule = Schedule.newBuilder()
+                                          .setAfter(delay)
+                                          .build();
+        return createCommandContext(schedule);
+    }
+
+    /**
+     * Creates a new context with the given scheduling options.
+     */
+    public static CommandContext createCommandContext(Schedule schedule) {
+        final CommandContext.Builder builder = createCommandContext().toBuilder()
+                                                                     .setSchedule(schedule);
+        return builder.build();
+    }
+
+    /*
+     * Event context factory methods.
+     */
 
     /**
      * Creates a new {@link EventContext} with default properties.

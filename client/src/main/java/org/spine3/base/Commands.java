@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Descriptors.FileDescriptor;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.EntityPackagesMap;
@@ -39,6 +40,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Client-side utilities for working with commands.
@@ -48,11 +50,12 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public class Commands {
 
     /**
-     * A substring which the {@code .proto} file containing commands must have in its name.
+     * A suffix which the {@code .proto} file containing commands must have in its name.
      */
-    public static final String COMMANDS_FILE_SUBSTRING = "commands";
+    public static final String FILE_NAME_SUFFIX = "commands";
 
-    private static final char PROTO_FILE_SEPARATOR = '/';
+    private static final char FILE_PATH_SEPARATOR = '/';
+    private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private Commands() {}
 
@@ -193,13 +196,14 @@ public class Commands {
      * Checks if the file is for commands.
      *
      * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name contains {@link #COMMANDS_FILE_SUBSTRING} substring, {@code false} otherwise
+     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         final String fqn = file.getName();
-        final int startIndexOfFileName = fqn.lastIndexOf(PROTO_FILE_SEPARATOR) + 1;
-        final String fileName = fqn.substring(startIndexOfFileName);
-        final boolean isCommandsFile = fileName.contains(COMMANDS_FILE_SUBSTRING);
+        final int startIndexOfFileName = fqn.lastIndexOf(FILE_PATH_SEPARATOR) + 1;
+        final int endIndexOfFileName = fqn.lastIndexOf(FILE_EXTENSION_SEPARATOR);
+        final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
+        final boolean isCommandsFile = fileName.endsWith(FILE_NAME_SUFFIX);
         return isCommandsFile;
     }
 
@@ -215,5 +219,21 @@ public class Commands {
         final String protoPackage = file.getPackage();
         final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
         return isCommandForEntity;
+    }
+
+    /**
+     * Checks if the command is scheduled to be delivered later.
+     *
+     * @param command a command to check
+     * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
+     */
+    public static boolean isScheduled(Command command) {
+        final Schedule schedule = command.getContext().getSchedule();
+        final Duration delay = schedule.getAfter();
+        if (isNotDefault(delay)) {
+            checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
+            return true;
+        }
+        return false;
     }
 }

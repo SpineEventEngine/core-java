@@ -20,15 +20,14 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.mockito.Mockito.spy;
+import static org.spine3.testdata.TestCommands.newCommandBus;
+import static org.spine3.testdata.TestEventFactory.newEventBus;
 
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
@@ -43,21 +42,14 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(StorageFactory storageFactory) {
-        final CommandBus commandBus = CommandBus.create(
-                new CommandStore(storageFactory.createCommandStorage()));
-
-        final EventBus eventBus = EventBus.newInstance(EventStore.newBuilder()
-                                                                 .setStreamExecutor(MoreExecutors.directExecutor())
-                                                                 .setStorage(storageFactory.createEventStorage())
-                                                                 .build());
-
-        return BoundedContext.newBuilder()
+        final CommandBus commandBus = newCommandBus(storageFactory);
+        final EventBus eventBus = newEventBus(storageFactory);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
                 .setCommandBus(commandBus)
-                .setEventBus(spy(eventBus))
-                .build();
+                .setEventBus(spy(eventBus));
+        return builder.build();
     }
 
-    private BoundedContextTestStubs() {
-    }
+    private BoundedContextTestStubs() {}
 }

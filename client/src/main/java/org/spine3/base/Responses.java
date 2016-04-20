@@ -22,6 +22,8 @@ package org.spine3.base;
 
 import com.google.protobuf.Empty;
 
+import static org.spine3.protobuf.Messages.fromAny;
+
 /**
  * Utilities for working with {@link org.spine3.base.Response} objects.
  *
@@ -47,6 +49,8 @@ public class Responses {
     }
 
     /**
+     * Checks if the response is OK.
+     *
      * @return {@code true} if the passed response represents `ok` status,
      *         {@code false} otherwise
      */
@@ -56,13 +60,31 @@ public class Responses {
     }
 
     /**
+     * Checks if the response is `unsupported command`.
+     *
      * @return {@code true} if the passed response represents `unsupported command` error,
      *         {@code false} otherwise
      */
     public static boolean isUnsupportedCommand(Response response) {
         if (response.getStatusCase() == Response.StatusCase.ERROR) {
             final Error error = response.getError();
-            return error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
+            final boolean isUnsupported = error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
+            return isUnsupported;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the response is `invalid command`.
+     *
+     * @return {@code true} if the passed response represents `invalid command` error,
+     *         {@code false} otherwise
+     */
+    public static boolean isInvalidCommand(Response response) {
+        if (response.getStatusCase() == Response.StatusCase.FAILURE) {
+            final ValidationFailure failure = fromAny(response.getFailure().getInstance());
+            final boolean isInvalid = !failure.getConstraintViolationList().isEmpty();
+            return isInvalid;
         }
         return false;
     }

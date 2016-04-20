@@ -19,7 +19,7 @@ import static org.spine3.util.Math.safeMultiply;
 
 /**
  * Utility class for working with durations in addition to those available from {@link TimeUtil}.
- * 
+ *
  * <p>Use {@code import static org.spine3.protobuf.Durations.*} for compact initialization like this:
  * <pre>
  *      Duration d = add(hours(2), minutes(30));
@@ -42,15 +42,26 @@ public class Durations {
      */
 
     /**
+     * Obtains an instance of {@code Duration} representing the passed number of milliseconds.
+     *
+     * @param milliseconds the number of milliseconds, positive or negative
+     * @return a non-null {@code Duration}
+     */
+    public static Duration ofMilliseconds(long milliseconds) {
+        final Duration result = createDurationFromMillis(milliseconds);
+        return result;
+    }
+
+    /**
      * Obtains an instance of {@code Duration} from the number of seconds.
      *
      * @param seconds the number of seconds, positive or negative
      * @return a non-null {@code Duration}
      */
     public static Duration ofSeconds(long seconds) {
-        return createDurationFromMillis(safeMultiply(seconds, MILLIS_PER_SECOND));
+        final Duration result = createDurationFromMillis(safeMultiply(seconds, MILLIS_PER_SECOND));
+        return result;
     }
-
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of minutes.
@@ -59,38 +70,55 @@ public class Durations {
      * @return a non-null {@code Duration}
      */
     public static Duration ofMinutes(long minutes) {
-        return ofSeconds(safeMultiply(minutes, SECONDS_PER_MINUTE));
+        final Duration duration = ofSeconds(safeMultiply(minutes, SECONDS_PER_MINUTE));
+        return duration;
     }
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of hours.
+     *
      * @param hours the number of hours, positive or negative
      * @return a non-null {@code Duration}
      */
     public static Duration ofHours(long hours) {
-        return ofMinutes(safeMultiply(hours, MINUTES_PER_HOUR));
+        final Duration duration = ofMinutes(safeMultiply(hours, MINUTES_PER_HOUR));
+        return duration;
     }
+
+    // Methods for brief computations with Durations like
+    //       add(hours(2), minutes(30));
+    /////////////////////////////////////////////////////
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of nanoseconds.
+     *
      * @param nanos the number of nanoseconds, positive or negative
      * @return a non-null {@code Duration}
      */
     public static Duration nanos(long nanos) {
-        return TimeUtil.createDurationFromNanos(nanos);
+        final Duration duration = TimeUtil.createDurationFromNanos(nanos);
+        return duration;
+    }
+
+    /**
+     * Obtains an instance of {@code Duration} representing the passed number of milliseconds.
+     *
+     * @param milliseconds the number of milliseconds, positive or negative
+     * @return a non-null {@code Duration}
+     */
+    public static Duration milliseconds(long milliseconds) {
+        return ofMilliseconds(milliseconds);
     }
 
     /**
      * Obtains an instance of {@code Duration} representing the passed number of seconds.
+     *
      * @param seconds the number of seconds, positive or negative
      * @return a non-null {@code Duration}
      */
     public static Duration seconds(long seconds) {
         return ofSeconds(seconds);
     }
-
-    // Methods for brief computations with Durations like
-    //       add(hours(2), minutes(30));
 
     /**
      * This method allows for more compact code of creation of {@code Duration} instance with minutes.
@@ -108,30 +136,27 @@ public class Durations {
 
     /**
      * Adds two durations one of which or both can be {@code null}.
+     *
      * @param d1 a duration to add, could be {@code null}
      * @param d2 another duration to add, could be {@code null}
-     * @return
-     *      <ul>
-     *          <li>sum of two durations if both of them are {@code non-null}</li>
-     *          <li>another {@code non-null} value, if one is {@code null}</li>
-     *          <li>{@link #ZERO} if both values are {@code null}</li>
-     *      </ul>
-     *
+     * @return <ul>
+     * <li>sum of two durations if both of them are {@code non-null}</li>
+     * <li>another {@code non-null} value, if one is {@code null}</li>
+     * <li>{@link #ZERO} if both values are {@code null}</li>
+     * </ul>
      */
     public static Duration add(@Nullable Duration d1, @Nullable Duration d2) {
         if (d1 == null && d2 == null) {
             return ZERO;
         }
-
         if (d1 == null) {
             return d2;
         }
-
         if (d2 == null) {
             return d1;
         }
-
-        return TimeUtil.add(d1, d2);
+        final Duration result = TimeUtil.add(d1, d2);
+        return result;
     }
 
 
@@ -141,14 +166,16 @@ public class Durations {
     public static Duration subtract(Duration d1, Duration d2) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
-        return TimeUtil.subtract(d1, d2);
+        final Duration result = TimeUtil.subtract(d1, d2);
+        return result;
     }
 
     /**
      * This method allows for more compact code of creation of {@code Duration} instance with hours and minutes.
      */
     public static Duration hoursAndMinutes(long hours, long minutes) {
-        return add(hours(hours), minutes(minutes));
+        final Duration result = add(hours(hours), minutes(minutes));
+        return result;
     }
 
     /**
@@ -157,14 +184,17 @@ public class Durations {
     public static long toNanos(Duration duration) {
         /* The sole purpose of this method is minimize the dependencies of the classes
            working with durations. */
-        return TimeUtil.toNanos(duration);
+        final long result = TimeUtil.toNanos(duration);
+        return result;
     }
 
     /**
      * Convert a duration to the number of seconds.
      */
     public static long toSeconds(Duration duration) {
-        return floorDiv(TimeUtil.toMillis(duration), MILLIS_PER_SECOND);
+        final long millis = TimeUtil.toMillis(duration);
+        final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
+        return seconds;
     }
 
     /**
@@ -201,7 +231,9 @@ public class Durations {
     public static int getMinutes(Duration value) {
         final long allMinutes = toMinutes(value);
         final long remainder = allMinutes % MINUTES_PER_HOUR;
-        return Long.valueOf(remainder).intValue();
+        final int result = Long.valueOf(remainder)
+                               .intValue();
+        return result;
     }
 
     /**
@@ -209,14 +241,18 @@ public class Durations {
      */
     public static boolean isPositiveOrZero(Duration value) {
         final long millis = toMillis(value);
-        return millis >= 0;
+        final boolean result = millis >= 0;
+        return result;
     }
 
     /**
      * @return {@code true} if the passed value is greater than zero, {@code false} otherwise
      */
     public static boolean isPositive(DurationOrBuilder value) {
-        return value.getSeconds() > 0 || value.getNanos() > 0;
+        final boolean secondsPositive = value.getSeconds() > 0;
+        final boolean nanosPositive = value.getNanos() > 0;
+        final boolean result = secondsPositive || nanosPositive;
+        return result;
 
     }
 
@@ -224,7 +260,10 @@ public class Durations {
      * @return {@code true} if the passed value is zero, {@code false} otherwise
      */
     public static boolean isZero(DurationOrBuilder value) {
-        return value.getSeconds() == 0 && value.getNanos() == 0;
+        final boolean noSeconds = value.getSeconds() == 0;
+        final boolean noNanos = value.getNanos() == 0;
+        final boolean result = noSeconds && noNanos;
+        return result;
     }
 
     /**
@@ -233,7 +272,8 @@ public class Durations {
     public static boolean isGreaterThan(Duration value, Duration another) {
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
-        return nanos > anotherNanos;
+        final boolean isGreater = nanos > anotherNanos;
+        return isGreater;
     }
 
     /**
@@ -242,7 +282,8 @@ public class Durations {
     public static boolean isLessThan(Duration value, Duration another) {
         final long nanos = toNanos(value);
         final long anotherNanos = toNanos(another);
-        return nanos < anotherNanos;
+        final boolean isLessThan = nanos < anotherNanos;
+        return isLessThan;
     }
 
     /**
@@ -251,7 +292,8 @@ public class Durations {
     public static int compare(Duration d1, Duration d2) {
         final long nanos = toNanos(d1);
         final long otherNanos = toNanos(d2);
-        return Long.compare(nanos, otherNanos);
+        final int result = Long.compare(nanos, otherNanos);
+        return result;
     }
 
     /**
@@ -259,6 +301,7 @@ public class Durations {
      */
     public static boolean isNegative(Duration value) {
         final long nanos = toNanos(value);
-        return nanos < 0;
+        final boolean isNegative = nanos < 0;
+        return isNegative;
     }
 }

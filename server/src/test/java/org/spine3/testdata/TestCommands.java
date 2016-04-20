@@ -28,6 +28,10 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.UserId;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandScheduler;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -112,8 +116,8 @@ public class TestCommands {
         return CreateProject.newBuilder()
                 .setProjectId(
                         ProjectId.newBuilder()
-                                .setId(projectId)
-                                .build())
+                                 .setId(projectId)
+                                 .build())
                 .build();
     }
 
@@ -148,8 +152,30 @@ public class TestCommands {
     public static StartProject startProject(String projectId) {
         return StartProject.newBuilder()
                 .setProjectId(ProjectId.newBuilder()
-                        .setId(projectId)
-                        .build())
+                                       .setId(projectId)
+                                       .build())
                 .build();
+    }
+
+    /**
+     * Creates a new command bus with the given storage factory.
+     */
+    public static CommandBus newCommandBus(StorageFactory storageFactory) {
+        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
+        final CommandBus commandBus = CommandBus.newBuilder()
+                .setCommandStore(store)
+                .build();
+        return commandBus;
+    }
+
+    /**
+     * Creates a new command bus with the given command store and scheduler.
+     */
+    public static CommandBus newCommandBus(CommandStore store, CommandScheduler scheduler) {
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(store)
+                                                .setScheduler(scheduler)
+                                                .build();
+        return commandBus;
     }
 }

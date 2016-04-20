@@ -20,6 +20,7 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.options.ConstraintViolation;
 
-import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -43,12 +44,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
 import static org.spine3.server.command.CommandValidation.invalidCommand;
 import static org.spine3.server.command.CommandValidation.unsupportedCommand;
+import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
+ * @author Alexander Litus
  */
 public class CommandBus implements AutoCloseable {
 
@@ -57,18 +60,28 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStore commandStore;
 
-    private final CommandStatusService commandStatusService;
-
+    @Nullable
+    private final CommandScheduler scheduler;
+    
     private ProblemLog problemLog = new ProblemLog();
+    private final CommandStatusService commandStatusService;
+    private MessageValidator messageValidator;
 
-    @CheckReturnValue
-    public static CommandBus create(CommandStore store) {
-        return new CommandBus(checkNotNull(store));
+    private CommandBus(Builder builder) {
+        commandStore = builder.getCommandStore();
+        scheduler = builder.getScheduler();
+        if (scheduler != null) {
+            scheduler.setPostFunction(newPostFunction());
+        }
+        commandStatusService = new CommandStatusService(commandStore);
+        messageValidator = new MessageValidator();
     }
 
-    protected CommandBus(CommandStore commandStore) {
-        this.commandStore = commandStore;
-        this.commandStatusService = new CommandStatusService(commandStore);
+    /**
+     * Creates a new builder for command bus.
+     */
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -129,13 +142,12 @@ public class CommandBus implements AutoCloseable {
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
-        checkNotNull(command);
+        checkNotDefault(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (isUnsupportedCommand(commandClass)) {
             return unsupportedCommand(command);
         }
-        final MessageValidator validator = new MessageValidator();
-        final List<ConstraintViolation> violations = validator.validate(command);
+        final List<ConstraintViolation> violations = messageValidator.validate(command);
         if (!violations.isEmpty()) {
             return invalidCommand(command, violations);
         }
@@ -150,30 +162,29 @@ public class CommandBus implements AutoCloseable {
     /**
      * Directs a command request to the corresponding handler.
      *
-     * @param request the command request to be processed
+     * @param command the command to be processed
      * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
      *                                     the class of the passed command
      */
-    public void post(Command request) {
-        checkNotNull(request);
-
-        store(request);
-
-        final CommandClass commandClass = CommandClass.of(request);
-
+    public void post(Command command) {
+        checkNotDefault(command);
+        if (isScheduled(command)) {
+            schedule(command);
+            return;
+        }
+        store(command);
+        final CommandClass commandClass = CommandClass.of(command);
         if (isDispatcherRegistered(commandClass)) {
-            dispatch(request);
+            dispatch(command);
             return;
         }
-
         if (isHandlerRegistered(commandClass)) {
-            final Message command = getMessage(request);
-            final CommandContext context = request.getContext();
-            invokeHandler(command, context);
+            final Message message = getMessage(command);
+            final CommandContext context = command.getContext();
+            invokeHandler(message, context);
             return;
         }
-
-        throw new UnsupportedCommandException(getMessage(request));
+        throw new UnsupportedCommandException(getMessage(command));
     }
 
     /**
@@ -187,7 +198,6 @@ public class CommandBus implements AutoCloseable {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
         final CommandId commandId = command.getContext().getCommandId();
-
         try {
             dispatcher.dispatch(command);
         } catch (Exception e) {
@@ -202,9 +212,7 @@ public class CommandBus implements AutoCloseable {
         final CommandId commandId = context.getCommandId();
         try {
             handler.handle(msg, context);
-
             commandStatusService.setOk(commandId);
-
         } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
             //noinspection ChainOfInstanceofChecks
@@ -228,9 +236,13 @@ public class CommandBus implements AutoCloseable {
         return handler;
     }
 
-    @VisibleForTesting
-    /* package */ void setProblemLog(ProblemLog problemLog) {
-        this.problemLog = problemLog;
+    private void schedule(Command command) {
+        if (scheduler != null) {
+            scheduler.schedule(command);
+        } else {
+            throw new IllegalStateException(
+                    "Scheduled commands are not supported by this command bus: scheduler is not set.");
+        }
     }
 
     /**
@@ -262,8 +274,13 @@ public class CommandBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ ProblemLog getProblemLog() {
-        return problemLog;
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
+    }
+
+    @VisibleForTesting
+    /* package */ void setMessageValidator(MessageValidator messageValidator) {
+        this.messageValidator = messageValidator;
     }
 
     private void store(Command request) {
@@ -284,16 +301,31 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
+    private Function<Command, Command> newPostFunction() {
+        final Function<Command, Command> function = new Function<Command, Command>() {
+            @Nullable
+            @Override
+            public Command apply(@Nullable Command command) {
+                //noinspection ConstantConditions
+                post(command);
+                return command;
+            }
+        };
+        return function;
+    }
+
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
     }
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
@@ -304,5 +336,39 @@ public class CommandBus implements AutoCloseable {
     @VisibleForTesting
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
+    }
+
+    /**
+     * Constructs a command bus.
+     */
+    public static class Builder {
+
+        private CommandStore commandStore;
+        private CommandScheduler scheduler;
+
+        public CommandBus build() {
+            checkNotNull(commandStore, "Command store must be set.");
+            final CommandBus commandBus = new CommandBus(this);
+            return commandBus;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            this.commandStore = commandStore;
+            return this;
+        }
+
+        public CommandStore getCommandStore() {
+            return commandStore;
+        }
+
+        public Builder setScheduler(CommandScheduler scheduler) {
+            this.scheduler = scheduler;
+            return this;
+        }
+
+        @Nullable
+        public CommandScheduler getScheduler() {
+            return scheduler;
+        }
     }
 }

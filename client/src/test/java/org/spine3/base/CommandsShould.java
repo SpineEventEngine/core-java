@@ -39,10 +39,12 @@ import java.util.List;
 
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
@@ -145,5 +147,28 @@ public class CommandsShould {
         final FileDescriptor file = StringValue.getDescriptor().getFile();
 
         assertFalse(Commands.isEntityFile(file));
+    }
+
+    @Test
+    public void when_command_delay_is_set_then_consider_it_scheduled() {
+        final CommandContext context = createCommandContext(/*delay=*/seconds(10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
+
+        assertTrue(Commands.isScheduled(cmd));
+    }
+
+    @Test
+    public void when_no_scheduling_options_then_consider_command_not_scheduled() {
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        assertFalse(Commands.isScheduled(cmd));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void when_set_negative_delay_then_throw_exception() {
+        final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
+        final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
+
+        Commands.isScheduled(cmd);
     }
 }

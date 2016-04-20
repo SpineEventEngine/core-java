@@ -20,8 +20,12 @@
 
 package org.spine3.testdata;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
@@ -116,5 +120,17 @@ public class TestEventFactory {
         final ProjectStarted event = projectStartedEvent(projectId);
         final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
         return builder.build();
+    }
+
+    /**
+     * Creates a new event bus with the given storage factory.
+     */
+    public static EventBus newEventBus(StorageFactory storageFactory) {
+        final EventStore store = EventStore.newBuilder()
+                                           .setStreamExecutor(MoreExecutors.directExecutor())
+                                           .setStorage(storageFactory.createEventStorage())
+                                           .build();
+        final EventBus eventBus = EventBus.newInstance(store);
+        return eventBus;
     }
 }
