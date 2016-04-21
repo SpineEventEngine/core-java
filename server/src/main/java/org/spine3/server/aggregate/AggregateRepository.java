@@ -183,31 +183,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void store(A aggregate) {
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
-
-        //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
-        // Now we're storing snapshot in a sequence of uncommitted
-        // events, which isn't going to be the case. We need to read the number of events since the last
-        // snapshot of the aggregate instead.
-
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
-        int eventCount = 0;
+        final AggregateStorage<I> storage = aggregateStorage();
+        int eventCount = storage.readEventCountAfterLastSnapshot();
+        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
-            aggregateStorage().writeEvent(id, event);
+            storage.writeEvent(id, event);
             ++eventCount;
-
             if (eventCount > snapshotTrigger) {
-                createAndStoreSnapshot(id, aggregate);
+                final Snapshot snapshot = aggregate.toSnapshot();
+                storage.write(id, snapshot);
                 eventCount = 0;
             }
         }
         aggregate.commitEvents();
-    }
-
-    private void createAndStoreSnapshot(I id, A aggregate) {
-        final Snapshot snapshot = aggregate.toSnapshot();
-        aggregateStorage().write(id, snapshot);
+        storage.writeEventCountAfterLastSnapshot(eventCount);
     }
 
     /**

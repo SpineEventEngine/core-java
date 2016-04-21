@@ -34,7 +34,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * In-memory storage for aggregate root events and snapshots.
+ * In-memory storage for aggregate events and snapshots.
  *
  * @author Alexander Litus
  */
@@ -46,8 +46,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
+    private int eventCountAfterLastSnapshot = 0;
+
     /**
-     * Creates new storage instance.
+     * Creates a new storage instance.
      */
     protected static <I> InMemoryAggregateStorage<I> newInstance() {
         return new InMemoryAggregateStorage<>();
@@ -61,9 +63,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-
         final Collection<AggregateStorageRecord> records = storage.get(id);
         return records.iterator();
+    }
+
+    @Override
+    public int readEventCountAfterLastSnapshot() {
+        return eventCountAfterLastSnapshot;
+    }
+
+    @Override
+    public void writeEventCountAfterLastSnapshot(int eventCount) {
+        this.eventCountAfterLastSnapshot = eventCount;
     }
 
     /**
