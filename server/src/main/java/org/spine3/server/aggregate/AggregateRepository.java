@@ -184,7 +184,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
         final AggregateStorage<I> storage = aggregateStorage();
-        int eventCount = storage.readEventCountAfterLastSnapshot();
+        int eventCount = storage.readEventCountAfterLastSnapshot(id);
         final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
@@ -196,7 +196,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             }
         }
         aggregate.commitEvents();
-        storage.writeEventCountAfterLastSnapshot(eventCount);
+        storage.writeEventCountAfterLastSnapshot(id, eventCount);
     }
 
     /**

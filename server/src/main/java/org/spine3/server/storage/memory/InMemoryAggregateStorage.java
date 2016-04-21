@@ -30,8 +30,10 @@ import org.spine3.server.storage.AggregateStorageRecord;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * In-memory storage for aggregate events and snapshots.
@@ -41,12 +43,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings("ComparatorNotSerializable")
 /*package*/ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
-    private final Multimap<I, AggregateStorageRecord> storage = TreeMultimap.create(
+    private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
             Ordering.arbitrary(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
-    private int eventCountAfterLastSnapshot = 0;
+    private final Map<I, Integer> eventCountMap = newHashMap();
 
     /**
      * Creates a new storage instance.
@@ -57,31 +59,37 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     @Override
     protected void writeInternal(I id, AggregateStorageRecord record) {
-        storage.put(id, record);
+        recordMap.put(id, record);
     }
 
     @Override
     protected Iterator<AggregateStorageRecord> historyBackward(I id) {
         checkNotNull(id);
-        final Collection<AggregateStorageRecord> records = storage.get(id);
+        final Collection<AggregateStorageRecord> records = recordMap.get(id);
         return records.iterator();
     }
 
     @Override
-    public int readEventCountAfterLastSnapshot() {
-        return eventCountAfterLastSnapshot;
+    public int readEventCountAfterLastSnapshot(I id) {
+        checkNotClosed();
+        final Integer count = eventCountMap.get(id);
+        if (count == null) {
+            return 0;
+        }
+        return count;
     }
 
     @Override
-    public void writeEventCountAfterLastSnapshot(int eventCount) {
-        this.eventCountAfterLastSnapshot = eventCount;
+    public void writeEventCountAfterLastSnapshot(I id, int eventCount) {
+        checkNotClosed();
+        eventCountMap.put(id, eventCount);
     }
 
     /**
      * Clears all data in the storage.
      */
     protected void clear() {
-        storage.clear();
+        recordMap.clear();
     }
 
     @Override
