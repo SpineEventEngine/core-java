@@ -72,7 +72,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           implements CommandDispatcher {
 
     /**
-     * Default number of events to be stored before a next snapshot is made.
+     * The default number of events to be stored before a next snapshot is made.
      */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
@@ -86,7 +86,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final EventBus eventBus;
 
     /**
-     * {@inheritDoc}
+     * Creates a new repository instance.
+     *
+     * @param boundedContext the bounded context to which this repository belongs
      */
     public AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
