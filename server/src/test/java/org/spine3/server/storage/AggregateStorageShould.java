@@ -218,8 +218,22 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     public void write_and_read_event_count_after_last_snapshot() {
         final int expectedCount = 32;
         storage.writeEventCountAfterLastSnapshot(expectedCount);
+
         final int actualCount = storage.readEventCountAfterLastSnapshot();
+
         assertEquals(expectedCount, actualCount);
+    }
+
+    @Test
+    public void rewrite_event_count_after_last_snapshot() {
+        final int primaryValue = 16;
+        storage.writeEventCountAfterLastSnapshot(primaryValue);
+        final int expectedValue = 32;
+        storage.writeEventCountAfterLastSnapshot(expectedValue);
+
+        final int actualCount = storage.readEventCountAfterLastSnapshot();
+
+        assertEquals(expectedValue, actualCount);
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
