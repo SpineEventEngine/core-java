@@ -128,7 +128,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test
-    public void write_and_one_event_by_Message_id() {
+    public void write_read_and_one_event_by_Message_id() {
         writeAndReadEventTest(id, storage);
     }
 
@@ -179,7 +179,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test
-    public void store_and_read_snapshot() {
+    public void write_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
         storage.write(id, expected);
@@ -207,6 +207,19 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         storage.write(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
+    }
+
+    @Test
+    public void return_zero_event_count_after_last_snapshot_by_default() {
+        assertEquals(0, storage.readEventCountAfterLastSnapshot());
+    }
+
+    @Test
+    public void write_and_read_event_count_after_last_snapshot() {
+        final int expectedCount = 32;
+        storage.writeEventCountAfterLastSnapshot(expectedCount);
+        final int actualCount = storage.readEventCountAfterLastSnapshot();
+        assertEquals(expectedCount, actualCount);
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {

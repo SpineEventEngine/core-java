@@ -86,7 +86,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     @Override
     public void close() throws Exception {
-        storage.clear();
+        clear();
         super.close();
     }
 
