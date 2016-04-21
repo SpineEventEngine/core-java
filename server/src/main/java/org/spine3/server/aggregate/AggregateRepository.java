@@ -158,20 +158,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A load(I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().read(id);
-
         try {
             final Snapshot snapshot = aggregateEvents.hasSnapshot()
                     ? aggregateEvents.getSnapshot()
                     : null;
             final A result = create(id);
             final List<Event> events = aggregateEvents.getEventList();
-
             if (snapshot != null) {
                 result.restore(snapshot);
             }
-
             result.play(events);
-
             return result;
         } catch (Throwable e) {
             throw propagate(e);
@@ -231,7 +227,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final CommandId commandId = context.getCommandId();
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
-
         try {
             aggregate.dispatch(command, context);
         } catch (RuntimeException e) {
@@ -247,16 +242,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
-
         final List<Event> events = aggregate.getUncommittedEvents();
-
         //noinspection OverlyBroadCatchBlock
         try {
             store(aggregate);
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }
-
         postEvents(events);
         commandStatusService.setOk(commandId);
     }
