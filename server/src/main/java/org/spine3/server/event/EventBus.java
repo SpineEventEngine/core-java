@@ -46,8 +46,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <ol>
  *    <li>Expose a public method that accepts the type of the event as the first parameter,
  *        and {@link EventContext} as the second parameter;
- *    <li>Mark the method with {@link Subscribe} annotation;</li>
- * <li>Register with an instance of EventBus using {@link #subscribe(EventHandler)}.</li>
+ *    <li>Mark the method with {@link Subscribe} annotation;
+ * <li>Register with an instance of EventBus using {@link #subscribe(EventHandler)}.
  * </ol>
  * Note: Since Protobuf messages are final classes, a handler method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event that needs to be handled.
