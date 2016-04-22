@@ -44,6 +44,8 @@ public abstract class EventHandler {
     }
 
     private EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
-        return MethodRegistry.getInstance().get(getClass(), eventClass, EventHandlerMethod.factory());
+        final MethodRegistry registry = MethodRegistry.getInstance();
+        final EventHandlerMethod method = registry.get(getClass(), eventClass, EventHandlerMethod.factory());
+        return method;
     }
 }
