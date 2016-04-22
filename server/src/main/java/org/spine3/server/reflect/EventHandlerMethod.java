@@ -117,25 +117,24 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
+            private final EventHandlerMethod.Factory value = new EventHandlerMethod.Factory();
         }
 
         private static Factory instance() {
             return Singleton.INSTANCE.value;
         }
     }
+
     /**
      * The predicate class allowing to filter event handling methods.
      *
-     * <p>An event handler must accept a type derived from {@link Message} as the first parameter,
-     * have {@link EventContext} value as the second parameter, and return {@code void}.
+     * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class FilterPredicate implements Predicate<Method> {
 
         private static final int MESSAGE_PARAM_INDEX = 0;
         private static final int EVENT_CONTEXT_PARAM_INDEX = 1;
-        private static final int EVENT_HANDLER_PARAM_COUNT = 2;
 
         /**
          * Checks if the passed method is an event handler.
@@ -152,15 +151,19 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
         }
 
         private static boolean acceptsCorrectParams(Method method) {
-            final Class<?>[] parameterTypes = method.getParameterTypes();
-
-            if (parameterTypes.length != EVENT_HANDLER_PARAM_COUNT) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            final int paramCount = paramTypes.length;
+            if (paramCount == 1) {
+                final boolean isCorrect = Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]);
+                return isCorrect;
+            } else if (paramCount == 2) {
+                final boolean paramsCorrect =
+                        Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
+                        EventContext.class.equals(paramTypes[EVENT_CONTEXT_PARAM_INDEX]);
+                return paramsCorrect;
+            } else {
                 return false;
             }
-            final boolean acceptsCorrectParams =
-                    Message.class.isAssignableFrom(parameterTypes[MESSAGE_PARAM_INDEX]) &&
-                            EventContext.class.equals(parameterTypes[EVENT_CONTEXT_PARAM_INDEX]);
-            return acceptsCorrectParams;
         }
 
         private static boolean isAnnotatedCorrectly(Method method) {
