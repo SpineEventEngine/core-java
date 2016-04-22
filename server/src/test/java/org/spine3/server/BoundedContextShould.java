@@ -76,7 +76,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
@@ -86,20 +86,6 @@ public class BoundedContextShould {
     private StorageFactory storageFactory;
     private BoundedContext boundedContext;
     private boolean handlersRegistered = false;
-
-    private final StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response response) {
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-    };
 
     @Before
     public void setUp() {
