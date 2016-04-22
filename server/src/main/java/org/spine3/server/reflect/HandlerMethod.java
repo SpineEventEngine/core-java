@@ -19,12 +19,15 @@
  */
 package org.spine3.server.reflect;
 
+import com.google.api.client.util.Throwables;
 import com.google.common.base.Predicate;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,6 +35,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.server.reflect.Classes.*;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -41,9 +45,14 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @param <C> the type of the message context or {@code Void} if context is not used
+ * @param <C> the type of the message context or {@link Empty} if context is not used
  */
-public abstract class HandlerMethod<C> {
+public abstract class HandlerMethod<C extends Message> {
+
+    /**
+     * The index of the declaration of the generic parameter type {@code C} in this class.
+     */
+    private static final int CONTEXT_CLASS_GENERIC_INDEX = 0;
 
     /**
      * The method to be called.
@@ -103,10 +112,9 @@ public abstract class HandlerMethod<C> {
         return result;
     }
 
-    //TODO:2016-04-19:alexander.yevsyukov: Check the value returned by this method in the invoke() methods below.
-    // See if we can have a common internal method that accepts null as the context parameter and ignores it
-    // if the underlying method accepts only one parameter.
-
+    /**
+     * Returns the count of the method parameters.
+     */
     protected int getParamCount() {
         return paramCount;
     }
@@ -121,13 +129,20 @@ public abstract class HandlerMethod<C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
         checkNotNull(message);
         checkNotNull(context);
         try {
-            @SuppressWarnings("unchecked")
-            final R result = (R) method.invoke(target, message, context);
-            return result;
+            final int paramCount = getParamCount();
+            if (paramCount == 1) {
+                @SuppressWarnings("unchecked")
+                final R result = (R) method.invoke(target, message);
+                return result;
+            } else {
+                @SuppressWarnings("unchecked")
+                final R result = (R) method.invoke(target, message, context);
+                return result;
+            }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
         } catch (InvocationTargetException e) {
@@ -150,19 +165,18 @@ public abstract class HandlerMethod<C> {
      *                                   an {@link Error}. {@code Error} instances are propagated as-is.
      */
     protected <R> R invoke(Object target, Message message) throws InvocationTargetException {
-        checkNotNull(message);
+        return invoke(target, message, getDefaultContextInstance());
+    }
+
+    private C getDefaultContextInstance() {
+        final Class<C> contextClass = getGenericParameterType(getClass(), CONTEXT_CLASS_GENERIC_INDEX);
         try {
-            @SuppressWarnings("unchecked")
-            final R result = (R) method.invoke(target, message);
-            return result;
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw propagate(e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
-                throw (Error) e.getCause();
-            }
-            throw e;
+            final Constructor<C> constructor = contextClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            final C context = constructor.newInstance();
+            return context;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw Throwables.propagate(e);
         }
     }
 

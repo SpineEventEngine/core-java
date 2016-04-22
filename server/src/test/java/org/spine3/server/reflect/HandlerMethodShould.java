@@ -21,6 +21,7 @@
 package org.spine3.server.reflect;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,24 +34,10 @@ import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class MessageHandlerMethodShould {
-
-    private static class TwoParamMethod extends HandlerMethod<EventContext> {
-
-        protected TwoParamMethod(Method method) {
-            super(method);
-        }
-    }
-
-    private static class OneParamMethod extends HandlerMethod<Void> {
-
-        protected OneParamMethod(Method method) {
-            super(method);
-        }
-    }
+public class HandlerMethodShould {
 
     private HandlerMethod<EventContext> twoParamMethod;
-    private HandlerMethod<Void> oneParamMethod;
+    private HandlerMethod<Empty> oneParamMethod;
 
     private Object target;
 
@@ -59,52 +46,6 @@ public class MessageHandlerMethodShould {
         target = new StubHandler();
         twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
         oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
-    }
-
-    @SuppressWarnings("UnusedParameters") // OK for test methods.
-    private static class StubHandler {
-
-        private boolean onInvoked;
-        private boolean handleInvoked;
-
-        public void on(StringValue message, EventContext context) {
-            onInvoked = true;
-        }
-
-        @SuppressWarnings("unused") // The method is used via reflection.
-        private void handle(BoolValue message) {
-            handleInvoked = true;
-        }
-
-        /* package */ static Method getTwoParameterMethod() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getMethod("on", StringValue.class, EventContext.class);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-            return method;
-        }
-
-        /* package */ static Method getOneParameterMethod() {
-            final Method method;
-            final Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getDeclaredMethod("handle", BoolValue.class);
-            } catch (NoSuchMethodException e) {
-                throw propagate(e);
-            }
-            return method;
-        }
-
-        /* package */ boolean wasOnInvoked() {
-            return onInvoked;
-        }
-
-        /* package */ boolean wasHandleInvoked() {
-            return handleInvoked;
-        }
     }
 
     @Test(expected = NullPointerException.class)
@@ -176,5 +117,65 @@ public class MessageHandlerMethodShould {
     @Test
     public void have_hashCode() {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
+    }
+
+    @SuppressWarnings("UnusedParameters") // OK for test methods.
+    private static class StubHandler {
+
+        private boolean onInvoked;
+        private boolean handleInvoked;
+
+        public void on(StringValue message, EventContext context) {
+            onInvoked = true;
+        }
+
+        @SuppressWarnings("unused") // The method is used via reflection.
+        private void handle(BoolValue message) {
+            handleInvoked = true;
+        }
+
+        /* package */ static Method getTwoParameterMethod() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getMethod("on", StringValue.class, EventContext.class);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+            return method;
+        }
+
+        /* package */ static Method getOneParameterMethod() {
+            final Method method;
+            final Class<?> clazz = StubHandler.class;
+            try {
+                method = clazz.getDeclaredMethod("handle", BoolValue.class);
+            } catch (NoSuchMethodException e) {
+                throw propagate(e);
+            }
+            return method;
+        }
+
+        /* package */ boolean wasOnInvoked() {
+            return onInvoked;
+        }
+
+        /* package */ boolean wasHandleInvoked() {
+            return handleInvoked;
+        }
+    }
+
+    private static class TwoParamMethod extends HandlerMethod<EventContext> {
+
+        protected TwoParamMethod(Method method) {
+            super(method);
+        }
+    }
+
+    private static class OneParamMethod extends HandlerMethod<Empty> {
+
+        protected OneParamMethod(Method method) {
+            super(method);
+        }
     }
 }

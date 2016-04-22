@@ -21,6 +21,7 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.HandlerMethod;
 
@@ -36,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplier extends HandlerMethod<Void> {
+/* package */ class EventApplier extends HandlerMethod<Empty> {
 
     /**
      * The instance of the predicate to filter event applier methods of an aggregate class.
@@ -101,8 +102,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
+            private final EventApplier.Factory value = new EventApplier.Factory();
         }
 
         private static Factory instance() {

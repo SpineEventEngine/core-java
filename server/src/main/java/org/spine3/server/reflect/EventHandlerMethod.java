@@ -27,7 +27,6 @@ import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -66,14 +65,9 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
         return result;
     }
 
-    @Override
-    public <R> R invoke(Object target, Message message, EventContext context) throws InvocationTargetException {
-        return super.invoke(target, message, context);
-    }
-
     /**
      * Verifiers modifiers in the methods in the passed map to be 'public'.
-     * <p/>
+     *
      * <p>Logs warning for the methods with a non-public modifier.
      *
      * @param methods the map of methods to check
