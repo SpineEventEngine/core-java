@@ -20,12 +20,10 @@
 
 package org.spine3.server.reflect;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,148 +38,170 @@ import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventHandlerMethodShould {
 
-    private static final ImmutableMap<String, Method> HANDLERS = getHandlers();
-
-    private final EventHandlerMethod validHandlerOneParam =
-            new EventHandlerMethod(HANDLERS.get("validHandlerOneParam"));
-
-    private final EventHandlerMethod validHandlerTwoParams =
-            new EventHandlerMethod(HANDLERS.get("validHandlerTwoParams"));
-
     @Test
     public void scan_target_for_handlers() {
-        final TestEventHandler handlerObject = new TestEventHandler();
+        final TestEventHandler handlerObject = new ValidEventHandlerOneParam();
 
         final MethodMap<EventHandlerMethod> handlerMap = EventHandlerMethod.scan(handlerObject);
 
-        assertEquals(2, handlerMap.values().size());
-        assertEquals(validHandlerOneParam, handlerMap.get(ProjectStarted.class));
-        assertEquals(validHandlerTwoParams, handlerMap.get(ProjectCreated.class));
+        assertEquals(1, handlerMap.values().size());
+        //noinspection ConstantConditions
+        assertEquals(handlerObject.getHandler(), handlerMap.get(ProjectCreated.class).getMethod());
     }
 
     @Test
     public void invoke_handler_method() throws InvocationTargetException {
-        final TestEventHandler handlerObject = mock(TestEventHandler.class);
+        final ValidEventHandlerTwoParams handlerObject = spy(new ValidEventHandlerTwoParams());
+        final EventHandlerMethod handler = new EventHandlerMethod(handlerObject.getHandler());
         final ProjectCreated msg = projectCreatedEvent();
 
-        validHandlerTwoParams.invoke(handlerObject, msg, EventContext.getDefaultInstance());
+        handler.invoke(handlerObject, msg, EventContext.getDefaultInstance());
 
-        verify(handlerObject, times(1)).validHandlerTwoParams(msg, EventContext.getDefaultInstance());
+        verify(handlerObject, times(1)).handle(msg, EventContext.getDefaultInstance());
     }
 
     @Test
     public void consider_handler_with_one_msg_param_valid() {
-        final Method handler = validHandlerOneParam.getMethod();
+        final Method handler = new ValidEventHandlerOneParam().getHandler();
 
-        assertTrue(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_msg_and_context_params_valid() {
-        final Method handler = validHandlerTwoParams.getMethod();
+        final Method handler = new ValidEventHandlerTwoParams().getHandler();
 
-        assertTrue(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, true);
     }
 
     @Test
     public void consider_not_annotated_handler_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerNoAnnotation");
+        final Method handler = new InvalidEventHandlerNoAnnotation().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_without_params_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerNoParams");
+        final Method handler = new InvalidEventHandlerNoParams().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_too_many_params_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerTooManyParams");
+        final Method handler = new InvalidEventHandlerTooManyParams().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_one_invalid_param_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerOneNotMsgParam");
+        final Method handler = new InvalidEventHandlerOneNotMsgParam().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_first_not_message_param_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerTwoParamsFirstInvalid");
+        final Method handler = new InvalidEventHandlerTwoParamsFirstInvalid().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_second_not_context_param_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerTwoParamsSecondInvalid");
+        final Method handler = new InvalidEventHandlerTwoParamsSecondInvalid().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
     @Test
     public void consider_void_handler_invalid() {
-        final Method handler = HANDLERS.get("invalidHandlerNotVoid");
+        final Method handler = new InvalidEventHandlerNotVoid().getHandler();
 
-        assertFalse(EventHandlerMethod.PREDICATE.apply(handler));
+        assertIsCommandHandler(handler, false);
     }
 
-    private static ImmutableMap<String, Method> getHandlers() {
-        final Method[] methods = TestEventHandler.class.getDeclaredMethods();
-        final ImmutableMap.Builder<String, Method> builder = ImmutableMap.builder();
-        for (Method method : methods) {
-            builder.put(method.getName(), method);
-        }
-        return builder.build();
+    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
+        assertEquals(isHandler, EventHandlerMethod.PREDICATE.apply(handler));
     }
 
-    @SuppressWarnings("unused")
-    private static class TestEventHandler {
+    /*
+     * Valid handlers
+     */
 
+    private static class ValidEventHandlerOneParam extends TestEventHandler {
         @Subscribe
-        public void validHandlerOneParam(ProjectStarted event) {
+        public void handle(ProjectCreated event) {
         }
+    }
 
+    private static class ValidEventHandlerTwoParams extends TestEventHandler {
         @Subscribe
-        public void validHandlerTwoParams(ProjectCreated event, EventContext context) {
+        public void handle(ProjectCreated event, EventContext context) {
         }
+    }
 
-        /*
-         * Invalid handlers
-         */
+    /*
+     * Invalid handlers
+     */
 
-        public void invalidHandlerNoAnnotation(ProjectCreated event, EventContext context) {
+    private static class InvalidEventHandlerNoAnnotation extends TestEventHandler {
+        public void handle(ProjectCreated event, EventContext context) {
         }
+    }
 
+    private static class InvalidEventHandlerNoParams extends TestEventHandler {
         @Subscribe
-        public void invalidHandlerNoParams() {
+        public void handle() {
         }
+    }
 
+    private static class InvalidEventHandlerTooManyParams extends TestEventHandler {
         @Subscribe
-        public void invalidHandlerTooManyParams(ProjectCreated event, EventContext context, Object redundant) {
+        public void handle(ProjectCreated event, EventContext context, Object redundant) {
         }
+    }
 
+    private static class InvalidEventHandlerOneNotMsgParam extends TestEventHandler {
         @Subscribe
-        public void invalidHandlerOneNotMsgParam(Exception invalid) {
+        public void handle(Exception invalid) {
         }
+    }
 
+    private static class InvalidEventHandlerTwoParamsFirstInvalid extends TestEventHandler {
         @Subscribe
-        public void invalidHandlerTwoParamsFirstInvalid(Exception invalid, EventContext context) {
+        public void handle(Exception invalid, EventContext context) {
         }
+    }
 
+    private static class InvalidEventHandlerTwoParamsSecondInvalid extends TestEventHandler {
         @Subscribe
-        public void invalidHandlerTwoParamsSecondInvalid(ProjectCreated event, Exception invalid) {
+        public void handle(ProjectCreated event, Exception invalid) {
         }
+    }
 
+    private static class InvalidEventHandlerNotVoid extends TestEventHandler {
         @Subscribe
-        public Object invalidHandlerNotVoid(ProjectCreated event, EventContext context) {
+        public Object handle(ProjectCreated event, EventContext context) {
             return event;
+        }
+    }
+
+    private abstract static class TestEventHandler {
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        private static final String HANDLER_METHOD_NAME = "handle";
+
+        public Method getHandler() {
+            final Method[] methods = getClass().getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(HANDLER_METHOD_NAME)) {
+                    return method;
+                }
+            }
+            throw new RuntimeException("No handler method found: " + HANDLER_METHOD_NAME);
         }
     }
 }
