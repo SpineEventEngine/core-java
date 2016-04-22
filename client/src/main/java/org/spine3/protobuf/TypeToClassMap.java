@@ -34,6 +34,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.ListValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.slf4j.Logger;
@@ -152,6 +153,8 @@ public class TypeToClassMap {
                 .put(TypeName.of(EnumValue.getDescriptor()), ClassName.of(EnumValue.class))
                 .put(TypeName.of(FloatValue.getDescriptor()), ClassName.of(FloatValue.class))
                 .put(TypeName.of(Duration.getDescriptor()), ClassName.of(Duration.class))
+                .put(TypeName.of(Any.getDescriptor()), ClassName.of(Any.class))
+                .put(TypeName.of(Timestamp.getDescriptor()), ClassName.of(Timestamp.class))
                 .build();
     }
 
