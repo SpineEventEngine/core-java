@@ -136,7 +136,7 @@ public class TypeToClassMap {
 
     /**
      * Returns needed classes from the {@code com.google.protobuf} package.
-     * Every class name ends with {@code Value} (except {@link Duration} class).
+     * Most of their names end with {@code Value}.
      * Other classes from this package are unnecessary.
      */
     private static ImmutableMap<TypeName, ClassName> buildProtobufNamesMap() {
