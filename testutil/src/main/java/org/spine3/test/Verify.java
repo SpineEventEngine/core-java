@@ -36,7 +36,7 @@ import static com.google.common.collect.Sets.newHashSet;
  *     Verify.assertContains("fred", nameList);  // from new extensions
  *     Verify.assertBefore("fred", "jim", orderedNamesList);  // from new extensions
  * </pre>
- * <p/>
+ *
  * Is based on
  * <a href="https://github.com/eclipse/eclipse-collections/blob/master/eclipse-collections-testutils/src/main/java/org/eclipse/collections/impl/test/Verify.java">
  * org.eclipse.collections.impl.test.Verify</a> class.
@@ -61,7 +61,7 @@ public final class Verify extends Assert {
     /**
      * Mangles the stack trace of {@link AssertionError} so that it looks like its been thrown from the line that
      * called to a custom assertion.
-     * <p/>
+     *
      * This method behaves identically to {@link #mangledException(AssertionError, int)} and is provided
      * for convenience for assert methods that only want to pop two stack frames. The only time that you would want to
      * call the other {@link #mangledException(AssertionError, int)} method is if you have a custom assert
