@@ -72,7 +72,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           implements CommandDispatcher {
 
     /**
-     * Default number of events to be stored before a next snapshot is made.
+     * The default number of events to be stored before a next snapshot is made.
      */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
@@ -86,7 +86,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final EventBus eventBus;
 
     /**
-     * {@inheritDoc}
+     * Creates a new repository instance.
+     *
+     * @param boundedContext the bounded context to which this repository belongs
      */
     public AggregateRepository(BoundedContext boundedContext) {
         super(boundedContext);
@@ -156,20 +158,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A load(I id) throws IllegalStateException {
         final AggregateEvents aggregateEvents = aggregateStorage().read(id);
-
         try {
             final Snapshot snapshot = aggregateEvents.hasSnapshot()
                     ? aggregateEvents.getSnapshot()
                     : null;
             final A result = create(id);
             final List<Event> events = aggregateEvents.getEventList();
-
             if (snapshot != null) {
                 result.restore(snapshot);
             }
-
             result.play(events);
-
             return result;
         } catch (Throwable e) {
             throw propagate(e);
@@ -183,31 +181,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void store(A aggregate) {
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
-
-        //TODO:2016-01-22:alexander.yevsyukov: The below code is not correct.
-        // Now we're storing snapshot in a sequence of uncommitted
-        // events, which isn't going to be the case. We need to read the number of events since the last
-        // snapshot of the aggregate instead.
-
         final I id = aggregate.getId();
         final int snapshotTrigger = getSnapshotTrigger();
-        int eventCount = 0;
+        final AggregateStorage<I> storage = aggregateStorage();
+        int eventCount = storage.readEventCountAfterLastSnapshot(id);
+        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
-            aggregateStorage().writeEvent(id, event);
+            storage.writeEvent(id, event);
             ++eventCount;
-
             if (eventCount > snapshotTrigger) {
-                createAndStoreSnapshot(id, aggregate);
+                final Snapshot snapshot = aggregate.toSnapshot();
+                storage.write(id, snapshot);
                 eventCount = 0;
             }
         }
         aggregate.commitEvents();
-    }
-
-    private void createAndStoreSnapshot(I id, A aggregate) {
-        final Snapshot snapshot = aggregate.toSnapshot();
-        aggregateStorage().write(id, snapshot);
+        storage.writeEventCountAfterLastSnapshot(id, eventCount);
     }
 
     /**
@@ -238,7 +227,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         final CommandId commandId = context.getCommandId();
         final I aggregateId = getAggregateId(command);
         final A aggregate = load(aggregateId);
-
         try {
             aggregate.dispatch(command, context);
         } catch (RuntimeException e) {
@@ -254,16 +242,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
             }
         }
-
         final List<Event> events = aggregate.getUncommittedEvents();
-
         //noinspection OverlyBroadCatchBlock
         try {
             store(aggregate);
         } catch (Exception e) {
             commandStatusService.setToError(commandId, e);
         }
-
         postEvents(events);
         commandStatusService.setOk(commandId);
     }

@@ -128,7 +128,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test
-    public void write_and_one_event_by_Message_id() {
+    public void write_read_and_one_event_by_Message_id() {
         writeAndReadEventTest(id, storage);
     }
 
@@ -179,7 +179,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test
-    public void store_and_read_snapshot() {
+    public void write_and_read_snapshot() {
         final Snapshot expected = newSnapshot(getCurrentTime());
 
         storage.write(id, expected);
@@ -207,6 +207,47 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         storage.write(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
+    }
+
+    @Test
+    public void return_zero_event_count_after_last_snapshot_by_default() {
+        assertEquals(0, storage.readEventCountAfterLastSnapshot(id));
+    }
+
+    @Test
+    public void write_and_read_event_count_after_last_snapshot() {
+        final int expectedCount = 32;
+        storage.writeEventCountAfterLastSnapshot(id, expectedCount);
+
+        final int actualCount = storage.readEventCountAfterLastSnapshot(id);
+
+        assertEquals(expectedCount, actualCount);
+    }
+
+    @Test
+    public void rewrite_event_count_after_last_snapshot() {
+        final int primaryValue = 16;
+        storage.writeEventCountAfterLastSnapshot(id, primaryValue);
+        final int expectedValue = 32;
+        storage.writeEventCountAfterLastSnapshot(id, expectedValue);
+
+        final int actualCount = storage.readEventCountAfterLastSnapshot(id);
+
+        assertEquals(expectedValue, actualCount);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_write_event_count_to_closed_storage() throws Exception {
+        storage.close();
+
+        storage.writeEventCountAfterLastSnapshot(id, 5);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_read_event_count_from_closed_storage() throws Exception {
+        storage.close();
+
+        storage.readEventCountAfterLastSnapshot(id);
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
