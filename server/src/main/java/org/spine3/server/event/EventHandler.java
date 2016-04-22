@@ -38,10 +38,9 @@ import java.lang.reflect.InvocationTargetException;
  */
 public abstract class EventHandler {
 
-    public void handle(Message eventMessage, EventContext commandContext) throws InvocationTargetException {
+    public void handle(Message eventMessage, EventContext context) throws InvocationTargetException {
         final EventHandlerMethod method = getHandlerMethod(eventMessage.getClass());
-
-        method.invoke(this, eventMessage, commandContext);
+        method.invoke(this, eventMessage, context);
     }
 
     private EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
