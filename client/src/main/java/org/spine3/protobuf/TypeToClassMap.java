@@ -157,7 +157,7 @@ public class TypeToClassMap {
 
     /**
      * Attempts to find a {@link ClassName} for the passed inner Protobuf type.
-     * <p/>
+     *
      * <p>For example, com.package.OuterClass.InnerClass class name.
      *
      * @param type {@link TypeName} of the class to find

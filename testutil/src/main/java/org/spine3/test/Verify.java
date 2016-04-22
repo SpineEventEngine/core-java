@@ -36,8 +36,8 @@ import static com.google.common.collect.Sets.newHashSet;
  *     Verify.assertContains("fred", nameList);  // from new extensions
  *     Verify.assertBefore("fred", "jim", orderedNamesList);  // from new extensions
  * </pre>
- * <p/>
- * Is based on
+ *
+ * <p>Is based on
  * <a href="https://github.com/eclipse/eclipse-collections/blob/master/eclipse-collections-testutils/src/main/java/org/eclipse/collections/impl/test/Verify.java">
  * org.eclipse.collections.impl.test.Verify</a> class.
  *
@@ -61,8 +61,8 @@ public final class Verify extends Assert {
     /**
      * Mangles the stack trace of {@link AssertionError} so that it looks like its been thrown from the line that
      * called to a custom assertion.
-     * <p/>
-     * This method behaves identically to {@link #mangledException(AssertionError, int)} and is provided
+     *
+     * <p>This method behaves identically to {@link #mangledException(AssertionError, int)} and is provided
      * for convenience for assert methods that only want to pop two stack frames. The only time that you would want to
      * call the other {@link #mangledException(AssertionError, int)} method is if you have a custom assert
      * that calls another custom assert i.e. the source line calling the custom asserts is more than two stack frames
@@ -83,8 +83,8 @@ public final class Verify extends Assert {
     /**
      * Mangles the stack trace of {@link AssertionError} so that it looks like
      * its been thrown from the line that called to a custom assertion.
-     * <p>
-     * This is useful for when you are in a debugging session and you want to go to the source
+     *
+     * <p>This is useful for when you are in a debugging session and you want to go to the source
      * of the problem in the test case quickly. The regular use case for this would be something
      * along the lines of:
      * <pre>
@@ -113,9 +113,10 @@ public final class Verify extends Assert {
      *   }
      * }
      * </pre>
-     * <p>
-     * Without the {@code try ... catch} block around lines 11-13 the stack trace following a test failure
+     *
+     * <p>Without the {@code try ... catch} block around lines 11-13 the stack trace following a test failure
      * would look a little like:
+     *
      * <p>
      * <pre>
      * java.lang.AssertionError: ...
@@ -127,13 +128,16 @@ public final class Verify extends Assert {
      *  at java.lang.reflect.Method.invoke(Method.java:324)
      *  ...
      * </pre>
+     *
      * <p>
      * Note that the source of the error isn't readily apparent as the first line in the stack trace
      * is the code within the custom assert. If we were debugging the failure we would be more interested
      * in the second line of the stack trace which shows us where in our tests the assert failed.
+     *
      * <p>
      * With the {@code try ... catch} block around lines 11-13 the stack trace would look like the
      * following:
+     *
      * <p>
      * <pre>
      * java.lang.AssertionError: ...
@@ -144,6 +148,7 @@ public final class Verify extends Assert {
      *  at java.lang.reflect.Method.invoke(Method.java:324)
      *  ...
      * </pre>
+     *
      * <p>
      * Here the source of the error is more visible as we can instantly see that the testFoo test is
      * failing at line 5.
