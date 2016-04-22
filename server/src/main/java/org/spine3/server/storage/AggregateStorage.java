@@ -41,7 +41,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.checkTimestamp;
 
 /**
- * An event-sourced storage of aggregate root events and snapshots.
+ * An event-sourced storage of aggregate events and snapshots.
  *
  * @param <I> the type of IDs of aggregates managed by this storage
  * @author Alexander Yevsyukov
@@ -149,6 +149,26 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
                 .build();
         writeInternal(aggregateId, record);
     }
+
+    /**
+     * Writes a count of events which were saved to the storage after the last snapshot was created,
+     * or a count of all events if there were no snapshots yet.
+     *
+     * @param id an ID of an aggregate
+     * @return an even count after the last snapshot
+     * @throws IllegalStateException if the storage is closed
+     */
+    public abstract int readEventCountAfterLastSnapshot(I id);
+
+    /**
+     * Reads a count of events which were saved to the storage after the last snapshot was created,
+     * or a count of all events if there were no snapshots yet.
+     *
+     * @param id an ID of an aggregate
+     * @param eventCount an even count after the last snapshot
+     * @throws IllegalStateException if the storage is closed
+     */
+    public abstract void writeEventCountAfterLastSnapshot(I id, int eventCount);
 
     private static AggregateStorageRecord toStorageRecord(Event event) {
         checkArgument(event.hasContext(), "Event context must be set.");

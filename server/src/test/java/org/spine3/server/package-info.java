@@ -18,10 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Package containing abstract AggregateRoot class.
- */
-
 @ParametersAreNonnullByDefault
 package org.spine3.server;
 

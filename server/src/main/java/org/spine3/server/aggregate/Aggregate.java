@@ -37,7 +37,6 @@ import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
@@ -50,6 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static java.util.Collections.singletonList;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
 /**
  * Abstract base for aggregates.
@@ -140,7 +140,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     /* package */ static ImmutableSet<Class<? extends Message>> getCommandClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
+        return getHandledMessageClasses(clazz, CommandHandlerMethod.PREDICATE);
     }
 
     /**
@@ -150,7 +150,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable set of event classes
      */
     /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
-        return Classes.getHandledMessageClasses(clazz, EventApplier.PREDICATE);
+        return getHandledMessageClasses(clazz, EventApplier.PREDICATE);
     }
 
     private Any getIdAsAny() {
