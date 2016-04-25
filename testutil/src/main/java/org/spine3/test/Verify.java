@@ -144,8 +144,8 @@ public final class Verify extends Assert {
      *  at java.lang.reflect.Method.invoke(Method.java:324)
      *  ...
      * </pre>
-     *
-     * <p>Here the source of the error is more visible as we can instantly see that the testFoo test is
+     * <p>
+     * Here the source of the error is more visible as we can instantly see that the testFoo test is
      * failing at line 5.
      *
      * @param e           The exception to mangle.

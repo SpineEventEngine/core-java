@@ -102,18 +102,18 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *
      * <p>This method performs the following:
      * <ol>
-     * <li>Closes associated {@link StorageFactory}.</li>
-     * <li>Closes {@link CommandBus}.</li>
-     * <li>Closes {@link EventBus}.</li>
-     * <li>Closes {@link CommandStore}.</li>
-     * <li>Closes {@link EventStore}.</li>
+     * <li>Closes associated {@link StorageFactory}.
+     * <li>Closes {@link CommandBus}.
+     * <li>Closes {@link EventBus}.
+     * <li>Closes {@link CommandStore}.
+     * <li>Closes {@link EventStore}.
      * <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
-     *      <li>un-registered from {@link CommandBus}</li>
-     *      <li>un-registered from {@link EventBus}</li>
-     *      <li>detached from its storage</li>
+     *      <li>un-registered from {@link CommandBus}
+     *      <li>un-registered from {@link EventBus}
+     *      <li>detached from its storage
      *      </ul>
-     * </li>
+     *
      * </ol>
      * @throws Exception caused by closing one of the components
      */

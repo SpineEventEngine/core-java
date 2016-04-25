@@ -43,19 +43,19 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
  *
  * <p>An entity identifier can be of one of the following types:
  *   <ul>
- *      <li>String</li>
- *      <li>Long</li>
- *      <li>Integer</li>
- *      <li>A class implementing {@link Message}</li>
+ *      <li>String
+ *      <li>Long
+ *      <li>Integer
+ *      <li>A class implementing {@link Message}
  *   </ul>
  *
  * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code, and/or
  * if you need to have IDs with some structure inside. Examples of such structural IDs are:
  *   <ul>
- *      <li>EAN value used in bar codes</li>
- *      <li>ISBN</li>
- *      <li>Phone number</li>
- *      <li>email address as a couple of local-part and domain</li>
+ *      <li>EAN value used in bar codes
+ *      <li>ISBN
+ *      <li>Phone number
+ *      <li>email address as a couple of local-part and domain
  *   </ul>
  *
  *
@@ -204,9 +204,9 @@ public abstract class Entity<I, S extends Message> {
      *
      * <p>Results of this method call are:
      * <ul>
-     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.</li>
-     *   <li>The version number is set to zero.</li>
-     *   <li>The {@link #whenModified} field is set to the system time of the call.</li>
+     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
+     *   <li>The version number is set to zero.
+     *   <li>The {@link #whenModified} field is set to the system time of the call.
      * </ul>
      * <p>The timestamp is set to current system time.
      */
@@ -281,8 +281,8 @@ public abstract class Entity<I, S extends Message> {
      *
      * @return
      *  <ul>
-     *      <li>Short Protobuf type name if the value is {@link Message}.</li>
-     *      <li>Simple class name of the value, otherwise.</li>
+     *      <li>Short Protobuf type name if the value is {@link Message}.
+     *      <li>Simple class name of the value, otherwise.
      *  </ul>
      */
     public String getShortIdTypeName() {

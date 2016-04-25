@@ -65,10 +65,10 @@ import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
  * <p>In order to create a new aggregate class you need to:
  * <ol>
  *     <li>Select a type for identifiers of the aggregates. If you select to use a typed identifier
- *     (which is recommended), you need to define a protobuf message for the ID type.</li>
- *     <li>Define aggregate state structure as a protobuf message.</li>
- *     <li>Generate Java code for ID and state types.</li>
- *     <li>Create new aggregate class derived from {@code Aggregate} passing ID and state types.</li>
+ *     (which is recommended), you need to define a protobuf message for the ID type.
+ *     <li>Define aggregate state structure as a protobuf message.
+ *     <li>Generate Java code for ID and state types.
+ *     <li>Create new aggregate class derived from {@code Aggregate} passing ID and state types.
  * </ol>
  *
  * <h2>Adding command handler methods</h2>
