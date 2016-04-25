@@ -22,7 +22,7 @@ package org.spine3.server.event;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,19 +33,19 @@ import java.lang.reflect.InvocationTargetException;
  * <p>Objects may also receive events via {@link EventDispatcher}s that can be registered with {@code EventBus}.
  *
  * @author Alexander Yevsyukov
- * @see EventBus#subscribe(EventHandler)
+ * @see EventBus#subscribe(EventSubscriber)
  * @see EventBus#register(EventDispatcher)
  */
-public abstract class EventHandler {
+public abstract class EventSubscriber {
 
     public void handle(Message eventMessage, EventContext context) throws InvocationTargetException {
-        final EventHandlerMethod method = getHandlerMethod(eventMessage.getClass());
+        final EventSubscriberMethod method = getHandlerMethod(eventMessage.getClass());
         method.invoke(this, eventMessage, context);
     }
 
-    private EventHandlerMethod getHandlerMethod(Class<? extends Message> eventClass) {
+    private EventSubscriberMethod getHandlerMethod(Class<? extends Message> eventClass) {
         final MethodRegistry registry = MethodRegistry.getInstance();
-        final EventHandlerMethod method = registry.get(getClass(), eventClass, EventHandlerMethod.factory());
+        final EventSubscriberMethod method = registry.get(getClass(), eventClass, EventSubscriberMethod.factory());
         return method;
     }
 }

@@ -30,14 +30,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * A wrapper for an event handling method.
+ * A wrapper for an event subscriber method.
  *
  * @author Alexander Yevsyukov
  */
-public class EventHandlerMethod extends HandlerMethod<EventContext> {
+public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
     /**
-     * The instance of the predicate to filter event handler methods of a class.
+     * The instance of the predicate to filter event subscriber methods of a class.
      */
     public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
@@ -46,42 +46,42 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
      *
      * @param method subscriber method
      */
-    public EventHandlerMethod(Method method) {
+    public EventSubscriberMethod(Method method) {
         super(method);
     }
 
     /**
-     * Scans for event handlers the passed target.
+     * Scans for event subscribers the passed target.
      *
      * @param target the target to scan
-     * @return immutable map of event handling methods
+     * @return immutable map of event subscriber methods
      */
     @CheckReturnValue
-    public static MethodMap<EventHandlerMethod> scan(Object target) {
-        final MethodMap<EventHandlerMethod> result = MethodMap.create(target.getClass(), factory());
+    public static MethodMap<EventSubscriberMethod> scan(Object target) {
+        final MethodMap<EventSubscriberMethod> result = MethodMap.create(target.getClass(), factory());
         return result;
     }
 
     /**
-     * @return the factory for filtering and creating event handler methods
+     * @return the factory for filtering and creating event subscriber methods
      */
-    public static HandlerMethod.Factory<EventHandlerMethod> factory() {
+    public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.instance();
     }
 
     /**
      * The factory for filtering methods that match {@code EventHandlerMethod} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<EventHandlerMethod> {
+    private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
 
         @Override
-        public Class<EventHandlerMethod> getMethodClass() {
-            return EventHandlerMethod.class;
+        public Class<EventSubscriberMethod> getMethodClass() {
+            return EventSubscriberMethod.class;
         }
 
         @Override
-        public EventHandlerMethod create(Method method) {
-            return new EventHandlerMethod(method);
+        public EventSubscriberMethod create(Method method) {
+            return new EventSubscriberMethod(method);
         }
 
         @Override
@@ -92,14 +92,14 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
         @Override
         public void checkAccessModifier(Method method) {
             if (!Modifier.isPublic(method.getModifiers())) {
-                warnOnWrongModifier("Event handler {} must be declared 'public'", method);
+                warnOnWrongModifier("Event subscriber {} must be declared 'public'", method);
             }
         }
 
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventHandlerMethod.Factory value = new EventHandlerMethod.Factory(); // use the FQN
+            private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory(); // use the FQN
         }
 
         private static Factory instance() {
@@ -108,7 +108,7 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
     }
 
     /**
-     * The predicate class allowing to filter event handling methods.
+     * The predicate class allowing to filter event subscriber methods.
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */

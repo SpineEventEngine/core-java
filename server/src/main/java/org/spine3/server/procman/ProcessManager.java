@@ -39,7 +39,7 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
-import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.time.ZoneOffset;
 
@@ -51,7 +51,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
+import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -152,7 +152,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     }
 
     /**
-     * Dispatches an event to the event handler method of the process manager.
+     * Dispatches an event to the event subscriber method of the process manager.
      *
      * @param event the event to be handled by the process manager
      * @param context of the event
@@ -163,8 +163,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         checkNotNull(event);
 
         final Class<? extends Message> eventClass = event.getClass();
-        final EventHandlerMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(), eventClass, EventHandlerMethod.factory());
+        final EventSubscriberMethod method = MethodRegistry.getInstance()
+                                                        .get(getClass(), eventClass, EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }

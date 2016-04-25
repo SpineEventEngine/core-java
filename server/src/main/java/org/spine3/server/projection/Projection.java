@@ -25,22 +25,22 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
-import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.server.reflect.EventHandlerMethod.PREDICATE;
+import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
  *
  * <p>The process of projecting the event stream into data we collect is performed
- * by event handlers for the events of interest. These event handlers are implemented
+ * by event subscribers for the events of interest. These event handlers are implemented
  * in the classes extending this abstract class.
  *
- * <p>Event handlers are invoked by a {@link ProjectionRepository} that manages instances
+ * <p>Event subscribers are invoked by a {@link ProjectionRepository} that manages instances
  * of a stream projection class.
  *
  * @param <I> the type of the IDs
@@ -65,8 +65,8 @@ public abstract class Projection<I, M extends Message> extends Entity<I, M> {
 
     private void dispatch(Message event, EventContext ctx) {
         final Class<? extends Message> eventClass = event.getClass();
-        final EventHandlerMethod method = MethodRegistry.getInstance()
-                                                        .get(getClass(), eventClass, EventHandlerMethod.factory());
+        final EventSubscriberMethod method = MethodRegistry.getInstance()
+                                                        .get(getClass(), eventClass, EventSubscriberMethod.factory());
         if (method == null) {
             throw missingEventHandler(eventClass);
         }

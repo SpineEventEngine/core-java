@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a method as an event subscriber.
  *
- * <p>An event subscriber/handler method:
+ * <p>An event subscriber method:
  * <ul>
  *     <li>is annotated with {@link Subscribe};</li>
  *     <li>is {@code public};</li>
@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
- * considered as an event handler and is not registered for event delivery from {@link EventBus}.
+ * considered as an event subscriber and is not registered for event delivery from {@link EventBus}.
  *
  * @author Alexander Yevsyukov
  */
