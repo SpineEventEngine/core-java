@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 
 /**
  * This exception is thrown on a discovery of an event class, which is not handled by any of
- * the applier methods of an aggregate root class.
+ * the applier methods of an aggregate class.
  *
  * @author Mikhail Melnik
  */

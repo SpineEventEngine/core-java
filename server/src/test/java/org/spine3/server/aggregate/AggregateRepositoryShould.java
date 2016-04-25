@@ -22,38 +22,70 @@ package org.spine3.server.aggregate;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.ProjectAggregate;
-import org.spine3.validate.Validate;
+import org.spine3.test.project.command.AddTask;
+import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestContextFactory;
 
+import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Events.createEvent;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
+import static org.spine3.testdata.TestEventMessageFactory.taskAddedEvent;
+import static org.spine3.validate.Validate.isDefault;
+import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class AggregateRepositoryShould {
 
-    private StorageFactory storageFactory;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
     @Before
     public void setUp() {
-        storageFactory = InMemoryStorageFactory.getInstance();
+        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
-        private ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
+    @Test
+    public void return_default_aggregate_instance_if_no_aggregate_found() {
+        final ProjectAggregate aggregate = repository.load(newProjectId());
+        final Project state = aggregate.getState();
+
+        assertTrue(isDefault(state));
+    }
+
+    @Test
+    public void store_and_load_aggregate() {
+        final ProjectId id = newProjectId();
+        final ProjectAggregate expected = new ProjectAggregate(id);
+        repository.store(expected);
+
+        final ProjectAggregate actual = repository.load(id);
+
+        final Project expectedState = expected.getState();
+        assertTrue(isNotDefault(expectedState));
+        final Project actualState = actual.getState();
+        assertTrue(isNotDefault(actualState));
+        assertEquals(expectedState, actualState);
+        assertEquals(expected.getId(), actual.getId());
     }
 
     @Test
@@ -84,19 +116,59 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void load_or_create_aggregate_by_id() {
-        repository.initStorage(storageFactory);
-        final ProjectAggregate pa = repository.load(ProjectId.newBuilder().setId("load_or_create_aggregate_by_id").build());
-        checkNotNull(pa);
-        Validate.checkDefault(pa.getState());
-    }
-
-    @Test
     public void expose_classes_of_commands_of_its_aggregate() {
         final Set<CommandClass> aggregateCommands = CommandClass.setOf(Aggregate.getCommandClasses(ProjectAggregate.class));
         final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
+    }
+
+    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+        private ProjectAggregateRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+
+        public ProjectAggregate(ProjectId id) {
+            super(id);
+            final Project expectedState = Project.newBuilder()
+                                                 .setProjectId(id)
+                                                 .build();
+            incrementStateForTest(expectedState);
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
+            return projectCreatedEvent(cmd.getProjectId());
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
+            return taskAddedEvent(cmd.getProjectId());
+        }
+
+        @Apply
+        private void apply(ProjectCreated event) {
+            getBuilder().setProjectId(event.getProjectId());
+        }
+
+        @Apply
+        private void apply(TaskAdded event) {
+            getBuilder()
+                    .setProjectId(event.getProjectId())
+                    .addTask(event.getTask());
+        }
+
+        @Override
+        @SuppressWarnings("RefusedBequest")
+        /* package */ List<Event> getUncommittedEvents() {
+            final ProjectCreated msg = projectCreatedEvent(getId());
+            final Event event = createEvent(msg, TestContextFactory.createEventContext());
+            final List<Event> events = newArrayList(event);
+            return events;
+        }
     }
 
     //TODO:2016-01-21:alexander.yevsyukov: Cover more.
