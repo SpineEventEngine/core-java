@@ -28,7 +28,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 
@@ -40,7 +40,7 @@ public class EventHandlerMethodShould {
 
     @Test
     public void scan_target_for_handlers() {
-        final TestEventHandler handlerObject = new ValidEventHandlerOneParam();
+        final TestEventHandler handlerObject = new ValidHandlerOneParam();
 
         final MethodMap<EventHandlerMethod> handlerMap = EventHandlerMethod.scan(handlerObject);
 
@@ -50,8 +50,21 @@ public class EventHandlerMethodShould {
     }
 
     @Test
+    public void log_warning_if_not_public_handler_found() {
+        final TestEventHandler handlerObject = new ValidHandlerButPrivate();
+        final Method handlerMethod = handlerObject.getHandler();
+
+        final MethodMap<EventHandlerMethod> handlerMap = EventHandlerMethod.scan(handlerObject);
+
+        assertEquals(1, handlerMap.values().size());
+        //noinspection ConstantConditions
+        assertEquals(handlerMethod, handlerMap.get(ProjectCreated.class).getMethod());
+        // TODO:2016-04-25:alexander.litus: check that a warning is logged (may require some refactoring)
+    }
+
+    @Test
     public void invoke_handler_method() throws InvocationTargetException {
-        final ValidEventHandlerTwoParams handlerObject = spy(new ValidEventHandlerTwoParams());
+        final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final EventHandlerMethod handler = new EventHandlerMethod(handlerObject.getHandler());
         final ProjectCreated msg = projectCreatedEvent();
 
@@ -62,63 +75,70 @@ public class EventHandlerMethodShould {
 
     @Test
     public void consider_handler_with_one_msg_param_valid() {
-        final Method handler = new ValidEventHandlerOneParam().getHandler();
+        final Method handler = new ValidHandlerOneParam().getHandler();
 
         assertIsEventHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_msg_and_context_params_valid() {
-        final Method handler = new ValidEventHandlerTwoParams().getHandler();
+        final Method handler = new ValidHandlerTwoParams().getHandler();
 
         assertIsEventHandler(handler, true);
     }
 
     @Test
+    public void consider_not_public_handler_valid() {
+        final Method method = new ValidHandlerButPrivate().getHandler();
+
+        assertIsEventHandler(method, true);
+    }
+
+    @Test
     public void consider_not_annotated_handler_invalid() {
-        final Method handler = new InvalidEventHandlerNoAnnotation().getHandler();
+        final Method handler = new InvalidHandlerNoAnnotation().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_without_params_invalid() {
-        final Method handler = new InvalidEventHandlerNoParams().getHandler();
+        final Method handler = new InvalidHandlerNoParams().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_too_many_params_invalid() {
-        final Method handler = new InvalidEventHandlerTooManyParams().getHandler();
+        final Method handler = new InvalidHandlerTooManyParams().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_one_invalid_param_invalid() {
-        final Method handler = new InvalidEventHandlerOneNotMsgParam().getHandler();
+        final Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_first_not_message_param_invalid() {
-        final Method handler = new InvalidEventHandlerTwoParamsFirstInvalid().getHandler();
+        final Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_second_not_context_param_invalid() {
-        final Method handler = new InvalidEventHandlerTwoParamsSecondInvalid().getHandler();
+        final Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
 
         assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_void_handler_invalid() {
-        final Method handler = new InvalidEventHandlerNotVoid().getHandler();
+        final Method handler = new InvalidHandlerNotVoid().getHandler();
 
         assertIsEventHandler(handler, false);
     }
@@ -131,15 +151,21 @@ public class EventHandlerMethodShould {
      * Valid handlers
      */
 
-    private static class ValidEventHandlerOneParam extends TestEventHandler {
+    private static class ValidHandlerOneParam extends TestEventHandler {
         @Subscribe
         public void handle(ProjectCreated event) {
         }
     }
 
-    private static class ValidEventHandlerTwoParams extends TestEventHandler {
+    private static class ValidHandlerTwoParams extends TestEventHandler {
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
+        }
+    }
+
+    private static class ValidHandlerButPrivate extends TestEventHandler {
+        @Subscribe
+        private void handle(ProjectCreated event) {
         }
     }
 
@@ -147,43 +173,43 @@ public class EventHandlerMethodShould {
      * Invalid handlers
      */
 
-    private static class InvalidEventHandlerNoAnnotation extends TestEventHandler {
+    private static class InvalidHandlerNoAnnotation extends TestEventHandler {
         @SuppressWarnings("unused")
         public void handle(ProjectCreated event, EventContext context) {
         }
     }
 
-    private static class InvalidEventHandlerNoParams extends TestEventHandler {
+    private static class InvalidHandlerNoParams extends TestEventHandler {
         @Subscribe
         public void handle() {
         }
     }
 
-    private static class InvalidEventHandlerTooManyParams extends TestEventHandler {
+    private static class InvalidHandlerTooManyParams extends TestEventHandler {
         @Subscribe
         public void handle(ProjectCreated event, EventContext context, Object redundant) {
         }
     }
 
-    private static class InvalidEventHandlerOneNotMsgParam extends TestEventHandler {
+    private static class InvalidHandlerOneNotMsgParam extends TestEventHandler {
         @Subscribe
         public void handle(Exception invalid) {
         }
     }
 
-    private static class InvalidEventHandlerTwoParamsFirstInvalid extends TestEventHandler {
+    private static class InvalidHandlerTwoParamsFirstInvalid extends TestEventHandler {
         @Subscribe
         public void handle(Exception invalid, EventContext context) {
         }
     }
 
-    private static class InvalidEventHandlerTwoParamsSecondInvalid extends TestEventHandler {
+    private static class InvalidHandlerTwoParamsSecondInvalid extends TestEventHandler {
         @Subscribe
         public void handle(ProjectCreated event, Exception invalid) {
         }
     }
 
-    private static class InvalidEventHandlerNotVoid extends TestEventHandler {
+    private static class InvalidHandlerNotVoid extends TestEventHandler {
         @Subscribe
         public Object handle(ProjectCreated event, EventContext context) {
             return event;
