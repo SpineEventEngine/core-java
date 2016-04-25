@@ -23,6 +23,7 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.base.EventContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 
@@ -153,8 +154,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
+            private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory();
         }
 
         private static Factory instance() {
@@ -167,20 +168,20 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
      */
     private static class FilterPredicate implements Predicate<Method> {
 
-        /**
-         * A command must be the first parameter of a handling method.
-         */
         private static final int MESSAGE_PARAM_INDEX = 0;
-
-        /**
-         * A {@code CommandContext} must be the second parameter of the handling method.
-         */
         private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
 
-        /**
-         * A command handling method accepts two parameters.
-         */
-        private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
+        @Override
+        public boolean apply(@Nullable Method method) {
+            //noinspection SimplifiableIfStatement
+            if (method == null) {
+                return false;
+            }
+            final boolean isCommandHandler = isAnnotatedCorrectly(method)
+                    && acceptsCorrectParams(method)
+                    && returnsMessageOrList(method);
+            return isCommandHandler;
+        }
 
         private static boolean isAnnotatedCorrectly(Method method) {
             final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
@@ -189,19 +190,22 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         private static boolean acceptsCorrectParams(Method method) {
             final Class<?>[] paramTypes = method.getParameterTypes();
-            final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
-            if (!paramCountIsCorrect) {
+            final int paramCount = paramTypes.length;
+            if (paramCount == 1) {
+                final boolean isCorrect = Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]);
+                return isCorrect;
+            } else if (paramCount == 2) {
+                final boolean paramsCorrect =
+                        Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
+                                EventContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
+                return paramsCorrect;
+            } else {
                 return false;
             }
-            final boolean acceptsCorrectParams =
-                    Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                            CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-            return acceptsCorrectParams;
         }
 
         private static boolean returnsMessageOrList(Method method) {
             final Class<?> returnType = method.getReturnType();
-
             if (Message.class.isAssignableFrom(returnType)) {
                 return true;
             }
@@ -209,19 +213,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             if (List.class.isAssignableFrom(returnType)) {
                 return true;
             }
-
             return false;
-        }
-
-        @Override
-        public boolean apply(@Nullable Method method) {
-            //noinspection SimplifiableIfStatement
-            if (method == null) {
-                return false;
-            }
-            return isAnnotatedCorrectly(method)
-                    && acceptsCorrectParams(method)
-                    && returnsMessageOrList(method);
         }
     }
 }
