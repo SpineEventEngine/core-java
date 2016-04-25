@@ -148,6 +148,7 @@ public class EventHandlerMethodShould {
      */
 
     private static class InvalidEventHandlerNoAnnotation extends TestEventHandler {
+        @SuppressWarnings("unused")
         public void handle(ProjectCreated event, EventContext context) {
         }
     }

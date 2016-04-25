@@ -67,20 +67,6 @@ public abstract class HandlerMethod<C extends Message> {
         method.setAccessible(true);
     }
 
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, getFullMethodName(method));
-    }
-
-    /**
-     * Returns a full method name without parameters.
-     *
-     * @param method a method to get name for
-     * @return full method name
-     */
-    private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
-    }
-
     /**
      * @return the handling method
      */
@@ -156,6 +142,23 @@ public abstract class HandlerMethod<C extends Message> {
      */
     public String getFullName() {
         return getFullMethodName(method);
+    }
+
+    /**
+     * Logs a message at the WARN level according to the specified format and method.
+     */
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+        log().warn(messageFormat, getFullMethodName(method));
+    }
+
+    /**
+     * Returns a full method name without parameters.
+     *
+     * @param method a method to get name for
+     * @return full method name
+     */
+    private static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
     /**

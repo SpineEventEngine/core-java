@@ -70,6 +70,16 @@ public class HandlerMethodShould {
     }
 
     @Test
+    public void have_log_warning_method() {
+        HandlerMethod.warnOnWrongModifier("", oneParamMethod.getMethod());
+    }
+
+    @Test
+    public void return_first_param_type() {
+        assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
+    }
+
+    @Test
     public void invoke_the_method_with_two_parameters() throws InvocationTargetException {
         twoParamMethod.invoke(target, StringValue.getDefaultInstance(), EventContext.getDefaultInstance());
 
@@ -108,8 +118,7 @@ public class HandlerMethodShould {
 
     @Test
     public void compare_fields_in_equals() {
-        final HandlerMethod<EventContext> anotherMethod =
-                new TwoParamMethod(StubHandler.getTwoParameterMethod());
+        final HandlerMethod<EventContext> anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
         assertTrue(twoParamMethod.equals(anotherMethod));
     }
