@@ -102,8 +102,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
-            private final EventApplier.Factory value = new EventApplier.Factory();
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final EventApplier.Factory value = new EventApplier.Factory(); // use the FQN
         }
 
         private static Factory instance() {
