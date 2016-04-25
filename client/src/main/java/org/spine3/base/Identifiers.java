@@ -81,8 +81,8 @@ public class Identifiers {
      * @param id  the value to convert
      * @param <I> the type of the ID
      * @return <ul>
-     * <li>For classes implementing {@link Message} — Json form</li>
-     * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}</li>
+     * <li>For classes implementing {@link Message} — Json form
+     * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
@@ -174,10 +174,10 @@ public class Identifiers {
      * The type of the value wrapped into the returned instance is defined by the type
      * of the passed value:
      * <ul>
-     * <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself</li>
-     * <li>For {@code String} — {@link com.google.protobuf.StringValue}</li>
-     * <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}</li>
-     * <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}</li>
+     * <li>For classes implementing {@link com.google.protobuf.Message} — the value of the message itself
+     * <li>For {@code String} — {@link com.google.protobuf.StringValue}
+     * <li>For {@code Long} — {@link com.google.protobuf.UInt64Value}
+     * <li>For {@code Integer} — {@link com.google.protobuf.UInt32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -213,10 +213,10 @@ public class Identifiers {
      *
      * @param idInAny the ID value wrapped into {@code Any}
      * @return <ul>
-     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped</li>
-     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped</li>
-     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped</li>
-     * <li>unwrapped {@code Message} instance if its type is none of the above</li>
+     * <li>{@code String} value if {@link com.google.protobuf.StringValue} is unwrapped
+     * <li>{@code Integer} value if {@link com.google.protobuf.UInt32Value} is unwrapped
+     * <li>{@code Long} value if {@link com.google.protobuf.UInt64Value} is unwrapped
+     * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      */
     public static Object idFromAny(Any idInAny) {

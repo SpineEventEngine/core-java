@@ -140,9 +140,9 @@ public class Durations {
      * @param d1 a duration to add, could be {@code null}
      * @param d2 another duration to add, could be {@code null}
      * @return <ul>
-     * <li>sum of two durations if both of them are {@code non-null}</li>
-     * <li>another {@code non-null} value, if one is {@code null}</li>
-     * <li>{@link #ZERO} if both values are {@code null}</li>
+     * <li>sum of two durations if both of them are {@code non-null}
+     * <li>another {@code non-null} value, if one is {@code null}
+     * <li>{@link #ZERO} if both values are {@code null}
      * </ul>
      */
     public static Duration add(@Nullable Duration d1, @Nullable Duration d2) {

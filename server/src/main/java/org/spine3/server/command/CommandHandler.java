@@ -45,9 +45,9 @@ import java.util.List;
  *
  * <p>A command handler is responsible for:
  * <ol>
- *     <li>Changing the state of the business model</li>
- *     <li>Producing corresponding events.</li>
- *     <li>Posting events to {@code EventBus}.</li>
+ *     <li>Changing the state of the business model
+ *     <li>Producing corresponding events.
+ *     <li>Posting events to {@code EventBus}.
  * </ol>
  *
  * <p>Event messages are returned as values of command handling methods.
