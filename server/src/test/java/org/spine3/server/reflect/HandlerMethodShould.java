@@ -78,7 +78,7 @@ public class HandlerMethodShould {
 
     @Test
     public void invoke_the_method_with_one_parameter() throws InvocationTargetException {
-        oneParamMethod.invoke(target, BoolValue.getDefaultInstance());
+        oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
 
         assertTrue(((StubHandler)target).wasHandleInvoked());
     }
@@ -149,6 +149,7 @@ public class HandlerMethodShould {
             final Method method;
             final Class<?> clazz = StubHandler.class;
             try {
+                //noinspection DuplicateStringLiteralInspection
                 method = clazz.getDeclaredMethod("handle", BoolValue.class);
             } catch (NoSuchMethodException e) {
                 throw propagate(e);

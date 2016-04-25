@@ -23,7 +23,6 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 
@@ -166,45 +165,16 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * The predicate class that allows to filter command handling methods.
      */
-    private static class FilterPredicate implements Predicate<Method> {
-
-        private static final int MESSAGE_PARAM_INDEX = 0;
-        private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
+    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
         @Override
-        public boolean apply(@Nullable Method method) {
-            //noinspection SimplifiableIfStatement
-            if (method == null) {
-                return false;
-            }
-            final boolean isCommandHandler = isAnnotatedCorrectly(method)
-                    && acceptsCorrectParams(method)
-                    && returnsMessageOrList(method);
-            return isCommandHandler;
-        }
-
-        private static boolean isAnnotatedCorrectly(Method method) {
+        protected boolean isAnnotatedCorrectly(Method method) {
             final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
             return isAnnotated;
         }
 
-        private static boolean acceptsCorrectParams(Method method) {
-            final Class<?>[] paramTypes = method.getParameterTypes();
-            final int paramCount = paramTypes.length;
-            if (paramCount == 1) {
-                final boolean isCorrect = Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]);
-                return isCorrect;
-            } else if (paramCount == 2) {
-                final boolean paramsCorrect =
-                        Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                                EventContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-                return paramsCorrect;
-            } else {
-                return false;
-            }
-        }
-
-        private static boolean returnsMessageOrList(Method method) {
+        @Override
+        protected boolean isReturnTypeCorrect(Method method) {
             final Class<?> returnType = method.getReturnType();
             if (Message.class.isAssignableFrom(returnType)) {
                 return true;
@@ -214,6 +184,11 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
                 return true;
             }
             return false;
+        }
+
+        @Override
+        protected Class<? extends Message> getContextClass() {
+            return CommandContext.class;
         }
     }
 }

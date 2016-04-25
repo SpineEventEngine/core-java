@@ -26,11 +26,8 @@ import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for an event handling method.
@@ -125,50 +122,23 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate implements Predicate<Method> {
+    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
-        private static final int MESSAGE_PARAM_INDEX = 0;
-        private static final int EVENT_CONTEXT_PARAM_INDEX = 1;
-
-        /**
-         * Checks if the passed method is an event handler.
-         */
-        private static boolean isEventHandler(Method method) {
-            if (!isAnnotatedCorrectly(method)) {
-                return false;
-            }
-            if (!acceptsCorrectParams(method)) {
-                return false;
-            }
-            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-            return returnsNothing;
-        }
-
-        private static boolean acceptsCorrectParams(Method method) {
-            final Class<?>[] paramTypes = method.getParameterTypes();
-            final int paramCount = paramTypes.length;
-            if (paramCount == 1) {
-                final boolean isCorrect = Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]);
-                return isCorrect;
-            } else if (paramCount == 2) {
-                final boolean paramsCorrect =
-                        Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                        EventContext.class.equals(paramTypes[EVENT_CONTEXT_PARAM_INDEX]);
-                return paramsCorrect;
-            } else {
-                return false;
-            }
-        }
-
-        private static boolean isAnnotatedCorrectly(Method method) {
-            final boolean result = method.isAnnotationPresent(Subscribe.class);
-            return result;
+        @Override
+        protected boolean isAnnotatedCorrectly(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Subscribe.class);
+            return isAnnotated;
         }
 
         @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventHandler(method);
+        protected boolean isReturnTypeCorrect(Method method) {
+            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            return isVoid;
+        }
+
+        @Override
+        protected Class<? extends Message> getContextClass() {
+            return EventContext.class;
         }
     }
 }
