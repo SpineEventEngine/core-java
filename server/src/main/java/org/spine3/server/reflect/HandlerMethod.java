@@ -211,11 +211,28 @@ public abstract class HandlerMethod<C extends Message> {
      */
     public interface Factory<H extends HandlerMethod> {
 
+        /**
+         * Returns the class of the method wrapper.
+         */
         Class<H> getMethodClass();
 
+        /**
+         * Creates a wrapper for a method.
+         */
         H create(Method method);
 
+        /**
+         * Returns a predicate for filtering methods.
+         */
         Predicate<Method> getPredicate();
+
+        /**
+         * Checks an access modifier of the method and logs a warning if it is invalid.
+         *
+         * @param method the method to check
+         * @see HandlerMethod#warnOnWrongModifier(String, Method)
+         */
+        void checkAccessModifier(Method method);
     }
 
     /**

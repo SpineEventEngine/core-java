@@ -110,23 +110,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return handlers;
     }
 
-    /**
-     * Verifies that passed methods are declared {@code public}.
-     *
-     * <p>Logs warning for the methods with a non-public modifier.
-     *
-     * @param methods the methods to check
-     * @see HandlerMethod#log()
-     */
-    public static void checkModifiers(Iterable<Method> methods) {
-        for (Method method : methods) {
-            final boolean isPublic = Modifier.isPublic(method.getModifiers());
-            if (!isPublic) {
-                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
-            }
-        }
-    }
-
     public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.instance();
     }
@@ -149,6 +132,13 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         @Override
         public Predicate<Method> getPredicate() {
             return PREDICATE;
+        }
+
+        @Override
+        public void checkAccessModifier(Method method) {
+            if (!Modifier.isPublic(method.getModifiers())) {
+                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
+            }
         }
 
         private enum Singleton {

@@ -55,23 +55,6 @@ import java.lang.reflect.Modifier;
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
-    /**
-     * Verifiers modifiers in the methods in the passed map to be 'private'.
-     *
-     * <p>Logs warning for the methods with a non-private modifier.
-     *
-     * @param methods the map of methods to check
-     * @see HandlerMethod#log()
-     */
-    /* package */ static void checkModifiers(Iterable<Method> methods) {
-        for (Method method : methods) {
-            final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
-            if (!isPrivate) {
-                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
-            }
-        }
-    }
-
     public static HandlerMethod.Factory<EventApplier> factory() {
         return Factory.instance();
     }
@@ -94,6 +77,13 @@ import java.lang.reflect.Modifier;
         @Override
         public Predicate<Method> getPredicate() {
             return PREDICATE;
+        }
+
+        @Override
+        public void checkAccessModifier(Method method) {
+            if (!Modifier.isPrivate(method.getModifiers())) {
+                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
+            }
         }
 
         private enum Singleton {
