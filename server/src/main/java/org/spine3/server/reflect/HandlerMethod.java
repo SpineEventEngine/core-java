@@ -47,11 +47,6 @@ import static com.google.common.base.Throwables.propagate;
 public abstract class HandlerMethod<C extends Message> {
 
     /**
-     * The index of the declaration of the generic parameter type {@code C} in this class.
-     */
-    private static final int CONTEXT_CLASS_GENERIC_INDEX = 0;
-
-    /**
      * The method to be called.
      */
     private final Method method;
