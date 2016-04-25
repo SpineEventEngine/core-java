@@ -63,23 +63,6 @@ public class EventHandlerMethod extends HandlerMethod<EventContext> {
     }
 
     /**
-     * Verifiers modifiers in the methods in the passed map to be 'public'.
-     * <p/>
-     * <p>Logs warning for the methods with a non-public modifier.
-     *
-     * @param methods the map of methods to check
-     * @see HandlerMethod#log()
-     */
-    public static void checkModifiers(Iterable<Method> methods) {
-        for (Method method : methods) {
-            final boolean isPublic = Modifier.isPublic(method.getModifiers());
-            if (!isPublic) {
-                warnOnWrongModifier("Event handler {} must be declared 'public'", method);
-            }
-        }
-    }
-
-    /**
      * @return the factory for filtering and creating event handler methods
      */
     public static HandlerMethod.Factory<EventHandlerMethod> factory() {
