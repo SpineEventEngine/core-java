@@ -64,66 +64,66 @@ public class EventHandlerMethodShould {
     public void consider_handler_with_one_msg_param_valid() {
         final Method handler = new ValidEventHandlerOneParam().getHandler();
 
-        assertIsCommandHandler(handler, true);
+        assertIsEventHandler(handler, true);
     }
 
     @Test
     public void consider_handler_with_msg_and_context_params_valid() {
         final Method handler = new ValidEventHandlerTwoParams().getHandler();
 
-        assertIsCommandHandler(handler, true);
+        assertIsEventHandler(handler, true);
     }
 
     @Test
     public void consider_not_annotated_handler_invalid() {
         final Method handler = new InvalidEventHandlerNoAnnotation().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_without_params_invalid() {
         final Method handler = new InvalidEventHandlerNoParams().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_too_many_params_invalid() {
         final Method handler = new InvalidEventHandlerTooManyParams().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_one_invalid_param_invalid() {
         final Method handler = new InvalidEventHandlerOneNotMsgParam().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_first_not_message_param_invalid() {
         final Method handler = new InvalidEventHandlerTwoParamsFirstInvalid().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_handler_with_second_not_context_param_invalid() {
         final Method handler = new InvalidEventHandlerTwoParamsSecondInvalid().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
     @Test
     public void consider_void_handler_invalid() {
         final Method handler = new InvalidEventHandlerNotVoid().getHandler();
 
-        assertIsCommandHandler(handler, false);
+        assertIsEventHandler(handler, false);
     }
 
-    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
+    private static void assertIsEventHandler(Method handler, boolean isHandler) {
         assertEquals(isHandler, EventHandlerMethod.PREDICATE.apply(handler));
     }
 
