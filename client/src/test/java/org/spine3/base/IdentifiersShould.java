@@ -38,6 +38,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.*;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Alexander Litus
@@ -46,6 +47,11 @@ import static org.spine3.protobuf.Messages.toAny;
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Identifiers.class));
+    }
 
     @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
     @Test

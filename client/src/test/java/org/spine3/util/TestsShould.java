@@ -24,9 +24,27 @@ import org.junit.Test;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MethodWithTooExceptionsDeclared"})
 public class TestsShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Tests.class));
+    }
+
+    @Test
+    public void verify_public_constructor() {
+        assertFalse(Tests.hasPrivateUtilityConstructor(ClassWithPublicCtor.class));
+        assertTrue(Tests.hasPrivateUtilityConstructor(TestsTest.class));
+        assertTrue(Tests.hasPrivateUtilityConstructor(ClassThrowingExceptionInConstructor.class));
+    }
+
+    @Test
+    public void return_current_time_in_seconds() {
+        assertNotEquals(0, Tests.currentTimeSeconds());
+    }
 
     private static class TestsTest {
         @SuppressWarnings("RedundantNoArgConstructor") // We need this constructor for our tests.
@@ -43,17 +61,5 @@ public class TestsShould {
         private ClassThrowingExceptionInConstructor() {
             throw new AssertionError("Private constructor must not be called.");
         }
-    }
-
-    @Test
-    public void verify_public_constructor() {
-        assertFalse(Tests.hasPrivateUtilityConstructor(ClassWithPublicCtor.class));
-        assertTrue(Tests.hasPrivateUtilityConstructor(TestsTest.class));
-        assertTrue(Tests.hasPrivateUtilityConstructor(ClassThrowingExceptionInConstructor.class));
-    }
-
-    @Test
-    public void return_current_time_in_seconds() {
-        assertNotEquals(0, Tests.currentTimeSeconds());
     }
 }
