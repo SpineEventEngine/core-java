@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.TimeUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -35,6 +36,7 @@ import org.spine3.base.Failure;
 import org.spine3.protobuf.Messages;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
+import org.spine3.testdata.TestCommands;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
@@ -44,7 +46,6 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 
 /**
@@ -65,12 +66,17 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         storage = getStorage();
     }
 
+    @After
+    public void tearDownCommandStorageTest() {
+        close(storage);
+    }
+
     @Override
     protected abstract CommandStorage getStorage();
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = toAny(createProject());
+        final Any command = toAny(TestCommands.createProjectCmd());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -91,7 +97,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_and_read_command() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         final CommandId commandId = command.getContext().getCommandId();
         storage.store(command);
 
@@ -136,7 +142,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         final CreateProject message = Messages.fromAny(command.getMessage());
 
         final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
@@ -169,7 +175,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         CommandStorage.checkCommand(command);
     }
 
@@ -177,6 +183,30 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     public void return_null_when_fail_to_get_id_from_command_message_which_has_no_id_field() {
         final Object id = CommandStorage.tryToGetTargetId(StringValue.getDefaultInstance());
         assertNull(id);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_store_null() {
+        //noinspection ConstantConditions
+        storage.store(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.setOkStatus(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_error_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.updateStatus(null, Error.getDefaultInstance());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.updateStatus(null, Failure.getDefaultInstance());
     }
 
     private void givenNewRecord() {

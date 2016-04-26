@@ -25,9 +25,11 @@ import org.spine3.server.storage.CommandStorageShould;
 
 public class InMemoryCommandStorageShould extends CommandStorageShould {
 
+    private final InMemoryStorageFactory factory = InMemoryStorageFactory.getInstance();
+
     @Override
     protected CommandStorage getStorage() {
-        final CommandStorage storage = InMemoryStorageFactory.getInstance().createCommandStorage();
+        final CommandStorage storage = factory.createCommandStorage();
         return storage;
     }
 }

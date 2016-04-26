@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.io;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
 /**
- * The content of this package and its subpackages are for internal use of the framework
- * and are considered annotated with {@link org.spine3.Internal}.
+ * @author Alexander Litus
  */
-@Internal
-@ParametersAreNonnullByDefault
-package org.spine3.server.internal;
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class IoUtilShould {
 
-import org.spine3.Internal;
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(IoUtil.class));
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Test
+    public void close_streams() {
+
+    }
+}

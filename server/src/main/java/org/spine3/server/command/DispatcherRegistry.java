@@ -107,6 +107,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     private static void warnUnregisterNotPossible(CommandClass commandClass,
                                                   CommandDispatcher registeredDispatcher,
                                                   CommandDispatcher dispatcher) {
+        //noinspection TestOnlyProblems
         CommandBus.log().warn(
                 "Another dispatcher {} found when trying to unregister dispatcher {} for the command class {}." +
                 " Dispatcher for the command class {} will not be unregistered.",

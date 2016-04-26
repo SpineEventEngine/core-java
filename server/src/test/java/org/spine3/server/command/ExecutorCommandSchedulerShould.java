@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.testdata.TestCommands;
 
 import javax.annotation.Nullable;
 
@@ -35,8 +36,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
-import static org.spine3.testdata.TestCommands.addTask;
-import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestCommands.addTaskMsg;
+import static org.spine3.testdata.TestCommands.createProjectMsg;
 import static org.spine3.testdata.TestContextFactory.createCommandContext;
 
 /**
@@ -66,7 +67,7 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmd = Commands.create(createProject(newUuid()), context);
+        final Command cmd = Commands.create(createProjectMsg(newUuid()), context);
 
         scheduler.schedule(cmd);
 
@@ -77,8 +78,8 @@ public class ExecutorCommandSchedulerShould {
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();
-        final Command expectedCmd = Commands.create(createProject(id), context);
-        final Command extraCmd = Commands.create(addTask(id), context);
+        final Command expectedCmd = Commands.create(createProjectMsg(id), context);
+        final Command extraCmd = Commands.create(addTaskMsg(id), context);
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
@@ -91,7 +92,7 @@ public class ExecutorCommandSchedulerShould {
     public void throw_exception_if_is_shutdown() {
         scheduler.shutdown();
         try {
-            scheduler.schedule(createProject());
+            scheduler.schedule(TestCommands.createProjectCmd());
         } catch (IllegalStateException expected) {
             // is OK as it is shutdown
             return;

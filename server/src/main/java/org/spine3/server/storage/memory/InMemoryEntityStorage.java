@@ -50,16 +50,8 @@ import static com.google.common.collect.Maps.newHashMap;
         storage.put(id, record);
     }
 
-    /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        storage.clear();
-    }
-
     @Override
     public void close() throws Exception {
-        clear();
         super.close();
     }
 }

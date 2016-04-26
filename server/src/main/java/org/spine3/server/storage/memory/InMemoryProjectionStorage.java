@@ -65,17 +65,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return entityStorage;
     }
 
-    /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        timestamp = null;
-        entityStorage.clear();
-    }
-
     @Override
     public void close() throws Exception {
-        clear();
         entityStorage.close();
         super.close();
     }

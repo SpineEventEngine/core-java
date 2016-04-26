@@ -55,71 +55,71 @@ public class TestEventFactory {
     /**
      * Creates a new {@link Event} with default properties.
      */
-    public static Event projectCreated() {
-        return projectCreated(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
-    }
-
-    /**
-     * Creates a new {@link Event} with default properties.
-     */
-    public static Event taskAdded() {
-        return taskAdded(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
-    }
-
-    /**
-     * Creates a new {@link Event} with default properties.
-     */
-    public static Event projectStarted() {
-        return projectStarted(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
+    public static Event projectCreatedEvent() {
+        return projectCreatedEvent(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
     /**
      * Creates a new {@link Event} with the given projectId.
      */
-    public static Event projectCreated(ProjectId projectId) {
-        return projectCreated(projectId, createEventContext(projectId));
-    }
-
-    /**
-     * Creates a new {@link Event} with the given projectId.
-     */
-    public static Event taskAdded(ProjectId projectId) {
-        return taskAdded(projectId, createEventContext(projectId));
-    }
-
-    /**
-     * Creates a new {@link Event} with the given projectId.
-     */
-    public static Event projectStarted(ProjectId projectId) {
-        return projectStarted(projectId, createEventContext(projectId));
+    public static Event projectCreatedEvent(ProjectId projectId) {
+        return projectCreatedEvent(projectId, createEventContext(projectId));
     }
 
     /**
      * Creates a new {@link Event} with the given projectId and eventContext.
      */
-    public static Event projectCreated(ProjectId projectId, EventContext eventContext) {
+    public static Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
 
-        final ProjectCreated event = projectCreatedEvent(projectId);
+        final ProjectCreated event = projectCreatedMsg(projectId);
         final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
         return builder.build();
     }
 
     /**
-     * Creates a new {@link Event} with the given projectId and eventContext.
+     * Creates a new {@link Event} with default properties.
      */
-    public static Event taskAdded(ProjectId projectId, EventContext eventContext) {
-
-        final TaskAdded event = taskAddedEvent(projectId);
-        final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
-        return builder.build();
+    public static Event taskAddedEvent() {
+        return taskAddedEvent(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
     }
 
     /**
      * Creates a new {@link Event} with the given projectId and eventContext.
      */
-    public static Event projectStarted(ProjectId projectId, EventContext eventContext) {
+    public static Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
 
-        final ProjectStarted event = projectStartedEvent(projectId);
+        final TaskAdded event = taskAddedMsg(projectId);
+        final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
+        return builder.build();
+    }
+
+    /**
+     * Creates a new {@link Event} with the given projectId.
+     */
+    public static Event taskAddedEvent(ProjectId projectId) {
+        return taskAddedEvent(projectId, createEventContext(projectId));
+    }
+
+    /**
+     * Creates a new {@link Event} with default properties.
+     */
+    public static Event projectStartedEvent() {
+        return projectStartedEvent(STUB_PROJECT_ID, STUB_EVENT_CONTEXT);
+    }
+
+    /**
+     * Creates a new {@link Event} with the given projectId.
+     */
+    public static Event projectStartedEvent(ProjectId projectId) {
+        return projectStartedEvent(projectId, createEventContext(projectId));
+    }
+
+    /**
+     * Creates a new {@link Event} with the given projectId and eventContext.
+     */
+    public static Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
+
+        final ProjectStarted event = projectStartedMsg(projectId);
         final Event.Builder builder = Event.newBuilder().setContext(eventContext).setMessage(toAny(event));
         return builder.build();
     }

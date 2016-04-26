@@ -45,6 +45,8 @@ public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, En
     /**
      * Used to get a storage in tests with different ID types.
      *
+     * <p>NOTE: the storage is closed after each test.
+     *
      * @param <Id> the type of Entity IDs
      * @return an empty storage instance
      */
@@ -90,6 +92,7 @@ public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, En
         final EntityStorageRecord actual = storage.read(id);
 
         assertEquals(expected, actual);
+        close(storage);
     }
 
     private static class TestEntityWithIdMessage extends Entity<ProjectId, Project> {

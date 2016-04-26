@@ -57,46 +57,46 @@ public class TestCommands {
     /**
      * Creates a new {@link Command} with default properties (current time etc).
      */
-    public static Command createProject() {
-        return createProject(TimeUtil.getCurrentTime());
+    public static Command createProjectCmd() {
+        return createProjectCmd(TimeUtil.getCurrentTime());
     }
 
     /**
      * Creates a new {@link Command} with the given timestamp.
      */
-    public static Command createProject(Timestamp when) {
-        return createProject(STUB_USER_ID, STUB_PROJECT_ID, when);
+    public static Command createProjectCmd(Timestamp when) {
+        return createProjectCmd(STUB_USER_ID, STUB_PROJECT_ID, when);
     }
 
     /**
      * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-        final CreateProject command = createProject(projectId);
-        return createCommand(command, userId, when);
+    public static Command createProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
+        final CreateProject command = createProjectMsg(projectId);
+        return createCommandCmd(command, userId, when);
     }
 
     /**
      * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
-        final AddTask command = addTask(projectId);
-        return createCommand(command, userId, when);
+    public static Command addTaskCmd(UserId userId, ProjectId projectId, Timestamp when) {
+        final AddTask command = addTaskMsg(projectId);
+        return createCommandCmd(command, userId, when);
     }
 
     /**
      * Creates a new {@link Command} with the given userId, projectId and timestamp.
      */
-    public static Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
-        final StartProject command = startProject(projectId);
-        return createCommand(command, userId, when);
+    public static Command startProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
+        final StartProject command = startProjectMsg(projectId);
+        return createCommandCmd(command, userId, when);
     }
 
     /**
      * Creates a new {@link Command} with the given command, userId and timestamp using default
      * {@link CommandId} instance.
      */
-    public static Command createCommand(Message command, UserId userId, Timestamp when) {
+    public static Command createCommandCmd(Message command, UserId userId, Timestamp when) {
         final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
         final Command result = Commands.create(command, context);
         return result;
@@ -105,14 +105,14 @@ public class TestCommands {
     /**
      * Creates a new {@link CreateProject} command with the given project ID.
      */
-    public static CreateProject createProject(ProjectId id) {
+    public static CreateProject createProjectMsg(ProjectId id) {
         return CreateProject.newBuilder().setProjectId(id).build();
     }
 
     /**
      * Creates {@link CreateProject} command for the passed project ID.
      */
-    public static CreateProject createProject(String projectId) {
+    public static CreateProject createProjectMsg(String projectId) {
         return CreateProject.newBuilder()
                 .setProjectId(
                         ProjectId.newBuilder()
@@ -124,14 +124,14 @@ public class TestCommands {
     /**
      * Creates a new {@link AddTask} command with the given project ID.
      */
-    public static AddTask addTask(ProjectId id) {
+    public static AddTask addTaskMsg(ProjectId id) {
         return AddTask.newBuilder().setProjectId(id).build();
     }
 
     /**
      * Creates a new {@link AddTask} command with the given project ID.
      */
-    public static AddTask addTask(String projectId) {
+    public static AddTask addTaskMsg(String projectId) {
         return AddTask.newBuilder().setProjectId(
                 ProjectId.newBuilder()
                         .setId(projectId)
@@ -142,14 +142,14 @@ public class TestCommands {
     /**
      * Creates a new {@link StartProject} command with the given project ID.
      */
-    public static StartProject startProject(ProjectId id) {
+    public static StartProject startProjectMsg(ProjectId id) {
         return StartProject.newBuilder().setProjectId(id).build();
     }
 
     /**
      * Creates {@link StartProject} command for the passed project ID.
      */
-    public static StartProject startProject(String projectId) {
+    public static StartProject startProjectMsg(String projectId) {
         return StartProject.newBuilder()
                 .setProjectId(ProjectId.newBuilder()
                                        .setId(projectId)

@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -87,12 +88,17 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         storage = getStorage();
     }
 
+    @After
+    public void tearDownEventStorageTest() {
+        close(storage);
+    }
+
     @Override
     protected abstract EventStorage getStorage();
 
     @Override
     protected Event newStorageRecord() {
-        return TestEventFactory.projectCreated();
+        return TestEventFactory.projectCreatedEvent();
     }
 
     @Override

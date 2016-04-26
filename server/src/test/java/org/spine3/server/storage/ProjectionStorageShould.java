@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import com.google.protobuf.Timestamp;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
@@ -45,6 +46,11 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
     @Before
     public void setUpProjectionStorageTest() {
         storage = getStorage();
+    }
+
+    @After
+    public void tearDownProjectionStorageTest() {
+        close(storage);
     }
 
     @Override

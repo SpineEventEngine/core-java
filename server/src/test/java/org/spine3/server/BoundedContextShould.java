@@ -60,6 +60,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
+import org.spine3.testdata.TestCommands;
 
 import java.util.List;
 
@@ -68,7 +69,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -124,7 +124,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
-        boundedContext.post(createProject(), new StreamObserver<Response>() {
+        boundedContext.post(TestCommands.createProjectCmd(), new StreamObserver<Response>() {
             @Override
             public void onNext(Response response) {
                 assertTrue(Responses.isUnsupportedCommand(response));
@@ -162,7 +162,7 @@ public class BoundedContextShould {
     @Test
     public void post_Command() {
         registerAll();
-        final Command request = createProject(userId, projectId, getCurrentTime());
+        final Command request = TestCommands.createProjectCmd(userId, projectId, getCurrentTime());
 
         boundedContext.post(request, new StreamObserver<Response>() {
             @Override
@@ -241,19 +241,19 @@ public class BoundedContextShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return projectCreatedEvent(cmd.getProjectId());
+            return projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return taskAddedEvent(cmd.getProjectId());
+            return taskAddedMsg(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
+            final ProjectStarted message = projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
         }
 

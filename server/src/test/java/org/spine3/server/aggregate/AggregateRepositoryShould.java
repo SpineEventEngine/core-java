@@ -37,6 +37,7 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestContextFactory;
+import org.spine3.testdata.TestEventMessageFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -46,8 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
-import static org.spine3.testdata.TestEventMessageFactory.taskAddedEvent;
+import static org.spine3.testdata.TestEventMessageFactory.taskAddedMsg;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -141,12 +141,12 @@ public class AggregateRepositoryShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return taskAddedEvent(cmd.getProjectId());
+            return taskAddedMsg(cmd.getProjectId());
         }
 
         @Apply
@@ -164,7 +164,7 @@ public class AggregateRepositoryShould {
         @Override
         @SuppressWarnings("RefusedBequest")
         /* package */ List<Event> getUncommittedEvents() {
-            final ProjectCreated msg = projectCreatedEvent(getId());
+            final ProjectCreated msg = TestEventMessageFactory.projectCreatedMsg(getId());
             final Event event = createEvent(msg, TestContextFactory.createEventContext());
             final List<Event> events = newArrayList(event);
             return events;

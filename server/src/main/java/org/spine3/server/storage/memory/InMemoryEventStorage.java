@@ -68,7 +68,6 @@ import static com.google.common.collect.Iterators.filter;
             final int result = Timestamps.compare(time1, time2);
             return result;
         }
-
         private static final long serialVersionUID = 0L;
     }
 
@@ -98,15 +97,6 @@ import static com.google.common.collect.Iterators.filter;
 
     @Override
     public void close() throws Exception {
-        clear();
         super.close();
-    }
-
-    /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        storage.clear();
-        index.clear();
     }
 }

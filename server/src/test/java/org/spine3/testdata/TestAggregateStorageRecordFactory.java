@@ -82,11 +82,11 @@ public class TestAggregateStorageRecordFactory {
         final Timestamp timestamp3 = add(timestamp2, delta);
 
         final AggregateStorageRecord record1 = newAggregateStorageRecord(timestamp1,
-                projectCreated(id, createEventContext(timestamp1)));
+                projectCreatedEvent(id, createEventContext(timestamp1)));
         final AggregateStorageRecord record2 = newAggregateStorageRecord(timestamp2,
-                taskAdded(id, createEventContext(timestamp2)));
+                taskAddedEvent(id, createEventContext(timestamp2)));
         final AggregateStorageRecord record3 = newAggregateStorageRecord(timestamp3,
-                projectStarted(id, createEventContext(timestamp3)));
+                projectStartedEvent(id, createEventContext(timestamp3)));
 
         return newArrayList(record1, record2, record3);
     }

@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -32,6 +33,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.testdata.TestEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -48,7 +50,6 @@ import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 /**
  * @author Alexander Litus
@@ -65,11 +66,18 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         storage = getStorage();
     }
 
+    @After
+    public void tearDownAggregateStorageTest() {
+        close(storage);
+    }
+
     @Override
     protected abstract AggregateStorage<ProjectId> getStorage();
 
     /**
      * Used to get a storage in tests with different ID types.
+     *
+     * <p>NOTE: the storage is closed after each test.
      *
      * @param <Id> the type of aggregate IDs
      * @return an empty storage instance
@@ -237,21 +245,21 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_write_event_count_to_closed_storage() throws Exception {
-        storage.close();
+    public void throw_exception_if_try_to_write_event_count_to_closed_storage() {
+        close(storage);
 
         storage.writeEventCountAfterLastSnapshot(id, 5);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_try_to_read_event_count_from_closed_storage() throws Exception {
-        storage.close();
+    public void throw_exception_if_try_to_read_event_count_from_closed_storage() {
+        close(storage);
 
         storage.readEventCountAfterLastSnapshot(id);
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
-        final Event expectedEvent = projectCreated();
+        final Event expectedEvent = TestEventFactory.projectCreatedEvent();
 
         storage.writeEvent(id, expectedEvent);
 
@@ -259,6 +267,8 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         assertEquals(1, events.getEventCount());
         final Event actualEvent = events.getEvent(0);
         assertEquals(expectedEvent, actualEvent);
+
+        close(storage);
     }
 
     // Ignore this test because several records can be stored by an aggregate ID.

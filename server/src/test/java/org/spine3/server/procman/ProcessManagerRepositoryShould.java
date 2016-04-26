@@ -67,7 +67,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class ProcessManagerRepositoryShould {
 
     private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
@@ -104,14 +104,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_manager() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
-        testDispatchEvent(taskAddedEvent(ID));
-        testDispatchEvent(projectStartedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
+        testDispatchEvent(taskAddedMsg(ID));
+        testDispatchEvent(projectStartedMsg(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -123,14 +123,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(addTask(ID));
+        testDispatchCommand(addTaskMsg(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(createProject(ID));
-        testDispatchCommand(addTask(ID));
-        testDispatchCommand(startProject(ID));
+        testDispatchCommand(createProjectMsg(ID));
+        testDispatchCommand(addTaskMsg(ID));
+        testDispatchCommand(startProjectMsg(ID));
     }
 
     private void testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
@@ -142,7 +142,7 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(addTask(ID));
+        testDispatchCommand(addTaskMsg(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -246,19 +246,19 @@ public class ProcessManagerRepositoryShould {
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toState(command));
-            return projectCreatedEvent(command.getProjectId());
+            return projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toState(command));
-            return taskAddedEvent(command.getProjectId());
+            return taskAddedMsg(command.getProjectId());
         }
 
         @Assign
         public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toState(command));
-            final Message addTask = TestCommands.addTask(command.getProjectId());
+            final Message addTask = TestCommands.addTaskMsg(command.getProjectId());
 
             return newRouter().of(command, context)
                     .add(addTask)

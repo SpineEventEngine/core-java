@@ -83,14 +83,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent());
+        testDispatchEvent(projectCreatedMsg());
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent());
-        testDispatchEvent(taskAddedEvent());
-        testDispatchEvent(projectStartedEvent());
+        testDispatchEvent(projectCreatedMsg());
+        testDispatchEvent(taskAddedMsg());
+        testDispatchEvent(projectStartedMsg());
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
@@ -100,15 +100,15 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        testDispatchCommand(addTask(ID));
+        testDispatchCommand(addTaskMsg(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException {
         processManager.setCommandBus(commandBus);
-        testDispatchCommand(createProject(ID));
-        testDispatchCommand(addTask(ID));
-        testDispatchCommand(startProject(ID));
+        testDispatchCommand(createProjectMsg(ID));
+        testDispatchCommand(addTaskMsg(ID));
+        testDispatchCommand(startProjectMsg(ID));
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
@@ -119,7 +119,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final List<Event> events = testDispatchCommand(createProject(ID));
+        final List<Event> events = testDispatchCommand(createProjectMsg(ID));
 
         assertEquals(1, events.size());
         final Event event = events.get(0);
@@ -136,7 +136,7 @@ public class ProcessManagerShould {
     @Test
     public void route_commands() throws InvocationTargetException {
         processManager.setCommandBus(commandBus);
-        final List<Event> events = testDispatchCommand(startProject(ID));
+        final List<Event> events = testDispatchCommand(startProjectMsg(ID));
 
         // There's only one event generated.
         assertEquals(1, events.size());
@@ -221,20 +221,20 @@ public class ProcessManagerShould {
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toAny(command));
-            return projectCreatedEvent(command.getProjectId());
+            return projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toAny(command));
-            return taskAddedEvent(command.getProjectId());
+            return taskAddedMsg(command.getProjectId());
         }
 
         @Assign
         public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toAny(command));
 
-            final Message startProject = TestCommands.startProject(command.getProjectId());
+            final Message startProject = TestCommands.startProjectMsg(command.getProjectId());
             return newRouter().of(command, context)
                     .add(startProject)
                     .route();
