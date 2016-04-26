@@ -297,7 +297,6 @@ public class CommandHandlerMethodShould {
 
     private abstract class TestCommandHandler extends CommandHandler {
 
-        @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String HANDLER_METHOD_NAME = "handleTest";
 
         protected TestCommandHandler() {

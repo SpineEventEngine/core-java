@@ -178,7 +178,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         private final EventStreamQuery query;
         private final Predicate<Event> timePredicate;
 
-        @SuppressWarnings({"IfMayBeConditional"})
+        @SuppressWarnings("IfMayBeConditional")
         public MatchesStreamQuery(EventStreamQuery query) {
             this.query = query;
 

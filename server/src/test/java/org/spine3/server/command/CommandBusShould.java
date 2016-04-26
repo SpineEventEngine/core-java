@@ -89,7 +89,7 @@ public class CommandBusShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
-        //noinspection ConstantConditions,ResultOfMethodCallIgnored
+        // noinspection ConstantConditions
         CommandBus.newBuilder()
                   .setCommandStore(null)
                   .build();
@@ -120,7 +120,6 @@ public class CommandBusShould {
         commandBus.register(new EmptyCommandHandler(newUuid(), eventBus));
     }
 
-    @SuppressWarnings("EmptyClass")
     private static class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler(String id, EventBus eventBus) {
             super(id, eventBus);
@@ -236,7 +235,7 @@ public class CommandBusShould {
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject command, CommandContext ctx) throws TestFailure, TestThrowable {
+        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
             handlerInvoked = true;
             return ProjectCreated.getDefaultInstance();
         }
@@ -428,7 +427,7 @@ public class CommandBusShould {
         verify(log, times(1)).errorHandlingUnknown(eq(throwable), eq(commandMessage), eq(commandId));
     }
 
-    private <E extends Throwable> Command givenThrowingHandler(E throwable) throws TestThrowable, TestFailure {
+    private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, throwable);
         commandBus.register(handler);
         final CreateProject msg = createProject(newUuid());

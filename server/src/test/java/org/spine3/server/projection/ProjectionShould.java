@@ -42,13 +42,13 @@ public class ProjectionShould {
 
         @Subscribe
         public void on(StringValue event, EventContext ignored) {
-            final StringValue newSate = createNewState("string", event.getValue());
+            final StringValue newSate = createNewState("stringState", event.getValue());
             incrementState(newSate);
         }
 
         @Subscribe
         public void on(UInt32Value event, EventContext ignored) {
-            final StringValue newSate = createNewState("integer", String.valueOf(event.getValue()));
+            final StringValue newSate = createNewState("integerState", String.valueOf(event.getValue()));
             incrementState(newSate);
         }
 

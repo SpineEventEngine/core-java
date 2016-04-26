@@ -170,11 +170,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <E>        the type of entities or aggregates
      * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
-    @SuppressWarnings({"InstanceofIncompatibleInterface", "CastToIncompatibleInterface", "ChainOfInstanceofChecks"})
-        // reason for suppressing: we intentionally cast the repository to CommandHandler because custom
-        // repositories may implement CommandHandler interface for handling commands that related to
-        // more than one entity in the repository. For example, DeleteAll command would mark as removed (or remove)
-        // all entities in the repository.
+    @SuppressWarnings({"ChainOfInstanceofChecks"})
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
@@ -195,8 +191,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
-    @SuppressWarnings({"ChainOfInstanceofChecks", "InstanceofIncompatibleInterface", "CastToIncompatibleInterface"})
-        // See comments for register(Repository<?, ?> repository).
+    @SuppressWarnings({"ChainOfInstanceofChecks"})
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
             commandBus.unregister((CommandDispatcher) repository);

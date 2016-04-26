@@ -85,7 +85,7 @@ public class EventBusShould {
 
         private boolean methodCalled = false;
 
-        @SuppressWarnings("UnusedParameters") // OK for the test class.
+        // OK for the test class.
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             this.methodCalled = true;
@@ -223,7 +223,6 @@ public class EventBusShould {
 
         private boolean methodCalled = false;
 
-        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             methodCalled = true;

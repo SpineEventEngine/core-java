@@ -174,7 +174,6 @@ public class EventApplierMethodShould {
 
     private abstract static class TestEventApplier {
 
-        @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String APPLIER_METHOD_NAME = "apply";
 
         public Method getMethod() {
