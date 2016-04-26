@@ -20,6 +20,7 @@
 package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,9 @@ import static com.google.common.base.Throwables.propagate;
  *
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
- * @param <C> the type of the message context or {@code Void} if context is not used
+ * @param <C> the type of the message context or {@link Empty} if a context parameter is never used
  */
-public abstract class HandlerMethod<C> {
+public abstract class HandlerMethod<C extends Message> {
 
     /**
      * The method to be called.
@@ -64,20 +65,6 @@ public abstract class HandlerMethod<C> {
         this.method = checkNotNull(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
-    }
-
-    protected static void warnOnWrongModifier(String messageFormat, Method method) {
-        log().warn(messageFormat, getFullMethodName(method));
-    }
-
-    /**
-     * Returns a full method name without parameters.
-     *
-     * @param method a method to get name for
-     * @return full method name
-     */
-    private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
     /**
@@ -103,10 +90,9 @@ public abstract class HandlerMethod<C> {
         return result;
     }
 
-    //TODO:2016-04-19:alexander.yevsyukov: Check the value returned by this method in the invoke() methods below.
-    // See if we can have a common internal method that accepts null as the context parameter and ignores it
-    // if the underlying method accepts only one parameter.
-
+    /**
+     * Returns the count of the method parameters.
+     */
     protected int getParamCount() {
         return paramCount;
     }
@@ -121,40 +107,20 @@ public abstract class HandlerMethod<C> {
      * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not an {@link Error}.
      *                                   {@code Error} instances are propagated as-is.
      */
-    protected <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
+    public <R> R invoke(Object target, Message message, C context) throws InvocationTargetException {
         checkNotNull(message);
         checkNotNull(context);
         try {
-            @SuppressWarnings("unchecked")
-            final R result = (R) method.invoke(target, message, context);
-            return result;
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw propagate(e);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof Error) {
-                //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException,ProhibitedExceptionThrown
-                throw (Error) e.getCause();
+            final int paramCount = getParamCount();
+            if (paramCount == 1) {
+                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                final R result = (R) method.invoke(target, message);
+                return result;
+            } else {
+                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                final R result = (R) method.invoke(target, message, context);
+                return result;
             }
-            throw e;
-        }
-    }
-
-    /**
-     * Invokes the wrapped subscriber method to handle {@code message}.
-     *
-     * @param <R>     the type of the expected handler invocation result
-     * @param target  the target object on which call the method
-     * @param message  a message to handle
-     * @return the result of message handling
-     * @throws InvocationTargetException if the wrapped method throws any {@link Throwable} that is not
-     *                                   an {@link Error}. {@code Error} instances are propagated as-is.
-     */
-    protected <R> R invoke(Object target, Message message) throws InvocationTargetException {
-        checkNotNull(message);
-        try {
-            @SuppressWarnings("unchecked")
-            final R result = (R) method.invoke(target, message);
-            return result;
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw propagate(e);
         } catch (InvocationTargetException e) {
@@ -176,6 +142,23 @@ public abstract class HandlerMethod<C> {
      */
     public String getFullName() {
         return getFullMethodName(method);
+    }
+
+    /**
+     * Logs a message at the WARN level according to the specified format and method.
+     */
+    protected static void warnOnWrongModifier(String messageFormat, Method method) {
+        log().warn(messageFormat, getFullMethodName(method));
+    }
+
+    /**
+     * Returns a full method name without parameters.
+     *
+     * @param method a method to get name for
+     * @return full method name
+     */
+    private static String getFullMethodName(Method method) {
+        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
     }
 
     /**
@@ -231,16 +214,89 @@ public abstract class HandlerMethod<C> {
      */
     public interface Factory<H extends HandlerMethod> {
 
+        /**
+         * Returns the class of the method wrapper.
+         */
         Class<H> getMethodClass();
 
+        /**
+         * Creates a wrapper for a method.
+         */
         H create(Method method);
 
+        /**
+         * Returns a predicate for filtering methods.
+         */
         Predicate<Method> getPredicate();
+
+        /**
+         * Checks an access modifier of the method and logs a warning if it is invalid.
+         *
+         * @param method the method to check
+         * @see HandlerMethod#warnOnWrongModifier(String, Method)
+         */
+        void checkAccessModifier(Method method);
+    }
+
+    /**
+     * The predicate class allowing to filter message handler methods.
+     */
+    protected abstract static class FilterPredicate implements Predicate<Method> {
+
+        @Override
+        public boolean apply(@Nullable Method method) {
+            checkNotNull(method);
+            return isHandler(method);
+        }
+
+        /**
+         * Checks if the passed method is a handler.
+         */
+        protected boolean isHandler(Method method) {
+            final boolean isHandler = isAnnotatedCorrectly(method)
+                    && acceptsCorrectParams(method)
+                    && isReturnTypeCorrect(method);
+            return isHandler;
+        }
+
+        /**
+         * Returns {@code true} if the method is annotated correctly, {@code false} otherwise.
+         */
+        protected abstract boolean isAnnotatedCorrectly(Method method);
+
+        /**
+         * Returns {@code true} if the method return type is correct, {@code false} otherwise.
+         */
+        protected abstract boolean isReturnTypeCorrect(Method method);
+
+        /**
+         * Returns the context parameter type.
+         */
+        protected abstract Class<? extends Message> getContextClass();
+
+        /**
+         * Returns {@code true} if the method parameters are correct, {@code false} otherwise.
+         */
+        protected boolean acceptsCorrectParams(Method method) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            final int paramCount = paramTypes.length;
+            final boolean isParamCountCorrect = (paramCount == 1) || (paramCount == 2);
+            if (!isParamCountCorrect) {
+                return false;
+            }
+            final boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
+            if (paramCount == 1) {
+                return isFirstParamMsg;
+            } else {
+                final Class<? extends Message> contextClass = getContextClass();
+                final boolean paramsCorrect = isFirstParamMsg && contextClass.equals(paramTypes[1]);
+                return paramsCorrect;
+            }
+        }
     }
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
     }
@@ -251,6 +307,4 @@ public abstract class HandlerMethod<C> {
     protected static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }
-

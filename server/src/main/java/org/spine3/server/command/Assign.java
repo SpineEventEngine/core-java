@@ -20,20 +20,29 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Message;
+import org.spine3.base.CommandContext;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 /**
  * Marks a method as command handler.
  *
- * <p>A command handler method must have two parameters. The class of the command will be
- * indicated by the first parameter.
+ * <p>A command handler method:
+ * <ul>
+ *     <li>is annotated with {@link Assign};
+ *     <li>is {@code public};
+ *     <li>returns an event derived from {@link Message} or a {@link List} of messages;
+ *     <li>accepts a command derived from {@link Message} as a first parameter;
+ *     <li>(optional) accepts a {@link CommandContext} as the second parameter.
+ * </ul>
  *
- * <p>The second parameter of the method must be {@link org.spine3.base.CommandContext}.
- * If the annotation is applied to a method with less or more than two parameters,
- * the method will not be registered for command dispatching.
+ * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
+ * considered as a command handler and is not registered for command dispatching.
  *
  * <p>Objects handing commands are registered using {@link CommandBus#register(CommandHandler)}.
  *
@@ -46,4 +55,3 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Assign {
 }
-

@@ -70,12 +70,12 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 public abstract class Entity<I, S extends Message> {
 
     /**
-     * The index of the declaration of the generic parameter type {@code Id} in this class.
+     * The index of the declaration of the generic parameter type {@code I} in this class.
      */
     private static final int ID_CLASS_GENERIC_INDEX = 0;
 
     /**
-     * The index of the declaration of the generic parameter type {@code State} in this class.
+     * The index of the declaration of the generic parameter type {@code S} in this class.
      */
     private static final int STATE_CLASS_GENERIC_INDEX = 1;
 

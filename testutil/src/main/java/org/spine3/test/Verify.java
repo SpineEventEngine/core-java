@@ -117,8 +117,7 @@ public final class Verify extends Assert {
      * <p>Without the {@code try ... catch} block around lines 11-13 the stack trace following a test failure
      * would look a little like:
      *
-     * <p>
-     * <pre>
+     * <p><pre>
      * java.lang.AssertionError: ...
      *  at TestFoo.assertFoo(TestFoo.java:11)
      *  at TestFoo.testFoo(TestFoo.java:5)
@@ -129,17 +128,14 @@ public final class Verify extends Assert {
      *  ...
      * </pre>
      *
-     * <p>
-     * Note that the source of the error isn't readily apparent as the first line in the stack trace
+     * <p>Note that the source of the error isn't readily apparent as the first line in the stack trace
      * is the code within the custom assert. If we were debugging the failure we would be more interested
      * in the second line of the stack trace which shows us where in our tests the assert failed.
      *
-     * <p>
-     * With the {@code try ... catch} block around lines 11-13 the stack trace would look like the
+     * <p>With the {@code try ... catch} block around lines 11-13 the stack trace would look like the
      * following:
      *
-     * <p>
-     * <pre>
+     * <p><pre>
      * java.lang.AssertionError: ...
      *  at TestFoo.testFoo(TestFoo.java:5)
      *  at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
@@ -148,7 +144,6 @@ public final class Verify extends Assert {
      *  at java.lang.reflect.Method.invoke(Method.java:324)
      *  ...
      * </pre>
-     *
      * <p>
      * Here the source of the error is more visible as we can instantly see that the testFoo test is
      * failing at line 5.

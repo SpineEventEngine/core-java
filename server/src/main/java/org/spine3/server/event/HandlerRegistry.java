@@ -24,7 +24,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import org.spine3.server.reflect.EventHandlerMethod;
+import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodMap;
 import org.spine3.server.type.EventClass;
 
@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The registry of event handling methods by event class.
+ * The registry of event subscriber methods by event class.
  *
  * <p>There can be multiple handlers per event class.
  *
@@ -43,20 +43,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 /* package */ class HandlerRegistry {
 
-    private final Multimap<EventClass, EventHandler> handlersByEventClass = HashMultimap.create();
+    private final Multimap<EventClass, EventSubscriber> handlersByEventClass = HashMultimap.create();
 
-    /* package */ void subscribe(EventHandler object) {
+    /* package */ void subscribe(EventSubscriber object) {
         checkNotNull(object);
-        final MethodMap<EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+        final MethodMap<EventSubscriberMethod> handlers = EventSubscriberMethod.scan(object);
         final boolean handlersEmpty = handlers.isEmpty();
         checkHandlersNotEmpty(object, handlersEmpty);
-        for (Map.Entry<Class<? extends Message>, EventHandlerMethod> entry : handlers.entrySet()) {
+        for (Map.Entry<Class<? extends Message>, EventSubscriberMethod> entry : handlers.entrySet()) {
             handlersByEventClass.put(EventClass.of(entry.getKey()), object);
         }
     }
 
-    /* package */ void usubscribe(EventHandler object) {
-        final MethodMap<EventHandlerMethod> handlers = EventHandlerMethod.scan(object);
+    /* package */ void usubscribe(EventSubscriber object) {
+        final MethodMap<EventSubscriberMethod> handlers = EventSubscriberMethod.scan(object);
         final boolean handlersEmpty = handlers.isEmpty();
         checkHandlersNotEmpty(object, handlersEmpty);
         if (!handlersEmpty) {
@@ -71,12 +71,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
         EventBus.log().info("All subscribers cleared.");
     }
 
-    /* package */ Collection<EventHandler> getSubscribers(EventClass c) {
+    /* package */ Collection<EventSubscriber> getSubscribers(EventClass c) {
         return ImmutableList.copyOf(handlersByEventClass.get(c));
     }
 
     /* package */ boolean hasSubscribers(EventClass eventClass) {
-        final Collection<EventHandler> handlers = getSubscribers(eventClass);
+        final Collection<EventSubscriber> handlers = getSubscribers(eventClass);
         return !handlers.isEmpty();
     }
 

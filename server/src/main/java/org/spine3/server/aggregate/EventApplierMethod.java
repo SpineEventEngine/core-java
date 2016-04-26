@@ -21,22 +21,20 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import org.spine3.server.reflect.HandlerMethod;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A wrapper for event applier method.
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplier extends HandlerMethod<Void> {
+/* package */ class EventApplierMethod extends HandlerMethod<Empty> {
 
     /**
      * The instance of the predicate to filter event applier methods of an aggregate class.
@@ -48,50 +46,47 @@ import static com.google.common.base.Preconditions.checkNotNull;
      *
      * @param method subscriber method
      */
-    /* package */ EventApplier(Method method) {
+    /* package */ EventApplierMethod(Method method) {
         super(method);
     }
 
-    @Override
+    /**
+     * Invokes {@link HandlerMethod#invoke(Object, Message, Message)} passing the default message as the context parameter
+     * as event appliers do not have this parameter.
+     */
     protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
-        return super.invoke(aggregate, message);
+        return super.invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
     /**
-     * Verifiers modifiers in the methods in the passed map to be 'private'.
+     * This method is deprecated because event appliers do not have context parameter.
      *
-     * <p>Logs warning for the methods with a non-private modifier.
-     *
-     * @param methods the map of methods to check
-     * @see HandlerMethod#log()
+     * <p>Please use {@link EventApplierMethod#invoke(Object, Message)} instead.
      */
-    /* package */ static void checkModifiers(Iterable<Method> methods) {
-        for (Method method : methods) {
-            final boolean isPrivate = Modifier.isPrivate(method.getModifiers());
-            if (!isPrivate) {
-                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
-            }
-        }
+    @Deprecated
+    @Override
+    public <R> R invoke(Object target, Message message, Empty context) throws InvocationTargetException {
+        return super.invoke(target, message, Empty.getDefaultInstance());
     }
 
-    public static HandlerMethod.Factory<EventApplier> factory() {
+    public static HandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.instance();
     }
 
     /**
      * The factory for filtering methods that match {@code EventApplier} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<EventApplier> {
+    private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
 
         @Override
-        public Class<EventApplier> getMethodClass() {
-            return EventApplier.class;
+        public Class<EventApplierMethod> getMethodClass() {
+            return EventApplierMethod.class;
         }
 
         @Override
-        public EventApplier create(Method method) {
-            return new EventApplier(method);
+        public EventApplierMethod create(Method method) {
+            return new EventApplierMethod(method);
         }
 
         @Override
@@ -99,10 +94,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
             return PREDICATE;
         }
 
+        @Override
+        public void checkAccessModifier(Method method) {
+            if (!Modifier.isPrivate(method.getModifiers())) {
+                warnOnWrongModifier("Event applier method {} must be declared 'private'.", method);
+            }
+        }
+
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
+            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory(); // use the FQN
         }
 
         private static Factory instance() {
@@ -113,40 +115,39 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * The predicate for filtering event applier methods.
      */
-    private static class FilterPredicate implements Predicate<Method> {
-
-        private static final int EVENT_PARAM_INDEX = 0;
+    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
         private static final int NUMBER_OF_PARAMS = 1;
+        private static final int EVENT_PARAM_INDEX = 0;
 
-        /**
-         * Checks if a method is an event applier.
-         *
-         * @param method to check
-         * @return {@code true} if the method is an event applier, {@code false} otherwise
-         */
-        public static boolean isEventApplier(Method method) {
-            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
-            if (!isAnnotated) {
-                return false;
-            }
-
+        @Override
+        @SuppressWarnings("RefusedBequest")
+        protected boolean acceptsCorrectParams(Method method) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean paramCountValid = parameterTypes.length == NUMBER_OF_PARAMS;
-            if (!paramCountValid) {
+            final boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
+            if (!paramCountIsValid) {
                 return false;
             }
-
-            final boolean firstParamIsMessage = Message.class.isAssignableFrom(parameterTypes[EVENT_PARAM_INDEX]);
-            final boolean returnsNothing = Void.TYPE.equals(method.getReturnType());
-
-            return firstParamIsMessage && returnsNothing;
+            final Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
+            final boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
+            return paramIsMessage;
         }
 
         @Override
-        public boolean apply(@Nullable Method method) {
-            checkNotNull(method);
-            return isEventApplier(method);
+        protected boolean isAnnotatedCorrectly(Method method) {
+            final boolean isAnnotated = method.isAnnotationPresent(Apply.class);
+            return isAnnotated;
+        }
+
+        @Override
+        protected boolean isReturnTypeCorrect(Method method) {
+            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            return isVoid;
+        }
+
+        @Override
+        protected Class<? extends Message> getContextClass() {
+            return Empty.class;
         }
     }
 }

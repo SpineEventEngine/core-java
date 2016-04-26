@@ -20,6 +20,9 @@
 
 package org.spine3.server.event;
 
+import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,12 +31,17 @@ import java.lang.annotation.Target;
 /**
  * Marks a method as an event subscriber.
  *
- * <p>An event subscriber method must have two parameters. The class of the event will be
- * indicated by the first parameter.
+ * <p>An event subscriber method:
+ * <ul>
+ *     <li>is annotated with {@link Subscribe};</li>
+ *     <li>is {@code public};</li>
+ *     <li>returns {@code void};</li>
+ *     <li>accepts an event derived from {@link Message} as the first parameter;</li>
+ *     <li>(optional) accepts an {@link EventContext} as the second parameter.</li>
+ * </ul>
  *
- * <p>The second parameter must be {@link org.spine3.base.EventContext}. If the annotation
- * is applied to a method with less or more than two parameters, the method will not be
- * registered for event delivery from {@link EventBus}.
+ * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
+ * considered as an event subscriber and is not registered for event delivery from {@link EventBus}.
  *
  * @author Alexander Yevsyukov
  */

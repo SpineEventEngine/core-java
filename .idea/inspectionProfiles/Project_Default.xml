@@ -198,7 +198,6 @@
       </option>
       <option name="ignoreClassWithParameterization" value="true" />
       <option name="ignoreThrowables" value="true" />
-      <option name="commentsAreContent" value="true" />
     </inspection_tool>
     <inspection_tool class="EmptyDirectory" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EmptyInitializer" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -672,7 +671,7 @@
     </inspection_tool>
     <inspection_tool class="UnaryPlus" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UnconditionalWait" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UnnecessarilyQualifiedInnerClassAccess" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="UnnecessarilyQualifiedInnerClassAccess" enabled="true" level="INFO" enabled_by_default="true">
       <option name="ignoreReferencesNeedingImport" value="true" />
     </inspection_tool>
     <inspection_tool class="UnnecessarilyQualifiedStaticUsage" enabled="true" level="WARNING" enabled_by_default="true">

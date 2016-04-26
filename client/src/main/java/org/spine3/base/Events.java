@@ -110,7 +110,7 @@ public class Events {
      * <p>The 'actor' is the user who sent the command, which generated the event which context is
      * passed to this method.
      *
-     * <p>This is a convenience method for obtaining actor in event handling methods.
+     * <p>This is a convenience method for obtaining actor in event subscriber methods.
      */
     public static UserId getActor(EventContext context) {
         final CommandContext commandContext = checkNotNull(context).getCommandContext();

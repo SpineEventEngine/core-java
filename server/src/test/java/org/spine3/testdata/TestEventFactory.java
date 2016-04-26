@@ -25,7 +25,9 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
@@ -129,6 +131,19 @@ public class TestEventFactory {
         final EventStore store = EventStore.newBuilder()
                                            .setStreamExecutor(MoreExecutors.directExecutor())
                                            .setStorage(storageFactory.createEventStorage())
+                                           .build();
+        final EventBus eventBus = EventBus.newInstance(store);
+        return eventBus;
+    }
+
+    /**
+     * Creates a new event bus with the {@link InMemoryStorageFactory}.
+     */
+    public static EventBus newEventBus() {
+        final EventStorage storage = InMemoryStorageFactory.getInstance().createEventStorage();
+        final EventStore store = EventStore.newBuilder()
+                                           .setStreamExecutor(MoreExecutors.directExecutor())
+                                           .setStorage(storage)
                                            .build();
         final EventBus eventBus = EventBus.newInstance(store);
         return eventBus;

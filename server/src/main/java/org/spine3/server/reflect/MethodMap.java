@@ -47,13 +47,12 @@ public class MethodMap<H extends HandlerMethod> {
 
     private MethodMap(Class<?> clazz, HandlerMethod.Factory<H> factory) {
         final Map<Class<? extends Message>, Method> rawMethods = scan(clazz, factory.getPredicate());
-
         final ImmutableMap.Builder<Class<? extends Message>, H> builder = ImmutableMap.builder();
         for (Map.Entry<Class<? extends Message>, Method> entry : rawMethods.entrySet()) {
-            final H value = factory.create(entry.getValue());
-            builder.put(entry.getKey(), value);
+            final H handler = factory.create(entry.getValue());
+            factory.checkAccessModifier(handler.getMethod());
+            builder.put(entry.getKey(), handler);
         }
-
         this.map = builder.build();
     }
 

@@ -110,23 +110,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return handlers;
     }
 
-    /**
-     * Verifies that passed methods are declared {@code public}.
-     *
-     * <p>Logs warning for the methods with a non-public modifier.
-     *
-     * @param methods the methods to check
-     * @see HandlerMethod#log()
-     */
-    public static void checkModifiers(Iterable<Method> methods) {
-        for (Method method : methods) {
-            final boolean isPublic = Modifier.isPublic(method.getModifiers());
-            if (!isPublic) {
-                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
-            }
-        }
-    }
-
     public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.instance();
     }
@@ -151,10 +134,17 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             return PREDICATE;
         }
 
+        @Override
+        public void checkAccessModifier(Method method) {
+            if (!Modifier.isPublic(method.getModifiers())) {
+                warnOnWrongModifier("Command handler method {} should be declared 'public'.", method);
+            }
+        }
+
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
+            private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory(); // use the FQN
         }
 
         private static Factory instance() {
@@ -165,43 +155,17 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     /**
      * The predicate class that allows to filter command handling methods.
      */
-    private static class FilterPredicate implements Predicate<Method> {
+    private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
-        /**
-         * A command must be the first parameter of a handling method.
-         */
-        private static final int MESSAGE_PARAM_INDEX = 0;
-
-        /**
-         * A {@code CommandContext} must be the second parameter of the handling method.
-         */
-        private static final int COMMAND_CONTEXT_PARAM_INDEX = 1;
-
-        /**
-         * A command handling method accepts two parameters.
-         */
-        private static final int COMMAND_HANDLER_PARAM_COUNT = 2;
-
-        private static boolean isAnnotatedCorrectly(Method method) {
+        @Override
+        protected boolean isAnnotatedCorrectly(Method method) {
             final boolean isAnnotated = method.isAnnotationPresent(Assign.class);
             return isAnnotated;
         }
 
-        private static boolean acceptsCorrectParams(Method method) {
-            final Class<?>[] paramTypes = method.getParameterTypes();
-            final boolean paramCountIsCorrect = paramTypes.length == COMMAND_HANDLER_PARAM_COUNT;
-            if (!paramCountIsCorrect) {
-                return false;
-            }
-            final boolean acceptsCorrectParams =
-                    Message.class.isAssignableFrom(paramTypes[MESSAGE_PARAM_INDEX]) &&
-                            CommandContext.class.equals(paramTypes[COMMAND_CONTEXT_PARAM_INDEX]);
-            return acceptsCorrectParams;
-        }
-
-        private static boolean returnsMessageOrList(Method method) {
+        @Override
+        protected boolean isReturnTypeCorrect(Method method) {
             final Class<?> returnType = method.getReturnType();
-
             if (Message.class.isAssignableFrom(returnType)) {
                 return true;
             }
@@ -209,19 +173,12 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             if (List.class.isAssignableFrom(returnType)) {
                 return true;
             }
-
             return false;
         }
 
         @Override
-        public boolean apply(@Nullable Method method) {
-            //noinspection SimplifiableIfStatement
-            if (method == null) {
-                return false;
-            }
-            return isAnnotatedCorrectly(method)
-                    && acceptsCorrectParams(method)
-                    && returnsMessageOrList(method);
+        protected Class<? extends Message> getContextClass() {
+            return CommandContext.class;
         }
     }
 }

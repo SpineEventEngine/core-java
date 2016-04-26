@@ -40,7 +40,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.IdFunction;
-import org.spine3.server.event.EventHandler;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.procman.CommandRouted;
@@ -76,30 +76,16 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention"})
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
     private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
-    private final EmptyHandler handler = new EmptyHandler();
+    private final EmptySubscriber handler = new EmptySubscriber();
 
     private StorageFactory storageFactory;
     private BoundedContext boundedContext;
     private boolean handlersRegistered = false;
-
-    private final StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response response) {
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-    };
 
     @Before
     public void setUp() {
@@ -311,7 +297,7 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptyHandler extends EventHandler {
+    private static class EmptySubscriber extends EventSubscriber {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {

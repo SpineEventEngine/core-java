@@ -150,7 +150,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @return immutable set of event classes
      */
     /* package */ static ImmutableSet<Class<? extends Message>> getEventClasses(Class<? extends Aggregate> clazz) {
-        return getHandledMessageClasses(clazz, EventApplier.PREDICATE);
+        return getHandledMessageClasses(clazz, EventApplierMethod.PREDICATE);
     }
 
     private Any getIdAsAny() {
@@ -267,8 +267,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
-        final EventApplier method = MethodRegistry.getInstance()
-                .get(getClass(), eventMessage.getClass(), EventApplier.factory());
+        final EventApplierMethod method = MethodRegistry.getInstance()
+                .get(getClass(), eventMessage.getClass(), EventApplierMethod.factory());
         if (method == null) {
             throw missingEventApplier(eventMessage.getClass());
         }

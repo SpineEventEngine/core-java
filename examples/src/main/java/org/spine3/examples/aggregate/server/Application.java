@@ -31,7 +31,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventHandler;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -49,7 +49,7 @@ public class Application implements AutoCloseable {
 
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
-    private final EventHandler eventLogger = new EventLogger();
+    private final EventSubscriber eventLogger = new EventLogger();
 
     /**
      * Creates a new sample with the specified storage factory.
@@ -136,7 +136,7 @@ public class Application implements AutoCloseable {
 
         boundedContext.register(repository);
 
-        // Register event handlers.
+        // Register event subscribers.
         boundedContext.getEventBus().subscribe(eventLogger);
     }
 

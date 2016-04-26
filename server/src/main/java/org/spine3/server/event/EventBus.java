@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    <li>Expose a public method that accepts the type of the event as the first parameter,
  *        and {@link EventContext} as the second parameter;
  *    <li>Mark the method with {@link Subscribe} annotation;
- * <li>Register with an instance of EventBus using {@link #subscribe(EventHandler)}.
+ * <li>Register with an instance of EventBus using {@link #subscribe(EventSubscriber)}.
  * </ol>
  * Note: Since Protobuf messages are final classes, a handler method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event that needs to be handled.
@@ -96,7 +96,7 @@ public class EventBus implements AutoCloseable {
      * Creates new instance.
      *
      * @param eventStore the event store to put posted events
-     * @param executor the executor for invoking event handlers
+     * @param executor the executor for invoking event subscribers
      */
     protected EventBus(EventStore eventStore, Executor executor) {
         this.eventStore = eventStore;
@@ -136,15 +136,15 @@ public class EventBus implements AutoCloseable {
     }
 
     /**
-     * Subscribes the event handler to receive events from the bus.
+     * Subscribes the event subscriber to receive events from the bus.
      *
-     * <p>The event handler must expose at least one event subscriber method. If it is not the
+     * <p>The event subscriber must expose at least one event subscriber method. If it is not the
      * case, {@code IllegalArgumentException} will be thrown.
      *
-     * @param object the event handler object
-     * @throws IllegalArgumentException if the object does not have event handling methods
+     * @param object the event subscriber object
+     * @throws IllegalArgumentException if the object does not have event subscriber methods
      */
-    public void subscribe(EventHandler object) {
+    public void subscribe(EventSubscriber object) {
         checkNotNull(object);
         handlerRegistry.subscribe(object);
     }
@@ -163,8 +163,8 @@ public class EventBus implements AutoCloseable {
     }
 
     @VisibleForTesting
-    /* package */ Collection<EventHandler> getHandlers(EventClass eventClass) {
-        final Collection<EventHandler> result = handlerRegistry.getSubscribers(eventClass);
+    /* package */ Collection<EventSubscriber> getHandlers(EventClass eventClass) {
+        final Collection<EventSubscriber> result = handlerRegistry.getSubscribers(eventClass);
         return result;
     }
 
@@ -179,7 +179,7 @@ public class EventBus implements AutoCloseable {
      * @param object the object whose methods should be unregistered
      * @throws IllegalArgumentException if the object was not previously registered
      */
-    public void unsubscribe(EventHandler object) {
+    public void unsubscribe(EventSubscriber object) {
         checkNotNull(object);
         handlerRegistry.usubscribe(object);
     }
@@ -191,7 +191,7 @@ public class EventBus implements AutoCloseable {
         dispatcherRegistry.unregister(dispatcher);
     }
 
-    private Collection<EventHandler> getSubscribers(EventClass c) {
+    private Collection<EventSubscriber> getSubscribers(EventClass c) {
         return handlerRegistry.getSubscribers(c);
     }
 
@@ -229,14 +229,14 @@ public class EventBus implements AutoCloseable {
     }
 
     private void invokeHandlers(Message event, EventContext context) {
-        final Collection<EventHandler> handlers = getSubscribers(EventClass.of(event));
+        final Collection<EventSubscriber> handlers = getSubscribers(EventClass.of(event));
 
         if (handlers.isEmpty()) {
             handleDeadEvent(event);
             return;
         }
 
-        for (EventHandler handler : handlers) {
+        for (EventSubscriber handler : handlers) {
             invokeHandler(handler, event, context);
         }
     }
@@ -245,7 +245,7 @@ public class EventBus implements AutoCloseable {
         eventStore.append(event);
     }
 
-    private void invokeHandler(final EventHandler target, final Message event, final EventContext context) {
+    private void invokeHandler(final EventSubscriber target, final Message event, final EventContext context) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
