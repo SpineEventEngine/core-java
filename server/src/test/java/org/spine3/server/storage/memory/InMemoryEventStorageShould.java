@@ -30,9 +30,11 @@ import org.spine3.server.storage.EventStorageShould;
  */
 public class InMemoryEventStorageShould extends EventStorageShould {
 
+    private final InMemoryStorageFactory factory = InMemoryStorageFactory.getInstance();
+
     @Override
     protected EventStorage getStorage() {
-        final InMemoryEventStorage storage = (InMemoryEventStorage) InMemoryStorageFactory.getInstance().createEventStorage();
+        final InMemoryEventStorage storage = (InMemoryEventStorage) factory.createEventStorage();
         return storage;
     }
 }
