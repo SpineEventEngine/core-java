@@ -137,7 +137,7 @@ public class EventSubscriberMethodShould {
     }
 
     @Test
-    public void consider_void_subscriber_invalid() {
+    public void consider_not_void_subscriber_invalid() {
         final Method subscriber = new InvalidSubscriberNotVoid().getMethod();
 
         assertIsEventSubscriber(subscriber, false);
