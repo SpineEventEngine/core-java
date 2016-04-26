@@ -35,4 +35,9 @@ public class IoUtilShould {
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(IoUtil.class));
     }
+
+    @Test
+    public void close_streams() {
+
+    }
 }

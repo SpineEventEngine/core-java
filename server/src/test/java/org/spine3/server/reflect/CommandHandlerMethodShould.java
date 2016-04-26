@@ -38,7 +38,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestCommands.createProject;
+import static org.spine3.testdata.TestCommands.createProjectMsg;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 
 /**
@@ -78,7 +78,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProject(newUuid());
+        final CreateProject cmd = createProjectMsg(newUuid());
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -92,7 +92,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
         final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProject(newUuid());
+        final CreateProject cmd = createProjectMsg(newUuid());
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 

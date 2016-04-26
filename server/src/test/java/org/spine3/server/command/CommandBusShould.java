@@ -165,9 +165,9 @@ public class CommandBusShould {
         });
 
         final String projectId = newUuid();
-        assertEquals(Responses.ok(), commandBus.validate(createProject(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(startProject(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(addTask(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(createProjectMsg(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(startProjectMsg(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(addTaskMsg(projectId)));
     }
 
     /**
@@ -190,9 +190,9 @@ public class CommandBusShould {
         commandBus.unregister(dispatcher);
 
         final String projectId = newUuid();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProject(projectId))));
-        assertTrue(isUnsupportedCommand(commandBus.validate(startProject(projectId))));
-        assertTrue(isUnsupportedCommand(commandBus.validate(addTask(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(startProjectMsg(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(addTaskMsg(projectId))));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class CommandBusShould {
                 .validate(any(Message.class));
         commandBus.setMessageValidator(validator);
 
-        final Response response = commandBus.validate(createProject(newUuid()));
+        final Response response = commandBus.validate(createProjectMsg(newUuid()));
         assertTrue(isInvalidCommand(response));
     }
 
@@ -261,7 +261,7 @@ public class CommandBusShould {
         commandBus.register(handler);
         commandBus.unregister(handler);
         final String projectId = newUuid();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProject(projectId))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(projectId))));
     }
 
     @Test
@@ -271,8 +271,8 @@ public class CommandBusShould {
         commandBus.register(dispatcher);
 
         final String projectId = newUuid();
-        assertEquals(Responses.ok(), commandBus.validate(createProject(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(addTask(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(createProjectMsg(projectId)));
+        assertEquals(Responses.ok(), commandBus.validate(addTaskMsg(projectId)));
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
@@ -323,14 +323,14 @@ public class CommandBusShould {
         commandBus.register(handler);
 
         commandBus.close();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProject(newUuid()))));
+        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(newUuid()))));
     }
 
     @Test
     public void invoke_handler_when_command_posted() {
         commandBus.register(handler);
 
-        final Command command = commandFactory.create(createProject(newUuid()));
+        final Command command = commandFactory.create(createProjectMsg(newUuid()));
         commandBus.post(command);
 
         assertTrue(handler.wasHandlerInvoked());
@@ -341,7 +341,7 @@ public class CommandBusShould {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
 
-        final Command command = commandFactory.create(addTask(newUuid()));
+        final Command command = commandFactory.create(addTaskMsg(newUuid()));
 
         commandBus.post(command);
 
@@ -350,7 +350,7 @@ public class CommandBusShould {
 
     @Test(expected = UnsupportedCommandException.class)
     public void throw_exception_when_there_is_no_neither_handler_nor_dispatcher() {
-        final Command command = commandFactory.create(addTask(newUuid()));
+        final Command command = commandFactory.create(addTaskMsg(newUuid()));
 
         commandBus.post(command);
     }
@@ -358,7 +358,7 @@ public class CommandBusShould {
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
         commandBus.register(handler);
-        final Command command = commandFactory.create(createProject(newUuid()));
+        final Command command = commandFactory.create(createProjectMsg(newUuid()));
 
         commandBus.post(command);
 
@@ -370,7 +370,7 @@ public class CommandBusShould {
     @Test
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final IOException exception = givenThrowingDispatcher();
-        final Command command = commandFactory.create(createProject(newUuid()));
+        final Command command = commandFactory.create(createProjectMsg(newUuid()));
 
         commandBus.post(command);
 
@@ -430,7 +430,7 @@ public class CommandBusShould {
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, throwable);
         commandBus.register(handler);
-        final CreateProject msg = createProject(newUuid());
+        final CreateProject msg = createProjectMsg(newUuid());
         final Command command = commandFactory.create(msg);
         return command;
     }
@@ -463,7 +463,7 @@ public class CommandBusShould {
     @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler(newUuid(), eventBus));
-        final Command cmd = commandFactory.create(createProject(newUuid()));
+        final Command cmd = commandFactory.create(createProjectMsg(newUuid()));
 
         commandBus.post(cmd);
 
@@ -491,7 +491,7 @@ public class CommandBusShould {
 
     private static Command newCommand(Duration delay) {
         final CommandContext context = createCommandContext(delay);
-        return Commands.create(createProject(newUuid()), context);
+        return Commands.create(createProjectMsg(newUuid()), context);
     }
 
     private static class TestFailure extends FailureThrowable {

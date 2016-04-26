@@ -36,6 +36,7 @@ import org.spine3.base.Failure;
 import org.spine3.protobuf.Messages;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
+import org.spine3.testdata.TestCommands;
 import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
@@ -45,7 +46,6 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestCommands.createProject;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 
 /**
@@ -76,7 +76,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = toAny(createProject());
+        final Any command = toAny(TestCommands.createProjectCmd());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = TestContextFactory.createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -97,7 +97,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_and_read_command() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         final CommandId commandId = command.getContext().getCommandId();
         storage.store(command);
 
@@ -142,7 +142,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         final CreateProject message = Messages.fromAny(command.getMessage());
 
         final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
@@ -175,7 +175,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command command = createProject();
+        final Command command = TestCommands.createProjectCmd();
         CommandStorage.checkCommand(command);
     }
 
