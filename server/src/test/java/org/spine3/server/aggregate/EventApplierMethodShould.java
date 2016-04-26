@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Verify.assertContains;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class EventApplierShould {
+public class EventApplierMethodShould {
 
     private static class AggregateWithTwoMethodsApplier extends Aggregate<Long, Project, Project.Builder> {
 

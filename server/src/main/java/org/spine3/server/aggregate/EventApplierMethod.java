@@ -34,7 +34,7 @@ import java.lang.reflect.Modifier;
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventApplier extends HandlerMethod<Empty> {
+/* package */ class EventApplierMethod extends HandlerMethod<Empty> {
 
     /**
      * The instance of the predicate to filter event applier methods of an aggregate class.
@@ -46,7 +46,7 @@ import java.lang.reflect.Modifier;
      *
      * @param method subscriber method
      */
-    /* package */ EventApplier(Method method) {
+    /* package */ EventApplierMethod(Method method) {
         super(method);
     }
 
@@ -55,23 +55,23 @@ import java.lang.reflect.Modifier;
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
-    public static HandlerMethod.Factory<EventApplier> factory() {
+    public static HandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.instance();
     }
 
     /**
      * The factory for filtering methods that match {@code EventApplier} specification.
      */
-    private static class Factory implements HandlerMethod.Factory<EventApplier> {
+    private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
 
         @Override
-        public Class<EventApplier> getMethodClass() {
-            return EventApplier.class;
+        public Class<EventApplierMethod> getMethodClass() {
+            return EventApplierMethod.class;
         }
 
         @Override
-        public EventApplier create(Method method) {
-            return new EventApplier(method);
+        public EventApplierMethod create(Method method) {
+            return new EventApplierMethod(method);
         }
 
         @Override
@@ -89,7 +89,7 @@ import java.lang.reflect.Modifier;
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final EventApplier.Factory value = new EventApplier.Factory(); // use the FQN
+            private final EventApplierMethod.Factory value = new EventApplierMethod.Factory(); // use the FQN
         }
 
         private static Factory instance() {
