@@ -59,7 +59,6 @@ import static com.google.common.collect.Maps.newHashMap;
 
     @Override
     public void close() throws Exception {
-        clear();
         super.close();
     }
 }

@@ -92,12 +92,6 @@ import static com.google.common.collect.Maps.newHashMap;
         recordMap.clear();
     }
 
-    @Override
-    public void close() throws Exception {
-        clear();
-        super.close();
-    }
-
     /**
      * Used for sorting by timestamp descending (from newer to older)
      */

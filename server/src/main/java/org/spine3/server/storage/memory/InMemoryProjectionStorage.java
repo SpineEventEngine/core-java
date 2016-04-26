@@ -75,7 +75,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     @Override
     public void close() throws Exception {
-        clear();
         entityStorage.close();
         super.close();
     }
