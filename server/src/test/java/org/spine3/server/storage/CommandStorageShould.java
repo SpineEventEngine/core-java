@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.TimeUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
@@ -63,6 +64,11 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Before
     public void setUpCommandStorageTest() {
         storage = getStorage();
+    }
+
+    @After
+    public void tearDownCommandStorageTest() {
+        close(storage);
     }
 
     @Override

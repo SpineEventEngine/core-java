@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.*;
 
 /**
@@ -45,16 +46,17 @@ public abstract class AbstractStorageShould<I, R extends Message> {
     }
 
     @After
-    public void tearDownAbstractStorageTest() throws Exception {
-        if (storage.isOpen()) {
-            storage.close();
-        }
+    public void tearDownAbstractStorageTest() {
+        close(storage);
     }
 
     /**
      * Used to initialize the storage before each test.
      *
+     * <p>NOTE: the storage is closed after each test.
+     *
      * @return an empty storage instance
+     * @see AbstractStorage#close()
      */
     protected abstract AbstractStorage<I, R> getStorage();
 
@@ -67,6 +69,21 @@ public abstract class AbstractStorageShould<I, R extends Message> {
      * Creates a new unique storage record ID.
      */
     protected abstract I newId();
+
+    /**
+     * Closes the storage.
+     *
+     * @throws RuntimeException which wraps the primary one if occurs
+     */
+    protected void close(AbstractStorage storage) {
+        if (storage.isOpen()) {
+            try {
+                storage.close();
+            } catch (Exception e) {
+                throw propagate(e);
+            }
+        }
+    }
 
     @Test
     public void return_default_record_instance_if_no_record_with_such_id() {
