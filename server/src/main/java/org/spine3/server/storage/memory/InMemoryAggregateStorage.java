@@ -86,13 +86,6 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        recordMap.clear();
-    }
-
-    /**
      * Used for sorting by timestamp descending (from newer to older)
      */
     private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord> {

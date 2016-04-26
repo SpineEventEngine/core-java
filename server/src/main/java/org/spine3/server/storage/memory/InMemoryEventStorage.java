@@ -99,12 +99,4 @@ import static com.google.common.collect.Iterators.filter;
     public void close() throws Exception {
         super.close();
     }
-
-    /**
-     * Clears all data in the storage.
-     */
-    protected void clear() {
-        storage.clear();
-        index.clear();
-    }
 }
