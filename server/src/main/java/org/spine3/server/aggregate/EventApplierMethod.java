@@ -51,12 +51,23 @@ import java.lang.reflect.Modifier;
     }
 
     /**
-     * Invokes {@link HandlerMethod#invoke(Object, Message, Message)} passing the default message as the third parameter
+     * Invokes {@link HandlerMethod#invoke(Object, Message, Message)} passing the default message as the context parameter
      * as event appliers do not have this parameter.
      */
     protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
-        return invoke(aggregate, message, Empty.getDefaultInstance());
+        return super.invoke(aggregate, message, Empty.getDefaultInstance());
+    }
+
+    /**
+     * This method is deprecated because event appliers do not have context parameter.
+     *
+     * <p>Please use {@link EventApplierMethod#invoke(Object, Message)} instead.
+     */
+    @Deprecated
+    @Override
+    public <R> R invoke(Object target, Message message, Empty context) throws InvocationTargetException {
+        return super.invoke(target, message, Empty.getDefaultInstance());
     }
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
