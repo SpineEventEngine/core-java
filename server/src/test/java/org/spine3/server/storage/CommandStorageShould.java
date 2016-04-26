@@ -185,6 +185,30 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         assertNull(id);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_store_null() {
+        //noinspection ConstantConditions
+        storage.store(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.setOkStatus(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_error_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.updateStatus(null, Error.getDefaultInstance());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
+        //noinspection ConstantConditions
+        storage.updateStatus(null, Failure.getDefaultInstance());
+    }
+
     private void givenNewRecord() {
         record = newStorageRecord();
         id = record.getContext().getCommandId();
