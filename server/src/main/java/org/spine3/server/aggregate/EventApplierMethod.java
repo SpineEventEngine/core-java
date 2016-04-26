@@ -50,6 +50,10 @@ import java.lang.reflect.Modifier;
         super(method);
     }
 
+    /**
+     * Invokes {@link HandlerMethod#invoke(Object, Message, Message)} passing the default message as the third parameter
+     * as event appliers do not have this parameter.
+     */
     protected <R> R invoke(Object aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
