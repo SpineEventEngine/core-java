@@ -241,19 +241,19 @@ public class BoundedContextShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return projectCreatedEvent(cmd.getProjectId());
+            return projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return taskAddedEvent(cmd.getProjectId());
+            return taskAddedMsg(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
+            final ProjectStarted message = projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
         }
 

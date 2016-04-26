@@ -33,6 +33,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Snapshot;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.testdata.TestEventFactory;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -49,7 +50,6 @@ import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.createSequentialRecords;
 import static org.spine3.testdata.TestAggregateStorageRecordFactory.newAggregateStorageRecord;
-import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 /**
  * @author Alexander Litus
@@ -259,7 +259,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
-        final Event expectedEvent = projectCreated();
+        final Event expectedEvent = TestEventFactory.projectCreatedEvent();
 
         storage.writeEvent(id, expectedEvent);
 

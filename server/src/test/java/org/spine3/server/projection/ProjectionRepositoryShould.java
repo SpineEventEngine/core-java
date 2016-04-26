@@ -74,14 +74,14 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_projection() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
-        testDispatchEvent(taskAddedEvent(ID));
-        testDispatchEvent(projectStartedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
+        testDispatchEvent(taskAddedMsg(ID));
+        testDispatchEvent(projectStartedMsg(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -108,7 +108,7 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(projectCreatedEvent(ID), createEventContext(ID));
+        final ProjectId actual = repository.getEntityId(projectCreatedMsg(ID), createEventContext(ID));
         assertEquals(ID, actual);
     }
 

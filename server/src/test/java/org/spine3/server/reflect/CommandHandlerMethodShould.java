@@ -29,6 +29,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.testdata.TestEventFactory;
+import org.spine3.testdata.TestEventMessageFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,7 +40,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestCommands.createProjectMsg;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 
 /**
  * @author Alexander Litus
@@ -198,7 +198,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -206,7 +206,7 @@ public class CommandHandlerMethodShould {
         @Assign
         public List<Message> handleTest(CreateProject cmd) {
             final List<Message> result = newLinkedList();
-            result.add(projectCreatedEvent(cmd.getProjectId()));
+            result.add(TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId()));
             return result;
         }
     }
@@ -215,7 +215,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -224,7 +224,7 @@ public class CommandHandlerMethodShould {
         @SuppressWarnings("unused")
         public List<Message> handleTest(CreateProject cmd, CommandContext context) {
             final List<Message> result = newLinkedList();
-            result.add(projectCreatedEvent(cmd.getProjectId()));
+            result.add(TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId()));
             return result;
         }
     }
@@ -233,7 +233,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         private ProjectCreated handleTest(CreateProject cmd) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -244,7 +244,7 @@ public class CommandHandlerMethodShould {
     private class InvalidHandlerNoAnnotation extends TestCommandHandler {
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -260,7 +260,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context, Object redundant) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -284,7 +284,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, Exception invalid) {
-            return projectCreatedEvent(cmd.getProjectId());
+            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
         }
     }
 

@@ -104,14 +104,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_manager() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent(ID));
-        testDispatchEvent(taskAddedEvent(ID));
-        testDispatchEvent(projectStartedEvent(ID));
+        testDispatchEvent(projectCreatedMsg(ID));
+        testDispatchEvent(taskAddedMsg(ID));
+        testDispatchEvent(projectStartedMsg(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -246,13 +246,13 @@ public class ProcessManagerRepositoryShould {
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toState(command));
-            return projectCreatedEvent(command.getProjectId());
+            return projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toState(command));
-            return taskAddedEvent(command.getProjectId());
+            return taskAddedMsg(command.getProjectId());
         }
 
         @Assign

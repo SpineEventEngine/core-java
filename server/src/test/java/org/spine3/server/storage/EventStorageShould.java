@@ -98,7 +98,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Override
     protected Event newStorageRecord() {
-        return TestEventFactory.projectCreated();
+        return TestEventFactory.projectCreatedEvent();
     }
 
     @Override

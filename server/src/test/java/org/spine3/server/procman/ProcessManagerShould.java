@@ -83,14 +83,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent());
+        testDispatchEvent(projectCreatedMsg());
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedEvent());
-        testDispatchEvent(taskAddedEvent());
-        testDispatchEvent(projectStartedEvent());
+        testDispatchEvent(projectCreatedMsg());
+        testDispatchEvent(taskAddedMsg());
+        testDispatchEvent(projectStartedMsg());
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
@@ -221,13 +221,13 @@ public class ProcessManagerShould {
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toAny(command));
-            return projectCreatedEvent(command.getProjectId());
+            return projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toAny(command));
-            return taskAddedEvent(command.getProjectId());
+            return taskAddedMsg(command.getProjectId());
         }
 
         @Assign

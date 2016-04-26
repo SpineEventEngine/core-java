@@ -374,9 +374,9 @@ public class AggregateShould {
 
     private static List<Event> getProjectEvents() {
         final List<Event> events = newLinkedList();
-        events.add(projectCreated(ID, EVENT_CONTEXT));
-        events.add(taskAdded(ID, EVENT_CONTEXT));
-        events.add(projectStarted(ID, EVENT_CONTEXT));
+        events.add(projectCreatedEvent(ID, EVENT_CONTEXT));
+        events.add(taskAddedEvent(ID, EVENT_CONTEXT));
+        events.add(projectStartedEvent(ID, EVENT_CONTEXT));
         return events;
     }
     
@@ -416,19 +416,19 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return projectCreatedEvent(cmd.getProjectId());
+            return projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return taskAddedEvent(cmd.getProjectId());
+            return taskAddedMsg(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = projectStartedEvent(cmd.getProjectId());
+            final ProjectStarted message = projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -481,7 +481,7 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return projectCreatedEvent(cmd.getProjectId());
+            return projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -559,7 +559,7 @@ public class AggregateShould {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }
-            return projectCreatedEvent(cmd.getProjectId());
+            return projectCreatedMsg(cmd.getProjectId());
         }
 
         @Apply
@@ -610,7 +610,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_play_raises_exception() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
         try {
-            faultyAggregate.play(ImmutableList.of(projectCreated()));
+            faultyAggregate.play(ImmutableList.of(projectCreatedEvent()));
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);

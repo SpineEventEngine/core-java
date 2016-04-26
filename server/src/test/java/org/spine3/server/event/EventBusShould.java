@@ -30,13 +30,13 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.testdata.TestEventFactory;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
-import static org.spine3.testdata.TestEventFactory.projectCreated;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
@@ -139,7 +139,7 @@ public class EventBusShould {
         final ProjectCreatedSubscriber handler = new ProjectCreatedSubscriber();
 
         eventBus.subscribe(handler);
-        eventBus.post(projectCreated());
+        eventBus.post(TestEventFactory.projectCreatedEvent());
 
         assertTrue(handler.isMethodCalled());
     }
@@ -181,7 +181,7 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        eventBus.post(projectCreated());
+        eventBus.post(TestEventFactory.projectCreatedEvent());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -211,7 +211,7 @@ public class EventBusShould {
         final FaultySubscriber faultyHandler = new FaultySubscriber();
 
         eventBus.subscribe(faultyHandler);
-        eventBus.post(projectCreated());
+        eventBus.post(TestEventFactory.projectCreatedEvent());
 
         assertTrue(faultyHandler.isMethodCalled());
     }

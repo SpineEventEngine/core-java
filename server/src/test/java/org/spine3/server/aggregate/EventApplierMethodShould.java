@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.testdata.TestEventMessageFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,7 +34,6 @@ import java.lang.reflect.Method;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Verify.assertContains;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEvent;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventApplierMethodShould {
@@ -42,7 +42,7 @@ public class EventApplierMethodShould {
     public void invoke_applier_method() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
-        final ProjectCreated event = projectCreatedEvent();
+        final ProjectCreated event = TestEventMessageFactory.projectCreatedMsg();
 
         applier.invoke(applierObject, event);
 

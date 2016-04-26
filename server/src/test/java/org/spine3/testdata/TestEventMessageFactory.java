@@ -38,9 +38,9 @@ public class TestEventMessageFactory {
 
     private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
 
-    private static final ProjectCreated PROJECT_CREATED = projectCreatedEvent(DUMMY_PROJECT_ID);
-    private static final TaskAdded TASK_ADDED = taskAddedEvent(DUMMY_PROJECT_ID);
-    private static final ProjectStarted PROJECT_STARTED = projectStartedEvent(DUMMY_PROJECT_ID);
+    private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
+    private static final TaskAdded TASK_ADDED = taskAddedMsg(DUMMY_PROJECT_ID);
+    private static final ProjectStarted PROJECT_STARTED = projectStartedMsg(DUMMY_PROJECT_ID);
 
     private static final Any PROJECT_CREATED_ANY = toAny(PROJECT_CREATED);
     private static final Any TASK_ADDED_ANY = toAny(TASK_ADDED);
@@ -49,16 +49,34 @@ public class TestEventMessageFactory {
     private TestEventMessageFactory() {}
 
 
-    public static ProjectCreated projectCreatedEvent() {
+    public static ProjectCreated projectCreatedMsg() {
         return PROJECT_CREATED;
     }
 
-    public static TaskAdded taskAddedEvent() {
+    public static ProjectCreated projectCreatedMsg(String projectId) {
+        return ProjectCreated.newBuilder().setProjectId(
+                ProjectId.newBuilder().setId(projectId).build()
+        ).build();
+    }
+
+    public static ProjectCreated projectCreatedMsg(ProjectId id) {
+        return ProjectCreated.newBuilder().setProjectId(id).build();
+    }
+
+    public static TaskAdded taskAddedMsg() {
         return TASK_ADDED;
     }
 
-    public static ProjectStarted projectStartedEvent() {
+    public static TaskAdded taskAddedMsg(ProjectId id) {
+        return TaskAdded.newBuilder().setProjectId(id).build();
+    }
+
+    public static ProjectStarted projectStartedMsg() {
         return PROJECT_STARTED;
+    }
+
+    public static ProjectStarted projectStartedMsg(ProjectId id) {
+        return ProjectStarted.newBuilder().setProjectId(id).build();
     }
 
     public static Any projectCreatedEventAny() {
@@ -71,23 +89,5 @@ public class TestEventMessageFactory {
 
     public static Any projectStartedEventAny() {
         return PROJECT_STARTED_ANY;
-    }
-
-    public static ProjectCreated projectCreatedEvent(ProjectId id) {
-        return ProjectCreated.newBuilder().setProjectId(id).build();
-    }
-
-    public static ProjectCreated projectCreatedEvent(String projectId) {
-        return ProjectCreated.newBuilder().setProjectId(
-                ProjectId.newBuilder().setId(projectId).build()
-        ).build();
-    }
-
-    public static TaskAdded taskAddedEvent(ProjectId id) {
-        return TaskAdded.newBuilder().setProjectId(id).build();
-    }
-
-    public static ProjectStarted projectStartedEvent(ProjectId id) {
-        return ProjectStarted.newBuilder().setProjectId(id).build();
     }
 }
