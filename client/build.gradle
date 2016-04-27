@@ -4,7 +4,7 @@ buildscript {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
     dependencies {
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: '1.3.2', changing: true
+        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: "$SPINE_PROTOBUF_PLUGIN_VERSION", changing: true
     }
 }
 
@@ -35,9 +35,7 @@ protobuf {
     generateProtoTasks {
         all().each { final task ->
             task.plugins {
-                grpc {
-//                    option 'nano=true'
-                }
+                grpc {}
             }
         }
     }
