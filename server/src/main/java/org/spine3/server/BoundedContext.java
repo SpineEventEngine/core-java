@@ -42,6 +42,7 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -230,6 +231,10 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
 
     private void post(Command request)  {
         commandBus.post(request);
+    }
+
+    public void post (IntegrationEvent event,  StreamObserver<Response> responseObserver) {
+        //TODO:2016-04-27:alexander.yevsyukov: Implement
     }
 
     /**
