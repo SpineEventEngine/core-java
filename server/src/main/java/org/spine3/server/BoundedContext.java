@@ -28,10 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
@@ -51,14 +48,18 @@ import javax.annotation.CheckReturnValue;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Responses.isOk;
+import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
- * This class is a facade for configuration and entry point for handling commands.
+ * A facade for configuration and entry point for handling commands.
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
+public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -114,7 +115,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *      <li>un-registered from {@link EventBus}
      *      <li>detached from its storage
      *      </ul>
-     *
      * </ol>
      * @throws Exception caused by closing one of the components
      */
@@ -171,15 +171,13 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <E>        the type of entities or aggregates
      * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
-    @SuppressWarnings({"ChainOfInstanceofChecks"})
+    @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
-
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
-
         if (repository instanceof EventDispatcher) {
             getEventBus().register((EventDispatcher)repository);
         }
@@ -192,49 +190,37 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
-    @SuppressWarnings({"ChainOfInstanceofChecks"})
+    @SuppressWarnings("ChainOfInstanceofChecks")
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
             commandBus.unregister((CommandDispatcher) repository);
         }
-
         if (repository instanceof EventDispatcher) {
             getEventBus().unregister((EventDispatcher) repository);
         }
-
         repository.close();
     }
 
     @Override
-    public void post(Command request, StreamObserver<Response> responseObserver) {
-        final Message message = Messages.fromAny(request.getMessage());
-        final CommandContext commandContext = request.getContext();
-
-        Response reply = null;
-
-        // Ensure `namespace` context attribute is defined in a multitenant app.
-        if (isMultitenant() && !commandContext.hasNamespace()) {
-            reply = CommandValidation.unknownNamespace(message, request.getContext());
-        }
-
-        if (reply == null) {
-            reply = validate(message);
-        }
-
-        responseObserver.onNext(reply);
+    public void post(Command command, StreamObserver<Response> responseObserver) {
+        final Response response = validateCommand(command);
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
-
-        if (Responses.isOk(reply)) {
-            post(request);
+        if (isOk(response)) {
+            commandBus.post(command);
         }
     }
 
-    private void post(Command request)  {
-        commandBus.post(request);
-    }
-
-    public void post (IntegrationEvent event,  StreamObserver<Response> responseObserver) {
-        //TODO:2016-04-27:alexander.yevsyukov: Implement
+    private Response validateCommand(Command command) {
+        final Message message = fromAny(command.getMessage());
+        final CommandContext context = command.getContext();
+        final Response response;
+        if (isMultitenant() && !context.hasNamespace()) {
+            response = CommandValidation.unknownNamespace(message, context);
+        } else {
+            response = validateMessage(message);
+        }
+        return response;
     }
 
     /**
@@ -244,9 +230,14 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @return {@link Response} with {@code ok} value if the command is valid, or
      *          with {@link org.spine3.base.Error} value otherwise
      */
-    protected Response validate(Message commandMessage) {
+    protected Response validateMessage(Message commandMessage) {
         final Response result = commandBus.validate(commandMessage);
         return result;
+    }
+
+    @Override
+    public void notify(IntegrationEvent event, StreamObserver<Response> responseObserver) {
+        // TODO:2016-04-27:alexander.litus: impl
     }
 
     @Override
