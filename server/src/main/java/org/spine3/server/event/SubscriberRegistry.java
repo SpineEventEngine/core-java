@@ -37,50 +37,50 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The registry of event subscriber methods by event class.
  *
- * <p>There can be multiple handlers per event class.
+ * <p>There can be multiple subscribers per event class.
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class HandlerRegistry {
+/* package */ class SubscriberRegistry {
 
-    private final Multimap<EventClass, EventSubscriber> handlersByEventClass = HashMultimap.create();
+    private final Multimap<EventClass, EventSubscriber> subscribersByEventClass = HashMultimap.create();
 
     /* package */ void subscribe(EventSubscriber object) {
         checkNotNull(object);
-        final MethodMap<EventSubscriberMethod> handlers = EventSubscriberMethod.scan(object);
-        final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersNotEmpty(object, handlersEmpty);
-        for (Map.Entry<Class<? extends Message>, EventSubscriberMethod> entry : handlers.entrySet()) {
-            handlersByEventClass.put(EventClass.of(entry.getKey()), object);
+        final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
+        final boolean subscribersEmpty = subscribers.isEmpty();
+        checkSubscribersNotEmpty(object, subscribersEmpty);
+        for (Map.Entry<Class<? extends Message>, EventSubscriberMethod> entry : subscribers.entrySet()) {
+            subscribersByEventClass.put(EventClass.of(entry.getKey()), object);
         }
     }
 
     /* package */ void usubscribe(EventSubscriber object) {
-        final MethodMap<EventSubscriberMethod> handlers = EventSubscriberMethod.scan(object);
-        final boolean handlersEmpty = handlers.isEmpty();
-        checkHandlersNotEmpty(object, handlersEmpty);
-        if (!handlersEmpty) {
-            for (Class<? extends Message> eventClass : handlers.keySet()) {
-                handlersByEventClass.remove(EventClass.of(eventClass), object);
+        final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
+        final boolean subscribersEmpty = subscribers.isEmpty();
+        checkSubscribersNotEmpty(object, subscribersEmpty);
+        if (!subscribersEmpty) {
+            for (Class<? extends Message> eventClass : subscribers.keySet()) {
+                subscribersByEventClass.remove(EventClass.of(eventClass), object);
             }
         }
     }
 
     /* package */ void unsubscribeAll() {
-        handlersByEventClass.clear();
+        subscribersByEventClass.clear();
         EventBus.log().info("All subscribers cleared.");
     }
 
     /* package */ Collection<EventSubscriber> getSubscribers(EventClass c) {
-        return ImmutableList.copyOf(handlersByEventClass.get(c));
+        return ImmutableList.copyOf(subscribersByEventClass.get(c));
     }
 
     /* package */ boolean hasSubscribers(EventClass eventClass) {
-        final Collection<EventSubscriber> handlers = getSubscribers(eventClass);
-        return !handlers.isEmpty();
+        final Collection<EventSubscriber> subscribers = getSubscribers(eventClass);
+        return !subscribers.isEmpty();
     }
 
-    private static void checkHandlersNotEmpty(Object object, boolean handlersEmpty) {
-        checkArgument(!handlersEmpty, "No event subscriber methods found in %s", object);
+    private static void checkSubscribersNotEmpty(Object object, boolean subscribersEmpty) {
+        checkArgument(!subscribersEmpty, "No event subscriber methods found in %s", object);
     }
 }

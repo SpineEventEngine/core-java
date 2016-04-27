@@ -79,7 +79,7 @@ public class EventBusShould {
     }
 
     /**
-     * A simple one subscriber method handler class used in tests below.
+     * A simple subscriber class used in tests below.
      */
     private static class ProjectCreatedSubscriber extends EventSubscriber {
 
@@ -97,51 +97,51 @@ public class EventBusShould {
     }
 
     @Test
-    public void register_event_handler() {
-        final EventSubscriber handlerOne = new ProjectCreatedSubscriber();
-        final EventSubscriber handlerTwo = new ProjectCreatedSubscriber();
+    public void register_event_subscriber() {
+        final EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+        final EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
 
-        eventBus.subscribe(handlerOne);
-        eventBus.subscribe(handlerTwo);
+        eventBus.subscribe(subscriberOne);
+        eventBus.subscribe(subscriberTwo);
 
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         assertTrue(eventBus.hasSubscribers(eventClass));
 
-        final Collection<EventSubscriber> subscribers = eventBus.getHandlers(eventClass);
-        assertTrue(subscribers.contains(handlerOne));
-        assertTrue(subscribers.contains(handlerTwo));
+        final Collection<EventSubscriber> subscribers = eventBus.getSubscribers(eventClass);
+        assertTrue(subscribers.contains(subscriberOne));
+        assertTrue(subscribers.contains(subscriberTwo));
     }
 
     @Test
-    public void unregister_handlers() {
-        final EventSubscriber handlerOne = new ProjectCreatedSubscriber();
-        final EventSubscriber handlerTwo = new ProjectCreatedSubscriber();
-        eventBus.subscribe(handlerOne);
-        eventBus.subscribe(handlerTwo);
+    public void unregister_subscribers() {
+        final EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+        final EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+        eventBus.subscribe(subscriberOne);
+        eventBus.subscribe(subscriberTwo);
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
 
-        eventBus.unsubscribe(handlerOne);
+        eventBus.unsubscribe(subscriberOne);
 
         // Check that the 2nd subscriber with the same event subscriber method remains
         // after the 1st subscriber unregisters.
-        final Collection<EventSubscriber> subscribers = eventBus.getHandlers(eventClass);
-        assertFalse(subscribers.contains(handlerOne));
-        assertTrue(subscribers.contains(handlerTwo));
+        final Collection<EventSubscriber> subscribers = eventBus.getSubscribers(eventClass);
+        assertFalse(subscribers.contains(subscriberOne));
+        assertTrue(subscribers.contains(subscriberTwo));
 
-        // Check that after 2nd handler us unregisters he's no longer in
-        eventBus.unsubscribe(handlerTwo);
+        // Check that after 2nd subscriber us unregisters he's no longer in
+        eventBus.unsubscribe(subscriberTwo);
 
-        assertFalse(eventBus.getHandlers(eventClass).contains(handlerTwo));
+        assertFalse(eventBus.getSubscribers(eventClass).contains(subscriberTwo));
     }
 
     @Test
     public void call_subscribers_when_event_posted() {
-        final ProjectCreatedSubscriber handler = new ProjectCreatedSubscriber();
+        final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
 
-        eventBus.subscribe(handler);
+        eventBus.subscribe(subscriber);
         eventBus.post(TestEventFactory.projectCreatedEvent());
 
-        assertTrue(handler.isMethodCalled());
+        assertTrue(subscriber.isMethodCalled());
     }
 
     /**
@@ -207,17 +207,17 @@ public class EventBusShould {
 
 
     @Test
-    public void catches_exceptions_caused_by_handlers() {
-        final FaultySubscriber faultyHandler = new FaultySubscriber();
+    public void catches_exceptions_caused_by_subscribers() {
+        final FaultySubscriber faultySubscriber = new FaultySubscriber();
 
-        eventBus.subscribe(faultyHandler);
+        eventBus.subscribe(faultySubscriber);
         eventBus.post(TestEventFactory.projectCreatedEvent());
 
-        assertTrue(faultyHandler.isMethodCalled());
+        assertTrue(faultySubscriber.isMethodCalled());
     }
 
     /**
-     * The handler which throws exception from the subscriber method.
+     * The subscriber which throws exception from the subscriber method.
      */
     private static class FaultySubscriber extends EventSubscriber {
 
@@ -226,7 +226,8 @@ public class EventBusShould {
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             methodCalled = true;
-            throw new UnsupportedOperationException("What did you expect from FaultyHandler?");
+            throw new UnsupportedOperationException("What did you expect from " +
+                                                            FaultySubscriber.class.getSimpleName() + '?');
         }
 
         /* package */ boolean isMethodCalled() {
@@ -243,7 +244,7 @@ public class EventBusShould {
         eventBus.close();
 
         assertTrue(eventBus.getDispatchers(eventClass).isEmpty());
-        assertTrue(eventBus.getHandlers(eventClass).isEmpty());
+        assertTrue(eventBus.getSubscribers(eventClass).isEmpty());
     }
 
     //TODO:2016-01-27:alexander.yevsyukov: Check that EventStore is closed on close() too. Using Mocks?
