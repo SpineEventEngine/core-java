@@ -31,6 +31,7 @@ import "google/protobuf/any.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
 
+// An event which is sent between different Bounded Contexts.
 message IntegrationEvent {
     // The message of the event message wrapped into `Any`.
     google.protobuf.Any message = 1;
@@ -42,7 +43,9 @@ message IntegrationEvent {
     string source = 3;
 }
 
+// A service for notifying integration event subscribers.
 service IntegrationEventSubscriber {
-
+    // Notifies integration event subscribers.
+    // A response contains information about event validation result, etc.
     rpc Notify(IntegrationEvent) returns (spine.base.Response);
 }
