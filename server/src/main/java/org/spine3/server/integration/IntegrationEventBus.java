@@ -20,9 +20,9 @@
 
 package org.spine3.server.integration;
 
-import com.google.protobuf.Message;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import org.spine3.server.type.EventClass;
 
 /**
  *
@@ -40,8 +40,10 @@ public class IntegrationEventBus {
         //TODO:2016-04-27:alexander.yevsyukov: Implement
     }
 
-    public void subscribe(Iterable<Class<? extends Message>> integrationEventClasses,
-                          BoundedContext subscriber) {
+    /**
+     * Subscribes the passed subscriber to receive integration events of the specified classes.
+     */
+    public void subscribe(Iterable<EventClass> eventClasses, IntegrationEventSubscriber subscriber) {
         //TODO:2016-04-27:alexander.yevsyukov: Implement
     }
 
