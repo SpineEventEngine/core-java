@@ -39,11 +39,11 @@ import java.lang.reflect.InvocationTargetException;
 public abstract class EventSubscriber {
 
     public void handle(Message eventMessage, EventContext context) throws InvocationTargetException {
-        final EventSubscriberMethod method = getHandlerMethod(eventMessage.getClass());
+        final EventSubscriberMethod method = getSubscriberMethod(eventMessage.getClass());
         method.invoke(this, eventMessage, context);
     }
 
-    private EventSubscriberMethod getHandlerMethod(Class<? extends Message> eventClass) {
+    private EventSubscriberMethod getSubscriberMethod(Class<? extends Message> eventClass) {
         final MethodRegistry registry = MethodRegistry.getInstance();
         final EventSubscriberMethod method = registry.get(getClass(), eventClass, EventSubscriberMethod.factory());
         return method;
