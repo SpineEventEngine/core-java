@@ -21,26 +21,22 @@ syntax = "proto3";
 
 package spine.server.integration;
 
-option java_package = "org.spine3.server.integration";
+option java_package = "org.spine3.server.integration.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "IntegrationEventProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
 
-import "spine/base/event.proto";
 import "spine/base/response.proto";
+import "spine/server/integration/integration_event.proto";
 
-// An event which is sent between loosely coupled parts of a system.
-// Typically such parts would be implemented as Bounded Contexts.
-message IntegrationEvent {
-    // The message of the event message wrapped into `Any`.
-    google.protobuf.Any message = 1;
-
-    // The context of the event.
-    spine.base.EventContext context = 2;
-
-    // An identifier of a software component, which generated this integration event.
-    // If the source is a Bounded Context, this field contains its name.
-    string source = 3;
+// A service for notifying integration event subscribers.
+// A Bounded Context is a typical integration event subscriber.
+service IntegrationEventSubscriber {
+    // Notifies the subscribers about the event.
+    // The response is `ok` if the event is successfully received by the subscriber.
+    // If the event is not handled by the subscriber, or not a valid message, the response is `error`.
+    // If the event cannot be handled because of business conditions, the response is `failure`.
+    rpc Notify(IntegrationEvent) returns (spine.base.Response);
 }

@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
  * A facade for configuration and entry point for handling commands.

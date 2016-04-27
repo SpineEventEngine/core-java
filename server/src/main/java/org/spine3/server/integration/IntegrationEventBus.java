@@ -21,7 +21,7 @@
 package org.spine3.server.integration;
 
 import org.spine3.server.event.EventBus;
-import org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.server.type.EventClass;
 
 /**
@@ -43,7 +43,7 @@ public class IntegrationEventBus {
     /**
      * Subscribes the passed subscriber to receive integration events of the specified classes.
      */
-    public void subscribe(Iterable<EventClass> eventClasses, IntegrationEventSubscriber subscriber) {
+    public void subscribe(IntegrationEventSubscriber subscriber, Iterable<EventClass> eventClasses) {
         //TODO:2016-04-27:alexander.yevsyukov: Implement
     }
 
