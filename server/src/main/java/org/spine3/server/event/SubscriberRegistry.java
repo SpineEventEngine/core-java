@@ -55,7 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
-    /* package */ void usubscribe(EventSubscriber object) {
+    /* package */ void unsubscribe(EventSubscriber object) {
         final MethodMap<EventSubscriberMethod> subscribers = EventSubscriberMethod.scan(object);
         final boolean subscribersEmpty = subscribers.isEmpty();
         checkSubscribersNotEmpty(object, subscribersEmpty);

@@ -182,7 +182,7 @@ public class EventBus implements AutoCloseable {
      */
     public void unsubscribe(EventSubscriber object) {
         checkNotNull(object);
-        subscriberRegistry.usubscribe(object);
+        subscriberRegistry.unsubscribe(object);
     }
 
     /**
