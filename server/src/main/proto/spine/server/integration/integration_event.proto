@@ -31,7 +31,8 @@ import "google/protobuf/any.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
 
-// An event which is sent between different Bounded Contexts.
+// An event which is sent between loosely coupled parts of a system.
+// Typically such parts would be implemented as Bounded Contexts.
 message IntegrationEvent {
     // The message of the event message wrapped into `Any`.
     google.protobuf.Any message = 1;
@@ -39,13 +40,17 @@ message IntegrationEvent {
     // The context of the event.
     spine.base.EventContext context = 2;
 
-    // The name of the bounded context, which generated the event.
+    // An identifier of a software component, which generated this integration event.
+    // If the source is a Bounded Context, this field contains its name.
     string source = 3;
 }
 
 // A service for notifying integration event subscribers.
+// A Bounded Context is a typical integration event subscriber.
 service IntegrationEventSubscriber {
-    // Notifies integration event subscribers.
-    // A response contains information about event validation result, etc.
+    // Notifies the subscribers about the event.
+    // The response is `ok` if the event is successfully received by the subscriber.
+    // If the event is not handled by the subscriber, or not a valid message, the response is `error`.
+    // If the event cannot be handled because of business conditions, the response is `failure`.
     rpc Notify(IntegrationEvent) returns (spine.base.Response);
 }
