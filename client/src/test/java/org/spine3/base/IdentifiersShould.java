@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.IdWithStructure;
@@ -51,6 +52,26 @@ public class IdentifiersShould {
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Identifiers.class));
+    }
+
+    @Test
+    public void return_NULL_string_to_passed_null_value() {
+        assertEquals(NULL_ID_OR_FIELD, idToString(null));
+    }
+
+    @Test
+    public void return_NULL_string_to_empty_string() {
+        assertEquals(NULL_ID_OR_FIELD, idToString(""));
+    }
+
+    @Test
+    public void return_NULL_string_to_blank_value() {
+        assertEquals(NULL_ID_OR_FIELD, idToString(" "));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_IAE_to_empty_messages() {
+        idToString(Empty.getDefaultInstance());
     }
 
     @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
@@ -194,10 +215,10 @@ public class IdentifiersShould {
     @Test
     public void generate_new_UUID() {
         // We have non-empty values.
-        assertTrue(Identifiers.newUuid().length() > 0);
+        assertTrue(newUuid().length() > 0);
 
         // Values are random.
-        assertNotEquals(Identifiers.newUuid(), Identifiers.newUuid());
+        assertNotEquals(newUuid(), newUuid());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -210,13 +231,13 @@ public class IdentifiersShould {
     public void handle_null_in_standard_converters() {
         final ConverterRegistry registry = ConverterRegistry.getInstance();
 
-        assertEquals(Identifiers.NULL_ID_OR_FIELD,
-                registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID_OR_FIELD,
+                     registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
 
-        assertEquals(Identifiers.NULL_ID_OR_FIELD,
-                registry.getConverter(EventId.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID_OR_FIELD,
+                     registry.getConverter(EventId.getDefaultInstance()).apply(null));
 
-        assertEquals(Identifiers.NULL_ID_OR_FIELD,
-                registry.getConverter(CommandId.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID_OR_FIELD,
+                     registry.getConverter(CommandId.getDefaultInstance()).apply(null));
     }
 }

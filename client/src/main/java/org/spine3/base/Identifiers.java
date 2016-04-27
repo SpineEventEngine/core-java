@@ -87,7 +87,6 @@ public class Identifiers {
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
      */
-    @SuppressWarnings({"ChainOfInstanceofChecks", "IfStatementWithTooManyBranches"})
     public static <I> String idToString(@Nullable I id) {
 
         if (id == null) {
@@ -135,7 +134,6 @@ public class Identifiers {
         return result;
     }
 
-    @SuppressWarnings("IfMayBeConditional")
     private static String convert(Message message) {
 
         final String result;
