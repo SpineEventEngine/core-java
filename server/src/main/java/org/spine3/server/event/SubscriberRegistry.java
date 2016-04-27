@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The registry of event subscriber methods by event class.
+ * The registry of event subscribers by event class.
  *
  * <p>There can be multiple subscribers per event class.
  *
