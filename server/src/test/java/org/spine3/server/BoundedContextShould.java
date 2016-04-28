@@ -60,7 +60,6 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
-import org.spine3.testdata.TestCommands;
 
 import java.util.List;
 
@@ -69,8 +68,10 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
+import static org.spine3.testdata.TestEventFactory.projectCreatedEvent;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
@@ -124,7 +125,7 @@ public class BoundedContextShould {
 
     @Test
     public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
-        boundedContext.post(TestCommands.createProjectCmd(), new StreamObserver<Response>() {
+        boundedContext.post(createProjectCmd(), new StreamObserver<Response>() {
             @Override
             public void onNext(Response response) {
                 assertTrue(Responses.isUnsupportedCommand(response));
@@ -162,40 +163,22 @@ public class BoundedContextShould {
     @Test
     public void post_Command() {
         registerAll();
-        final Command request = TestCommands.createProjectCmd(userId, projectId, getCurrentTime());
+        final Command request = createProjectCmd(userId, projectId, getCurrentTime());
+        final TestResponseObserver observer = new TestResponseObserver();
 
-        boundedContext.post(request, new StreamObserver<Response>() {
-            @Override
-            public void onNext(Response response) {}
+        boundedContext.post(request, observer);
 
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {}
-        });
+        assertEquals(Responses.ok(), observer.getResponseHandled());
     }
+    
+    @Test
+    public void notify_integration_event_subscribers() {
+        registerAll();
+        final TestResponseObserver observer = new TestResponseObserver();
 
-    private static class ResponseObserver implements StreamObserver<Response> {
+        boundedContext.notify(projectCreatedEvent(), observer);
 
-        private Response response;
-
-        @Override
-        public void onNext(Response commandResponse) {
-            this.response = commandResponse;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-
-        public Response getResponse() {
-            return response;
-        }
+        assertEquals(Responses.ok(), observer.getResponseHandled());
     }
 
     @Test
@@ -207,7 +190,7 @@ public class BoundedContextShould {
                 .setMultitenant(true)
                 .build();
 
-        final ResponseObserver observer = new ResponseObserver();
+        final TestResponseObserver observer = new TestResponseObserver();
 
         final Command request = Command.newBuilder()
                 // Pass empty command so that we have something valid to unpack in the context.
@@ -215,7 +198,29 @@ public class BoundedContextShould {
                 .build();
         bc.post(request, observer);
 
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponse().getError().getCode());
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled().getError().getCode());
+    }
+
+    private static class TestResponseObserver implements StreamObserver<Response> {
+
+        private Response responseHandled;
+
+        @Override
+        public void onNext(Response response) {
+            this.responseHandled = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+
+        public Response getResponseHandled() {
+            return responseHandled;
+        }
     }
 
     @SuppressWarnings({"unused", "TypeMayBeWeakened"})
@@ -288,7 +293,6 @@ public class BoundedContextShould {
             isProjectStartedEventApplied = true;
         }
     }
-
 
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
         private ProjectAggregateRepository(BoundedContext boundedContext) {
