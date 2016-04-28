@@ -26,14 +26,14 @@ import org.spine3.server.type.EventClass;
 import java.util.Set;
 
 /**
- * {@code EventDispatcher} delivers events to handlers.
+ * {@code EventDispatcher} delivers events to subscribers.
  *
  * @author Alexander Yevsyukov
  */
 public interface EventDispatcher {
 
     /**
-     * Provides the set of classes of events forwarded by the dispatcher
+     * Provides the set of classes of events forwarded by the dispatcher.
      *
      * @return non-empty set
      */

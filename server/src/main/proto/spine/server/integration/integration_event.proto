@@ -34,7 +34,7 @@ import "spine/base/response.proto";
 // An event which is sent between loosely coupled parts of a system.
 // Typically such parts would be implemented as Bounded Contexts.
 message IntegrationEvent {
-    // The message of the event message wrapped into `Any`.
+    // The event message wrapped into `Any`.
     google.protobuf.Any message = 1;
 
     // The context of the event.

@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *    <li>Expose a public method that accepts the type of the event as the first parameter,
  *        and {@link EventContext} as the second parameter;
  *    <li>Mark the method with {@link Subscribe} annotation;
- * <li>Register with an instance of EventBus using {@link #subscribe(EventSubscriber)}.
+ *    <li>Register with an instance of EventBus using {@link #subscribe(EventSubscriber)}.
  * </ol>
  * Note: Since Protobuf messages are final classes, a subscriber method cannot accept just {@link Message}
  * as the first parameter. It must be an exact type of the event message that needs to be handled.
@@ -208,12 +208,9 @@ public class EventBus implements AutoCloseable {
      */
     public void post(Event event) {
         store(event);
-
         callDispatchers(event);
-
         final Message message = Events.getMessage(event);
         final EventContext context = event.getContext();
-
         invokeSubscribers(message, context);
     }
 
