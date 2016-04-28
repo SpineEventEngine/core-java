@@ -85,7 +85,7 @@ public class Commands {
                                                             .setActor(userId)
                                                             .setTimestamp(getCurrentTime())
                                                             .setZoneOffset(zoneOffset)
-                                                            .setSourceBoundedContext(boundedContextName);
+                                                            .setSource(boundedContextName);
         return result.build();
     }
 

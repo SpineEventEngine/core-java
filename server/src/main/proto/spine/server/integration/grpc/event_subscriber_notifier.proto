@@ -33,8 +33,8 @@ import "spine/base/response.proto";
 
 // A service for notifying integration event subscribers.
 // A Bounded Context is a typical integration event subscriber.
-service IntegrationEventSubscribersNotifier {
-    // Notifies subscribers about an event.
+service IntegrationEventSubscriber {
+    // Notifies a subscriber about an event.
     // The response is `ok` if the event is successfully received by the subscriber.
     // If the event is not handled because of a technical error, the response is `error`.
     // If the event cannot be handled because of business conditions, the response is `failure`.

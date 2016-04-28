@@ -76,9 +76,10 @@ message EventContext {
     // The version of the entity after the event was applied.
     int32 version = 5;
 
-    // The name of the bounded context, which generated the event.
-    // It can be the name of another BC for integration event.
-    string source_bounded_context = 6;
+    // An identifier of a software component, which generated the event.
+    // If the source is a Bounded Context, this field is its name.
+    // It can be a name of another BC for integration event.
+    string source = 6;
 
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.

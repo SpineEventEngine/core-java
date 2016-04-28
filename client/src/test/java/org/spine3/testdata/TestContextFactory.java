@@ -74,7 +74,7 @@ public class TestContextFactory {
                                                              .setActor(userId)
                                                              .setTimestamp(when)
                                                              .setZoneOffset(UTC)
-                                                             .setSourceBoundedContext(TEST_BC_NAME);
+                                                             .setSource(TEST_BC_NAME);
         return builder.build();
     }
 
@@ -113,7 +113,7 @@ public class TestContextFactory {
                                                          .setEventId(eventId)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(AGGREGATE_ID)
-                                                         .setSourceBoundedContext(TEST_BC_NAME)
+                                                         .setSource(TEST_BC_NAME)
                                                          .setTimestamp(now);
         return builder.build();
     }
@@ -126,7 +126,7 @@ public class TestContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(toAny(aggregateId))
-                                                         .setSourceBoundedContext(TEST_BC_NAME)
+                                                         .setSource(TEST_BC_NAME)
                                                          .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -140,7 +140,7 @@ public class TestContextFactory {
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
                                                          .setProducerId(AGGREGATE_ID)
-                                                         .setSourceBoundedContext(TEST_BC_NAME);
+                                                         .setSource(TEST_BC_NAME);
         return builder.build();
     }
 
@@ -153,7 +153,7 @@ public class TestContextFactory {
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
                                                          .setProducerId(toAny(aggregateId))
-                                                         .setSourceBoundedContext(TEST_BC_NAME);
+                                                         .setSource(TEST_BC_NAME);
         return builder.build();
     }
 }

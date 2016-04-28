@@ -23,31 +23,47 @@ package org.spine3.server.integration;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.Event;
+import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.type.EventClass;
-import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
- * Allows to register {@link BoundedContext}s which contain integration event subscribers and
- * to deliver events to them.
+ * Allows to register integration event subscribers and deliver events to them.
  *
- * <p>An integration event is sent between different Bounded Contexts.
+ * <p>An integration event is sent between loosely coupled parts of a system.
+ * Typically such parts would be implemented as {@link BoundedContext}s.
  *
  * @see Subscribe
  * @see EventBus
  */
 public class IntegrationEventBus {
 
-    private final Multimap<EventClass, BoundedContext> boundedContextMap = HashMultimap.create();
+    private final Multimap<EventClass, IntegrationEventSubscriber> subscribersMap = HashMultimap.create();
+
+    private final StreamObserver<Response> observer = new StreamObserver<Response>() {
+        @Override
+        public void onNext(Response response) {
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+    };
 
     /**
      * Returns an event bus instance.
@@ -64,15 +80,24 @@ public class IntegrationEventBus {
     public void post(Event event) {
         final Message msg = fromAny(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
-        final Collection<BoundedContext> contexts = boundedContextMap.get(eventClass);
-        for (BoundedContext context : contexts) {
-            context.notify(event);
+        checkNotEmptyOrBlank(event.getContext().getSource(), "integration event source");
+        final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
+        for (IntegrationEventSubscriber subscriber : subscribers) {
+            subscriber.notify(event, observer);
         }
     }
 
-    public void subscribe(Iterable<Class<? extends Message>> integrationEventClasses,
-                          BoundedContext subscriber) {
-        //TODO:2016-04-27:alexander.yevsyukov: Implement
+    /**
+     * Subscribes the passed object to receive integration events of the specified classes.
+     *
+     * @param subscriber a subscriber to register
+     * @param eventClasses classes of integration event messages handled by the subscriber
+     */
+    public void subscribe(IntegrationEventSubscriber subscriber, Iterable<Class<? extends Message>> eventClasses) {
+        checkNotNull(subscriber);
+        for (Class<? extends Message> eventClass : eventClasses) {
+            subscribersMap.put(EventClass.of(eventClass), subscriber);
+        }
     }
 
     private enum Singleton {

@@ -203,8 +203,9 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     protected static class CommandRouter {
 
         private final CommandBus commandBus;
-        private Message source;
+        private Message sourceCommand;
         private CommandContext sourceContext;
+        private String sourceId;
 
         /**
          * The actor of the command we route.
@@ -230,9 +231,10 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         /**
          * Sets command to be routed.
          */
-        public CommandRouter of(Message source, CommandContext context) {
-            this.source = checkNotNull(source);
+        public CommandRouter of(Message sourceCommand, CommandContext context) {
+            this.sourceCommand = checkNotNull(sourceCommand);
             this.sourceContext = checkNotNull(context);
+            this.sourceId = context.getSource();
             this.actor = context.getActor();
             this.zoneOffset = context.getZoneOffset();
             return this;
@@ -253,7 +255,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
          */
         public CommandRouted route() {
             final CommandRouted.Builder result = CommandRouted.newBuilder();
-            result.setSource(Commands.create(this.source, this.sourceContext));
+            result.setSource(Commands.create(sourceCommand, sourceContext));
             for (Message message : toRoute) {
                 final Command command = produceCommand(message);
                 commandBus.post(command);
@@ -263,8 +265,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         private Command produceCommand(Message newMessage) {
-            final String boundedContext = sourceContext.getSourceBoundedContext();
-            final CommandContext newContext = Commands.createContext(actor, zoneOffset, boundedContext);
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset, sourceId);
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }
@@ -291,7 +292,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                                             int currentVersion) {
         final EventId eventId = Events.generateId();
         final Any producerId = idToAny(getId());
-        final String boundedContext = cmdContext.getSourceBoundedContext();
+        final String eventSource = cmdContext.getSource();
         final CommandId commandId = cmdContext.getCommandId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
@@ -299,7 +300,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                 .setCommandContext(cmdContext)
                 .setProducerId(producerId)
                 .setVersion(currentVersion)
-                .setSourceBoundedContext(boundedContext);
+                .setSource(eventSource);
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
         return builder.build();
     }

@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.grpc.Topic;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
@@ -50,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.integration.IntegrationEventSubscribersNotifierGrpc.IntegrationEventSubscribersNotifier;
+import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -58,7 +59,7 @@ import static org.spine3.server.integration.IntegrationEventSubscribersNotifierG
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientService, IntegrationEventSubscribersNotifier, AutoCloseable {
+public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -234,13 +235,15 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         return result;
     }
 
-    public void notify(Event event) {
-        eventBus.post(event);
-    }
-
     @Override
     public void notify(Event event, StreamObserver<Response> responseObserver) {
-        // TODO:2016-04-27:alexander.litus: Implement
+        try {
+            eventBus.post(event);
+            responseObserver.onNext(Responses.ok());
+            responseObserver.onCompleted();
+        } catch (RuntimeException e) {
+            responseObserver.onError(e);
+        }
     }
 
     @Override

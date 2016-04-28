@@ -434,7 +434,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setCommandContext(commandContext)
                 .setProducerId(getIdAsAny())
                 .setVersion(getVersion())
-                .setSourceBoundedContext(commandContext.getSourceBoundedContext());
+                .setSource(commandContext.getSource());
         extendEventContext(event, builder, commandContext);
         return builder.build();
     }
