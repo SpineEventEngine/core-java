@@ -24,6 +24,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
@@ -51,19 +53,7 @@ public class IntegrationEventBus {
 
     private final Multimap<EventClass, IntegrationEventSubscriber> subscribersMap = HashMultimap.create();
 
-    private final StreamObserver<Response> observer = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response response) {
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-    };
+    private final StreamObserver<Response> notificationObserver = new NotificationObserver();
 
     /**
      * Returns an event bus instance.
@@ -83,7 +73,7 @@ public class IntegrationEventBus {
         checkNotEmptyOrBlank(event.getContext().getSource(), "integration event source");
         final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
         for (IntegrationEventSubscriber subscriber : subscribers) {
-            subscriber.notify(event, observer);
+            subscriber.notify(event, notificationObserver);
         }
     }
 
@@ -100,13 +90,39 @@ public class IntegrationEventBus {
         }
     }
 
-    private enum Singleton {
+    private static class NotificationObserver implements StreamObserver<Response> {
+        @Override
+        public void onNext(Response response) {
+            log().debug("Notified integration event subscriber, response:", response);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            log().error("Error while notifying integration event subscriber:", throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+    }
+
+    private static IntegrationEventBus instance() {
+        return BusSingleton.INSTANCE.value;
+    }
+
+    private enum BusSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final IntegrationEventBus value = new IntegrationEventBus();
     }
 
-    private static IntegrationEventBus instance() {
-        return Singleton.INSTANCE.value;
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(IntegrationEventBus.class);
     }
 }
