@@ -33,17 +33,20 @@ import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.client.UserUtil.*;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {
 
-    private final UserId actor = UserUtil.newUserId("create_instance_by_user_and_timezone");
+    private final UserId actor = newUserId(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
 
     private CommandFactory commandFactory;
 
     @Before
     public void setUp() {
-        commandFactory = CommandFactory.newInstance(actor, zoneOffset);
+        commandFactory = CommandFactory.newInstance(actor, zoneOffset, "Tests");
     }
 
     @Test

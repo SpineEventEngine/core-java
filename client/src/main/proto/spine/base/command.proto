@@ -79,8 +79,11 @@ message CommandContext {
     // The `namespace` attribute must be defined for commands in multitenant applications.
     Namespace namespace = 5;
 
+    // The name of the bounded context, which generated the command.
+    string source_bounded_context = 6;
+
     // The command scheduling options.
-    Schedule schedule = 6;
+    Schedule schedule = 7;
 }
 
 message Schedule {

@@ -47,7 +47,11 @@ message EventStorageRecord {
     // String representation of `EventId`.
     string event_id = 4;
 
-    reserved 5 to 19;
+    // The name of the bounded context, which generated the event.
+    // It can be the name of another BC for integration event.
+    string source_bounded_context = 5;
+
+    reserved 6 to 19;
 
     // Event instance.
     google.protobuf.Any message = 20;

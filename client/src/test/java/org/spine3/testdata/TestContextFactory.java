@@ -32,13 +32,13 @@ import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Schedule;
 import org.spine3.base.UserId;
-import org.spine3.time.ZoneOffset;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.time.ZoneOffsets.UTC;
 
 
 /**
@@ -51,8 +51,9 @@ public class TestContextFactory {
 
     private static final Any AGGREGATE_ID = toAny(newStringValue(newUuid()));
 
-    private TestContextFactory() {
-    }
+    private static final String TEST_BC_NAME = "Test BC";
+
+    private TestContextFactory() {}
 
     /**
      * Creates a new {@link CommandContext} with the random userId, commandId and current timestamp.
@@ -69,10 +70,11 @@ public class TestContextFactory {
      */
     public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
         final CommandContext.Builder builder = CommandContext.newBuilder()
-                .setCommandId(commandId)
-                .setActor(userId)
-                .setTimestamp(when)
-                .setZoneOffset(ZoneOffset.getDefaultInstance());
+                                                             .setCommandId(commandId)
+                                                             .setActor(userId)
+                                                             .setTimestamp(when)
+                                                             .setZoneOffset(UTC)
+                                                             .setSourceBoundedContext(TEST_BC_NAME);
         return builder.build();
     }
 
@@ -108,10 +110,11 @@ public class TestContextFactory {
         final CommandContext commandContext = createCommandContext(userId, Commands.generateId(), now);
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setCommandContext(commandContext)
-                .setProducerId(AGGREGATE_ID)
-                .setTimestamp(now);
+                                                         .setEventId(eventId)
+                                                         .setCommandContext(commandContext)
+                                                         .setProducerId(AGGREGATE_ID)
+                                                         .setSourceBoundedContext(TEST_BC_NAME)
+                                                         .setTimestamp(now);
         return builder.build();
     }
 
@@ -121,9 +124,10 @@ public class TestContextFactory {
     public static EventContext createEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setProducerId(toAny(aggregateId))
-                .setTimestamp(getCurrentTime());
+                                                         .setEventId(eventId)
+                                                         .setProducerId(toAny(aggregateId))
+                                                         .setSourceBoundedContext(TEST_BC_NAME)
+                                                         .setTimestamp(getCurrentTime());
         return builder.build();
     }
 
@@ -133,9 +137,10 @@ public class TestContextFactory {
     public static EventContext createEventContext(Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setTimestamp(timestamp)
-                .setProducerId(AGGREGATE_ID);
+                                                         .setEventId(eventId)
+                                                         .setTimestamp(timestamp)
+                                                         .setProducerId(AGGREGATE_ID)
+                                                         .setSourceBoundedContext(TEST_BC_NAME);
         return builder.build();
     }
 
@@ -145,9 +150,10 @@ public class TestContextFactory {
     public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setTimestamp(timestamp)
-                .setProducerId(toAny(aggregateId));
+                                                         .setEventId(eventId)
+                                                         .setTimestamp(timestamp)
+                                                         .setProducerId(toAny(aggregateId))
+                                                         .setSourceBoundedContext(TEST_BC_NAME);
         return builder.build();
     }
 }

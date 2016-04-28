@@ -27,7 +27,8 @@ import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
 import org.spine3.protobuf.Messages;
-import org.spine3.time.ZoneOffset;
+
+import static org.spine3.time.ZoneOffsets.UTC;
 
 /**
  * Utility class for generating sample command requests.
@@ -36,11 +37,13 @@ import org.spine3.time.ZoneOffset;
  */
 /*package*/ class Requests {
 
+    private static final String ORDER_BC_NAME = "Order BC";
+
     public static Command createOrder(UserId userId, OrderId orderId) {
         final CreateOrder msg = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -63,7 +66,7 @@ import org.spine3.time.ZoneOffset;
         final AddOrderLine msg = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -74,7 +77,7 @@ import org.spine3.time.ZoneOffset;
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        final CommandContext context = Commands.createContext(userId, ZoneOffset.getDefaultInstance());
+        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
