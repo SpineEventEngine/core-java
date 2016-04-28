@@ -39,7 +39,6 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -51,7 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import static org.spine3.server.integration.IntegrationEventSubscribersNotifierGrpc.IntegrationEventSubscribersNotifier;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -59,7 +58,7 @@ import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
+public class BoundedContext implements ClientService, IntegrationEventSubscribersNotifier, AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -179,7 +178,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             commandBus.register((CommandDispatcher) repository);
         }
         if (repository instanceof EventDispatcher) {
-            getEventBus().register((EventDispatcher)repository);
+            eventBus.register((EventDispatcher) repository);
         }
     }
 
@@ -196,7 +195,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             commandBus.unregister((CommandDispatcher) repository);
         }
         if (repository instanceof EventDispatcher) {
-            getEventBus().unregister((EventDispatcher) repository);
+            eventBus.unregister((EventDispatcher) repository);
         }
         repository.close();
     }
@@ -235,9 +234,13 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         return result;
     }
 
+    public void notify(Event event) {
+        eventBus.post(event);
+    }
+
     @Override
-    public void notify(IntegrationEvent event, StreamObserver<Response> responseObserver) {
-        // TODO:2016-04-27:alexander.litus: impl
+    public void notify(Event event, StreamObserver<Response> responseObserver) {
+        // TODO:2016-04-27:alexander.litus: Implement
     }
 
     @Override
