@@ -32,8 +32,11 @@ import "spine/base/event.proto";
 import "spine/base/response.proto";
 
 // A service for notifying integration event subscribers.
+// A Bounded Context is a typical integration event subscriber.
 service IntegrationEventSubscribersNotifier {
-    // Notifies integration event subscribers about an event.
-    // A response contains information about event validation result, etc.
+    // Notifies subscribers about an event.
+    // The response is `ok` if the event is successfully received by the subscriber.
+    // If the event is not handled because of a technical error, the response is `error`.
+    // If the event cannot be handled because of business conditions, the response is `failure`.
     rpc Notify(spine.base.Event) returns (spine.base.Response);
 }
