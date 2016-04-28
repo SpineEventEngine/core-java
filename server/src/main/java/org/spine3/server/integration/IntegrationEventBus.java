@@ -20,6 +20,8 @@
 
 package org.spine3.server.integration;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
@@ -35,6 +37,7 @@ import org.spine3.server.type.EventClass;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
@@ -53,13 +56,25 @@ public class IntegrationEventBus {
 
     private final Multimap<EventClass, IntegrationEventSubscriber> subscribersMap = HashMultimap.create();
 
-    private final StreamObserver<Response> notificationObserver = new NotificationObserver();
+    private StreamObserver<Response> responseObserver = new DefaultResponseObserver();
 
     /**
      * Returns an event bus instance.
      */
     public static IntegrationEventBus getInstance() {
         return instance();
+    }
+
+    /**
+     * Sets a response observer used in {@link IntegrationEventSubscriber#notify(Event, StreamObserver)}.
+     */
+    public void setResponseObserver(StreamObserver<Response> responseObserver) {
+        this.responseObserver = responseObserver;
+    }
+
+    @VisibleForTesting
+    /* package */ StreamObserver<Response> getResponseObserver() {
+        return responseObserver;
     }
 
     /**
@@ -72,8 +87,9 @@ public class IntegrationEventBus {
         final EventClass eventClass = EventClass.of(msg);
         checkNotEmptyOrBlank(event.getContext().getSource(), "integration event source");
         final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
+        checkArgument(!subscribers.isEmpty(), "No integration event subscribers found for event " + msg.getClass().getName());
         for (IntegrationEventSubscriber subscriber : subscribers) {
-            subscriber.notify(event, notificationObserver);
+            subscriber.notify(event, responseObserver);
         }
     }
 
@@ -90,7 +106,18 @@ public class IntegrationEventBus {
         }
     }
 
-    private static class NotificationObserver implements StreamObserver<Response> {
+    /**
+     * Subscribes the passed object to receive integration events of the specified classes.
+     *
+     * @param subscriber a subscriber to register
+     * @param eventClasses classes of integration event messages handled by the subscriber
+     */
+    @SafeVarargs
+    public final void subscribe(IntegrationEventSubscriber subscriber, Class<? extends Message>... eventClasses) {
+        subscribe(subscriber, FluentIterable.of(eventClasses));
+    }
+
+    private static class DefaultResponseObserver implements StreamObserver<Response> {
         @Override
         public void onNext(Response response) {
             log().debug("Notified integration event subscriber, response:", response);
