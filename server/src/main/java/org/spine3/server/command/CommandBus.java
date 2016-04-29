@@ -130,15 +130,12 @@ public class CommandBus implements AutoCloseable {
     /**
      * Verifies if the command can be posted to this {@code CommandBus}.
      *
-     * <p>The command can be posted if it has either dispatcher or handler registered with
+     * <p>A command can be posted if it has either dispatcher or handler registered with
      * the command bus.
      *
-     * <p>The method intended to be used with the instances of command messages extracted from {@link Command}.
-     *
-     * <p>If {@code Command} instance is passed, its message is extracted and validated.
-     *
-     * @param command the command message to check
-     * @return the result of {@link Responses#ok()} if the command is supported,
+     * @param command a command message to check
+     * @return the result of {@link Responses#ok()} if the command is valid and supported,
+     *         {@link CommandValidation#invalidCommand(Message, List)} or
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
