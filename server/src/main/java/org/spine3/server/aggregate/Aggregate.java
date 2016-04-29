@@ -433,8 +433,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setTimestamp(whenModified())
                 .setCommandContext(commandContext)
                 .setProducerId(getIdAsAny())
-                .setVersion(getVersion())
-                .setSource(commandContext.getSource());
+                .setVersion(getVersion());
         extendEventContext(event, builder, commandContext);
         return builder.build();
     }

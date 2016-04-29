@@ -50,7 +50,7 @@ public class TestCommandFactory extends CommandFactory {
     }
 
     protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
-        super(actor, zoneOffset, "Tests BC");
+        super(actor, zoneOffset);
     }
 
     /**

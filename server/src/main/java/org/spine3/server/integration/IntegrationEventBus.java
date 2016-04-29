@@ -41,7 +41,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Allows to register integration event subscribers and deliver events to them.
@@ -85,7 +84,6 @@ public class IntegrationEventBus {
     public void post(Event event) {
         final Message msg = fromAny(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
-        checkNotEmptyOrBlank(event.getContext().getSource(), "integration event source");
         final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
         checkArgument(!subscribers.isEmpty(), "No integration event subscribers found for event " + msg.getClass().getName());
         for (IntegrationEventSubscriber subscriber : subscribers) {

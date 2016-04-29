@@ -76,13 +76,7 @@ message EventContext {
     // The version of the entity after the event was applied.
     int32 version = 5;
 
-    // An identifier of a software component, which generated the event.
-    // If the source is a Bounded Context, this field is its name.
-    // It can be a name of another BC for integration event.
-    string source = 6;
-
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.
-    map<string, google.protobuf.Any> attributes = 7;
+    map<string, google.protobuf.Any> attributes = 6;
 }
-

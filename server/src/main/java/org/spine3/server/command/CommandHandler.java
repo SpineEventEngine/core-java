@@ -111,13 +111,11 @@ public abstract class CommandHandler extends Entity<String, Empty> {
         final EventId eventId = Events.generateId();
         final Timestamp now = TimeUtil.getCurrentTime();
         final Any producerId = idToAny(getId());
-        final String eventSource = commandContext.getSource();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(now)
                 .setCommandContext(commandContext)
-                .setProducerId(producerId)
-                .setSource(eventSource);
+                .setProducerId(producerId);
         return builder.build();
     }
 

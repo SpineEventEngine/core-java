@@ -158,7 +158,6 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         checkNotEmptyOrBlank(eventType, "event type");
         final String producerId = Identifiers.idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
-        checkNotEmptyOrBlank(context.getSource(), "event source");
         final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
                 .setTimestamp(timestamp)

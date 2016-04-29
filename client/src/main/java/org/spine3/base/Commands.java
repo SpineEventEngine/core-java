@@ -75,17 +75,15 @@ public class Commands {
      *
      * @param userId the actor id
      * @param zoneOffset the offset of the timezone in which the user works
-     * @param boundedContextName the name of the current context
      * @see CommandFactory
      */
-    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset, String boundedContextName) {
+    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = CommandContext.newBuilder()
                                                             .setCommandId(commandId)
                                                             .setActor(userId)
                                                             .setTimestamp(getCurrentTime())
-                                                            .setZoneOffset(zoneOffset)
-                                                            .setSource(boundedContextName);
+                                                            .setZoneOffset(zoneOffset);
         return result.build();
     }
 

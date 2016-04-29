@@ -37,13 +37,11 @@ import static org.spine3.time.ZoneOffsets.UTC;
  */
 /*package*/ class Requests {
 
-    private static final String ORDER_BC_NAME = "Order BC";
-
     public static Command createOrder(UserId userId, OrderId orderId) {
         final CreateOrder msg = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
+        final CommandContext context = Commands.createContext(userId, UTC);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -66,7 +64,7 @@ import static org.spine3.time.ZoneOffsets.UTC;
         final AddOrderLine msg = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
+        final CommandContext context = Commands.createContext(userId, UTC);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -77,7 +75,7 @@ import static org.spine3.time.ZoneOffsets.UTC;
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        final CommandContext context = Commands.createContext(userId, UTC, ORDER_BC_NAME);
+        final CommandContext context = Commands.createContext(userId, UTC);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }

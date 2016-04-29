@@ -51,8 +51,6 @@ public class TestContextFactory {
 
     private static final Any AGGREGATE_ID = toAny(newStringValue(newUuid()));
 
-    private static final String TEST_BC_NAME = "Test BC";
-
     private TestContextFactory() {}
 
     /**
@@ -73,8 +71,7 @@ public class TestContextFactory {
                                                              .setCommandId(commandId)
                                                              .setActor(userId)
                                                              .setTimestamp(when)
-                                                             .setZoneOffset(UTC)
-                                                             .setSource(TEST_BC_NAME);
+                                                             .setZoneOffset(UTC);
         return builder.build();
     }
 
@@ -113,7 +110,6 @@ public class TestContextFactory {
                                                          .setEventId(eventId)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(AGGREGATE_ID)
-                                                         .setSource(TEST_BC_NAME)
                                                          .setTimestamp(now);
         return builder.build();
     }
@@ -126,7 +122,6 @@ public class TestContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(toAny(aggregateId))
-                                                         .setSource(TEST_BC_NAME)
                                                          .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -139,8 +134,7 @@ public class TestContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
-                                                         .setProducerId(AGGREGATE_ID)
-                                                         .setSource(TEST_BC_NAME);
+                                                         .setProducerId(AGGREGATE_ID);
         return builder.build();
     }
 
@@ -152,8 +146,7 @@ public class TestContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
-                                                         .setProducerId(toAny(aggregateId))
-                                                         .setSource(TEST_BC_NAME);
+                                                         .setProducerId(toAny(aggregateId));
         return builder.build();
     }
 }

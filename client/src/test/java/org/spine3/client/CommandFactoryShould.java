@@ -46,7 +46,7 @@ public class CommandFactoryShould {
 
     @Before
     public void setUp() {
-        commandFactory = CommandFactory.newInstance(actor, zoneOffset, "Tests");
+        commandFactory = CommandFactory.newInstance(actor, zoneOffset);
     }
 
     @Test

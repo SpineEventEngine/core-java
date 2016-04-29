@@ -205,7 +205,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         private final CommandBus commandBus;
         private Message sourceCommand;
         private CommandContext sourceContext;
-        private String sourceId;
 
         /**
          * The actor of the command we route.
@@ -234,7 +233,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         public CommandRouter of(Message sourceCommand, CommandContext context) {
             this.sourceCommand = checkNotNull(sourceCommand);
             this.sourceContext = checkNotNull(context);
-            this.sourceId = context.getSource();
             this.actor = context.getActor();
             this.zoneOffset = context.getZoneOffset();
             return this;
@@ -265,7 +263,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         private Command produceCommand(Message newMessage) {
-            final CommandContext newContext = Commands.createContext(actor, zoneOffset, sourceId);
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset);
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }
@@ -292,15 +290,13 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                                             int currentVersion) {
         final EventId eventId = Events.generateId();
         final Any producerId = idToAny(getId());
-        final String eventSource = cmdContext.getSource();
         final CommandId commandId = cmdContext.getCommandId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
                 .setTimestamp(whenModified)
                 .setCommandContext(cmdContext)
                 .setProducerId(producerId)
-                .setVersion(currentVersion)
-                .setSource(eventSource);
+                .setVersion(currentVersion);
         addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
         return builder.build();
     }

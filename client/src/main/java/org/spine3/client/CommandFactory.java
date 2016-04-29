@@ -28,7 +28,6 @@ import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * The factory to generate new {@link Command} instances.
@@ -39,12 +38,10 @@ public class CommandFactory {
 
     private final UserId actor;
     private final ZoneOffset zoneOffset;
-    private final String boundedContextName;
 
-    protected CommandFactory(UserId actor, ZoneOffset zoneOffset, String boundedContextName) {
+    protected CommandFactory(UserId actor, ZoneOffset zoneOffset) {
         this.actor = checkNotNull(actor);
         this.zoneOffset = checkNotNull(zoneOffset);
-        this.boundedContextName = checkNotEmptyOrBlank(boundedContextName, "Bounded context name");
     }
 
     /**
@@ -53,11 +50,10 @@ public class CommandFactory {
      *
      * @param actor the ID of the user generating commands
      * @param zoneOffset the offset of the timezone the user works in
-     * @param boundedContextName a name of the current bounded context
      * @return a new factory instance
      */
-    public static CommandFactory newInstance(UserId actor, ZoneOffset zoneOffset, String boundedContextName) {
-        return new CommandFactory(actor, zoneOffset, boundedContextName);
+    public static CommandFactory newInstance(UserId actor, ZoneOffset zoneOffset) {
+        return new CommandFactory(actor, zoneOffset);
     }
 
     /**
@@ -67,7 +63,7 @@ public class CommandFactory {
      * @return new command factory at new time zone
      */
     public CommandFactory switchTimezone(ZoneOffset zoneOffset) {
-        return newInstance(getActor(), zoneOffset, getBoundedContextName());
+        return newInstance(getActor(), zoneOffset);
     }
 
     public UserId getActor() {
@@ -76,10 +72,6 @@ public class CommandFactory {
 
     public ZoneOffset getZoneOffset() {
         return zoneOffset;
-    }
-
-    public String getBoundedContextName() {
-        return boundedContextName;
     }
 
     /**
@@ -92,7 +84,7 @@ public class CommandFactory {
      */
     public Command create(Message message) {
         checkNotNull(message);
-        final CommandContext context = Commands.createContext(getActor(), getZoneOffset(), getBoundedContextName());
+        final CommandContext context = Commands.createContext(getActor(), getZoneOffset());
         final Command result = Commands.create(message, context);
         return result;
     }
