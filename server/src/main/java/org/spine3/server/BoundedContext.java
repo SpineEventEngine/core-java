@@ -52,6 +52,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -215,7 +216,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
     }
 
     private Response validateCommand(Command command) {
-        final Message message = fromAny(command.getMessage());
+        final Message message = getMessage(command);
         final CommandContext context = command.getContext();
         final Response response;
         if (isMultitenant() && !context.hasNamespace()) {
@@ -272,6 +273,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
                 .setEventId(sourceContext.getEventId())
                 .setTimestamp(sourceContext.getTimestamp())
                 .setProducerId(sourceContext.getProducerId())
+                .setBoundedContextName(sourceContext.getBoundedContextName())
                 .build();
         final Event.Builder result = Event.newBuilder()
                 .setMessage(integrationEvent.getMessage())
