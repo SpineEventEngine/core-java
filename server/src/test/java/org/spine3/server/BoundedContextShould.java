@@ -43,6 +43,7 @@ import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
+import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -68,6 +69,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
@@ -82,7 +84,7 @@ public class BoundedContextShould {
 
     private final UserId userId = newUserId(newUuid());
     private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
-    private final EmptySubscriber handler = new EmptySubscriber();
+    private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
     private StorageFactory storageFactory;
     private BoundedContext boundedContext;
@@ -97,7 +99,7 @@ public class BoundedContextShould {
     @After
     public void tearDown() throws Exception {
         if (handlersRegistered) {
-            boundedContext.getEventBus().unsubscribe(handler);
+            boundedContext.getEventBus().unsubscribe(subscriber);
         }
         boundedContext.close();
     }
@@ -109,7 +111,7 @@ public class BoundedContextShould {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         boundedContext.register(repository);
-        boundedContext.getEventBus().subscribe(handler);
+        boundedContext.getEventBus().subscribe(subscriber);
         handlersRegistered = true;
     }
 
@@ -175,10 +177,13 @@ public class BoundedContextShould {
     public void notify_integration_event_subscribers() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
+        final IntegrationEvent event = projectCreatedIntegrationEvent();
+        final Message msg = fromAny(event.getMessage());
 
-        boundedContext.notify(projectCreatedIntegrationEvent(), observer);
+        boundedContext.notify(event, observer);
 
         assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(subscriber.eventHandled, msg);
     }
 
     @Test
@@ -198,7 +203,9 @@ public class BoundedContextShould {
                 .build();
         bc.post(request, observer);
 
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled().getError().getCode());
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled()
+                                                                                   .getError()
+                                                                                   .getCode());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {
@@ -301,10 +308,13 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class EmptySubscriber extends EventSubscriber {
+    private static class TestEventSubscriber extends EventSubscriber {
+
+        private ProjectCreated eventHandled;
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
+            this.eventHandled = event;
         }
 
         @Subscribe
