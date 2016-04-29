@@ -20,25 +20,30 @@
 package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.type.EventClass;
+import org.spine3.server.validate.MessageValidator;
+import org.spine3.validate.options.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static org.spine3.base.Events.getMessage;
+import static org.spine3.server.event.EventValidation.invalidEvent;
+import static org.spine3.server.event.EventValidation.unsupportedEvent;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -95,6 +100,8 @@ public class EventBus implements AutoCloseable {
      */
     private final Executor executor;
 
+    private MessageValidator messageValidator;
+
     /**
      * Creates new instance.
      *
@@ -104,6 +111,7 @@ public class EventBus implements AutoCloseable {
     protected EventBus(EventStore eventStore, Executor executor) {
         this.eventStore = eventStore;
         this.executor = checkNotNull(executor);
+        this.messageValidator = new MessageValidator();
     }
 
     /**
@@ -113,7 +121,7 @@ public class EventBus implements AutoCloseable {
      * @return new EventBus instance
      */
     public static EventBus newInstance(EventStore eventStore) {
-        final EventBus result = new EventBus(eventStore, MoreExecutors.directExecutor());
+        final EventBus result = new EventBus(eventStore, directExecutor());
         return result;
     }
 
@@ -133,7 +141,7 @@ public class EventBus implements AutoCloseable {
      * Determines the class of the event from the passed event record.
      */
     public static EventClass getEventClass(Event event) {
-        final Message message = Events.getMessage(event);
+        final Message message = getMessage(event);
         final EventClass result = EventClass.of(message);
         return result;
     }
@@ -211,7 +219,7 @@ public class EventBus implements AutoCloseable {
     public void post(Event event) {
         store(event);
         callDispatchers(event);
-        final Message message = Events.getMessage(event);
+        final Message message = getMessage(event);
         final EventContext context = event.getContext();
         invokeSubscribers(message, context);
     }
@@ -259,11 +267,23 @@ public class EventBus implements AutoCloseable {
      * this event bus.
      *
      * @param event the event message to check
-     * @return an appropriate response
+     * @return an appropriate response: `OK`, `unsupported` or `invalid` event
      */
     public Response validate(Message event) {
-        // TODO:2016-04-29:alexander.litus: implement
+        final EventClass eventClass = EventClass.of(event);
+        if (isUnsupportedEvent(eventClass)) {
+            return unsupportedEvent(event);
+        }
+        final List<ConstraintViolation> violations = messageValidator.validate(event);
+        if (!violations.isEmpty()) {
+            return invalidEvent(event, violations);
+        }
         return Responses.ok();
+    }
+
+    private boolean isUnsupportedEvent(EventClass eventClass) {
+        final boolean isUnsupported = dispatcherRegistry.noDispatchersFor(eventClass) && !hasSubscribers(eventClass);
+        return isUnsupported;
     }
 
     private static void handleDeadEvent(Message event) {
@@ -282,6 +302,11 @@ public class EventBus implements AutoCloseable {
         dispatcherRegistry.unregisterAll();
         subscriberRegistry.unsubscribeAll();
         eventStore.close();
+    }
+
+    @VisibleForTesting
+    /* package */ void setMessageValidator(MessageValidator messageValidator) {
+        this.messageValidator = messageValidator;
     }
 
     private enum LogSingleton {

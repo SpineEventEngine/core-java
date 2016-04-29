@@ -66,6 +66,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
         dispatchers.clear();
     }
 
+    /* package */ boolean hasDispatchersFor(EventClass eventClass) {
+        final Set<EventDispatcher> dispatchers = getDispatchers(eventClass);
+        final boolean result = !dispatchers.isEmpty();
+        return result;
+    }
+
+    /* package */ boolean noDispatchersFor(EventClass eventClass) {
+        final boolean result = !hasDispatchersFor(eventClass);
+        return result;
+    }
+
     /**
      * Ensures that the dispatcher forwards at least one event.
      *

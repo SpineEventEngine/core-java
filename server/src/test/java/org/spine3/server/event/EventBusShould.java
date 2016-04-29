@@ -22,21 +22,31 @@ package org.spine3.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Response;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
+import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.testdata.TestEventFactory;
+import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.spine3.base.Responses.*;
+import static org.spine3.testdata.TestEventMessageFactory.projectCreatedMsg;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
@@ -131,7 +141,8 @@ public class EventBusShould {
         // Check that after 2nd subscriber us unregisters he's no longer in
         eventBus.unsubscribe(subscriberTwo);
 
-        assertFalse(eventBus.getSubscribers(eventClass).contains(subscriberTwo));
+        assertFalse(eventBus.getSubscribers(eventClass)
+                            .contains(subscriberTwo));
     }
 
     @Test
@@ -142,28 +153,6 @@ public class EventBusShould {
         eventBus.post(TestEventFactory.projectCreatedEvent());
 
         assertTrue(subscriber.isMethodCalled());
-    }
-
-    /**
-     * A simple dispatcher class, which only dispatch and does not have own event subscribing methods.
-     */
-    private static class BareDispatcher implements EventDispatcher {
-
-        private boolean dispatchCalled = false;
-
-        @Override
-        public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
-        }
-
-        @Override
-        public void dispatch(Event event) {
-            dispatchCalled = true;
-        }
-
-        /* package */ boolean isDispatchCalled() {
-            return dispatchCalled;
-        }
     }
 
     @Test
@@ -202,9 +191,9 @@ public class EventBusShould {
         assertTrue(dispatchers.contains(dispatcherTwo));
 
         eventBus.unregister(dispatcherTwo);
-        assertFalse(eventBus.getDispatchers(eventClass).contains(dispatcherTwo));
+        assertFalse(eventBus.getDispatchers(eventClass)
+                            .contains(dispatcherTwo));
     }
-
 
     @Test
     public void catches_exceptions_caused_by_subscribers() {
@@ -214,6 +203,41 @@ public class EventBusShould {
         eventBus.post(TestEventFactory.projectCreatedEvent());
 
         assertTrue(faultySubscriber.isMethodCalled());
+    }
+
+    @Test
+    public void return_ok_response_if_event_is_valid() {
+        eventBus.subscribe(new TestEventSubscriber());
+
+        final Response response = eventBus.validate(projectCreatedMsg());
+        assertTrue(isOk(response));
+    }
+
+    @Test
+    public void return_invalid_event_response_if_event_is_invalid() {
+        eventBus.subscribe(new TestEventSubscriber());
+        final MessageValidator validator = mock(MessageValidator.class);
+        doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
+                .when(validator)
+                .validate(any(Message.class));
+        eventBus.setMessageValidator(validator);
+
+        final Response response = eventBus.validate(projectCreatedMsg());
+        assertTrue(isInvalidMessage(response));
+    }
+
+    @Test
+    public void return_unsupported_event_response_if_event_is_not_supported() {
+        final Response response = eventBus.validate(projectCreatedMsg());
+
+        assertTrue(isUnsupportedEvent(response));
+    }
+
+    private static class TestEventSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(ProjectCreated event, EventContext context) {
+        }
     }
 
     /**
@@ -232,6 +256,28 @@ public class EventBusShould {
 
         /* package */ boolean isMethodCalled() {
             return this.methodCalled;
+        }
+    }
+
+    /**
+     * A simple dispatcher class, which only dispatch and does not have own event subscribing methods.
+     */
+    private static class BareDispatcher implements EventDispatcher {
+
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getEventClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public void dispatch(Event event) {
+            dispatchCalled = true;
+        }
+
+        /* package */ boolean isDispatchCalled() {
+            return dispatchCalled;
         }
     }
 

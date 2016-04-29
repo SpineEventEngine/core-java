@@ -84,3 +84,12 @@ message EventContext {
     // defined in the event message.
     map<string, google.protobuf.Any> attributes = 7;
 }
+
+// Enumeration of possible event validation technical error reasons.
+enum EventValidationError {
+    // Reserved value.
+    UNKNOWN_REASON = 0;
+
+    // The event type is not supported by the server.
+    UNSUPPORTED_EVENT = 1;
+}

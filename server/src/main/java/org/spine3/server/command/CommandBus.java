@@ -139,7 +139,6 @@ public class CommandBus implements AutoCloseable {
      *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
      */
     public Response validate(Message command) {
-        checkNotDefault(command);
         final CommandClass commandClass = CommandClass.of(command);
         if (isUnsupportedCommand(commandClass)) {
             return unsupportedCommand(command);

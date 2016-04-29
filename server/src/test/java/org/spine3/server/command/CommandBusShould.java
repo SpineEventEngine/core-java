@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Responses.isInvalidCommand;
+import static org.spine3.base.Responses.isInvalidMessage;
 import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.protobuf.Durations.minutes;
@@ -205,7 +205,7 @@ public class CommandBusShould {
         commandBus.setMessageValidator(validator);
 
         final Response response = commandBus.validate(createProjectMsg(newUuid()));
-        assertTrue(isInvalidCommand(response));
+        assertTrue(isInvalidMessage(response));
     }
 
     //
