@@ -27,16 +27,35 @@ option java_outer_classname = "IntegrationEventProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
-
+import "google/protobuf/timestamp.proto";
 import "spine/base/event.proto";
-import "spine/base/response.proto";
 
-// A service for notifying integration event subscribers.
-// A Bounded Context is a typical integration event subscriber.
-service IntegrationEventSubscriber {
-    // Notifies a subscriber about an event.
-    // The response is `ok` if the event is successfully received by the subscriber.
-    // If the event is not handled because of a technical error, the response is `error`.
-    // If the event cannot be handled because of business conditions, the response is `failure`.
-    rpc Notify(spine.base.Event) returns (spine.base.Response);
+// An integration event is sent between loosely coupled parts of a system.
+// Typically these parts would be implemented as Bounded Contexts.
+message IntegrationEvent {
+    // An event message wrapped to `Any`.
+    google.protobuf.Any message = 1;
+
+    // A context of the event.
+    IntegrationEventContext context = 2;
+}
+
+// Meta-information about an event.
+message IntegrationEventContext {
+    // An id of the event.
+    spine.base.EventId event_id = 1;
+
+    // When the event occurred.
+    google.protobuf.Timestamp timestamp = 2;
+
+    // A name of a Bounded Context which generated the event.
+    string bounded_context_name = 3;
+
+    // An id of an entity which generated the event.
+    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted` event).
+    google.protobuf.Any producer_id = 4;
+
+    // Service attributes that the system may store in addition to the domain attributes
+    // defined in the event message.
+    map<string, google.protobuf.Any> attributes = 5;
 }

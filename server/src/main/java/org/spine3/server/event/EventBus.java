@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.type.EventClass;
@@ -250,6 +252,20 @@ public class EventBus implements AutoCloseable {
         });
     }
 
+    /**
+     * Verifies that an event can be posted to this {@code EventBus}.
+     *
+     * <p>An event can be posted if it has either dispatcher or handler registered with
+     * this event bus.
+     *
+     * @param event the event message to check
+     * @return an appropriate response
+     */
+    public Response validate(Message event) {
+        // TODO:2016-04-29:alexander.litus: implement
+        return Responses.ok();
+    }
+
     private static void handleDeadEvent(Message event) {
         log().warn("No subscriber defined for event class: " + event.getClass().getName());
     }
@@ -258,7 +274,7 @@ public class EventBus implements AutoCloseable {
             Message eventMessage,
             EventContext eventContext) {
         log().error("Exception handling event. Event message: {}, context: {}, cause: {}",
-                                                              eventMessage, eventContext, e.getCause());
+                    eventMessage, eventContext, e.getCause());
     }
 
     @Override

@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
@@ -40,10 +39,10 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
- * Allows to register integration event subscribers and deliver events to them.
+ * Allows to register {@link IntegrationEvent} subscribers and deliver events to them.
  *
  * <p>An integration event is sent between loosely coupled parts of a system.
  * Typically such parts would be implemented as {@link BoundedContext}s.
@@ -65,7 +64,7 @@ public class IntegrationEventBus {
     }
 
     /**
-     * Sets a response observer used in {@link IntegrationEventSubscriber#notify(Event, StreamObserver)}.
+     * Sets a response observer used in {@link IntegrationEventSubscriber#notify(IntegrationEvent, StreamObserver)}.
      */
     public void setResponseObserver(StreamObserver<Response> responseObserver) {
         this.responseObserver = responseObserver;
@@ -81,7 +80,7 @@ public class IntegrationEventBus {
      *
      * @param event an event to post
      */
-    public void post(Event event) {
+    public void post(IntegrationEvent event) {
         final Message msg = fromAny(event.getMessage());
         final EventClass eventClass = EventClass.of(msg);
         final Collection<IntegrationEventSubscriber> subscribers = subscribersMap.get(eventClass);
@@ -92,9 +91,9 @@ public class IntegrationEventBus {
     }
 
     /**
-     * Subscribes the passed object to receive integration events of the specified classes.
+     * Subscribes the passed object to receive {@link IntegrationEvent}s of the specified classes.
      *
-     * @param subscriber a subscriber to register
+     * @param subscriber a subscriber to register (typically it is a {@link BoundedContext})
      * @param eventClasses classes of integration event messages handled by the subscriber
      */
     public void subscribe(IntegrationEventSubscriber subscriber, Iterable<Class<? extends Message>> eventClasses) {

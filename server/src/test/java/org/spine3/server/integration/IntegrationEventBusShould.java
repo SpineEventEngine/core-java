@@ -23,18 +23,14 @@ package org.spine3.server.integration;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.test.project.event.ProjectCreated;
 
 import static org.junit.Assert.*;
-import static org.spine3.base.Events.createEvent;
-import static org.spine3.testdata.TestEventFactory.projectCreatedEvent;
-import static org.spine3.testdata.TestEventFactory.taskAddedEvent;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedMsg;
+import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
+import static org.spine3.testdata.TestEventFactory.taskAddedIntegrationEvent;
 
 /**
  * @author Alexander Litus
@@ -45,7 +41,7 @@ public class IntegrationEventBusShould {
     private IntegrationEventBus eventBus;
     private TestIntEventSubscriber subscriber;
 
-    private final Event event = projectCreatedEvent();
+    private final IntegrationEvent event = projectCreatedIntegrationEvent();
 
     @Before
     public void setUpTest() {
@@ -68,12 +64,7 @@ public class IntegrationEventBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_no_subscribers_for_event() {
-        eventBus.post(taskAddedEvent());
-    }
-
-    //@Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_no_event_source_id_set() {
-        eventBus.post(createEvent(projectCreatedMsg(), EventContext.getDefaultInstance()));
+        eventBus.post(taskAddedIntegrationEvent());
     }
 
     @Test
@@ -87,7 +78,7 @@ public class IntegrationEventBusShould {
     }
 
     @Test
-    public void have_default_response_observer_which_logs() {
+    public void have_default_response_observer() {
         final StreamObserver<Response> observer = eventBus.getResponseObserver();
         assertNotNull(observer);
         eventBus.post(event);
@@ -95,10 +86,10 @@ public class IntegrationEventBusShould {
 
     private static class TestIntEventSubscriber implements IntegrationEventSubscriber {
 
-        private Event eventHandled;
+        private IntegrationEvent eventHandled;
 
         @Override
-        public void notify(Event event, StreamObserver<Response> observer) {
+        public void notify(IntegrationEvent event, StreamObserver<Response> observer) {
             this.eventHandled = event;
             observer.onNext(Responses.ok());
             observer.onError(new RuntimeException(""));

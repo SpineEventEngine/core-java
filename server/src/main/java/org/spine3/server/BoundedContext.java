@@ -27,8 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
 import org.spine3.client.grpc.Topic;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
@@ -40,6 +41,9 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.integration.IntegrationEvent;
+import org.spine3.server.integration.IntegrationEventContext;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -51,7 +55,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.server.integration.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -218,7 +221,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         if (isMultitenant() && !context.hasNamespace()) {
             response = CommandValidation.unknownNamespace(message, context);
         } else {
-            response = validateMessage(message);
+            response = validateCommandMessage(message);
         }
         return response;
     }
@@ -227,23 +230,53 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
      * Validates the incoming command message.
      *
      * @param commandMessage the command message to validate
-     * @return {@link Response} with {@code ok} value if the command is valid, or
-     *          with {@link org.spine3.base.Error} value otherwise
+     * @return a response with {@code OK} value if the command is valid, or
+     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
      */
-    protected Response validateMessage(Message commandMessage) {
+    protected Response validateCommandMessage(Message commandMessage) {
         final Response result = commandBus.validate(commandMessage);
         return result;
     }
 
     @Override
-    public void notify(Event event, StreamObserver<Response> responseObserver) {
+    public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         try {
-            eventBus.post(event);
-            responseObserver.onNext(Responses.ok());
+            final Message message = fromAny(integrationEvent.getMessage());
+            final Response response = validateIntegrationEventMessage(message);
+            responseObserver.onNext(response);
             responseObserver.onCompleted();
+            if (isOk(response)) {
+                final Event event = toEvent(integrationEvent);
+                eventBus.post(event);
+            }
         } catch (RuntimeException e) {
             responseObserver.onError(e);
         }
+    }
+
+    /**
+     * Validates an incoming integration event message.
+     *
+     * @param eventMessage a message to validate
+     * @return a response with {@code OK} value if the command is valid, or
+     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
+     */
+    protected Response validateIntegrationEventMessage(Message eventMessage) {
+        final Response response = eventBus.validate(eventMessage);
+        return response;
+    }
+
+    private static Event toEvent(IntegrationEvent integrationEvent) {
+        final IntegrationEventContext sourceContext = integrationEvent.getContext();
+        final EventContext context = EventContext.newBuilder()
+                .setEventId(sourceContext.getEventId())
+                .setTimestamp(sourceContext.getTimestamp())
+                .setProducerId(sourceContext.getProducerId())
+                .build();
+        final Event.Builder result = Event.newBuilder()
+                .setMessage(integrationEvent.getMessage())
+                .setContext(context);
+        return result.build();
     }
 
     @Override
