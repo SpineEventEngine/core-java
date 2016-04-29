@@ -62,7 +62,7 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**

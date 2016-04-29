@@ -30,7 +30,7 @@ import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventContextFactory.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**

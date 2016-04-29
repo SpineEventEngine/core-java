@@ -57,8 +57,8 @@ import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testdata.TestContextFactory.createCommandContext;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 

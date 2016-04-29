@@ -61,7 +61,7 @@ import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {

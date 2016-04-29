@@ -71,7 +71,7 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
-import static org.spine3.testdata.TestEventFactory.projectCreatedEvent;
+import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
@@ -176,7 +176,7 @@ public class BoundedContextShould {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
 
-        boundedContext.notify(projectCreatedEvent(), observer);
+        boundedContext.notify(projectCreatedIntegrationEvent(), observer);
 
         assertEquals(Responses.ok(), observer.getResponseHandled());
     }
