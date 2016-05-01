@@ -81,6 +81,10 @@ message CommandContext {
 
     // The command scheduling options.
     Schedule schedule = 6;
+
+    // The version of the entity for which this command is intended.
+    // A client app may not fill in this attribute if the command applies to any version of the entity.
+    int32 target_version = 7;
 }
 
 message Schedule {
