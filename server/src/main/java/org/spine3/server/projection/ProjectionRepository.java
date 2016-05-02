@@ -151,4 +151,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return checkStorage(storage);
     }
+
+    public void catchUp() {
+        //TODO:2016-05-02:alexander.yevsyukov: Implement
+    }
 }

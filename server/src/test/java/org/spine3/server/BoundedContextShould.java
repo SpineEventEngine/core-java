@@ -221,9 +221,6 @@ public class BoundedContextShould {
     @SuppressWarnings({"unused", "TypeMayBeWeakened"})
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        private static final String STATUS_NEW = "STATUS_NEW";
-        private static final String STATUS_STARTED = "STATUS_STARTED";
-
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
         private boolean isStartProjectCommandHandled = false;
@@ -261,8 +258,8 @@ public class BoundedContextShould {
         private void event(ProjectCreated event) {
 
             final Project newState = Project.newBuilder(getState())
-                    .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_NEW)
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.CREATED)
                     .build();
 
             incrementState(newState);
@@ -279,8 +276,8 @@ public class BoundedContextShould {
         private void event(ProjectStarted event) {
 
             final Project newState = Project.newBuilder(getState())
-                    .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_STARTED)
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.STARTED)
                     .build();
 
             incrementState(newState);

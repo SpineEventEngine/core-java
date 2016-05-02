@@ -180,7 +180,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
 
         if (repository instanceof EventDispatcher) {
-            getEventBus().register((EventDispatcher)repository);
+            eventBus.register((EventDispatcher)repository);
         }
     }
 
@@ -198,7 +198,7 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
 
         if (repository instanceof EventDispatcher) {
-            getEventBus().unregister((EventDispatcher) repository);
+            eventBus.unregister((EventDispatcher) repository);
         }
 
         repository.close();
