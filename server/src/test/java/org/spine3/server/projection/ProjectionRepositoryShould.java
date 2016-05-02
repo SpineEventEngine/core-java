@@ -43,7 +43,9 @@ import org.spine3.test.project.event.TaskAdded;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -56,12 +58,50 @@ public class ProjectionRepositoryShould {
 
     private static final ProjectId ID = newProjectId();
 
+    /**
+     * The projection stub used in tests.
+     */
+    private static class TestProjection extends Projection<ProjectId, Project> {
+
+        public TestProjection(ProjectId id) {
+            super(id);
+        }
+
+        @Subscribe
+        public void on(ProjectCreated event) {
+            incrementState(toState(event));
+        }
+
+        @Subscribe
+        public void on(TaskAdded event) {
+            incrementState(toState(event));
+        }
+
+        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
+                                                 can have two parameters. */
+        @Subscribe
+        public void on(ProjectStarted event, EventContext ignored) {
+            incrementState(toState(event));
+        }
+    }
+
+    /**
+     * Stub projection repository.
+     */
+    private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
+
+        protected TestProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+
+    private BoundedContext boundedContext;
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
 
     @Before
     public void setUp() {
         final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
+        boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new TestProjectionRepository(boundedContext);
         repository.initStorage(storageFactory);
     }
@@ -101,9 +141,10 @@ public class ProjectionRepositoryShould {
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository.getEventClasses();
-        assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
-        assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
-        assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
+        assertContainsAll(eventClasses,
+                                 EventClass.of(ProjectCreated.class),
+                                 EventClass.of(TaskAdded.class),
+                                 EventClass.of(ProjectStarted.class));
     }
 
     @Test
@@ -126,34 +167,4 @@ public class ProjectionRepositoryShould {
         return project.build();
     }
 
-    private static class TestProjection extends Projection<ProjectId, Project> {
-
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // Public constructor is a part of projection public API. It's called by a repository.
-        public TestProjection(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-
-        @Subscribe
-        public void on(TaskAdded event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-    }
-
-    private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
-
-        protected TestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
 }
