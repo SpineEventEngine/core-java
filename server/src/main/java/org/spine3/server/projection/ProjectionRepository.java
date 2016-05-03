@@ -209,7 +209,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     }
 
     /**
-     * Dispatches the passed event to corresponding {@link Projection}.
+     * Dispatches the passed event to corresponding {@link Projection} if the repository is
+     * in {@link Status#ONLINE}.
+     *
+     * <p>If the repository in another status the event is not dispatched. This is needed to
+     * preserve the chronological sequence of events delivered to the repository, while it's
+     * updating projections using the {@link #catchUp()} call.
      *
      * <p>The ID of the projection must be specified as the first property of the passed event.
      *
@@ -217,17 +222,27 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
+     * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
     @Override
     public void dispatch(Event event) {
         if (!isOnline()) {
             if (log().isTraceEnabled()) {
-                log().trace("Ignoring event {} while not online", event);
+                log().trace("Ignoring event {} while repository is not in {} status", event, Status.ONLINE);
             }
             return;
         }
 
+        internalDispatch(event);
+    }
+
+    /**
+     * Dispatches event to a projection without checking the status of the repository.
+     *
+     * @param event the event to dispatch
+     */
+    /* package */ void internalDispatch(Event event) {
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final I id = getEntityId(eventMessage, context);
@@ -305,7 +320,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
 
         @Override
         public void onNext(Event event) {
-            projectionRepository.dispatch(event);
+            projectionRepository.internalDispatch(event);
         }
 
         @Override

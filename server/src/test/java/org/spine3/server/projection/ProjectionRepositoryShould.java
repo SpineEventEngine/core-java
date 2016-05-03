@@ -25,7 +25,6 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -68,7 +67,7 @@ public class ProjectionRepositoryShould {
     private static class TestProjection extends Projection<ProjectId, Project> {
 
         /**
-         * The event message we store for inspecting in delivery tests.
+         * The event message history we store for inspecting in delivery tests.
          */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
 
@@ -198,8 +197,6 @@ public class ProjectionRepositoryShould {
         assertNotNull(entityStorage);
     }
 
-
-    @Ignore
     @Test
     public void catches_up_from_EventStorage() {
         final EventStore eventStore = boundedContext.getEventBus()
