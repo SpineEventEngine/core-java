@@ -142,6 +142,7 @@ public class ProjectionRepositoryShould {
         boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new TestProjectionRepository(boundedContext);
         repository.initStorage(storageFactory);
+        repository.setOnline();
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -198,7 +199,8 @@ public class ProjectionRepositoryShould {
     }
 
 
-    @Test @Ignore
+    @Ignore
+    @Test
     public void catches_up_from_EventStorage() {
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();

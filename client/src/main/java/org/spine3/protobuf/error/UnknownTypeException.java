@@ -25,9 +25,9 @@ package org.spine3.protobuf.error;
  *
  * @author Mikhail Melnik
  */
-public class UnknownTypeInAnyException extends RuntimeException {
+public class UnknownTypeException extends RuntimeException {
 
-    public UnknownTypeInAnyException(String typeUrl) {
+    public UnknownTypeException(String typeUrl) {
         super("No Java class found for message type: " + typeUrl);
     }
 

@@ -21,6 +21,7 @@
 package org.spine3.server.type;
 
 import com.google.protobuf.Message;
+import org.spine3.type.ClassName;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -48,6 +49,13 @@ public abstract class MessageClass {
     @Override
     public String toString() {
         return String.valueOf(value);
+    }
+
+    /**
+     * Obtains the {@code ClassName} for this message class.
+     */
+    public ClassName getClassName() {
+        return ClassName.of(value());
     }
 
     /**
