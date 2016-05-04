@@ -74,7 +74,12 @@ public class TypeToClassMap {
      *
      * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final BiMap<TypeName, ClassName> NAMES_MAP = Builder.build();
+    private static final BiMap<TypeName, ClassName> TYPE_TO_CLASS_MAP = Builder.build();
+
+    /**
+     * The inverse view of the primary type to class map.
+     */
+    private static final BiMap<ClassName, TypeName> CLASS_TO_TYPE_MAP = TYPE_TO_CLASS_MAP.inverse();
 
     private TypeToClassMap() {}
 
@@ -84,7 +89,7 @@ public class TypeToClassMap {
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> knownTypes() {
-        final Set<TypeName> result = NAMES_MAP.keySet();
+        final Set<TypeName> result = TYPE_TO_CLASS_MAP.keySet();
         return ImmutableSet.copyOf(result);
     }
 
@@ -96,25 +101,24 @@ public class TypeToClassMap {
      * @return Java class name
      * @throws UnknownTypeException if there is no such type known to the application
      */
-    public static ClassName get(TypeName protoType) {
-        if (!NAMES_MAP.containsKey(protoType)) {
+    public static ClassName get(TypeName protoType) throws UnknownTypeException {
+        if (!TYPE_TO_CLASS_MAP.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
-            NAMES_MAP.put(protoType, className);
+            TYPE_TO_CLASS_MAP.put(protoType, className);
         }
-        final ClassName result = NAMES_MAP.get(protoType);
+        final ClassName result = TYPE_TO_CLASS_MAP.get(protoType);
         return result;
     }
 
     /**
-     * Returns the protobuf name for the class with the given name.
+     * Returns the Protobuf name for the class with the given name.
      *
-     * @param className the name of the Java class for which to get protobuf type
-     * @return protobuf type name
-     * @throws IllegalStateException if there is no protobuf type for the specified class
+     * @param className the name of the Java class for which to get Protobuf type
+     * @return a Protobuf type name
+     * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
     public static TypeName get(ClassName className) {
-        final TypeName result = NAMES_MAP.inverse()
-                                           .get(className);
+        final TypeName result = CLASS_TO_TYPE_MAP.get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type found for the Java class " + className);
         }
@@ -130,7 +134,7 @@ public class TypeToClassMap {
      * @return the found class name
      * @throws UnknownTypeException if there is no such type known to the application
      */
-    private static ClassName findInnerMessageClass(TypeName type) {
+    private static ClassName findInnerMessageClass(TypeName type) throws UnknownTypeException {
         String lookupType = type.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
@@ -139,7 +143,7 @@ public class TypeToClassMap {
             suffix.insert(0, lookupType.substring(lastDotPosition));
             lookupType = lookupType.substring(0, lastDotPosition);
             final TypeName typeName = TypeName.of(lookupType);
-            className = NAMES_MAP.get(typeName);
+            className = TYPE_TO_CLASS_MAP.get(typeName);
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
