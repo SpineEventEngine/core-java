@@ -60,7 +60,7 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
-    // The id of the event.
+    // The ID of the event.
     EventId event_id = 1;
 
     // When the event occurred.
@@ -69,20 +69,17 @@ message EventContext {
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
-    // The id of the entity which generated the event.
-    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`).
+    // The ID of the entity which generated the event.
+    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`),
+    // bounded contexts (for integration events).
     google.protobuf.Any producer_id = 4;
 
     // The version of the entity after the event was applied.
     int32 version = 5;
 
-    // A name of a Bounded Context which generated the event.
-    // Is set for events retrieved via conversion from integration ones.
-    string bounded_context_name = 6;
-
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.
-    map<string, google.protobuf.Any> attributes = 7;
+    map<string, google.protobuf.Any> attributes = 6;
 }
 
 // Enumeration of possible event validation technical error reasons.

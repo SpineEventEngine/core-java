@@ -21,6 +21,7 @@ package org.spine3.server;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,8 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -269,11 +272,11 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
     private static Event toEvent(IntegrationEvent integrationEvent) {
         final IntegrationEventContext sourceContext = integrationEvent.getContext();
+        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
         final EventContext context = EventContext.newBuilder()
                 .setEventId(sourceContext.getEventId())
                 .setTimestamp(sourceContext.getTimestamp())
-                .setProducerId(sourceContext.getProducerId())
-                .setBoundedContextName(sourceContext.getBoundedContextName())
+                .setProducerId(toAny(producerId))
                 .build();
         final Event.Builder result = Event.newBuilder()
                 .setMessage(integrationEvent.getMessage())
