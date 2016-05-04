@@ -333,13 +333,10 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     @Test
-    public void filter_events_by_type_and_aggregate_id_and_time() {
+    public void find_event_by_type_and_aggregate_id_and_time() {
         givenSequentialRecords();
-        final String typeName = record2.getEventType();
-        final Any id = idToAny(newProjectId(record2.getProducerId()));
-        final EventFilter filter = EventFilter.newBuilder().setEventType(typeName).addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
-                .addFilter(filter)
+                .addFilter(newEventFilterFor(record2))
                 .setAfter(time1)
                 .setBefore(time3)
                 .build();
@@ -348,6 +345,30 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
         final Iterator<Event> actual = storage.iterator(query);
 
         assertEquals(expected, newArrayList(actual));
+    }
+
+    @Test
+    public void find_several_events_by_types_and_aggregate_ids() {
+        givenSequentialRecords();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .addFilter(newEventFilterFor(record1))
+                                                       .addFilter(newEventFilterFor(record2))
+                                                       .addFilter(newEventFilterFor(record3))
+                                                       .build();
+        final List<Event> expected = toEventList(record1, record2, record3);
+
+        final Iterator<Event> actual = storage.iterator(query);
+
+        assertEquals(expected, newArrayList(actual));
+    }
+
+    private static EventFilter newEventFilterFor(EventStorageRecord record) {
+        final String typeName = record.getEventType();
+        final Any id = idToAny(newProjectId(record.getProducerId()));
+        return EventFilter.newBuilder()
+                          .setEventType(typeName)
+                          .addAggregateId(id)
+                          .build();
     }
 
     private void givenSequentialRecords() {
