@@ -91,9 +91,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     private Status status = Status.CREATED;
 
     /**
-     * Underlying storage for projections.
+     * An underlying entity storage used to store projections.
      */
-    private EntityStorage<I> entityStorage;  //TODO:2016-05-03:alexander.yevsyukov: Why isn't it named projectionStorage?
+    private EntityStorage<I> entityStorage;
 
     protected ProjectionRepository(BoundedContext boundedContext) {
         super(boundedContext);
