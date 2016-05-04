@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
-import org.spine3.base.Schedule;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -30,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.spine3.base.CommandContext.Schedule;
 
 /**
  * The command scheduler implementation which uses basic Java task scheduling features.
@@ -72,7 +72,7 @@ public class ExecutorCommandScheduler extends CommandScheduler {
 
     private static long getDelaySeconds(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        final long delaySec = schedule.getAfter().getSeconds();
+        final long delaySec = schedule.getDelay().getSeconds();
         return delaySec;
     }
 
