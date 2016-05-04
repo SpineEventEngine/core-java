@@ -282,7 +282,9 @@ public class EventBus implements AutoCloseable {
     }
 
     private boolean isUnsupportedEvent(EventClass eventClass) {
-        final boolean isUnsupported = dispatcherRegistry.noDispatchersFor(eventClass) && !hasSubscribers(eventClass);
+        final boolean noDispatchers = !dispatcherRegistry.hasDispatchersFor(eventClass);
+        final boolean noSubscribers = !hasSubscribers(eventClass);
+        final boolean isUnsupported = noDispatchers && noSubscribers;
         return isUnsupported;
     }
 
