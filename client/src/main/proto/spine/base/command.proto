@@ -81,11 +81,11 @@ message CommandContext {
 
     // The command scheduling options.
     Schedule schedule = 6;
-}
 
-message Schedule {
-    // The delay between the moment of receiving a command at the server and its delivery to the target.
-    google.protobuf.Duration after = 1;
+    message Schedule {
+        // The delay between the moment of receiving a command at the server and its delivery to the target.
+        google.protobuf.Duration delay = 1;
+    }
 }
 
 // Enumeration of possible failures when validating a command.
