@@ -37,7 +37,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 public class TypeToClassMapShould {
 
     @Test
-    public void test() {
+    public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(TypeToClassMap.class));
     }
 
