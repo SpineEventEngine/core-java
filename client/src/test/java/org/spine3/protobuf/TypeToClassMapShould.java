@@ -21,8 +21,10 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
@@ -55,6 +57,17 @@ public class TypeToClassMapShould {
         final ClassName className = TypeToClassMap.get(typeName);
 
         assertEquals(ClassName.of(Command.class), className);
+    }
+
+    // TODO:2016-05-04:alexander.litus: do not ignore when an issue with the Proto-lookup gradle plugin is fixed
+    @Ignore
+    @Test
+    public void return_java_inner_class_name_by_proto_type_name() {
+        final TypeName typeName = TypeName.of(CommandContext.Schedule.getDescriptor());
+
+        final ClassName className = TypeToClassMap.get(typeName);
+
+        assertEquals(ClassName.of(CommandContext.Schedule.class), className);
     }
 
     @Test
