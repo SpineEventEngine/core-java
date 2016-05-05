@@ -26,12 +26,26 @@ option java_multiple_files = true;
 
 import "spine/test/project/task.proto";
 
-message Project {
-    ProjectId project_id = 1;
-    repeated Task task = 2;
-    string status = 3;
-}
-
 message ProjectId {
     string id = 1;
 }
+
+message Project {
+
+    ProjectId id = 1;
+
+    string name = 2;
+
+    repeated Task task = 3;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+
+    Status status = 4;
+}
+

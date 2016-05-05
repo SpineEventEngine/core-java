@@ -22,39 +22,73 @@ package org.spine3.server.type;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.spine3.type.ClassName;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.Objects;
+
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "EmptyClass"})
 public class MessageClassShould {
 
+    private static final Class<StringValue> MSG_CLASS = StringValue.class;
+
+    private TestMessageClass testMsgClass;
+
+    @Before
+    public void setUpTest() {
+        testMsgClass = new TestMessageClass(MSG_CLASS);
+    }
+
     @Test
     public void return_enclosed_value() {
-        final Class<? extends Message> expected = StringValue.class;
-        Assert.assertEquals(expected, new  MessageClass(expected) {}.value());
+        assertEquals(MSG_CLASS, testMsgClass.value());
+    }
+
+    @Test
+    public void return_java_class_name() {
+        assertEquals(ClassName.of(MSG_CLASS), testMsgClass.getClassName());
+    }
+    
+    @Test
+    public void convert_value_to_string() {
+        assertEquals(String.valueOf(MSG_CLASS), testMsgClass.toString());
+    }
+
+    @Test
+    public void return_hash_code() {
+        assertEquals(Objects.hash(MSG_CLASS), testMsgClass.hashCode());
     }
 
     @Test
     public void be_not_equal_to_null() {
         //noinspection ObjectEqualsNull
-        assertFalse(new MessageClass(UInt32Value.class){}.equals(null));
+        assertNotEquals(testMsgClass, null);
     }
 
     @Test
     public void be_not_equal_to_object_of_another_class() {
-        // Notice that we're creating new inner classes here with the same value passed.
+        // Notice that we're creating a new object with the same value passed.
         //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(new MessageClass(StringValue.class){}.equals(new MessageClass(StringValue.class){}));
+        assertNotEquals(testMsgClass, new MessageClass(MSG_CLASS) {});
+    }
+
+    @Test
+    public void be_equal_to_object_with_the_same_value() {
+        assertEquals(testMsgClass, new TestMessageClass(MSG_CLASS));
     }
 
     @Test
     public void be_equal_to_self() {
-        final MessageClass test = new MessageClass(UInt32Value.class){};
-        //noinspection EqualsWithItself
-        assertTrue(test.equals(test));
+        assertEquals(testMsgClass, testMsgClass);
+    }
+
+    private static class TestMessageClass extends MessageClass {
+
+        protected TestMessageClass(Class<? extends Message> value) {
+            super(value);
+        }
     }
 }

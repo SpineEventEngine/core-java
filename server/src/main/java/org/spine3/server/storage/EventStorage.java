@@ -206,13 +206,19 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
                 return false;
             }
 
-            for (EventFilter filter : query.getFilterList()) {
+            final List<EventFilter> filterList = query.getFilterList();
+            if (filterList.isEmpty()) {
+                return true; // The time range matches, and no filters specified.
+            }
+
+            // Check if one of the filters matches. If so, the event matches.
+            for (EventFilter filter : filterList) {
                 final Predicate<Event> filterPredicate = new MatchFilter(filter);
-                if (!filterPredicate.apply(input)) {
-                    return false;
+                if (filterPredicate.apply(input)) {
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
     }
 

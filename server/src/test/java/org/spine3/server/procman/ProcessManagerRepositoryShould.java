@@ -20,6 +20,8 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -45,6 +47,7 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
+import org.spine3.test.project.Task;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
@@ -97,6 +100,7 @@ public class ProcessManagerRepositoryShould {
 
         repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
+        TestProcessManager.clearMessageDeliveryHistory();
     }
 
     @Test
@@ -120,8 +124,7 @@ public class ProcessManagerRepositoryShould {
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
         final Event event = Events.createEvent(eventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
-        final TestProcessManager manager = repository.load(ID);
-        assertEquals(toState(eventMessage), manager.getState());
+        assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @Test
@@ -136,11 +139,10 @@ public class ProcessManagerRepositoryShould {
         testDispatchCommand(startProjectMsg(ID));
     }
 
-    private void testDispatchCommand(Message command) throws InvocationTargetException, FailureThrowable {
-        final Command request = Commands.create(command, CMD_CONTEXT);
-        repository.dispatch(request);
-        final TestProcessManager manager = repository.load(ID);
-        assertEquals(toState(command), manager.getState());
+    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
+        final Command cmd = Commands.create(cmdMsg, CMD_CONTEXT);
+        repository.dispatch(cmd);
+        assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
     @Test
@@ -194,14 +196,6 @@ public class ProcessManagerRepositoryShould {
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
     }
 
-    private static Project toState(Message status) {
-        final String statusStr = status.getClass().getName();
-        final Project.Builder project = Project.newBuilder()
-                .setProjectId(ID)
-                .setStatus(statusStr);
-        return project.build();
-    }
-
     private static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
 
@@ -215,13 +209,30 @@ public class ProcessManagerRepositoryShould {
         }
     }
 
-    @SuppressWarnings({"TypeMayBeWeakened", "UnusedParameters", "unused"})
     private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
-        // a ProcessManager constructor must be public because it is used via reflection
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
+        /**
+         * The event message we store for inspecting in delivery tests.
+         */
+        private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
+
+        @SuppressWarnings("PublicConstructorInNonPublicClass") /* A Process Manager constructor must be public by
+                convention. It is used by reflection and is part of public API of process managers. */
         public TestProcessManager(ProjectId id) {
             super(id);
+        }
+
+        private void keep(Message commandOrEventMsg) {
+            messagesDelivered.put(getState().getId(), commandOrEventMsg);
+        }
+
+        /* package */ static boolean processed(Message eventMessage) {
+            final boolean result = messagesDelivered.containsValue(eventMessage);
+            return result;
+        }
+
+        /* package */ static void clearMessageDeliveryHistory() {
+            messagesDelivered.clear();
         }
 
         // is overridden to make it accessible from tests
@@ -231,36 +242,74 @@ public class ProcessManagerRepositoryShould {
             return Project.getDefaultInstance();
         }
 
+        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
+                                                 can have two parameters. */
         @Subscribe
         public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(toState(event));
+            // Keep the event message for further inspection in tests.
+            keep(event);
+
+            handleProjectCreated(event.getProjectId());
+        }
+
+        private void handleProjectCreated(ProjectId projectId) {
+            final Project newState = getState().toBuilder()
+                                               .setId(projectId)
+                                               .setStatus(Project.Status.CREATED)
+                                               .build();
+            incrementState(newState);
         }
 
         @Subscribe
-        public void on(TaskAdded event, EventContext ignored) {
-            incrementState(toState(event));
+        public void on(TaskAdded event) {
+            keep(event);
+
+            final Task task = event.getTask();
+            handleTaskAdded(task);
+        }
+
+        private void handleTaskAdded(Task task) {
+            final Project newState = getState().toBuilder()
+                                               .addTask(task)
+                                               .build();
+            incrementState(newState);
         }
 
         @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(toState(event));
+        public void on(ProjectStarted event) {
+            keep(event);
+
+            handleProjectStarted();
+        }
+
+        private void handleProjectStarted() {
+            final Project newState = getState().toBuilder()
+                                               .setStatus(Project.Status.STARTED)
+                                               .build();
+            incrementState(newState);
         }
 
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
-            incrementState(toState(command));
+            keep(command);
+
+            handleProjectCreated(command.getProjectId());
             return projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
-            incrementState(toState(command));
+            keep(command);
+
+            handleTaskAdded(command.getTask());
             return taskAddedMsg(command.getProjectId());
         }
 
         @Assign
         public CommandRouted handle(StartProject command, CommandContext context) {
-            incrementState(toState(command));
+            keep(command);
+
+            handleProjectStarted();
             final Message addTask = TestCommands.addTaskMsg(command.getProjectId());
 
             return newRouter().of(command, context)

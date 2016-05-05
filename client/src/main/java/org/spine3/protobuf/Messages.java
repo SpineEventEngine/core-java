@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
 import org.spine3.protobuf.error.MissingDescriptorException;
-import org.spine3.protobuf.error.UnknownTypeInAnyException;
+import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
 
@@ -83,13 +83,13 @@ public class Messages {
      * Unwraps {@link Any} value into an instance of type specified by value
      * returned by {@link Any#getTypeUrl()}.
      *
-     * <p>If there is no Java class for the type, {@link UnknownTypeInAnyException}
+     * <p>If there is no Java class for the type, {@link UnknownTypeException}
      * will be thrown.
      *
      * @param any instance of {@link Any} that should be unwrapped
      * @param <T> the type enclosed into {@code Any}
      * @return unwrapped message instance
-     * @throws UnknownTypeInAnyException if there is no Java class in the classpath for the enclosed type
+     * @throws UnknownTypeException if there is no Java class in the classpath for the enclosed type
      */
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
@@ -104,7 +104,7 @@ public class Messages {
             result = any.unpack(messageClass);
 
         } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeInAnyException(typeStr);
+            throw new UnknownTypeException(typeStr);
         } catch (InvalidProtocolBufferException e) {
             propagate(e);
         }

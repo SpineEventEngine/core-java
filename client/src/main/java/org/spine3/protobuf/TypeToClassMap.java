@@ -20,7 +20,8 @@
 
 package org.spine3.protobuf;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
@@ -40,11 +41,10 @@ import com.google.protobuf.UInt64Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
-import org.spine3.protobuf.error.UnknownTypeInAnyException;
+import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
 
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -74,7 +74,8 @@ public class TypeToClassMap {
      *
      * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final Map<TypeName, ClassName> NAMES_MAP = Builder.build();
+    private static final BiMap<TypeName, ClassName> biMap = Builder.build();
+
 
     private TypeToClassMap() {}
 
@@ -84,7 +85,7 @@ public class TypeToClassMap {
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> knownTypes() {
-        final Set<TypeName> result = NAMES_MAP.keySet();
+        final Set<TypeName> result = biMap.keySet();
         return ImmutableSet.copyOf(result);
     }
 
@@ -94,14 +95,29 @@ public class TypeToClassMap {
      *
      * @param protoType {@link Any} type url
      * @return Java class name
-     * @throws UnknownTypeInAnyException if there is no such type known to the application
+     * @throws UnknownTypeException if there is no such type known to the application
      */
-    public static ClassName get(TypeName protoType) {
-        if (!NAMES_MAP.containsKey(protoType)) {
+    public static ClassName get(TypeName protoType) throws UnknownTypeException {
+        if (!biMap.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
-            NAMES_MAP.put(protoType, className);
+            biMap.put(protoType, className);
         }
-        final ClassName result = NAMES_MAP.get(protoType);
+        final ClassName result = biMap.get(protoType);
+        return result;
+    }
+
+    /**
+     * Returns the Protobuf name for the class with the given name.
+     *
+     * @param className the name of the Java class for which to get Protobuf type
+     * @return a Protobuf type name
+     * @throws IllegalStateException if there is no Protobuf type for the specified class
+     */
+    public static TypeName get(ClassName className) {
+        final TypeName result = biMap.inverse().get(className);
+        if (result == null) {
+            throw new IllegalStateException("No Protobuf type found for the Java class " + className);
+        }
         return result;
     }
 
@@ -112,9 +128,9 @@ public class TypeToClassMap {
      *
      * @param type {@link TypeName} of the class to find
      * @return the found class name
-     * @throws UnknownTypeInAnyException if there is no such type known to the application
+     * @throws UnknownTypeException if there is no such type known to the application
      */
-    private static ClassName findInnerMessageClass(TypeName type) {
+    private static ClassName findInnerMessageClass(TypeName type) throws UnknownTypeException {
         String lookupType = type.value();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
@@ -123,18 +139,18 @@ public class TypeToClassMap {
             suffix.insert(0, lookupType.substring(lastDotPosition));
             lookupType = lookupType.substring(0, lastDotPosition);
             final TypeName typeName = TypeName.of(lookupType);
-            className = NAMES_MAP.get(typeName);
+            className = biMap.get(typeName);
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
-            throw new UnknownTypeInAnyException(type.value());
+            throw new UnknownTypeException(type.value());
         }
         className = ClassName.of(className.value() + suffix);
         try {
             Class.forName(className.value());
         } catch (ClassNotFoundException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new UnknownTypeInAnyException(type.value());
+            throw new UnknownTypeException(type.value());
         }
         return className;
     }
@@ -144,14 +160,14 @@ public class TypeToClassMap {
      */
     private static class Builder {
 
-        private final ImmutableMap.Builder<TypeName, ClassName> mapBuilder = new ImmutableMap.Builder<>();
+        private final ImmutableBiMap.Builder<TypeName, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();
 
-        private static Map<TypeName, ClassName> build() {
+        private static BiMap<TypeName, ClassName> build() {
             final Builder builder = new Builder()
                     .addStandardProtobufTypes()
                     .loadNamesFromProperties();
 
-            final ImmutableMap<TypeName, ClassName> result = builder.mapBuilder.build();
+            final ImmutableBiMap<TypeName, ClassName> result = builder.mapBuilder.build();
 
             if (log().isDebugEnabled()) {
                 log().debug("Total classes in TypeToClassMap: " + result.size());

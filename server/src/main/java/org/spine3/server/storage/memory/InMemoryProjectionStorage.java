@@ -32,14 +32,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of stream projection IDs
  * @author Alexander Litus
  */
-/*package*/ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
+/* package */ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final InMemoryEntityStorage<I> entityStorage;
 
     /**
      * The time of the last handled event.
      */
-    private Timestamp timestamp;
+    private Timestamp timestampOfLastEvent;
 
     public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
         return new InMemoryProjectionStorage<>(entityStorage);
@@ -52,12 +52,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
     @Override
     public void writeLastHandledEventTime(Timestamp timestamp) {
         checkNotNull(timestamp);
-        this.timestamp = timestamp;
+        this.timestampOfLastEvent = timestamp;
     }
 
     @Override
     public Timestamp readLastHandledEventTime() {
-        return timestamp;
+        return timestampOfLastEvent;
     }
 
     @Override

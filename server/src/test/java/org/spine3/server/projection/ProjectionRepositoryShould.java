@@ -20,6 +20,8 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
@@ -29,6 +31,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -39,11 +42,13 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
+import org.spine3.testdata.TestEventFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -56,14 +61,88 @@ public class ProjectionRepositoryShould {
 
     private static final ProjectId ID = newProjectId();
 
+    /**
+     * The projection stub used in tests.
+     */
+    private static class TestProjection extends Projection<ProjectId, Project> {
+
+        /**
+         * The event message history we store for inspecting in delivery tests.
+         */
+        private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
+
+        public TestProjection(ProjectId id) {
+            super(id);
+        }
+
+        private void keep(Message eventMessage) {
+            eventMessagesDelivered.put(getState().getId(), eventMessage);
+        }
+
+        /* package */ static boolean processed(Message eventMessage) {
+            final boolean result = eventMessagesDelivered.containsValue(eventMessage);
+            return result;
+        }
+
+        /* package */ static void clearMessageDeliveryHistory() {
+            eventMessagesDelivered.clear();
+        }
+
+        @Subscribe
+        public void on(ProjectCreated event) {
+            // Keep the event message for further inspection in tests.
+            keep(event);
+
+            final Project newState = getState().toBuilder()
+                                              .setId(event.getProjectId())
+                                              .setStatus(Project.Status.CREATED)
+                                              .build();
+            incrementState(newState);
+        }
+
+        @Subscribe
+        public void on(TaskAdded event) {
+            keep(event);
+            final Project newState = getState().toBuilder()
+                                               .addTask(event.getTask())
+                                               .build();
+            incrementState(newState);
+        }
+
+        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
+                                                 can have two parameters. */
+        @Subscribe
+        public void on(ProjectStarted event, EventContext ignored) {
+            keep(event);
+            final Project newState = getState().toBuilder()
+                                               .setStatus(Project.Status.STARTED)
+                                               .build();
+            incrementState(newState);
+        }
+    }
+
+    /**
+     * Stub projection repository.
+     */
+    private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
+        protected TestProjectionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+
+    }
+
+    private BoundedContext boundedContext;
+
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
 
     @Before
     public void setUp() {
         final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final BoundedContext boundedContext = BoundedContextTestStubs.create(storageFactory);
+        boundedContext = BoundedContextTestStubs.create(storageFactory);
         repository = new TestProjectionRepository(boundedContext);
         repository.initStorage(storageFactory);
+        repository.setOnline();
+        TestProjection.clearMessageDeliveryHistory();
     }
 
     @Test
@@ -87,8 +166,7 @@ public class ProjectionRepositoryShould {
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
         final Event event = Events.createEvent(eventMessage, createEventContext(ID));
         repository.dispatch(event);
-        final TestProjection projection = repository.load(ID);
-        assertEquals(toState(eventMessage), projection.getState());
+        assertTrue(TestProjection.processed(eventMessage));
     }
 
     @Test(expected = RuntimeException.class)
@@ -101,9 +179,10 @@ public class ProjectionRepositoryShould {
     @Test
     public void return_event_classes() {
         final Set<EventClass> eventClasses = repository.getEventClasses();
-        assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
-        assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
-        assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
+        assertContainsAll(eventClasses,
+                                 EventClass.of(ProjectCreated.class),
+                                 EventClass.of(TaskAdded.class),
+                                 EventClass.of(ProjectStarted.class));
     }
 
     @Test
@@ -118,42 +197,27 @@ public class ProjectionRepositoryShould {
         assertNotNull(entityStorage);
     }
 
-    private static Project toState(Message status) {
-        final String statusStr = status.getClass().getName();
-        final Project.Builder project = Project.newBuilder()
-                .setProjectId(ID)
-                .setStatus(statusStr);
-        return project.build();
+    @Test
+    public void catches_up_from_EventStorage() {
+        final EventStore eventStore = boundedContext.getEventBus()
+                                                    .getEventStore();
+
+        // Put events into the EventStore.
+        final Event projectCreatedEvent = TestEventFactory.projectCreatedEvent(ID);
+        eventStore.append(projectCreatedEvent);
+
+        final Event taskAddedEvent = TestEventFactory.taskAddedEvent(ID);
+        eventStore.append(taskAddedEvent);
+
+        final Event projectStartedEvent = TestEventFactory.projectStartedEvent(ID);
+        eventStore.append(projectStartedEvent);
+
+        repository.catchUp();
+
+        assertTrue(TestProjection.processed(Events.getMessage(projectCreatedEvent)));
+        assertTrue(TestProjection.processed(Events.getMessage(taskAddedEvent)));
+        assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
-    private static class TestProjection extends Projection<ProjectId, Project> {
 
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // Public constructor is a part of projection public API. It's called by a repository.
-        public TestProjection(ProjectId id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-
-        @Subscribe
-        public void on(TaskAdded event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(toState(event));
-        }
-    }
-
-    private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
-
-        protected TestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
 }

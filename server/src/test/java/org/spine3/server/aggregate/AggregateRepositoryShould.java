@@ -134,7 +134,7 @@ public class AggregateRepositoryShould {
         public ProjectAggregate(ProjectId id) {
             super(id);
             final Project expectedState = Project.newBuilder()
-                                                 .setProjectId(id)
+                                                 .setId(id)
                                                  .build();
             incrementStateForTest(expectedState);
         }
@@ -151,13 +151,13 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectCreated event) {
-            getBuilder().setProjectId(event.getProjectId());
+            getBuilder().setId(event.getProjectId());
         }
 
         @Apply
         private void apply(TaskAdded event) {
             getBuilder()
-                    .setProjectId(event.getProjectId())
+                    .setId(event.getProjectId())
                     .addTask(event.getTask());
         }
 
@@ -170,6 +170,4 @@ public class AggregateRepositoryShould {
             return events;
         }
     }
-
-    //TODO:2016-01-21:alexander.yevsyukov: Cover more.
 }

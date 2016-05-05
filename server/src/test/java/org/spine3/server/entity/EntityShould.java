@@ -190,8 +190,8 @@ public class EntityShould {
 
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
-                                               .setProjectId(newProjectId())
-                                               .setStatus(newUuid());
+                                               .setId(newProjectId())
+                                               .setStatus(Project.Status.CREATED);
         return project.build();
     }
 

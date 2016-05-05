@@ -222,17 +222,17 @@ public class AggregateShould {
 
         final Project state = aggregate.getState();
 
-        assertEquals(ID, state.getProjectId());
-        assertEquals(TestAggregate.STATUS_NEW, state.getStatus());
+        assertEquals(ID, state.getId());
+        assertEquals(Project.Status.CREATED, state.getStatus());
     }
 
     @Test
     public void return_current_state_after_several_dispatches() {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
-        assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
     }
 
     @Test
@@ -267,11 +267,11 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
 
         final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
         aggregate.play(events);
-        assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
     }
 
     @Test
@@ -327,8 +327,8 @@ public class AggregateShould {
         final Snapshot snapshot = aggregate.toSnapshot();
         final Project state = fromAny(snapshot.getState());
 
-        assertEquals(ID, state.getProjectId());
-        assertEquals(TestAggregate.STATUS_NEW, state.getStatus());
+        assertEquals(ID, state.getId());
+        assertEquals(Project.Status.CREATED, state.getStatus());
     }
 
     @Test
@@ -339,10 +339,10 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(TestAggregate.STATUS_STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
 
         aggregate.restore(snapshotNewProject);
-        assertEquals(TestAggregate.STATUS_NEW, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
     }
 
     private static Collection<Class<? extends Message>> eventsToClasses(Collection<Event> events) {
@@ -385,9 +385,6 @@ public class AggregateShould {
     @SuppressWarnings("unused")
     private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        private static final String STATUS_NEW = "NEW";
-        private static final String STATUS_STARTED = "STARTED";
-
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
         private boolean isStartProjectCommandHandled = false;
@@ -427,8 +424,8 @@ public class AggregateShould {
         @Apply
         private void event(ProjectCreated event) {
             getBuilder()
-                    .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_NEW);
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.CREATED);
 
             isProjectCreatedEventApplied = true;
         }
@@ -441,8 +438,8 @@ public class AggregateShould {
         @Apply
         private void event(ProjectStarted event) {
             getBuilder()
-                    .setProjectId(event.getProjectId())
-                    .setStatus(STATUS_STARTED);
+                    .setId(event.getProjectId())
+                    .setStatus(Project.Status.STARTED);
 
             isProjectStartedEventApplied = true;
         }
@@ -559,7 +556,7 @@ public class AggregateShould {
             }
 
             final Project newState = newBuilder(getState())
-                    .setProjectId(event.getProjectId())
+                    .setId(event.getProjectId())
                     .build();
 
             incrementState(newState);
