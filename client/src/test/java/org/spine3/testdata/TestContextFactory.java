@@ -25,12 +25,12 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.Schedule;
 import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
 
@@ -81,7 +81,7 @@ public class TestContextFactory {
      */
     public static CommandContext createCommandContext(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
-                                          .setAfter(delay)
+                                          .setDelay(delay)
                                           .build();
         return createCommandContext(schedule);
     }
