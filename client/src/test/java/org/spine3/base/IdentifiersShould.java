@@ -44,7 +44,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
@@ -239,5 +239,21 @@ public class IdentifiersShould {
 
         assertEquals(NULL_ID_OR_FIELD,
                      registry.getConverter(CommandId.getDefaultInstance()).apply(null));
+    }
+
+    @Test
+    public void convert_command_id_to_string() {
+        final CommandId id = Commands.generateId();
+        final String actual = new CommandIdToStringConverter().apply(id);
+
+        assertEquals(id.getUuid(), actual);
+    }
+
+    @Test
+    public void convert_event_id_to_string() {
+        final EventId id = Events.generateId();
+        final String actual = new Identifiers.EventIdToStringConverter().apply(id);
+
+        assertEquals(id.getUuid(), actual);
     }
 }
