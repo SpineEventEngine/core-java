@@ -40,6 +40,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.CommandContext.*;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -76,7 +77,7 @@ public class Commands {
      */
     public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
-        final CommandContext.Builder result = CommandContext.newBuilder()
+        final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .setCommandId(commandId)
@@ -229,7 +230,7 @@ public class Commands {
      */
     public static boolean isScheduled(Command command) {
         final Schedule schedule = command.getContext().getSchedule();
-        final Duration delay = schedule.getAfter();
+        final Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0, "Command delay seconds must be a positive value.");
             return true;
