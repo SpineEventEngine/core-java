@@ -29,11 +29,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.UserId;
-import org.spine3.client.UserUtil;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.server.command.Assign;
 import org.spine3.test.project.Project;
@@ -46,7 +43,6 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.testdata.TestCommands;
-import org.spine3.time.ZoneOffsets;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -57,16 +53,14 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
-import static org.spine3.base.Commands.createContext;
-import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.project.Project.newBuilder;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventFactory.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
-import static org.spine3.time.ZoneOffsets.UTC;
 
 /**
  * @author Alexander Litus
@@ -76,14 +70,12 @@ public class AggregateShould {
 
     private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
 
+    private static final CommandContext COMMAND_CONTEXT = createCommandContext();
+    private static final EventContext EVENT_CONTEXT = createEventContext(ID);
+
     private final CreateProject createProject = TestCommands.createProjectMsg(ID);
     private final AddTask addTask = TestCommands.addTaskMsg(ID);
     private final StartProject startProject = TestCommands.startProjectMsg(ID);
-
-    private static final UserId USER_ID = newUserId("AggregateShould@spine3.org");
-
-    private static final CommandContext COMMAND_CONTEXT = createContext(USER_ID, UTC);
-    private static final EventContext EVENT_CONTEXT = createEventContext(ID);
 
     private TestAggregate aggregate;
 
@@ -453,10 +445,8 @@ public class AggregateShould {
         }
 
         public void dispatchCommands(Message... commands) {
-            final UserId userId = UserUtil.newUserId("aggregate_should@spine3.org");
             for (Message cmd : commands) {
-                final CommandContext ctx = Commands.createContext(userId, ZoneOffsets.UTC);
-                dispatchForTest(cmd, ctx);
+                dispatchForTest(cmd, COMMAND_CONTEXT);
             }
         }
     }

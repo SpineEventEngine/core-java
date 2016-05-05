@@ -33,18 +33,18 @@ import org.spine3.test.RunTest;
 import org.spine3.test.TestCommand;
 import org.spine3.type.TypeName;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-import static org.spine3.testdata.TestContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "MagicNumber"})
 public class CommandsShould {
@@ -53,25 +53,16 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final Command command1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
-        final Command command2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
-        final Command command3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final Command cmd1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
+        final Command cmd2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
+        final Command cmd3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
+        final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
+        assertFalse(sortedCommands.equals(commandsToSort));
 
-        final Collection<Command> sortedList = new ArrayList<>();
-        sortedList.add(command1);
-        sortedList.add(command2);
-        sortedList.add(command3);
+        Commands.sort(commandsToSort);
 
-        final List<Command> unSortedList = new ArrayList<>();
-        unSortedList.add(command3);
-        unSortedList.add(command1);
-        unSortedList.add(command2);
-
-        assertFalse(sortedList.equals(unSortedList));
-
-        Commands.sort(unSortedList);
-
-        assertEquals(sortedList, unSortedList);
+        assertEquals(sortedCommands, commandsToSort);
     }
 
     @Test
@@ -118,10 +109,20 @@ public class CommandsShould {
         final String commandId = command.getContext().getCommandId().getUuid();
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
-        final String string = Commands.formatCommandTypeAndId("To log: %s %s", command);
+        final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);
 
         assertTrue(string.contains(typeName));
         assertTrue(string.contains(commandId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_create_logging_message_and_format_string_is_empty() {
+        Commands.formatCommandTypeAndId("", commandFactory.create(newStringValue(newUuid())));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
+        Commands.formatCommandTypeAndId("  ", commandFactory.create(newStringValue(newUuid())));
     }
     
     @Test

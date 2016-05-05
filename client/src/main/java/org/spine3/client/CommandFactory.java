@@ -37,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class CommandFactory {
 
     private final UserId actor;
-
     private final ZoneOffset zoneOffset;
 
     protected CommandFactory(UserId actor, ZoneOffset zoneOffset) {
@@ -51,14 +50,14 @@ public class CommandFactory {
      *
      * @param actor the ID of the user generating commands
      * @param zoneOffset the offset of the timezone the user works in
-     * @return new factory instance
+     * @return a new factory instance
      */
     public static CommandFactory newInstance(UserId actor, ZoneOffset zoneOffset) {
         return new CommandFactory(actor, zoneOffset);
     }
 
     /**
-     * Creates new factory with the same user and new time zone offset.
+     * Creates new factory with the same user and bounded context name and new time zone offset.
      *
      * @param zoneOffset the offset of the time zone
      * @return new command factory at new time zone
@@ -78,7 +77,7 @@ public class CommandFactory {
     /**
      * Creates new {@code Command} with the passed message.
      *
-     * <p>The command contains {@code CommandContext} instance with the current time.
+     * <p>The command contains a {@code CommandContext} instance with the current time.
      *
      * @param message the command message
      * @return new command instance

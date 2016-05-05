@@ -19,16 +19,36 @@
  */
 package org.spine3.base;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.testdata.TestCommandContextFactory;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
+import static org.spine3.protobuf.Values.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
+
+    private final EventContext context = newEventContext();
+
+    private final StringValue stringValue = newStringValue(newUuid());
+    private final BoolValue boolValue = newBoolValue(true);
+    @SuppressWarnings("MagicNumber")
+    private final DoubleValue doubleValue = newDoubleValue(10.1);
 
     @Test
     public void have_private_ctor() {
@@ -59,8 +79,78 @@ public class EventsShould {
 
     @Test
     public void return_actor_from_EventContext() {
-        // Since Events.getActor() is merely wrapper over the chain of generated method calls
-        // the main reason to have this test is to mark the Events.getActor() as `used`.
-        checkNotNull(Events.getActor(EventContext.getDefaultInstance()));
+        assertEquals(context.getCommandContext().getActor(), Events.getActor(context));
+    }
+
+    @Test
+    public void sort_events_by_time() {
+        final Event event1 = Events.createEvent(stringValue, newEventContext(minutesAgo(30)));
+        final Event event2 = Events.createEvent(boolValue, newEventContext(minutesAgo(20)));
+        final Event event3 = Events.createEvent(doubleValue, newEventContext(secondsAgo(10)));
+        final List<Event> sortedEvents = newArrayList(event1, event2, event3);
+        final List<Event> eventsToSort = newArrayList(event2, event1, event3);
+
+        Events.sort(eventsToSort);
+
+        assertEquals(sortedEvents, eventsToSort);
+    }
+
+    @Test
+    public void create_event() {
+        createEventTest(stringValue);
+        createEventTest(boolValue);
+        createEventTest(doubleValue);
+    }
+
+    private void createEventTest(Message msg) {
+        final Event event = Events.createEvent(msg, context);
+
+        assertEquals(msg, fromAny(event.getMessage()));
+        assertEquals(context, event.getContext());
+    }
+
+    @Test
+    public void get_message_from_event() {
+        getMsgFromEventTest(stringValue);
+        getMsgFromEventTest(boolValue);
+        getMsgFromEventTest(doubleValue);
+    }
+
+    private void getMsgFromEventTest(Message msg) {
+        final Event event = Events.createEvent(msg, context);
+
+        assertEquals(msg, Events.getMessage(event));
+    }
+
+    @Test
+    public void get_timestamp_from_event() {
+        final Event event = Events.createEvent(stringValue, context);
+
+        assertEquals(context.getTimestamp(), Events.getTimestamp(event));
+    }
+
+    @Test
+    public void get_producer_from_event_context() {
+        final StringValue msg = fromAny(context.getProducerId());
+
+        final String id = Events.getProducer(context);
+
+        assertEquals(msg.getValue(), id);
+    }
+
+    private static EventContext newEventContext() {
+        return newEventContext(getCurrentTime());
+    }
+
+    private static EventContext newEventContext(Timestamp time) {
+        final EventId eventId = Events.generateId();
+        final StringValue producerId = newStringValue(newUuid());
+        final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(eventId)
+                                                         .setProducerId(toAny(producerId))
+                                                         .setTimestamp(time)
+                                                         .setCommandContext(cmdContext);
+        return builder.build();
     }
 }

@@ -60,7 +60,7 @@ message Event {
 
 // Meta-information for an event.
 message EventContext {
-    // The id of the event.
+    // The ID of the event.
     EventId event_id = 1;
 
     // When the event occurred.
@@ -69,8 +69,9 @@ message EventContext {
     // The context of the command, which generated this event.
     CommandContext command_context = 3;
 
-    // The id of the entity which generated the event.
-    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`).
+    // The ID of the entity which generated the event.
+    // Examples of event producers are: aggregates, process managers (which generate `CommandRouted`),
+    // bounded contexts (for integration events).
     google.protobuf.Any producer_id = 4;
 
     // The version of the entity after the event was applied.
@@ -81,3 +82,11 @@ message EventContext {
     map<string, google.protobuf.Any> attributes = 6;
 }
 
+// Enumeration of possible event validation technical error reasons.
+enum EventValidationError {
+    // Reserved value.
+    UNKNOWN_REASON = 0;
+
+    // The event type is not supported by the server.
+    UNSUPPORTED_EVENT = 1;
+}

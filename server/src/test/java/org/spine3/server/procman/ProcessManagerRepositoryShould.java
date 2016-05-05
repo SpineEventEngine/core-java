@@ -54,7 +54,6 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestAggregateIdFactory;
 import org.spine3.testdata.TestCommands;
 
 import java.lang.reflect.InvocationTargetException;
@@ -64,16 +63,20 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommands.*;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould {
 
-    private static final ProjectId ID = TestAggregateIdFactory.newProjectId();
+    private static final ProjectId ID = newProjectId();
+
+    private static final CommandContext CMD_CONTEXT = createCommandContext();
 
     private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
@@ -136,10 +139,10 @@ public class ProcessManagerRepositoryShould {
         testDispatchCommand(startProjectMsg(ID));
     }
 
-    private void testDispatchCommand(Message commandMessage) throws InvocationTargetException, FailureThrowable {
-        final Command request = Commands.create(commandMessage, CommandContext.getDefaultInstance());
-        repository.dispatch(request);
-        assertTrue(TestProcessManager.processed(commandMessage));
+    private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
+        final Command cmd = Commands.create(cmdMsg, CMD_CONTEXT);
+        repository.dispatch(cmd);
+        assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
     @Test

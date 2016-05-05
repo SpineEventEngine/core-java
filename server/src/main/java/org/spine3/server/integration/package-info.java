@@ -18,30 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
-
-import org.spine3.base.Event;
-import org.spine3.server.type.EventClass;
-
-import java.util.Set;
-
 /**
- * {@code EventDispatcher} delivers events to subscribers.
- *
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for communications between bounded contexts.
  */
-public interface EventDispatcher {
 
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher.
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
+@ParametersAreNonnullByDefault
+package org.spine3.server.integration;
 
-    /**
-     * Dispatches the event.
-     */
-    void dispatch(Event event);
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -21,15 +21,16 @@
 package org.spine3.server.command;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureThrowable;
@@ -38,6 +39,8 @@ import org.spine3.server.reflect.MethodRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import static org.spine3.base.Identifiers.idToAny;
 
 /**
  * The abstract base for classes that expose command handling methods
@@ -106,11 +109,13 @@ public abstract class CommandHandler extends Entity<String, Empty> {
 
     private EventContext createEventContext(CommandContext commandContext) {
         final EventId eventId = Events.generateId();
+        final Timestamp now = TimeUtil.getCurrentTime();
+        final Any producerId = idToAny(getId());
         final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setCommandContext(commandContext)
-                                                         .setTimestamp(TimeUtil.getCurrentTime())
-                                                         .setProducerId(Identifiers.idToAny(getId()));
+                .setEventId(eventId)
+                .setTimestamp(now)
+                .setCommandContext(commandContext)
+                .setProducerId(producerId);
         return builder.build();
     }
 

@@ -32,7 +32,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventContextFactory.*;
 import static org.spine3.testdata.TestEventFactory.*;
 
 

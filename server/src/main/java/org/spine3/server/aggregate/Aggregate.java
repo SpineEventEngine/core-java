@@ -363,7 +363,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             return;
         }
         invokeApplier(eventMessage);
-
         incrementVersion(); // This will also update whenModified field.
     }
 
@@ -431,10 +430,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                 .setEventId(eventId)
-                .setCommandContext(commandContext)
                 .setTimestamp(whenModified())
-                .setVersion(getVersion())
-                .setProducerId(getIdAsAny());
+                .setCommandContext(commandContext)
+                .setProducerId(getIdAsAny())
+                .setVersion(getVersion());
         extendEventContext(event, builder, commandContext);
         return builder.build();
     }
@@ -468,7 +467,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 .setWhenModified(whenModified)
                 .setVersion(version)
                 .setTimestamp(TimeUtil.getCurrentTime());
-
         return builder.build();
     }
 

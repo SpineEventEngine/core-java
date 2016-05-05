@@ -50,7 +50,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
