@@ -74,12 +74,8 @@ public class TypeToClassMap {
      *
      * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final BiMap<TypeName, ClassName> TYPE_TO_CLASS_MAP = Builder.build();
+    private static final BiMap<TypeName, ClassName> biMap = Builder.build();
 
-    /**
-     * The inverse view of the primary type to class map.
-     */
-    private static final BiMap<ClassName, TypeName> CLASS_TO_TYPE_MAP = TYPE_TO_CLASS_MAP.inverse();
 
     private TypeToClassMap() {}
 
@@ -89,7 +85,7 @@ public class TypeToClassMap {
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> knownTypes() {
-        final Set<TypeName> result = TYPE_TO_CLASS_MAP.keySet();
+        final Set<TypeName> result = biMap.keySet();
         return ImmutableSet.copyOf(result);
     }
 
@@ -102,11 +98,11 @@ public class TypeToClassMap {
      * @throws UnknownTypeException if there is no such type known to the application
      */
     public static ClassName get(TypeName protoType) throws UnknownTypeException {
-        if (!TYPE_TO_CLASS_MAP.containsKey(protoType)) {
+        if (!biMap.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
-            TYPE_TO_CLASS_MAP.put(protoType, className);
+            biMap.put(protoType, className);
         }
-        final ClassName result = TYPE_TO_CLASS_MAP.get(protoType);
+        final ClassName result = biMap.get(protoType);
         return result;
     }
 
@@ -118,7 +114,7 @@ public class TypeToClassMap {
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
     public static TypeName get(ClassName className) {
-        final TypeName result = CLASS_TO_TYPE_MAP.get(className);
+        final TypeName result = biMap.inverse().get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type found for the Java class " + className);
         }
@@ -143,7 +139,7 @@ public class TypeToClassMap {
             suffix.insert(0, lookupType.substring(lastDotPosition));
             lookupType = lookupType.substring(0, lastDotPosition);
             final TypeName typeName = TypeName.of(lookupType);
-            className = TYPE_TO_CLASS_MAP.get(typeName);
+            className = biMap.get(typeName);
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
