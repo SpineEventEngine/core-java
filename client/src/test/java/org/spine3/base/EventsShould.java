@@ -25,10 +25,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.testdata.TestCommandContextFactory;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
@@ -79,9 +79,7 @@ public class EventsShould {
 
     @Test
     public void return_actor_from_EventContext() {
-        // Since Events.getActor() is merely wrapper over the chain of generated method calls
-        // the main reason to have this test is to mark the Events.getActor() as `used`.
-        checkNotNull(Events.getActor(EventContext.getDefaultInstance()));
+        assertEquals(context.getCommandContext().getActor(), Events.getActor(context));
     }
 
     @Test
@@ -147,10 +145,12 @@ public class EventsShould {
     private static EventContext newEventContext(Timestamp time) {
         final EventId eventId = Events.generateId();
         final StringValue producerId = newStringValue(newUuid());
+        final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(toAny(producerId))
-                                                         .setTimestamp(time);
+                                                         .setTimestamp(time)
+                                                         .setCommandContext(cmdContext);
         return builder.build();
     }
 }
