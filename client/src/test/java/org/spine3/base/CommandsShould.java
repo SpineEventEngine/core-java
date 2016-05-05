@@ -33,10 +33,9 @@ import org.spine3.test.RunTest;
 import org.spine3.test.TestCommand;
 import org.spine3.type.TypeName;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
@@ -54,25 +53,16 @@ public class CommandsShould {
 
     @Test
     public void sort() {
-        final Command command1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
-        final Command command2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
-        final Command command3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final Command cmd1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
+        final Command cmd2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
+        final Command cmd3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+        final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
+        final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
+        assertFalse(sortedCommands.equals(commandsToSort));
 
-        final Collection<Command> sortedList = new ArrayList<>();
-        sortedList.add(command1);
-        sortedList.add(command2);
-        sortedList.add(command3);
+        Commands.sort(commandsToSort);
 
-        final List<Command> unSortedList = new ArrayList<>();
-        unSortedList.add(command3);
-        unSortedList.add(command1);
-        unSortedList.add(command2);
-
-        assertFalse(sortedList.equals(unSortedList));
-
-        Commands.sort(unSortedList);
-
-        assertEquals(sortedList, unSortedList);
+        assertEquals(sortedCommands, commandsToSort);
     }
 
     @Test
