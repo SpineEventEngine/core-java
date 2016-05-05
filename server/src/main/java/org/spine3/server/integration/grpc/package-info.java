@@ -18,30 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
-
-import org.spine3.base.Event;
-import org.spine3.server.type.EventClass;
-
-import java.util.Set;
-
 /**
- * {@code EventDispatcher} delivers events to subscribers.
- *
- * @author Alexander Yevsyukov
+ * This package contains gRPC-generated code for integrating bounded contexts.
  */
-public interface EventDispatcher {
 
-    /**
-     * Provides the set of classes of events forwarded by the dispatcher.
-     *
-     * @return non-empty set
-     */
-    Set<EventClass> getEventClasses();
+@Internal
+@ParametersAreNonnullByDefault
+package org.spine3.server.integration.grpc;
 
-    /**
-     * Dispatches the event.
-     */
-    void dispatch(Event event);
+import org.spine3.Internal;
 
-}
+import javax.annotation.ParametersAreNonnullByDefault;

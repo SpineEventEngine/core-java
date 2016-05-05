@@ -37,7 +37,6 @@ import org.spine3.protobuf.Messages;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.testdata.TestCommands;
-import org.spine3.testdata.TestContextFactory;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -46,6 +45,7 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 
 /**
@@ -78,7 +78,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     protected CommandStorageRecord newStorageRecord() {
         final Any command = toAny(TestCommands.createProjectCmd());
         final TypeName commandType = TypeName.ofEnclosed(command);
-        final CommandContext context = TestContextFactory.createCommandContext();
+        final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())

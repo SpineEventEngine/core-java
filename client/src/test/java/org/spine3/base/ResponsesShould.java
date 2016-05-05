@@ -40,7 +40,12 @@ public class ResponsesShould {
                            .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber()))
             .build();
 
-    private static final Response RESPONSE_INVALID_COMMAND = newInvalidCommandResponse();
+    private static final Response RESPONSE_UNSUPPORTED_EVENT = Response.newBuilder()
+            .setError(Error.newBuilder()
+                           .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber()))
+            .build();
+
+    private static final Response RESPONSE_INVALID_MESSAGE = newInvalidMessageResponse();
 
     @Test
     public void have_private_constructor() {
@@ -73,16 +78,26 @@ public class ResponsesShould {
     }
 
     @Test
-    public void recognize_INVALID_COMMAND_response() {
-        assertTrue(Responses.isInvalidCommand(RESPONSE_INVALID_COMMAND));
+    public void recognize_UNSUPPORTED_EVENT_response() {
+        assertTrue(Responses.isUnsupportedEvent(RESPONSE_UNSUPPORTED_EVENT));
     }
 
     @Test
-    public void return_false_if_not_INVALID_COMMAND_response() {
-        assertFalse(Responses.isInvalidCommand(Responses.ok()));
+    public void return_false_if_not_UNSUPPORTED_EVENT_response() {
+        assertFalse(Responses.isUnsupportedEvent(Responses.ok()));
     }
 
-    private static Response newInvalidCommandResponse() {
+    @Test
+    public void recognize_INVALID_MESSAGE_response() {
+        assertTrue(Responses.isInvalidMessage(RESPONSE_INVALID_MESSAGE));
+    }
+
+    @Test
+    public void return_false_if_not_INVALID_MESSAGES_response() {
+        assertFalse(Responses.isInvalidMessage(Responses.ok()));
+    }
+
+    private static Response newInvalidMessageResponse() {
         final List<ConstraintViolation> violations = newArrayList(ConstraintViolation.getDefaultInstance());
         final ValidationFailure failureInstance = ValidationFailure.newBuilder()
                                                                    .addAllConstraintViolation(violations)

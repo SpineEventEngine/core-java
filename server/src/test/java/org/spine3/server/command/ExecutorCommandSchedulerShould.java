@@ -38,7 +38,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.testdata.TestCommands.addTaskMsg;
 import static org.spine3.testdata.TestCommands.createProjectMsg;
-import static org.spine3.testdata.TestContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus

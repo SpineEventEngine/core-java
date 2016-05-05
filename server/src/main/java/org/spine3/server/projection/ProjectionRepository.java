@@ -39,6 +39,9 @@ import java.util.Set;
 /**
  * Abstract base for repositories managing {@link Projection}s.
  *
+ * @param <I> the type of IDs of projections
+ * @param <P> the type of projections
+ * @param <M> the type of projection state messages
  * @author Alexander Yevsyukov
  */
 public abstract class ProjectionRepository<I, P extends Projection<I, M>, M extends Message>
@@ -108,11 +111,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Nonnull
     @Override
     public P load(I id) {
-        P result = super.load(id);
-        if (result == null) {
-            result = create(id);
+        P projection = super.load(id);
+        if (projection == null) {
+            projection = create(id);
         }
-        return result;
+        return projection;
     }
 
     /**
@@ -131,9 +134,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final Message eventMessage = Events.getMessage(event);
         final EventContext context = event.getContext();
         final I id = getEntityId(eventMessage, context);
-        final P sp = load(id);
-        sp.handle(eventMessage, context);
-        store(sp);
+        final P projection = load(id);
+        projection.handle(eventMessage, context);
+        store(projection);
         final ProjectionStorage<I> storage = projectionStorage();
         final Timestamp eventTime = context.getTimestamp();
         storage.writeLastHandledEventTime(eventTime);

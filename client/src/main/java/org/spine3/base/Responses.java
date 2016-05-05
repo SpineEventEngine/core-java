@@ -75,12 +75,27 @@ public class Responses {
     }
 
     /**
-     * Checks if the response is `invalid command`.
+     * Checks if the response is `unsupported event`.
      *
-     * @return {@code true} if the passed response represents `invalid command` error,
+     * @return {@code true} if the passed response represents `unsupported event` error,
      *         {@code false} otherwise
      */
-    public static boolean isInvalidCommand(Response response) {
+    public static boolean isUnsupportedEvent(Response response) {
+        if (response.getStatusCase() == Response.StatusCase.ERROR) {
+            final Error error = response.getError();
+            final boolean isUnsupported = error.getCode() == EventValidationError.UNSUPPORTED_EVENT.getNumber();
+            return isUnsupported;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the response is `invalid message`.
+     *
+     * @return {@code true} if the passed response represents `invalid message` failure,
+     *         {@code false} otherwise
+     */
+    public static boolean isInvalidMessage(Response response) {
         if (response.getStatusCase() == Response.StatusCase.FAILURE) {
             final ValidationFailure failure = fromAny(response.getFailure().getInstance());
             final boolean isInvalid = !failure.getConstraintViolationList().isEmpty();

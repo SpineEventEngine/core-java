@@ -30,6 +30,8 @@ import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 
+import static org.spine3.client.UserUtil.newUserId;
+
 /**
  * The command factory, which allows generating commands as if the were
  * created at the specified moments in time.
@@ -40,7 +42,7 @@ import org.spine3.time.ZoneOffsets;
 public class TestCommandFactory extends CommandFactory {
 
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
-        return new TestCommandFactory(UserId.newBuilder().setValue(actor).build(), zoneOffset);
+        return new TestCommandFactory(newUserId(actor), zoneOffset);
     }
 
     public static TestCommandFactory newInstance(Class<?> testClass) {

@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.EntityPackagesMap;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
@@ -40,7 +41,9 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.base.CommandContext.*;
+import static org.spine3.base.CommandContext.Schedule;
+import static org.spine3.base.CommandContext.newBuilder;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -71,9 +74,11 @@ public class Commands {
     }
 
     /**
-     * Creates new command context with the current time
+     * Creates a new command context with the current time.
+     *
      * @param userId the actor id
      * @param zoneOffset the offset of the timezone in which the user works
+     * @see CommandFactory
      */
     public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
@@ -169,8 +174,8 @@ public class Commands {
     public static String formatCommandTypeAndId(String format, Command command) {
         final CommandId commandId = command.getContext().getCommandId();
         final Message commandMessage = getMessage(command);
-
-        return formatMessageTypeAndId(format, commandMessage, commandId);
+        final String msg = formatMessageTypeAndId(format, commandMessage, commandId);
+        return msg;
     }
 
     /**
@@ -185,7 +190,7 @@ public class Commands {
      */
     public static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
         checkNotNull(format);
-        checkArgument(!format.isEmpty());
+        checkNotEmptyOrBlank(format, "format string");
 
         final TypeName commandType = TypeName.of(commandMessage);
         final String id = commandId.getUuid();

@@ -21,17 +21,17 @@ package org.spine3.server;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
@@ -42,6 +42,9 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.integration.IntegrationEvent;
+import org.spine3.server.integration.IntegrationEventContext;
+import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -50,14 +53,20 @@ import javax.annotation.CheckReturnValue;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Commands.getMessage;
+import static org.spine3.base.Responses.isOk;
+import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * This class is a facade for configuration and entry point for handling commands.
+ * A facade for configuration and entry point for handling commands.
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientServiceGrpc.ClientService, AutoCloseable {
+public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -113,7 +122,6 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      *      <li>un-registered from {@link EventBus}
      *      <li>detached from its storage
      *      </ul>
-     *
      * </ol>
      * @throws Exception caused by closing one of the components
      */
@@ -170,17 +178,15 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
      * @param <E>        the type of entities or aggregates
      * @throws IllegalArgumentException if the passed repository has no storage assigned
      */
-    @SuppressWarnings({"ChainOfInstanceofChecks"})
+    @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         repositories.add(repository);
-
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
         }
-
         if (repository instanceof EventDispatcher) {
-            getEventBus().register((EventDispatcher)repository);
+            eventBus.register((EventDispatcher) repository);
         }
     }
 
@@ -191,57 +197,91 @@ public class BoundedContext implements ClientServiceGrpc.ClientService, AutoClos
         }
     }
 
-    @SuppressWarnings({"ChainOfInstanceofChecks"})
+    @SuppressWarnings("ChainOfInstanceofChecks")
     private void unregister(Repository<?, ?> repository) throws Exception {
         if (repository instanceof CommandDispatcher) {
             commandBus.unregister((CommandDispatcher) repository);
         }
-
         if (repository instanceof EventDispatcher) {
-            getEventBus().unregister((EventDispatcher) repository);
+            eventBus.unregister((EventDispatcher) repository);
         }
-
         repository.close();
     }
 
     @Override
-    public void post(Command request, StreamObserver<Response> responseObserver) {
-        final Message message = Messages.fromAny(request.getMessage());
-        final CommandContext commandContext = request.getContext();
-
-        Response reply = null;
-
-        // Ensure `namespace` context attribute is defined in a multitenant app.
-        if (isMultitenant() && !commandContext.hasNamespace()) {
-            reply = CommandValidation.unknownNamespace(message, request.getContext());
-        }
-
-        if (reply == null) {
-            reply = validate(message);
-        }
-
-        responseObserver.onNext(reply);
+    public void post(Command command, StreamObserver<Response> responseObserver) {
+        final Response response = validateCommand(command);
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
-
-        if (Responses.isOk(reply)) {
-            post(request);
+        if (isOk(response)) {
+            commandBus.post(command);
         }
     }
 
-    private void post(Command request)  {
-        commandBus.post(request);
+    private Response validateCommand(Command command) {
+        final Message message = getMessage(command);
+        final CommandContext context = command.getContext();
+        final Response response;
+        if (isMultitenant() && !context.hasNamespace()) {
+            response = CommandValidation.unknownNamespace(message, context);
+        } else {
+            response = validateCommandMessage(message);
+        }
+        return response;
     }
 
     /**
      * Validates the incoming command message.
      *
      * @param commandMessage the command message to validate
-     * @return {@link Response} with {@code ok} value if the command is valid, or
-     *          with {@link org.spine3.base.Error} value otherwise
+     * @return a response with {@code OK} value if the command is valid, or
+     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
      */
-    protected Response validate(Message commandMessage) {
+    protected Response validateCommandMessage(Message commandMessage) {
         final Response result = commandBus.validate(commandMessage);
         return result;
+    }
+
+    @Override
+    public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
+        try {
+            final Message message = fromAny(integrationEvent.getMessage());
+            final Response response = validateIntegrationEventMessage(message);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            if (isOk(response)) {
+                final Event event = toEvent(integrationEvent);
+                eventBus.post(event);
+            }
+        } catch (RuntimeException e) {
+            responseObserver.onError(e);
+        }
+    }
+
+    /**
+     * Validates an incoming integration event message.
+     *
+     * @param eventMessage a message to validate
+     * @return a response with {@code OK} value if the command is valid, or
+     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
+     */
+    protected Response validateIntegrationEventMessage(Message eventMessage) {
+        final Response response = eventBus.validate(eventMessage);
+        return response;
+    }
+
+    private static Event toEvent(IntegrationEvent integrationEvent) {
+        final IntegrationEventContext sourceContext = integrationEvent.getContext();
+        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
+        final EventContext context = EventContext.newBuilder()
+                .setEventId(sourceContext.getEventId())
+                .setTimestamp(sourceContext.getTimestamp())
+                .setProducerId(toAny(producerId))
+                .build();
+        final Event.Builder result = Event.newBuilder()
+                .setMessage(integrationEvent.getMessage())
+                .setContext(context);
+        return result.build();
     }
 
     @Override

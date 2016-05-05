@@ -40,6 +40,7 @@ import org.spine3.test.project.command.StartProject;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestCommandContextFactory.*;
 
 /**
  * The utility class for creating the test data related to commands (command messages, Commands etc.).
@@ -97,7 +98,7 @@ public class TestCommands {
      * {@link CommandId} instance.
      */
     public static Command createCommandCmd(Message command, UserId userId, Timestamp when) {
-        final CommandContext context = TestContextFactory.createCommandContext(userId, Commands.generateId(), when);
+        final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
         final Command result = Commands.create(command, context);
         return result;
     }
