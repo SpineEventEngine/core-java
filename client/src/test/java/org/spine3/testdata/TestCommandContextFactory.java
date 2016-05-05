@@ -23,9 +23,9 @@ package org.spine3.testdata;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.base.Schedule;
 import org.spine3.base.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -71,7 +71,7 @@ public class TestCommandContextFactory {
      */
     public static CommandContext createCommandContext(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
-                                          .setAfter(delay)
+                                          .setDelay(delay)
                                           .build();
         return createCommandContext(schedule);
     }

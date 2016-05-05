@@ -1,0 +1,13 @@
+#
+# For more options see: https://gist.github.com/stevepeak/53bee7b2c326b24a9b4a
+#
+
+coverage:
+  ignore:
+  - generated/*
+  - examples/*
+  status:
+    patch: false
+
+comment:
+  layout: header, changes, diff
