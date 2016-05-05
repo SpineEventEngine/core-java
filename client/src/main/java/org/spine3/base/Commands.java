@@ -40,7 +40,9 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.base.CommandContext.*;
+import static org.spine3.base.CommandContext.Schedule;
+import static org.spine3.base.CommandContext.newBuilder;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -185,7 +187,7 @@ public class Commands {
      */
     public static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
         checkNotNull(format);
-        checkArgument(!format.isEmpty());
+        checkNotEmptyOrBlank(format, "format string");
 
         final TypeName commandType = TypeName.of(commandMessage);
         final String id = commandId.getUuid();

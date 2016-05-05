@@ -39,6 +39,7 @@ import java.util.List;
 
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
@@ -118,10 +119,20 @@ public class CommandsShould {
         final String commandId = command.getContext().getCommandId().getUuid();
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
-        final String string = Commands.formatCommandTypeAndId("To log: %s %s", command);
+        final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);
 
         assertTrue(string.contains(typeName));
         assertTrue(string.contains(commandId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_create_logging_message_and_format_string_is_empty() {
+        Commands.formatCommandTypeAndId("", commandFactory.create(newStringValue(newUuid())));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
+        Commands.formatCommandTypeAndId("  ", commandFactory.create(newStringValue(newUuid())));
     }
     
     @Test
