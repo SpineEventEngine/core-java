@@ -130,8 +130,9 @@ public class CommandBus implements AutoCloseable {
     /**
      * Verifies that the command message can be posted to this {@code CommandBus}.
      *
-     * <p>A command message can be posted if it has either dispatcher or handler registered with
-     * this {@code CommandBus}. The message also must satisfy validation constraints defined in its Protobuf type.
+     * <p>A command can be posted if its message has either dispatcher or handler registered with
+     * this {@code CommandBus}.
+     * The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param command a command message to check
      * @return the result of {@link Responses#ok()} if the command is valid and supported,

@@ -263,8 +263,9 @@ public class EventBus implements AutoCloseable {
     /**
      * Verifies that an event can be posted to this {@code EventBus}.
      *
-     * <p>An event can be posted if it has either dispatcher or handler registered with
-     * this {@code EventBus}. The message also must satisfy validation constraints defined in its Protobuf type.
+     * <p>An event can be posted if its message has either dispatcher or handler registered with
+     * this {@code EventBus}.
+     * The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param event the event message to check
      * @return an appropriate response: `OK`, `unsupported` or `invalid` event
