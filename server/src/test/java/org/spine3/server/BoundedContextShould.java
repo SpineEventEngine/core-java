@@ -33,7 +33,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
 import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -66,8 +65,12 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Responses.isUnsupportedCommand;
+import static org.spine3.base.Responses.ok;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
@@ -126,22 +129,6 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
-        boundedContext.post(createProjectCmd(), new StreamObserver<Response>() {
-            @Override
-            public void onNext(Response response) {
-                assertTrue(Responses.isUnsupportedCommand(response));
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {}
-        });
-    }
-
-    @Test
     public void register_AggregateRepository() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
@@ -163,14 +150,24 @@ public class BoundedContextShould {
     }
 
     @Test
+    public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
+        final TestResponseObserver responseObserver = new TestResponseObserver();
+
+        boundedContext.post(createProjectCmd(), responseObserver);
+
+        final Response response = responseObserver.getResponseHandled();
+        assertTrue(isUnsupportedCommand(response));
+    }
+
+    @Test
     public void post_Command() {
         registerAll();
-        final Command request = createProjectCmd(userId, projectId, getCurrentTime());
+        final Command cmd = createProjectCmd(userId, projectId, getCurrentTime());
         final TestResponseObserver observer = new TestResponseObserver();
 
-        boundedContext.post(request, observer);
+        boundedContext.post(cmd, observer);
 
-        assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(ok(), observer.getResponseHandled());
     }
     
     @Test
@@ -182,7 +179,7 @@ public class BoundedContextShould {
 
         boundedContext.notify(event, observer);
 
-        assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(ok(), observer.getResponseHandled());
         assertEquals(subscriber.eventHandled, msg);
     }
 
@@ -197,11 +194,11 @@ public class BoundedContextShould {
 
         final TestResponseObserver observer = new TestResponseObserver();
 
-        final Command request = Command.newBuilder()
+        final Command cmd = Command.newBuilder()
                 // Pass empty command so that we have something valid to unpack in the context.
                 .setMessage(Any.pack(StringValue.getDefaultInstance()))
                 .build();
-        bc.post(request, observer);
+        bc.post(cmd, observer);
 
         assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled()
                                                                                    .getError()
