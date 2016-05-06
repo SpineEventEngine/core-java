@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -99,13 +98,14 @@ public class ResponsesShould {
 
     private static Response newInvalidMessageResponse() {
         final List<ConstraintViolation> violations = newArrayList(ConstraintViolation.getDefaultInstance());
-        final ValidationFailure failureInstance = ValidationFailure.newBuilder()
-                                                                   .addAllConstraintViolation(violations)
-                                                                   .build();
-        final Failure.Builder failure = Failure.newBuilder()
-                                               .setInstance(toAny(failureInstance));
+        final ValidationError validationError = ValidationError.newBuilder()
+                                                               .addAllConstraintViolation(violations)
+                                                               .build();
+        final Error error = Error.newBuilder()
+                                 .setValidationError(validationError)
+                                 .build();
         final Response response = Response.newBuilder()
-                                          .setFailure(failure)
+                                          .setError(error)
                                           .build();
         return response;
     }

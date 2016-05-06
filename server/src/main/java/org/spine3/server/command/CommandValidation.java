@@ -26,16 +26,12 @@ import com.google.protobuf.Value;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
-import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.ValidationFailure;
+import org.spine3.base.ValidationError;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
 import java.util.Map;
-
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Utility class for working with command validation.
@@ -44,8 +40,7 @@ import static org.spine3.protobuf.Messages.toAny;
  */
 public class CommandValidation {
 
-    private CommandValidation() {
-    }
+    private CommandValidation() {}
 
     /**
      * Attribute names for command-related business failures.
@@ -60,12 +55,14 @@ public class CommandValidation {
     public static Response unsupportedCommand(Message command) {
         final String commandType = command.getDescriptorForType().getFullName();
         final String errMsg = String.format("Commands of the type `%s` are not supported.", commandType);
+        final Error error = Error.newBuilder()
+                                 .setType(CommandValidationError.getDescriptor().getFullName())
+                                 .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
+                                 .putAllAttributes(commandTypeAttribute(commandType))
+                                 .setMessage(errMsg)
+                                 .build();
         final Response response = Response.newBuilder()
-                .setError(Error.newBuilder()
-                    .setType(CommandValidationError.getDescriptor().getFullName())
-                    .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
-                    .putAllAttributes(commandTypeAttribute(commandType))
-                    .setMessage(errMsg))
+                .setError(error)
                 .build();
         return response;
     }
@@ -73,21 +70,24 @@ public class CommandValidation {
     /**
      * Creates a {@code Response} for getting a command with invalid fields (e.g., marked as "required" but not set).
      *
-     * @param command an invalid command
+     * @param command an invalid command message
      * @param violations constraint violations found in command message
      */
     public static Response invalidCommand(Message command, List<ConstraintViolation> violations) {
         final String commandType = command.getDescriptorForType().getFullName();
-        final ValidationFailure failureInstance = ValidationFailure.newBuilder()
-                .addAllConstraintViolation(violations)
-                .build();
-        final Failure.Builder failure = Failure.newBuilder()
-                .setInstance(toAny(failureInstance))
-                .setTimestamp(getCurrentTime())
-                .putAllAttributes(commandTypeAttribute(commandType));
+        final ValidationError validationError = ValidationError.newBuilder()
+                                                               .addAllConstraintViolation(violations)
+                                                               .build();
+        final Error error = Error.newBuilder()
+                                 .setType(CommandValidationError.getDescriptor().getFullName())
+                                 .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
+                                 .setValidationError(validationError)
+                                 .putAllAttributes(commandTypeAttribute(commandType))
+                                 .setMessage("Command message is invalid.")
+                                 .build();
         final Response response = Response.newBuilder()
-                .setFailure(failure)
-                .build();
+                                          .setError(error)
+                                          .build();
         return response;
     }
 
@@ -100,12 +100,14 @@ public class CommandValidation {
         final String errMsg = String.format("Command `%s` (id: `%s`) has no namespace attribute in the context.",
                 commandType,
                 context.getCommandId().getUuid());
+        final Error error = Error.newBuilder()
+                                 .setType(CommandValidationError.getDescriptor() .getFullName())
+                                 .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
+                                 .setMessage(errMsg)
+                                 .putAllAttributes(commandTypeAttribute(commandType))
+                                 .build();
         final Response response = Response.newBuilder()
-                .setError(Error.newBuilder()
-                    .setType(CommandValidationError.getDescriptor().getFullName())
-                    .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
-                    .setMessage(errMsg)
-                    .putAllAttributes(commandTypeAttribute(commandType)))
+                .setError(error)
                 .build();
         return response;
     }
