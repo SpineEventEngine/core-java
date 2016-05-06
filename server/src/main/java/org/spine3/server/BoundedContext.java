@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Failure;
@@ -55,6 +56,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Responses.isOk;
+import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
@@ -215,7 +217,15 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         responseObserver.onCompleted();
         if (isOk(response)) {
             commandBus.post(command);
+        } else if (isUnsupportedCommand(response)) {
+            storeUnsupportedCommand(command, response);
         }
+    }
+
+    private void storeUnsupportedCommand(Command command, Response response) {
+        commandBus.store(command);
+        final CommandId id = command.getContext().getCommandId();
+        commandBus.getCommandStatusService().setToError(id, response.getError());
     }
 
     private Response validateCommand(Command command) {

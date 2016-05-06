@@ -280,8 +280,13 @@ public class CommandBus implements AutoCloseable {
         this.messageValidator = messageValidator;
     }
 
-    private void store(Command request) {
-        commandStore.store(request);
+    /**
+     * Stores a command to the storage.
+     *
+     * @param command a command to store
+     */
+    public void store(Command command) {
+        commandStore.store(command);
     }
 
     private boolean isDispatcherRegistered(CommandClass cls) {
