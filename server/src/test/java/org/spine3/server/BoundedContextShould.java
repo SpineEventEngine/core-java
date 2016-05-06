@@ -38,6 +38,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
@@ -65,9 +66,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.base.Responses.ok;
@@ -152,15 +153,19 @@ public class BoundedContextShould {
     @Test
     public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
         final TestResponseObserver responseObserver = new TestResponseObserver();
+        final CommandBus commandBus = boundedContext.getCommandBus();
 
-        boundedContext.post(createProjectCmd(), responseObserver);
+        final Command cmd = createProjectCmd();
+        boundedContext.post(cmd, responseObserver);
 
         final Response response = responseObserver.getResponseHandled();
         assertTrue(isUnsupportedCommand(response));
+        verify(commandBus, times(1)).store(cmd);
+        verify(commandBus, times(1)).getCommandStatusService();
     }
 
     @Test
-    public void post_Command() {
+    public void post_Command_and_store_it() {
         registerAll();
         final Command cmd = createProjectCmd(userId, projectId, getCurrentTime());
         final TestResponseObserver observer = new TestResponseObserver();
@@ -168,6 +173,7 @@ public class BoundedContextShould {
         boundedContext.post(cmd, observer);
 
         assertEquals(ok(), observer.getResponseHandled());
+        verify(boundedContext.getCommandBus(), times(1)).store(cmd);
     }
     
     @Test
