@@ -71,6 +71,7 @@ public class CommandBus implements AutoCloseable {
         commandStore = builder.getCommandStore();
         scheduler = builder.getScheduler();
         if (scheduler != null) {
+            //TODO:2016-05-08:alexander.yevsyukov: We still have circular dependency, but now indirectly. Need to fix.
             scheduler.setPostFunction(newPostFunction());
         }
         commandStatusService = new CommandStatusService(commandStore);
