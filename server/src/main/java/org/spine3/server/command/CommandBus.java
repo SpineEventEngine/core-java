@@ -36,7 +36,6 @@ import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -71,13 +70,11 @@ public class CommandBus implements AutoCloseable {
      */
     private boolean multitenant;
     private ProblemLog problemLog = new ProblemLog();
-    private MessageValidator messageValidator;
 
     private CommandBus(Builder builder) {
         commandStore = builder.getCommandStore();
         scheduler = builder.getScheduler();
         commandStatusService = new CommandStatusService(commandStore);
-        messageValidator = builder.messageValidator;
     }
 
     /**
@@ -131,10 +128,10 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Directs the command to be dispatched or handler.
+     * Directs the command to be dispatched or handled.
      *
      * <p>If the command has scheduling attributes, it will be posted for execution by the configured
-     * scheduled according to values of those scheduling attributes.
+     * scheduler according to values of those scheduling attributes.
      *
      * <p>If a command does not have neither dispatcher nor handler, the error is returned via
      * {@link StreamObserver#onError(Throwable)} call with {@link UnsupportedCommandException} as the cause.
@@ -144,17 +141,14 @@ public class CommandBus implements AutoCloseable {
      */
     public void post(Command command, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(command);
-
         // If the command is not supported, return as error.
         if (!isSupportedCommand(commandClass)) {
             handleUnsupported(command, responseObserver);
             return;
         }
-
         if (!handleValidation(command, responseObserver)) {
             return;
         }
-
         if (isScheduled(command)) {
             //TODO:2016-05-08:alexander.yevsyukov: Do store command if it was scheduled and update its status when it's executed.
             // It is needed to make command delivery more reliable. E.g. if a delay is long enough, not stored message
@@ -164,13 +158,9 @@ public class CommandBus implements AutoCloseable {
             responseObserver.onCompleted();
             return;
         }
-
         store(command);
-
         responseObserver.onNext(Responses.ok());
-
         doPost(command);
-
         responseObserver.onCompleted();
     }
 
@@ -178,7 +168,6 @@ public class CommandBus implements AutoCloseable {
         final Message message = getMessage(command);
         final CommandClass commandClass = CommandClass.of(message);
         final CommandContext commandContext = command.getContext();
-
         if (isDispatcherRegistered(commandClass)) {
             dispatch(command);
         } else if (isHandlerRegistered(commandClass)) {
@@ -196,9 +185,7 @@ public class CommandBus implements AutoCloseable {
             );
             return false;
         }
-
         final CommandContext context = command.getContext();
-
         if (isMultitenant() && !context.hasNamespace()) {
             responseObserver.onError(
                     Status.INVALID_ARGUMENT
@@ -207,7 +194,6 @@ public class CommandBus implements AutoCloseable {
             );
             return false;
         }
-
         return true;
     }
 
@@ -312,11 +298,6 @@ public class CommandBus implements AutoCloseable {
         this.problemLog = problemLog;
     }
 
-    @VisibleForTesting
-    /* package */ void setMessageValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
-    }
-
     /**
      * Convenience wrapper for logging errors and warnings.
      */
@@ -401,7 +382,6 @@ public class CommandBus implements AutoCloseable {
         private CommandStore commandStore;
         @Nullable
         private CommandScheduler scheduler;
-        private MessageValidator messageValidator = new MessageValidator();
 
         public CommandBus build() {
             checkNotNull(commandStore, "Command store must be set.");
@@ -435,12 +415,6 @@ public class CommandBus implements AutoCloseable {
         @Nullable
         public CommandScheduler getScheduler() {
             return scheduler;
-        }
-
-        @Internal
-        /* package */ Builder setMessageValidator(MessageValidator messageValidator) {
-            this.messageValidator = messageValidator;
-            return this;
         }
     }
 }
