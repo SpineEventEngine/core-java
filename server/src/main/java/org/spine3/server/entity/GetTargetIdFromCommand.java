@@ -21,8 +21,12 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
+import org.spine3.server.error.MissingEntityIdException;
+
+import javax.annotation.Nullable;
 
 /**
  * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
@@ -34,9 +38,12 @@ import org.spine3.base.Identifiers;
  * @param <M> the type of command messages to get IDs from
  * @author Alexander Litus
  */
+@Internal
 public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIndex<I, M, CommandContext> {
 
     public static final int ID_FIELD_INDEX = 0;
+
+    private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = newInstance();
 
     private GetTargetIdFromCommand() {
         super(ID_FIELD_INDEX);
@@ -47,5 +54,22 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
      */
     public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
         return new GetTargetIdFromCommand<>();
+    }
+
+    /**
+     * Tries to obtain a target ID from the passed command message.
+     *
+     * @return an ID or {@code null} if {@link GetTargetIdFromCommand#getId(Message, Message)}
+     * throws an exception (in the case if the command is not for an entity)
+     */
+    @Nullable
+    public static Object asNullableObject(Message commandMessage) {
+        //TODO:2016-05-09:alexander.yevsyukov: return Optional
+        try {
+            final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
+            return id;
+        } catch (MissingEntityIdException | ClassCastException ignored) {
+            return null;
+        }
     }
 }

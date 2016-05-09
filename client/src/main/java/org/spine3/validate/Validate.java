@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * This class provides general validation routines.
@@ -196,7 +197,7 @@ public class Validate {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        checkNotEmptyOrBlank(id.getUuid(), "command ID");
+        checkNotEmptyOrBlank(idToString(id), "command ID");
         return id;
     }
 

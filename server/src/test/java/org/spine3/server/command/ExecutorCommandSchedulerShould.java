@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -30,15 +29,13 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.testdata.TestCommands;
 
-import javax.annotation.Nullable;
-
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestCommands.addTaskMsg;
 import static org.spine3.testdata.TestCommands.createProjectMsg;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus
@@ -56,7 +53,6 @@ public class ExecutorCommandSchedulerShould {
     @Before
     public void setUpTest() {
         scheduler = spy(ExecutorCommandScheduler.class);
-        scheduler.setPostFunction(newStubPostFunction());
         context = createCommandContext(DELAY);
     }
 
@@ -98,15 +94,5 @@ public class ExecutorCommandSchedulerShould {
             return;
         }
         fail("Must throw an exception as it is shutdown.");
-    }
-
-    private static Function<Command, Command> newStubPostFunction() {
-        return new Function<Command, Command>() {
-            @Nullable
-            @Override
-            public Command apply(@Nullable Command input) {
-                return input;
-            }
-        };
     }
 }

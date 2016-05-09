@@ -246,7 +246,7 @@ public class IdentifiersShould {
         final CommandId id = Commands.generateId();
         final String actual = new CommandIdToStringConverter().apply(id);
 
-        assertEquals(id.getUuid(), actual);
+        assertEquals(idToString(id), actual);
     }
 
     @Test
@@ -254,6 +254,6 @@ public class IdentifiersShould {
         final EventId id = Events.generateId();
         final String actual = new Identifiers.EventIdToStringConverter().apply(id);
 
-        assertEquals(id.getUuid(), actual);
+        assertEquals(idToString(id), actual);
     }
 }

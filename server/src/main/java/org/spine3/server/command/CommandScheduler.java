@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.base.Function;
 import org.spine3.base.Command;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -34,7 +33,7 @@ public abstract class CommandScheduler {
 
     private boolean isActive = true;
 
-    private Function<Command, Command> postFunction;
+    private CommandBus commandBus;
 
     /**
      * Schedule a command and deliver it to the target according to the scheduling options.
@@ -65,13 +64,10 @@ public abstract class CommandScheduler {
      * @param command a command to deliver
      */
     protected void post(Command command) {
-        postFunction.apply(command);
+        commandBus.doPost(command);
     }
 
-    /**
-     * Sets a function used to post scheduled commands.
-     */
-    /* package */ void setPostFunction(Function<Command, Command> postFunction) {
-        this.postFunction = postFunction;
+    /* package */ void setCommandBus(CommandBus commandBus) {
+        this.commandBus = commandBus;
     }
 }

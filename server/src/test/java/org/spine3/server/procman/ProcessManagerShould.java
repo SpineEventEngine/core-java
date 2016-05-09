@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -32,6 +33,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Response;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -157,7 +160,9 @@ public class ProcessManagerShould {
         assertTrue(Commands.getMessage(commandRouted.getSource()) instanceof StartProject);
 
         // The produced command was posted to CommandBus once, and the same command is in the generated event.
-        verify(commandBus, times(1)).post(commandRouted.getProduced(0));
+        // We are not interested in observer instance here.
+        @SuppressWarnings("unchecked") final StreamObserver<Response> any = any(StreamObserver.class);
+        verify(commandBus, times(1)).post(commandRouted.getProduced(0), any);
     }
 
     @Test(expected = IllegalStateException.class)

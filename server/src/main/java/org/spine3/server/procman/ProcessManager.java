@@ -23,9 +23,11 @@ package org.spine3.server.procman;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
@@ -34,6 +36,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.Response;
 import org.spine3.base.UserId;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
@@ -48,9 +51,11 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.propagate;
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
@@ -199,10 +204,14 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
      * <p>The routed commands are created on behalf of the actor of the original command.
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
+     *
+     * <p>This class is made internal and protected to {@code ProcessManager} so that only derived classes
+     * can have the code constructs similar to the quoted above.
      */
     protected static class CommandRouter {
 
         private final CommandBus commandBus;
+
         private Message sourceCommand;
         private CommandContext sourceContext;
 
@@ -253,10 +262,36 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
          */
         public CommandRouted route() {
             final CommandRouted.Builder result = CommandRouted.newBuilder();
+
+            final SettableFuture<Void> finishFuture = SettableFuture.create();
+            final StreamObserver<Response>responseObserver = new StreamObserver<Response>() {
+
+                @Override
+                public void onNext(Response response) {
+                    // Do nothing. It's just a confirmation of successful post to Command Bus.
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    finishFuture.setException(throwable);
+                }
+
+                @Override
+                public void onCompleted() {
+                    finishFuture.set(null);
+                }
+            };
+
             result.setSource(Commands.create(sourceCommand, sourceContext));
             for (Message message : toRoute) {
                 final Command command = produceCommand(message);
-                commandBus.post(command);
+                commandBus.post(command, responseObserver);
+                // Wait till the call is completed.
+                try {
+                    finishFuture.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    propagate(e);
+                }
                 result.addProduced(command);
             }
             return result.build();

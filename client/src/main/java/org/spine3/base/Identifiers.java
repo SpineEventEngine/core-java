@@ -93,6 +93,19 @@ public class Identifiers {
             return NULL_ID_OR_FIELD;
         }
 
+        /*
+           Localize conversion of built-in identifiers so that if their attributes
+           are changed from UUID values to something else, the code of transforming the to strings
+           stays the same.
+         */
+        //noinspection ChainOfInstanceofChecks
+        if (id instanceof CommandId) {
+            return ((CommandId) id).getUuid();
+        }
+        if (id instanceof EventId) {
+            return ((EventId) id).getUuid();
+        }
+
         String result;
 
         final boolean isStringOrNumber = id instanceof String
@@ -351,7 +364,7 @@ public class Identifiers {
             if (commandId == null) {
                 return NULL_ID_OR_FIELD;
             }
-            return commandId.getUuid();
+            return idToString(commandId);
         }
     }
 }

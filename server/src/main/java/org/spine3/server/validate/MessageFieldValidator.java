@@ -58,7 +58,9 @@ import static org.spine3.validate.options.Time.UNDEFINED;
      * @param fieldValues values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    /* package */ MessageFieldValidator(FieldDescriptor descriptor, ImmutableList<Message> fieldValues, FieldPath rootFieldPath) {
+    /* package */ MessageFieldValidator(FieldDescriptor descriptor,
+                                        ImmutableList<Message> fieldValues,
+                                        FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validOption = getFieldOption(ValidationProto.valid);

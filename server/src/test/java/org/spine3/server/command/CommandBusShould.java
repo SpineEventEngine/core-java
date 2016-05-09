@@ -22,46 +22,46 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
+import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.command.error.InvalidCommandException;
+import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.testdata.TestEventFactory;
-import org.spine3.validate.options.ConstraintViolation;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Responses.isInvalidMessage;
-import static org.spine3.base.Responses.isUnsupportedCommand;
+import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.protobuf.Durations.minutes;
-import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommands.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class CommandBusShould {
@@ -72,19 +72,21 @@ public class CommandBusShould {
     private CommandBus.ProblemLog log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
-    private CreateProjectHandler handler;
+    private CreateProjectHandler createProjectHandler;
+    private TestResponseObserver responseObserver;
 
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        commandBus = newCommandBus(commandStore, scheduler);
+        commandBus = spy(newCommandBus(commandStore, scheduler));
         log = spy(new CommandBus.ProblemLog());
         commandBus.setProblemLog(log);
         eventBus = spy(TestEventFactory.newEventBus(storageFactory));
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
-        handler = new CreateProjectHandler(newUuid(), eventBus);
+        createProjectHandler = new CreateProjectHandler(newUuid(), eventBus);
+        responseObserver = new TestResponseObserver();
     }
 
     @Test(expected = NullPointerException.class)
@@ -164,10 +166,10 @@ public class CommandBusShould {
             }
         });
 
-        final String projectId = newUuid();
-        assertEquals(Responses.ok(), commandBus.validate(createProjectMsg(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(startProjectMsg(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(addTaskMsg(projectId)));
+
+        assertTrue(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+        assertTrue(commandBus.isSupportedCommand(CommandClass.of(StartProject.class)));
+        assertTrue(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
     }
 
     /**
@@ -189,23 +191,9 @@ public class CommandBusShould {
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
 
-        final String projectId = newUuid();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(projectId))));
-        assertTrue(isUnsupportedCommand(commandBus.validate(startProjectMsg(projectId))));
-        assertTrue(isUnsupportedCommand(commandBus.validate(addTaskMsg(projectId))));
-    }
-
-    @Test
-    public void return_invalid_command_response_if_command_is_invalid() {
-        commandBus.register(handler);
-        final MessageValidator validator = mock(MessageValidator.class);
-        doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
-                .when(validator)
-                .validate(any(Message.class));
-        commandBus.setMessageValidator(validator);
-
-        final Response response = commandBus.validate(createProjectMsg(newUuid()));
-        assertTrue(isInvalidMessage(response));
+        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+        assertFalse(commandBus.isSupportedCommand(CommandClass.of(StartProject.class)));
+        assertFalse(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
     }
 
     //
@@ -215,7 +203,7 @@ public class CommandBusShould {
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
-        commandBus.register(handler);
+        commandBus.register(createProjectHandler);
         commandBus.register(createProjectDispatcher);
     }
 
@@ -223,7 +211,7 @@ public class CommandBusShould {
     public void do_not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
         final CommandDispatcher createProjectDispatcher = new CreateProjectDispatcher();
         commandBus.register(createProjectDispatcher);
-        commandBus.register(handler);
+        commandBus.register(createProjectHandler);
     }
 
     private static class CreateProjectHandler extends CommandHandler {
@@ -258,21 +246,18 @@ public class CommandBusShould {
 
     @Test
     public void unregister_handler() {
-        commandBus.register(handler);
-        commandBus.unregister(handler);
-        final String projectId = newUuid();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(projectId))));
+        commandBus.register(createProjectHandler);
+        commandBus.unregister(createProjectHandler);
+        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
     }
 
     @Test
     public void validate_commands_both_dispatched_and_handled() {
-        final CommandDispatcher dispatcher = new AddTaskDispatcher();
-        commandBus.register(handler);
-        commandBus.register(dispatcher);
+        commandBus.register(createProjectHandler);
+        commandBus.register(new AddTaskDispatcher());
 
-        final String projectId = newUuid();
-        assertEquals(Responses.ok(), commandBus.validate(createProjectMsg(projectId)));
-        assertEquals(Responses.ok(), commandBus.validate(addTaskMsg(projectId)));
+        assertTrue(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+        assertTrue(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
@@ -320,20 +305,121 @@ public class CommandBusShould {
 
     @Test
     public void remove_all_handlers_on_close() throws Exception {
-        commandBus.register(handler);
+        commandBus.register(createProjectHandler);
 
         commandBus.close();
-        assertTrue(isUnsupportedCommand(commandBus.validate(createProjectMsg(newUuid()))));
+        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+    }
+
+    //
+    // Command validation tests
+    //----------------------------------------
+
+    @Test
+    public void verify_namespace_attribute_if_multitenant() {
+        commandBus.setMultitenant(true);
+        commandBus.register(createProjectHandler);
+
+        final TestResponseObserver observer = new TestResponseObserver();
+        final Command cmd = createProjectCmd();
+
+        commandBus.post(cmd, observer);
+
+        final Throwable cause = observer.getThrowable()
+                                        .getCause();
+        assertEquals(InvalidCommandException.class, cause.getClass());
+
+        final InvalidCommandException exception = (InvalidCommandException) cause;
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), exception.getError()
+                                                                                    .getCode());
     }
 
     @Test
+    public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
+        final Command command = commandFactory.create(addTaskMsg(newUuid()));
+
+        commandBus.post(command, responseObserver);
+
+        final Throwable cause = responseObserver.getThrowable()
+                                                .getCause();
+        assertEquals(UnsupportedCommandException.class, cause.getClass());
+
+        final UnsupportedCommandException exception = (UnsupportedCommandException) cause;
+        assertEquals(CommandValidationError.UNSUPPORTED_COMMAND.getNumber(), exception.getError()
+                                                                                      .getCode());
+
+    }
+
+    @Test
+    public void return_InvalidCommandException_if_command_is_invalid() {
+        commandBus.register(createProjectHandler);
+        final Command command = createProjectCmd();
+        final Command commandWithNoContext = command.toBuilder()
+                                                    .setContext(CommandContext.getDefaultInstance())
+                                                    .build();
+
+        commandBus.post(commandWithNoContext, responseObserver);
+
+        final Throwable throwable = responseObserver.getThrowable();
+        assertNotNull(throwable);
+
+        final Throwable cause = responseObserver.getThrowable()
+                                                .getCause();
+        assertEquals(InvalidCommandException.class, cause.getClass());
+
+        final InvalidCommandException exception = (InvalidCommandException) cause;
+        final Error error = exception.getError();
+
+        assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
+        assertEquals(CommandValidationError.INVALID_COMMAND.getNumber(), error.getCode());
+    }
+
+    private static class TestResponseObserver implements StreamObserver<Response> {
+
+        private Response responseHandled;
+        private boolean completed;
+        private Throwable throwable;
+
+        @Override
+        public void onNext(Response response) {
+            this.responseHandled = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.completed = true;
+        }
+
+        /* package */ Response getResponseHandled() {
+            return responseHandled;
+        }
+
+        /* package */ Throwable getThrowable() {
+            return this.throwable;
+        }
+
+        /* package */ boolean isCompleted() {
+            return this.completed;
+        }
+    }
+
+    //
+    // Tests of command processing
+    //---------------------------------------------
+
+    @Test
     public void invoke_handler_when_command_posted() {
-        commandBus.register(handler);
+        commandBus.register(createProjectHandler);
 
         final Command command = commandFactory.create(createProjectMsg(newUuid()));
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
-        assertTrue(handler.wasHandlerInvoked());
+        assertTrue(createProjectHandler.wasHandlerInvoked());
     }
 
     @Test
@@ -343,24 +429,17 @@ public class CommandBusShould {
 
         final Command command = commandFactory.create(addTaskMsg(newUuid()));
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         assertTrue(dispatcher.wasDispatcherInvoked());
     }
 
-    @Test(expected = UnsupportedCommandException.class)
-    public void throw_exception_when_there_is_no_neither_handler_nor_dispatcher() {
-        final Command command = commandFactory.create(addTaskMsg(newUuid()));
-
-        commandBus.post(command);
-    }
-
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
-        commandBus.register(handler);
+        commandBus.register(createProjectHandler);
         final Command command = commandFactory.create(createProjectMsg(newUuid()));
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         // See that we called CommandStore only once with the right command ID.
         verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
@@ -372,7 +451,7 @@ public class CommandBusShould {
         final IOException exception = givenThrowingDispatcher();
         final Command command = commandFactory.create(createProjectMsg(newUuid()));
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         // Verify we updated the status.
         verify(commandStore, times(1)).updateStatus(eq(command.getContext()
@@ -385,10 +464,11 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
         final TestFailure failure = new TestFailure();
         final Command command = givenThrowingHandler(failure);
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = command.getContext()
+                                           .getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         // Verify we updated the status.
 
@@ -401,10 +481,11 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
         final RuntimeException exception = new IllegalStateException("handler throws");
         final Command command = givenThrowingHandler(exception);
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = command.getContext()
+                                           .getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         // Verify we updated the status.
         verify(commandStore, times(1)).updateStatus(eq(commandId), eq(exception));
@@ -416,10 +497,11 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
         final Throwable throwable = new TestThrowable();
         final Command command = givenThrowingHandler(throwable);
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = command.getContext()
+                                           .getCommandId();
         final Message commandMessage = Commands.getMessage(command);
 
-        commandBus.post(command);
+        commandBus.post(command, responseObserver);
 
         // Verify we updated the status.
         verify(commandStore, times(1)).updateStatus(eq(commandId), eq(Errors.fromThrowable(throwable)));
@@ -448,12 +530,57 @@ public class CommandBusShould {
         return throwable;
     }
 
+
+    //
+    // Tests of storage
+    //---------------------------------------
+
+    @Test
+    public void stores_the_command_when_posted() {
+        commandBus.register(createProjectHandler);
+        final Command cmd = createProjectCmd();
+        final TestResponseObserver observer = new TestResponseObserver();
+
+        commandBus.post(cmd, observer);
+
+        assertEquals(ok(), observer.getResponseHandled());
+        verify(commandBus, times(1)).store(cmd);
+    }
+
+    @Test
+    public void store_invalid_command_with_error_status() {
+        final TestResponseObserver responseObserver = new TestResponseObserver();
+
+        final Command cmd = createProjectCmd();
+        commandBus.post(cmd, responseObserver);
+
+        verify(commandBus, times(1)).storeWithError(eq(cmd), any(InvalidCommandException.class));
+    }
+
+    //TODO:2016-05-08:alexander.yevsyukov: We may want to change this to make the command delivery more reliable.
+    @Test
+    public void do_not_store_command_if_command_is_scheduled() {
+        commandBus.register(createProjectHandler);
+        final Command cmd = newCreateProjectCommand(/*delay=*/minutes(1));
+
+        commandBus.post(cmd, responseObserver);
+
+        verify(commandStore, never()).store(cmd);
+        assertTrue(responseObserver.isCompleted());
+    }
+
+    //
+    // Test of scheduling
+    //-----------------------------------------
+
     @Test
     public void schedule_command_if_delay_is_set() {
-        final int delayMsec = 1100;
-        final Command cmd = newCommand(/*delay=*/milliseconds(delayMsec));
+        commandBus.register(createProjectHandler);
 
-        commandBus.post(cmd);
+        final int delayMsec = 1100;
+        final Command cmd = newCreateProjectCommand(/*delay=*/milliseconds(delayMsec));
+
+        commandBus.post(cmd, responseObserver);
 
         verify(scheduler, times(1)).schedule(cmd);
         verify(scheduler, never()).post(cmd);
@@ -465,31 +592,25 @@ public class CommandBusShould {
         commandBus.register(new CreateProjectHandler(newUuid(), eventBus));
         final Command cmd = commandFactory.create(createProjectMsg(newUuid()));
 
-        commandBus.post(cmd);
+        commandBus.post(cmd, responseObserver);
 
         verify(scheduler, never()).schedule(cmd);
+        assertTrue(responseObserver.isCompleted());
     }
 
-    @Test
-    public void do_not_store_command_if_command_is_scheduled() {
-        final Command cmd = newCommand(/*delay=*/minutes(1));
-
-        commandBus.post(cmd);
-
-        verify(commandStore, never()).store(cmd);
-    }
-
+    @Ignore // Decide on the below comment.
+    //TODO:2016-05-08:alexander.yevsyukov: Shouldn't we return Status.FAILED_PRECONDITION in response instead?
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_post_scheduled_cmd_and_no_scheduler_is_set() {
         final CommandBus commandBus = CommandBus.newBuilder()
-                .setCommandStore(commandStore)
-                .build();
-        final Command cmd = newCommand(/*delay=*/minutes(1));
+                                                .setCommandStore(commandStore)
+                                                .build();
+        final Command cmd = newCreateProjectCommand(/*delay=*/minutes(1));
 
-        commandBus.post(cmd);
+        commandBus.post(cmd, responseObserver);
     }
 
-    private static Command newCommand(Duration delay) {
+    private static Command newCreateProjectCommand(Duration delay) {
         final CommandContext context = createCommandContext(delay);
         return Commands.create(createProjectMsg(newUuid()), context);
     }

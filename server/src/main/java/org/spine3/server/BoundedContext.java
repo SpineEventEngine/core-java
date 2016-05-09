@@ -26,8 +26,6 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Failure;
@@ -37,7 +35,6 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.CommandValidation;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
@@ -54,9 +51,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Responses.isOk;
-import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
@@ -212,45 +207,11 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
     @Override
     public void post(Command command, StreamObserver<Response> responseObserver) {
-        final Response response = validateCommand(command);
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-        if (isOk(response)) {
-            commandBus.post(command);
-        } else if (isUnsupportedCommand(response)) {
-            storeUnsupportedCommand(command, response);
-        }
+        checkNotNull(command);
+        checkNotNull(responseObserver);
+        commandBus.post(command, responseObserver);
     }
 
-    private void storeUnsupportedCommand(Command command, Response response) {
-        commandBus.store(command);
-        final CommandId id = command.getContext().getCommandId();
-        commandBus.getCommandStatusService().setToError(id, response.getError());
-    }
-
-    private Response validateCommand(Command command) {
-        final Message message = getMessage(command);
-        final CommandContext context = command.getContext();
-        final Response response;
-        if (isMultitenant() && !context.hasNamespace()) {
-            response = CommandValidation.unknownNamespace(message, context);
-        } else {
-            response = validateCommandMessage(message);
-        }
-        return response;
-    }
-
-    /**
-     * Validates the incoming command message.
-     *
-     * @param commandMessage the command message to validate
-     * @return a response with {@code OK} value if the command is valid, or
-     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
-     */
-    protected Response validateCommandMessage(Message commandMessage) {
-        final Response result = commandBus.validate(commandMessage);
-        return result;
-    }
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
@@ -395,6 +356,8 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             checkNotNull(storageFactory, "storageFactory must be set");
             checkNotNull(commandBus, "commandDispatcher must be set");
             checkNotNull(eventBus, "eventBus must be set");
+
+            commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 

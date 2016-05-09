@@ -20,17 +20,20 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.protobuf.Message;
+import io.grpc.Status;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.command.error.InvalidCommandException;
+import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.validate.MessageValidator;
@@ -42,9 +45,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
-import static org.spine3.server.command.CommandValidation.invalidCommand;
-import static org.spine3.server.command.CommandValidation.unsupportedCommand;
-import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -63,19 +63,21 @@ public class CommandBus implements AutoCloseable {
     @Nullable
     private final CommandScheduler scheduler;
     
-    private ProblemLog problemLog = new ProblemLog();
     private final CommandStatusService commandStatusService;
+
+    /**
+     * If {@code true} the Bounded Context to which this Command Bus belongs is multi-tenant,
+     * and therefore commands posted to this Command Bus must have the {@code namespace} attribute.
+     */
+    private boolean multitenant;
+    private ProblemLog problemLog = new ProblemLog();
     private MessageValidator messageValidator;
 
     private CommandBus(Builder builder) {
         commandStore = builder.getCommandStore();
         scheduler = builder.getScheduler();
-        if (scheduler != null) {
-            //TODO:2016-05-08:alexander.yevsyukov: We still have circular dependency, but now indirectly. Need to fix.
-            scheduler.setPostFunction(newPostFunction());
-        }
         commandStatusService = new CommandStatusService(commandStore);
-        messageValidator = new MessageValidator();
+        messageValidator = builder.messageValidator;
     }
 
     /**
@@ -129,60 +131,112 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Verifies that the command message can be posted to this {@code CommandBus}.
+     * Directs the command to be dispatched or handler.
      *
-     * <p>A command can be posted if its message has either dispatcher or handler registered with
-     * this {@code CommandBus}.
-     * The message also must satisfy validation constraints defined in its Protobuf type.
+     * <p>If the command has scheduling attributes, it will be posted for execution by the configured
+     * scheduled according to values of those scheduling attributes.
      *
-     * @param command a command message to check
-     * @return the result of {@link Responses#ok()} if the command is valid and supported,
-     *         {@link CommandValidation#invalidCommand(Message, List)} or
-     *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
-     */
-    public Response validate(Message command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        if (isUnsupportedCommand(commandClass)) {
-            return unsupportedCommand(command);
-        }
-        final List<ConstraintViolation> violations = messageValidator.validate(command);
-        if (!violations.isEmpty()) {
-            return invalidCommand(command, violations);
-        }
-        return Responses.ok();
-    }
-
-    private boolean isUnsupportedCommand(CommandClass commandClass) {
-        final boolean isUnsupported = !isDispatcherRegistered(commandClass) && !isHandlerRegistered(commandClass);
-        return isUnsupported;
-    }
-
-    /**
-     * Directs a command request to the corresponding handler.
+     * <p>If a command does not have neither dispatcher nor handler, the error is returned via
+     * {@link StreamObserver#onError(Throwable)} call with {@link UnsupportedCommandException} as the cause.
      *
      * @param command the command to be processed
-     * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
-     *                                     the class of the passed command
+     * @param responseObserver the observer to return the result of the call
      */
-    public void post(Command command) {
-        checkNotDefault(command);
-        if (isScheduled(command)) {
-            schedule(command);
+    public void post(Command command, StreamObserver<Response> responseObserver) {
+        final CommandClass commandClass = CommandClass.of(command);
+
+        // If the command is not supported, return as error.
+        if (!isSupportedCommand(commandClass)) {
+            handleUnsupported(command, responseObserver);
             return;
         }
+
+        if (!handleValidation(command, responseObserver)) {
+            return;
+        }
+
+        if (isScheduled(command)) {
+            //TODO:2016-05-08:alexander.yevsyukov: Do store command if it was scheduled and update its status when it's executed.
+            // It is needed to make command delivery more reliable. E.g. if a delay is long enough, not stored message
+            // could be lost if the server, which holds it in memory is shut down.
+            schedule(command);
+            responseObserver.onNext(Responses.ok());
+            responseObserver.onCompleted();
+            return;
+        }
+
         store(command);
-        final CommandClass commandClass = CommandClass.of(command);
+
+        responseObserver.onNext(Responses.ok());
+
+        doPost(command);
+
+        responseObserver.onCompleted();
+    }
+
+    /* package */ void doPost(Command command) {
+        final Message message = getMessage(command);
+        final CommandClass commandClass = CommandClass.of(message);
+        final CommandContext commandContext = command.getContext();
+
         if (isDispatcherRegistered(commandClass)) {
             dispatch(command);
-            return;
+        } else if (isHandlerRegistered(commandClass)) {
+            invokeHandler(message, commandContext);
         }
-        if (isHandlerRegistered(commandClass)) {
-            final Message message = getMessage(command);
-            final CommandContext context = command.getContext();
-            invokeHandler(message, context);
-            return;
+    }
+
+    private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
+        final List<ConstraintViolation> violations = CommandValidator.instance().validate(command);
+        if (!violations.isEmpty()) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT
+                            .withCause(InvalidCommandException.onConstraintViolations(command, violations))
+                            .asRuntimeException()
+            );
+            return false;
         }
-        throw new UnsupportedCommandException(getMessage(command));
+
+        final CommandContext context = command.getContext();
+
+        if (isMultitenant() && !context.hasNamespace()) {
+            responseObserver.onError(
+                    Status.INVALID_ARGUMENT
+                            .withCause(InvalidCommandException.onMissingNamespace(command))
+                            .asRuntimeException()
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
+        final UnsupportedCommandException exception = new UnsupportedCommandException(command);
+        storeWithError(command, exception);
+        responseObserver.onError(
+                Status.INVALID_ARGUMENT
+                        .withCause(exception)
+                        .asRuntimeException()
+        );
+    }
+
+    @VisibleForTesting
+    /* package */ void storeWithError(Command command, Exception exception) {
+        store(command);
+        //TODO:2016-05-08:alexander.yevsyukov: Support storage method that can make storing command with error in one call.
+        commandStatusService.setToError(command.getContext().getCommandId(), exception);
+    }
+
+    @VisibleForTesting
+    /* package */ boolean isSupportedCommand(CommandClass commandClass) {
+        final boolean dispatcherRegistered = isDispatcherRegistered(commandClass);
+        final boolean handlerRegistered = isHandlerRegistered(commandClass);
+        return (dispatcherRegistered || handlerRegistered);
+    }
+
+    private boolean isMultitenant() {
+        return this.multitenant;
     }
 
     /**
@@ -244,6 +298,26 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
+     * Sets the multitenancy status of the {@code CommandBus}.
+     *
+     * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
+     */
+    @Internal
+    public void setMultitenant(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    @VisibleForTesting
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
+    }
+
+    @VisibleForTesting
+    /* package */ void setMessageValidator(MessageValidator messageValidator) {
+        this.messageValidator = messageValidator;
+    }
+
+    /**
      * Convenience wrapper for logging errors and warnings.
      */
     /* package */ static class ProblemLog {
@@ -271,22 +345,13 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    @VisibleForTesting
-    /* package */ void setProblemLog(ProblemLog problemLog) {
-        this.problemLog = problemLog;
-    }
-
-    @VisibleForTesting
-    /* package */ void setMessageValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
-    }
-
     /**
      * Stores a command to the storage.
      *
      * @param command a command to store
      */
-    public void store(Command command) {
+    @VisibleForTesting
+    /* package */ void store(Command command) {
         commandStore.store(command);
     }
 
@@ -302,19 +367,6 @@ public class CommandBus implements AutoCloseable {
 
     private CommandDispatcher getDispatcher(CommandClass commandClass) {
         return dispatcherRegistry.getDispatcher(commandClass);
-    }
-
-    private Function<Command, Command> newPostFunction() {
-        final Function<Command, Command> function = new Function<Command, Command>() {
-            @Nullable
-            @Override
-            public Command apply(@Nullable Command command) {
-                //noinspection ConstantConditions
-                post(command);
-                return command;
-            }
-        };
-        return function;
     }
 
     @Override
@@ -342,17 +394,21 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Constructs a command bus.
+     * Constructs a Command Bus.
      */
     public static class Builder {
 
         private CommandStore commandStore;
         @Nullable
         private CommandScheduler scheduler;
+        private MessageValidator messageValidator = new MessageValidator();
 
         public CommandBus build() {
             checkNotNull(commandStore, "Command store must be set.");
             final CommandBus commandBus = new CommandBus(this);
+            if (scheduler != null) {
+                scheduler.setCommandBus(commandBus);
+            }
             return commandBus;
         }
 
@@ -379,6 +435,12 @@ public class CommandBus implements AutoCloseable {
         @Nullable
         public CommandScheduler getScheduler() {
             return scheduler;
+        }
+
+        @Internal
+        /* package */ Builder setMessageValidator(MessageValidator messageValidator) {
+            this.messageValidator = messageValidator;
+            return this;
         }
     }
 }

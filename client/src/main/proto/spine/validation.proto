@@ -62,7 +62,7 @@ extend google.protobuf.FieldOptions {
 // A validation constraint violation for a message field.
 message ConstraintViolation {
     // An error message format string for this constraint violation.
-    // Contains `%s` format specifiers (or no ones).
+    // Contains `%s` format specifiers if the violation has one or more parameters.
     string msg_format = 1;
 
     // Parameters (as strings) referenced by the format specifiers in the error message format string.

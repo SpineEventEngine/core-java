@@ -26,6 +26,7 @@ import org.spine3.base.UserId;
 
 import static org.junit.Assert.*;
 import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -41,7 +42,7 @@ public class ClientUtilShould {
     public void generate_command_Ids() {
         final CommandId result = generateId();
 
-        assertFalse(result.getUuid().isEmpty());
+        assertFalse(idToString(result).isEmpty());
     }
 
     @Test

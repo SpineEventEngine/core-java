@@ -17,22 +17,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
 
-import com.google.protobuf.Message;
+package org.spine3.server.command.error;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Value;
+import org.spine3.base.Command;
+import org.spine3.base.Error;
+
+import java.util.Map;
 
 /**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
+ * Abstract base for exceptions related to commands.
  *
- * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
-public class UnsupportedCommandException extends RuntimeException {
+public abstract class CommandException extends RuntimeException {
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+    private final Command command;
+    private final Error error;
+
+    public CommandException(String messageText, Command command, Error error) {
+        super(messageText);
+        this.error = error;
+        this.command = command;
+    }
+
+    public static Map<String, Value> commandTypeAttribute(String commandType) {
+        return ImmutableMap.of(Attribute.COMMAND_TYPE_NAME, Value.newBuilder().setStringValue(commandType).build());
+    }
+
+    public Command getCommand() {
+        return command;
+    }
+
+    public Error getError() {
+        return error;
     }
 
     private static final long serialVersionUID = 0L;
 
+    /**
+     * Attribute names for command-related business failures.
+     */
+    public interface Attribute {
+        String COMMAND_TYPE_NAME = "commandType";
+    }
 }

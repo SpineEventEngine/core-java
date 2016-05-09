@@ -42,5 +42,5 @@ public class MissingEntityIdException extends RuntimeException {
         return message;
     }
 
-    private static final long serialVersionUID = 348L;
+    private static final long serialVersionUID = 0L;
 }

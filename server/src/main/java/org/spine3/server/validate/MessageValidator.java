@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
@@ -28,8 +29,6 @@ import org.spine3.base.FieldPath;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
-
-import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * Validates messages according to Spine custom protobuf options and provides constraint violations found.
@@ -52,7 +51,8 @@ public class MessageValidator {
 
     /**
      * Creates a new validator instance.
-     * Use this constructor for inner messages (which are marked with "valid" option in Protobuf).
+     *
+     * <p>Use this constructor for inner messages (which are marked with "valid" option in Protobuf).
      *
      * @param rootFieldPath the path to the message field which is the root for this message
      */
@@ -66,7 +66,7 @@ public class MessageValidator {
      * @param message a message to validate
      */
     public List<ConstraintViolation> validate(Message message) {
-        final List<ConstraintViolation> result = newLinkedList();
+        final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
@@ -75,6 +75,6 @@ public class MessageValidator {
             final List<ConstraintViolation> violations = validator.validate();
             result.addAll(violations);
         }
-        return result;
+        return result.build();
     }
 }

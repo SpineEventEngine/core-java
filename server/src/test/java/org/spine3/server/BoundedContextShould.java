@@ -20,17 +20,14 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandValidationError;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.UserId;
@@ -65,12 +62,10 @@ import org.spine3.testdata.TestAggregateIdFactory;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Responses.isUnsupportedCommand;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -151,31 +146,16 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
+    public void post_commands_to_CommandBus() {
         final TestResponseObserver responseObserver = new TestResponseObserver();
         final CommandBus commandBus = boundedContext.getCommandBus();
 
         final Command cmd = createProjectCmd();
         boundedContext.post(cmd, responseObserver);
 
-        final Response response = responseObserver.getResponseHandled();
-        assertTrue(isUnsupportedCommand(response));
-        verify(commandBus, times(1)).store(cmd);
-        verify(commandBus, times(1)).getCommandStatusService();
+        verify(commandBus, times(1)).post(cmd, responseObserver);
     }
 
-    @Test
-    public void post_Command_and_store_it() {
-        registerAll();
-        final Command cmd = createProjectCmd(userId, projectId, getCurrentTime());
-        final TestResponseObserver observer = new TestResponseObserver();
-
-        boundedContext.post(cmd, observer);
-
-        assertEquals(ok(), observer.getResponseHandled());
-        verify(boundedContext.getCommandBus(), times(1)).store(cmd);
-    }
-    
     @Test
     public void notify_integration_event_subscribers() {
         registerAll();
@@ -190,25 +170,14 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void verify_namespace_attribute_if_multitenant() {
+    public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
-                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandBus(newCommandBus(storageFactory))
-                .setEventBus(newEventBus(storageFactory))
-                .setMultitenant(true)
-                .build();
-
-        final TestResponseObserver observer = new TestResponseObserver();
-
-        final Command cmd = Command.newBuilder()
-                // Pass empty command so that we have something valid to unpack in the context.
-                .setMessage(Any.pack(StringValue.getDefaultInstance()))
-                .build();
-        bc.post(cmd, observer);
-
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled()
-                                                                                   .getError()
-                                                                                   .getCode());
+                                                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                .setCommandBus(newCommandBus(storageFactory))
+                                                .setEventBus(newEventBus(storageFactory))
+                                                .setMultitenant(true)
+                                                .build();
+        assertTrue(bc.isMultitenant());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {
