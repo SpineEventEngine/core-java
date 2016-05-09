@@ -77,7 +77,7 @@ public class CommandValidator {
         result.addAll(messageViolations);
 
         final CommandContext context = command.getContext();
-        final String commandId = idToString(context.getCommandId()).trim();
+        final String commandId = idToString(context.getCommandId());
         if (commandId.isEmpty()) {
             result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK).build());
         }
@@ -120,5 +120,4 @@ public class CommandValidator {
     public static CommandValidator instance() {
         return LogSingleton.INSTANCE.value;
     }
-
 }
