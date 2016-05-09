@@ -72,6 +72,13 @@ public class CommandsShould {
     }
 
     @Test
+    public void generate_command_ids() {
+        final CommandId id = Commands.generateId();
+
+        assertFalse(idToString(id).isEmpty());
+    }
+
+    @Test
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());

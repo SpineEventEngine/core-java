@@ -21,28 +21,19 @@
 package org.spine3.client;
 
 import org.junit.Test;
-import org.spine3.base.CommandId;
 import org.spine3.base.UserId;
 
-import static org.junit.Assert.*;
-import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Identifiers.idToString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ClientUtilShould {
+public class UserUtilShould {
 
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(UserUtil.class));
-    }
-
-    @Test
-    public void generate_command_Ids() {
-        final CommandId result = generateId();
-
-        assertFalse(idToString(result).isEmpty());
     }
 
     @Test
@@ -61,5 +52,4 @@ public class ClientUtilShould {
     public void do_not_accept_null_UseId_value() {
         newUserId(null);
     }
-
 }
