@@ -51,7 +51,14 @@ public class InvalidCommandException extends CommandException {
         super(messageText, command, error);
     }
 
-    public static InvalidCommandException onConstraintViolations(Command command, Iterable<ConstraintViolation> violations) {
+    /**
+     * Creates an exception instance for a command message, which has fields that violate validation constraint(s).
+     *
+     * @param command an invalid command
+     * @param violations constraint violations for the command message
+     */
+    public static InvalidCommandException onConstraintViolations(Command command,
+                                                                 Iterable<ConstraintViolation> violations) {
         final Error error = invalidCommandMessageError(Commands.getMessage(command), violations, MSG_VALIDATION_ERROR);
         final String text = MSG_VALIDATION_ERROR + " Message class: " + CommandClass.of(command) +
                 " See Error.getValidationError() for details.";
@@ -60,24 +67,27 @@ public class InvalidCommandException extends CommandException {
 
     /**
      * Creates an instance of {@code Error} for a command message, which has fields that violate
-     * validation constraint.
+     * validation constraint(s).
      */
     private static Error invalidCommandMessageError(Message commandMessage,
-            Iterable<ConstraintViolation> violations,
-            String errorText) {
-        final String commandType = commandMessage.getDescriptorForType().getFullName();
+                                                    Iterable<ConstraintViolation> violations,
+                                                    String errorText) {
         final ValidationError validationError = ValidationError.newBuilder()
-                                                               .addAllConstraintViolation(violations)
-                                                               .build();
-        return Error.newBuilder()
-                                 .setType(CommandValidationError.getDescriptor().getFullName())
-                                 .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
-                                 .setValidationError(validationError)
-                                 .putAllAttributes(commandTypeAttribute(commandType))
-                                 .setMessage(errorText)
-                                 .build();
+                .addAllConstraintViolation(violations)
+                .build();
+        final Error.Builder error = Error.newBuilder()
+                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
+                .setValidationError(validationError)
+                .setMessage(errorText)
+                .putAllAttributes(commandTypeAttribute(commandMessage));
+        return error.build();
     }
 
+    /**
+     * Creates an exception instance for a command with missing namespace attribute, which is required
+     * in a multitenant application.
+     */
     public static InvalidCommandException onMissingNamespace(Command command) {
         final Message commandMessage = Commands.getMessage(command);
         final CommandContext context = command.getContext();
@@ -87,24 +97,20 @@ public class InvalidCommandException extends CommandException {
                 TypeName.of(commandMessage).value(),
                 CommandClass.of(commandMessage).value(),
                 idToString(context.getCommandId()));
-
-        final Error error = unknownNamespaceError(commandMessage, context, errMsg);
-
+        final Error error = unknownNamespaceError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
-
 
     /**
      * Creates an error instance for a command with missing namespace attribute, which is required
      * in a multitenant application.
      */
-    public static Error unknownNamespaceError(Message commandMessage, CommandContext context, String errorText) {
-        final String commandType = commandMessage.getDescriptorForType().getFullName();
-        return Error.newBuilder()
-                                 .setType(CommandValidationError.getDescriptor().getFullName())
-                                 .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
-                                 .setMessage(errorText)
-                                 .putAllAttributes(commandTypeAttribute(commandType))
-                                 .build();
+    public static Error unknownNamespaceError(Message commandMessage, String errorText) {
+        final Error.Builder error = Error.newBuilder()
+                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
+                .setMessage(errorText)
+                .putAllAttributes(commandTypeAttribute(commandMessage));
+        return error.build();
     }
 }

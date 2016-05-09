@@ -21,6 +21,7 @@
 package org.spine3.server.command.error;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Command;
 import org.spine3.base.Error;
@@ -37,25 +38,45 @@ public abstract class CommandException extends RuntimeException {
     private final Command command;
     private final Error error;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param messageText an error message text
+     * @param command a related command
+     * @param error an error occurred
+     */
     public CommandException(String messageText, Command command, Error error) {
         super(messageText);
-        this.error = error;
         this.command = command;
+        this.error = error;
     }
 
-    public static Map<String, Value> commandTypeAttribute(String commandType) {
-        return ImmutableMap.of(Attribute.COMMAND_TYPE_NAME, Value.newBuilder().setStringValue(commandType).build());
+    /**
+     * Returns a map with a command type attribute.
+     *
+     * @param commandMessage a command message to get the type from
+     */
+    public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
+        final String commandType = commandMessage.getDescriptorForType().getFullName();
+        final Value value = Value.newBuilder()
+                                 .setStringValue(commandType)
+                                 .build();
+        return ImmutableMap.of(Attribute.COMMAND_TYPE_NAME, value);
     }
 
+    /**
+     * Returns a related command.
+     */
     public Command getCommand() {
         return command;
     }
 
+    /**
+     * Returns an error occurred.
+     */
     public Error getError() {
         return error;
     }
-
-    private static final long serialVersionUID = 0L;
 
     /**
      * Attribute names for command-related business failures.
@@ -63,4 +84,6 @@ public abstract class CommandException extends RuntimeException {
     public interface Attribute {
         String COMMAND_TYPE_NAME = "commandType";
     }
+
+    private static final long serialVersionUID = 0L;
 }

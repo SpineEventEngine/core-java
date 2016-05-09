@@ -45,8 +45,8 @@ public class UnsupportedCommandException extends CommandException {
         final TypeName typeName = TypeName.ofCommand(command);
         Commands.getMessage(command).getClass();
         final String result = String.format(
-                "There is no registered handler or dispatcher for the command of class: `%s`. " +
-                        "Protobuf type: `%s`", commandClass, typeName
+                "There is no registered handler or dispatcher for the command of class: `%s`. Protobuf type: `%s`",
+                commandClass, typeName
         );
         return result;
     }
@@ -54,15 +54,15 @@ public class UnsupportedCommandException extends CommandException {
     /**
      * Creates an instance of unsupported command error.
      */
-    private static Error unsupportedCommandError(Message command) {
-        final String commandType = command.getDescriptorForType().getFullName();
+    private static Error unsupportedCommandError(Message commandMessage) {
+        final String commandType = commandMessage.getDescriptorForType().getFullName();
         final String errMsg = String.format("Commands of the type `%s` are not supported.", commandType);
-        return Error.newBuilder()
-                                 .setType(CommandValidationError.getDescriptor().getFullName())
-                                 .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
-                                 .putAllAttributes(commandTypeAttribute(commandType))
-                                 .setMessage(errMsg)
-                                 .build();
+        final Error.Builder error = Error.newBuilder()
+                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
+                .putAllAttributes(commandTypeAttribute(commandMessage))
+                .setMessage(errMsg);
+        return error.build();
     }
 
     private static final long serialVersionUID = 0L;
