@@ -167,9 +167,9 @@ public class CommandBusShould {
         });
 
 
-        assertTrue(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
-        assertTrue(commandBus.isSupportedCommand(CommandClass.of(StartProject.class)));
-        assertTrue(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
+        assertIsSupportedCmd(CreateProject.class, true);
+        assertIsSupportedCmd(StartProject.class, true);
+        assertIsSupportedCmd(AddTask.class, true);
     }
 
     /**
@@ -191,9 +191,9 @@ public class CommandBusShould {
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
 
-        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
-        assertFalse(commandBus.isSupportedCommand(CommandClass.of(StartProject.class)));
-        assertFalse(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
+        assertIsSupportedCmd(CreateProject.class, false);
+        assertIsSupportedCmd(StartProject.class, false);
+        assertIsSupportedCmd(AddTask.class, false);
     }
 
     //
@@ -248,7 +248,7 @@ public class CommandBusShould {
     public void unregister_handler() {
         commandBus.register(createProjectHandler);
         commandBus.unregister(createProjectHandler);
-        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+        assertIsSupportedCmd(CreateProject.class, false);
     }
 
     @Test
@@ -256,8 +256,8 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        assertTrue(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
-        assertTrue(commandBus.isSupportedCommand(CommandClass.of(AddTask.class)));
+        assertIsSupportedCmd(CreateProject.class, true);
+        assertIsSupportedCmd(AddTask.class, true);
     }
 
     private static class AddTaskDispatcher implements CommandDispatcher {
@@ -308,7 +308,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
 
         commandBus.close();
-        assertFalse(commandBus.isSupportedCommand(CommandClass.of(CreateProject.class)));
+        assertIsSupportedCmd(CreateProject.class, false);
     }
 
     //
@@ -613,6 +613,15 @@ public class CommandBusShould {
     private static Command newCreateProjectCommand(Duration delay) {
         final CommandContext context = createCommandContext(delay);
         return Commands.create(createProjectMsg(newUuid()), context);
+    }
+
+    private void assertIsSupportedCmd(Class<? extends Message> cmdClass, boolean isSupported) {
+        final CommandClass clazz = CommandClass.of(cmdClass);
+        if (isSupported) {
+            assertTrue(commandBus.isSupportedCommand(clazz));
+        } else {
+            assertFalse(commandBus.isSupportedCommand(clazz));
+        }
     }
 
     private static class TestFailure extends FailureThrowable {
