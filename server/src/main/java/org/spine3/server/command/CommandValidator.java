@@ -56,19 +56,17 @@ public class CommandValidator {
     public List<ConstraintViolation> validate(Command command) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         if (!command.hasMessage()) {
-            result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_MESSAGE_MUST_BE_SET).build());
+            result.add(newConstraintViolation(COMMAND_MESSAGE_MUST_BE_SET));
         }
         if (!command.hasContext()) {
-            result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_CONTEXT_MUST_BE_SET).build());
+            result.add(newConstraintViolation(COMMAND_CONTEXT_MUST_BE_SET));
         }
         final Message commandMessage = Commands.getMessage(command);
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
             if (targetIdString.equals(NULL_OR_EMPTY_ID)) {
-                result.add(ConstraintViolation.newBuilder()
-                                              .setMsgFormat(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK)
-                                              .build());
+                result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
         }
         final List<ConstraintViolation> messageViolations = new MessageValidator().validate(commandMessage);
@@ -76,11 +74,16 @@ public class CommandValidator {
         final CommandContext context = command.getContext();
         final String commandId = idToString(context.getCommandId());
         if (commandId.equals(NULL_OR_EMPTY_ID)) {
-            result.add(ConstraintViolation.newBuilder()
-                                          .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK)
-                                          .build());
+            result.add(newConstraintViolation(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK));
         }
         return result.build();
+    }
+
+    private static ConstraintViolation newConstraintViolation(String msgFormat) {
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                .setMsgFormat(msgFormat)
+                .build();
+        return violation;
     }
 
     public static void checkCommand(Command command) {
