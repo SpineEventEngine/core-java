@@ -55,20 +55,22 @@ import static org.spine3.base.Commands.*;
 public class CommandBus implements AutoCloseable {
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
+
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     private final CommandStore commandStore;
 
-    @Nullable
-    private final CommandScheduler scheduler;
-    
     private final CommandStatusService commandStatusService;
 
+    @Nullable
+    private final CommandScheduler scheduler;
+
     /**
-     * If {@code true} the Bounded Context to which this Command Bus belongs is multi-tenant,
-     * and therefore commands posted to this Command Bus must have the {@code namespace} attribute.
+     * Is {@code true} if the Bounded Context (to which this Command Bus belongs) is multi-tenant.
+     * Therefore commands posted to this Command Bus must have the {@code namespace} attribute.
      */
-    private boolean multitenant;
+    private boolean isMultitenant;
+
     private ProblemLog problemLog = new ProblemLog();
 
     private CommandBus(Builder builder) {
@@ -164,6 +166,14 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Directs a command to be dispatched or handled.
+     *
+     * <p>Logs exceptions which may occur during dispatching or handling and
+     * sets the command status to {@code error} or {@code failure} in the storage.
+     *
+     * @param command a command to post
+     */
     /* package */ void doPost(Command command) {
         final Message message = getMessage(command);
         final CommandClass commandClass = CommandClass.of(message);
@@ -199,7 +209,7 @@ public class CommandBus implements AutoCloseable {
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final UnsupportedCommandException exception = new UnsupportedCommandException(command);
-        storeWithError(command, exception);
+        storeWithErrorStatus(command, exception);
         responseObserver.onError(
                 Status.INVALID_ARGUMENT
                         .withCause(exception)
@@ -207,13 +217,26 @@ public class CommandBus implements AutoCloseable {
         );
     }
 
+    /**
+     * Stores a command with the error status.
+     *
+     * @param command a command to store
+     * @param exception an exception occurred during command processing
+     */
     @VisibleForTesting
-    /* package */ void storeWithError(Command command, Exception exception) {
+    /* package */ void storeWithErrorStatus(Command command, Exception exception) {
         store(command);
         //TODO:2016-05-08:alexander.yevsyukov: Support storage method that can make storing command with error in one call.
         commandStatusService.setToError(command.getContext().getCommandId(), exception);
     }
 
+    /**
+     * Checks if a command is supported by the Command Bus.
+     *
+     * @param commandClass a class of commands to check
+     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
+     *      for commands of this type, {@code false} otherwise
+     */
     @VisibleForTesting
     /* package */ boolean isSupportedCommand(CommandClass commandClass) {
         final boolean dispatcherRegistered = isDispatcherRegistered(commandClass);
@@ -223,7 +246,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     private boolean isMultitenant() {
-        return this.multitenant;
+        return this.isMultitenant;
     }
 
     /**
@@ -253,20 +276,24 @@ public class CommandBus implements AutoCloseable {
             handler.handle(msg, context);
             commandStatusService.setOk(commandId);
         } catch (InvocationTargetException e) {
-            final Throwable cause = e.getCause();
-            //noinspection ChainOfInstanceofChecks
-            if (cause instanceof Exception) {
-                final Exception exception = (Exception) cause;
-                problemLog.errorHandling(exception, msg, commandId);
-                commandStatusService.setToError(commandId, exception);
-            } else if (cause instanceof FailureThrowable){
-                final FailureThrowable failure = (FailureThrowable) cause;
-                problemLog.failureHandling(failure, msg, commandId);
-                commandStatusService.setToFailure(commandId, failure);
-            } else {
-                problemLog.errorHandlingUnknown(cause, msg, commandId);
-                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-            }
+            onHandlerException(msg, commandId, e);
+        }
+    }
+
+    private void onHandlerException(Message msg, CommandId commandId, InvocationTargetException e) {
+        final Throwable cause = e.getCause();
+        //noinspection ChainOfInstanceofChecks
+        if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+            problemLog.errorHandling(exception, msg, commandId);
+            commandStatusService.setToError(commandId, exception);
+        } else if (cause instanceof FailureThrowable){
+            final FailureThrowable failure = (FailureThrowable) cause;
+            problemLog.failureHandling(failure, msg, commandId);
+            commandStatusService.setToFailure(commandId, failure);
+        } else {
+            problemLog.errorHandlingUnknown(cause, msg, commandId);
+            commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
         }
     }
 
@@ -291,7 +318,7 @@ public class CommandBus implements AutoCloseable {
      */
     @Internal
     public void setMultitenant(boolean multitenant) {
-        this.multitenant = multitenant;
+        this.isMultitenant = multitenant;
     }
 
     @VisibleForTesting
@@ -361,20 +388,6 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
-    }
-
-    /**
-     * The logger instance used by {@code CommandBus}.
-     */
-    @VisibleForTesting
-    /* package */ static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
     /**
      * Constructs a Command Bus.
      */
@@ -417,5 +430,19 @@ public class CommandBus implements AutoCloseable {
         public CommandScheduler getScheduler() {
             return scheduler;
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
+    }
+
+    /**
+     * The logger instance used by {@code CommandBus}.
+     */
+    @VisibleForTesting
+    /* package */ static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

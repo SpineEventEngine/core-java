@@ -422,7 +422,7 @@ public class CommandBusShould {
         final Command cmd = createProjectCmd();
         commandBus.post(cmd, responseObserver);
 
-        verify(commandBus, times(1)).storeWithError(eq(cmd), any(InvalidCommandException.class));
+        verify(commandBus, times(1)).storeWithErrorStatus(eq(cmd), any(InvalidCommandException.class));
     }
 
     //TODO:2016-05-08:alexander.yevsyukov: We may want to change this to make the command delivery more reliable.
