@@ -88,31 +88,11 @@ public class Identifiers {
      *         the passed {@link Message} instance has no fields
      */
     public static <I> String idToString(@Nullable I id) {
-
         if (id == null) {
             return NULL_ID_OR_FIELD;
         }
-
-        /*
-           Localize conversion of built-in identifiers so that if their attributes
-           are changed from UUID values to something else, the code of transforming the to strings
-           stays the same.
-         */
-        //noinspection ChainOfInstanceofChecks
-        if (id instanceof CommandId) {
-            return ((CommandId) id).getUuid();
-        }
-        if (id instanceof EventId) {
-            return ((EventId) id).getUuid();
-        }
-
         String result;
-
-        final boolean isStringOrNumber = id instanceof String
-                || id instanceof Integer
-                || id instanceof Long;
-
-        if (isStringOrNumber) {
+        if (isStringOrNumber(id)) {
             result = id.toString();
         } else if (id instanceof Any) {
             final Message messageFromAny = fromAny((Any) id);
@@ -122,13 +102,17 @@ public class Identifiers {
         } else {
             throw unsupportedIdType(id);
         }
-
         if (isNullOrEmpty(result) || result.trim().isEmpty()) {
             result = NULL_ID_OR_FIELD;
         }
-
         result = result.trim();
+        return result;
+    }
 
+    private static <I> boolean isStringOrNumber(I id) {
+        final boolean result = id instanceof String
+                || id instanceof Integer
+                || id instanceof Long;
         return result;
     }
 
