@@ -58,7 +58,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.server.reflect.EventSubscriberMethod.PREDICATE;
 
 /**
  * An independent component that reacts to domain events in a cross-aggregate, eventually consistent manner.
@@ -157,6 +156,55 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
     }
 
     /**
+     * Creates a context for an event.
+     *
+     * <p>The context may optionally have custom attributes added by
+     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
+     *
+     * @param cmdContext     the context of the command, which processing caused the event
+     * @param event          the event for which to create the context
+     * @param currentState   the state of the process manager after the event was applied
+     * @param whenModified   the moment of the process manager modification for this event
+     * @param currentVersion the version of the process manager after the event was applied
+     * @return new instance of the {@code EventContext}
+     */
+    @CheckReturnValue
+    private EventContext createEventContext(CommandContext cmdContext,
+            Message event,
+            M currentState,
+            Timestamp whenModified,
+            int currentVersion) {
+        final EventId eventId = Events.generateId();
+        final Any producerId = idToAny(getId());
+        final CommandId commandId = cmdContext.getCommandId();
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(eventId)
+                                                         .setTimestamp(whenModified)
+                                                         .setCommandContext(cmdContext)
+                                                         .setProducerId(producerId)
+                                                         .setVersion(currentVersion);
+        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
+        return builder.build();
+    }
+
+    /**
+     * Adds custom attributes to an event context builder during the creation of the event context.
+     *
+     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
+     *
+     * @param builder        a builder for the event context
+     * @param commandId      the id of the command, which cased the event
+     * @param event          the event message
+     * @param currentState   the current state of the aggregate after the event was applied
+     * @param currentVersion the version of the process manager after the event was applied
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
+    protected void addEventContextAttributes(EventContext.Builder builder,
+            CommandId commandId, Message event, M currentState, int currentVersion) {
+        // Do nothing.
+    }
+
+    /**
      * Dispatches an event to the event subscriber method of the process manager.
      *
      * @param event the event to be handled by the process manager
@@ -173,6 +221,26 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             throw missingEventHandler(eventClass);
         }
         method.invoke(this, event, context);
+    }
+
+    /**
+     * Returns the set of the command types handled by the process manager.
+     *
+     * @param pmClass the process manager class to inspect
+     * @return immutable set of command classes or an empty set if no commands are handled
+     */
+    public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
+        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.PREDICATE);
+    }
+
+    /**
+     * Returns the set of event classes handled by the process manager.
+     *
+     * @param pmClass the process manager class to inspect
+     * @return immutable set of event classes or an empty set if no events are handled
+     */
+    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
+        return Classes.getHandledMessageClasses(pmClass, EventSubscriberMethod.PREDICATE);
     }
 
     /**
@@ -303,75 +371,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }
-    }
-
-    /**
-     * Creates a context for an event.
-     *
-     * <p>The context may optionally have custom attributes added by
-     * {@link #addEventContextAttributes(EventContext.Builder, CommandId, Message, Message, int)}.
-     *
-     * @param cmdContext     the context of the command, which processing caused the event
-     * @param event          the event for which to create the context
-     * @param currentState   the state of the process manager after the event was applied
-     * @param whenModified   the moment of the process manager modification for this event
-     * @param currentVersion the version of the process manager after the event was applied
-     * @return new instance of the {@code EventContext}
-     */
-    @CheckReturnValue
-    private EventContext createEventContext(CommandContext cmdContext,
-                                            Message event,
-                                            M currentState,
-                                            Timestamp whenModified,
-                                            int currentVersion) {
-        final EventId eventId = Events.generateId();
-        final Any producerId = idToAny(getId());
-        final CommandId commandId = cmdContext.getCommandId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                .setEventId(eventId)
-                .setTimestamp(whenModified)
-                .setCommandContext(cmdContext)
-                .setProducerId(producerId)
-                .setVersion(currentVersion);
-        addEventContextAttributes(builder, commandId, event, currentState, currentVersion);
-        return builder.build();
-    }
-
-    /**
-     * Adds custom attributes to an event context builder during the creation of the event context.
-     *
-     * <p>Does nothing by default. Override this method if you want to add custom attributes to the created context.
-     *
-     * @param builder        a builder for the event context
-     * @param commandId      the id of the command, which cased the event
-     * @param event          the event message
-     * @param currentState   the current state of the aggregate after the event was applied
-     * @param currentVersion the version of the process manager after the event was applied
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"}) // Have no-op method to avoid forced overriding.
-    protected void addEventContextAttributes(EventContext.Builder builder,
-                                             CommandId commandId, Message event, M currentState, int currentVersion) {
-        // Do nothing.
-    }
-
-    /**
-     * Returns the set of the command types handled by the process manager.
-     *
-     * @param pmClass the process manager class to inspect
-     * @return immutable set of command classes or an empty set if no commands are handled
-     */
-    public static Set<Class<? extends Message>> getHandledCommandClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, CommandHandlerMethod.PREDICATE);
-    }
-
-    /**
-     * Returns the set of event classes handled by the process manager.
-     *
-     * @param pmClass the process manager class to inspect
-     * @return immutable set of event classes or an empty set if no events are handled
-     */
-    public static ImmutableSet<Class<? extends Message>> getHandledEventClasses(Class<? extends ProcessManager> pmClass) {
-        return Classes.getHandledMessageClasses(pmClass, PREDICATE);
     }
 
     private IllegalStateException missingCommandHandler(Class<? extends Message> commandClass) {
