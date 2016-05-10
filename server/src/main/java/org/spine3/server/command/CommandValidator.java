@@ -66,7 +66,7 @@ public class CommandValidator {
 
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
-            final String targetIdString = idToString(targetId).trim();
+            final String targetIdString = idToString(targetId);
             if (targetIdString.isEmpty()) {
                 result.add(ConstraintViolation.newBuilder().setMsgFormat(
                         COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK).build());

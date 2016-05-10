@@ -83,6 +83,7 @@ public class Identifiers {
      * @return <ul>
      * <li>For classes implementing {@link Message} — Json form
      * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}
+     * <li>For {@code null} ID or if the result is empty or blank string — {@link #NULL_ID_OR_FIELD}
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
