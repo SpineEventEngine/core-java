@@ -262,10 +262,25 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
          */
         public CommandRouted route() {
             final CommandRouted.Builder result = CommandRouted.newBuilder();
-
+            result.setSource(Commands.create(sourceCommand, sourceContext));
             final SettableFuture<Void> finishFuture = SettableFuture.create();
-            final StreamObserver<Response>responseObserver = new StreamObserver<Response>() {
+            final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
+            for (Message message : toRoute) {
+                final Command command = produceCommand(message);
+                commandBus.post(command, responseObserver);
+                // Wait till the call is completed.
+                try {
+                    finishFuture.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    propagate(e);
+                }
+                result.addProduced(command);
+            }
+            return result.build();
+        }
 
+        private static StreamObserver<Response> newResponseObserver(final SettableFuture<Void> finishFuture) {
+            return new StreamObserver<Response>() {
                 @Override
                 public void onNext(Response response) {
                     // Do nothing. It's just a confirmation of successful post to Command Bus.
@@ -281,20 +296,6 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
                     finishFuture.set(null);
                 }
             };
-
-            result.setSource(Commands.create(sourceCommand, sourceContext));
-            for (Message message : toRoute) {
-                final Command command = produceCommand(message);
-                commandBus.post(command, responseObserver);
-                // Wait till the call is completed.
-                try {
-                    finishFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    propagate(e);
-                }
-                result.addProduced(command);
-            }
-            return result.build();
         }
 
         private Command produceCommand(Message newMessage) {
