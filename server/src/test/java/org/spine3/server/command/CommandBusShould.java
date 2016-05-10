@@ -47,6 +47,8 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.test.project.event.ProjectStarted;
+import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestEventFactory;
 
 import java.util.Collections;
@@ -84,7 +86,7 @@ public class CommandBusShould {
         commandBus.setProblemLog(log);
         eventBus = spy(TestEventFactory.newEventBus(storageFactory));
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
-        createProjectHandler = new CreateProjectHandler(newUuid(), eventBus);
+        createProjectHandler = new CreateProjectHandler(newUuid());
         responseObserver = new TestResponseObserver();
     }
 
@@ -96,6 +98,49 @@ public class CommandBusShould {
                   .build();
     }
 
+    /*
+     * Registration tests.
+     ******************************/
+
+    @Test
+    public void state_that_no_commands_are_supported_if_nothing_registered() {
+        assertAllCommandsAreSupported(false);
+    }
+
+    @Test
+    public void register_command_dispatcher() {
+        commandBus.register(new AllCommandDispatcher());
+
+        assertAllCommandsAreSupported(true);
+    }
+
+    @Test
+    public void unregister_command_dispatcher() {
+        final CommandDispatcher dispatcher = new AllCommandDispatcher();
+
+        commandBus.register(dispatcher);
+        commandBus.unregister(dispatcher);
+
+        assertAllCommandsAreSupported(false);
+    }
+
+    @Test
+    public void register_command_handler() {
+        commandBus.register(new AllCommandHandler(newUuid()));
+
+        assertAllCommandsAreSupported(true);
+    }
+
+    @Test
+    public void unregister_command_handler() {
+        final AllCommandHandler handler = new AllCommandHandler(newUuid());
+
+        commandBus.register(handler);
+        commandBus.unregister(handler);
+
+        assertAllCommandsAreSupported(false);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_dispatchers() {
         commandBus.register(new EmptyDispatcher());
@@ -103,37 +148,13 @@ public class CommandBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_command_handlers_without_methods() {
-        commandBus.register(new EmptyCommandHandler(newUuid(), eventBus));
+        commandBus.register(new EmptyCommandHandler(newUuid()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_another_dispatcher_for_already_registered_commands() {
         commandBus.register(new AllCommandDispatcher());
         commandBus.register(new AllCommandDispatcher());
-    }
-
-    /**
-     * Test for successful dispatcher registration.
-     */
-    @Test
-    public void register_command_dispatcher() {
-        commandBus.register(new AllCommandDispatcher());
-
-        assertIsSupportedCmd(CreateProject.class, true);
-        assertIsSupportedCmd(StartProject.class, true);
-        assertIsSupportedCmd(AddTask.class, true);
-    }
-
-    @Test
-    public void turn_commands_unsupported_when_dispatcher_unregistered() {
-        final CommandDispatcher dispatcher = new AllCommandDispatcher();
-
-        commandBus.register(dispatcher);
-        commandBus.unregister(dispatcher);
-
-        assertIsSupportedCmd(CreateProject.class, false);
-        assertIsSupportedCmd(StartProject.class, false);
-        assertIsSupportedCmd(AddTask.class, false);
     }
 
     /*
@@ -166,8 +187,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        assertIsSupportedCmd(CreateProject.class, true);
-        assertIsSupportedCmd(AddTask.class, true);
+        assertAreSupportedCommands(true, CreateProject.class, AddTask.class);
     }
 
     @Test // To improve coverage stats.
@@ -392,7 +412,7 @@ public class CommandBusShould {
     }
 
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(eventBus, throwable);
+        final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = createProjectMsg(newUuid());
         final Command command = commandFactory.create(msg);
@@ -457,7 +477,7 @@ public class CommandBusShould {
 
     @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
-        commandBus.register(new CreateProjectHandler(newUuid(), eventBus));
+        commandBus.register(new CreateProjectHandler(newUuid()));
         final Command cmd = commandFactory.create(createProjectMsg(newUuid()));
 
         commandBus.post(cmd, responseObserver);
@@ -485,6 +505,17 @@ public class CommandBusShould {
     private static Command newCreateProjectCommand(Duration delay) {
         final CommandContext context = createCommandContext(delay);
         return Commands.create(createProjectMsg(newUuid()), context);
+    }
+
+    private void assertAllCommandsAreSupported(boolean areSupported) {
+        assertAreSupportedCommands(areSupported, CreateProject.class, AddTask.class, StartProject.class);
+    }
+
+    @SafeVarargs
+    private final void assertAreSupportedCommands(boolean areSupported, Class<? extends Message>... cmdClasses) {
+        for (Class<? extends Message> clazz : cmdClasses) {
+            assertIsSupportedCmd(clazz, areSupported);
+        }
     }
 
     private void assertIsSupportedCmd(Class<? extends Message> cmdClass, boolean isSupported) {
@@ -572,11 +603,11 @@ public class CommandBusShould {
      * Test command handlers.
      ********************/
 
-    private static class CreateProjectHandler extends CommandHandler {
+    private class CreateProjectHandler extends CommandHandler {
 
         private boolean handlerInvoked = false;
 
-        protected CreateProjectHandler(String id, EventBus eventBus) {
+        protected CreateProjectHandler(String id) {
             super(id, eventBus);
         }
 
@@ -592,6 +623,29 @@ public class CommandBusShould {
         }
     }
 
+    @SuppressWarnings("unused")
+    private class AllCommandHandler extends CommandHandler {
+
+        protected AllCommandHandler(String id) {
+            super(id, eventBus);
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject command, CommandContext ctx) {
+            return ProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        public TaskAdded handle(AddTask command) {
+            return TaskAdded.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectStarted handle(StartProject command) {
+            return ProjectStarted.getDefaultInstance();
+        }
+    }
+
     /**
      * A stub handler that throws passed `Throwable` in the command handler method.
      *
@@ -599,11 +653,11 @@ public class CommandBusShould {
      * @see #set_command_status_to_failure_when_handler_throws_exception
      * @see #set_command_status_to_failure_when_handler_throws_unknown_Throwable
      */
-    private static class ThrowingCreateProjectHandler extends CommandHandler {
+    private class ThrowingCreateProjectHandler extends CommandHandler {
 
         private final Throwable throwable;
 
-        protected ThrowingCreateProjectHandler(EventBus eventBus, Throwable throwable) {
+        protected ThrowingCreateProjectHandler(Throwable throwable) {
             super(newUuid(), eventBus);
             this.throwable = throwable;
         }
@@ -616,8 +670,8 @@ public class CommandBusShould {
         }
     }
 
-    private static class EmptyCommandHandler extends CommandHandler {
-        protected EmptyCommandHandler(String id, EventBus eventBus) {
+    private class EmptyCommandHandler extends CommandHandler {
+        protected EmptyCommandHandler(String id) {
             super(id, eventBus);
         }
     }
