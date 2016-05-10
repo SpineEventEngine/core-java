@@ -176,7 +176,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
-        final List<ConstraintViolation> violations = CommandValidator.instance().validate(command);
+        final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
             responseObserver.onError(
                     Status.INVALID_ARGUMENT

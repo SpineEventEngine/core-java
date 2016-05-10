@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.type.TypeName;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
@@ -53,6 +52,13 @@ public class CommandValidator {
     private CommandValidator() {
     }
 
+    /**
+     * Validates a command checking that its required fields are valid and
+     * validates a command message according to Spine custom protobuf options.
+     *
+     * @param command a command to validate
+     * @return constraint violations found
+     */
     public List<ConstraintViolation> validate(Command command) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         if (!command.hasMessage()) {
@@ -86,6 +92,14 @@ public class CommandValidator {
         return violation;
     }
 
+    /**
+     * Checks required fields of a command.
+     *
+     * <p>Does not validate a command message, only checks that it is set.
+     *
+     * @param command a command to check
+     * @throws IllegalArgumentException if any command field is invalid
+     */
     public static void checkCommand(Command command) {
         checkArgument(command.hasMessage(), COMMAND_MESSAGE_MUST_BE_SET);
         checkArgument(command.hasContext(), COMMAND_CONTEXT_MUST_BE_SET);
@@ -93,26 +107,23 @@ public class CommandValidator {
         checkValid(context.getCommandId());
         checkTimestamp(context.getTimestamp(), "Command time");
         final Message commandMessage = Commands.getMessage(command);
-        //TODO:2016-05-09:alexander.yevsyukov: Why do we do it?
-        final String commandType = TypeName.of(commandMessage).nameOnly();
-        checkNotEmptyOrBlank(commandType, "command type");
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
-            checkNotEmptyOrBlank(targetIdString, "command target ID");
-            final String targetIdType = targetId.getClass().getName();
-            //TODO:2016-05-09:alexander.yevsyukov: Is this possible?
-            checkNotEmptyOrBlank(targetIdType, "command target ID type");
+            checkArgument(!targetIdString.equals(NULL_OR_EMPTY_ID), "Target ID must not be an empty string.");
         }
+    }
+
+    /**
+     * Returns a validator instance.
+     */
+    public static CommandValidator getInstance() {
+        return LogSingleton.INSTANCE.value;
     }
 
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final CommandValidator value = new CommandValidator();
-    }
-
-    public static CommandValidator instance() {
-        return LogSingleton.INSTANCE.value;
     }
 }
