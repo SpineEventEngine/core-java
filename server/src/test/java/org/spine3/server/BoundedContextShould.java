@@ -30,7 +30,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
-import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -57,7 +56,6 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestAggregateIdFactory;
 
 import java.util.List;
 
@@ -65,9 +63,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Responses.ok;
-import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
@@ -81,8 +77,6 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextShould {
 
-    private final UserId userId = newUserId(newUuid());
-    private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
     private StorageFactory storageFactory;

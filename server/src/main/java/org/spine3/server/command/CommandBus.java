@@ -218,7 +218,8 @@ public class CommandBus implements AutoCloseable {
     /* package */ boolean isSupportedCommand(CommandClass commandClass) {
         final boolean dispatcherRegistered = isDispatcherRegistered(commandClass);
         final boolean handlerRegistered = isHandlerRegistered(commandClass);
-        return (dispatcherRegistered || handlerRegistered);
+        final boolean isSupported = dispatcherRegistered || handlerRegistered;
+        return isSupported;
     }
 
     private boolean isMultitenant() {
