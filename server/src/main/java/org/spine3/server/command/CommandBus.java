@@ -270,7 +270,7 @@ public class CommandBus implements AutoCloseable {
 
     private void invokeHandler(Message msg, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandler handler = getHandler(commandClass);
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
         final CommandId commandId = context.getCommandId();
         try {
             handler.handle(msg, context);
@@ -295,11 +295,6 @@ public class CommandBus implements AutoCloseable {
             problemLog.errorHandlingUnknown(cause, msg, commandId);
             commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
         }
-    }
-
-    private CommandHandler getHandler(CommandClass commandClass) {
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        return handler;
     }
 
     private void schedule(Command command) {
