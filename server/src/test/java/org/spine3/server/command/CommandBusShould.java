@@ -155,21 +155,22 @@ public class CommandBusShould {
      */
     @Test
     public void register_command_dispatcher() {
-        commandBus.register(new CommandDispatcher() {
-            @Override
-            public Set<CommandClass> getCommandClasses() {
-                return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
-            }
-
-            @Override
-            public void dispatch(Command request) throws Exception {
-            }
-        });
-
+        commandBus.register(new AllCommandDispatcher());
 
         assertIsSupportedCmd(CreateProject.class, true);
         assertIsSupportedCmd(StartProject.class, true);
         assertIsSupportedCmd(AddTask.class, true);
+    }
+
+    private static class AllCommandDispatcher implements CommandDispatcher {
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
+        }
+
+        @Override
+        public void dispatch(Command request) throws Exception {
+        }
     }
 
     /**
@@ -223,6 +224,7 @@ public class CommandBusShould {
         }
 
         @Assign
+        @SuppressWarnings("unused")
         public ProjectCreated handle(CreateProject command, CommandContext ctx) {
             handlerInvoked = true;
             return ProjectCreated.getDefaultInstance();
