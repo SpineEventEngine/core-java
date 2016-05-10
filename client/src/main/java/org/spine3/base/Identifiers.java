@@ -59,10 +59,10 @@ public class Identifiers {
 
     private Identifiers() {}
 
-    /*
-     * Null message or field string representation
+    /**
+     * Null or empty ID string representation.
      */
-    public static final String NULL_ID_OR_FIELD = "NULL";
+    public static final String NULL_OR_EMPTY_ID = "NULL_OR_EMPTY";
 
     /**
      * The suffix of ID fields.
@@ -81,16 +81,17 @@ public class Identifiers {
      * @param id  the value to convert
      * @param <I> the type of the ID
      * @return <ul>
-     * <li>For classes implementing {@link Message} — Json form
-     * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}
-     * <li>For {@code null} ID or if the result is empty or blank string — {@link #NULL_ID_OR_FIELD}
+     * <li>For classes implementing {@link Message} &mdash; a Json form
+     * <li>For {@code String}, {@code Long}, {@code Integer} &mdash; the result of {@link Object#toString()}
+     * <li>For {@code null} ID or if the result is empty or blank string &mdash; {@link #NULL_OR_EMPTY_ID}
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
+     * @see ConverterRegistry
      */
     public static <I> String idToString(@Nullable I id) {
         if (id == null) {
-            return NULL_ID_OR_FIELD;
+            return NULL_OR_EMPTY_ID;
         }
         String result;
         if (isStringOrNumber(id)) {
@@ -104,7 +105,7 @@ public class Identifiers {
             throw unsupportedIdType(id);
         }
         if (isNullOrEmpty(result) || result.trim().isEmpty()) {
-            result = NULL_ID_OR_FIELD;
+            result = NULL_OR_EMPTY_ID;
         }
         result = result.trim();
         return result;
@@ -325,7 +326,7 @@ public class Identifiers {
         @Override
         public String apply(@Nullable Timestamp timestamp) {
             if (timestamp == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_OR_EMPTY_ID;
             }
             final String result = timestampToIdString(timestamp);
             return result;
@@ -336,7 +337,7 @@ public class Identifiers {
         @Override
         public String apply(@Nullable EventId eventId) {
             if (eventId == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_OR_EMPTY_ID;
             }
             return eventId.getUuid();
         }
@@ -347,9 +348,9 @@ public class Identifiers {
         @Override
         public String apply(@Nullable CommandId commandId) {
             if (commandId == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_OR_EMPTY_ID;
             }
-            return idToString(commandId);
+            return commandId.getUuid();
         }
     }
 }

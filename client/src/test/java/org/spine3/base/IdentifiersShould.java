@@ -55,18 +55,18 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void return_NULL_string_to_passed_null_value() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(null));
+    public void return_NULL_OR_EMPTY_ID_string_to_passed_null_value() {
+        assertEquals(NULL_OR_EMPTY_ID, idToString(null));
     }
 
     @Test
-    public void return_NULL_string_to_empty_string() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(""));
+    public void return_NULL_OR_EMPTY_ID_string_to_empty_string() {
+        assertEquals(NULL_OR_EMPTY_ID, idToString(""));
     }
 
     @Test
-    public void return_NULL_string_to_blank_value() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(" "));
+    public void return_NULL_OR_EMPTY_ID_string_to_blank_value() {
+        assertEquals(NULL_OR_EMPTY_ID, idToString(" "));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -196,7 +196,7 @@ public class IdentifiersShould {
         @Override
         public String apply(@Nullable IdWithStructure id) {
             if (id == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_OR_EMPTY_ID;
             }
             return id.getName();
         }
@@ -231,13 +231,13 @@ public class IdentifiersShould {
     public void handle_null_in_standard_converters() {
         final ConverterRegistry registry = ConverterRegistry.getInstance();
 
-        assertEquals(NULL_ID_OR_FIELD,
+        assertEquals(NULL_OR_EMPTY_ID,
                      registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
 
-        assertEquals(NULL_ID_OR_FIELD,
+        assertEquals(NULL_OR_EMPTY_ID,
                      registry.getConverter(EventId.getDefaultInstance()).apply(null));
 
-        assertEquals(NULL_ID_OR_FIELD,
+        assertEquals(NULL_OR_EMPTY_ID,
                      registry.getConverter(CommandId.getDefaultInstance()).apply(null));
     }
 

@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
+import static org.spine3.base.Identifiers.NULL_OR_EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -197,7 +198,8 @@ public class Validate {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        checkNotEmptyOrBlank(idToString(id), "command ID");
+        final String idStr = idToString(id);
+        checkArgument(!idStr.equals(NULL_OR_EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
 

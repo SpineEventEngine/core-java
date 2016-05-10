@@ -33,6 +33,7 @@ import org.spine3.validate.options.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spine3.base.Identifiers.NULL_OR_EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.*;
 
@@ -57,49 +58,41 @@ public class CommandValidator {
         if (!command.hasMessage()) {
             result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_MESSAGE_MUST_BE_SET).build());
         }
-
         if (!command.hasContext()) {
             result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_CONTEXT_MUST_BE_SET).build());
         }
-
         final Message commandMessage = Commands.getMessage(command);
-
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
-            if (targetIdString.isEmpty()) {
-                result.add(ConstraintViolation.newBuilder().setMsgFormat(
-                        COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK).build());
+            if (targetIdString.equals(NULL_OR_EMPTY_ID)) {
+                result.add(ConstraintViolation.newBuilder()
+                                              .setMsgFormat(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK)
+                                              .build());
             }
         }
-
         final List<ConstraintViolation> messageViolations = new MessageValidator().validate(commandMessage);
         result.addAll(messageViolations);
-
         final CommandContext context = command.getContext();
         final String commandId = idToString(context.getCommandId());
-        if (commandId.isEmpty()) {
-            result.add(ConstraintViolation.newBuilder().setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK).build());
+        if (commandId.equals(NULL_OR_EMPTY_ID)) {
+            result.add(ConstraintViolation.newBuilder()
+                                          .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK)
+                                          .build());
         }
-
         return result.build();
     }
 
     public static void checkCommand(Command command) {
         checkArgument(command.hasMessage(), COMMAND_MESSAGE_MUST_BE_SET);
         checkArgument(command.hasContext(), COMMAND_CONTEXT_MUST_BE_SET);
-
         final CommandContext context = command.getContext();
-
         checkValid(context.getCommandId());
-
         checkTimestamp(context.getTimestamp(), "Command time");
-
         final Message commandMessage = Commands.getMessage(command);
         //TODO:2016-05-09:alexander.yevsyukov: Why do we do it?
         final String commandType = TypeName.of(commandMessage).nameOnly();
         checkNotEmptyOrBlank(commandType, "command type");
-
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
@@ -112,7 +105,6 @@ public class CommandValidator {
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final CommandValidator value = new CommandValidator();
     }
