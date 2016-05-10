@@ -42,11 +42,11 @@ import static org.spine3.base.CommandContext.Schedule;
  */
 public class ExecutorCommandScheduler extends CommandScheduler {
 
-    private static final int MIN_THEAD_POOL_SIZE = 5;
+    private static final int MIN_THREAD_POOL_SIZE = 5;
 
     private static final Set<CommandId> SCHEDULED_COMMAND_IDS = newHashSet();
 
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THEAD_POOL_SIZE);
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
 
     @Override
     public void schedule(final Command command) {
