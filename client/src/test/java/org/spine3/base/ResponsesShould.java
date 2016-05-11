@@ -34,11 +34,6 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ResponsesShould {
 
-    private static final Response RESPONSE_UNSUPPORTED_COMMAND = Response.newBuilder()
-            .setError(Error.newBuilder()
-                           .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber()))
-            .build();
-
     private static final Response RESPONSE_UNSUPPORTED_EVENT = Response.newBuilder()
             .setError(Error.newBuilder()
                            .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber()))
@@ -63,17 +58,7 @@ public class ResponsesShould {
 
     @Test
     public void return_false_if_not_OK_response() {
-        assertFalse(Responses.isOk(RESPONSE_UNSUPPORTED_COMMAND));
-    }
-
-    @Test
-    public void recognize_UNSUPPORTED_COMMAND_response() {
-        assertTrue(Responses.isUnsupportedCommand(RESPONSE_UNSUPPORTED_COMMAND));
-    }
-
-    @Test
-    public void return_false_if_not_UNSUPPORTED_COMMAND_response() {
-        assertFalse(Responses.isUnsupportedCommand(Responses.ok()));
+        assertFalse(Responses.isOk(RESPONSE_INVALID_MESSAGE));
     }
 
     @Test
