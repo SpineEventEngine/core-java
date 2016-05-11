@@ -215,6 +215,10 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
+        /**
+         * TODO:2016-05-11:alexander.litus: use {@link StreamObserver#onError}
+         * instead of returning responses, see {@link CommandBus#post(Command, StreamObserver)}.
+         */
         try {
             final Message message = fromAny(integrationEvent.getMessage());
             final Response response = validateIntegrationEventMessage(message);
