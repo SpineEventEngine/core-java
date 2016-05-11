@@ -186,25 +186,26 @@ public class CommandBus implements AutoCloseable {
     }
 
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
+        InvalidCommandException exception = null;
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            responseObserver.onError(
-                    Status.INVALID_ARGUMENT
-                            .withCause(InvalidCommandException.onConstraintViolations(command, violations))
-                            .asRuntimeException()
-            );
-            return false;
+            exception = InvalidCommandException.onConstraintViolations(command, violations);
         }
         final CommandContext context = command.getContext();
         if (isMultitenant() && !context.hasNamespace()) {
+            exception = InvalidCommandException.onMissingNamespace(command);
+        }
+        if (exception != null) {
+            storeWithErrorStatus(command, exception);
             responseObserver.onError(
                     Status.INVALID_ARGUMENT
-                            .withCause(InvalidCommandException.onMissingNamespace(command))
-                            .asRuntimeException()
+                          .withCause(exception)
+                          .asRuntimeException()
             );
             return false;
+        } else {
+            return true;
         }
-        return true;
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
@@ -276,12 +277,12 @@ public class CommandBus implements AutoCloseable {
             handler.handle(msg, context);
             commandStatusService.setOk(commandId);
         } catch (InvocationTargetException e) {
-            onHandlerException(msg, commandId, e);
+            final Throwable cause = e.getCause();
+            onHandlerException(msg, commandId, cause);
         }
     }
 
-    private void onHandlerException(Message msg, CommandId commandId, InvocationTargetException e) {
-        final Throwable cause = e.getCause();
+    private void onHandlerException(Message msg, CommandId commandId, Throwable cause) {
         //noinspection ChainOfInstanceofChecks
         if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
