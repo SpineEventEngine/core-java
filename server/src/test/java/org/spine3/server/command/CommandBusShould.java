@@ -35,6 +35,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.server.command.error.CommandException;
@@ -64,7 +65,6 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.CommandValidationError.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.protobuf.Durations.minutes;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -237,12 +237,11 @@ public class CommandBusShould {
     public void verify_namespace_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-        final TestResponseObserver observer = new TestResponseObserver();
         final Command cmd = createProjectCmd();
 
-        commandBus.post(cmd, observer);
+        commandBus.post(cmd, responseObserver);
 
-        final List<Throwable> throwables = observer.getThrowables();
+        final List<Throwable> throwables = responseObserver.getThrowables();
         assertEquals(1, throwables.size());
         checkCommandError(throwables.get(0), NAMESPACE_UNKNOWN, InvalidCommandException.class, cmd);
     }
@@ -294,6 +293,16 @@ public class CommandBusShould {
     /*
      * Command processing tests.
      ***************************/
+
+    @Test
+    public void post_command_and_return_OK_response() {
+        commandBus.register(createProjectHandler);
+        final Command cmd = createProjectCmd();
+
+        commandBus.post(cmd, responseObserver);
+
+        isResponseOkAndCompleted(responseObserver);
+    }
 
     @Test
     public void invoke_handler_when_command_posted() {
@@ -397,13 +406,9 @@ public class CommandBusShould {
     public void store_command_when_posted() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmd();
-        final TestResponseObserver observer = new TestResponseObserver();
 
-        commandBus.post(cmd, observer);
+        commandBus.post(cmd, responseObserver);
 
-        final List<Response> responses = observer.getResponses();
-        assertEquals(1, responses.size());
-        assertEquals(ok(), responses.get(0));
         verify(commandStore, times(1)).store(cmd);
     }
 
@@ -445,6 +450,7 @@ public class CommandBusShould {
         verify(scheduler, times(1)).schedule(cmd);
         verify(scheduler, never()).post(cmd);
         verify(scheduler, after(delayMsec).times(1)).post(cmd);
+        isResponseOkAndCompleted(responseObserver);
     }
 
     @Test
@@ -455,7 +461,7 @@ public class CommandBusShould {
         commandBus.post(cmd, responseObserver);
 
         verify(scheduler, never()).schedule(cmd);
-        assertTrue(responseObserver.isCompleted());
+        isResponseOkAndCompleted(responseObserver);
     }
 
     @Ignore // Decide on the below comment.
@@ -473,6 +479,13 @@ public class CommandBusShould {
     /*
      * Utility methods.
      ********************/
+
+    private static void isResponseOkAndCompleted(TestResponseObserver observer) {
+        final List<Response> responses = observer.getResponses();
+        assertEquals(1, responses.size());
+        assertEquals(Responses.ok(), responses.get(0));
+        assertTrue(observer.isCompleted());
+    }
 
     private static Command newCreateProjectCmd(Duration delay) {
         final CommandContext context = createCommandContext(delay);
