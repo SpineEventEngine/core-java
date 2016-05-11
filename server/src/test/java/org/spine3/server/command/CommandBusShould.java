@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -36,6 +37,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.Response;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
@@ -52,12 +54,15 @@ import org.spine3.test.project.event.TaskAdded;
 import org.spine3.testdata.TestEventFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
+import static org.spine3.base.CommandValidationError.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Durations.milliseconds;
@@ -232,51 +237,58 @@ public class CommandBusShould {
     public void verify_namespace_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-
         final TestResponseObserver observer = new TestResponseObserver();
         final Command cmd = createProjectCmd();
 
         commandBus.post(cmd, observer);
 
-        final Throwable cause = observer.getThrowable().getCause();
-        assertEquals(InvalidCommandException.class, cause.getClass());
-
-        final InvalidCommandException exception = (InvalidCommandException) cause;
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), exception.getError().getCode());
+        final List<Throwable> throwables = observer.getThrowables();
+        assertEquals(1, throwables.size());
+        checkCommandError(throwables.get(0), NAMESPACE_UNKNOWN, InvalidCommandException.class, cmd);
     }
 
     @Test
     public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
-        final Command command = commandFactory.create(addTaskMsg(newUuid()));
+        final Command cmd = commandFactory.create(addTaskMsg(newUuid()));
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(cmd, responseObserver);
 
-        final Throwable cause = responseObserver.getThrowable().getCause();
-        assertEquals(UnsupportedCommandException.class, cause.getClass());
-
-        final UnsupportedCommandException exception = (UnsupportedCommandException) cause;
-        assertEquals(CommandValidationError.UNSUPPORTED_COMMAND.getNumber(), exception.getError().getCode());
-
+        final List<Throwable> throwables = responseObserver.getThrowables();
+        assertEquals(1, throwables.size());
+        checkCommandError(throwables.get(0), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
     }
 
     @Test
     public void return_InvalidCommandException_if_command_is_invalid() {
         commandBus.register(createProjectHandler);
-        final Command invalidCmd = newInvalidCreateProjectCmd();
+        final Command cmd = newInvalidCreateProjectCmd();
 
-        commandBus.post(invalidCmd, responseObserver);
+        commandBus.post(cmd, responseObserver);
 
-        final Throwable throwable = responseObserver.getThrowable();
-        assertNotNull(throwable);
+        final List<Throwable> throwables = responseObserver.getThrowables();
+        assertEquals(1, throwables.size());
+        checkCommandError(throwables.get(0), INVALID_COMMAND, InvalidCommandException.class, cmd);
+    }
 
-        final Throwable cause = responseObserver.getThrowable().getCause();
-        assertEquals(InvalidCommandException.class, cause.getClass());
-
-        final InvalidCommandException exception = (InvalidCommandException) cause;
+    private static <E extends CommandException> void checkCommandError(
+            Throwable throwable,
+            CommandValidationError cmdValidationError,
+            Class<E> exceptionClass,
+            Command cmd) {
+        final Throwable cause = throwable.getCause();
+        assertEquals(exceptionClass, cause.getClass());
+        @SuppressWarnings("unchecked")
+        final E exception = (E) cause;
+        assertEquals(cmd, exception.getCommand());
         final Error error = exception.getError();
-
         assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
-        assertEquals(CommandValidationError.INVALID_COMMAND.getNumber(), error.getCode());
+        assertEquals(cmdValidationError.getNumber(), error.getCode());
+        assertFalse(error.getMessage().isEmpty());
+        if (cmdValidationError == INVALID_COMMAND) {
+            assertFalse(error.getValidationError()
+                             .getConstraintViolationList()
+                             .isEmpty());
+        }
     }
 
     /*
@@ -286,8 +298,8 @@ public class CommandBusShould {
     @Test
     public void invoke_handler_when_command_posted() {
         commandBus.register(createProjectHandler);
-
         final Command command = commandFactory.create(createProjectMsg(newUuid()));
+
         commandBus.post(command, responseObserver);
 
         assertTrue(createProjectHandler.wasHandlerInvoked());
@@ -297,7 +309,6 @@ public class CommandBusShould {
     public void invoke_dispatcher_when_command_posted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-
         final Command command = commandFactory.create(addTaskMsg(newUuid()));
 
         commandBus.post(command, responseObserver);
@@ -390,7 +401,9 @@ public class CommandBusShould {
 
         commandBus.post(cmd, observer);
 
-        assertEquals(ok(), observer.getResponseHandled());
+        final List<Response> responses = observer.getResponses();
+        assertEquals(1, responses.size());
+        assertEquals(ok(), responses.get(0));
         verify(commandStore, times(1)).store(cmd);
     }
 
@@ -645,18 +658,18 @@ public class CommandBusShould {
 
     private static class TestResponseObserver implements StreamObserver<Response> {
 
-        private Response responseHandled;
-        private boolean completed;
-        private Throwable throwable;
+        private final List<Response> responses = newLinkedList();
+        private final List<Throwable> throwables = newLinkedList();
+        private boolean completed = false;
 
         @Override
         public void onNext(Response response) {
-            this.responseHandled = response;
+            responses.add(response);
         }
 
         @Override
         public void onError(Throwable throwable) {
-            this.throwable = throwable;
+            throwables.add(throwable);
         }
 
         @Override
@@ -664,12 +677,12 @@ public class CommandBusShould {
             this.completed = true;
         }
 
-        /* package */ Response getResponseHandled() {
-            return responseHandled;
+        /* package */ List<Response> getResponses() {
+            return ImmutableList.copyOf(responses);
         }
 
-        /* package */ Throwable getThrowable() {
-            return this.throwable;
+        /* package */ List<Throwable> getThrowables() {
+            return ImmutableList.copyOf(throwables);
         }
 
         /* package */ boolean isCompleted() {
