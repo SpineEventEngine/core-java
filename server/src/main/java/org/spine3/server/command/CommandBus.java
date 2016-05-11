@@ -194,28 +194,28 @@ public class CommandBus implements AutoCloseable {
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final Namespace namespace = command.getContext().getNamespace();
         if (isMultitenant() && isDefault(namespace)) {
-            final Exception exception = InvalidCommandException.onMissingNamespace(command);
-            commandStore.store(command, exception);
-            responseObserver.onError(newStatusRuntimeException(exception));
+            final Exception noNamespace = InvalidCommandException.onMissingNamespace(command);
+            commandStore.store(command, noNamespace);
+            responseObserver.onError(invalidArgumentWithCause(noNamespace));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            final Exception exception = InvalidCommandException.onConstraintViolations(command, violations);
-            commandStore.store(command, exception);
-            responseObserver.onError(newStatusRuntimeException(exception));
+            final Exception invalidCmd = InvalidCommandException.onConstraintViolations(command, violations);
+            commandStore.store(command, invalidCmd);
+            responseObserver.onError(invalidArgumentWithCause(invalidCmd));
             return false;
         }
         return true;
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final UnsupportedCommandException exception = new UnsupportedCommandException(command);
-        commandStore.store(command, exception);
-        responseObserver.onError(newStatusRuntimeException(exception));
+        final Exception unsupported = new UnsupportedCommandException(command);
+        commandStore.store(command, unsupported);
+        responseObserver.onError(invalidArgumentWithCause(unsupported));
     }
 
-    private static StatusRuntimeException newStatusRuntimeException(Exception exception) {
+    private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
         final StatusRuntimeException result = Status.INVALID_ARGUMENT
                 .withCause(exception)
                 .asRuntimeException();
