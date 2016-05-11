@@ -196,14 +196,14 @@ public class CommandBus implements AutoCloseable {
         if (isMultitenant() && isDefault(namespace)) {
             final Exception exception = InvalidCommandException.onMissingNamespace(command);
             commandStore.store(command, exception);
-            responseObserver.onError(newInvalidArgumentException(exception));
+            responseObserver.onError(newStatusRuntimeException(exception));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
             final Exception exception = InvalidCommandException.onConstraintViolations(command, violations);
             commandStore.store(command, exception);
-            responseObserver.onError(newInvalidArgumentException(exception));
+            responseObserver.onError(newStatusRuntimeException(exception));
             return false;
         }
         return true;
@@ -212,10 +212,10 @@ public class CommandBus implements AutoCloseable {
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final UnsupportedCommandException exception = new UnsupportedCommandException(command);
         commandStore.store(command, exception);
-        responseObserver.onError(newInvalidArgumentException(exception));
+        responseObserver.onError(newStatusRuntimeException(exception));
     }
 
-    private static StatusRuntimeException newInvalidArgumentException(Exception exception) {
+    private static StatusRuntimeException newStatusRuntimeException(Exception exception) {
         final StatusRuntimeException result = Status.INVALID_ARGUMENT
                 .withCause(exception)
                 .asRuntimeException();
