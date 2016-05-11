@@ -160,7 +160,7 @@ public class CommandBus implements AutoCloseable {
             responseObserver.onCompleted();
             return;
         }
-        store(command);
+        commandStore.store(command);
         responseObserver.onNext(Responses.ok());
         doPost(command);
         responseObserver.onCompleted();
@@ -196,7 +196,7 @@ public class CommandBus implements AutoCloseable {
             exception = InvalidCommandException.onMissingNamespace(command);
         }
         if (exception != null) {
-            storeWithErrorStatus(command, exception);
+            commandStore.store(command, exception);
             responseObserver.onError(
                     Status.INVALID_ARGUMENT
                           .withCause(exception)
@@ -210,24 +210,12 @@ public class CommandBus implements AutoCloseable {
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final UnsupportedCommandException exception = new UnsupportedCommandException(command);
-        storeWithErrorStatus(command, exception);
+        commandStore.store(command, exception);
         responseObserver.onError(
                 Status.INVALID_ARGUMENT
-                        .withCause(exception)
-                        .asRuntimeException()
+                      .withCause(exception)
+                      .asRuntimeException()
         );
-    }
-
-    /**
-     * Stores a command with the error status.
-     *
-     * @param command a command to store
-     * @param exception an exception occurred during command processing
-     */
-    private void storeWithErrorStatus(Command command, Exception exception) {
-        store(command);
-        //TODO:2016-05-08:alexander.yevsyukov: Support storage method that can make storing command with error in one call.
-        commandStatusService.setToError(command.getContext().getCommandId(), exception);
     }
 
     /**
@@ -347,15 +335,6 @@ public class CommandBus implements AutoCloseable {
                     commandMessage, commandId);
             log().error(msg, throwable);
         }
-    }
-
-    /**
-     * Stores a command to the storage.
-     *
-     * @param command a command to store
-     */
-    private void store(Command command) {
-        commandStore.store(command);
     }
 
     private boolean isDispatcherRegistered(CommandClass cls) {

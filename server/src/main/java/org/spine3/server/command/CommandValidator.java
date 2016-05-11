@@ -32,9 +32,9 @@ import org.spine3.validate.options.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spine3.base.Identifiers.NULL_OR_EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.*;
+import static org.spine3.base.Identifiers.*;
+import static org.spine3.validate.Validate.checkTimestamp;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * The validator for {@code Command} instances.
@@ -71,7 +71,7 @@ public class CommandValidator {
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
-            if (targetIdString.equals(NULL_OR_EMPTY_ID)) {
+            if (targetIdString.equals(EMPTY_ID)) {
                 result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
         }
@@ -79,7 +79,7 @@ public class CommandValidator {
         result.addAll(messageViolations);
         final CommandContext context = command.getContext();
         final String commandId = idToString(context.getCommandId());
-        if (commandId.equals(NULL_OR_EMPTY_ID)) {
+        if (commandId.equals(EMPTY_ID)) {
             result.add(newConstraintViolation(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK));
         }
         return result.build();
@@ -108,9 +108,9 @@ public class CommandValidator {
         checkTimestamp(context.getTimestamp(), "Command time");
         final Message commandMessage = Commands.getMessage(command);
         final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
-        if (targetId != null) {
+        if (targetId != null) { // else - consider the command is not for an entity
             final String targetIdString = idToString(targetId);
-            checkArgument(!targetIdString.equals(NULL_OR_EMPTY_ID), "Target ID must not be an empty string.");
+            checkArgument(!targetIdString.equals(EMPTY_ID), "Target ID must not be an empty string.");
         }
     }
 

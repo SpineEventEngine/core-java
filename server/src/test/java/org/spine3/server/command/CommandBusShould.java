@@ -56,6 +56,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Responses.ok;
@@ -81,8 +82,9 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        commandBus = spy(newCommandBus(commandStore, scheduler));
         log = spy(new CommandBus.ProblemLog());
+        // Do not create a spy of the command bus because it would be impossible to debug its code
+        commandBus = newCommandBus(commandStore, scheduler);
         commandBus.setProblemLog(log);
         eventBus = spy(TestEventFactory.newEventBus(storageFactory));
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
@@ -100,7 +102,7 @@ public class CommandBusShould {
 
     /*
      * Registration tests.
-     ******************************/
+     *********************/
 
     @Test
     public void state_that_no_commands_are_supported_if_nothing_registered() {
@@ -159,7 +161,7 @@ public class CommandBusShould {
 
     /*
      * Tests for not overriding handlers by dispatchers and vice versa.
-     ******************************/
+     ******************************************************************/
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
@@ -224,7 +226,7 @@ public class CommandBusShould {
 
     /*
      * Command validation tests.
-     ********************/
+     ***************************/
 
     @Test
     public void verify_namespace_attribute_if_multitenant() {
@@ -236,13 +238,11 @@ public class CommandBusShould {
 
         commandBus.post(cmd, observer);
 
-        final Throwable cause = observer.getThrowable()
-                                        .getCause();
+        final Throwable cause = observer.getThrowable().getCause();
         assertEquals(InvalidCommandException.class, cause.getClass());
 
         final InvalidCommandException exception = (InvalidCommandException) cause;
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), exception.getError()
-                                                                                    .getCode());
+        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), exception.getError().getCode());
     }
 
     @Test
@@ -251,31 +251,25 @@ public class CommandBusShould {
 
         commandBus.post(command, responseObserver);
 
-        final Throwable cause = responseObserver.getThrowable()
-                                                .getCause();
+        final Throwable cause = responseObserver.getThrowable().getCause();
         assertEquals(UnsupportedCommandException.class, cause.getClass());
 
         final UnsupportedCommandException exception = (UnsupportedCommandException) cause;
-        assertEquals(CommandValidationError.UNSUPPORTED_COMMAND.getNumber(), exception.getError()
-                                                                                      .getCode());
+        assertEquals(CommandValidationError.UNSUPPORTED_COMMAND.getNumber(), exception.getError().getCode());
 
     }
 
     @Test
     public void return_InvalidCommandException_if_command_is_invalid() {
         commandBus.register(createProjectHandler);
-        final Command command = createProjectCmd();
-        final Command commandWithNoContext = command.toBuilder()
-                                                    .setContext(CommandContext.getDefaultInstance())
-                                                    .build();
+        final Command invalidCmd = newInvalidCreateProjectCmd();
 
-        commandBus.post(commandWithNoContext, responseObserver);
+        commandBus.post(invalidCmd, responseObserver);
 
         final Throwable throwable = responseObserver.getThrowable();
         assertNotNull(throwable);
 
-        final Throwable cause = responseObserver.getThrowable()
-                                                .getCause();
+        final Throwable cause = responseObserver.getThrowable().getCause();
         assertEquals(InvalidCommandException.class, cause.getClass());
 
         final InvalidCommandException exception = (InvalidCommandException) cause;
@@ -285,43 +279,9 @@ public class CommandBusShould {
         assertEquals(CommandValidationError.INVALID_COMMAND.getNumber(), error.getCode());
     }
 
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private Response responseHandled;
-        private boolean completed;
-        private Throwable throwable;
-
-        @Override
-        public void onNext(Response response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.completed = true;
-        }
-
-        /* package */ Response getResponseHandled() {
-            return responseHandled;
-        }
-
-        /* package */ Throwable getThrowable() {
-            return this.throwable;
-        }
-
-        /* package */ boolean isCompleted() {
-            return this.completed;
-        }
-    }
-
     /*
      * Command processing tests.
-     *********************/
+     ***************************/
 
     @Test
     public void invoke_handler_when_command_posted() {
@@ -353,8 +313,7 @@ public class CommandBusShould {
         commandBus.post(command, responseObserver);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, times(1)).setCommandStatusOk(command.getContext()
-                                                                 .getCommandId());
+        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
     }
 
     @Test
@@ -420,11 +379,11 @@ public class CommandBusShould {
     }
 
     /*
-     * Tests of storage
+     * Tests of storage.
      **********************/
 
     @Test
-    public void stores_the_command_when_posted() {
+    public void store_command_when_posted() {
         commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmd();
         final TestResponseObserver observer = new TestResponseObserver();
@@ -432,24 +391,24 @@ public class CommandBusShould {
         commandBus.post(cmd, observer);
 
         assertEquals(ok(), observer.getResponseHandled());
-        verify(commandBus, times(1)).store(cmd);
+        verify(commandStore, times(1)).store(cmd);
     }
 
     @Test
     public void store_invalid_command_with_error_status() {
-        final TestResponseObserver responseObserver = new TestResponseObserver();
+        commandBus.register(createProjectHandler);
+        final Command cmd = newInvalidCreateProjectCmd();
 
-        final Command cmd = createProjectCmd();
         commandBus.post(cmd, responseObserver);
 
-        verify(commandBus, times(1)).storeWithErrorStatus(eq(cmd), any(InvalidCommandException.class));
+        verify(commandStore, times(1)).store(eq(cmd), isA(InvalidCommandException.class));
     }
 
     //TODO:2016-05-08:alexander.yevsyukov: We may want to change this to make the command delivery more reliable.
     @Test
     public void do_not_store_command_if_command_is_scheduled() {
         commandBus.register(createProjectHandler);
-        final Command cmd = newCreateProjectCommand(/*delay=*/minutes(1));
+        final Command cmd = newCreateProjectCmd(/*delay=*/minutes(1));
 
         commandBus.post(cmd, responseObserver);
 
@@ -466,7 +425,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
 
         final int delayMsec = 1100;
-        final Command cmd = newCreateProjectCommand(/*delay=*/milliseconds(delayMsec));
+        final Command cmd = newCreateProjectCmd(/*delay=*/milliseconds(delayMsec));
 
         commandBus.post(cmd, responseObserver);
 
@@ -493,7 +452,7 @@ public class CommandBusShould {
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setCommandStore(commandStore)
                                                 .build();
-        final Command cmd = newCreateProjectCommand(/*delay=*/minutes(1));
+        final Command cmd = newCreateProjectCmd(/*delay=*/minutes(1));
 
         commandBus.post(cmd, responseObserver);
     }
@@ -502,9 +461,17 @@ public class CommandBusShould {
      * Utility methods.
      ********************/
 
-    private static Command newCreateProjectCommand(Duration delay) {
+    private static Command newCreateProjectCmd(Duration delay) {
         final CommandContext context = createCommandContext(delay);
         return Commands.create(createProjectMsg(newUuid()), context);
+    }
+
+    private static Command newInvalidCreateProjectCmd() {
+        final Command cmd = createProjectCmd();
+        final Command invalidCmd = cmd.toBuilder()
+                                      .setContext(CommandContext.getDefaultInstance())
+                                      .build();
+        return invalidCmd;
     }
 
     private void assertAllCommandsAreSupported(boolean areSupported) {
@@ -518,6 +485,7 @@ public class CommandBusShould {
         }
     }
 
+    // TODO:2016-05-11:alexander.litus: remove
     private void assertIsSupportedCmd(Class<? extends Message> cmdClass, boolean isSupported) {
         final CommandClass clazz = CommandClass.of(cmdClass);
         if (isSupported) {
@@ -529,7 +497,7 @@ public class CommandBusShould {
 
     /*
      * Test command dispatchers.
-     ********************/
+     ***************************/
 
     private static class EmptyDispatcher implements CommandDispatcher {
         @Override
@@ -601,7 +569,7 @@ public class CommandBusShould {
 
     /*
      * Test command handlers.
-     ********************/
+     ************************/
 
     private class CreateProjectHandler extends CommandHandler {
 
@@ -673,6 +641,44 @@ public class CommandBusShould {
     private class EmptyCommandHandler extends CommandHandler {
         protected EmptyCommandHandler(String id) {
             super(id, eventBus);
+        }
+    }
+
+    /*
+     * Response observers.
+     *********************/
+
+    private static class TestResponseObserver implements StreamObserver<Response> {
+
+        private Response responseHandled;
+        private boolean completed;
+        private Throwable throwable;
+
+        @Override
+        public void onNext(Response response) {
+            this.responseHandled = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.completed = true;
+        }
+
+        /* package */ Response getResponseHandled() {
+            return responseHandled;
+        }
+
+        /* package */ Throwable getThrowable() {
+            return this.throwable;
+        }
+
+        /* package */ boolean isCompleted() {
+            return this.completed;
         }
     }
 

@@ -36,7 +36,10 @@ import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.type.TypeName;
 
+import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -60,6 +63,30 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final CommandStorageRecord record = toStorageRecord(command);
         final CommandId commandId = command.getContext().getCommandId();
         write(commandId, record);
+    }
+
+    /**
+     * Stores a command with the {@link CommandStatus#ERROR} status by a command ID from a command context.
+     *
+     * <p>If there is no ID, a new one is generated is used.
+     *
+     * @param command a command to store
+     * @param error an error occurred
+     */
+    public void store(Command command, Error error) {
+        checkNotClosed();
+        checkNotDefault(error);
+        CommandId id = command.getContext().getCommandId();
+        if (idToString(id).equals(EMPTY_ID)) {
+            id = generateId();
+        }
+        final CommandStorageRecord record = toStorageRecord(command)
+                .toBuilder()
+                .setStatus(CommandStatus.ERROR)
+                .setError(error)
+                .setCommandId(idToString(id))
+                .build();
+        write(id, record);
     }
 
     @VisibleForTesting

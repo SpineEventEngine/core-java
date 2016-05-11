@@ -22,6 +22,8 @@ package org.spine3.server.command;
 
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
+import org.spine3.base.CommandStatus;
+import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
@@ -37,6 +39,11 @@ public class CommandStore implements AutoCloseable {
 
     private final CommandStorage storage;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param storage an underlying storage
+     */
     public CommandStore(CommandStorage storage) {
         this.storage = storage;
     }
@@ -49,9 +56,30 @@ public class CommandStore implements AutoCloseable {
      * @param command the command to store
      */
     public void store(Command command) {
-        checkState(storage.isOpen(), "Unable to store to closed storage.");
-
+        checkIsOpened();
         storage.store(command);
+    }
+
+    /**
+     * Stores a command with the error status.
+     *
+     * @param command a command to store
+     * @param error an error occurred
+     */
+    public void store(Command command, Error error) {
+        checkIsOpened();
+        storage.store(command, error);
+    }
+
+    /**
+     * Stores the command with the error status.
+     *
+     * @param command the command to store
+     * @param exception an exception occurred to convert to {@link org.spine3.base.Error}
+     */
+    public void store(Command command, Exception exception) {
+        checkIsOpened();
+        storage.store(command, Errors.fromException(exception));
     }
 
     @Override
@@ -74,9 +102,10 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
-     * Sets the status of the command to {@link org.spine3.base.CommandStatus#OK}
+     * Sets the status of the command to {@link CommandStatus#OK}
      */
     public void setCommandStatusOk(CommandId commandId) {
+        checkIsOpened();
         storage.setOkStatus(commandId);
     }
 
@@ -87,6 +116,7 @@ public class CommandStore implements AutoCloseable {
      * @param exception the exception occurred during command processing
      */
     public void updateStatus(CommandId commandId, Exception exception) {
+        checkIsOpened();
         storage.updateStatus(commandId, Errors.fromException(exception));
     }
 
@@ -97,6 +127,7 @@ public class CommandStore implements AutoCloseable {
      * @param error the error, which occurred during command processing
      */
     public void updateStatus(CommandId commandId, org.spine3.base.Error error) {
+        checkIsOpened();
         storage.updateStatus(commandId, error);
     }
 
@@ -107,6 +138,11 @@ public class CommandStore implements AutoCloseable {
      * @param failure the business failure occurred during command processing
      */
     public void updateStatus(CommandId commandId, Failure failure) {
+        checkIsOpened();
         storage.updateStatus(commandId, failure);
+    }
+
+    private void checkIsOpened() {
+        checkState(storage.isOpen(), "The command store is closed.");
     }
 }
