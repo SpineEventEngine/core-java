@@ -181,7 +181,7 @@ public class CommandBusShould {
     public void unregister_handler() {
         commandBus.register(createProjectHandler);
         commandBus.unregister(createProjectHandler);
-        assertIsSupportedCmd(CreateProject.class, false);
+        assertSupported(false, CreateProject.class);
     }
 
     @Test
@@ -189,7 +189,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        assertAreSupportedCommands(true, CreateProject.class, AddTask.class);
+        assertSupported(true, CreateProject.class, AddTask.class);
     }
 
     @Test // To improve coverage stats.
@@ -221,7 +221,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
 
         commandBus.close();
-        assertIsSupportedCmd(CreateProject.class, false);
+        assertSupported(false, CreateProject.class);
     }
 
     /*
@@ -475,23 +475,18 @@ public class CommandBusShould {
     }
 
     private void assertAllCommandsAreSupported(boolean areSupported) {
-        assertAreSupportedCommands(areSupported, CreateProject.class, AddTask.class, StartProject.class);
+        assertSupported(areSupported, CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @SafeVarargs
-    private final void assertAreSupportedCommands(boolean areSupported, Class<? extends Message>... cmdClasses) {
+    private final void assertSupported(boolean areSupported, Class<? extends Message>... cmdClasses) {
         for (Class<? extends Message> clazz : cmdClasses) {
-            assertIsSupportedCmd(clazz, areSupported);
-        }
-    }
-
-    // TODO:2016-05-11:alexander.litus: remove
-    private void assertIsSupportedCmd(Class<? extends Message> cmdClass, boolean isSupported) {
-        final CommandClass clazz = CommandClass.of(cmdClass);
-        if (isSupported) {
-            assertTrue(commandBus.isSupportedCommand(clazz));
-        } else {
-            assertFalse(commandBus.isSupportedCommand(clazz));
+            final CommandClass cmdClass = CommandClass.of(clazz);
+            if (areSupported) {
+                assertTrue(commandBus.isSupportedCommand(cmdClass));
+            } else {
+                assertFalse(commandBus.isSupportedCommand(cmdClass));
+            }
         }
     }
 
