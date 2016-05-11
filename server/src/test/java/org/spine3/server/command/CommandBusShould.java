@@ -111,14 +111,14 @@ public class CommandBusShould {
 
     @Test
     public void state_that_no_commands_are_supported_if_nothing_registered() {
-        assertAllCommandsAreSupported(false);
+        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test
     public void register_command_dispatcher() {
         commandBus.register(new AllCommandDispatcher());
 
-        assertAllCommandsAreSupported(true);
+        assertSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test
@@ -128,14 +128,14 @@ public class CommandBusShould {
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
 
-        assertAllCommandsAreSupported(false);
+        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test
     public void register_command_handler() {
         commandBus.register(new AllCommandHandler(newUuid()));
 
-        assertAllCommandsAreSupported(true);
+        assertSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class CommandBusShould {
         commandBus.register(handler);
         commandBus.unregister(handler);
 
-        assertAllCommandsAreSupported(false);
+        assertNotSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -186,7 +186,7 @@ public class CommandBusShould {
     public void unregister_handler() {
         commandBus.register(createProjectHandler);
         commandBus.unregister(createProjectHandler);
-        assertSupported(false, CreateProject.class);
+        assertNotSupported(CreateProject.class);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        assertSupported(true, CreateProject.class, AddTask.class);
+        assertSupported(CreateProject.class, AddTask.class);
     }
 
     @Test // To improve coverage stats.
@@ -226,7 +226,7 @@ public class CommandBusShould {
         commandBus.register(createProjectHandler);
 
         commandBus.close();
-        assertSupported(false, CreateProject.class);
+        assertNotSupported(CreateProject.class);
     }
 
     /*
@@ -494,19 +494,19 @@ public class CommandBusShould {
         return invalidCmd;
     }
 
-    private void assertAllCommandsAreSupported(boolean areSupported) {
-        assertSupported(areSupported, CreateProject.class, AddTask.class, StartProject.class);
+    @SafeVarargs
+    private final void assertSupported(Class<? extends Message>... cmdClasses) {
+        for (Class<? extends Message> clazz : cmdClasses) {
+            final CommandClass cmdClass = CommandClass.of(clazz);
+            assertTrue(commandBus.isSupportedCommand(cmdClass));
+        }
     }
 
     @SafeVarargs
-    private final void assertSupported(boolean areSupported, Class<? extends Message>... cmdClasses) {
+    private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
         for (Class<? extends Message> clazz : cmdClasses) {
             final CommandClass cmdClass = CommandClass.of(clazz);
-            if (areSupported) {
-                assertTrue(commandBus.isSupportedCommand(cmdClass));
-            } else {
-                assertFalse(commandBus.isSupportedCommand(cmdClass));
-            }
+            assertFalse(commandBus.isSupportedCommand(cmdClass));
         }
     }
 
