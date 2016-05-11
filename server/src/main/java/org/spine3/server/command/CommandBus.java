@@ -201,9 +201,9 @@ public class CommandBus implements AutoCloseable {
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            final Exception invalidCmd = InvalidCommandException.onConstraintViolations(command, violations);
-            commandStore.store(command, invalidCmd);
-            responseObserver.onError(invalidArgumentWithCause(invalidCmd));
+            final Exception invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
+            commandStore.store(command, invalidCommand);
+            responseObserver.onError(invalidArgumentWithCause(invalidCommand));
             return false;
         }
         return true;
