@@ -8,7 +8,6 @@ buildscript {
 }
 
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
     testCompile project(path: ":testutil", configuration: 'testArtifacts')
 }
 
@@ -26,11 +25,6 @@ sourceSets {
 }
 
 protobuf {
-    plugins {
-        grpc {
-            artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION"
-        }
-    }
     generateProtoTasks {
         all().each { final task ->
             task.plugins {

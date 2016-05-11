@@ -78,6 +78,8 @@ subprojects {
         compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.PROTOBUF_VERSION
         compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: project.PROTOBUF_VERSION
 
+        compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
+
         testCompile(group: 'junit', name: 'junit', version: '4.12') {
             exclude(module: 'hamcrest-core')
         }
@@ -109,6 +111,11 @@ subprojects {
     }
 
     protobuf {
+        plugins {
+            grpc {
+                artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION"
+            }
+        }
         generatedFilesBaseDir = GEN_ROOT_DIR
         protoc {
             artifact = project.PROTOBUF_DEPENDENCY
