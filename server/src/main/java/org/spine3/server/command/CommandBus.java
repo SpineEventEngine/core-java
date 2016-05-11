@@ -224,8 +224,7 @@ public class CommandBus implements AutoCloseable {
      * @param command a command to store
      * @param exception an exception occurred during command processing
      */
-    @VisibleForTesting
-    /* package */ void storeWithErrorStatus(Command command, Exception exception) {
+    private void storeWithErrorStatus(Command command, Exception exception) {
         store(command);
         //TODO:2016-05-08:alexander.yevsyukov: Support storage method that can make storing command with error in one call.
         commandStatusService.setToError(command.getContext().getCommandId(), exception);
@@ -355,8 +354,7 @@ public class CommandBus implements AutoCloseable {
      *
      * @param command a command to store
      */
-    @VisibleForTesting
-    /* package */ void store(Command command) {
+    private void store(Command command) {
         commandStore.store(command);
     }
 
