@@ -8,9 +8,9 @@ buildscript {
 }
 
 dependencies {
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-
     compile project(path: ':client');
+
+    testCompile project(path: ":client", configuration: 'testArtifacts')
 }
 
 apply plugin: 'org.spine3.tools.protobuf-plugin';
