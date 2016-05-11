@@ -27,8 +27,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.spine3.base.Identifiers.NULL_ID_OR_FIELD;
+import static org.spine3.base.Identifiers.NULL_ID;
 
 /**
  * @author Mikhail Melnik
@@ -47,12 +46,9 @@ public class OrderRepository extends AggregateRepository<OrderId, OrderAggregate
         @Override
         public String apply(@Nullable OrderId orderId) {
             if (orderId == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_ID;
             }
             final String value = orderId.getValue();
-            if (isNullOrEmpty(value) || value.trim().isEmpty()) {
-                return NULL_ID_OR_FIELD;
-            }
             return value;
         }
     }

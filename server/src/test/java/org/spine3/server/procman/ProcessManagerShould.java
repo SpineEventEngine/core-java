@@ -24,9 +24,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
@@ -35,7 +36,12 @@ import org.spine3.base.Events;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.ExecutorCommandScheduler;
 import org.spine3.server.event.Subscribe;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.type.CommandClass;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -50,8 +56,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
@@ -71,8 +77,9 @@ public class ProcessManagerShould {
 
     @Before
     public void setUp() {
-        commandBus = Mockito.mock(CommandBus.class);
-
+        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        commandBus = spy(newCommandBus(commandStore, new ExecutorCommandScheduler()));
         processManager = new TestProcessManager(ID);
     }
 
@@ -105,7 +112,9 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException {
+        commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
+
         testDispatchCommand(createProjectMsg(ID));
         testDispatchCommand(addTaskMsg(ID));
         testDispatchCommand(startProjectMsg(ID));
@@ -135,7 +144,10 @@ public class ProcessManagerShould {
      */
     @Test
     public void route_commands() throws InvocationTargetException {
+        // Add dispatcher for the routed command. Otherwise the command would reject the command.
+        commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
+
         final List<Event> events = testDispatchCommand(startProjectMsg(ID));
 
         // There's only one event generated.
@@ -155,9 +167,14 @@ public class ProcessManagerShould {
 
         // The source of the command is StartProject.
         assertTrue(Commands.getMessage(commandRouted.getSource()) instanceof StartProject);
+        verifyPostedCmd(commandRouted.getProduced(0));
+    }
 
+    @SuppressWarnings("unchecked")
+    private void verifyPostedCmd(Command cmd) {
         // The produced command was posted to CommandBus once, and the same command is in the generated event.
-        verify(commandBus, times(1)).post(commandRouted.getProduced(0));
+        // We are not interested in observer instance here.
+        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -234,10 +251,30 @@ public class ProcessManagerShould {
         public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toAny(command));
 
-            final Message startProject = TestCommands.startProjectMsg(command.getProjectId());
-            return newRouter().of(command, context)
-                    .add(startProject)
-                    .route();
+            final Message addTask = TestCommands.addTaskMsg(command.getProjectId());
+            final CommandRouted route = newRouter().of(command, context)
+                                                   .add(addTask)
+                                                   .route();
+            return route;
+        }
+    }
+
+    private static class AddTaskDispatcher implements CommandDispatcher {
+
+        private boolean dispatcherInvoked = false;
+
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return CommandClass.setOf(AddTask.class);
+        }
+
+        @Override
+        public void dispatch(Command request) throws Exception {
+            dispatcherInvoked = true;
+        }
+
+        public boolean wasDispatcherInvoked() {
+            return dispatcherInvoked;
         }
     }
 }

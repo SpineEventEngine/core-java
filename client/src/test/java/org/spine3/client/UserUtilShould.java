@@ -17,22 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
 
-import com.google.protobuf.Message;
+package org.spine3.client;
 
-/**
- * Exception that is thrown when unsupported command is obtained
- * or in case there is no class for given Protobuf command message.
- *
- * @author Mikhail Melnik
- */
-public class UnsupportedCommandException extends RuntimeException {
+import org.junit.Test;
+import org.spine3.base.UserId;
 
-    public UnsupportedCommandException(Message command) {
-        super("There is no registered handler or dispatcher for the command: " + command.getClass().getName());
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class UserUtilShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(UserUtil.class));
     }
 
-    private static final long serialVersionUID = 0L;
+    @Test
+    public void create_UserId_by_string() {
 
+        final String testIdString = "12345";
+        final UserId userId = newUserId(testIdString);
+
+        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+
+        assertEquals(expected, userId);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test(expected = NullPointerException.class)
+    public void do_not_accept_null_UseId_value() {
+        newUserId(null);
+    }
 }

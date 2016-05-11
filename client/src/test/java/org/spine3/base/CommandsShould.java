@@ -38,6 +38,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
@@ -68,6 +69,13 @@ public class CommandsShould {
     @Test
     public void have_private_ctor() {
         assertTrue(hasPrivateUtilityConstructor(Commands.class));
+    }
+
+    @Test
+    public void generate_command_ids() {
+        final CommandId id = Commands.generateId();
+
+        assertFalse(idToString(id).isEmpty());
     }
 
     @Test
@@ -106,7 +114,7 @@ public class CommandsShould {
                                        .build();
         final Command command = commandFactory.create(message);
         final String typeName = TypeName.ofCommand(command).toString();
-        final String commandId = command.getContext().getCommandId().getUuid();
+        final String commandId = idToString(command.getContext().getCommandId());
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
         final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);

@@ -25,16 +25,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
-import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.ValidationFailure;
+import org.spine3.base.ValidationError;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.util.List;
 import java.util.Map;
-
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Utility class for working with event validation.
@@ -44,8 +40,7 @@ import static org.spine3.protobuf.Messages.toAny;
 @SuppressWarnings("UtilityClass")
 public class EventValidation {
 
-    private EventValidation() {
-    }
+    private EventValidation() {}
 
     /**
      * Attribute names for event-related business failures.
@@ -60,12 +55,14 @@ public class EventValidation {
     public static Response unsupportedEvent(Message event) {
         final String eventType = event.getDescriptorForType().getFullName();
         final String errMsg = String.format("Events of the type `%s` are not supported.", eventType);
+        final Error error = Error.newBuilder()
+                                 .setType(EventValidationError.getDescriptor().getFullName())
+                                 .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
+                                 .putAllAttributes(eventTypeAttribute(eventType))
+                                 .setMessage(errMsg)
+                                 .build();
         final Response response = Response.newBuilder()
-                .setError(Error.newBuilder()
-                    .setType(EventValidationError.getDescriptor().getFullName())
-                    .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
-                    .putAllAttributes(eventTypeAttribute(eventType))
-                    .setMessage(errMsg))
+                .setError(error)
                 .build();
         return response;
     }
@@ -73,20 +70,23 @@ public class EventValidation {
     /**
      * Creates a {@code Response} for getting an event with invalid fields (e.g., marked as "required" but not set).
      *
-     * @param event an invalid event
+     * @param event an invalid event message
      * @param violations constraint violations found in event message
      */
     public static Response invalidEvent(Message event, List<ConstraintViolation> violations) {
         final String eventType = event.getDescriptorForType().getFullName();
-        final ValidationFailure failureInstance = ValidationFailure.newBuilder()
+        final ValidationError validationError = ValidationError.newBuilder()
                 .addAllConstraintViolation(violations)
                 .build();
-        final Failure.Builder failure = Failure.newBuilder()
-                .setInstance(toAny(failureInstance))
-                .setTimestamp(getCurrentTime())
-                .putAllAttributes(eventTypeAttribute(eventType));
+        final Error error = Error.newBuilder()
+                                 .setType(EventValidationError.getDescriptor().getFullName())
+                                 .setCode(EventValidationError.INVALID_EVENT.getNumber())
+                                 .setValidationError(validationError)
+                                 .putAllAttributes(eventTypeAttribute(eventType))
+                                 .setMessage("Event message is invalid.")
+                                 .build();
         final Response response = Response.newBuilder()
-                .setFailure(failure)
+                .setError(error)
                 .build();
         return response;
     }

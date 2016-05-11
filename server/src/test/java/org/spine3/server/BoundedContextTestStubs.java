@@ -46,7 +46,7 @@ public class BoundedContextTestStubs {
         final EventBus eventBus = newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                 .setStorageFactory(storageFactory)
-                .setCommandBus(commandBus)
+                .setCommandBus(spy(commandBus))
                 .setEventBus(spy(eventBus));
         return builder.build();
     }

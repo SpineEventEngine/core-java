@@ -33,20 +33,25 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.protobuf.Messages;
+import org.spine3.server.command.CommandValidator;
+import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
-import org.spine3.testdata.TestCommands;
 import org.spine3.type.TypeName;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
+import static org.spine3.base.CommandStatus.*;
 import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
+import static org.spine3.validate.Validate.isDefault;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * @author Alexander Litus
@@ -76,13 +81,13 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = toAny(TestCommands.createProjectCmd());
+        final Any command = toAny(createProjectCmd());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
-                .setCommandId(context.getCommandId().getUuid())
+                .setCommandId(idToString(context.getCommandId()))
                 .setTargetId(newUuid())
                 .setTargetIdType(String.class.getName())
                 .setMessage(command)
@@ -97,13 +102,27 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_and_read_command() {
-        final Command command = TestCommands.createProjectCmd();
+        final Command command = createProjectCmd();
         final CommandId commandId = command.getContext().getCommandId();
+
         storage.store(command);
+        final CommandStorageRecord record = storage.read(commandId);
+
+        checkRecord(command, record, RECEIVED);
+    }
+
+    @Test
+    public void store_command_with_error_status() {
+        final Command command = createProjectCmd();
+        final CommandId commandId = command.getContext().getCommandId();
+        final Error error = newError();
+
+        storage.store(command, error);
 
         final CommandStorageRecord record = storage.read(commandId);
 
-        assertEquals(command.getMessage(), record.getMessage());
+        checkRecord(command, record, ERROR);
+        assertEquals(error, record.getError());
     }
 
     @Test
@@ -113,7 +132,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         storage.setOkStatus(id);
 
         final CommandStorageRecord actual = storage.read(id);
-        assertEquals(CommandStatus.OK, actual.getStatus());
+        assertEquals(OK, actual.getStatus());
     }
 
     @Test
@@ -124,7 +143,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         storage.updateStatus(id, error);
 
         final CommandStorageRecord actual = storage.read(id);
-        assertEquals(CommandStatus.ERROR, actual.getStatus());
+        assertEquals(ERROR, actual.getStatus());
         assertEquals(error, actual.getError());
     }
 
@@ -136,25 +155,17 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         storage.updateStatus(id, failure);
 
         final CommandStorageRecord actual = storage.read(id);
-        assertEquals(CommandStatus.FAILURE, actual.getStatus());
+        assertEquals(FAILURE, actual.getStatus());
         assertEquals(failure, actual.getFailure());
     }
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = TestCommands.createProjectCmd();
-        final CreateProject message = Messages.fromAny(command.getMessage());
+        final Command command = createProjectCmd();
 
         final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
 
-        assertEquals(command.getMessage(), record.getMessage());
-        assertEquals(command.getContext().getTimestamp(), record.getTimestamp());
-        assertEquals(CreateProject.class.getSimpleName(), record.getCommandType());
-        assertEquals(command.getContext().getCommandId().getUuid(), record.getCommandId());
-        assertEquals(CommandStatus.RECEIVED, record.getStatus());
-        assertEquals(ProjectId.class.getName(), record.getTargetIdType());
-        assertEquals(message.getProjectId().getId(), record.getTargetId());
-        assertEquals(command.getContext(), record.getContext());
+        checkRecord(command, record, RECEIVED);
     }
 
     @Test
@@ -170,18 +181,18 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test(expected = IllegalArgumentException.class)
     public void check_command_and_throw_exception_if_it_is_invalid() {
         final Command command = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
-        CommandStorage.checkCommand(command);
+        CommandValidator.checkCommand(command);
     }
 
     @Test
     public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command command = TestCommands.createProjectCmd();
-        CommandStorage.checkCommand(command);
+        final Command command = createProjectCmd();
+        CommandValidator.checkCommand(command);
     }
 
     @Test
     public void return_null_when_fail_to_get_id_from_command_message_which_has_no_id_field() {
-        final Object id = CommandStorage.tryToGetTargetId(StringValue.getDefaultInstance());
+        final Object id = GetTargetIdFromCommand.asNullableObject(StringValue.getDefaultInstance());
         assertNull(id);
     }
 
@@ -230,5 +241,39 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                 .setStacktrace("failure stacktrace")
                 .setTimestamp(TimeUtil.getCurrentTime())
                 .build();
+    }
+
+    private static void checkRecord(
+            Command cmd,
+            CommandStorageRecord record,
+            CommandStatus statusExpected) {
+        final CommandContext context = cmd.getContext();
+        final CommandId commandId = context.getCommandId();
+        final CreateProject message = fromAny(cmd.getMessage());
+
+        assertEquals(cmd.getMessage(), record.getMessage());
+        assertEquals(context.getTimestamp(), record.getTimestamp());
+        assertEquals(message.getClass().getSimpleName(), record.getCommandType());
+        assertEquals(idToString(commandId), record.getCommandId());
+        assertEquals(statusExpected, record.getStatus());
+        assertEquals(ProjectId.class.getName(), record.getTargetIdType());
+        assertEquals(message.getProjectId().getId(), record.getTargetId());
+        assertEquals(context, record.getContext());
+        switch (statusExpected) {
+            case RECEIVED:
+            case OK:
+                assertTrue(isDefault(record.getError()));
+                assertTrue(isDefault(record.getFailure()));
+                break;
+            case ERROR:
+                assertTrue(isNotDefault(record.getError()));
+                break;
+            case FAILURE:
+                assertTrue(isNotDefault(record.getFailure()));
+                break;
+            case UNDEFINED:
+            case UNRECOGNIZED:
+                break;
+        }
     }
 }

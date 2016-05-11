@@ -20,25 +20,21 @@
 
 package org.spine3.server;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandValidationError;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.base.UserId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
@@ -60,15 +56,14 @@ import org.spine3.test.project.command.StartProject;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestAggregateIdFactory;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.newUserId;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
@@ -82,8 +77,6 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextShould {
 
-    private final UserId userId = newUserId(newUuid());
-    private final ProjectId projectId = TestAggregateIdFactory.newProjectId();
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
     private StorageFactory storageFactory;
@@ -126,22 +119,6 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void return_unsupported_command_response_if_no_handlers_or_dispatchers() {
-        boundedContext.post(createProjectCmd(), new StreamObserver<Response>() {
-            @Override
-            public void onNext(Response response) {
-                assertTrue(Responses.isUnsupportedCommand(response));
-            }
-
-            @Override
-            public void onError(Throwable throwable) {}
-
-            @Override
-            public void onCompleted() {}
-        });
-    }
-
-    @Test
     public void register_AggregateRepository() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
         repository.initStorage(storageFactory);
@@ -163,16 +140,16 @@ public class BoundedContextShould {
     }
 
     @Test
-    public void post_Command() {
-        registerAll();
-        final Command request = createProjectCmd(userId, projectId, getCurrentTime());
-        final TestResponseObserver observer = new TestResponseObserver();
+    public void post_commands_to_CommandBus() {
+        final TestResponseObserver responseObserver = new TestResponseObserver();
+        final CommandBus commandBus = boundedContext.getCommandBus();
 
-        boundedContext.post(request, observer);
+        final Command cmd = createProjectCmd();
+        boundedContext.post(cmd, responseObserver);
 
-        assertEquals(Responses.ok(), observer.getResponseHandled());
+        verify(commandBus, times(1)).post(cmd, responseObserver);
     }
-    
+
     @Test
     public void notify_integration_event_subscribers() {
         registerAll();
@@ -182,30 +159,19 @@ public class BoundedContextShould {
 
         boundedContext.notify(event, observer);
 
-        assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(ok(), observer.getResponseHandled());
         assertEquals(subscriber.eventHandled, msg);
     }
 
     @Test
-    public void verify_namespace_attribute_if_multitenant() {
+    public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
-                .setStorageFactory(InMemoryStorageFactory.getInstance())
-                .setCommandBus(newCommandBus(storageFactory))
-                .setEventBus(newEventBus(storageFactory))
-                .setMultitenant(true)
-                .build();
-
-        final TestResponseObserver observer = new TestResponseObserver();
-
-        final Command request = Command.newBuilder()
-                // Pass empty command so that we have something valid to unpack in the context.
-                .setMessage(Any.pack(StringValue.getDefaultInstance()))
-                .build();
-        bc.post(request, observer);
-
-        assertEquals(CommandValidationError.NAMESPACE_UNKNOWN.getNumber(), observer.getResponseHandled()
-                                                                                   .getError()
-                                                                                   .getCode());
+                                                .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                .setCommandBus(newCommandBus(storageFactory))
+                                                .setEventBus(newEventBus(storageFactory))
+                                                .setMultitenant(true)
+                                                .build();
+        assertTrue(bc.isMultitenant());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {

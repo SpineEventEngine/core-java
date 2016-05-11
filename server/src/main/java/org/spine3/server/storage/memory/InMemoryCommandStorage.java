@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -66,7 +67,12 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
         checkNotNull(id);
         checkNotNull(error);
 
-        final CommandStorageRecord updatedRecord = get(id)
+        final CommandStorageRecord record = get(id);
+        if (record == null) {
+            throw new IllegalStateException("No record found for command ID: " + idToString(id));
+        }
+
+        final CommandStorageRecord updatedRecord = record
                 .toBuilder()
                 .setStatus(CommandStatus.ERROR)
                 .setError(error)

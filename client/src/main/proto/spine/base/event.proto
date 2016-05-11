@@ -89,4 +89,7 @@ enum EventValidationError {
 
     // The event type is not supported by the server.
     UNSUPPORTED_EVENT = 1;
+
+    // The event message is invalid according to custom Protobuf options set.
+    INVALID_EVENT = 2;
 }

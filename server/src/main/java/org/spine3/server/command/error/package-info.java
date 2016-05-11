@@ -19,10 +19,9 @@
  */
 
 /**
- * This package contains common classes for server-side errors.
+ * This package contains server-side exceptions related to commands.
  */
-
 @ParametersAreNonnullByDefault
-package org.spine3.server.error;
+package org.spine3.server.command.error;
 
 import javax.annotation.ParametersAreNonnullByDefault;

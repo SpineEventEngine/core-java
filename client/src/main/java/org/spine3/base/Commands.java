@@ -43,6 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -193,7 +194,7 @@ public class Commands {
         checkNotEmptyOrBlank(format, "format string");
 
         final TypeName commandType = TypeName.of(commandMessage);
-        final String id = commandId.getUuid();
+        final String id = idToString(commandId);
         final String result = String.format(format, commandType, id);
         return result;
     }

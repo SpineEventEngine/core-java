@@ -24,12 +24,15 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.type.TypeName;
 import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
 
 /**
  * This class provides general validation routines.
@@ -101,7 +104,7 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", object);
+        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
         return object;
     }
 
@@ -142,7 +145,7 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", object);
+        checkDefault(object, "The message is not in the default state: %s", TypeName.of(object));
         return object;
     }
 
@@ -157,8 +160,7 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim()
-                                   .length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 
@@ -196,7 +198,8 @@ public class Validate {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        checkNotEmptyOrBlank(id.getUuid(), "command ID");
+        final String idStr = idToString(id);
+        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
 

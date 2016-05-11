@@ -22,7 +22,7 @@ package org.spine3.base;
 
 import com.google.protobuf.Empty;
 
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.base.Response.StatusCase.*;
 
 /**
  * Utilities for working with {@link org.spine3.base.Response} objects.
@@ -35,7 +35,7 @@ public class Responses {
     }
 
     /**
-     * The response returned on successful acceptance of a command for processing.
+     * The response returned on successful acceptance of a message for processing.
      */
     private static final Response RESPONSE_OK = Response.newBuilder()
             .setOk(Empty.getDefaultInstance())
@@ -55,23 +55,8 @@ public class Responses {
      *         {@code false} otherwise
      */
     public static boolean isOk(Response response) {
-        final boolean result = response.getStatusCase() == Response.StatusCase.OK;
+        final boolean result = response.getStatusCase() == OK;
         return result;
-    }
-
-    /**
-     * Checks if the response is `unsupported command`.
-     *
-     * @return {@code true} if the passed response represents `unsupported command` error,
-     *         {@code false} otherwise
-     */
-    public static boolean isUnsupportedCommand(Response response) {
-        if (response.getStatusCase() == Response.StatusCase.ERROR) {
-            final Error error = response.getError();
-            final boolean isUnsupported = error.getCode() == CommandValidationError.UNSUPPORTED_COMMAND.getNumber();
-            return isUnsupported;
-        }
-        return false;
     }
 
     /**
@@ -81,7 +66,7 @@ public class Responses {
      *         {@code false} otherwise
      */
     public static boolean isUnsupportedEvent(Response response) {
-        if (response.getStatusCase() == Response.StatusCase.ERROR) {
+        if (isError(response)) {
             final Error error = response.getError();
             final boolean isUnsupported = error.getCode() == EventValidationError.UNSUPPORTED_EVENT.getNumber();
             return isUnsupported;
@@ -92,15 +77,20 @@ public class Responses {
     /**
      * Checks if the response is `invalid message`.
      *
-     * @return {@code true} if the passed response represents `invalid message` failure,
+     * @return {@code true} if the passed response represents `invalid message` error,
      *         {@code false} otherwise
      */
     public static boolean isInvalidMessage(Response response) {
-        if (response.getStatusCase() == Response.StatusCase.FAILURE) {
-            final ValidationFailure failure = fromAny(response.getFailure().getInstance());
-            final boolean isInvalid = !failure.getConstraintViolationList().isEmpty();
+        if (isError(response)) {
+            final ValidationError error = response.getError().getValidationError();
+            final boolean isInvalid = !error.getConstraintViolationList().isEmpty();
             return isInvalid;
         }
         return false;
+    }
+
+    private static boolean isError(Response response) {
+        final boolean isError = response.getStatusCase() == ERROR;
+        return isError;
     }
 }

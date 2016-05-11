@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -59,10 +58,15 @@ public class Identifiers {
 
     private Identifiers() {}
 
-    /*
-     * Null message or field string representation
+    /**
+     * A {@code null} ID string representation.
      */
-    public static final String NULL_ID_OR_FIELD = "NULL";
+    public static final String NULL_ID = "NULL";
+
+    /**
+     * An empty ID string representation.
+     */
+    public static final String EMPTY_ID = "EMPTY";
 
     /**
      * The suffix of ID fields.
@@ -81,25 +85,21 @@ public class Identifiers {
      * @param id  the value to convert
      * @param <I> the type of the ID
      * @return <ul>
-     * <li>For classes implementing {@link Message} — Json form
-     * <li>For {@code String}, {@code Long}, {@code Integer} — the result of {@link Object#toString()}
+     * <li>for classes implementing {@link Message} &mdash; a Json form;
+     * <li>for {@code String}, {@code Long}, {@code Integer} &mdash; the result of {@link Object#toString()};
+     * <li>for {@code null} ID &mdash; the {@link #NULL_ID};
+     * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
      * </ul>
      * @throws IllegalArgumentException if the passed type isn't one of the above or
      *         the passed {@link Message} instance has no fields
+     * @see ConverterRegistry
      */
     public static <I> String idToString(@Nullable I id) {
-
         if (id == null) {
-            return NULL_ID_OR_FIELD;
+            return NULL_ID;
         }
-
         String result;
-
-        final boolean isStringOrNumber = id instanceof String
-                || id instanceof Integer
-                || id instanceof Long;
-
-        if (isStringOrNumber) {
+        if (isStringOrNumber(id)) {
             result = id.toString();
         } else if (id instanceof Any) {
             final Message messageFromAny = fromAny((Any) id);
@@ -109,43 +109,41 @@ public class Identifiers {
         } else {
             throw unsupportedIdType(id);
         }
-
-        if (isNullOrEmpty(result) || result.trim().isEmpty()) {
-            result = NULL_ID_OR_FIELD;
-        }
-
         result = result.trim();
+        if (result.isEmpty()) {
+            result = EMPTY_ID;
+        }
+        return result;
+    }
 
+    private static <I> boolean isStringOrNumber(I id) {
+        final boolean result = id instanceof String
+                || id instanceof Integer
+                || id instanceof Long;
         return result;
     }
 
     private static String idMessageToString(Message message) {
-
         final String result;
         final ConverterRegistry registry = ConverterRegistry.getInstance();
-
         if (registry.containsConverter(message)) {
             final Function<Message, String> converter = registry.getConverter(message);
             result = converter.apply(message);
         } else {
             result = convert(message);
         }
-
         return result;
     }
 
     private static String convert(Message message) {
-
         final String result;
         final Collection<Object> values = message.getAllFields().values();
-
         if (values.isEmpty()) {
-            throw new IllegalArgumentException("ID must have at least one field. Encountered: " + message);
+            throw new IllegalArgumentException("ID must have at least one field. Encountered: " +
+                                                       message.getClass().getName());
         }
-
         if (values.size() == 1) {
             final Object object = values.iterator().next();
-
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);
             } else {
@@ -154,12 +152,10 @@ public class Identifiers {
         } else {
             result = messageWithMultipleFieldsToString(message);
         }
-
         return result;
     }
 
     private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
-
         String result = shortDebugString(message);
         result = PATTERN_COLON_SPACE.matcher(result).replaceAll(EQUAL_SIGN);
         return result;
@@ -327,7 +323,7 @@ public class Identifiers {
         @Override
         public String apply(@Nullable Timestamp timestamp) {
             if (timestamp == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_ID;
             }
             final String result = timestampToIdString(timestamp);
             return result;
@@ -338,7 +334,7 @@ public class Identifiers {
         @Override
         public String apply(@Nullable EventId eventId) {
             if (eventId == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_ID;
             }
             return eventId.getUuid();
         }
@@ -349,7 +345,7 @@ public class Identifiers {
         @Override
         public String apply(@Nullable CommandId commandId) {
             if (commandId == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_ID;
             }
             return commandId.getUuid();
         }

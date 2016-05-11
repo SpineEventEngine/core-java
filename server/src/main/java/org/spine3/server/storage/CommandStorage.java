@@ -32,15 +32,14 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
-import org.spine3.server.error.MissingEntityIdException;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.*;
+import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
  * A storage used by {@link CommandStore} for keeping command data.
@@ -49,8 +48,6 @@ import static org.spine3.validate.Validate.*;
  */
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
-
-    private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = GetTargetIdFromCommand.newInstance();
 
     /**
      * Stores a command by a command ID from a command context.
@@ -61,49 +58,49 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      */
     public void store(Command command) {
         checkNotClosed();
-        checkCommand(command);
+        CommandValidator.checkCommand(command);
 
         final CommandStorageRecord record = toStorageRecord(command);
         final CommandId commandId = command.getContext().getCommandId();
         write(commandId, record);
     }
 
-    @VisibleForTesting
-    /* package */ static void checkCommand(Command command) {
-        checkArgument(command.hasMessage(), "Command message must be set.");
-
-        checkArgument(command.hasContext(), "Command context must be set.");
-        final CommandContext context = command.getContext();
-
-        checkValid(context.getCommandId());
-
-        checkTimestamp(context.getTimestamp(), "Command time");
-
-        final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeName.of(commandMessage).nameOnly();
-        checkNotEmptyOrBlank(commandType, "command type");
-
-        final Object targetId = tryToGetTargetId(commandMessage);
-        if (targetId != null) {
-            final String targetIdString = idToString(targetId);
-            checkNotEmptyOrBlank(targetIdString, "command target ID");
-            final String targetIdType = targetId.getClass().getName();
-            checkNotEmptyOrBlank(targetIdType, "command target ID type");
+    /**
+     * Stores a command with the {@link CommandStatus#ERROR} status by a command ID from a command context.
+     *
+     * <p>If there is no ID, a new one is generated is used.
+     *
+     * @param command a command to store
+     * @param error an error occurred
+     */
+    public void store(Command command, Error error) {
+        checkNotClosed();
+        checkNotDefault(error);
+        CommandId id = command.getContext().getCommandId();
+        if (idToString(id).equals(EMPTY_ID)) {
+            id = generateId();
         }
+        final CommandStorageRecord record = toStorageRecord(command)
+                .toBuilder()
+                .setStatus(CommandStatus.ERROR)
+                .setError(error)
+                .setCommandId(idToString(id))
+                .build();
+        write(id, record);
     }
 
     @VisibleForTesting
     /* package */ static CommandStorageRecord toStorageRecord(Command command) {
         final CommandContext context = command.getContext();
         final CommandId commandId = context.getCommandId();
-        final String commandIdString = commandId.getUuid();
+        final String commandIdString = idToString(commandId);
 
         final Any messageAny = command.getMessage();
 
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeName.of(commandMessage).nameOnly();
 
-        final Object targetId = tryToGetTargetId(commandMessage);
+        final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
         final String targetIdString;
         final String targetIdType;
         if (targetId != null) {
@@ -124,23 +121,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setTargetId(targetIdString)
                 .setContext(context);
         return builder.build();
-    }
-
-    /**
-     * Tries to obtain a target ID.
-     *
-     * @return an ID or {@code null} if {@link GetTargetIdFromCommand#getId(Message, Message)}
-     * throws an exception (in the case if the command is not for an entity)
-     */
-    @Nullable
-    @VisibleForTesting
-    /* package */ static Object tryToGetTargetId(Message commandMessage) {
-        try {
-            final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
-            return id;
-        } catch (MissingEntityIdException | ClassCastException ignored) {
-            return null;
-        }
     }
 
     /**

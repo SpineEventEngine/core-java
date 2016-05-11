@@ -100,8 +100,11 @@ enum CommandValidationError {
     // The command type is not supported by the server.
     UNSUPPORTED_COMMAND = 1;
 
+    // The command message is invalid according to custom Protobuf options set.
+    INVALID_COMMAND = 2;
+
     // The command context does not have `namespace` attribute defined in a multitenant application.
-    NAMESPACE_UNKNOWN = 2;
+    NAMESPACE_UNKNOWN = 3;
 }
 
 // This enumeration defines possible statuses of command processing.

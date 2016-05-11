@@ -20,20 +20,24 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import com.google.protobuf.Message;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
+import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.error.UnsupportedCommandException;
+import org.spine3.server.command.error.InvalidCommandException;
+import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -42,9 +46,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
-import static org.spine3.server.command.CommandValidation.invalidCommand;
-import static org.spine3.server.command.CommandValidation.unsupportedCommand;
-import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -56,25 +58,28 @@ import static org.spine3.validate.Validate.checkNotDefault;
 public class CommandBus implements AutoCloseable {
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
+
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
     private final CommandStore commandStore;
 
+    private final CommandStatusService commandStatusService;
+
     @Nullable
     private final CommandScheduler scheduler;
-    
+
+    /**
+     * Is {@code true} if the Bounded Context (to which this Command Bus belongs) is multi-tenant.
+     * Therefore commands posted to this Command Bus must have the {@code namespace} attribute.
+     */
+    private boolean isMultitenant;
+
     private ProblemLog problemLog = new ProblemLog();
-    private final CommandStatusService commandStatusService;
-    private MessageValidator messageValidator;
 
     private CommandBus(Builder builder) {
         commandStore = builder.getCommandStore();
         scheduler = builder.getScheduler();
-        if (scheduler != null) {
-            scheduler.setPostFunction(newPostFunction());
-        }
         commandStatusService = new CommandStatusService(commandStore);
-        messageValidator = new MessageValidator();
     }
 
     /**
@@ -128,60 +133,112 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Verifies that the command message can be posted to this {@code CommandBus}.
+     * Directs the command to be dispatched or handled.
      *
-     * <p>A command can be posted if its message has either dispatcher or handler registered with
-     * this {@code CommandBus}.
-     * The message also must satisfy validation constraints defined in its Protobuf type.
+     * <p>If the command has scheduling attributes, it will be posted for execution by the configured
+     * scheduler according to values of those scheduling attributes.
      *
-     * @param command a command message to check
-     * @return the result of {@link Responses#ok()} if the command is valid and supported,
-     *         {@link CommandValidation#invalidCommand(Message, List)} or
-     *         {@link CommandValidation#unsupportedCommand(Message)} otherwise
+     * <p>If a command does not have neither dispatcher nor handler, the error is returned via
+     * {@link StreamObserver#onError(Throwable)} call with {@link UnsupportedCommandException} as the cause.
+     *
+     * @param command the command to be processed
+     * @param responseObserver the observer to return the result of the call
      */
-    public Response validate(Message command) {
+    public void post(Command command, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(command);
-        if (isUnsupportedCommand(commandClass)) {
-            return unsupportedCommand(command);
+        // If the command is not supported, return as error.
+        if (!isSupportedCommand(commandClass)) {
+            handleUnsupported(command, responseObserver);
+            return;
         }
-        final List<ConstraintViolation> violations = messageValidator.validate(command);
-        if (!violations.isEmpty()) {
-            return invalidCommand(command, violations);
+        if (!handleValidation(command, responseObserver)) {
+            return;
         }
-        return Responses.ok();
-    }
-
-    private boolean isUnsupportedCommand(CommandClass commandClass) {
-        final boolean isUnsupported = !isDispatcherRegistered(commandClass) && !isHandlerRegistered(commandClass);
-        return isUnsupported;
+        if (isScheduled(command)) {
+            //TODO:2016-05-08:alexander.yevsyukov: Do store command if it was scheduled and update its status when it's executed.
+            // It is needed to make command delivery more reliable. E.g. if a delay is long enough, not stored message
+            // could be lost if the server, which holds it in memory is shut down.
+            schedule(command);
+            responseObserver.onNext(Responses.ok());
+            responseObserver.onCompleted();
+            return;
+        }
+        commandStore.store(command);
+        responseObserver.onNext(Responses.ok());
+        doPost(command);
+        responseObserver.onCompleted();
     }
 
     /**
-     * Directs a command request to the corresponding handler.
+     * Directs a command to be dispatched or handled.
      *
-     * @param command the command to be processed
-     * @throws UnsupportedCommandException if there is neither handler nor dispatcher registered for
-     *                                     the class of the passed command
+     * <p>Logs exceptions which may occur during dispatching or handling and
+     * sets the command status to {@code error} or {@code failure} in the storage.
+     *
+     * @param command a command to post
      */
-    public void post(Command command) {
-        checkNotDefault(command);
-        if (isScheduled(command)) {
-            schedule(command);
-            return;
-        }
-        store(command);
-        final CommandClass commandClass = CommandClass.of(command);
+    /* package */ void doPost(Command command) {
+        final Message message = getMessage(command);
+        final CommandClass commandClass = CommandClass.of(message);
+        final CommandContext commandContext = command.getContext();
         if (isDispatcherRegistered(commandClass)) {
             dispatch(command);
-            return;
+        } else if (isHandlerRegistered(commandClass)) {
+            invokeHandler(message, commandContext);
         }
-        if (isHandlerRegistered(commandClass)) {
-            final Message message = getMessage(command);
-            final CommandContext context = command.getContext();
-            invokeHandler(message, context);
-            return;
+    }
+
+    /**
+     * Returns {@code true} if a command is valid, {@code false} otherwise.
+     */
+    private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
+        final Namespace namespace = command.getContext().getNamespace();
+        if (isMultitenant() && isDefault(namespace)) {
+            final Exception noNamespace = InvalidCommandException.onMissingNamespace(command);
+            commandStore.store(command, noNamespace);
+            responseObserver.onError(invalidArgumentWithCause(noNamespace));
+            return false; // and nothing else matters
         }
-        throw new UnsupportedCommandException(getMessage(command));
+        final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
+        if (!violations.isEmpty()) {
+            final Exception invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
+            commandStore.store(command, invalidCommand);
+            responseObserver.onError(invalidArgumentWithCause(invalidCommand));
+            return false;
+        }
+        return true;
+    }
+
+    private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
+        final Exception unsupported = new UnsupportedCommandException(command);
+        commandStore.store(command, unsupported);
+        responseObserver.onError(invalidArgumentWithCause(unsupported));
+    }
+
+    private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
+        final StatusRuntimeException result = Status.INVALID_ARGUMENT
+                .withCause(exception)
+                .asRuntimeException();
+        return result;
+    }
+
+    /**
+     * Checks if a command is supported by the Command Bus.
+     *
+     * @param commandClass a class of commands to check
+     * @return {@code true} if there is a {@link CommandDispatcher} or a {@link CommandHandler} registered
+     *      for commands of this type, {@code false} otherwise
+     */
+    @VisibleForTesting
+    /* package */ boolean isSupportedCommand(CommandClass commandClass) {
+        final boolean dispatcherRegistered = isDispatcherRegistered(commandClass);
+        final boolean handlerRegistered = isHandlerRegistered(commandClass);
+        final boolean isSupported = dispatcherRegistered || handlerRegistered;
+        return isSupported;
+    }
+
+    private boolean isMultitenant() {
+        return this.isMultitenant;
     }
 
     /**
@@ -205,32 +262,31 @@ public class CommandBus implements AutoCloseable {
 
     private void invokeHandler(Message msg, CommandContext context) {
         final CommandClass commandClass = CommandClass.of(msg);
-        final CommandHandler handler = getHandler(commandClass);
+        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
         final CommandId commandId = context.getCommandId();
         try {
             handler.handle(msg, context);
             commandStatusService.setOk(commandId);
         } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
-            //noinspection ChainOfInstanceofChecks
-            if (cause instanceof Exception) {
-                final Exception exception = (Exception) cause;
-                problemLog.errorHandling(exception, msg, commandId);
-                commandStatusService.setToError(commandId, exception);
-            } else if (cause instanceof FailureThrowable){
-                final FailureThrowable failure = (FailureThrowable) cause;
-                problemLog.failureHandling(failure, msg, commandId);
-                commandStatusService.setToFailure(commandId, failure);
-            } else {
-                problemLog.errorHandlingUnknown(cause, msg, commandId);
-                commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-            }
+            onHandlerException(msg, commandId, cause);
         }
     }
 
-    private CommandHandler getHandler(CommandClass commandClass) {
-        final CommandHandler handler = handlerRegistry.getHandler(commandClass);
-        return handler;
+    private void onHandlerException(Message msg, CommandId commandId, Throwable cause) {
+        //noinspection ChainOfInstanceofChecks
+        if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+            problemLog.errorHandling(exception, msg, commandId);
+            commandStatusService.setToError(commandId, exception);
+        } else if (cause instanceof FailureThrowable){
+            final FailureThrowable failure = (FailureThrowable) cause;
+            problemLog.failureHandling(failure, msg, commandId);
+            commandStatusService.setToFailure(commandId, failure);
+        } else {
+            problemLog.errorHandlingUnknown(cause, msg, commandId);
+            commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
+        }
     }
 
     private void schedule(Command command) {
@@ -240,6 +296,21 @@ public class CommandBus implements AutoCloseable {
             throw new IllegalStateException(
                     "Scheduled commands are not supported by this command bus: scheduler is not set.");
         }
+    }
+
+    /**
+     * Sets the multitenancy status of the {@code CommandBus}.
+     *
+     * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
+     */
+    @Internal
+    public void setMultitenant(boolean multitenant) {
+        this.isMultitenant = multitenant;
+    }
+
+    @VisibleForTesting
+    /* package */ void setProblemLog(ProblemLog problemLog) {
+        this.problemLog = problemLog;
     }
 
     /**
@@ -270,20 +341,6 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    @VisibleForTesting
-    /* package */ void setProblemLog(ProblemLog problemLog) {
-        this.problemLog = problemLog;
-    }
-
-    @VisibleForTesting
-    /* package */ void setMessageValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
-    }
-
-    private void store(Command request) {
-        commandStore.store(request);
-    }
-
     private boolean isDispatcherRegistered(CommandClass cls) {
         final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
         return result;
@@ -298,19 +355,6 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
-    private Function<Command, Command> newPostFunction() {
-        final Function<Command, Command> function = new Function<Command, Command>() {
-            @Nullable
-            @Override
-            public Command apply(@Nullable Command command) {
-                //noinspection ConstantConditions
-                post(command);
-                return command;
-            }
-        };
-        return function;
-    }
-
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
@@ -321,22 +365,8 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
-    }
-
     /**
-     * The logger instance used by {@code CommandBus}.
-     */
-    @VisibleForTesting
-    /* package */ static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    /**
-     * Constructs a command bus.
+     * Constructs a Command Bus.
      */
     public static class Builder {
 
@@ -347,6 +377,9 @@ public class CommandBus implements AutoCloseable {
         public CommandBus build() {
             checkNotNull(commandStore, "Command store must be set.");
             final CommandBus commandBus = new CommandBus(this);
+            if (scheduler != null) {
+                scheduler.setCommandBus(commandBus);
+            }
             return commandBus;
         }
 
@@ -374,5 +407,19 @@ public class CommandBus implements AutoCloseable {
         public CommandScheduler getScheduler() {
             return scheduler;
         }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(CommandBus.class);
+    }
+
+    /**
+     * The logger instance used by {@code CommandBus}.
+     */
+    @VisibleForTesting
+    /* package */ static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

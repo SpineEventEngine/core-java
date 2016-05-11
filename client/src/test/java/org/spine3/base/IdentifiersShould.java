@@ -22,7 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.IdWithStructure;
@@ -39,6 +39,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.*;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
@@ -55,23 +56,39 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void return_NULL_string_to_passed_null_value() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(null));
+    public void return_NULL_ID_if_convert_null_to_string() {
+        assertEquals(NULL_ID, idToString(null));
     }
 
     @Test
-    public void return_NULL_string_to_empty_string() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(""));
+    public void return_EMPTY_ID_if_convert_empty_string_to_string() {
+        assertEquals(EMPTY_ID, idToString(""));
     }
 
     @Test
-    public void return_NULL_string_to_blank_value() {
-        assertEquals(NULL_ID_OR_FIELD, idToString(" "));
+    public void return_EMPTY_ID_if_convert_blank_string_to_string() {
+        assertEquals(EMPTY_ID, idToString(" "));
+    }
+
+    @Test
+    public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_empty_string() {
+        assertEquals(EMPTY_ID, idToString(CommandId.getDefaultInstance()));
+    }
+
+    @Test
+    public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_blank_string() {
+        assertEquals(EMPTY_ID, idToString(newStringValue("  ")));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_IAE_to_empty_messages() {
-        idToString(Empty.getDefaultInstance());
+    public void throw_exception_if_convert_empty_message_to_string() {
+        idToString(StringValue.getDefaultInstance());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_object_of_unsupported_class_passed() {
+        //noinspection UnnecessaryBoxing
+        idToString(Boolean.valueOf(true));
     }
 
     @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
@@ -84,12 +101,6 @@ public class IdentifiersShould {
     @Test
     public void return_string_id_as_is() {
         assertEquals(TEST_ID, idToString(TEST_ID));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_object_of_unsuppored_class_passed() {
-        //noinspection UnnecessaryBoxing
-        idToString(Boolean.valueOf(true));
     }
 
     @Test
@@ -196,7 +207,7 @@ public class IdentifiersShould {
         @Override
         public String apply(@Nullable IdWithStructure id) {
             if (id == null) {
-                return NULL_ID_OR_FIELD;
+                return NULL_ID;
             }
             return id.getName();
         }
@@ -231,14 +242,9 @@ public class IdentifiersShould {
     public void handle_null_in_standard_converters() {
         final ConverterRegistry registry = ConverterRegistry.getInstance();
 
-        assertEquals(NULL_ID_OR_FIELD,
-                     registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
-
-        assertEquals(NULL_ID_OR_FIELD,
-                     registry.getConverter(EventId.getDefaultInstance()).apply(null));
-
-        assertEquals(NULL_ID_OR_FIELD,
-                     registry.getConverter(CommandId.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID, registry.getConverter(Timestamp.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID, registry.getConverter(EventId.getDefaultInstance()).apply(null));
+        assertEquals(NULL_ID, registry.getConverter(CommandId.getDefaultInstance()).apply(null));
     }
 
     @Test
@@ -246,7 +252,7 @@ public class IdentifiersShould {
         final CommandId id = Commands.generateId();
         final String actual = new CommandIdToStringConverter().apply(id);
 
-        assertEquals(id.getUuid(), actual);
+        assertEquals(idToString(id), actual);
     }
 
     @Test
@@ -254,6 +260,6 @@ public class IdentifiersShould {
         final EventId id = Events.generateId();
         final String actual = new Identifiers.EventIdToStringConverter().apply(id);
 
-        assertEquals(id.getUuid(), actual);
+        assertEquals(idToString(id), actual);
     }
 }
