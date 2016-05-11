@@ -104,7 +104,7 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object).value());
+        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
         return object;
     }
 
@@ -145,7 +145,7 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", TypeName.of(object).value());
+        checkDefault(object, "The message is not in the default state: %s", TypeName.of(object));
         return object;
     }
 
@@ -160,8 +160,7 @@ public class Validate {
     public static String checkNotEmptyOrBlank(String stringToCheck, String fieldName) {
         checkNotNull(stringToCheck, fieldName + " must not be null.");
         checkArgument(!stringToCheck.isEmpty(), fieldName + " must not be an empty string.");
-        checkArgument(stringToCheck.trim()
-                                   .length() > 0, fieldName + " must not be a blank string.");
+        checkArgument(stringToCheck.trim().length() > 0, fieldName + " must not be a blank string.");
         return stringToCheck;
     }
 
