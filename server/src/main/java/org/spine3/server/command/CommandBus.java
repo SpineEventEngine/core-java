@@ -22,6 +22,7 @@ package org.spine3.server.command;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
+import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.command.error.InvalidCommandException;
@@ -44,6 +46,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.*;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -185,37 +188,38 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns {@code true} if a command is valid, {@code false} otherwise.
+     */
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
-        InvalidCommandException exception = null;
+        final Namespace namespace = command.getContext().getNamespace();
+        if (isMultitenant() && isDefault(namespace)) {
+            final Exception exception = InvalidCommandException.onMissingNamespace(command);
+            commandStore.store(command, exception);
+            responseObserver.onError(newInvalidArgumentException(exception));
+            return false; // and nothing else matters
+        }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            exception = InvalidCommandException.onConstraintViolations(command, violations);
-        }
-        final CommandContext context = command.getContext();
-        if (isMultitenant() && !context.hasNamespace()) {
-            exception = InvalidCommandException.onMissingNamespace(command);
-        }
-        if (exception != null) {
+            final Exception exception = InvalidCommandException.onConstraintViolations(command, violations);
             commandStore.store(command, exception);
-            responseObserver.onError(
-                    Status.INVALID_ARGUMENT
-                          .withCause(exception)
-                          .asRuntimeException()
-            );
+            responseObserver.onError(newInvalidArgumentException(exception));
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final UnsupportedCommandException exception = new UnsupportedCommandException(command);
         commandStore.store(command, exception);
-        responseObserver.onError(
-                Status.INVALID_ARGUMENT
-                      .withCause(exception)
-                      .asRuntimeException()
-        );
+        responseObserver.onError(newInvalidArgumentException(exception));
+    }
+
+    private static StatusRuntimeException newInvalidArgumentException(Exception exception) {
+        final StatusRuntimeException result = Status.INVALID_ARGUMENT
+                .withCause(exception)
+                .asRuntimeException();
+        return result;
     }
 
     /**

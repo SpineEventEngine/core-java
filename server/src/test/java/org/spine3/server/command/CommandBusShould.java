@@ -237,13 +237,21 @@ public class CommandBusShould {
     public void verify_namespace_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmd();
+        final Command cmd = createProjectCmdWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
-        final List<Throwable> throwables = responseObserver.getThrowables();
-        assertEquals(1, throwables.size());
-        checkCommandError(throwables.get(0), NAMESPACE_UNKNOWN, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(), NAMESPACE_UNKNOWN, InvalidCommandException.class, cmd);
+    }
+
+    @Test
+    public void return_InvalidCommandException_if_command_is_invalid() {
+        commandBus.register(createProjectHandler);
+        final Command cmd = createProjectCmdWithoutContext();
+
+        commandBus.post(cmd, responseObserver);
+
+        checkCommandError(responseObserver.getThrowable(), INVALID_COMMAND, InvalidCommandException.class, cmd);
     }
 
     @Test
@@ -252,26 +260,12 @@ public class CommandBusShould {
 
         commandBus.post(cmd, responseObserver);
 
-        final List<Throwable> throwables = responseObserver.getThrowables();
-        assertEquals(1, throwables.size());
-        checkCommandError(throwables.get(0), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
-    }
-
-    @Test
-    public void return_InvalidCommandException_if_command_is_invalid() {
-        commandBus.register(createProjectHandler);
-        final Command cmd = newInvalidCreateProjectCmd();
-
-        commandBus.post(cmd, responseObserver);
-
-        final List<Throwable> throwables = responseObserver.getThrowables();
-        assertEquals(1, throwables.size());
-        checkCommandError(throwables.get(0), INVALID_COMMAND, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
     }
 
     private static <E extends CommandException> void checkCommandError(
             Throwable throwable,
-            CommandValidationError cmdValidationError,
+            CommandValidationError validationError,
             Class<E> exceptionClass,
             Command cmd) {
         final Throwable cause = throwable.getCause();
@@ -281,9 +275,9 @@ public class CommandBusShould {
         assertEquals(cmd, exception.getCommand());
         final Error error = exception.getError();
         assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
-        assertEquals(cmdValidationError.getNumber(), error.getCode());
+        assertEquals(validationError.getNumber(), error.getCode());
         assertFalse(error.getMessage().isEmpty());
-        if (cmdValidationError == INVALID_COMMAND) {
+        if (validationError == INVALID_COMMAND) {
             assertFalse(error.getValidationError()
                              .getConstraintViolationList()
                              .isEmpty());
@@ -415,7 +409,7 @@ public class CommandBusShould {
     @Test
     public void store_invalid_command_with_error_status() {
         commandBus.register(createProjectHandler);
-        final Command cmd = newInvalidCreateProjectCmd();
+        final Command cmd = createProjectCmdWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
@@ -492,7 +486,7 @@ public class CommandBusShould {
         return Commands.create(createProjectMsg(newUuid()), context);
     }
 
-    private static Command newInvalidCreateProjectCmd() {
+    private static Command createProjectCmdWithoutContext() {
         final Command cmd = createProjectCmd();
         final Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
@@ -672,7 +666,7 @@ public class CommandBusShould {
     private static class TestResponseObserver implements StreamObserver<Response> {
 
         private final List<Response> responses = newLinkedList();
-        private final List<Throwable> throwables = newLinkedList();
+        private Throwable throwable;
         private boolean completed = false;
 
         @Override
@@ -682,7 +676,7 @@ public class CommandBusShould {
 
         @Override
         public void onError(Throwable throwable) {
-            throwables.add(throwable);
+            this.throwable = throwable;
         }
 
         @Override
@@ -694,8 +688,8 @@ public class CommandBusShould {
             return ImmutableList.copyOf(responses);
         }
 
-        /* package */ List<Throwable> getThrowables() {
-            return ImmutableList.copyOf(throwables);
+        /* package */ Throwable getThrowable() {
+            return throwable;
         }
 
         /* package */ boolean isCompleted() {
