@@ -167,11 +167,14 @@ public class ProcessManagerShould {
 
         // The source of the command is StartProject.
         assertTrue(Commands.getMessage(commandRouted.getSource()) instanceof StartProject);
+        verifyPostedCmd(commandRouted.getProduced(0));
+    }
 
+    @SuppressWarnings("unchecked")
+    private void verifyPostedCmd(Command cmd) {
         // The produced command was posted to CommandBus once, and the same command is in the generated event.
         // We are not interested in observer instance here.
-        //noinspection unchecked
-        verify(commandBus, times(1)).post(eq(commandRouted.getProduced(0)), any(StreamObserver.class));
+        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
