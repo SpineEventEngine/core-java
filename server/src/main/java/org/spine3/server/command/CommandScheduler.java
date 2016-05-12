@@ -36,16 +36,31 @@ public abstract class CommandScheduler {
     private CommandBus commandBus;
 
     /**
-     * Schedule a command and deliver it to the target according to the scheduling options.
-     *
-     * <p>NOTE: check if the command is scheduled already.
+     * Schedules a command and delivers it to the target according to the scheduling options.
      *
      * @param command a command to deliver later
      * @throws IllegalStateException if the scheduler is shut down
-     * @see #post(Command)
      */
     public void schedule(Command command) {
         checkState(isActive, "Scheduler is shut down.");
+        doSchedule(command);
+    }
+
+    /**
+     * Schedules a command and delivers it to the target according to the scheduling options.
+     *
+     * @param command a command to deliver later
+     * @see #post(Command)
+     */
+    protected abstract void doSchedule(Command command);
+
+    /**
+     * Delivers a scheduled command to a target.
+     *
+     * @param command a command to deliver
+     */
+    protected void post(Command command) {
+        commandBus.doPost(command);
     }
 
     /**
@@ -59,14 +74,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Delivers a scheduled command to a target.
-     *
-     * @param command a command to deliver
+     * Sets a command bus used to post scheduled commands.
      */
-    protected void post(Command command) {
-        commandBus.doPost(command);
-    }
-
     /* package */ void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
     }

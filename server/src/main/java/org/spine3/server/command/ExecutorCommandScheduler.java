@@ -49,8 +49,7 @@ public class ExecutorCommandScheduler extends CommandScheduler {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
 
     @Override
-    public void schedule(final Command command) {
-        super.schedule(command);
+    protected void doSchedule(final Command command) {
         if (isScheduledAlready(command)) {
             return;
         }
