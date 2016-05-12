@@ -45,6 +45,8 @@ public abstract class CommandScheduler {
     /**
      * Schedules a command and delivers it to the target according to the scheduling options.
      *
+     * <p>A command with the same ID cannot be scheduled again.
+     *
      * @param command a command to deliver later
      * @throws IllegalStateException if the scheduler is shut down
      */

@@ -268,6 +268,24 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     }
 
     /*
+     * Check that exception is thrown if try to store invalid commands.
+     ******************************************************************/
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_try_to_store_invalid_command() {
+        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        storage.store(cmd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_try_to_store_invalid_command_with_status() {
+        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        storage.store(cmd, OK);
+    }
+
+    /*
      * Check that exception is thrown if try to use closed storage.
      **************************************************************/
 

@@ -62,14 +62,25 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      *
      * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
-     * @param command a command to store
+     * @param command a complete command to store
      * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command) {
+        store(command, RECEIVED);
+    }
+
+    /**
+     * Stores a command with the given status by a command ID from a command context.
+     *
+     * @param command a complete command to store
+     * @param status a command status
+     * @throws IllegalStateException if the storage is closed
+     */
+    public void store(Command command, CommandStatus status) {
         checkNotClosed();
         CommandValidator.checkCommand(command);
 
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, RECEIVED).build();
+        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
         final CommandId commandId = getId(command);
         write(commandId, record);
     }
@@ -94,20 +105,6 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
                 .setError(error)
                 .setCommandId(idToString(id))
                 .build();
-        write(id, record);
-    }
-
-    /**
-     * Stores a command with the given status by a command ID from a command context.
-     *
-     * @param command a command to store
-     * @param status a command status
-     * @throws IllegalStateException if the storage is closed
-     */
-    public void store(Command command, CommandStatus status) {
-        checkNotClosed();
-        final CommandId id = getId(command);
-        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
         write(id, record);
     }
 
