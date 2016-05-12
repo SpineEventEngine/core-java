@@ -43,8 +43,6 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
 
     public static final int ID_FIELD_INDEX = 0;
 
-    private static final GetTargetIdFromCommand<Object, Message> ID_FUNCTION = newInstance();
-
     private GetTargetIdFromCommand() {
         super(ID_FIELD_INDEX);
     }
@@ -52,7 +50,7 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
     /**
      * Creates a new ID function instance.
      */
-    public static<I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
+    public static <I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
         return new GetTargetIdFromCommand<>();
     }
 
@@ -63,10 +61,11 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
      * throws an exception (in the case if the command is not for an entity)
      */
     @Nullable
-    public static Object asNullableObject(Message commandMessage) {
+    public static <I> I asNullableObject(Message commandMessage) {
         //TODO:2016-05-09:alexander.yevsyukov: return Optional
         try {
-            final Object id = ID_FUNCTION.getId(commandMessage, CommandContext.getDefaultInstance());
+            final GetTargetIdFromCommand<I, Message> function = newInstance();
+            final I id = function.getId(commandMessage, CommandContext.getDefaultInstance());
             return id;
         } catch (MissingEntityIdException | ClassCastException ignored) {
             return null;

@@ -32,9 +32,9 @@ import org.spine3.validate.options.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spine3.base.Identifiers.*;
-import static org.spine3.validate.Validate.checkTimestamp;
-import static org.spine3.validate.Validate.checkValid;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.validate.Validate.*;
 
 /**
  * The validator for {@code Command} instances.
@@ -43,14 +43,17 @@ import static org.spine3.validate.Validate.checkValid;
  */
 public class CommandValidator {
 
-    private static final String COMMAND_MESSAGE_MUST_BE_SET = "Command message must be set.";
-    private static final String COMMAND_CONTEXT_MUST_BE_SET = "Command context must be set.";
-    private static final String COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK = "Command ID cannot be empty or blank.";
     private static final String COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK =
             "Command target entity ID cannot be empty or blank.";
 
-    private CommandValidator() {
+    /**
+     * Returns a validator instance.
+     */
+    public static CommandValidator getInstance() {
+        return LogSingleton.INSTANCE.value;
     }
+
+    private CommandValidator() {}
 
     /**
      * Validates a command checking that its required fields are valid and
@@ -61,28 +64,40 @@ public class CommandValidator {
      */
     public List<ConstraintViolation> validate(Command command) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
-        if (!command.hasMessage()) {
-            result.add(newConstraintViolation(COMMAND_MESSAGE_MUST_BE_SET));
+        final Message message = Commands.getMessage(command);
+        final CommandContext context = command.getContext();
+        validateMessage(message, result);
+        validateContext(context, result);
+        validateTargetId(message, result);
+        return result.build();
+    }
+
+    private static void validateMessage(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+        if (isDefault(message)) {
+            result.add(newConstraintViolation("Non-default command message must be set."));
         }
-        if (!command.hasContext()) {
-            result.add(newConstraintViolation(COMMAND_CONTEXT_MUST_BE_SET));
+        final List<ConstraintViolation> messageViolations = new MessageValidator().validate(message);
+        result.addAll(messageViolations);
+    }
+
+    private static void validateContext(CommandContext context, ImmutableList.Builder<ConstraintViolation> result) {
+        if (isDefault(context)) {
+            result.add(newConstraintViolation("Non-default command context must be set."));
         }
-        final Message commandMessage = Commands.getMessage(command);
-        final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
+        final String commandId = idToString(context.getCommandId());
+        if (commandId.equals(EMPTY_ID)) {
+            result.add(newConstraintViolation("Command ID cannot be empty or blank."));
+        }
+    }
+
+    private static void validateTargetId(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+        final Object targetId = GetTargetIdFromCommand.asNullableObject(message);
         if (targetId != null) {
             final String targetIdString = idToString(targetId);
             if (targetIdString.equals(EMPTY_ID)) {
                 result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
         }
-        final List<ConstraintViolation> messageViolations = new MessageValidator().validate(commandMessage);
-        result.addAll(messageViolations);
-        final CommandContext context = command.getContext();
-        final String commandId = idToString(context.getCommandId());
-        if (commandId.equals(EMPTY_ID)) {
-            result.add(newConstraintViolation(COMMAND_ID_CANNOT_BE_EMPTY_OR_BLANK));
-        }
-        return result.build();
     }
 
     private static ConstraintViolation newConstraintViolation(String msgFormat) {
@@ -101,8 +116,8 @@ public class CommandValidator {
      * @throws IllegalArgumentException if any command field is invalid
      */
     public static void checkCommand(Command command) {
-        checkArgument(command.hasMessage(), COMMAND_MESSAGE_MUST_BE_SET);
-        checkArgument(command.hasContext(), COMMAND_CONTEXT_MUST_BE_SET);
+        checkArgument(command.hasMessage(), "Command message must be set.");
+        checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
         checkValid(context.getCommandId());
         checkTimestamp(context.getTimestamp(), "Command time");
@@ -112,13 +127,6 @@ public class CommandValidator {
             final String targetIdString = idToString(targetId);
             checkArgument(!targetIdString.equals(EMPTY_ID), "Target ID must not be an empty string.");
         }
-    }
-
-    /**
-     * Returns a validator instance.
-     */
-    public static CommandValidator getInstance() {
-        return LogSingleton.INSTANCE.value;
     }
 
     private enum LogSingleton {

@@ -22,7 +22,6 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.TimeUtil;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
@@ -37,10 +36,11 @@ import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestCommandContextFactory.*;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * The utility class for creating the test data related to commands (command messages, Commands etc.).
@@ -49,8 +49,8 @@ import static org.spine3.testdata.TestCommandContextFactory.*;
  */
 public class TestCommands {
 
-    private static final UserId STUB_USER_ID = newUserId(newUuid());
-    private static final ProjectId STUB_PROJECT_ID = newProjectId();
+    private static final UserId USER_ID = newUserId(newUuid());
+    private static final ProjectId PROJECT_ID = newProjectId();
 
     private TestCommands() {
     }
@@ -59,14 +59,14 @@ public class TestCommands {
      * Creates a new {@link Command} with default properties (current time etc).
      */
     public static Command createProjectCmd() {
-        return createProjectCmd(TimeUtil.getCurrentTime());
+        return createProjectCmd(getCurrentTime());
     }
 
     /**
      * Creates a new {@link Command} with the given timestamp.
      */
     public static Command createProjectCmd(Timestamp when) {
-        return createProjectCmd(STUB_USER_ID, STUB_PROJECT_ID, when);
+        return createProjectCmd(USER_ID, PROJECT_ID, when);
     }
 
     /**
@@ -74,7 +74,14 @@ public class TestCommands {
      */
     public static Command createProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
         final CreateProject command = createProjectMsg(projectId);
-        return createCommandCmd(command, userId, when);
+        return createCommand(command, userId, when);
+    }
+
+    /**
+     * Creates a new {@link Command}.
+     */
+    public static Command addTaskCmd() {
+        return addTaskCmd(USER_ID, PROJECT_ID, getCurrentTime());
     }
 
     /**
@@ -82,7 +89,14 @@ public class TestCommands {
      */
     public static Command addTaskCmd(UserId userId, ProjectId projectId, Timestamp when) {
         final AddTask command = addTaskMsg(projectId);
-        return createCommandCmd(command, userId, when);
+        return createCommand(command, userId, when);
+    }
+
+    /**
+     * Creates a new {@link Command}.
+     */
+    public static Command startProjectCmd() {
+        return startProjectCmd(USER_ID, PROJECT_ID, getCurrentTime());
     }
 
     /**
@@ -90,17 +104,24 @@ public class TestCommands {
      */
     public static Command startProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
         final StartProject command = startProjectMsg(projectId);
-        return createCommandCmd(command, userId, when);
+        return createCommand(command, userId, when);
     }
 
     /**
      * Creates a new {@link Command} with the given command, userId and timestamp using default
      * {@link CommandId} instance.
      */
-    public static Command createCommandCmd(Message command, UserId userId, Timestamp when) {
+    public static Command createCommand(Message command, UserId userId, Timestamp when) {
         final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
         final Command result = Commands.create(command, context);
         return result;
+    }
+
+    /**
+     * Creates a new {@link CreateProject} command with the generated project ID.
+     */
+    public static CreateProject createProjectMsg() {
+        return CreateProject.newBuilder().setProjectId(newProjectId()).build();
     }
 
     /**
