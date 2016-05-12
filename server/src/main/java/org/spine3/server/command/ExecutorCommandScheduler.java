@@ -21,13 +21,10 @@
 package org.spine3.server.command;
 
 import org.spine3.base.Command;
-import org.spine3.base.CommandId;
 
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.base.CommandContext.Schedule;
 
@@ -44,15 +41,10 @@ public class ExecutorCommandScheduler extends CommandScheduler {
 
     private static final int MIN_THREAD_POOL_SIZE = 5;
 
-    private static final Set<CommandId> SCHEDULED_COMMAND_IDS = newHashSet();
-
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
 
     @Override
     protected void doSchedule(final Command command) {
-        if (isScheduledAlready(command)) {
-            return;
-        }
         final long delaySec = getDelaySeconds(command);
         executorService.schedule(new Runnable() {
             @Override
@@ -60,13 +52,6 @@ public class ExecutorCommandScheduler extends CommandScheduler {
                 post(command);
             }
         }, delaySec, SECONDS);
-        SCHEDULED_COMMAND_IDS.add(command.getContext().getCommandId());
-    }
-
-    private static boolean isScheduledAlready(Command command) {
-        final CommandId id = command.getContext().getCommandId();
-        final boolean isScheduledAlready = SCHEDULED_COMMAND_IDS.contains(id);
-        return isScheduledAlready;
     }
 
     private static long getDelaySeconds(Command command) {

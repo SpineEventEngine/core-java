@@ -21,8 +21,12 @@
 package org.spine3.server.command;
 
 import org.spine3.base.Command;
+import org.spine3.base.CommandId;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -30,6 +34,8 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Litus
  */
 public abstract class CommandScheduler {
+
+    private static final Set<CommandId> SCHEDULED_COMMAND_IDS = newHashSet();
 
     private boolean isActive = true;
 
@@ -43,11 +49,15 @@ public abstract class CommandScheduler {
      */
     public void schedule(Command command) {
         checkState(isActive, "Scheduler is shut down.");
+        if (isScheduledAlready(command)) {
+            return;
+        }
         doSchedule(command);
+        SCHEDULED_COMMAND_IDS.add(command.getContext().getCommandId());
     }
 
     /**
-     * Schedules a command and delivers it to the target according to the scheduling options.
+     * Schedules a command and delivers it to the target according to the scheduling options set to a context.
      *
      * @param command a command to deliver later
      * @see #post(Command)
@@ -61,6 +71,12 @@ public abstract class CommandScheduler {
      */
     protected void post(Command command) {
         commandBus.doPost(command);
+    }
+
+    private static boolean isScheduledAlready(Command command) {
+        final CommandId id = command.getContext().getCommandId();
+        final boolean isScheduledAlready = SCHEDULED_COMMAND_IDS.contains(id);
+        return isScheduledAlready;
     }
 
     /**
