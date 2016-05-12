@@ -42,9 +42,11 @@ import org.spine3.validate.options.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -80,6 +82,16 @@ public class CommandBus implements AutoCloseable {
         commandStore = builder.getCommandStore();
         scheduler = builder.getScheduler();
         commandStatusService = new CommandStatusService(commandStore);
+        rescheduleCommands();
+    }
+
+    private void rescheduleCommands() {
+        final Iterator<Command> commands = commandStore.load(SCHEDULED);
+        // TODO:2016-05-12:alexander.litus: re-calculate delays and schedule
+        /*while (commands.hasNext()) {
+            final Command command = commands.next();
+            schedule(command);
+        }*/
     }
 
     /**
@@ -155,12 +167,7 @@ public class CommandBus implements AutoCloseable {
             return;
         }
         if (isScheduled(command)) {
-            //TODO:2016-05-08:alexander.yevsyukov: Do store command if it was scheduled and update its status when it's executed.
-            // It is needed to make command delivery more reliable. E.g. if a delay is long enough, not stored message
-            // could be lost if the server, which holds it in memory is shut down.
-            schedule(command);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
+            scheduleAndStore(command, responseObserver);
             return;
         }
         commandStore.store(command);
@@ -215,9 +222,30 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onError(invalidArgumentWithCause(unsupported));
     }
 
+    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+        if (scheduler == null) {
+            final StatusRuntimeException noSchedulerException = failedPreconditionNoScheduler();
+            responseObserver.onError(noSchedulerException);
+            commandStore.store(command, noSchedulerException);
+            return;
+        }
+        scheduler.schedule(command);
+        commandStore.store(command, SCHEDULED);
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+    }
+
     private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
         final StatusRuntimeException result = Status.INVALID_ARGUMENT
                 .withCause(exception)
+                .asRuntimeException();
+        return result;
+    }
+
+    private static StatusRuntimeException failedPreconditionNoScheduler() {
+        final String msg = "Scheduled commands are not supported by this command bus: scheduler is not set.";
+        final StatusRuntimeException result = Status.FAILED_PRECONDITION
+                .withCause(new IllegalStateException(msg))
                 .asRuntimeException();
         return result;
     }
@@ -251,7 +279,7 @@ public class CommandBus implements AutoCloseable {
     private void dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         try {
             dispatcher.dispatch(command);
         } catch (Exception e) {
@@ -286,15 +314,6 @@ public class CommandBus implements AutoCloseable {
         } else {
             problemLog.errorHandlingUnknown(cause, msg, commandId);
             commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
-        }
-    }
-
-    private void schedule(Command command) {
-        if (scheduler != null) {
-            scheduler.schedule(command);
-        } else {
-            throw new IllegalStateException(
-                    "Scheduled commands are not supported by this command bus: scheduler is not set.");
         }
     }
 
