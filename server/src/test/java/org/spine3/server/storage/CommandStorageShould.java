@@ -389,7 +389,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
             case FAILURE:
                 assertTrue(isNotDefault(record.getFailure()));
                 break;
-            case UNDEFINED_COMMAND_STATUS:
+            case UNDEFINED:
             case UNRECOGNIZED:
                 break;
         }

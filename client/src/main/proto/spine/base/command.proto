@@ -95,7 +95,7 @@ message CommandContext {
 // Enumeration of possible failures when validating a command.
 enum CommandValidationError {
     // Reserved value.
-    UNDEFINED_COMMAND_VALIDATION_ERROR = 0;
+    UNKNOWN = 0;
 
     // The command type is not supported by the server.
     UNSUPPORTED_COMMAND = 1;
@@ -110,7 +110,7 @@ enum CommandValidationError {
 // This enumeration defines possible statuses of command processing.
 enum CommandStatus {
     // Reserved value.
-    UNDEFINED_COMMAND_STATUS = 0;
+    UNDEFINED = 0;
 
     // The command has been received by backend and stored.
     RECEIVED = 1;
