@@ -44,6 +44,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
@@ -69,7 +70,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         CommandValidator.checkCommand(command);
 
         final CommandStorageRecord record = newCommandStorageRecordBuilder(command, RECEIVED).build();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         write(commandId, record);
     }
 
@@ -85,7 +86,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
     public void store(Command command, Error error) {
         checkNotClosed();
         checkNotDefault(error);
-        CommandId id = command.getContext().getCommandId();
+        CommandId id = getId(command);
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
@@ -105,7 +106,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      */
     public void store(Command command, CommandStatus status) {
         checkNotClosed();
-        final CommandId id = command.getContext().getCommandId();
+        final CommandId id = getId(command);
         final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
         write(id, record);
     }

@@ -46,6 +46,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.CommandStatus.*;
 import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
@@ -111,7 +112,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test
     public void store_and_read_command() {
         final Command command = createProjectCmd();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
 
         storage.store(command);
         final CommandStorageRecord record = storage.read(commandId);
@@ -122,7 +123,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test
     public void store_command_with_error() {
         final Command command = createProjectCmd();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         final Error error = newError();
 
         storage.store(command, error);
@@ -150,7 +151,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test
     public void store_command_with_status() {
         final Command command = createProjectCmd();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         final CommandStatus status = SCHEDULED;
 
         storage.store(command, status);

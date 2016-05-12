@@ -114,6 +114,14 @@ public class Commands {
     }
 
     /**
+     * Extracts a command ID from the passed {@code Command} instance.
+     */
+    public static CommandId getId(Command command) {
+        final CommandId id = command.getContext().getCommandId();
+        return id;
+    }
+
+    /**
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
     public static Predicate<Command> wereAfter(final Timestamp from) {
@@ -173,7 +181,7 @@ public class Commands {
      * @return formatted string
      */
     public static String formatCommandTypeAndId(String format, Command command) {
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         final Message commandMessage = getMessage(command);
         final String msg = formatMessageTypeAndId(format, commandMessage, commandId);
         return msg;

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.spine3.base.Commands.getId;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -53,7 +54,7 @@ public abstract class CommandScheduler {
             return;
         }
         doSchedule(command);
-        SCHEDULED_COMMAND_IDS.add(command.getContext().getCommandId());
+        markAsScheduled(command);
     }
 
     /**
@@ -74,9 +75,14 @@ public abstract class CommandScheduler {
     }
 
     private static boolean isScheduledAlready(Command command) {
-        final CommandId id = command.getContext().getCommandId();
+        final CommandId id = getId(command);
         final boolean isScheduledAlready = SCHEDULED_COMMAND_IDS.contains(id);
         return isScheduledAlready;
+    }
+
+    private static void markAsScheduled(Command command) {
+        final CommandId id = getId(command);
+        SCHEDULED_COMMAND_IDS.add(id);
     }
 
     /**

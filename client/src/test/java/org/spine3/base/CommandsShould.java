@@ -38,6 +38,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static org.junit.Assert.*;
+import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -81,8 +82,17 @@ public class CommandsShould {
     @Test
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");
+
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
+
         assertEquals(message, Commands.getMessage(command));
+    }
+
+    @Test
+    public void extract_id_from_command() {
+        final Command command = commandFactory.create(newStringValue(newUuid()));
+
+        assertEquals(command.getContext().getCommandId(), getId(command));
     }
 
     @Test
@@ -114,7 +124,7 @@ public class CommandsShould {
                                        .build();
         final Command command = commandFactory.create(message);
         final String typeName = TypeName.ofCommand(command).toString();
-        final String commandId = idToString(command.getContext().getCommandId());
+        final String commandId = idToString(getId(command));
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
         final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);

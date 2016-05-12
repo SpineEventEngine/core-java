@@ -31,7 +31,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Response;
@@ -64,6 +63,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.CommandValidationError.*;
+import static org.spine3.base.Commands.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.protobuf.Durations.minutes;
@@ -327,7 +327,7 @@ public class CommandBusShould {
         commandBus.post(command, responseObserver);
 
         // See that we called CommandStore only once with the right command ID.
-        verify(commandStore, times(1)).setCommandStatusOk(command.getContext().getCommandId());
+        verify(commandStore, times(1)).setCommandStatusOk(getId(command));
     }
 
     @Test
@@ -338,7 +338,7 @@ public class CommandBusShould {
 
         commandBus.post(command, responseObserver);
 
-        verify(commandStore, times(1)).updateStatus(eq(command.getContext().getCommandId()), eq(dispatcher.exception));
+        verify(commandStore, times(1)).updateStatus(eq(getId(command)), eq(dispatcher.exception));
         verify(log, times(1)).errorDispatching(eq(dispatcher.exception), eq(command));
     }
 
@@ -346,9 +346,8 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_failure() throws TestFailure, TestThrowable {
         final TestFailure failure = new TestFailure();
         final Command command = givenThrowingHandler(failure);
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
-        final Message commandMessage = Commands.getMessage(command);
+        final CommandId commandId = getId(command);
+        final Message commandMessage = getMessage(command);
 
         commandBus.post(command, responseObserver);
 
@@ -360,9 +359,8 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_exception() throws TestFailure, TestThrowable {
         final RuntimeException exception = new IllegalStateException("handler throws");
         final Command command = givenThrowingHandler(exception);
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
-        final Message commandMessage = Commands.getMessage(command);
+        final CommandId commandId = getId(command);
+        final Message commandMessage = getMessage(command);
 
         commandBus.post(command, responseObserver);
 
@@ -374,9 +372,8 @@ public class CommandBusShould {
     public void set_command_status_to_failure_when_handler_throws_unknown_Throwable() throws TestFailure, TestThrowable {
         final Throwable throwable = new TestThrowable();
         final Command command = givenThrowingHandler(throwable);
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
-        final Message commandMessage = Commands.getMessage(command);
+        final CommandId commandId = getId(command);
+        final Message commandMessage = getMessage(command);
 
         commandBus.post(command, responseObserver);
 
@@ -483,7 +480,7 @@ public class CommandBusShould {
 
     private static Command newCreateProjectCmd(Duration delay) {
         final CommandContext context = createCommandContext(delay);
-        return Commands.create(createProjectMsg(newUuid()), context);
+        return create(createProjectMsg(newUuid()), context);
     }
 
     private static Command createProjectCmdWithoutContext() {
