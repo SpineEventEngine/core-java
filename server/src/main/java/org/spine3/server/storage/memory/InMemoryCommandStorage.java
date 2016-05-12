@@ -20,6 +20,8 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
@@ -27,13 +29,15 @@ import org.spine3.base.Failure;
 import org.spine3.server.storage.CommandStorage;
 import org.spine3.server.storage.CommandStorageRecord;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /* package */ class InMemoryCommandStorage extends CommandStorage {
 
@@ -44,9 +48,6 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
         checkNotClosed();
         checkNotDefault(id);
         checkNotDefault(record);
-        final String commandId = record.getCommandId();
-        checkNotEmptyOrBlank(commandId, "Command ID");
-
         put(id, record);
     }
 
@@ -59,6 +60,28 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
             return CommandStorageRecord.getDefaultInstance();
         }
         return record;
+    }
+
+    @Override
+    protected Iterator<CommandStorageRecord> read(final CommandStatus status) {
+        checkNotClosed();
+        final Collection<CommandStorageRecord> records = storage.values();
+        final Iterator<CommandStorageRecord> filteredRecords = filterByStatus(records.iterator(), status);
+        return filteredRecords;
+    }
+
+    private static Iterator<CommandStorageRecord> filterByStatus(Iterator<CommandStorageRecord> records,
+                                                                 final CommandStatus status) {
+        return Iterators.filter(records, new Predicate<CommandStorageRecord>() {
+            @Override
+            public boolean apply(@Nullable CommandStorageRecord record) {
+                if (record == null) {
+                    return false;
+                }
+                final boolean statusMatches = record.getStatus() == status;
+                return statusMatches;
+            }
+        });
     }
 
     @Override

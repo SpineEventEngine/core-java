@@ -21,7 +21,8 @@
 package org.spine3.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
 import org.spine3.base.Command;
@@ -36,6 +37,12 @@ import org.spine3.server.command.CommandValidator;
 import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.type.TypeName;
 
+import javax.annotation.Nullable;
+import java.util.Iterator;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.CommandStatus.ERROR;
+import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
@@ -50,17 +57,18 @@ import static org.spine3.validate.Validate.checkNotDefault;
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
     /**
-     * Stores a command by a command ID from a command context.
+     * Stores a command with the {@link CommandStatus#RECEIVED} status by a command ID from a command context.
      *
      * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
      * @param command a command to store
+     * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command) {
         checkNotClosed();
         CommandValidator.checkCommand(command);
 
-        final CommandStorageRecord record = toStorageRecord(command);
+        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, RECEIVED).build();
         final CommandId commandId = command.getContext().getCommandId();
         write(commandId, record);
     }
@@ -72,6 +80,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      *
      * @param command a command to store
      * @param error an error occurred
+     * @throws IllegalStateException if the storage is closed
      */
     public void store(Command command, Error error) {
         checkNotClosed();
@@ -80,22 +89,80 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
-        final CommandStorageRecord record = toStorageRecord(command)
-                .toBuilder()
-                .setStatus(CommandStatus.ERROR)
+        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, ERROR)
                 .setError(error)
                 .setCommandId(idToString(id))
                 .build();
         write(id, record);
     }
 
+    /**
+     * Stores a command with the given status by a command ID from a command context.
+     *
+     * @param command a command to store
+     * @param status a command status
+     * @throws IllegalStateException if the storage is closed
+     */
+    public void store(Command command, CommandStatus status) {
+        checkNotClosed();
+        final CommandId id = command.getContext().getCommandId();
+        final CommandStorageRecord record = newCommandStorageRecordBuilder(command, status).build();
+        write(id, record);
+    }
+
+    /**
+     * Loads all commands with the given status.
+     *
+     * @param status a command status to search by
+     * @return commands with the given status
+     * @throws IllegalStateException if the storage is closed
+     */
+    public Iterator<Command> load(CommandStatus status) {
+        checkNotClosed();
+        final Iterator<CommandStorageRecord> recordIterator = read(status);
+        final Iterator<Command> commandIterator = toCommandIterator(recordIterator);
+        return commandIterator;
+    }
+
+    /**
+     * Reads all command records with the given status.
+     *
+     * @param status a command status to search by
+     * @return records with the given status
+     */
+    protected abstract Iterator<CommandStorageRecord> read(CommandStatus status);
+
+    /**
+     * Updates the status of the command to {@link CommandStatus#OK}
+     */
+    public abstract void setOkStatus(CommandId commandId);
+
+    /**
+     * Updates the status of the command with the error.
+     */
+    public abstract void updateStatus(CommandId commandId, Error error);
+
+    /**
+     * Updates the status of the command with the business failure.
+     */
+    public abstract void updateStatus(CommandId commandId, Failure failure);
+
+    /**
+     * Creates a command storage record builder passed on the passed parameters.
+     *
+     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if the command is not for an entity.
+     *
+     * @param command a command to convert to a record
+     * @param status a command status to set to a record
+     * @return a storage record
+     */
     @VisibleForTesting
-    /* package */ static CommandStorageRecord toStorageRecord(Command command) {
+    /* package */ static CommandStorageRecord.Builder newCommandStorageRecordBuilder(Command command,
+                                                                                     CommandStatus status) {
         final CommandContext context = command.getContext();
+
         final CommandId commandId = context.getCommandId();
         final String commandIdString = idToString(commandId);
-
-        final Any messageAny = command.getMessage();
 
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeName.of(commandMessage).nameOnly();
@@ -112,29 +179,35 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         }
 
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
-                .setMessage(messageAny)
-                .setTimestamp(context.getTimestamp())
+                .setMessage(command.getMessage())
+                .setTimestamp(getCurrentTime())
                 .setCommandType(commandType)
                 .setCommandId(commandIdString)
-                .setStatus(CommandStatus.RECEIVED)
+                .setStatus(status)
                 .setTargetIdType(targetIdType)
                 .setTargetId(targetIdString)
                 .setContext(context);
-        return builder.build();
+        return builder;
     }
 
     /**
-     * Updates the status of the command to {@link CommandStatus#OK}
+     * Converts {@code CommandStorageRecord}s to {@code Command}s.
      */
-    public abstract void setOkStatus(CommandId commandId);
+    @VisibleForTesting
+    /* package */ static Iterator<Command> toCommandIterator(Iterator<CommandStorageRecord> records) {
+        return Iterators.transform(records, TO_COMMAND);
+    }
 
-    /**
-     * Updates the status of the command with the error.
-     */
-    public abstract void updateStatus(CommandId commandId, Error error);
-
-    /**
-     * Updates the status of the command with the business failure.
-     */
-    public abstract void updateStatus(CommandId commandId, Failure failure);
+    private static final Function<CommandStorageRecord, Command> TO_COMMAND = new Function<CommandStorageRecord, Command>() {
+        @Override
+        public Command apply(@Nullable CommandStorageRecord record) {
+            if (record == null) {
+                return Command.getDefaultInstance();
+            }
+            final Command.Builder builder = Command.newBuilder()
+                                                   .setMessage(record.getMessage())
+                                                   .setContext(record.getContext());
+            return builder.build();
+        }
+    };
 }
