@@ -45,7 +45,6 @@ import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
 import org.spine3.validate.options.ConstraintViolation;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
@@ -76,9 +75,9 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStatusService commandStatusService;
 
-    // TODO:2016-05-13:alexander.litus: set scheduler automatically
-    @Nullable
     private final CommandScheduler scheduler;
+
+    private final ProblemLog problemLog;
 
     /**
      * Is {@code true} if the Bounded Context (to which this Command Bus belongs) is multi-tenant.
@@ -86,20 +85,33 @@ public class CommandBus implements AutoCloseable {
      */
     private boolean isMultitenant;
 
-    private ProblemLog problemLog = new ProblemLog();
-
-    private CommandBus(Builder builder) {
-        commandStore = builder.getCommandStore();
-        scheduler = builder.getScheduler();
-        commandStatusService = new CommandStatusService(commandStore);
-        rescheduleCommands();
+    /**
+     * Creates a new instance.
+     *
+     * @param commandStore a store to save commands
+     * @return a new instance
+     */
+    public static CommandBus newInstance(CommandStore commandStore) {
+        final CommandScheduler scheduler = createCommandScheduler();
+        final ProblemLog log = new ProblemLog();
+        final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
+        return commandBus;
     }
 
     /**
-     * Creates a new builder for command bus.
+     * Creates a new instance.
+     *
+     * @param commandStore a store to save commands
+     * @param scheduler a command scheduler
+     * @param problemLog a problem logger
      */
-    public static Builder newBuilder() {
-        return new Builder();
+    @VisibleForTesting
+    /* package */ CommandBus(CommandStore commandStore, CommandScheduler scheduler, ProblemLog problemLog) {
+        this.commandStore = checkNotNull(commandStore);
+        this.commandStatusService = new CommandStatusService(commandStore);
+        this.scheduler = scheduler;
+        this.problemLog = problemLog;
+        rescheduleCommands();
     }
 
     /**
@@ -224,12 +236,6 @@ public class CommandBus implements AutoCloseable {
     }
 
     private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
-        if (scheduler == null) {
-            final StatusRuntimeException noSchedulerException = failedPreconditionNoScheduler();
-            responseObserver.onError(noSchedulerException);
-            commandStore.store(command, noSchedulerException);
-            return;
-        }
         scheduler.schedule(command);
         commandStore.store(command, SCHEDULED);
         responseObserver.onNext(Responses.ok());
@@ -262,21 +268,14 @@ public class CommandBus implements AutoCloseable {
         // We cannot post this command because there is no handler/dispatcher registered yet.
         // Also, posting it can be undesirable.
         final Message msg = getMessage(command);
-        problemLog.errorExpiredCommand(command);
-        commandStatusService.setToError(getId(command), commandExpiredError(msg));
+        final CommandId id = getId(command);
+        problemLog.errorExpiredCommand(msg, id);
+        commandStatusService.setToError(id, commandExpiredError(msg));
     }
 
     private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
         final StatusRuntimeException result = Status.INVALID_ARGUMENT
                 .withCause(exception)
-                .asRuntimeException();
-        return result;
-    }
-
-    private static StatusRuntimeException failedPreconditionNoScheduler() {
-        final String msg = "Scheduled commands are not supported by this command bus: scheduler is not set.";
-        final StatusRuntimeException result = Status.FAILED_PRECONDITION
-                .withCause(new IllegalStateException(msg))
                 .asRuntimeException();
         return result;
     }
@@ -354,13 +353,8 @@ public class CommandBus implements AutoCloseable {
      * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
      */
     @Internal
-    public void setMultitenant(boolean multitenant) {
-        this.isMultitenant = multitenant;
-    }
-
-    @VisibleForTesting
-    /* package */ void setProblemLog(ProblemLog problemLog) {
-        this.problemLog = problemLog;
+    public void setIsMultitenant(boolean isMultitenant) {
+        this.isMultitenant = isMultitenant;
     }
 
     /**
@@ -390,9 +384,7 @@ public class CommandBus implements AutoCloseable {
             log().error(msg, throwable);
         }
 
-        /* package */ void errorExpiredCommand(Command command) {
-            final Message commandMsg = getMessage(command);
-            final CommandId id = getId(command);
+        /* package */ void errorExpiredCommand(Message commandMsg, CommandId id) {
             final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
             log().error(msg);
         }
@@ -412,58 +404,25 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
+    private static CommandScheduler createCommandScheduler() {
+        @SuppressWarnings("AccessOfSystemProperties")
+        final String appEngineVersion = System.getProperty("com.google.appengine.runtime.version");
+        if (appEngineVersion == null) {
+            return new ExecutorCommandScheduler();
+        } else {
+            log().error("CommandScheduler for AppEngine is not implemented yet.");
+            // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
+            // Return this one for now.
+            return new ExecutorCommandScheduler();
+        }
+    }
+
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
-    }
-
-    /**
-     * Constructs a Command Bus.
-     */
-    public static class Builder {
-
-        private CommandStore commandStore;
-        @Nullable
-        private CommandScheduler scheduler;
-
-        public CommandBus build() {
-            checkNotNull(commandStore, "Command store must be set.");
-            final CommandBus commandBus = new CommandBus(this);
-            if (scheduler != null) {
-                scheduler.setCommandBus(commandBus);
-            }
-            return commandBus;
-        }
-
-        /**
-         * Sets a command store, which is required.
-         */
-        public Builder setCommandStore(CommandStore commandStore) {
-            this.commandStore = commandStore;
-            return this;
-        }
-
-        public CommandStore getCommandStore() {
-            return commandStore;
-        }
-
-        /**
-         * Sets a command scheduler, which is not required.
-         */
-        public Builder setScheduler(CommandScheduler scheduler) {
-            this.scheduler = scheduler;
-            return this;
-        }
-
-        @Nullable
-        public CommandScheduler getScheduler() {
-            return scheduler;
-        }
+        scheduler.shutdown();
     }
 
     private enum LogSingleton {

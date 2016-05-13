@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
@@ -96,8 +95,7 @@ public class CommandBusShould {
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new CommandBus.ProblemLog());
         // Do not create a spy of the command bus because it would be impossible to debug its code
-        commandBus = newCommandBus(commandStore, scheduler);
-        commandBus.setProblemLog(log);
+        commandBus = new CommandBus(commandStore, scheduler, log);
         eventBus = newEventBus(storageFactory);
         commandFactory = TestCommandFactory.newInstance(CommandBusShould.class);
         createProjectHandler = new CreateProjectHandler(newUuid());
@@ -115,9 +113,7 @@ public class CommandBusShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
         // noinspection ConstantConditions
-        CommandBus.newBuilder()
-                  .setCommandStore(null)
-                  .build();
+        CommandBus.newInstance(null);
     }
 
     /*
@@ -250,7 +246,7 @@ public class CommandBusShould {
 
     @Test
     public void verify_namespace_attribute_if_multitenant() {
-        commandBus.setMultitenant(true);
+        commandBus.setIsMultitenant(true);
         commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmdWithoutContext();
 
@@ -464,20 +460,6 @@ public class CommandBusShould {
     }
 
     @Test
-    public void return_exception_and_store_cmd_with_schedule_opts_and_scheduler_is_not_set() {
-        final CommandBus commandBus = newCommandBusWithoutScheduler();
-        commandBus.register(createProjectHandler);
-        final Command cmd = createProjectCmd(/*delay=*/minutes(1));
-
-        commandBus.post(cmd, responseObserver);
-
-        final Throwable throwable = responseObserver.getThrowable();
-        assertEquals(IllegalStateException.class, throwable.getCause().getClass());
-        verify(commandStore).store(eq(cmd), isA(StatusRuntimeException.class));
-        assertTrue(responseObserver.getResponses().isEmpty());
-    }
-
-    @Test
     public void reschedule_commands_from_storage_on_startup() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
@@ -486,7 +468,7 @@ public class CommandBusShould {
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
         // command bus creation must trigger commands rescheduling
-        commandBus = newCommandBus(commandStore, scheduler);
+        commandBus = new CommandBus(commandStore, scheduler, log);
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -505,10 +487,13 @@ public class CommandBusShould {
         storeAsScheduled(commands, delay, schedulingTime);
 
         // command bus creation must trigger commands rescheduling
-        commandBus = newCommandBus(commandStore, scheduler);
+        commandBus = new CommandBus(commandStore, scheduler, log);
 
         for (Command cmd : commands) {
-            verify(commandStore).updateStatus(getId(cmd), commandExpiredError(getMessage(cmd)));
+            final Message msg = getMessage(cmd);
+            final CommandId id = getId(cmd);
+            verify(commandStore).updateStatus(id, commandExpiredError(msg));
+            verify(log).errorExpiredCommand(msg, id);
         }
     }
 
@@ -530,13 +515,6 @@ public class CommandBusShould {
                                       .setContext(CommandContext.getDefaultInstance())
                                       .build();
         return invalidCmd;
-    }
-
-    private CommandBus newCommandBusWithoutScheduler() {
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setCommandStore(commandStore)
-                                                .build();
-        return commandBus;
     }
 
     @SafeVarargs
