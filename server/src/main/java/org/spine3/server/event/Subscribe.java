@@ -33,11 +33,11 @@ import java.lang.annotation.Target;
  *
  * <p>An event subscriber method:
  * <ul>
- *     <li>is annotated with {@link Subscribe};</li>
- *     <li>is {@code public};</li>
- *     <li>returns {@code void};</li>
- *     <li>accepts an event derived from {@link Message} as the first parameter;</li>
- *     <li>(optional) accepts an {@link EventContext} as the second parameter.</li>
+ *     <li>is annotated with {@link Subscribe};
+ *     <li>is {@code public};
+ *     <li>returns {@code void};
+ *     <li>accepts an event derived from {@link Message} as the first parameter;
+ *     <li>(optional) accepts an {@link EventContext} as the second parameter.
  * </ul>
  *
  * If the annotation is applied to a method which doesn't satisfy any of these requirements, this method is not
