@@ -78,7 +78,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProjectMsg(newUuid());
+        final CreateProject cmd = createProjectMsg();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -92,7 +92,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
         final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProjectMsg(newUuid());
+        final CreateProject cmd = createProjectMsg();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 

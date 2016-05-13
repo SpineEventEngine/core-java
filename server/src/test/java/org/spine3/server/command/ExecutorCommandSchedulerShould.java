@@ -63,7 +63,7 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmd = Commands.create(createProjectMsg(newUuid()), context);
+        final Command cmd = Commands.create(createProjectMsg(), context);
 
         scheduler.schedule(cmd);
 

@@ -35,7 +35,7 @@ import java.util.List;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Timestamps.isAfter;
+import static org.spine3.protobuf.Timestamps.isLater;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.options.Time.FUTURE;
 import static org.spine3.validate.options.Time.UNDEFINED;
@@ -123,8 +123,8 @@ import static org.spine3.validate.options.Time.UNDEFINED;
 
     private static boolean isTimeInvalid(Timestamp time, Time when, Timestamp now) {
         final boolean isValid = (when == FUTURE) ?
-                                isAfter(time, /*than*/ now) :
-                                isAfter(now, /*than*/ time);
+                                isLater(time, /*than*/ now) :
+                                isLater(now, /*than*/ time);
         final boolean isInvalid = !isValid;
         return isInvalid;
     }
