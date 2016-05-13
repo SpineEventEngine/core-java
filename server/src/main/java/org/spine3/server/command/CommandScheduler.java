@@ -36,7 +36,7 @@ import static org.spine3.base.Commands.getId;
  */
 public abstract class CommandScheduler {
 
-    private static final Set<CommandId> SCHEDULED_COMMAND_IDS = newHashSet();
+    private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
     private boolean isActive = true;
 
@@ -78,13 +78,13 @@ public abstract class CommandScheduler {
 
     private static boolean isScheduledAlready(Command command) {
         final CommandId id = getId(command);
-        final boolean isScheduledAlready = SCHEDULED_COMMAND_IDS.contains(id);
+        final boolean isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
     private static void markAsScheduled(Command command) {
         final CommandId id = getId(command);
-        SCHEDULED_COMMAND_IDS.add(id);
+        scheduledCommandIds.add(id);
     }
 
     /**
