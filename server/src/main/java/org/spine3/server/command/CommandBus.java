@@ -407,12 +407,13 @@ public class CommandBus implements AutoCloseable {
     private static CommandScheduler createCommandScheduler() {
         @SuppressWarnings("AccessOfSystemProperties")
         final String appEngineVersion = System.getProperty("com.google.appengine.runtime.version");
-        if (appEngineVersion == null) {
-            return new ExecutorCommandScheduler();
-        } else {
+        final boolean isRunningOnAppEngine = appEngineVersion != null;
+        if (isRunningOnAppEngine) {
             log().error("CommandScheduler for AppEngine is not implemented yet.");
             // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
             // Return this one for now.
+            return new ExecutorCommandScheduler();
+        } else {
             return new ExecutorCommandScheduler();
         }
     }
