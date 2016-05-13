@@ -20,7 +20,9 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -29,11 +31,14 @@ import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.protobuf.Durations;
+import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
@@ -46,8 +51,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
+import static org.spine3.protobuf.Timestamps.isLater;
+import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -67,6 +76,7 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStatusService commandStatusService;
 
+    // TODO:2016-05-13:alexander.litus: set scheduler automatically
     @Nullable
     private final CommandScheduler scheduler;
 
@@ -83,15 +93,6 @@ public class CommandBus implements AutoCloseable {
         scheduler = builder.getScheduler();
         commandStatusService = new CommandStatusService(commandStore);
         rescheduleCommands();
-    }
-
-    private void rescheduleCommands() {
-        final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
-        // TODO:2016-05-12:alexander.litus: re-calculate delays and schedule
-        /*while (commands.hasNext()) {
-            final Command command = commands.next();
-            schedule(command);
-        }*/
     }
 
     /**
@@ -201,15 +202,15 @@ public class CommandBus implements AutoCloseable {
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final Namespace namespace = command.getContext().getNamespace();
         if (isMultitenant() && isDefault(namespace)) {
-            final Exception noNamespace = InvalidCommandException.onMissingNamespace(command);
-            commandStore.store(command, noNamespace);
+            final CommandException noNamespace = InvalidCommandException.onMissingNamespace(command);
+            commandStore.store(command, noNamespace.getError());
             responseObserver.onError(invalidArgumentWithCause(noNamespace));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            final Exception invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
-            commandStore.store(command, invalidCommand);
+            final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
+            commandStore.store(command, invalidCommand.getError());
             responseObserver.onError(invalidArgumentWithCause(invalidCommand));
             return false;
         }
@@ -217,8 +218,8 @@ public class CommandBus implements AutoCloseable {
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final Exception unsupported = new UnsupportedCommandException(command);
-        commandStore.store(command, unsupported);
+        final CommandException unsupported = new UnsupportedCommandException(command);
+        commandStore.store(command, unsupported.getError());
         responseObserver.onError(invalidArgumentWithCause(unsupported));
     }
 
@@ -233,6 +234,36 @@ public class CommandBus implements AutoCloseable {
         commandStore.store(command, SCHEDULED);
         responseObserver.onNext(Responses.ok());
         responseObserver.onCompleted();
+    }
+
+    private void rescheduleCommands() {
+        final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
+        while (commands.hasNext()) {
+            final Command command = commands.next();
+            final Timestamp now = getCurrentTime();
+            final Timestamp timeToPost = getTimeToPost(command);
+            if (isLater(now, /*than*/ timeToPost)) {
+                onScheduledCommandExpired(command);
+            } else {
+                final Duration newDelay = Durations.between(now, timeToPost);
+                final Command commandUpdated = setSchedule(command, newDelay, now);
+                scheduler.schedule(commandUpdated);
+            }
+        }
+    }
+
+    private static Timestamp getTimeToPost(Command command) {
+        final Schedule schedule = command.getContext().getSchedule();
+        final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
+        return timeToPost;
+    }
+
+    private void onScheduledCommandExpired(Command command) {
+        // We cannot post this command because there is no handler/dispatcher registered yet.
+        // Also, posting it can be undesirable.
+        final Message msg = getMessage(command);
+        problemLog.errorExpiredCommand(command);
+        commandStatusService.setToError(getId(command), commandExpiredError(msg));
     }
 
     private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
@@ -357,6 +388,13 @@ public class CommandBus implements AutoCloseable {
             final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
                     commandMessage, commandId);
             log().error(msg, throwable);
+        }
+
+        /* package */ void errorExpiredCommand(Command command) {
+            final Message commandMsg = getMessage(command);
+            final CommandId id = getId(command);
+            final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
+            log().error(msg);
         }
     }
 

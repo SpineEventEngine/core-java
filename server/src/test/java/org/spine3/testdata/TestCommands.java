@@ -20,6 +20,7 @@
 
 package org.spine3.testdata;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
@@ -37,6 +38,7 @@ import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Commands.create;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
@@ -67,6 +69,14 @@ public class TestCommands {
      */
     public static Command createProjectCmd(Timestamp when) {
         return createProjectCmd(USER_ID, PROJECT_ID, when);
+    }
+
+    /**
+     * Creates a new {@link Command} with the given delay.
+     */
+    public static Command createProjectCmd(Duration delay) {
+        final Command cmd = create(createProjectMsg(), createCommandContext(delay));
+        return cmd;
     }
 
     /**

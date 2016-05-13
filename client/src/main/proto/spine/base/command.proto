@@ -70,7 +70,7 @@ message CommandContext {
     // The user who created the command.
     UserId actor = 2;
 
-    // Date/time at which the command was created.
+    // The time when the command was created.
     google.protobuf.Timestamp timestamp = 3;
 
     // The zone offset from which the command is made.
@@ -89,6 +89,10 @@ message CommandContext {
     message Schedule {
         // The delay between the moment of receiving a command at the server and its delivery to the target.
         google.protobuf.Duration delay = 1;
+
+        // The time when the command was scheduled.
+        // Is set automatically.
+        google.protobuf.Timestamp scheduling_time = 2;
     }
 }
 
