@@ -36,8 +36,8 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>is annotated with {@link Apply};
  *     <li>is {@code private};
- *     <li>is void;
- *     <li>accepts an event {@link Message}.
+ *     <li>is {@code void};
+ *     <li>accepts an event derived from {@link Message} as the only parameter.
  * </ul>
  *
  * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.
