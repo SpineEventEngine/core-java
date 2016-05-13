@@ -20,22 +20,27 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.protobuf.Message;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-//TODO:2016-03-24:alexander.yevsyukov: Update with description of new applier convention: getBuilder(), etc.
-
 /**
  * Marks a method of an aggregate as one that modifies the state of the aggregate with data from the passed event.
 
  * <p>As we apply the event to the aggregate state, we call such method <i>Event Applier</i>.
-
- * <p>Event appliers are not supposed to be called from the outside of the declaring aggregate class.
- * As such they should be declared {@code private}.
  *
- * <p>The type of the event will be indicated by the first (and only) parameter.
+ * <p>An event applier method:
+ * <ul>
+ *     <li>is annotated with {@link Apply};
+ *     <li>is {@code private};
+ *     <li>is void;
+ *     <li>accepts an event {@link Message}.
+ * </ul>
+ *
+ * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.
  *
  * @author Alexander Yevsyukov
  */
