@@ -20,13 +20,14 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.testdata.TestCommands.createProjectMsg;
 
 /**
@@ -36,18 +37,19 @@ import static org.spine3.testdata.TestCommands.createProjectMsg;
 public class GetTargetIdFromCommandShould {
 
     @Test
-    public void return_null_if_fail_to_get_ID_from_command_message_without_ID_field() {
-        final Object id = GetTargetIdFromCommand.asNullableObject(StringValue.getDefaultInstance());
+    public void return_empty_Optional_if_fail_to_get_ID_from_command_message_without_ID_field() {
+        final Optional id = GetTargetIdFromCommand.asOptional(StringValue.getDefaultInstance());
 
-        assertNull(id);
+        assertFalse(id.isPresent());
     }
 
     @Test
     public void get_ID_from_command_message() {
         final CreateProject msg = createProjectMsg();
 
-        final ProjectId id = GetTargetIdFromCommand.asNullableObject(msg);
+        final Optional id = GetTargetIdFromCommand.asOptional(msg);
 
-        assertEquals(msg.getProjectId(), id);
+        assertTrue(id.isPresent());
+        assertEquals(msg.getProjectId(), id.get());
     }
 }

@@ -20,13 +20,12 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.server.error.MissingEntityIdException;
-
-import javax.annotation.Nullable;
 
 /**
  * Obtains a command target {@link Entity} ID based on a command {@link Message} and context.
@@ -57,18 +56,18 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
     /**
      * Tries to obtain a target ID from the passed command message.
      *
-     * @return an ID or {@code null} if {@link GetTargetIdFromCommand#getId(Message, Message)}
-     * throws an exception (in the case if the command is not for an entity)
+     * @param commandMessage a message to get ID from
+     * @return an {@link Optional} of the ID or {@link Optional#absent()}
+     * if {@link GetTargetIdFromCommand#getId(Message, Message)} throws an exception
+     * (in the case if the command is not for an entity)
      */
-    @Nullable
-    public static <I> I asNullableObject(Message commandMessage) {
-        //TODO:2016-05-09:alexander.yevsyukov: return Optional
+    public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
             final GetTargetIdFromCommand<I, Message> function = newInstance();
             final I id = function.getId(commandMessage, CommandContext.getDefaultInstance());
-            return id;
+            return Optional.of(id);
         } catch (MissingEntityIdException | ClassCastException ignored) {
-            return null;
+            return Optional.absent();
         }
     }
 }

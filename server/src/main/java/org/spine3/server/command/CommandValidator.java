@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
@@ -91,9 +92,9 @@ public class CommandValidator {
     }
 
     private static void validateTargetId(Message message, ImmutableList.Builder<ConstraintViolation> result) {
-        final Object targetId = GetTargetIdFromCommand.asNullableObject(message);
-        if (targetId != null) {
-            final String targetIdString = idToString(targetId);
+        final Optional targetId = GetTargetIdFromCommand.asOptional(message);
+        if (targetId.isPresent()) {
+            final String targetIdString = idToString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
                 result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
@@ -122,9 +123,9 @@ public class CommandValidator {
         checkValid(context.getCommandId());
         checkTimestamp(context.getTimestamp(), "Command time");
         final Message commandMessage = Commands.getMessage(command);
-        final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
-        if (targetId != null) { // else - consider the command is not for an entity
-            final String targetIdString = idToString(targetId);
+        final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
+        if (targetId.isPresent()) { // else - consider the command is not for an entity
+            final String targetIdString = idToString(targetId.get());
             checkArgument(!targetIdString.equals(EMPTY_ID), "Target ID must not be an empty string.");
         }
     }

@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
@@ -165,10 +166,11 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         final Message commandMessage = Commands.getMessage(command);
         final String commandType = TypeName.of(commandMessage).nameOnly();
 
-        final Object targetId = GetTargetIdFromCommand.asNullableObject(commandMessage);
+        final Optional targetIdOptional = GetTargetIdFromCommand.asOptional(commandMessage);
         final String targetIdString;
         final String targetIdType;
-        if (targetId != null) {
+        if (targetIdOptional.isPresent()) {
+            final Object targetId = targetIdOptional.get();
             targetIdString = idToString(targetId);
             targetIdType = targetId.getClass().getName();
         } else { // the command is not for an entity
