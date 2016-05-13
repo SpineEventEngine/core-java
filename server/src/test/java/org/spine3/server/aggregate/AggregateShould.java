@@ -80,7 +80,7 @@ public class AggregateShould {
     private TestAggregate aggregate;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         aggregate = new TestAggregate(ID);
     }
 

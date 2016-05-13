@@ -54,13 +54,13 @@ public class ExecutorCommandSchedulerShould {
     private CommandContext context;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = createCommandContext(DELAY);
     }
 
     @After
-    public void tearDownTest() {
+    public void tearDown() {
         scheduler.shutdown();
     }
 

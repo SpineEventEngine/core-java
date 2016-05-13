@@ -44,7 +44,7 @@ public class IntegrationEventBusShould {
     private final IntegrationEvent event = projectCreatedIntegrationEvent();
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         eventBus = IntegrationEventBus.getInstance();
         subscriber = new TestIntEventSubscriber();
         eventBus.subscribe(subscriber, ProjectCreated.class);

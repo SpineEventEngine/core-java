@@ -38,7 +38,7 @@ public class MessageClassShould {
     private TestMessageClass testMsgClass;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         testMsgClass = new TestMessageClass(MSG_CLASS);
     }
 

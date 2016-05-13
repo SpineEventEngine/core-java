@@ -89,7 +89,7 @@ public class CommandBusShould {
     private TestResponseObserver responseObserver;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
@@ -103,7 +103,7 @@ public class CommandBusShould {
     }
 
     @After
-    public void tearDownTest() throws Exception {
+    public void tearDown() throws Exception {
         if (commandStore.isOpen()) { // then command bus is opened, too
             commandBus.close();
         }
