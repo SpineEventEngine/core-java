@@ -246,7 +246,7 @@ public class CommandBusShould {
 
     @Test
     public void verify_namespace_attribute_if_multitenant() {
-        commandBus.setIsMultitenant(true);
+        commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmdWithoutContext();
 

@@ -353,7 +353,7 @@ public class CommandBus implements AutoCloseable {
      * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
      */
     @Internal
-    public void setIsMultitenant(boolean isMultitenant) {
+    public void setMultitenant(boolean isMultitenant) {
         this.isMultitenant = isMultitenant;
     }
 

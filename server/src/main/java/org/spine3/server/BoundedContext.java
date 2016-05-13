@@ -361,7 +361,7 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             checkNotNull(commandBus, "commandDispatcher must be set");
             checkNotNull(eventBus, "eventBus must be set");
 
-            commandBus.setIsMultitenant(this.multitenant);
+            commandBus.setMultitenant(this.multitenant);
 
             final BoundedContext result = new BoundedContext(this);
 
