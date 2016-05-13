@@ -43,6 +43,7 @@ import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
+import org.spine3.util.EnvironmentUtil;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
@@ -405,10 +406,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     private static CommandScheduler createCommandScheduler() {
-        @SuppressWarnings("AccessOfSystemProperties")
-        final String appEngineVersion = System.getProperty("com.google.appengine.runtime.version");
-        final boolean isRunningOnAppEngine = appEngineVersion != null;
-        if (isRunningOnAppEngine) {
+        if (EnvironmentUtil.isRunningOnAppEngine()) {
             log().error("CommandScheduler for AppEngine is not implemented yet.");
             // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
             // Return this one for now.

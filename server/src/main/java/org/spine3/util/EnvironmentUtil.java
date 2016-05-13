@@ -18,11 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains utilities that can be used by the client code, server code,
- * and business model compiler.
- */
-@ParametersAreNonnullByDefault
 package org.spine3.util;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * Provides information about the environment (current platform used, etc).
+ *
+ * @author Alexander Litus
+ */
+public class EnvironmentUtil {
+
+    private static final String APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
+
+    private EnvironmentUtil() {}
+
+    /**
+     * Returns {@code true} if the code is running on Google AppEngine,
+     * {@code false} otherwise.
+     */
+    public static boolean isRunningOnAppEngine() {
+        @SuppressWarnings("AccessOfSystemProperties")
+        final String appEngineVersion = System.getProperty(APP_ENGINE_RUNTIME_VERSION);
+        final boolean isVersionPresent = appEngineVersion != null;
+        return isVersionPresent;
+    }
+}
