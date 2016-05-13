@@ -100,15 +100,15 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
-     * Loads all commands with the given status.
+     * Returns an iterator over all commands with the given status.
      *
      * @param status a command status to search by
      * @return commands with the given status
      * @throws IllegalStateException if the storage is closed
      */
-    public Iterator<Command> load(CommandStatus status) {
+    public Iterator<Command> iterator(CommandStatus status) {
         checkIsOpened();
-        final Iterator<Command> commands = storage.load(status);
+        final Iterator<Command> commands = storage.iterator(status);
         return commands;
     }
 

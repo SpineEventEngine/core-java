@@ -169,7 +169,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         // store an extra command with another status
         storage.store(createProjectCmd(), ERROR);
 
-        final Iterator<Command> iterator = storage.load(status);
+        final Iterator<Command> iterator = storage.iterator(status);
         final List<Command> actualCommands = newArrayList(iterator);
         assertEquals(commands.size(), actualCommands.size());
         for (Command cmd : actualCommands) {
@@ -310,7 +310,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() {
         close(storage);
-        storage.load(OK);
+        storage.iterator(OK);
     }
 
     @Test(expected = IllegalStateException.class)

@@ -86,7 +86,7 @@ public class CommandBus implements AutoCloseable {
     }
 
     private void rescheduleCommands() {
-        final Iterator<Command> commands = commandStore.load(SCHEDULED);
+        final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
         // TODO:2016-05-12:alexander.litus: re-calculate delays and schedule
         /*while (commands.hasNext()) {
             final Command command = commands.next();
