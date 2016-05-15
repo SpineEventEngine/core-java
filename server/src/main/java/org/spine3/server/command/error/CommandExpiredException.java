@@ -32,6 +32,8 @@ import static java.lang.String.*;
 /**
  * Exception that is thrown when a scheduled command was not delivered to the target in time.
  *
+ * <p>For example, in the case when a server restarted when it was the time to deliver a scheduled command.
+ *
  * @author Alexander Litus
  */
 public class CommandExpiredException extends CommandException {
