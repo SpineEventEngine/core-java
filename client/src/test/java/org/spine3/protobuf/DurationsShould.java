@@ -21,7 +21,6 @@ package org.spine3.protobuf;
 
 
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Test;
 
@@ -393,24 +392,6 @@ public class DurationsShould {
         final Duration second = durationFromSec(5);
         assertTrue(compare(first, second) == 0);
     }
-
-    @Test
-    public void return_duration_between_two_timestamps() {
-        final Timestamp time1 = newTimestamp(5, 6);
-        final Timestamp time2 = newTimestamp(10, 10);
-
-        final Duration expected = Duration.newBuilder()
-                                       .setSeconds(5)
-                                       .setNanos(4)
-                                       .build();
-        assertEquals(expected, Durations.between(time1, time2));
-        assertEquals(expected, Durations.between(time2, time1));
-    }
-
-    private static Timestamp newTimestamp(long seconds, int nanos) {
-        return Timestamp.newBuilder().setSeconds(seconds).setNanos(nanos).build();
-    }
-
 
     private static long hoursToSeconds(long hours) {
         return hours * 60L * 60L;

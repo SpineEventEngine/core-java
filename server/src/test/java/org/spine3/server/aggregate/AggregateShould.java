@@ -513,14 +513,14 @@ public class AggregateShould {
         Thread.sleep(100);
 
         final Timestamp afterCreate = aggregate.whenModified();
-        assertTrue(Timestamps.isLater(afterCreate, start));
+        assertTrue(Timestamps.isLaterThan(afterCreate, start));
         Thread.sleep(100);
 
         aggregate.dispatchCommands(startProject);
         Thread.sleep(100);
 
         final Timestamp afterStart = aggregate.whenModified();
-        assertTrue(Timestamps.isLater(afterStart, afterCreate));
+        assertTrue(Timestamps.isLaterThan(afterStart, afterCreate));
     }
 
     /**

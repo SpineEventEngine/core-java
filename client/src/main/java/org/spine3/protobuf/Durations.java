@@ -7,14 +7,12 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 
 import javax.annotation.Nullable;
 
 import static com.google.protobuf.util.TimeUtil.createDurationFromMillis;
 import static com.google.protobuf.util.TimeUtil.toMillis;
-import static java.lang.Math.*;
 import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
@@ -304,18 +302,5 @@ public class Durations {
         final long nanos = toNanos(value);
         final boolean isNegative = nanos < 0;
         return isNegative;
-    }
-
-    /**
-     * Returns a duration between two timestamps.
-     */
-    public static Duration between(Timestamp time1, Timestamp time2) {
-        final long secondsBetween = time2.getSeconds() - time1.getSeconds();
-        final int nanosBetween = time2.getNanos() - time1.getNanos();
-        final Duration diff = Duration.newBuilder()
-                .setSeconds(abs(secondsBetween))
-                .setNanos(abs(nanosBetween))
-                .build();
-        return diff;
     }
 }

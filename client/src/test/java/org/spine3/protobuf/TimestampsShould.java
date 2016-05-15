@@ -147,7 +147,7 @@ public class TimestampsShould {
         final Timestamp fromPoint = getCurrentTime();
         final Timestamp timeToCheck = add(fromPoint, TEN_SECONDS);
 
-        final boolean isAfter = Timestamps.isLater(timeToCheck, fromPoint);
+        final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
 
         assertTrue(isAfter);
     }
@@ -157,7 +157,7 @@ public class TimestampsShould {
         final Timestamp fromPoint = getCurrentTime();
         final Timestamp timeToCheck = subtract(fromPoint, TEN_SECONDS);
 
-        final boolean isAfter = Timestamps.isLater(timeToCheck, fromPoint);
+        final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
 
         assertFalse(isAfter);
     }

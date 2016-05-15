@@ -110,7 +110,7 @@ public class Timestamps {
      * @param thanTime the first point in time which is supposed to be before the {@code timestamp}
      * @return true if the {@code timestamp} is later than {@code thanTime} timestamp, false otherwise
      */
-    public static boolean isLater(Timestamp timestamp, Timestamp thanTime) {
+    public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
         final boolean isAfter = compare(timestamp, thanTime) > 0;
         return isAfter;
     }

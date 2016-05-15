@@ -129,7 +129,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isLater(timestamp, from);
+                return Timestamps.isLaterThan(timestamp, from);
             }
         };
     }

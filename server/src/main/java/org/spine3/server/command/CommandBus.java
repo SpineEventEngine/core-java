@@ -37,13 +37,13 @@ import org.spine3.base.Errors;
 import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.protobuf.Durations;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
+import org.spine3.time.Intervals;
 import org.spine3.validate.options.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,7 +55,7 @@ import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
-import static org.spine3.protobuf.Timestamps.isLater;
+import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.util.EnvironmentUtil.isRunningOnAppEngine;
 import static org.spine3.validate.Validate.isDefault;
@@ -250,10 +250,10 @@ public class CommandBus implements AutoCloseable {
             final Command command = commands.next();
             final Timestamp now = getCurrentTime();
             final Timestamp timeToPost = getTimeToPost(command);
-            if (isLater(now, /*than*/ timeToPost)) {
+            if (isLaterThan(now, /*than*/ timeToPost)) {
                 onScheduledCommandExpired(command);
             } else {
-                final Duration newDelay = Durations.between(now, timeToPost);
+                final Duration newDelay = Intervals.between(now, timeToPost).getDuration();
                 final Command commandUpdated = setSchedule(command, newDelay, now);
                 scheduler.schedule(commandUpdated);
             }

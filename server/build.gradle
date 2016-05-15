@@ -9,6 +9,7 @@ buildscript {
 
 dependencies {
     compile project(path: ':client');
+    compile project(path: ':values');
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
 }
