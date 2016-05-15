@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.EntityPackagesMap;
 import org.spine3.protobuf.Messages;
@@ -255,9 +256,10 @@ public class Commands {
      * Sets a new scheduling time to {@link CommandContext.Schedule}.
      *
      * @param command a command to update
-     * @param schedulingTime a new scheduling time
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
+    @Internal
     public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
         final Duration delay = command.getContext()
                                       .getSchedule()
@@ -270,10 +272,11 @@ public class Commands {
      * Updates {@link CommandContext.Schedule}.
      *
      * @param command a command to update
-     * @param delay a delay to set
-     * @param schedulingTime a scheduling time to set
+     * @param delay a delay to set (see {@link Schedule#getDelay()} for details)
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
      * @return an updated command
      */
+    @Internal
     public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
         checkTimestamp(schedulingTime, "command scheduling time");
         final CommandContext context = command.getContext();
