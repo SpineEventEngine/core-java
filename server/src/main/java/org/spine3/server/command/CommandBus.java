@@ -38,6 +38,7 @@ import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.protobuf.Durations;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -349,11 +350,11 @@ public class CommandBus implements AutoCloseable {
     }
 
     /**
-     * Sets the multitenancy status of the {@code CommandBus}.
+     * Sets the multitenancy status of the {@link CommandBus}.
      *
-     * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
+     * <p>A {@link CommandBus} is multi-tenant if its {@link BoundedContext} is multi-tenant.
      */
-    @Internal
+    @Internal /** Is used by {@link BoundedContext} to set its multitenancy status. */
     public void setMultitenant(boolean isMultitenant) {
         this.isMultitenant = isMultitenant;
     }
