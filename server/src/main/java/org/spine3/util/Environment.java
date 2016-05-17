@@ -25,20 +25,46 @@ package org.spine3.util;
  *
  * @author Alexander Litus
  */
-public class EnvironmentUtil {
-
-    private static final String APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
-
-    private EnvironmentUtil() {}
+public class Environment {
 
     /**
-     * Returns {@code true} if the code is running on Google AppEngine,
+     * The key of the Google AppEngine runtime version system property.
+     */
+    public static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
+
+    @SuppressWarnings("AccessOfSystemProperties")
+    private static final String APP_ENGINE_RUNTIME_VERSION = System.getProperty(APP_ENGINE_RUNTIME_VERSION_KEY);
+
+    protected Environment() {}
+
+    /**
+     * Returns the singleton instance.
+     */
+    public static Environment getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    /**
+     * Returns {@code true} if the code is running on the Google AppEngine,
      * {@code false} otherwise.
      */
-    public static boolean isRunningOnAppEngine() {
-        @SuppressWarnings("AccessOfSystemProperties")
-        final String appEngineVersion = System.getProperty(APP_ENGINE_RUNTIME_VERSION);
-        final boolean isVersionPresent = appEngineVersion != null;
+    public boolean isAppEngine() {
+        final boolean isVersionPresent = (APP_ENGINE_RUNTIME_VERSION != null) &&
+                !APP_ENGINE_RUNTIME_VERSION.isEmpty();
         return isVersionPresent;
+    }
+
+    /**
+     * Returns the current Google AppEngine version
+     * retrieved by the key {@link Environment#APP_ENGINE_RUNTIME_VERSION_KEY}.
+     */
+    public String getAppEngineVersion() {
+        return APP_ENGINE_RUNTIME_VERSION;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Environment value = new Environment();
     }
 }
