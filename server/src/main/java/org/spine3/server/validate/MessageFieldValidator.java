@@ -121,10 +121,18 @@ import static org.spine3.validate.options.Time.UNDEFINED;
         }
     }
 
-    private static boolean isTimeInvalid(Timestamp time, Time when, Timestamp now) {
-        final boolean isValid = (when == FUTURE) ?
-                                isLaterThan(time, /*than*/ now) :
-                                isLaterThan(now, /*than*/ time);
+    /**
+     * Checks the time.
+     *
+     * @param timeToCheck a timestamp to check
+     * @param whenExpected the time when the checked timestamp should be
+     * @param now the current moment
+     * @return {@code true} if the time is valid according to {@code whenExpected} parameter, {@code false} otherwise
+     */
+    private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
+        final boolean isValid = (whenExpected == FUTURE) ?
+                                isLaterThan(timeToCheck, /*than*/ now) :
+                                isLaterThan(now, /*than*/ timeToCheck);
         final boolean isInvalid = !isValid;
         return isInvalid;
     }
