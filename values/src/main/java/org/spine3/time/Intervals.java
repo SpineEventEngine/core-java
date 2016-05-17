@@ -23,7 +23,9 @@ package org.spine3.time;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
+import static org.spine3.protobuf.Timestamps.isLaterThan;
 
 /**
  * A utility class for working with {@link Interval}s.
@@ -40,18 +42,30 @@ public class Intervals {
      * @param start the first point in time
      * @param end the second point in time
      * @return an interval between {@code start} and {@code end}
+     * @throws IllegalArgumentException if the {@code end} is before the {@code start}
      */
     public static Interval between(Timestamp start, Timestamp end) {
-        final long secondsBetween = end.getSeconds() - start.getSeconds();
-        final int nanosBetween = end.getNanos() - start.getNanos();
-        final Duration duration = Duration.newBuilder()
-                .setSeconds(abs(secondsBetween))
-                .setNanos(abs(nanosBetween))
-                .build();
+        checkArgument(isLaterThan(end, /*than*/ start), "The end must be after the start of the interval.");
         final Interval.Builder interval = Interval.newBuilder()
                 .setStart(start)
-                .setEnd(end)
-                .setDuration(duration);
+                .setEnd(end);
         return interval.build();
+    }
+
+    /**
+     * Returns a duration of the interval.
+     *
+     * @param interval the interval to calculate its duration
+     * @return the duration between the start and the end of the interval
+     */
+    public static Duration toDuration(Interval interval) {
+        final Timestamp start = interval.getStart();
+        final Timestamp end = interval.getEnd();
+        final long secondsBetween = end.getSeconds() - start.getSeconds();
+        final int nanosBetween = end.getNanos() - start.getNanos();
+        final Duration.Builder duration = Duration.newBuilder()
+                .setSeconds(abs(secondsBetween))
+                .setNanos(abs(nanosBetween));
+        return duration.build();
     }
 }

@@ -93,7 +93,4 @@ message Interval {
 
     // An end of the interval.
     google.protobuf.Timestamp end = 2;
-
-    // A duration between `start` and `end`.
-    google.protobuf.Duration duration = 3;
 }

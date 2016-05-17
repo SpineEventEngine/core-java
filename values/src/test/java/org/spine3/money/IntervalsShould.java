@@ -38,18 +38,27 @@ public class IntervalsShould {
     public void return_interval_between_two_timestamps() {
         final Timestamp start = newTimestamp(5, 6);
         final Timestamp end = newTimestamp(10, 10);
-
-        final Duration duration = Duration.newBuilder()
-                                          .setSeconds(end.getSeconds() - start.getSeconds())
-                                          .setNanos(end.getNanos() - start.getNanos())
-                                          .build();
         final Interval interval = Interval.newBuilder()
                                           .setStart(start)
                                           .setEnd(end)
-                                          .setDuration(duration)
                                           .build();
 
         assertEquals(interval, Intervals.between(start, end));
+    }
+
+    @Test
+    public void calculate_duration_of_interval() {
+        final Timestamp start = newTimestamp(5, 6);
+        final Timestamp end = newTimestamp(10, 10);
+        final Duration expectedDuration = Duration.newBuilder()
+                                          .setSeconds(end.getSeconds() - start.getSeconds())
+                                          .setNanos(end.getNanos() - start.getNanos())
+                                          .build();
+        final Interval interval = Intervals.between(start, end);
+
+        final Duration actualDuration = Intervals.toDuration(interval);
+
+        assertEquals(expectedDuration, actualDuration);
     }
 
     private static Timestamp newTimestamp(long seconds, int nanos) {

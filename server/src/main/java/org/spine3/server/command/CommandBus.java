@@ -43,7 +43,7 @@ import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
-import org.spine3.time.Intervals;
+import org.spine3.time.Interval;
 import org.spine3.util.Environment;
 import org.spine3.validate.options.ConstraintViolation;
 
@@ -58,6 +58,8 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.time.Intervals.between;
+import static org.spine3.time.Intervals.toDuration;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -253,7 +255,8 @@ public class CommandBus implements AutoCloseable {
             if (isLaterThan(now, /*than*/ timeToPost)) {
                 onScheduledCommandExpired(command);
             } else {
-                final Duration newDelay = Intervals.between(now, timeToPost).getDuration();
+                final Interval interval = between(now, timeToPost);
+                final Duration newDelay = toDuration(interval);
                 final Command commandUpdated = setSchedule(command, newDelay, now);
                 scheduler.schedule(commandUpdated);
             }
