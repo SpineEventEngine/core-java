@@ -22,6 +22,7 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.Durations;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -61,6 +62,9 @@ public class Intervals {
     public static Duration toDuration(Interval interval) {
         final Timestamp start = interval.getStart();
         final Timestamp end = interval.getEnd();
+        if (start.equals(end)) {
+            return Durations.ZERO;
+        }
         final long secondsBetween = end.getSeconds() - start.getSeconds();
         final int nanosBetween = end.getNanos() - start.getNanos();
         final Duration.Builder duration = Duration.newBuilder()
