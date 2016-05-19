@@ -104,16 +104,14 @@ public class ClientApp {
         client.subscribe();
 
         final List<Command> requests = generateRequests();
-        try {
-            for (Command request : requests) {
-                log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
-                final Response result = client.post(request);
-                log().info("Result: " + toText(result));
-            }
 
-        } finally {
-            client.shutdown();
+        for (Command request : requests) {
+            log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
+            final Response result = client.post(request);
+            log().info("Result: " + toText(result));
         }
+
+        client.shutdown();
     }
 
     /**

@@ -21,14 +21,39 @@
 package org.spine3.examples.aggregate.server;
 
 import org.junit.Test;
+import org.spine3.examples.aggregate.ClientApp;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+
+import java.io.IOException;
+
+import static com.google.common.base.Throwables.propagate;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ServerShould {
 
     @Test
-    public void execute_on_in_memory_storage() {
-        final ServerApp app = new ServerApp(InMemoryStorageFactory.getInstance());
-        app.execute();
+    public void run_on_in_memory_storage() throws Exception {
+        final Server[] serverRef = new Server[1];
+
+        final Thread serverThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Server server = new Server(InMemoryStorageFactory.getInstance());
+                serverRef[0] = server;
+                try {
+                    server.start();
+                    server.awaitTermination();
+                } catch (IOException | InterruptedException e) {
+                    propagate(e);
+                }
+            }
+        });
+
+        serverThread.start();
+
+        //noinspection ZeroLengthArrayAllocation
+        ClientApp.main(new String[0]);
+
+        serverRef[0].stop();
     }
 }

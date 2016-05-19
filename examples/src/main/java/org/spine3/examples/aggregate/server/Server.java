@@ -41,14 +41,14 @@ public class Server {
 
     private final ServerApp application;
 
-    private final io.grpc.Server server;
+    private final io.grpc.Server grpcServer;
 
     /**
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
     public Server(StorageFactory storageFactory) {
         this.application = new ServerApp(storageFactory);
-        this.server = createGrpcServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
+        this.grpcServer = createGrpcServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
@@ -66,10 +66,6 @@ public class Server {
 
         final Server server = new Server(storageFactory);
         server.start();
-
-        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
-
-        addShutdownHook(server);
         server.awaitTermination();
     }
 
@@ -79,7 +75,9 @@ public class Server {
      */
     public void start() throws IOException {
         application.setUp();
-        server.start();
+        grpcServer.start();
+        addShutdownHook(this);
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     /**
@@ -91,14 +89,14 @@ public class Server {
         } catch (IOException e) {
             log().error("Error closing application", e);
         }
-        server.shutdown();
+        grpcServer.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-        server.awaitTermination();
+        grpcServer.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {
@@ -107,7 +105,7 @@ public class Server {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                System.err.println("Shutting down the CommandService server since JVM is shutting down...");
+                System.err.println("Shutting down " + getClass().getName() + "  since JVM is shutting down...");
                 try {
                     server.stop();
                 } catch (Exception e) {
