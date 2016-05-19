@@ -20,6 +20,8 @@
 
 package org.spine3.util;
 
+import javax.annotation.Nullable;
+
 /**
  * Provides information about the environment (current platform used, etc).
  *
@@ -30,22 +32,23 @@ public class Environment {
     /**
      * The key of the Google AppEngine runtime version system property.
      */
-    public static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
+    private static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
 
     @SuppressWarnings("AccessOfSystemProperties")
+    @Nullable
     private static final String appEngineRuntimeVersion = System.getProperty(APP_ENGINE_RUNTIME_VERSION_KEY);
 
     protected Environment() {}
 
     /**
-     * Returns the singleton instance.
+     * @return the singleton instance.
      */
     public static Environment getInstance() {
         return Singleton.INSTANCE.value;
     }
 
     /**
-     * Returns {@code true} if the code is running on the Google AppEngine,
+     * @return {@code true} if the code is running on the Google AppEngine,
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
@@ -55,10 +58,10 @@ public class Environment {
     }
 
     /**
-     * Returns the current Google AppEngine version
-     * retrieved by the key {@link Environment#APP_ENGINE_RUNTIME_VERSION_KEY}
+     * @return the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
      */
+    @Nullable
     public String getAppEngineVersion() {
         return appEngineRuntimeVersion;
     }
