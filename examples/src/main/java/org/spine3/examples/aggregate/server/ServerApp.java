@@ -26,13 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
-import org.spine3.examples.aggregate.Client;
+import org.spine3.examples.aggregate.ClientApp;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -45,7 +45,7 @@ import java.util.List;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class Application implements AutoCloseable {
+public class ServerApp implements AutoCloseable {
 
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
@@ -55,7 +55,7 @@ public class Application implements AutoCloseable {
      * Creates a new sample with the specified storage factory.
      * @param storageFactory factory used to create and set up storages.
      */
-    public Application(StorageFactory storageFactory) {
+    public ServerApp(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
 
         this.boundedContext = BoundedContext.newBuilder()
@@ -86,7 +86,7 @@ public class Application implements AutoCloseable {
     public static void main(String[] args) throws Exception {
         final StorageFactory factory = InMemoryStorageFactory.getInstance();
 
-        try (final Application app = new Application(factory)) {
+        try (final ServerApp app = new ServerApp(factory)) {
             app.execute();
         } catch (IOException e) {
             log().error("", e);
@@ -100,7 +100,7 @@ public class Application implements AutoCloseable {
         setUp();
 
         // Generate test requests
-        final List<Command> requests = Client.generateRequests();
+        final List<Command> requests = ClientApp.generateRequests();
 
         final StreamObserver<Response> responseObserver = new StreamObserver<Response>() {
             @Override
@@ -157,6 +157,6 @@ public class Application implements AutoCloseable {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Application.class);
+        private final Logger value = LoggerFactory.getLogger(ServerApp.class);
     }
 }

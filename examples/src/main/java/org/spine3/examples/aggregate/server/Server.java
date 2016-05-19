@@ -39,19 +39,19 @@ import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_S
  */
 public class Server {
 
-    private final Application application;
+    private final ServerApp application;
 
-    private final io.grpc.Server clientServer;
+    private final io.grpc.Server server;
 
     /**
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
     public Server(StorageFactory storageFactory) {
-        this.application = new Application(storageFactory);
-        this.clientServer = buildClientServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
+        this.application = new ServerApp(storageFactory);
+        this.server = createGrpcServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
     }
 
-    private static io.grpc.Server buildClientServer(ClientServiceGrpc.ClientService boundedContext, int port) {
+    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
         final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
         final ServerBuilder builder = ServerBuilder.forPort(port);
         builder.addService(service);
@@ -79,7 +79,7 @@ public class Server {
      */
     public void start() throws IOException {
         application.setUp();
-        clientServer.start();
+        server.start();
     }
 
     /**
@@ -91,14 +91,14 @@ public class Server {
         } catch (IOException e) {
             log().error("Error closing application", e);
         }
-        clientServer.shutdown();
+        server.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-        clientServer.awaitTermination();
+        server.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {

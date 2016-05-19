@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class ApplicationShould {
+public class ServerShould {
 
     @Test
     public void execute_on_in_memory_storage() {
-        final Application app = new Application(InMemoryStorageFactory.getInstance());
+        final ServerApp app = new ServerApp(InMemoryStorageFactory.getInstance());
         app.execute();
     }
 }
