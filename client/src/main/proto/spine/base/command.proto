@@ -70,7 +70,7 @@ message CommandContext {
     // The user who created the command.
     UserId actor = 2;
 
-    // Date/time at which the command was created.
+    // The time when the command was created.
     google.protobuf.Timestamp timestamp = 3;
 
     // The zone offset from which the command is made.
@@ -89,6 +89,10 @@ message CommandContext {
     message Schedule {
         // The delay between the moment of receiving a command at the server and its delivery to the target.
         google.protobuf.Duration delay = 1;
+
+        // The time when the command was scheduled.
+        // Is set automatically.
+        google.protobuf.Timestamp scheduling_time = 2;
     }
 }
 
@@ -115,13 +119,16 @@ enum CommandStatus {
     // The command has been received by backend and stored.
     RECEIVED = 1;
 
+    // The command has been received by backend and stored, but will be delivered to the target later.
+    SCHEDULED = 2;
+
     // The command has been successfully handled.
     // Expect one or more events produced in as the result of handling this command.
-    OK = 2;
+    OK = 3;
 
     // There was an exception or another kind of technical error during command processing.
-    ERROR = 3;
+    ERROR = 4;
 
     // A business failure encountered during command processing.
-    FAILURE = 4;
+    FAILURE = 5;
 }

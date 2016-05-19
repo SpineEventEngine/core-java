@@ -20,7 +20,9 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
@@ -29,23 +31,35 @@ import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Errors;
 import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
+import org.spine3.time.Interval;
+import org.spine3.util.Environment;
 import org.spine3.validate.options.ConstraintViolation;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.TimeUtil.add;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.*;
+import static org.spine3.protobuf.Timestamps.isLaterThan;
+import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.time.Intervals.between;
+import static org.spine3.time.Intervals.toDuration;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -65,8 +79,9 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandStatusService commandStatusService;
 
-    @Nullable
     private final CommandScheduler scheduler;
+
+    private final ProblemLog problemLog;
 
     /**
      * Is {@code true} if the Bounded Context (to which this Command Bus belongs) is multi-tenant.
@@ -74,19 +89,33 @@ public class CommandBus implements AutoCloseable {
      */
     private boolean isMultitenant;
 
-    private ProblemLog problemLog = new ProblemLog();
-
-    private CommandBus(Builder builder) {
-        commandStore = builder.getCommandStore();
-        scheduler = builder.getScheduler();
-        commandStatusService = new CommandStatusService(commandStore);
+    /**
+     * Creates a new instance.
+     *
+     * @param commandStore a store to save commands
+     * @return a new instance
+     */
+    public static CommandBus newInstance(CommandStore commandStore) {
+        final CommandScheduler scheduler = createCommandScheduler();
+        final ProblemLog log = new ProblemLog();
+        final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
+        return commandBus;
     }
 
     /**
-     * Creates a new builder for command bus.
+     * Creates a new instance.
+     *
+     * @param commandStore a store to save commands
+     * @param scheduler a command scheduler
+     * @param problemLog a problem logger
      */
-    public static Builder newBuilder() {
-        return new Builder();
+    @VisibleForTesting
+    /* package */ CommandBus(CommandStore commandStore, CommandScheduler scheduler, ProblemLog problemLog) {
+        this.commandStore = checkNotNull(commandStore);
+        this.commandStatusService = new CommandStatusService(commandStore);
+        this.scheduler = scheduler;
+        this.problemLog = problemLog;
+        rescheduleCommands();
     }
 
     /**
@@ -155,12 +184,7 @@ public class CommandBus implements AutoCloseable {
             return;
         }
         if (isScheduled(command)) {
-            //TODO:2016-05-08:alexander.yevsyukov: Do store command if it was scheduled and update its status when it's executed.
-            // It is needed to make command delivery more reliable. E.g. if a delay is long enough, not stored message
-            // could be lost if the server, which holds it in memory is shut down.
-            schedule(command);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
+            scheduleAndStore(command, responseObserver);
             return;
         }
         commandStore.store(command);
@@ -194,15 +218,15 @@ public class CommandBus implements AutoCloseable {
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final Namespace namespace = command.getContext().getNamespace();
         if (isMultitenant() && isDefault(namespace)) {
-            final Exception noNamespace = InvalidCommandException.onMissingNamespace(command);
-            commandStore.store(command, noNamespace);
+            final CommandException noNamespace = InvalidCommandException.onMissingNamespace(command);
+            commandStore.store(command, noNamespace.getError());
             responseObserver.onError(invalidArgumentWithCause(noNamespace));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
-            final Exception invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
-            commandStore.store(command, invalidCommand);
+            final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
+            commandStore.store(command, invalidCommand.getError());
             responseObserver.onError(invalidArgumentWithCause(invalidCommand));
             return false;
         }
@@ -210,9 +234,48 @@ public class CommandBus implements AutoCloseable {
     }
 
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
-        final Exception unsupported = new UnsupportedCommandException(command);
-        commandStore.store(command, unsupported);
+        final CommandException unsupported = new UnsupportedCommandException(command);
+        commandStore.store(command, unsupported.getError());
         responseObserver.onError(invalidArgumentWithCause(unsupported));
+    }
+
+    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+        scheduler.schedule(command);
+        commandStore.store(command, SCHEDULED);
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+    }
+
+    private void rescheduleCommands() {
+        final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
+        while (commands.hasNext()) {
+            final Command command = commands.next();
+            final Timestamp now = getCurrentTime();
+            final Timestamp timeToPost = getTimeToPost(command);
+            if (isLaterThan(now, /*than*/ timeToPost)) {
+                onScheduledCommandExpired(command);
+            } else {
+                final Interval interval = between(now, timeToPost);
+                final Duration newDelay = toDuration(interval);
+                final Command commandUpdated = setSchedule(command, newDelay, now);
+                scheduler.schedule(commandUpdated);
+            }
+        }
+    }
+
+    private static Timestamp getTimeToPost(Command command) {
+        final Schedule schedule = command.getContext().getSchedule();
+        final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
+        return timeToPost;
+    }
+
+    private void onScheduledCommandExpired(Command command) {
+        // We cannot post this command because there is no handler/dispatcher registered yet.
+        // Also, posting it can be undesirable.
+        final Message msg = getMessage(command);
+        final CommandId id = getId(command);
+        problemLog.errorExpiredCommand(msg, id);
+        commandStatusService.setToError(id, commandExpiredError(msg));
     }
 
     private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
@@ -251,7 +314,7 @@ public class CommandBus implements AutoCloseable {
     private void dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final CommandDispatcher dispatcher = getDispatcher(commandClass);
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         try {
             dispatcher.dispatch(command);
         } catch (Exception e) {
@@ -289,28 +352,14 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    private void schedule(Command command) {
-        if (scheduler != null) {
-            scheduler.schedule(command);
-        } else {
-            throw new IllegalStateException(
-                    "Scheduled commands are not supported by this command bus: scheduler is not set.");
-        }
-    }
-
     /**
-     * Sets the multitenancy status of the {@code CommandBus}.
+     * Sets the multitenancy status of the {@link CommandBus}.
      *
-     * <p>A {@code CommandBus} is multi-tenant if its {@code BoundedContext} is multi-tenant.
+     * <p>A {@link CommandBus} is multi-tenant if its {@link BoundedContext} is multi-tenant.
      */
-    @Internal
-    public void setMultitenant(boolean multitenant) {
-        this.isMultitenant = multitenant;
-    }
-
-    @VisibleForTesting
-    /* package */ void setProblemLog(ProblemLog problemLog) {
-        this.problemLog = problemLog;
+    @Internal /** Is used by {@link BoundedContext} to set its multitenancy status. */
+    public void setMultitenant(boolean isMultitenant) {
+        this.isMultitenant = isMultitenant;
     }
 
     /**
@@ -339,6 +388,11 @@ public class CommandBus implements AutoCloseable {
                     commandMessage, commandId);
             log().error(msg, throwable);
         }
+
+        /* package */ void errorExpiredCommand(Message commandMsg, CommandId id) {
+            final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
+            log().error(msg);
+        }
     }
 
     private boolean isDispatcherRegistered(CommandClass cls) {
@@ -355,58 +409,23 @@ public class CommandBus implements AutoCloseable {
         return dispatcherRegistry.getDispatcher(commandClass);
     }
 
+    private static CommandScheduler createCommandScheduler() {
+        if (Environment.getInstance().isAppEngine()) {
+            log().error("CommandScheduler for AppEngine is not implemented yet.");
+            // TODO:2016-05-13:alexander.litus: load a CommandScheduler for AppEngine dynamically when it is implemented.
+            // Return this one for now.
+            return new ExecutorCommandScheduler();
+        } else {
+            return new ExecutorCommandScheduler();
+        }
+    }
+
     @Override
     public void close() throws Exception {
         dispatcherRegistry.unregisterAll();
         handlerRegistry.unregisterAll();
         commandStore.close();
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
-    }
-
-    /**
-     * Constructs a Command Bus.
-     */
-    public static class Builder {
-
-        private CommandStore commandStore;
-        @Nullable
-        private CommandScheduler scheduler;
-
-        public CommandBus build() {
-            checkNotNull(commandStore, "Command store must be set.");
-            final CommandBus commandBus = new CommandBus(this);
-            if (scheduler != null) {
-                scheduler.setCommandBus(commandBus);
-            }
-            return commandBus;
-        }
-
-        /**
-         * Sets a command store, which is required.
-         */
-        public Builder setCommandStore(CommandStore commandStore) {
-            this.commandStore = commandStore;
-            return this;
-        }
-
-        public CommandStore getCommandStore() {
-            return commandStore;
-        }
-
-        /**
-         * Sets a command scheduler, which is not required.
-         */
-        public Builder setScheduler(CommandScheduler scheduler) {
-            this.scheduler = scheduler;
-            return this;
-        }
-
-        @Nullable
-        public CommandScheduler getScheduler() {
-            return scheduler;
-        }
+        scheduler.shutdown();
     }
 
     private enum LogSingleton {

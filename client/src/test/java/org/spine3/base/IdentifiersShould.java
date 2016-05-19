@@ -80,9 +80,9 @@ public class IdentifiersShould {
         assertEquals(EMPTY_ID, idToString(newStringValue("  ")));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_convert_empty_message_to_string() {
-        idToString(StringValue.getDefaultInstance());
+    @Test
+    public void return_EMPTY_ID_if_convert_empty_message_to_string() {
+        assertEquals(EMPTY_ID, idToString(StringValue.getDefaultInstance()));
     }
 
     @Test(expected = IllegalArgumentException.class)

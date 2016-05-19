@@ -38,7 +38,6 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.ExecutorCommandScheduler;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
@@ -64,7 +63,7 @@ import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
 
     private static final ProjectId ID = newProjectId();
@@ -79,7 +78,7 @@ public class ProcessManagerShould {
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         final CommandStore commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
-        commandBus = spy(newCommandBus(commandStore, new ExecutorCommandScheduler()));
+        commandBus = spy(CommandBus.newInstance(commandStore));
         processManager = new TestProcessManager(ID);
     }
 

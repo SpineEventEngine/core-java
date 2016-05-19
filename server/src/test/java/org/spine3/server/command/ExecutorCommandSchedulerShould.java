@@ -21,14 +21,17 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.testdata.TestCommands;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
@@ -51,24 +54,28 @@ public class ExecutorCommandSchedulerShould {
     private CommandContext context;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = createCommandContext(DELAY);
     }
 
     @After
-    public void tearDownTest() {
+    public void tearDown() {
         scheduler.shutdown();
     }
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmd = Commands.create(createProjectMsg(newUuid()), context);
+        final Command cmdPrimary = Commands.create(createProjectMsg(), context);
+        final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
-        scheduler.schedule(cmd);
-
-        verify(scheduler, never()).post(cmd);
-        verify(scheduler, after(DELAY_MS).times(1)).post(cmd);
+        scheduler.schedule(cmdPrimary);
+        
+        verify(scheduler, never()).post(any(Command.class));
+        verify(scheduler, after(DELAY_MS)).post(commandCaptor.capture());
+        final Command actualCmd = commandCaptor.getValue();
+        final Command expectedCmd = Commands.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
+        assertEquals(expectedCmd, actualCmd);
     }
 
     @Test
@@ -80,7 +87,7 @@ public class ExecutorCommandSchedulerShould {
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
 
-        verify(scheduler, after(DELAY_MS).times(1)).post(expectedCmd);
+        verify(scheduler, after(DELAY_MS)).post(any(Command.class));
         verify(scheduler, never()).post(extraCmd);
     }
 
@@ -94,5 +101,12 @@ public class ExecutorCommandSchedulerShould {
             return;
         }
         fail("Must throw an exception as it is shutdown.");
+    }
+
+    private static Timestamp getSchedulingTime(Command cmd) {
+        final Timestamp time = cmd.getContext()
+                                  .getSchedule()
+                                  .getSchedulingTime();
+        return time;
     }
 }

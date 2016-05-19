@@ -35,7 +35,7 @@ import java.util.List;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Timestamps.isAfter;
+import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.options.Time.FUTURE;
 import static org.spine3.validate.options.Time.UNDEFINED;
@@ -121,10 +121,18 @@ import static org.spine3.validate.options.Time.UNDEFINED;
         }
     }
 
-    private static boolean isTimeInvalid(Timestamp time, Time when, Timestamp now) {
-        final boolean isValid = (when == FUTURE) ?
-                                isAfter(time, /*than*/ now) :
-                                isAfter(now, /*than*/ time);
+    /**
+     * Checks the time.
+     *
+     * @param timeToCheck a timestamp to check
+     * @param whenExpected the time when the checked timestamp should be
+     * @param now the current moment
+     * @return {@code true} if the time is valid according to {@code whenExpected} parameter, {@code false} otherwise
+     */
+    private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
+        final boolean isValid = (whenExpected == FUTURE) ?
+                                isLaterThan(timeToCheck, /*than*/ now) :
+                                isLaterThan(now, /*than*/ timeToCheck);
         final boolean isInvalid = !isValid;
         return isInvalid;
     }

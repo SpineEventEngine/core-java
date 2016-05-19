@@ -80,7 +80,7 @@ public class AggregateShould {
     private TestAggregate aggregate;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
         aggregate = new TestAggregate(ID);
     }
 
@@ -513,14 +513,14 @@ public class AggregateShould {
         Thread.sleep(100);
 
         final Timestamp afterCreate = aggregate.whenModified();
-        assertTrue(Timestamps.isAfter(afterCreate, start));
+        assertTrue(Timestamps.isLaterThan(afterCreate, start));
         Thread.sleep(100);
 
         aggregate.dispatchCommands(startProject);
         Thread.sleep(100);
 
         final Timestamp afterStart = aggregate.whenModified();
-        assertTrue(Timestamps.isAfter(afterStart, afterCreate));
+        assertTrue(Timestamps.isLaterThan(afterStart, afterCreate));
     }
 
     /**

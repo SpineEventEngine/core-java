@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.TimeUtil;
@@ -33,22 +34,25 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.command.CommandValidator;
-import org.spine3.server.entity.GetTargetIdFromCommand;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.type.TypeName;
 
+import java.util.Iterator;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.CommandStatus.*;
 import static org.spine3.base.Commands.generateId;
+import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.createProjectCmd;
+import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -56,7 +60,7 @@ import static org.spine3.validate.Validate.isNotDefault;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class CommandStorageShould extends AbstractStorageShould<CommandId, CommandStorageRecord> {
 
     private CommandStorage storage;
@@ -88,6 +92,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                 .setTimestamp(getCurrentTime())
                 .setCommandType(commandType.nameOnly())
                 .setCommandId(idToString(context.getCommandId()))
+                .setStatus(RECEIVED)
                 .setTargetId(newUuid())
                 .setTargetIdType(String.class.getName())
                 .setMessage(command)
@@ -100,30 +105,81 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         return generateId();
     }
 
+    /*
+     * Storing and loading tests.
+     ****************************/
+
     @Test
     public void store_and_read_command() {
         final Command command = createProjectCmd();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
 
         storage.store(command);
         final CommandStorageRecord record = storage.read(commandId);
 
-        checkRecord(command, record, RECEIVED);
+        checkRecord(record, command, RECEIVED);
     }
 
     @Test
-    public void store_command_with_error_status() {
+    public void store_command_with_error() {
         final Command command = createProjectCmd();
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         final Error error = newError();
 
         storage.store(command, error);
-
         final CommandStorageRecord record = storage.read(commandId);
 
-        checkRecord(command, record, ERROR);
+        checkRecord(record, command, ERROR);
         assertEquals(error, record.getError());
     }
+
+    @Test
+    public void store_command_with_error_and_generate_ID_if_needed() {
+        final Command command = Commands.create(createProjectMsg(), CommandContext.getDefaultInstance());
+        final Error error = newError();
+
+        storage.store(command, error);
+        final List<CommandStorageRecord> records = newArrayList(storage.read(ERROR));
+
+        assertEquals(1, records.size());
+        assertFalse(records.get(0)
+                           .getCommandId()
+                           .trim()
+                           .isEmpty());
+    }
+
+    @Test
+    public void store_command_with_status() {
+        final Command command = createProjectCmd();
+        final CommandId commandId = getId(command);
+        final CommandStatus status = SCHEDULED;
+
+        storage.store(command, status);
+        final CommandStorageRecord record = storage.read(commandId);
+
+        checkRecord(record, command, status);
+    }
+
+    @Test
+    public void load_commands_by_status() {
+        final List<Command> commands = ImmutableList.of(createProjectCmd(), addTaskCmd(), startProjectCmd());
+        final CommandStatus status = SCHEDULED;
+
+        store(commands, status);
+        // store an extra command with another status
+        storage.store(createProjectCmd(), ERROR);
+
+        final Iterator<Command> iterator = storage.iterator(status);
+        final List<Command> actualCommands = newArrayList(iterator);
+        assertEquals(commands.size(), actualCommands.size());
+        for (Command cmd : actualCommands) {
+            assertTrue(commands.contains(cmd));
+        }
+    }
+
+    /*
+     * Update command status tests.
+     ******************************/
 
     @Test
     public void set_ok_command_status() {
@@ -159,42 +215,33 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         assertEquals(failure, actual.getFailure());
     }
 
+    /*
+     * Conversion tests.
+     *******************/
+
     @Test
     public void convert_cmd_to_record() {
         final Command command = createProjectCmd();
+        final CommandStatus status = RECEIVED;
 
-        final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
+        final CommandStorageRecord record = CommandStorage.newCommandStorageRecordBuilder(command, status).build();
 
-        checkRecord(command, record, RECEIVED);
+        checkRecord(record, command, status);
     }
 
     @Test
     public void convert_cmd_to_record_and_set_empty_target_id_if_message_has_no_id_field() {
         final StringValue message = StringValue.getDefaultInstance();
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
-        final CommandStorageRecord record = CommandStorage.toStorageRecord(command);
+        final CommandStorageRecord record = CommandStorage.newCommandStorageRecordBuilder(command, RECEIVED).build();
 
         assertEquals("", record.getTargetId());
         assertEquals("", record.getTargetIdType());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_command_and_throw_exception_if_it_is_invalid() {
-        final Command command = Commands.create(StringValue.getDefaultInstance(), CommandContext.getDefaultInstance());
-        CommandValidator.checkCommand(command);
-    }
-
-    @Test
-    public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command command = createProjectCmd();
-        CommandValidator.checkCommand(command);
-    }
-
-    @Test
-    public void return_null_when_fail_to_get_id_from_command_message_which_has_no_id_field() {
-        final Object id = GetTargetIdFromCommand.asNullableObject(StringValue.getDefaultInstance());
-        assertNull(id);
-    }
+    /*
+     * Check that exception is thrown if try to pass null to methods.
+     **************************************************************/
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_store_null() {
@@ -220,6 +267,80 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         storage.updateStatus(null, Failure.getDefaultInstance());
     }
 
+    /*
+     * Check that exception is thrown if try to store invalid commands.
+     ******************************************************************/
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_try_to_store_invalid_command() {
+        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        storage.store(cmd);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_try_to_store_invalid_command_with_status() {
+        final Command cmd = Commands.create(CreateProject.getDefaultInstance(), CommandContext.getDefaultInstance());
+
+        storage.store(cmd, OK);
+    }
+
+    /*
+     * Check that exception is thrown if try to use closed storage.
+     **************************************************************/
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
+        close(storage);
+        storage.store(createProjectCmd());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
+        close(storage);
+        storage.store(createProjectCmd(), newError());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
+        close(storage);
+        storage.store(createProjectCmd(), OK);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() {
+        close(storage);
+        storage.iterator(OK);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_set_OK_status_using_closed_storage() {
+        close(storage);
+        storage.setOkStatus(generateId());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() {
+        close(storage);
+        storage.updateStatus(generateId(), newError());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_try_to_set_FAILURE_status_using_closed_storage() {
+        close(storage);
+        storage.updateStatus(generateId(), newFailure());
+    }
+
+    /*
+     * Utils.
+     **************************************************************/
+
+    private void store(Iterable<Command> commands, CommandStatus status) {
+        for (Command cmd : commands) {
+            storage.store(cmd, status);
+        }
+    }
+
     private void givenNewRecord() {
         record = newStorageRecord();
         id = record.getContext().getCommandId();
@@ -243,16 +364,12 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
                 .build();
     }
 
-    private static void checkRecord(
-            Command cmd,
-            CommandStorageRecord record,
-            CommandStatus statusExpected) {
+    private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
         final CreateProject message = fromAny(cmd.getMessage());
-
         assertEquals(cmd.getMessage(), record.getMessage());
-        assertEquals(context.getTimestamp(), record.getTimestamp());
+        assertTrue(record.getTimestamp().getSeconds() > 0);
         assertEquals(message.getClass().getSimpleName(), record.getCommandType());
         assertEquals(idToString(commandId), record.getCommandId());
         assertEquals(statusExpected, record.getStatus());
@@ -262,6 +379,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
         switch (statusExpected) {
             case RECEIVED:
             case OK:
+            case SCHEDULED:
                 assertTrue(isDefault(record.getError()));
                 assertTrue(isDefault(record.getFailure()));
                 break;

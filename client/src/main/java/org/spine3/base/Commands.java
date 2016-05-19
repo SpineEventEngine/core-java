@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.EntityPackagesMap;
 import org.spine3.protobuf.Messages;
@@ -44,8 +45,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.isNotDefault;
+import static org.spine3.validate.Validate.*;
 
 /**
  * Client-side utilities for working with commands.
@@ -114,6 +114,14 @@ public class Commands {
     }
 
     /**
+     * Extracts a command ID from the passed {@code Command} instance.
+     */
+    public static CommandId getId(Command command) {
+        final CommandId id = command.getContext().getCommandId();
+        return id;
+    }
+
+    /**
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
     public static Predicate<Command> wereAfter(final Timestamp from) {
@@ -122,7 +130,7 @@ public class Commands {
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
                 final Timestamp timestamp = getTimestamp(request);
-                return Timestamps.isAfter(timestamp, from);
+                return Timestamps.isLaterThan(timestamp, from);
             }
         };
     }
@@ -173,7 +181,7 @@ public class Commands {
      * @return formatted string
      */
     public static String formatCommandTypeAndId(String format, Command command) {
-        final CommandId commandId = command.getContext().getCommandId();
+        final CommandId commandId = getId(command);
         final Message commandMessage = getMessage(command);
         final String msg = formatMessageTypeAndId(format, commandMessage, commandId);
         return msg;
@@ -242,5 +250,47 @@ public class Commands {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Sets a new scheduling time to {@link CommandContext.Schedule}.
+     *
+     * @param command a command to update
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @return an updated command
+     */
+    @Internal
+    public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
+        final Duration delay = command.getContext()
+                                      .getSchedule()
+                                      .getDelay();
+        final Command result = setSchedule(command, delay, schedulingTime);
+        return result;
+    }
+
+    /**
+     * Updates {@link CommandContext.Schedule}.
+     *
+     * @param command a command to update
+     * @param delay a delay to set (see {@link Schedule#getDelay()} for details)
+     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
+     * @return an updated command
+     */
+    @Internal
+    public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
+        checkTimestamp(schedulingTime, "command scheduling time");
+        final CommandContext context = command.getContext();
+        final CommandContext.Schedule scheduleUpdated = context.getSchedule()
+                                                               .toBuilder()
+                                                               .setDelay(delay)
+                                                               .setSchedulingTime(schedulingTime)
+                                                               .build();
+        final CommandContext contextUpdated = context.toBuilder()
+                                                     .setSchedule(scheduleUpdated)
+                                                     .build();
+        final Command result = command.toBuilder()
+                                      .setContext(contextUpdated)
+                                      .build();
+        return result;
     }
 }

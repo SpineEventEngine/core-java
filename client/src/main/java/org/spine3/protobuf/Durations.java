@@ -159,7 +159,6 @@ public class Durations {
         return result;
     }
 
-
     /**
      * Subtract a duration from another.
      */

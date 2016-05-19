@@ -67,9 +67,7 @@ public class Application implements AutoCloseable {
 
     private static CommandBus createCommandBus() {
         final CommandStore store = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
-        final CommandBus commandBus = CommandBus.newBuilder()
-                .setCommandStore(store)
-                .build();
+        final CommandBus commandBus = CommandBus.newInstance(store);
         return commandBus;
     }
 

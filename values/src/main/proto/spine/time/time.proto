@@ -27,6 +27,8 @@ option java_outer_classname = "TimeProto";
 option java_package = "org.spine3.time";
 
 import "spine/time/zone_offset.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 // Enum representing the 12 months of the year.
 enum MonthOfYear {
@@ -82,4 +84,13 @@ message OffsetDateTime {
     LocalDate date = 1;
     LocalTime time = 2;
     ZoneOffset offset = 3;
+}
+
+// An interval between two points in time.
+message Interval {
+    // A start of the interval.
+    google.protobuf.Timestamp start = 1;
+
+    // An end of the interval.
+    google.protobuf.Timestamp end = 2;
 }

@@ -21,8 +21,15 @@
 package org.spine3.server.command;
 
 import org.spine3.base.Command;
+import org.spine3.base.CommandId;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Commands.getId;
+import static org.spine3.base.Commands.setSchedulingTime;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -31,21 +38,56 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public abstract class CommandScheduler {
 
+    private static final Set<CommandId> scheduledCommandIds = newHashSet();
+
     private boolean isActive = true;
 
     private CommandBus commandBus;
 
     /**
-     * Schedule a command and deliver it to the target according to the scheduling options.
+     * Schedules a command and delivers it to the target according to the scheduling options.
      *
-     * <p>NOTE: check if the command is scheduled already.
+     * <p>A command with the same ID cannot be scheduled again.
      *
      * @param command a command to deliver later
      * @throws IllegalStateException if the scheduler is shut down
-     * @see #post(Command)
      */
     public void schedule(Command command) {
         checkState(isActive, "Scheduler is shut down.");
+        if (isScheduledAlready(command)) {
+            return;
+        }
+        final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        doSchedule(commandUpdated);
+        markAsScheduled(commandUpdated);
+    }
+
+    /**
+     * Schedules a command and delivers it to the target according to the scheduling options set to a context.
+     *
+     * @param command a command to deliver later
+     * @see #post(Command)
+     */
+    protected abstract void doSchedule(Command command);
+
+    /**
+     * Delivers a scheduled command to a target.
+     *
+     * @param command a command to deliver
+     */
+    protected void post(Command command) {
+        commandBus.doPost(command);
+    }
+
+    private static boolean isScheduledAlready(Command command) {
+        final CommandId id = getId(command);
+        final boolean isScheduledAlready = scheduledCommandIds.contains(id);
+        return isScheduledAlready;
+    }
+
+    private static void markAsScheduled(Command command) {
+        final CommandId id = getId(command);
+        scheduledCommandIds.add(id);
     }
 
     /**
@@ -59,14 +101,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Delivers a scheduled command to a target.
-     *
-     * @param command a command to deliver
+     * Sets a command bus used to post scheduled commands.
      */
-    protected void post(Command command) {
-        commandBus.doPost(command);
-    }
-
     /* package */ void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
     }

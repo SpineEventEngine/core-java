@@ -136,13 +136,11 @@ public class Identifiers {
     }
 
     private static String convert(Message message) {
-        final String result;
         final Collection<Object> values = message.getAllFields().values();
+        final String result;
         if (values.isEmpty()) {
-            throw new IllegalArgumentException("ID must have at least one field. Encountered: " +
-                                                       message.getClass().getName());
-        }
-        if (values.size() == 1) {
+            result = EMPTY_ID;
+        } else if (values.size() == 1) {
             final Object object = values.iterator().next();
             if (object instanceof Message) {
                 result = idMessageToString((Message) object);

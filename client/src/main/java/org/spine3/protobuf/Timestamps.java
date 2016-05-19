@@ -104,14 +104,14 @@ public class Timestamps {
     }
 
     /**
-     * Calculates if the {@code timestamp} is after the {@code fromPoint} timestamp.
+     * Calculates if {@code timestamp} is later {@code thanTime} timestamp.
      *
-     * @param timestamp the timestamp to check if it is after the {@code fromPoint}
-     * @param fromPoint the first point in time which is supposed to be before the {@code timestamp}
-     * @return true if the {@code timestamp} is after the {@code fromPoint} timestamp, false otherwise
+     * @param timestamp the timestamp to check if it is later then {@code thanTime}
+     * @param thanTime the first point in time which is supposed to be before the {@code timestamp}
+     * @return true if the {@code timestamp} is later than {@code thanTime} timestamp, false otherwise
      */
-    public static boolean isAfter(Timestamp timestamp, Timestamp fromPoint) {
-        final boolean isAfter = compare(timestamp, fromPoint) > 0;
+    public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
+        final boolean isAfter = compare(timestamp, thanTime) > 0;
         return isAfter;
     }
 

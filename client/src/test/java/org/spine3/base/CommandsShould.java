@@ -24,11 +24,14 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.protobuf.Durations;
 import org.spine3.test.RunTest;
 import org.spine3.test.TestCommand;
 import org.spine3.type.TypeName;
@@ -37,7 +40,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
@@ -81,8 +86,17 @@ public class CommandsShould {
     @Test
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");
+
         final Command command = Commands.create(message, CommandContext.getDefaultInstance());
+
         assertEquals(message, Commands.getMessage(command));
+    }
+
+    @Test
+    public void extract_id_from_command() {
+        final Command command = commandFactory.create(newStringValue(newUuid()));
+
+        assertEquals(command.getContext().getCommandId(), getId(command));
     }
 
     @Test
@@ -114,7 +128,7 @@ public class CommandsShould {
                                        .build();
         final Command command = commandFactory.create(message);
         final String typeName = TypeName.ofCommand(command).toString();
-        final String commandId = idToString(command.getContext().getCommandId());
+        final String commandId = idToString(getId(command));
 
         @SuppressWarnings("QuestionableName") // is OK for this test.
         final String string = Commands.formatCommandTypeAndId("Command type: %s; ID %s", command);
@@ -179,5 +193,28 @@ public class CommandsShould {
         final Command cmd = Commands.create(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
+    }
+
+    @Test
+    public void update_schedule_options() {
+        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Timestamp schedulingTime = getCurrentTime();
+        final Duration delay = Durations.ofMinutes(5);
+
+        final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
+
+        final CommandContext.Schedule schedule = cmdUpdated.getContext().getSchedule();
+        assertEquals(delay, schedule.getDelay());
+        assertEquals(schedulingTime, schedule.getSchedulingTime());
+    }
+
+    @Test
+    public void update_scheduling_time() {
+        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Timestamp schedulingTime = getCurrentTime();
+
+        final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);
+
+        assertEquals(schedulingTime, cmdUpdated.getContext().getSchedule().getSchedulingTime());
     }
 }

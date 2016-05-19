@@ -37,7 +37,7 @@ import "spine/base/failure.proto";
 // Some of the fields are defined as string representation of corresponding message types
 // so that these fields are available for querying.
 message CommandStorageRecord {
-    // A moment of time when the command was created.
+    // A moment of time when this storage record was created.
     google.protobuf.Timestamp timestamp = 1;
 
     // A short name of Protobuf command type.
@@ -47,11 +47,10 @@ message CommandStorageRecord {
     string command_id = 3;
 
     // The status of the command processing.
-    // This field must be set to `RECEIVED` when a new record is created.
     spine.base.CommandStatus status = 4;
 
-    // `status_data` provides additional information on what went wrong if the value
-    // of `status` is not equal to `RECEIVED` or `OK`.
+    // `status_data` provides additional information on what went wrong
+    // if the value of `status` is `ERROR` or `FAILURE`.
     oneof status_data {
         // The technical error occurred during command processing.
         spine.base.Error error = 5;

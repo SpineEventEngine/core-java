@@ -393,7 +393,6 @@ public class DurationsShould {
         assertTrue(compare(first, second) == 0);
     }
 
-
     private static long hoursToSeconds(long hours) {
         return hours * 60L * 60L;
     }
