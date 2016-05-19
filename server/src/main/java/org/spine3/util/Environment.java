@@ -33,7 +33,7 @@ public class Environment {
     public static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
 
     @SuppressWarnings("AccessOfSystemProperties")
-    private static final String APP_ENGINE_RUNTIME_VERSION = System.getProperty(APP_ENGINE_RUNTIME_VERSION_KEY);
+    private static final String appEngineRuntimeVersion = System.getProperty(APP_ENGINE_RUNTIME_VERSION_KEY);
 
     protected Environment() {}
 
@@ -49,17 +49,18 @@ public class Environment {
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
-        final boolean isVersionPresent = (APP_ENGINE_RUNTIME_VERSION != null) &&
-                !APP_ENGINE_RUNTIME_VERSION.isEmpty();
+        final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
+                !appEngineRuntimeVersion.isEmpty();
         return isVersionPresent;
     }
 
     /**
      * Returns the current Google AppEngine version
-     * retrieved by the key {@link Environment#APP_ENGINE_RUNTIME_VERSION_KEY}.
+     * retrieved by the key {@link Environment#APP_ENGINE_RUNTIME_VERSION_KEY}
+     * or {@code null} if the program is running not on the AppEngine.
      */
     public String getAppEngineVersion() {
-        return APP_ENGINE_RUNTIME_VERSION;
+        return appEngineRuntimeVersion;
     }
 
     private enum Singleton {
