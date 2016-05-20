@@ -37,7 +37,6 @@ import org.spine3.server.command.Assign;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("TypeMayBeWeakened" /* Use command and event classes for parameters as messages instead of SomethingOrBuilder */)
 public class OrderAggregate extends Aggregate<OrderId, Order, Order.Builder> {
 
     public OrderAggregate(OrderId id) {

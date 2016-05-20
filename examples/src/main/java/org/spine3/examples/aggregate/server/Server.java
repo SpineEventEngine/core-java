@@ -49,8 +49,6 @@ public class Server {
     private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
     private final EventSubscriber eventLogger = new EventLogger();
-
-
     private final io.grpc.Server grpcServer;
 
     /**
@@ -104,6 +102,7 @@ public class Server {
 
     /**
      * Starts the server.
+     *
      * @throws IOException if unable to bind.
      */
     public void start() throws IOException {
