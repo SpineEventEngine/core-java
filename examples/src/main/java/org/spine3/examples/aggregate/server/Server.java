@@ -59,15 +59,15 @@ public class Server {
 
         this.boundedContext = BoundedContext.newBuilder()
                                             .setStorageFactory(storageFactory)
-                                            .setCommandBus(createCommandBus())
+                                            .setCommandBus(createCommandBus(storageFactory))
                                             .setEventBus(createEventBus(storageFactory))
                                             .build();
 
         this.grpcServer = createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
     }
 
-    private static CommandBus createCommandBus() {
-        final CommandStore store = new CommandStore(InMemoryStorageFactory.getInstance().createCommandStorage());
+    private static CommandBus createCommandBus(StorageFactory storageFactory) {
+        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
         final CommandBus commandBus = CommandBus.newInstance(store);
         return commandBus;
     }
@@ -106,7 +106,15 @@ public class Server {
      * @throws IOException if unable to bind.
      */
     public void start() throws IOException {
-        // Register repository with the bounded context. This will register it in the CommandDispatcher too.
+        initBoundedContext();
+
+        grpcServer.start();
+        addShutdownHook(this);
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
+    }
+
+    private void initBoundedContext() {
+        // Register repository with the bounded context. This will register it in Command Bus too.
         final OrderRepository repository = new OrderRepository(boundedContext);
         repository.initStorage(storageFactory);
 
@@ -114,14 +122,10 @@ public class Server {
 
         // Register event subscribers.
         boundedContext.getEventBus().subscribe(eventLogger);
-
-        grpcServer.start();
-        addShutdownHook(this);
-        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     /**
-     * Stops the server.
+     * Closes the Bounded Context and stops the gRPC server.
      */
     public void stop() throws Exception {
         boundedContext.close();
