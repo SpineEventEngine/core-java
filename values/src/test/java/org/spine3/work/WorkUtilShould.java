@@ -23,7 +23,9 @@ package org.spine3.work;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Mikhail Mikhaylov
@@ -81,4 +83,10 @@ public class WorkUtilShould {
         } catch (IllegalArgumentException ignored) {
         }
     }
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(WorkUtil.class));
+    }
+
 }
