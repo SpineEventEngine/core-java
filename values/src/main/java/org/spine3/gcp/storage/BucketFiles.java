@@ -34,6 +34,11 @@ public class BucketFiles {
     private BucketFiles() {
     }
 
+    /**
+     * Builds proper {@link File} from String path.
+     *
+     * @param path String path, including bucket name
+     */
     public static File ofPath(String path) {
         if (!path.contains(PATH_SEPARATOR)) {
             throw new IllegalArgumentException("Illegal file path");
@@ -47,9 +52,20 @@ public class BucketFiles {
                                     .setValue(bucketName)
                                     .build();
         final File result = File.newBuilder()
-                              .setBucket(bucket)
-                              .setName(imagePath)
-                              .build();
+                                .setBucket(bucket)
+                                .setName(imagePath)
+                                .build();
+        return result;
+    }
+
+    /**
+     * Returns full file path including bucket name and relative file path.
+     */
+    @SuppressWarnings("TypeMayBeWeakened")
+    public static String getFullPath(File file) {
+        final String bucketName = file.getBucket()
+                                      .getValue();
+        final String result = bucketName + PATH_SEPARATOR + file.getName();
         return result;
     }
 }

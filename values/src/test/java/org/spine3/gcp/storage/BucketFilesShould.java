@@ -30,15 +30,16 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BucketFilesShould {
 
+    private static final String BUCKET_NAME = "bucket7";
+    private static final String FILE_PATH = "folder4/file_name.proto";
+    private static final String FULL_PATH = BUCKET_NAME + '/' + FILE_PATH;
+
     @Test
     public void parse_file_path() {
-        final String bucketName = "bucket7";
-        final String filePath = "folder4/file_name.proto";
-        final String fullPath = bucketName + '/' + filePath;
-
-        final File file = BucketFiles.ofPath(fullPath);
-        assertEquals(bucketName, file.getBucket().getValue());
-        assertEquals(filePath, file.getName());
+        final File file = BucketFiles.ofPath(FULL_PATH);
+        assertEquals(BUCKET_NAME, file.getBucket()
+                                      .getValue());
+        assertEquals(FILE_PATH, file.getName());
     }
 
     @Test
@@ -49,6 +50,19 @@ public class BucketFilesShould {
             fail();
         } catch (IllegalArgumentException ignored) {
         }
+    }
+
+    @Test
+    public void get_full_path_properly() {
+        final Bucket bucket = Bucket.newBuilder()
+                                    .setValue(BUCKET_NAME)
+                                    .build();
+        final File file = File.newBuilder()
+                              .setBucket(bucket)
+                              .setName(FILE_PATH)
+                              .build();
+
+        assertEquals(FULL_PATH, BucketFiles.getFullPath(file));
     }
 
     @Test
