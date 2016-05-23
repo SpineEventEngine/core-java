@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package spine.net;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.net";
+option java_outer_classname = "UrlProto";
+
+message Url {
+    oneof value {
+        string raw = 1;
+        Record record = 2;
+    }
+
+    // Structurized record
+    message Record {
+
+        // Application layer protocol
+        Protocol protocol = 1;
+
+        // User's email and password (both optional)
+        Authorization auth = 2;
+
+        // Domain name
+        string host = 3;
+
+        // Server's port (e.g. :8080)
+        int32 port = 4;
+
+        // Single part of the path too desired resourse (e.g. "/index")
+        repeated string path = 5;
+
+        // Single key - value pair (?key1=value1&key2=value2)
+        repeated string query = 6;
+
+        // Sub-resource (e.g. "#article")
+        string fragment = 7;
+
+        // Application layer protocol
+        message Protocol {
+            oneof protocol {
+                // Most often used schemas
+                Schema schema = 1;
+
+                // Some other protocol
+                string name = 2;
+            }
+        }
+
+        // Most often used application layer procotols.
+        enum Schema {
+            UNDEFINED = 0;
+            HTTP = 1;
+            HTTPS = 2;
+            FTP = 3;
+            SSL = 4;
+            SSH = 5;
+            DNS = 6;
+            SOAP = 7;
+            RTP = 8;
+        }
+
+        // Pair of the username (email commonly) and password (optional) (e.g. "user:password@")
+        message Authorization {
+
+            // User name
+            string user = 1;
+
+            // Corresponding password
+            string password = 2;
+        }
+    }
+}
+
