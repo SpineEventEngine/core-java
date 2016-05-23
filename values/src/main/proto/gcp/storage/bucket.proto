@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package gcp.storage;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.gcp.storage";
+option java_outer_classname = "BucketProto";
+
+// Google Cloud Datastore bucket
+message Bucket {
+
+    // Bucket name, unique within GCP project
+    string value = 1;
+}
