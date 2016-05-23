@@ -26,12 +26,13 @@ message Url {
         string host = 3;
 
         // Server's port (e.g. :8080)
-        int32 port = 4;
+        // We leave port as String, because port 0 is hypothetically possible to use
+        string port = 4;
 
-        // Single part of the path too desired resourse (e.g. "/index")
-        repeated string path = 5;
+        // Relative path to desired resource (e.g. "/index" or "/js/app.js")
+        string path = 5;
 
-        // Single key - value pair (?key1=value1&key2=value2)
+        // A set of key-value pairs (?key1=value1&key2=value2)
         repeated string query = 6;
 
         // Sub-resource (e.g. "#article")
