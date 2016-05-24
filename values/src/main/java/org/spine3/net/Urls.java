@@ -49,12 +49,17 @@ public class Urls {
     }
 
     public static String toString(Url url) {
+        validate(url);
         final String stringUrl = UrlPrinter.printToString(url);
         return stringUrl;
     }
 
     @SuppressWarnings("TypeMayBeWeakened")
-    private static void validate(Url url) {
+    public static void validate(Url url) {
+        if (url.getValueCase() == Url.ValueCase.VALUE_NOT_SET) {
+            throw new IllegalArgumentException("Url is empty");
+        }
+
         if (url.getValueCase() == Url.ValueCase.RAW) {
             return;
         }
@@ -62,7 +67,15 @@ public class Urls {
         final Url.Record record = url.getRecord();
         final String host = record.getHost();
         if (host.isEmpty()) {
-            throw new IllegalStateException("Url host can not be empty!");
+            throw new IllegalArgumentException("Url host can not be empty!");
+        }
+
+        final Url.Record.Authorization auth = record.getAuth();
+        final String user = auth.getUser();
+        final String password = auth.getPassword();
+
+        if (user.isEmpty() && !password.isEmpty()) {
+            throw new IllegalArgumentException("Url can't have password without having user name");
         }
     }
 }

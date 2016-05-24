@@ -65,21 +65,23 @@ import com.google.protobuf.ProtocolStringList;
     }
 
     private static void appendAuth(Url.Record record, StringBuilder sb) {
-        if (!record.hasAuth()) {
+        if (!record.hasAuth() || record.getAuth()
+                                       .equals(Url.Record.Authorization.getDefaultInstance())) {
             return;
         }
 
         final Url.Record.Authorization auth = record.getAuth();
         final String user = auth.getUser();
+        final String password = auth.getPassword();
+
         if (user.isEmpty()) {
             return;
         }
-
         sb.append(user);
 
-        final String password = auth.getPassword();
         if (!password.isEmpty()) {
-            sb.append(UrlParser.CREDENTIALS_SEPARATOR).append(password);
+            sb.append(UrlParser.CREDENTIALS_SEPARATOR)
+              .append(password);
         }
 
         sb.append(UrlParser.CREDENTIALS_ENDING);
@@ -95,7 +97,8 @@ import com.google.protobuf.ProtocolStringList;
             return;
         }
 
-        sb.append(UrlParser.HOST_PORT_SEPARATOR).append(port);
+        sb.append(UrlParser.HOST_PORT_SEPARATOR)
+          .append(port);
     }
 
     private static void appendPath(Url.Record record, StringBuilder sb) {
@@ -104,7 +107,8 @@ import com.google.protobuf.ProtocolStringList;
             return;
         }
 
-        sb.append(UrlParser.HOST_ENDING).append(path);
+        sb.append(UrlParser.HOST_ENDING)
+          .append(path);
     }
 
     private static void appendQueries(Url.Record record, StringBuilder sb) {
@@ -131,6 +135,7 @@ import com.google.protobuf.ProtocolStringList;
             return;
         }
 
-        sb.append(UrlParser.FRAGMENT_START).append(fragment);
+        sb.append(UrlParser.FRAGMENT_START)
+          .append(fragment);
     }
 }

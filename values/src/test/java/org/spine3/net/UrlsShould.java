@@ -21,15 +21,18 @@
 package org.spine3.net;
 
 import org.junit.Test;
+import org.spine3.net.Url.Record;
+import org.spine3.net.Url.Record.Authorization;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
 public class UrlsShould {
 
     @Test
@@ -38,9 +41,76 @@ public class UrlsShould {
 
         assertEquals("google.com", url.getRecord()
                                       .getHost());
-        assertEquals(Url.Record.Schema.HTTP, url.getRecord()
-                                                .getProtocol()
-                                                .getSchema());
+        assertEquals(Record.Schema.HTTP, url.getRecord()
+                                            .getProtocol()
+                                            .getSchema());
+    }
+
+    @Test
+    public void fail_on_already_formed_url() {
+        final Url url = Urls.of("http://google.com");
+
+        try {
+            Urls.of(url);
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void validate_raw_urls() {
+        final Url url1 = Url.newBuilder()
+                            .setRaw("google.com")
+                            .build();
+        Urls.validate(url1);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    public void fail_on_wrong_urls_validation() {
+        final Url emptyUrl = Url.newBuilder()
+                                .build();
+        try {
+            Urls.toString(emptyUrl);
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        final Url urlWithoutHost = Url.newBuilder()
+                                      .setRecord(Record.getDefaultInstance())
+                                      .build();
+        try {
+            Urls.toString(urlWithoutHost);
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        final Authorization authWithPasswordWithoutUser =
+                Authorization.newBuilder()
+                             .setPassword("password")
+                             .build();
+        final Record recordWithPasswordWithoutUser =
+                Record.newBuilder()
+                      .setHost("google.com")
+                      .setAuth(authWithPasswordWithoutUser)
+                      .build();
+
+        final Url urlWithPasswordWithoutUser =
+                Url.newBuilder()
+                   .setRecord(recordWithPasswordWithoutUser)
+                   .build();
+        try {
+            Urls.toString(urlWithPasswordWithoutUser);
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void convert_to_string_properly() {
+        final String rawUrl = "http://google.com/index";
+
+        assertEquals(rawUrl, Urls.toString(Urls.of(rawUrl)));
     }
 
     @Test

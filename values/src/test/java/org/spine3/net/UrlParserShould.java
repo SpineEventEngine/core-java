@@ -140,4 +140,20 @@ public class UrlParserShould {
         assertEquals(query1, queries.get(0));
         assertEquals(query2, queries.get(1));
     }
+
+    @Test
+    public void parse_url_with_all_sub_items() {
+        final String rawUrl = "https://user:password@spine3.org/index?auth=none&locale=us#fragment9";
+
+        final Url.Record record = new UrlParser(rawUrl).parse().getRecord();
+
+        assertEquals(Url.Record.Schema.HTTPS, record.getProtocol().getSchema());
+        assertEquals("user", record.getAuth().getUser());
+        assertEquals("password", record.getAuth().getPassword());
+        assertEquals("spine3.org", record.getHost());
+        assertEquals("index", record.getPath());
+        assertEquals("auth=none", record.getQuery(0));
+        assertEquals("locale=us", record.getQuery(1));
+        assertEquals("fragment9", record.getFragment());
+    }
 }
