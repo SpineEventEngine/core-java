@@ -22,6 +22,7 @@ package org.spine3.net;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -31,7 +32,16 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class UrlsShould {
 
+    @Test
+    public void convert_proper_urls() {
+        final Url url = Urls.of("http://google.com");
 
+        assertEquals("google.com", url.getRecord()
+                                      .getHost());
+        assertEquals(Url.Record.Schema.HTTP, url.getRecord()
+                                                .getProtocol()
+                                                .getSchema());
+    }
 
     @Test
     public void have_private_constructor() {

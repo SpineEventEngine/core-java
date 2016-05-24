@@ -48,9 +48,9 @@ import org.spine3.net.Url.Record.Protocol;
 
         parseProtocol();
         parseCredentials();
-        parseHost();
         parseFragment();
         parseQueries();
+        parseHost();
         parsePath();
 
         final Url.Builder result = Url.newBuilder();
@@ -135,10 +135,6 @@ import org.spine3.net.Url.Record.Protocol;
     }
 
     private void parseFragment() {
-        if (unProcessedInput.isEmpty()) {
-            return;
-        }
-
         final int fragmentIndex = unProcessedInput.lastIndexOf(FRAGMENT_START);
         if (fragmentIndex == -1) {
             return;
@@ -151,10 +147,6 @@ import org.spine3.net.Url.Record.Protocol;
     }
 
     private void parseQueries() {
-        if (unProcessedInput.isEmpty()) {
-            return;
-        }
-
         final int queriesStartIndex = unProcessedInput.indexOf(QUERIES_START);
         if (queriesStartIndex == -1) {
             return;

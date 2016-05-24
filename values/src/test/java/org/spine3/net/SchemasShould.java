@@ -20,38 +20,31 @@
 
 package org.spine3.net;
 
-import com.google.common.collect.ImmutableMap;
-import org.spine3.net.Url.Record.Schema;
+import org.junit.Test;
 
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-@SuppressWarnings("UtilityClass")
-/* package */ class Schemas {
+/**
+ * @author Mikhail Mikhaylov
+ */
+@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+public class SchemasShould {
 
-    private Schemas() {
+    @Test
+    public void return_valid_schemas_on_valid_args() {
+        assertEquals(Url.Record.Schema.DNS, Schemas.of("dns"));
+        assertEquals(Url.Record.Schema.DNS, Schemas.of("DNS"));
     }
 
-    /* package */ static Schema of(String value) {
-        final String lowercaseValue = value.toLowerCase();
-        if (!stringSchemas.containsKey(lowercaseValue)) {
-            return Schema.UNDEFINED;
-        }
-        return stringSchemas.get(lowercaseValue);
+    @Test
+    public void return_undefined_schema_on_invalid_args() {
+        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.of("someunknownschema"));
     }
 
-    /* package */ static String getLowerCaseName(Schema schema) {
-        return schema.name().toLowerCase();
-    }
-
-    private static final Map<String, Schema> stringSchemas = buildSchemasMap();
-
-    private static Map<String, Schema> buildSchemasMap() {
-        final ImmutableMap.Builder<String, Schema> schemas = new ImmutableMap.Builder<>();
-
-        for (Schema schema : Schema.values()) {
-            schemas.put(getLowerCaseName(schema), schema);
-        }
-
-        return schemas.build();
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(Schemas.class));
     }
 }
