@@ -30,6 +30,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
 import org.spine3.client.grpc.Topic;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
@@ -266,6 +267,8 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
     @Override
     public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
         //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 

@@ -49,7 +49,7 @@ import static org.spine3.protobuf.Messages.toText;
  * @author Mikhail Mikhaylov
  * @author Alexander Litus
  */
-public class Client {
+public class ClientApp {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String SERVICE_HOST = "localhost";
 
@@ -82,7 +82,7 @@ public class Client {
     /**
      * Construct the client connecting to server at {@code host:port}.
      */
-    public Client() {
+    public ClientApp() {
         channel = ManagedChannelBuilder
                 .forAddress(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT)
                 .usePlaintext(true)
@@ -100,20 +100,18 @@ public class Client {
      * Sends requests to the server.
      */
     public static void main(String[] args) throws InterruptedException {
-        final Client client = new Client();
+        final ClientApp client = new ClientApp();
         client.subscribe();
 
         final List<Command> requests = generateRequests();
-        try {
-            for (Command request : requests) {
-                log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
-                final Response result = client.post(request);
-                log().info("Result: " + toText(result));
-            }
 
-        } finally {
-            client.shutdown();
+        for (Command request : requests) {
+            log().info("Sending a request: " + request.getMessage().getTypeUrl() + "...");
+            final Response result = client.post(request);
+            log().info("Result: " + toText(result));
         }
+
+        client.shutdown();
     }
 
     /**
@@ -161,7 +159,7 @@ public class Client {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Client.class);
+        private final Logger value = LoggerFactory.getLogger(ClientApp.class);
     }
 
     private static Logger log() {

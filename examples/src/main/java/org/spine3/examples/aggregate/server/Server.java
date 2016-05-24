@@ -19,11 +19,18 @@
  */
 package org.spine3.examples.aggregate.server;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.grpc.ClientServiceGrpc;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandStore;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -39,19 +46,43 @@ import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_S
  */
 public class Server {
 
-    private final Application application;
-
-    private final io.grpc.Server clientServer;
+    private final StorageFactory storageFactory;
+    private final BoundedContext boundedContext;
+    private final EventSubscriber eventLogger = new EventLogger();
+    private final io.grpc.Server grpcServer;
 
     /**
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
     public Server(StorageFactory storageFactory) {
-        this.application = new Application(storageFactory);
-        this.clientServer = buildClientServer(this.application.getBoundedContext(), DEFAULT_CLIENT_SERVICE_PORT);
+        this.storageFactory = storageFactory;
+
+        this.boundedContext = BoundedContext.newBuilder()
+                                            .setStorageFactory(storageFactory)
+                                            .setCommandBus(createCommandBus(storageFactory))
+                                            .setEventBus(createEventBus(storageFactory))
+                                            .build();
+
+        this.grpcServer = createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
     }
 
-    private static io.grpc.Server buildClientServer(ClientServiceGrpc.ClientService boundedContext, int port) {
+    private static CommandBus createCommandBus(StorageFactory storageFactory) {
+        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
+        final CommandBus commandBus = CommandBus.newInstance(store);
+        return commandBus;
+    }
+
+    private static EventBus createEventBus(StorageFactory storageFactory) {
+        final EventStore eventStore = EventStore.newBuilder()
+                                                .setStreamExecutor(MoreExecutors.directExecutor())
+                                                .setStorage(storageFactory.createEventStorage())
+                                                .setLogger(EventStore.log())
+                                                .build();
+        return EventBus.newInstance(eventStore);
+    }
+
+
+    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
         final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
         final ServerBuilder builder = ServerBuilder.forPort(port);
         builder.addService(service);
@@ -66,39 +97,46 @@ public class Server {
 
         final Server server = new Server(storageFactory);
         server.start();
-
-        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
-
-        addShutdownHook(server);
         server.awaitTermination();
     }
 
     /**
      * Starts the server.
+     *
      * @throws IOException if unable to bind.
      */
     public void start() throws IOException {
-        application.setUp();
-        clientServer.start();
+        initBoundedContext();
+
+        grpcServer.start();
+        addShutdownHook(this);
+        log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
+    }
+
+    private void initBoundedContext() {
+        // Register repository with the bounded context. This will register it in Command Bus too.
+        final OrderRepository repository = new OrderRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        boundedContext.register(repository);
+
+        // Register event subscribers.
+        boundedContext.getEventBus().subscribe(eventLogger);
     }
 
     /**
-     * Stops the server.
+     * Closes the Bounded Context and stops the gRPC server.
      */
     public void stop() throws Exception {
-        try {
-            application.close();
-        } catch (IOException e) {
-            log().error("Error closing application", e);
-        }
-        clientServer.shutdown();
+        boundedContext.close();
+        grpcServer.shutdown();
     }
 
     /**
      * Waits for the server to become terminated.
      */
     public void awaitTermination() throws InterruptedException {
-        clientServer.awaitTermination();
+        grpcServer.awaitTermination();
     }
 
     private static void addShutdownHook(final Server server) {
@@ -107,7 +145,7 @@ public class Server {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                System.err.println("Shutting down the CommandService server since JVM is shutting down...");
+                System.err.println("Shutting down " + getClass().getName() + "  since JVM is shutting down...");
                 try {
                     server.stop();
                 } catch (Exception e) {
