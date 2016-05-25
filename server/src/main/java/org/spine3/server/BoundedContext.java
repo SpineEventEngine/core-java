@@ -53,7 +53,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Responses.isOk;
-import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -64,7 +63,9 @@ import static org.spine3.protobuf.Values.newStringValue;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
+public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.ClientService,
+                                       IntegrationEventSubscriber,
+                                       AutoCloseable {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -361,7 +362,13 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             }
 
             checkNotNull(storageFactory, "storageFactory must be set");
-            checkNotNull(commandBus, "commandDispatcher must be set");
+
+            if (commandBus == null) {
+                // The CommandBus was not set explicitly. Create an instance using configured StorageFactory.
+                commandBus = createCommandBus(storageFactory);
+            }
+            checkNotNull(commandBus, "commandBus must be set");
+
             checkNotNull(eventBus, "eventBus must be set");
 
             commandBus.setMultitenant(this.multitenant);
@@ -370,6 +377,12 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
             log().info(result.nameForLogging() + " created.");
             return result;
+        }
+
+        private static CommandBus createCommandBus(StorageFactory storageFactory) {
+            final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
+            final CommandBus commandBus = CommandBus.newInstance(store);
+            return commandBus;
         }
     }
 

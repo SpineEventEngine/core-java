@@ -67,7 +67,7 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_CommandDispatcher_from_builder() {
+    public void return_CommandBus_from_builder() {
         final CommandBus expected = newCommandBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
@@ -97,5 +97,15 @@ public class BoundedContextBuilderShould {
     public void do_not_accept_null_EventBus() {
         //noinspection ConstantConditions
         BoundedContext.newBuilder().setEventBus(null);
+    }
+
+    @Test
+    public void create_CommandBus_using_set_StorageFactory_if_CommandBus_was_not_set() {
+        // Pass EventBus to builder initialization, and do NOT pass CommandBus.
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                   .setStorageFactory(storageFactory)
+                                                   .setEventBus(newEventBus(storageFactory))
+                                                   .build();
+        assertNotNull(boundedContext.getCommandBus());
     }
 }
