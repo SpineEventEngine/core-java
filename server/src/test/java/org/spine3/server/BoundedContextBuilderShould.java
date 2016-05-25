@@ -108,4 +108,14 @@ public class BoundedContextBuilderShould {
                                                    .build();
         assertNotNull(boundedContext.getCommandBus());
     }
+
+    @Test
+    public void create_EventBus_using_set_StorageFactory_if_EventBus_was_not_set() {
+        // Pass CommandBus to builder initialization, and do NOT pass EventBus.
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                   .setStorageFactory(storageFactory)
+                                                   .setCommandBus(newCommandBus(storageFactory))
+                                                   .build();
+        assertNotNull(boundedContext.getEventBus());
+    }
 }

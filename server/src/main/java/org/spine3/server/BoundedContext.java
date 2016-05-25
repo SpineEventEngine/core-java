@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -364,12 +365,15 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             checkNotNull(storageFactory, "storageFactory must be set");
 
             if (commandBus == null) {
-                // The CommandBus was not set explicitly. Create an instance using configured StorageFactory.
-                commandBus = createCommandBus(storageFactory);
+                // A CommandBus was not set explicitly. Create an instance using configured StorageFactory.
+                commandBus = createCommandBus();
             }
-            checkNotNull(commandBus, "commandBus must be set");
 
-            checkNotNull(eventBus, "eventBus must be set");
+
+            if (eventBus == null) {
+                // An EventBus was not set explicitly. Create a new instance using StorageFactory.
+                eventBus = createEventBus();
+            }
 
             commandBus.setMultitenant(this.multitenant);
 
@@ -379,10 +383,20 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             return result;
         }
 
-        private static CommandBus createCommandBus(StorageFactory storageFactory) {
+        private CommandBus createCommandBus() {
             final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
             final CommandBus commandBus = CommandBus.newInstance(store);
             return commandBus;
+        }
+
+        private EventBus createEventBus() {
+            final EventStore eventStore = EventStore.newBuilder()
+                                                    .setStreamExecutor(MoreExecutors.directExecutor())
+                                                    .setStorage(storageFactory.createEventStorage())
+                                                    .setLogger(EventStore.log())
+                                                    .build();
+            final EventBus eventBus = EventBus.newInstance(eventStore);
+            return eventBus;
         }
     }
 
