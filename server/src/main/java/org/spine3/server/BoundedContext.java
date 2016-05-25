@@ -418,21 +418,17 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
         public BoundedContext build() {
             checkNotNull(storageFactory, "storageFactory must be set");
 
+            /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
                 commandStore = createCommandStore();
             }
-
             if (commandBus == null) {
-                // A CommandBus was not set explicitly. Create an instance using configured StorageFactory.
                 commandBus = createCommandBus();
             }
-
             if (eventStore == null) {
                 createEventStore();
             }
-
             if (eventBus == null) {
-                // An EventBus was not set explicitly. Create a new instance using StorageFactory.
                 eventBus = createEventBus();
             }
 
