@@ -19,19 +19,17 @@
  */
 package org.spine3.examples.aggregate.server;
 
-import io.grpc.ServerBuilder;
-import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.ClientService;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
 
-import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.
@@ -56,14 +54,7 @@ public class Server {
                                             .setStorageFactory(storageFactory)
                                             .build();
 
-        this.grpcServer = createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
-    }
-
-    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
-        final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
-        final ServerBuilder builder = ServerBuilder.forPort(port);
-        builder.addService(service);
-        return builder.build();
+        this.grpcServer = ClientService.createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
     }
 
     /**

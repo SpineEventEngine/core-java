@@ -22,12 +22,16 @@ package org.spine3.server;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
+import org.spine3.client.ConnectionConstants;
+import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -47,6 +51,14 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     protected ClientService(Builder builder) {
         this.commandToBoundedContext = builder.commandToBoundedContextMap().build();
+    }
+
+    //TODO:2016-05-25:alexander.yevsyukov: Hide from public API after changing Server example.
+    public static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService clientService, int port) {
+        final ServerServiceDefinition service = ClientServiceGrpc.bindService(clientService);
+        final ServerBuilder builder = ServerBuilder.forPort(port);
+        builder.addService(service);
+        return builder.build();
     }
 
     @Override
@@ -78,6 +90,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     public static class Builder {
         private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+        private int port = ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
         public Builder addBoundedContext(BoundedContext boundedContext) {
             boundedContexts.add(boundedContext);
@@ -87,6 +100,15 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         public Builder removeBoundedContext(BoundedContext boundedContext) {
             boundedContexts.remove(boundedContext);
             return this;
+        }
+
+        public Builder setPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public int getPort() {
+            return this.port;
         }
 
         public ClientService build() {

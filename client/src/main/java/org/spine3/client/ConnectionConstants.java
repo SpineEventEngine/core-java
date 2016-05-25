@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.examples.aggregate;
+package org.spine3.client;
 
 /**
  * Constant values shared between client and server.
@@ -28,7 +28,7 @@ package org.spine3.examples.aggregate;
 public interface ConnectionConstants {
 
     /**
-     * The port on which the server of {@link org.spine3.client.grpc.ClientServiceGrpc.ClientService} runs.
+     * The default port number on which a client server runs.
      */
     int DEFAULT_CLIENT_SERVICE_PORT = 50051;
 
