@@ -45,11 +45,15 @@ import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.validate.Validate;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Responses.isOk;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
@@ -297,17 +301,24 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
          */
         public static final String DEFAULT_NAME = "Main";
 
-        private String name;
+        private String name = DEFAULT_NAME;
         private StorageFactory storageFactory;
+        private CommandStore commandStore;
         private CommandBus commandBus;
+        private EventStore eventStore;
+        private Executor eventStoreStreamExecutor;
         private EventBus eventBus;
         private boolean multitenant;
 
         public Builder setName(String name) {
-            this.name = name;
+            this.name = Validate.checkNotEmptyOrBlank(name, "name");
             return this;
         }
 
+        /**
+         * Returns the previously set name or {@link #DEFAULT_NAME}
+         * if the name was not explicitly set.
+         */
         public String getName() {
             return name;
         }
@@ -326,8 +337,19 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             return this;
         }
 
+        @Nullable
         public StorageFactory getStorageFactory() {
             return storageFactory;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            this.commandStore = checkNotNull(commandStore);
+            return this;
+        }
+
+        @Nullable
+        public CommandStore getCommandStore() {
+            return this.commandStore;
         }
 
         public Builder setCommandBus(CommandBus commandBus) {
@@ -335,8 +357,52 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             return this;
         }
 
+        @Nullable
         public CommandBus getCommandBus() {
             return commandBus;
+        }
+
+        /**
+         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
+         *
+         * <p>This method can be called if {@link #setEventStoreStreamExecutor(Executor)}
+         * was not called before.
+         *
+         * @see #setEventStoreStreamExecutor(Executor)
+         */
+        public Builder setEventStore(EventStore eventStore) {
+            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
+            this.eventStore = checkNotNull(eventStore);
+            return this;
+        }
+
+        /**
+         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
+         *
+         * <p>This {@code Executor} instance will be used for creating
+         * new {@code EventStore} instance when building {@code BoundedContext}, <em>if</em>
+         * {@code EventStore} was not explicitly set in the builder.
+         *
+         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
+         * will be used.
+         *
+         * @see #setEventStore(EventStore)
+         */
+        @SuppressWarnings("MethodParameterNamingConvention")
+        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
+            checkState(eventStore == null, "EventStore is already configured.");
+            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
+            return this;
+        }
+
+        @Nullable
+        public Executor getEventStoreStreamExecutor() {
+            return eventStoreStreamExecutor;
+        }
+
+        @Nullable
+        public EventStore getEventStore() {
+            return eventStore;
         }
 
         public Builder setEventBus(EventBus eventBus) {
@@ -344,22 +410,26 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             return this;
         }
 
+        @Nullable
         public EventBus getEventBus() {
             return eventBus;
         }
 
         public BoundedContext build() {
-            if (this.name == null) {
-                this.name = DEFAULT_NAME;
-            }
-
             checkNotNull(storageFactory, "storageFactory must be set");
+
+            if (commandStore == null) {
+                commandStore = createCommandStore();
+            }
 
             if (commandBus == null) {
                 // A CommandBus was not set explicitly. Create an instance using configured StorageFactory.
                 commandBus = createCommandBus();
             }
 
+            if (eventStore == null) {
+                createEventStore();
+            }
 
             if (eventBus == null) {
                 // An EventBus was not set explicitly. Create a new instance using StorageFactory.
@@ -374,18 +444,36 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
             return result;
         }
 
+        private CommandStore createCommandStore() {
+            final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
+            return result;
+        }
+
+        private EventStore createEventStore() {
+            if (eventStoreStreamExecutor == null) {
+                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
+            }
+
+            final EventStore result = EventStore.newBuilder()
+                                                .setStreamExecutor(eventStoreStreamExecutor)
+                                                .setStorage(storageFactory.createEventStorage())
+                                                .setLogger(EventStore.log())
+                                                .build();
+            return result;
+        }
+
         private CommandBus createCommandBus() {
-            final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-            final CommandBus commandBus = CommandBus.newInstance(store);
+            if (commandStore == null) {
+                this.commandStore = createCommandStore();
+            }
+            final CommandBus commandBus = CommandBus.newInstance(commandStore);
             return commandBus;
         }
 
         private EventBus createEventBus() {
-            final EventStore eventStore = EventStore.newBuilder()
-                                                    .setStreamExecutor(MoreExecutors.directExecutor())
-                                                    .setStorage(storageFactory.createEventStorage())
-                                                    .setLogger(EventStore.log())
-                                                    .build();
+            if (eventStore == null) {
+                this.eventStore = createEventStore();
+            }
             final EventBus eventBus = EventBus.newInstance(eventStore);
             return eventBus;
         }
