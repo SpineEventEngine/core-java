@@ -36,6 +36,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.IdFunction;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
@@ -61,8 +62,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
@@ -343,8 +344,20 @@ public class BoundedContextShould {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_repository_has_storage_assigned_upon_registration() {
-        boundedContext.register(new ProjectAggregateRepository(boundedContext));
+    @Test
+    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
+        assertTrue(repository.storageAssigned());
+    }
+
+    @Test
+    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 }

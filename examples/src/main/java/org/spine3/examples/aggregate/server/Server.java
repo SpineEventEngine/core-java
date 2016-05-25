@@ -38,8 +38,6 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  * @author Alexander Litus
  */
 public class Server {
-
-    private final StorageFactory storageFactory;
     private final BoundedContext boundedContext;
     private final EventSubscriber eventLogger = new EventLogger();
     private final io.grpc.Server grpcServer;
@@ -48,8 +46,6 @@ public class Server {
      * @param storageFactory the {@link StorageFactory} used to create and set up storages.
      */
     public Server(StorageFactory storageFactory) {
-        this.storageFactory = storageFactory;
-
         this.boundedContext = BoundedContext.newBuilder()
                                             .setStorageFactory(storageFactory)
                                             .build();
@@ -84,10 +80,6 @@ public class Server {
     private void initBoundedContext() {
         // Register repository with the bounded context. This will register it in Command Bus too.
         final OrderRepository repository = new OrderRepository(boundedContext);
-
-        //TODO:2016-05-25:alexander.yevsyukov: Make this operation in BoundedContext if a repository
-        // does not have a storage assigned upon registration.
-        repository.initStorage(storageFactory);
 
         boundedContext.register(repository);
 

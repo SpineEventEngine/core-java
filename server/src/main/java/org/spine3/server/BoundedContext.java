@@ -33,7 +33,6 @@ import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.grpc.Topic;
-import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
@@ -45,8 +44,6 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -163,20 +160,15 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
     }
 
     /**
-     * Registers the passed repository with the BoundedContext.
+     * Registers the passed repository with the {@code BoundedContext}.
      *
-     * <p>The context creates and assigns a storage depending on the type of the passed repository.
-     *
-     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
-     * and assigned.
-     *
-     * <p>For other types of repositories an instance of {@link EntityStorage} is
-     * created and assigned.
+     * <p>If the repository does not have a storage assigned, it will be initialized
+     * using the {@code StorageFactory} associated with this bounded context.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
-     * @throws IllegalArgumentException if the passed repository has no storage assigned
+     * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
@@ -190,10 +182,9 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
         }
     }
 
-    private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
+    private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
-            throw new IllegalArgumentException("The repository " + repository + " has no assigned storage. " +
-                    "Please call Repository.initStorage() before registration with BoundedContext.");
+            repository.initStorage(this.storageFactory);
         }
     }
 
