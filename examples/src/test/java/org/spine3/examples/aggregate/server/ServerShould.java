@@ -54,6 +54,6 @@ public class ServerShould {
         //noinspection ZeroLengthArrayAllocation
         ClientApp.main(new String[0]);
 
-        serverRef[0].stop();
+        serverRef[0].shutdown();
     }
 }

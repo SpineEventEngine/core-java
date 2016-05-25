@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 /* package */ class HandlerRegistry {
 
-    private final Map<CommandClass, CommandHandler> handlersByClass = Maps.newConcurrentMap();
+    private final Map<CommandClass, CommandHandler> handlers = Maps.newConcurrentMap();
 
     /* package */ void register(CommandHandler object) {
         checkNotNull(object);
@@ -63,6 +63,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
         final MethodMap<CommandHandlerMethod> handlers = CommandHandlerMethod.scan(object);
         unregisterMap(handlers);
+    }
+
+    /* package */ Set<CommandClass> getCommandClasses() {
+        return handlers.keySet();
     }
 
     /**
@@ -90,7 +94,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     private void removeFor(CommandClass commandClass) {
-        handlersByClass.remove(commandClass);
+        handlers.remove(commandClass);
     }
 
     private void checkDuplicates(MethodMap<CommandHandlerMethod> handlers) {
@@ -108,21 +112,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     @CheckReturnValue
     /* package */ boolean handlerRegistered(CommandClass cls) {
-        return handlersByClass.containsKey(cls);
+        return handlers.containsKey(cls);
     }
 
     /* package */ CommandHandler getHandler(CommandClass cls) {
-        return handlersByClass.get(cls);
+        return handlers.get(cls);
     }
 
     private void putAll(CommandHandler object, MethodMap<CommandHandlerMethod> methods) {
         for (Class<? extends Message> commandClass : methods.keySet()) {
-            handlersByClass.put(CommandClass.of(commandClass), object);
+            handlers.put(CommandClass.of(commandClass), object);
         }
     }
 
     /* package */ void unregisterAll() {
-        for (CommandClass commandClass : handlersByClass.keySet()) {
+        for (CommandClass commandClass : handlers.keySet()) {
             removeFor(commandClass);
         }
     }

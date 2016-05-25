@@ -20,11 +20,20 @@
 
 package org.spine3.server;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.client.grpc.Topic;
+import org.spine3.server.command.error.CommandException;
+import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.type.CommandClass;
+
+import java.util.Set;
 
 /**
  * The {@code ClientService} allows client applications to post commands and
@@ -34,15 +43,27 @@ import org.spine3.client.grpc.Topic;
  */
 public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.ClientService {
 
-    public ClientService() {
-        //TODO:2016-05-25:alexander.yevsyukov: Create a new instance using a Builder instance.
-        // The Builder should contain added BoundedContexts. They expose commands they can handle.
+    private final ImmutableMap<CommandClass, BoundedContext> commandToBoundedContext;
+
+    protected ClientService(Builder builder) {
+        this.commandToBoundedContext = builder.commandToBoundedContextMap().build();
     }
 
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
-        //TODO:2016-05-25:alexander.yevsyukov: Implement. Post the command to corresponding BoundedContext.
-        // If there's no context for the passed command, return error.
+        final CommandClass commandClass = CommandClass.of(request);
+        final BoundedContext boundedContext = commandToBoundedContext.get(commandClass);
+        if (boundedContext == null) {
+            handleUnsupported(request, responseObserver);
+            return;
+        }
+        boundedContext.post(request, responseObserver);
+    }
+
+    private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {
+        final CommandException unsupported = new UnsupportedCommandException(request);
+        log().error("Unsupported command posted to ClientService", unsupported);
+        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
     @Override
@@ -53,5 +74,50 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
     @Override
     public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
         //TODO:2016-05-25:alexander.yevsyukov: Unsubscribe the client from the topic in the corresponding BoundedContext.
+    }
+
+    public static class Builder {
+        private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
+
+        public Builder addBoundedContext(BoundedContext boundedContext) {
+            boundedContexts.add(boundedContext);
+            return this;
+        }
+
+        public Builder removeBoundedContext(BoundedContext boundedContext) {
+            boundedContexts.remove(boundedContext);
+            return this;
+        }
+
+        public ClientService build() {
+            final ClientService result = new ClientService(this);
+            return result;
+        }
+
+        private ImmutableMap.Builder<CommandClass, BoundedContext> commandToBoundedContextMap() {
+            final ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder = ImmutableMap.builder();
+            for (BoundedContext boundedContext : boundedContexts) {
+                addBoundedContext(mapBuilder, boundedContext);
+            }
+            return mapBuilder;
+        }
+
+        private static void addBoundedContext(ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder,
+                                              BoundedContext boundedContext) {
+            for (CommandClass commandClass : boundedContext.getCommandBus().getSupportedCommandClasses()) {
+                mapBuilder.put(commandClass, boundedContext);
+            }
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ClientService.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

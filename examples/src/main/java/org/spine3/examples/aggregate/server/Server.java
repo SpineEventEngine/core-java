@@ -93,6 +93,9 @@ public class Server {
     private void initBoundedContext() {
         // Register repository with the bounded context. This will register it in Command Bus too.
         final OrderRepository repository = new OrderRepository(boundedContext);
+
+        //TODO:2016-05-25:alexander.yevsyukov: Make this operation in BoundedContext if a repository
+        // does not have a storage assigned upon registration.
         repository.initStorage(storageFactory);
 
         boundedContext.register(repository);
@@ -104,7 +107,7 @@ public class Server {
     /**
      * Closes the Bounded Context and stops the gRPC server.
      */
-    public void stop() throws Exception {
+    public void shutdown() throws Exception {
         boundedContext.close();
         grpcServer.shutdown();
     }
@@ -122,14 +125,15 @@ public class Server {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                System.err.println("Shutting down " + getClass().getName() + "  since JVM is shutting down...");
+                final String serverClass = getClass().getName();
+                System.err.println("Shutting down " + serverClass + "  since JVM is shutting down...");
                 try {
-                    server.stop();
+                    server.shutdown();
                 } catch (Exception e) {
                     //noinspection CallToPrintStackTrace
                     e.printStackTrace(System.err);
                 }
-                System.err.println("Server shut down.");
+                System.err.println(serverClass + " shut down.");
             }
         }));
     }

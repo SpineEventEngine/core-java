@@ -20,11 +20,10 @@
 package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
@@ -50,6 +50,7 @@ import org.spine3.validate.options.ConstraintViolation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.add;
@@ -220,14 +221,14 @@ public class CommandBus implements AutoCloseable {
         if (isMultitenant() && isDefault(namespace)) {
             final CommandException noNamespace = InvalidCommandException.onMissingNamespace(command);
             commandStore.store(command, noNamespace.getError());
-            responseObserver.onError(invalidArgumentWithCause(noNamespace));
+            responseObserver.onError(Statuses.invalidArgumentWithCause(noNamespace));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
             final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
             commandStore.store(command, invalidCommand.getError());
-            responseObserver.onError(invalidArgumentWithCause(invalidCommand));
+            responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
             return false;
         }
         return true;
@@ -236,7 +237,7 @@ public class CommandBus implements AutoCloseable {
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(command);
         commandStore.store(command, unsupported.getError());
-        responseObserver.onError(invalidArgumentWithCause(unsupported));
+        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
     private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
@@ -278,13 +279,6 @@ public class CommandBus implements AutoCloseable {
         commandStatusService.setToError(id, commandExpiredError(msg));
     }
 
-    private static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
-        final StatusRuntimeException result = Status.INVALID_ARGUMENT
-                .withCause(exception)
-                .asRuntimeException();
-        return result;
-    }
-
     /**
      * Checks if a command is supported by the Command Bus.
      *
@@ -298,6 +292,12 @@ public class CommandBus implements AutoCloseable {
         final boolean handlerRegistered = isHandlerRegistered(commandClass);
         final boolean isSupported = dispatcherRegistered || handlerRegistered;
         return isSupported;
+    }
+
+    public Set<CommandClass> getSupportedCommandClasses() {
+        final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
+                                                    handlerRegistry.getCommandClasses());
+        return result;
     }
 
     private boolean isMultitenant() {
