@@ -19,17 +19,12 @@
  */
 package org.spine3.examples.aggregate.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -59,28 +54,10 @@ public class Server {
 
         this.boundedContext = BoundedContext.newBuilder()
                                             .setStorageFactory(storageFactory)
-                                            .setCommandBus(createCommandBus(storageFactory))
-                                            .setEventBus(createEventBus(storageFactory))
                                             .build();
 
         this.grpcServer = createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
     }
-
-    private static CommandBus createCommandBus(StorageFactory storageFactory) {
-        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-        final CommandBus commandBus = CommandBus.newInstance(store);
-        return commandBus;
-    }
-
-    private static EventBus createEventBus(StorageFactory storageFactory) {
-        final EventStore eventStore = EventStore.newBuilder()
-                                                .setStreamExecutor(MoreExecutors.directExecutor())
-                                                .setStorage(storageFactory.createEventStorage())
-                                                .setLogger(EventStore.log())
-                                                .build();
-        return EventBus.newInstance(eventStore);
-    }
-
 
     private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
         final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
