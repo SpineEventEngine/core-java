@@ -42,7 +42,7 @@ public class QueryParameters {
      * @return parsed instance
      * @throws IllegalArgumentException in case of not well formed argument value
      */
-    public static QueryParameter of(String queryParameter) {
+    public static QueryParameter parse(String queryParameter) {
         final int separatorIndex = queryParameter.indexOf(SEPARATOR);
 
         if (separatorIndex == -1) {

@@ -198,7 +198,7 @@ import org.spine3.net.Url.Record.Schema;
         final String[] queries = queriesString.split(QUERIES_SEPARATOR);
         for (String query : queries) {
 
-            final QueryParameter param = QueryParameters.of(query);
+            final QueryParameter param = QueryParameters.parse(query);
             record.addQuery(param);
         }
     }

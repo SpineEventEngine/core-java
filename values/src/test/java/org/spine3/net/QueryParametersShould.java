@@ -37,7 +37,7 @@ public class QueryParametersShould {
     @Test
     public void fail_on_wrong_queries() {
         try {
-            QueryParameters.of("123");
+            QueryParameters.parse("123");
             fail();
         } catch (IllegalArgumentException ignored) {
         }
@@ -50,7 +50,7 @@ public class QueryParametersShould {
 
         final String query = key + '=' + value;
 
-        final QueryParameter parameter = QueryParameters.of(query);
+        final QueryParameter parameter = QueryParameters.parse(query);
 
         assertEquals(key, parameter.getKey());
         assertEquals(value, parameter.getValue());
