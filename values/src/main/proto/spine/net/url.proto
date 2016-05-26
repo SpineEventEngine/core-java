@@ -7,6 +7,10 @@ option java_multiple_files = true;
 option java_package = "org.spine3.net";
 option java_outer_classname = "UrlProto";
 
+// Protobuf definition for URL.
+//
+// Can be defined in raw string form or as a structurized parsed record. Validity of URL is not guaranteed,
+// if the raw form is used.
 message Url {
     oneof value {
         string raw = 1;
@@ -77,8 +81,10 @@ message Url {
         // Url query parameter type. Should look like key=value after converting to string
         message QueryParameter {
 
+            // Parameter name
             string key = 1;
 
+            // Parameter value
             string value = 2;
         }
     }
