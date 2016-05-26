@@ -54,7 +54,6 @@ public class QueryParameters {
                                                     .setKey(key)
                                                     .setValue(value)
                                                     .build();
-
         return result;
     }
 
