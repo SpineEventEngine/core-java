@@ -20,12 +20,24 @@
 
 package org.spine3.net;
 
+/**
+ * Utility class, which simplifies working with {@link Url}.
+ * <p>
+ * <p>Provides all necessary operations, such as conversion and validation.
+ */
 @SuppressWarnings("UtilityClass")
 public class Urls {
 
     private Urls() {
     }
 
+    /**
+     * Converts {@link Url} with raw data into the instance with structurized record.
+     *
+     * @param rawUrl {@link Url} with raw String
+     * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
+     * @throws IllegalArgumentException if the argument already has a structurized record
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static Url of(Url rawUrl) {
         if (rawUrl.getValueCase() != Url.ValueCase.RAW) {
@@ -41,6 +53,12 @@ public class Urls {
         return url;
     }
 
+    /**
+     * Converts String URL representation into {@link Url} instance.
+     *
+     * @param rawUrlString raw URL String
+     * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
+     */
     public static Url of(String rawUrlString) {
         final Url.Builder builder = Url.newBuilder();
         builder.setRaw(rawUrlString);
@@ -48,12 +66,30 @@ public class Urls {
         return rawUrl;
     }
 
+    /**
+     * Performs String conversion for given {@link Url}.
+     *
+     * @param url valid {@link Url} instance
+     * @return String representation of the given URL
+     * @throws IllegalArgumentException if the argument is invalid
+     */
     public static String toString(Url url) {
         validate(url);
         final String stringUrl = UrlPrinter.printToString(url);
         return stringUrl;
     }
 
+    /**
+     * Validates {@link Url} instance.
+     * <p>
+     * <p>{@link Url} with raw String is always valid.
+     * <br>{@link Url} with not set value is always invalid.
+     * {@link Url} can not have empty host. {@link org.spine3.net.Url.Record.Authorization} can't have
+     * password without having login.
+     *
+     * @param url {@link Url} instance
+     * @throws IllegalArgumentException in case of invalid {@link Url}
+     */
     @SuppressWarnings("TypeMayBeWeakened")
     public static void validate(Url url) {
         if (url.getValueCase() == Url.ValueCase.VALUE_NOT_SET) {
