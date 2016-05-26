@@ -22,7 +22,7 @@ package org.spine3.net;
 
 /**
  * Utility class, which simplifies working with {@link Url}.
- * <p>
+ *
  * <p>Provides all necessary operations, such as conversion and validation.
  */
 @SuppressWarnings("UtilityClass")
@@ -81,9 +81,9 @@ public class Urls {
 
     /**
      * Validates {@link Url} instance.
-     * <p>
+     *
      * <p>{@link Url} with raw String is always valid.
-     * <br>{@link Url} with not set value is always invalid.
+     * {@link Url} with not set value is always invalid.
      * {@link Url} can not have empty host. {@link org.spine3.net.Url.Record.Authorization} can't have
      * password without having login.
      *
