@@ -40,7 +40,7 @@ message Url {
         // Relative path to desired resource (e.g. "/index" or "/js/app.js")
         string path = 5;
 
-        // A set of key-value pairs (?key1=value1&key2=value2)
+        // A list of key-value pairs (?key1=value1&key2=value2)
         repeated QueryParameter query = 6;
 
         // Sub-resource (e.g. "#article")
