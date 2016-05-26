@@ -56,6 +56,8 @@ public class Urls {
     /**
      * Converts String URL representation into {@link Url} instance.
      *
+     * <p>Does not perform any additional validation of the value, except calling {@link Urls#validate(Url)}.
+     *
      * @param rawUrlString raw URL String
      * @return {@link Url} with {@link org.spine3.net.Url.Record} instance
      */
