@@ -13,7 +13,9 @@ message Url {
         Record record = 2;
     }
 
-    // Structurized record
+    // Structurized record.
+    // This type represents parsed and structurized URL according to standards. Using this type can help
+    // avoiding the usage of invalid URLs and operation concrete URL attributes.
     message Record {
 
         // Application layer protocol
@@ -33,7 +35,7 @@ message Url {
         string path = 5;
 
         // A set of key-value pairs (?key1=value1&key2=value2)
-        repeated string query = 6;
+        repeated QueryParameter query = 6;
 
         // Sub-resource (e.g. "#article")
         string fragment = 7;
@@ -70,6 +72,14 @@ message Url {
 
             // Corresponding password
             string password = 2;
+        }
+
+        // Url query parameter type. Should look like key=value after converting to string
+        message QueryParameter {
+
+            string key = 1;
+
+            string value = 2;
         }
     }
 }

@@ -20,8 +20,9 @@
 
 package org.spine3.net;
 
-import com.google.protobuf.ProtocolStringList;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -126,19 +127,31 @@ public class UrlParserShould {
 
     @Test
     public void parse_queries() {
-        final String query1 = "key1=value2";
-        final String query2 = "key3=value4";
+        final String key1 = "key1";
+        final String key2 = "key2";
+
+        final String value1 = "value1";
+        final String value2 = "value2";
+
+        final String query1 = key1 + '=' + value1;
+        final String query2 = key2 + '=' + value2;
 
         final String rawUrl = HOST + '?' + query1 + '&' + query2;
 
         final Url url = new UrlParser(rawUrl).parse();
 
-        final ProtocolStringList queries = url.getRecord()
-                                              .getQueryList();
+        final List<Url.Record.QueryParameter> queries = url.getRecord()
+                                                             .getQueryList();
 
         assertEquals(2, queries.size());
-        assertEquals(query1, queries.get(0));
-        assertEquals(query2, queries.get(1));
+
+        final Url.Record.QueryParameter queryInstance1 = queries.get(0);
+        final Url.Record.QueryParameter queryInstance2 = queries.get(1);
+
+        assertEquals(key1, queryInstance1.getKey());
+        assertEquals(value1, queryInstance1.getValue());
+        assertEquals(key2, queryInstance2.getKey());
+        assertEquals(value2, queryInstance2.getValue());
     }
 
     @Test
@@ -152,8 +165,8 @@ public class UrlParserShould {
         assertEquals("password", record.getAuth().getPassword());
         assertEquals("spine3.org", record.getHost());
         assertEquals("index", record.getPath());
-        assertEquals("auth=none", record.getQuery(0));
-        assertEquals("locale=us", record.getQuery(1));
+        assertEquals("auth=none", QueryParameters.toString(record.getQuery(0)));
+        assertEquals("locale=us", QueryParameters.toString(record.getQuery(1)));
         assertEquals("fragment9", record.getFragment());
     }
 }

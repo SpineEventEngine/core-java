@@ -21,6 +21,7 @@
 package org.spine3.net;
 
 import org.spine3.net.Url.Record.Protocol;
+import org.spine3.net.Url.Record.QueryParameter;
 
 /* package */ class UrlParser {
 
@@ -157,8 +158,9 @@ import org.spine3.net.Url.Record.Protocol;
 
         final String[] queries = queriesString.split(QUERIES_SEPARATOR);
         for (String query : queries) {
-            // TODO:2016-05-23:mikhail.mikhaylov: Split arguments if needed.
-            record.addQuery(query);
+
+            final QueryParameter param = QueryParameters.of(query);
+            record.addQuery(param);
         }
     }
 

@@ -21,6 +21,9 @@
 package org.spine3.net;
 
 import com.google.protobuf.ProtocolStringList;
+import org.spine3.net.Url.Record.QueryParameter;
+
+import java.util.List;
 
 @SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
 /* package */ class UrlPrinter {
@@ -112,7 +115,7 @@ import com.google.protobuf.ProtocolStringList;
     }
 
     private static void appendQueries(Url.Record record, StringBuilder sb) {
-        final ProtocolStringList queryList = record.getQueryList();
+        final List<QueryParameter> queryList = record.getQueryList();
 
         if (queryList.isEmpty()) {
             return;
@@ -122,7 +125,8 @@ import com.google.protobuf.ProtocolStringList;
 
         final int queriesSize = queryList.size();
         for (int i = 0; i < queriesSize; i++) {
-            sb.append(queryList.get(i));
+            final String stringQuery = QueryParameters.toString(queryList.get(i));
+            sb.append(stringQuery);
             if (i != queriesSize - 1) {
                 sb.append(UrlParser.QUERIES_SEPARATOR);
             }
