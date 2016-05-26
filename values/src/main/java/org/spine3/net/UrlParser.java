@@ -22,7 +22,11 @@ package org.spine3.net;
 
 import org.spine3.net.Url.Record.Protocol;
 import org.spine3.net.Url.Record.QueryParameter;
+import org.spine3.net.Url.Record.Schema;
 
+/**
+ * Parses given URL to {@link Url} instance.
+ */
 /* package */ class UrlParser {
 
     /* package */ static final String PROTOCOL_ENDING = "://";
@@ -40,10 +44,20 @@ import org.spine3.net.Url.Record.QueryParameter;
     private Url.Record.Builder record;
     private String unProcessedInput;
 
+    /**
+     * Creates an instance of {@link UrlParser} with given String URL to parse.
+     *
+     * @param url String URL to parse
+     */
     /* package */ UrlParser(String url) {
         this.originalUrl = url;
     }
 
+    /**
+     * Starts parsing.
+     *
+     * @return {@link Url} instance
+     */
     /* package */ Url parse() {
         setupStartingState();
 
@@ -60,25 +74,34 @@ import org.spine3.net.Url.Record.QueryParameter;
         return result.build();
     }
 
+    /**
+     * Initializes starting {@link UrlParser} state.
+     */
     private void setupStartingState() {
         record = Url.Record.newBuilder();
         unProcessedInput = originalUrl;
     }
 
+    /**
+     * Parses protocol from remembered URL String adn saves it to the state.
+     * <p>
+     * <p><li>If no suitable protocol found, saves UNDEFINED value.</li>
+     * <li>If some value is fount, but the schema is unknown, saves raw value.</li>
+     */
     private void parseProtocol() {
         final Protocol.Builder protocolBuilder = Protocol.newBuilder();
         final int protocolEndingIndex = unProcessedInput.indexOf(PROTOCOL_ENDING);
         if (protocolEndingIndex == -1) {
-            protocolBuilder.setSchema(Url.Record.Schema.UNDEFINED);
+            protocolBuilder.setSchema(Schema.UNDEFINED);
             record.setProtocol(protocolBuilder);
             return;
         }
         final String protocol = unProcessedInput.substring(0, protocolEndingIndex);
         unProcessedInput = unProcessedInput.substring(protocolEndingIndex + PROTOCOL_ENDING.length());
 
-        final Url.Record.Schema schema = Schemas.of(protocol);
+        final Schema schema = Schemas.of(protocol);
 
-        if (schema == Url.Record.Schema.UNDEFINED) {
+        if (schema == Schema.UNDEFINED) {
             protocolBuilder.setName(protocol);
         } else {
             protocolBuilder.setSchema(schema);
@@ -87,6 +110,9 @@ import org.spine3.net.Url.Record.QueryParameter;
         record.setProtocol(protocolBuilder.build());
     }
 
+    /**
+     * Parses credentials from remembered URL String and saves them to the state.
+     */
     private void parseCredentials() {
         final int credentialsEndingIndex = unProcessedInput.indexOf(CREDENTIALS_ENDING);
         if (credentialsEndingIndex == -1) {
@@ -112,6 +138,9 @@ import org.spine3.net.Url.Record.QueryParameter;
         record.setAuth(auth.build());
     }
 
+    /**
+     * Parses host and port and saves them to the state.
+     */
     private void parseHost() {
         final int hostEndingIndex = unProcessedInput.indexOf(HOST_ENDING);
         final String host;
@@ -135,6 +164,9 @@ import org.spine3.net.Url.Record.QueryParameter;
         }
     }
 
+    /**
+     * Parses fragment and saves it to the state.
+     */
     private void parseFragment() {
         final int fragmentIndex = unProcessedInput.lastIndexOf(FRAGMENT_START);
         if (fragmentIndex == -1) {
@@ -147,6 +179,11 @@ import org.spine3.net.Url.Record.QueryParameter;
         record.setFragment(fragment);
     }
 
+    /**
+     * Parses query parameters and saves them to the state.
+     *
+     * @throws IllegalArgumentException in case of bad-formed parameter
+     */
     private void parseQueries() {
         final int queriesStartIndex = unProcessedInput.indexOf(QUERIES_START);
         if (queriesStartIndex == -1) {
@@ -164,6 +201,9 @@ import org.spine3.net.Url.Record.QueryParameter;
         }
     }
 
+    /**
+     * Parses the URL resource path from the remaining part of URL.
+     */
     private void parsePath() {
         if (unProcessedInput.isEmpty()) {
             return;
