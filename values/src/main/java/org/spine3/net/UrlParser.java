@@ -26,6 +26,8 @@ import org.spine3.net.Url.Record.Schema;
 
 /**
  * Parses given URL to {@link Url} instance.
+ *
+ * @author Mikhail Mikhaylov
  */
 /* package */ class UrlParser {
 

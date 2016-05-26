@@ -25,12 +25,23 @@ import org.spine3.net.Url.Record.Schema;
 
 import java.util.Map;
 
+/**
+ * Utility class for working with {@link Schema}.
+ *
+ * @author Mikhail Mikhaylov
+ */
 @SuppressWarnings("UtilityClass")
 /* package */ class Schemas {
 
     private Schemas() {
     }
 
+    /**
+     * Parses schema from String representation.
+     *
+     * @param value String schema representation.
+     * @return {@link Schema} value
+     */
     /* package */ static Schema of(String value) {
         final String lowercaseValue = value.toLowerCase();
         if (!stringSchemas.containsKey(lowercaseValue)) {
@@ -39,6 +50,12 @@ import java.util.Map;
         return stringSchemas.get(lowercaseValue);
     }
 
+    /**
+     * Obtains the lowercase schema name.
+     *
+     * @param schema {@link Schema} value
+     * @return String name
+     */
     /* package */ static String getLowerCaseName(Schema schema) {
         return schema.name().toLowerCase();
     }

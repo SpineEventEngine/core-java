@@ -20,17 +20,29 @@
 
 package org.spine3.net;
 
-import com.google.protobuf.ProtocolStringList;
 import org.spine3.net.Url.Record.QueryParameter;
 
 import java.util.List;
 
+/**
+ * Performs conversion of URLs to String.
+ *
+ * @author Mikhail Mikhaylov
+ */
 @SuppressWarnings({"UtilityClass", "TypeMayBeWeakened"})
 /* package */ class UrlPrinter {
 
     private UrlPrinter() {
     }
 
+    /**
+     * Converts {@link Url} to String.
+     *
+     * <p>Does not perform any validation.
+     *
+     * @param url already valid {@link Url} instance
+     * @return String {@link Url} value
+     */
     /* package */ static String printToString(Url url) {
         if (url.getValueCase() == Url.ValueCase.RAW) {
             return url.getRaw();

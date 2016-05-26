@@ -24,6 +24,8 @@ import org.spine3.net.Url.Record.QueryParameter;
 
 /**
  * The utility class, which helps performing URL query parameters parsing and String conversion.
+ *
+ * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
 public class QueryParameters {

@@ -24,6 +24,8 @@ package org.spine3.net;
  * Utility class, which simplifies working with {@link Url}.
  *
  * <p>Provides all necessary operations, such as conversion and validation.
+ *
+ * @author Mikhail Mikhaylov
  */
 @SuppressWarnings("UtilityClass")
 public class Urls {
