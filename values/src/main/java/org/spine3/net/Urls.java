@@ -107,7 +107,7 @@ public class Urls {
         }
 
         final Url.Record.Authorization auth = record.getAuth();
-        final String user = auth.getUser();
+        final String user = auth.getUserName();
         final String password = auth.getPassword();
 
         if (user.isEmpty() && !password.isEmpty()) {

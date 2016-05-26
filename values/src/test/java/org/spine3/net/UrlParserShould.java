@@ -82,13 +82,13 @@ public class UrlParserShould {
                                                          .getRecord();
         final String user1 = record1
                 .getAuth()
-                .getUser();
+                .getUserName();
         assertEquals(userName, user1);
 
         final Url.Record record2 = new UrlParser(userPasswordUrl).parse()
                                                                  .getRecord();
         final Url.Record.Authorization auth2 = record2.getAuth();
-        final String user2 = auth2.getUser();
+        final String user2 = auth2.getUserName();
         assertEquals(userName, user2);
         assertEquals(password, auth2.getPassword());
     }
@@ -161,7 +161,7 @@ public class UrlParserShould {
         final Url.Record record = new UrlParser(rawUrl).parse().getRecord();
 
         assertEquals(Url.Record.Schema.HTTPS, record.getProtocol().getSchema());
-        assertEquals("user", record.getAuth().getUser());
+        assertEquals("user", record.getAuth().getUserName());
         assertEquals("password", record.getAuth().getPassword());
         assertEquals("spine3.org", record.getHost());
         assertEquals("index", record.getPath());

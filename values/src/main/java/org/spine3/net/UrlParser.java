@@ -100,13 +100,13 @@ import org.spine3.net.Url.Record.QueryParameter;
 
         final int credentialsSeparatorIndex = credential.indexOf(CREDENTIALS_SEPARATOR);
         if (credentialsSeparatorIndex != -1) {
-            final String user = credential.substring(0, credentialsSeparatorIndex);
+            final String userName = credential.substring(0, credentialsSeparatorIndex);
             final String password = credential.substring(
                     credentialsSeparatorIndex + CREDENTIALS_SEPARATOR.length());
             auth.setPassword(password);
-            auth.setUser(user);
+            auth.setUserName(userName);
         } else {
-            auth.setUser(credential);
+            auth.setUserName(credential);
         }
 
         record.setAuth(auth.build());

@@ -36,7 +36,7 @@ public class UrlPrinterShould {
 
     private static final Authorization AUTH =
             Authorization.newBuilder()
-                         .setUser("admin")
+                         .setUserName("admin")
                          .setPassword("root")
                          .build();
 
@@ -105,7 +105,7 @@ public class UrlPrinterShould {
     public void print_url_with_broken_auth() {
         final Record record = Record.newBuilder(FULL_RECORD)
                                     .setAuth(Authorization.newBuilder(AUTH)
-                                                          .setUser("")
+                                                          .setUserName("")
                                                           .build())
                                     .build();
 

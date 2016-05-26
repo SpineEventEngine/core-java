@@ -74,13 +74,13 @@ import java.util.List;
         }
 
         final Url.Record.Authorization auth = record.getAuth();
-        final String user = auth.getUser();
+        final String userName = auth.getUserName();
         final String password = auth.getPassword();
 
-        if (user.isEmpty()) {
+        if (userName.isEmpty()) {
             return;
         }
-        sb.append(user);
+        sb.append(userName);
 
         if (!password.isEmpty()) {
             sb.append(UrlParser.CREDENTIALS_SEPARATOR)
