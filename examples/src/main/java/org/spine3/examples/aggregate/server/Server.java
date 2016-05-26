@@ -38,87 +38,51 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  * @author Alexander Litus
  */
 public class Server {
+
+    private final ClientService clientService;
     private final BoundedContext boundedContext;
-    private final EventSubscriber eventLogger = new EventLogger();
-    private final io.grpc.Server grpcServer;
 
-    /**
-     * @param storageFactory the {@link StorageFactory} used to create and set up storages.
-     */
     public Server(StorageFactory storageFactory) {
+        // Create a bounded context.
         this.boundedContext = BoundedContext.newBuilder()
-                                            .setStorageFactory(storageFactory)
-                                            .build();
+                                                            .setStorageFactory(storageFactory)
+                                                            .build();
+        // Create and register a repository with the bounded context.
+        final OrderRepository repository = new OrderRepository(boundedContext);
+        boundedContext.register(repository);
 
-        this.grpcServer = ClientService.createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
+        // Subscribe an event subscriber in the bounded context.
+        final EventSubscriber eventLogger = new EventLogger();
+        boundedContext.getEventBus().subscribe(eventLogger);
+
+        // Create a client service with this bounded context.
+        this.clientService = ClientService.newBuilder()
+                                          .addBoundedContext(boundedContext)
+                                          .setPort(DEFAULT_CLIENT_SERVICE_PORT)
+                                          .build();
+    }
+
+    public void start() throws IOException {
+        clientService.start();
+    }
+
+    public void awaitTermination() throws InterruptedException {
+        clientService.awaitTermination();
+    }
+
+    public void shutdown() throws Exception {
+        clientService.shutdown();
+        boundedContext.close();
     }
 
     /**
      * The entry point of the server application.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-
-        final Server server = new Server(storageFactory);
+        final Server server = new Server(InMemoryStorageFactory.getInstance());
         server.start();
-        server.awaitTermination();
-    }
-
-    /**
-     * Starts the server.
-     *
-     * @throws IOException if unable to bind.
-     */
-    public void start() throws IOException {
-        initBoundedContext();
-
-        grpcServer.start();
-        addShutdownHook(this);
         log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
-    }
-
-    private void initBoundedContext() {
-        // Register repository with the bounded context. This will register it in Command Bus too.
-        final OrderRepository repository = new OrderRepository(boundedContext);
-
-        boundedContext.register(repository);
-
-        // Register event subscribers.
-        boundedContext.getEventBus().subscribe(eventLogger);
-    }
-
-    /**
-     * Closes the Bounded Context and stops the gRPC server.
-     */
-    public void shutdown() throws Exception {
-        boundedContext.close();
-        grpcServer.shutdown();
-    }
-
-    /**
-     * Waits for the server to become terminated.
-     */
-    public void awaitTermination() throws InterruptedException {
-        grpcServer.awaitTermination();
-    }
-
-    private static void addShutdownHook(final Server server) {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-            @SuppressWarnings("UseOfSystemOutOrSystemErr")
-            @Override
-            public void run() {
-                final String serverClass = getClass().getName();
-                System.err.println("Shutting down " + serverClass + "  since JVM is shutting down...");
-                try {
-                    server.shutdown();
-                } catch (Exception e) {
-                    //noinspection CallToPrintStackTrace
-                    e.printStackTrace(System.err);
-                }
-                System.err.println(serverClass + " shut down.");
-            }
-        }));
+        server.awaitTermination();
     }
 
     private static Logger log() {
