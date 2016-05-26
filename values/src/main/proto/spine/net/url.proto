@@ -70,7 +70,6 @@ message Url {
 
         // Pair of the username (email commonly) and password (optional) (e.g. "user:password@")
         message Authorization {
-
             // User name
             string user_name = 1;
 
@@ -80,7 +79,6 @@ message Url {
 
         // Url query parameter type. Should look like key=value after converting to string
         message QueryParameter {
-
             // Parameter name
             string key = 1;
 
