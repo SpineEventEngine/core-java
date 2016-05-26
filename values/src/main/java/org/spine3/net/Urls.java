@@ -82,10 +82,11 @@ public class Urls {
     /**
      * Validates {@link Url} instance.
      *
-     * <p>{@link Url} with raw String is always valid.
-     * {@link Url} with not set value is always invalid.
-     * {@link Url} can not have empty host. {@link org.spine3.net.Url.Record.Authorization} can't have
-     * password without having login.
+     * <p><li>{@link Url} with raw String is always valid.</li>
+     * <li>{@link Url} with not set value is always invalid.</li>
+     * <li>{@link Url} can not have empty host.</li>
+     * <li>{@link org.spine3.net.Url.Record.Authorization} can't have
+     * password without having login.</li>
      *
      * @param url {@link Url} instance
      * @throws IllegalArgumentException in case of invalid {@link Url}
