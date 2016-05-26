@@ -60,6 +60,26 @@ public class QueryParameters {
     }
 
     /**
+     * Builds {@link QueryParameter} from given key-value pair.
+     *
+     * <p>Performs simple validation
+     *
+     * @param key   {@link QueryParameter} key
+     * @param value {@link QueryParameter} value
+     * @return {@link QueryParameter} instance
+     */
+    public static QueryParameter of(String key, String value) {
+        if (key.isEmpty() || value.isEmpty()) {
+            throw new IllegalArgumentException("Query parameter can not contain empty values.");
+        }
+        final QueryParameter result = QueryParameter.newBuilder()
+                                                    .setKey(key)
+                                                    .setValue(value)
+                                                    .build();
+        return result;
+    }
+
+    /**
      * Performs String conversion of {@link QueryParameter}.
      *
      * @param param {@link QueryParameter} instance

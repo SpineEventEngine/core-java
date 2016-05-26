@@ -41,6 +41,18 @@ public class QueryParametersShould {
             fail();
         } catch (IllegalArgumentException ignored) {
         }
+
+        try {
+            QueryParameters.of("", "123");
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        try {
+            QueryParameters.of("123", "");
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 
     @Test
@@ -50,12 +62,14 @@ public class QueryParametersShould {
 
         final String query = key + '=' + value;
 
-        final QueryParameter parameter = QueryParameters.parse(query);
+        final QueryParameter parameter1 = QueryParameters.parse(query);
+        final QueryParameter parameter2 = QueryParameters.of(key, value);
 
-        assertEquals(key, parameter.getKey());
-        assertEquals(value, parameter.getValue());
+        assertEquals(key, parameter1.getKey());
+        assertEquals(value, parameter1.getValue());
 
-        assertEquals(query, QueryParameters.toString(parameter));
+        assertEquals(query, QueryParameters.toString(parameter1));
+        assertEquals(query, QueryParameters.toString(parameter2));
     }
 
     @Test
