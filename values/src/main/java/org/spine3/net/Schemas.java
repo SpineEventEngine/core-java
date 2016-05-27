@@ -42,7 +42,7 @@ import java.util.Map;
      * @param value String schema representation.
      * @return {@link Schema} value
      */
-    /* package */ static Schema of(String value) {
+    /* package */ static Schema parse(String value) {
         final String lowercaseValue = value.toLowerCase();
         if (!stringSchemas.containsKey(lowercaseValue)) {
             return Schema.UNDEFINED;

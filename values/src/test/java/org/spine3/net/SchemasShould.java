@@ -34,13 +34,13 @@ public class SchemasShould {
 
     @Test
     public void return_valid_schemas_on_valid_args() {
-        assertEquals(Url.Record.Schema.DNS, Schemas.of("dns"));
-        assertEquals(Url.Record.Schema.DNS, Schemas.of("DNS"));
+        assertEquals(Url.Record.Schema.DNS, Schemas.parse("dns"));
+        assertEquals(Url.Record.Schema.DNS, Schemas.parse("DNS"));
     }
 
     @Test
     public void return_undefined_schema_on_invalid_args() {
-        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.of("someunknownschema"));
+        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.parse("someunknownschema"));
     }
 
     @Test

@@ -101,7 +101,7 @@ import org.spine3.net.Url.Record.Schema;
         final String protocol = unProcessedInput.substring(0, protocolEndingIndex);
         unProcessedInput = unProcessedInput.substring(protocolEndingIndex + PROTOCOL_ENDING.length());
 
-        final Schema schema = Schemas.of(protocol);
+        final Schema schema = Schemas.parse(protocol);
 
         if (schema == Schema.UNDEFINED) {
             protocolBuilder.setName(protocol);
