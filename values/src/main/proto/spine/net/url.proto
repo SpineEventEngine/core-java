@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package spine.net;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.net";
+option java_outer_classname = "UrlProto";
+
+// Protobuf definition for URL.
+//
+// Can be defined in raw string form or as a structurized parsed record. Validity of URL is not guaranteed,
+// if the raw form is used.
+message Url {
+    oneof value {
+        string raw = 1;
+        Record record = 2;
+    }
+
+    // Structurized record.
+    //
+    // This type represents URL according to RFC 3986.
+    // Using this type makes it easier to operate concrete URL attributes.
+    // Please see https://tools.ietf.org/html/rfc3986.
+    message Record {
+
+        // Application layer protocol
+        Protocol protocol = 1;
+
+        // User's email and password (both optional)
+        Authorization auth = 2;
+
+        // Domain name
+        string host = 3;
+
+        // Server's port (e.g. :8080)
+        // We leave port as String, because port 0 is hypothetically possible to use
+        string port = 4;
+
+        // Relative path to desired resource (e.g. "/index" or "/js/app.js")
+        string path = 5;
+
+        // A list of key-value pairs (?key1=value1&key2=value2)
+        repeated QueryParameter query = 6;
+
+        // Sub-resource (e.g. "#article")
+        string fragment = 7;
+
+        // Application layer protocol
+        message Protocol {
+            oneof protocol {
+                // Most often used schemas
+                Schema schema = 1;
+
+                // Some other protocol
+                string name = 2;
+            }
+        }
+
+        // Most often used application layer procotols.
+        enum Schema {
+            UNDEFINED = 0;
+            HTTP = 1;
+            HTTPS = 2;
+            FTP = 3;
+            SSL = 4;
+            SSH = 5;
+            DNS = 6;
+            SOAP = 7;
+            RTP = 8;
+        }
+
+        // Pair of the username (email commonly) and password (optional) (e.g. "user:password@")
+        message Authorization {
+            // User name
+            string user_name = 1;
+
+            // Corresponding password
+            string password = 2;
+        }
+
+        // Url query parameter type. Should look like key=value after converting to string
+        message QueryParameter {
+            // Parameter name
+            string key = 1;
+
+            // Parameter value
+            string value = 2;
+        }
+    }
+}
+
