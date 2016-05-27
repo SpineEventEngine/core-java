@@ -26,7 +26,6 @@ import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
@@ -34,8 +33,8 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.IdFunction;
+import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
@@ -61,11 +60,10 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
 import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
@@ -137,17 +135,6 @@ public class BoundedContextShould {
         final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
-    }
-
-    @Test
-    public void post_commands_to_CommandBus() {
-        final TestResponseObserver responseObserver = new TestResponseObserver();
-        final CommandBus commandBus = boundedContext.getCommandBus();
-
-        final Command cmd = createProjectCmd();
-        boundedContext.post(cmd, responseObserver);
-
-        verify(commandBus, times(1)).post(cmd, responseObserver);
     }
 
     @Test
@@ -234,13 +221,9 @@ public class BoundedContextShould {
 
         @Apply
         private void event(ProjectCreated event) {
-
-            final Project newState = Project.newBuilder(getState())
+            getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED)
-                    .build();
-
-            incrementState(newState);
+                    .setStatus(Project.Status.CREATED);
 
             isProjectCreatedEventApplied = true;
         }
@@ -252,13 +235,10 @@ public class BoundedContextShould {
 
         @Apply
         private void event(ProjectStarted event) {
-
-            final Project newState = Project.newBuilder(getState())
+            getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)
                     .build();
-
-            incrementState(newState);
 
             isProjectStartedEventApplied = true;
         }
@@ -343,8 +323,20 @@ public class BoundedContextShould {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_repository_has_storage_assigned_upon_registration() {
-        boundedContext.register(new ProjectAggregateRepository(boundedContext));
+    @Test
+    public void assign_storage_during_registration_if_repository_does_not_have_storage() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
+        assertTrue(repository.storageAssigned());
+    }
+
+    @Test
+    public void do_not_change_storage_during_registration_if_a_repository_has_one() {
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
+        repository.initStorage(storageFactory);
+
+        final Repository spy = spy(repository);
+        boundedContext.register(repository);
+        verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 }

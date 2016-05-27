@@ -56,6 +56,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
     }
 
+    /* package */ Set<CommandClass> getCommandClasses() {
+        return dispatchers.keySet();
+    }
+
     /**
      * Ensures that the dispatcher forwards at least one command.
      *
@@ -112,11 +116,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
                 "Another dispatcher {} found when trying to unregister dispatcher {} for the command class {}." +
                 " Dispatcher for the command class {} will not be unregistered.",
                 registeredDispatcher, dispatcher, commandClass, commandClass);
-    }
-
-    /* package */ boolean hasDispatcherFor(Message command) {
-        final boolean result = hasDispatcherFor(CommandClass.of(command));
-        return result;
     }
 
     /* package */ boolean hasDispatcherFor(CommandClass commandClass) {

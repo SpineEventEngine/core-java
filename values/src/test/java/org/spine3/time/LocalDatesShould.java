@@ -18,18 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.examples.aggregate;
+package org.spine3.time;
 
-/**
- * Constant values shared between client and server.
- *
- * @author Alexander Yevsyukov
- */
-public interface ConnectionConstants {
+import org.junit.Test;
 
-    /**
-     * The port on which the server of {@link org.spine3.client.grpc.ClientServiceGrpc.ClientService} runs.
-     */
-    int DEFAULT_CLIENT_SERVICE_PORT = 50051;
+import java.util.Calendar;
 
+import static org.junit.Assert.assertEquals;
+
+public class LocalDatesShould {
+
+    @Test
+    public void obtain_current_date() {
+        final LocalDate today = LocalDates.today();
+
+        final Calendar calendar = Calendar.getInstance();
+        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
+    }
 }

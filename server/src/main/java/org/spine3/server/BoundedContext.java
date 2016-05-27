@@ -20,6 +20,7 @@
 package org.spine3.server;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -30,9 +31,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.grpc.Topic;
-import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
@@ -44,16 +42,17 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
-import org.spine3.server.storage.AggregateStorage;
-import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.validate.Validate;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Responses.isOk;
-import static org.spine3.client.grpc.ClientServiceGrpc.ClientService;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -64,7 +63,11 @@ import static org.spine3.protobuf.Values.newStringValue;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements ClientService, IntegrationEventSubscriber, AutoCloseable {
+public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable {
+    /**
+     * The default name for a {@code BoundedContext}.
+     */
+    public static final String DEFAULT_NAME = "Main";
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -139,6 +142,11 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
     }
 
     /**
+     * Obtains a name of the bounded context.
+     *
+     * <p>The name allows to identify a bounded context if a multi-context application.
+     * If the name was not defined, during the building process, the context would get {@link #DEFAULT_NAME}.
+     *
      * @return the name of this {@code BoundedContext}
      */
     public String getName() {
@@ -161,20 +169,15 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
     }
 
     /**
-     * Registers the passed repository with the BoundedContext.
+     * Registers the passed repository with the {@code BoundedContext}.
      *
-     * <p>The context creates and assigns a storage depending on the type of the passed repository.
-     *
-     * <p>For instances of {@link AggregateRepository} an instance of {@link AggregateStorage} is created
-     * and assigned.
-     *
-     * <p>For other types of repositories an instance of {@link EntityStorage} is
-     * created and assigned.
+     * <p>If the repository does not have a storage assigned, it will be initialized
+     * using the {@code StorageFactory} associated with this bounded context.
      *
      * @param repository the repository to register
      * @param <I>        the type of IDs used in the repository
      * @param <E>        the type of entities or aggregates
-     * @throws IllegalArgumentException if the passed repository has no storage assigned
+     * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
@@ -188,10 +191,9 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         }
     }
 
-    private static <I, E extends Entity<I, ?>> void checkStorageAssigned(Repository<I, E> repository) {
+    private void checkStorageAssigned(Repository repository) {
         if (!repository.storageAssigned()) {
-            throw new IllegalArgumentException("The repository " + repository + " has no assigned storage. " +
-                    "Please call Repository.initStorage() before registration with BoundedContext.");
+            repository.initStorage(this.storageFactory);
         }
     }
 
@@ -205,14 +207,6 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         }
         repository.close();
     }
-
-    @Override
-    public void post(Command command, StreamObserver<Response> responseObserver) {
-        checkNotNull(command);
-        checkNotNull(responseObserver);
-        commandBus.post(command, responseObserver);
-    }
-
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
@@ -260,18 +254,6 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
         return result.build();
     }
 
-    @Override
-    public void subscribe(Topic request, StreamObserver<Event> responseObserver) {
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
-    }
-
-    @Override
-    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
-    }
-
     /**
      * Convenience method for obtaining instance of {@link CommandBus}.
      *
@@ -299,22 +281,35 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
     public static class Builder {
-        /**
-         * The default name of {@code BoundedContext}.
-         */
-        public static final String DEFAULT_NAME = "Main";
 
-        private String name;
+        private String name = DEFAULT_NAME;
         private StorageFactory storageFactory;
+        private CommandStore commandStore;
         private CommandBus commandBus;
+        private EventStore eventStore;
+        private Executor eventStoreStreamExecutor;
         private EventBus eventBus;
         private boolean multitenant;
 
+        /**
+         * Sets the name for a new bounded context.
+         *
+         * <p>If the name is not defined in the builder, the context will get {@link #DEFAULT_NAME}.
+         *
+         * <p>It is the responsibility of an application developer to provide meaningful and unique
+         * names for bounded contexts. The framework does not check for duplication of names.
+         *
+         * @param name a name for a new bounded context. Cannot be null, empty, or blank
+         */
         public Builder setName(String name) {
-            this.name = name;
+            this.name = Validate.checkNotEmptyOrBlank(name, "name");
             return this;
         }
 
+        /**
+         * Returns the previously set name or {@link #DEFAULT_NAME}
+         * if the name was not explicitly set.
+         */
         public String getName() {
             return name;
         }
@@ -333,8 +328,19 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             return this;
         }
 
+        @Nullable
         public StorageFactory getStorageFactory() {
             return storageFactory;
+        }
+
+        public Builder setCommandStore(CommandStore commandStore) {
+            this.commandStore = checkNotNull(commandStore);
+            return this;
+        }
+
+        @Nullable
+        public CommandStore getCommandStore() {
+            return this.commandStore;
         }
 
         public Builder setCommandBus(CommandBus commandBus) {
@@ -342,8 +348,52 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             return this;
         }
 
+        @Nullable
         public CommandBus getCommandBus() {
             return commandBus;
+        }
+
+        /**
+         * Specifies {@code EventStore} to be used when creating new {@code EventBus}.
+         *
+         * <p>This method can be called if {@link #setEventStoreStreamExecutor(Executor)}
+         * was not called before.
+         *
+         * @see #setEventStoreStreamExecutor(Executor)
+         */
+        public Builder setEventStore(EventStore eventStore) {
+            checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
+            this.eventStore = checkNotNull(eventStore);
+            return this;
+        }
+
+        /**
+         * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
+         *
+         * <p>This {@code Executor} instance will be used for creating
+         * new {@code EventStore} instance when building {@code BoundedContext}, <em>if</em>
+         * {@code EventStore} was not explicitly set in the builder.
+         *
+         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
+         * will be used.
+         *
+         * @see #setEventStore(EventStore)
+         */
+        @SuppressWarnings("MethodParameterNamingConvention")
+        public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
+            checkState(eventStore == null, "EventStore is already configured.");
+            this.eventStoreStreamExecutor = eventStoreStreamExecutor;
+            return this;
+        }
+
+        @Nullable
+        public Executor getEventStoreStreamExecutor() {
+            return eventStoreStreamExecutor;
+        }
+
+        @Nullable
+        public EventStore getEventStore() {
+            return eventStore;
         }
 
         public Builder setEventBus(EventBus eventBus) {
@@ -351,18 +401,27 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
             return this;
         }
 
+        @Nullable
         public EventBus getEventBus() {
             return eventBus;
         }
 
         public BoundedContext build() {
-            if (this.name == null) {
-                this.name = DEFAULT_NAME;
-            }
-
             checkNotNull(storageFactory, "storageFactory must be set");
-            checkNotNull(commandBus, "commandDispatcher must be set");
-            checkNotNull(eventBus, "eventBus must be set");
+
+            /* If some of the properties were not set, create them using set StorageFactory. */
+            if (commandStore == null) {
+                commandStore = createCommandStore();
+            }
+            if (commandBus == null) {
+                commandBus = createCommandBus();
+            }
+            if (eventStore == null) {
+                createEventStore();
+            }
+            if (eventBus == null) {
+                eventBus = createEventBus();
+            }
 
             commandBus.setMultitenant(this.multitenant);
 
@@ -370,6 +429,40 @@ public class BoundedContext implements ClientService, IntegrationEventSubscriber
 
             log().info(result.nameForLogging() + " created.");
             return result;
+        }
+
+        private CommandStore createCommandStore() {
+            final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
+            return result;
+        }
+
+        private EventStore createEventStore() {
+            if (eventStoreStreamExecutor == null) {
+                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
+            }
+
+            final EventStore result = EventStore.newBuilder()
+                                                .setStreamExecutor(eventStoreStreamExecutor)
+                                                .setStorage(storageFactory.createEventStorage())
+                                                .setLogger(EventStore.log())
+                                                .build();
+            return result;
+        }
+
+        private CommandBus createCommandBus() {
+            if (commandStore == null) {
+                this.commandStore = createCommandStore();
+            }
+            final CommandBus commandBus = CommandBus.newInstance(commandStore);
+            return commandBus;
+        }
+
+        private EventBus createEventBus() {
+            if (eventStore == null) {
+                this.eventStore = createEventStore();
+            }
+            final EventBus eventBus = EventBus.newInstance(eventStore);
+            return eventBus;
         }
     }
 

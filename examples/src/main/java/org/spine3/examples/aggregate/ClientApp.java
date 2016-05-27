@@ -37,8 +37,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static org.spine3.examples.aggregate.Requests.*;
 import static org.spine3.protobuf.Messages.toText;
 

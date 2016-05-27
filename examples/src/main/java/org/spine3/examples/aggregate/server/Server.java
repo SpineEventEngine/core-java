@@ -19,24 +19,17 @@
  */
 package org.spine3.examples.aggregate.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
-import io.grpc.ServerBuilder;
-import io.grpc.ServerServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
+import org.spine3.server.ClientService;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import java.io.IOException;
 
-import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Sample gRPC server implementation.
@@ -46,115 +39,51 @@ import static org.spine3.examples.aggregate.ConnectionConstants.DEFAULT_CLIENT_S
  */
 public class Server {
 
-    private final StorageFactory storageFactory;
+    private final ClientService clientService;
     private final BoundedContext boundedContext;
-    private final EventSubscriber eventLogger = new EventLogger();
-    private final io.grpc.Server grpcServer;
 
-    /**
-     * @param storageFactory the {@link StorageFactory} used to create and set up storages.
-     */
     public Server(StorageFactory storageFactory) {
-        this.storageFactory = storageFactory;
-
+        // Create a bounded context.
         this.boundedContext = BoundedContext.newBuilder()
-                                            .setStorageFactory(storageFactory)
-                                            .setCommandBus(createCommandBus(storageFactory))
-                                            .setEventBus(createEventBus(storageFactory))
-                                            .build();
+                                                            .setStorageFactory(storageFactory)
+                                                            .build();
+        // Create and register a repository with the bounded context.
+        final OrderRepository repository = new OrderRepository(boundedContext);
+        boundedContext.register(repository);
 
-        this.grpcServer = createGrpcServer(this.boundedContext, DEFAULT_CLIENT_SERVICE_PORT);
+        // Subscribe an event subscriber in the bounded context.
+        final EventSubscriber eventLogger = new EventLogger();
+        boundedContext.getEventBus().subscribe(eventLogger);
+
+        // Create a client service with this bounded context.
+        this.clientService = ClientService.newBuilder()
+                                          .addBoundedContext(boundedContext)
+                                          .setPort(DEFAULT_CLIENT_SERVICE_PORT)
+                                          .build();
     }
 
-    private static CommandBus createCommandBus(StorageFactory storageFactory) {
-        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-        final CommandBus commandBus = CommandBus.newInstance(store);
-        return commandBus;
+    public void start() throws IOException {
+        clientService.start();
+        clientService.addShutdownHook();
     }
 
-    private static EventBus createEventBus(StorageFactory storageFactory) {
-        final EventStore eventStore = EventStore.newBuilder()
-                                                .setStreamExecutor(MoreExecutors.directExecutor())
-                                                .setStorage(storageFactory.createEventStorage())
-                                                .setLogger(EventStore.log())
-                                                .build();
-        return EventBus.newInstance(eventStore);
+    public void awaitTermination() throws InterruptedException {
+        clientService.awaitTermination();
     }
 
-
-    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService boundedContext, int port) {
-        final ServerServiceDefinition service = ClientServiceGrpc.bindService(boundedContext);
-        final ServerBuilder builder = ServerBuilder.forPort(port);
-        builder.addService(service);
-        return builder.build();
+    public void shutdown() throws Exception {
+        clientService.shutdown();
+        boundedContext.close();
     }
 
     /**
      * The entry point of the server application.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-
-        final Server server = new Server(storageFactory);
+        final Server server = new Server(InMemoryStorageFactory.getInstance());
         server.start();
-        server.awaitTermination();
-    }
-
-    /**
-     * Starts the server.
-     *
-     * @throws IOException if unable to bind.
-     */
-    public void start() throws IOException {
-        initBoundedContext();
-
-        grpcServer.start();
-        addShutdownHook(this);
         log().info("Server started, listening to commands on the port " + DEFAULT_CLIENT_SERVICE_PORT);
-    }
-
-    private void initBoundedContext() {
-        // Register repository with the bounded context. This will register it in Command Bus too.
-        final OrderRepository repository = new OrderRepository(boundedContext);
-        repository.initStorage(storageFactory);
-
-        boundedContext.register(repository);
-
-        // Register event subscribers.
-        boundedContext.getEventBus().subscribe(eventLogger);
-    }
-
-    /**
-     * Closes the Bounded Context and stops the gRPC server.
-     */
-    public void stop() throws Exception {
-        boundedContext.close();
-        grpcServer.shutdown();
-    }
-
-    /**
-     * Waits for the server to become terminated.
-     */
-    public void awaitTermination() throws InterruptedException {
-        grpcServer.awaitTermination();
-    }
-
-    private static void addShutdownHook(final Server server) {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-            @SuppressWarnings("UseOfSystemOutOrSystemErr")
-            @Override
-            public void run() {
-                System.err.println("Shutting down " + getClass().getName() + "  since JVM is shutting down...");
-                try {
-                    server.stop();
-                } catch (Exception e) {
-                    //noinspection CallToPrintStackTrace
-                    e.printStackTrace(System.err);
-                }
-                System.err.println("Server shut down.");
-            }
-        }));
+        server.awaitTermination();
     }
 
     private static Logger log() {
