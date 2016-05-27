@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Identifiers;
 import org.spine3.base.PersonName;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
@@ -52,6 +53,7 @@ import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.time.LocalDate;
+import org.spine3.time.LocalDates;
 
 import java.util.List;
 import java.util.Set;
@@ -116,13 +118,16 @@ public class ClientServiceShould {
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
     }
 
+    /*
+     * Commands stubs
+     *********************/
+
     @SuppressWarnings("StaticNonFinalField") /* This hack is just for the testing purposes. The production code should
                                                 use more sane approach to generating the IDs. */
     private static int customerNumber = 1;
 
     private static Command createCustomerCmd() {
-        //TODO:2016-05-27:alexander.yevsyukov: Get the current local date.
-        final LocalDate localDate = LocalDate.getDefaultInstance();
+        final LocalDate localDate = LocalDates.today();
         final CustomerId customerId = CustomerId.newBuilder()
                                                 .setRegistrationDate(localDate)
                                                 .setNumber(customerNumber)
@@ -133,19 +138,18 @@ public class ClientServiceShould {
                                           .setCustomer(Customer.newBuilder()
                                                                .setId(customerId)
                                                                .setName(PersonName.newBuilder()
-                                                                                  .setGivenName("John")
-                                                                                  .setFamilyName("Doe")
-                                                                                  .build()
-                                                               ))
+                                                                                  .setGivenName("Kreat")
+                                                                                  .setFamilyName("C'Ustomer")
+                                                                                  .setHonorificSuffix("Cmd")))
                                           .build();
-        final UserId userId = newUserId("createCustomerCmd");
+        final UserId userId = newUserId(Identifiers.newUuid());
         final Command result = createCommand(msg, userId, TimeUtil.getCurrentTime());
 
         return result;
     }
 
     /*
-     * Mock classes for a repository and an aggregate.
+     * Stub repositories and aggregates
      ***************************************************/
 
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {

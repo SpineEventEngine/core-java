@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.money;
+package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.time.Interval;
-import org.spine3.time.Intervals;
 
 import static org.junit.Assert.assertEquals;
 
