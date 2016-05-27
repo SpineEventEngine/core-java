@@ -87,8 +87,10 @@ import org.spine3.net.Url.Record.Schema;
     /**
      * Parses protocol from remembered URL String and saves it to the state.
      *
-     * <p><li>If no suitable protocol found, saves UNDEFINED value.</li>
-     * <li>If some value is fount, but the schema is unknown, saves raw value.</li>
+     * <ul>
+     *     <li>If no suitable protocol found, saves UNDEFINED value.
+     *     <li>If some value is fount, but the schema is unknown, saves raw value.
+     * </ul>
      */
     private void parseProtocol() {
         final Protocol.Builder protocolBuilder = Protocol.newBuilder();
