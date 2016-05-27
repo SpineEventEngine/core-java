@@ -32,6 +32,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Namespace;
 import org.spine3.base.Response;
@@ -85,8 +86,10 @@ public class CommandBus implements AutoCloseable {
     private final ProblemLog problemLog;
 
     /**
-     * Is {@code true} if the Bounded Context (to which this Command Bus belongs) is multi-tenant.
-     * Therefore commands posted to this Command Bus must have the {@code namespace} attribute.
+     * Is true, if the {@code BoundedContext} (to which this {@code CommandBus} belongs) is multi-tenant.
+     *
+     * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the {@code namespace} attribute
+     * defined.
      */
     private boolean isMultitenant;
 
@@ -116,6 +119,7 @@ public class CommandBus implements AutoCloseable {
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
+        //TODO:2016-05-27:alexander.yevsyukov: This must be handled in parallel. This call blocks the start.
         rescheduleCommands();
     }
 
@@ -220,23 +224,27 @@ public class CommandBus implements AutoCloseable {
         final Namespace namespace = command.getContext().getNamespace();
         if (isMultitenant() && isDefault(namespace)) {
             final CommandException noNamespace = InvalidCommandException.onMissingNamespace(command);
-            commandStore.store(command, noNamespace.getError());
+            storeWithError(command, noNamespace);
             responseObserver.onError(Statuses.invalidArgumentWithCause(noNamespace));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);
         if (!violations.isEmpty()) {
             final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
-            commandStore.store(command, invalidCommand.getError());
+            storeWithError(command, invalidCommand);
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
             return false;
         }
         return true;
     }
 
+    private void storeWithError(Command command, CommandException exception) {
+        commandStore.store(command, exception.getError());
+    }
+
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(command);
-        commandStore.store(command, unsupported.getError());
+        storeWithError(command, unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
     }
 
@@ -276,7 +284,7 @@ public class CommandBus implements AutoCloseable {
         final Message msg = getMessage(command);
         final CommandId id = getId(command);
         problemLog.errorExpiredCommand(msg, id);
-        commandStatusService.setToError(id, commandExpiredError(msg));
+        setToError(id, commandExpiredError(msg));
     }
 
     /**
@@ -294,6 +302,11 @@ public class CommandBus implements AutoCloseable {
         return isSupported;
     }
 
+    /**
+     * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
+     *
+     * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     */
     public Set<CommandClass> getSupportedCommandClasses() {
         final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
                                                     handlerRegistry.getCommandClasses());
@@ -319,7 +332,7 @@ public class CommandBus implements AutoCloseable {
             dispatcher.dispatch(command);
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
-            commandStatusService.setToError(commandId, e);
+            setErrorStatus(commandId, e);
         }
     }
 
@@ -329,7 +342,7 @@ public class CommandBus implements AutoCloseable {
         final CommandId commandId = context.getCommandId();
         try {
             handler.handle(msg, context);
-            commandStatusService.setOk(commandId);
+            setOkStatus(commandId);
         } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
             onHandlerException(msg, commandId, cause);
@@ -341,15 +354,32 @@ public class CommandBus implements AutoCloseable {
         if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             problemLog.errorHandling(exception, msg, commandId);
-            commandStatusService.setToError(commandId, exception);
+            setErrorStatus(commandId, exception);
         } else if (cause instanceof FailureThrowable){
             final FailureThrowable failure = (FailureThrowable) cause;
             problemLog.failureHandling(failure, msg, commandId);
-            commandStatusService.setToFailure(commandId, failure);
+            setFailureStatus(commandId, failure);
         } else {
             problemLog.errorHandlingUnknown(cause, msg, commandId);
-            commandStatusService.setToError(commandId, Errors.fromThrowable(cause));
+            final Error error = Errors.fromThrowable(cause);
+            setToError(commandId, error);
         }
+    }
+
+    private void setOkStatus(CommandId commandId) {
+        commandStatusService.setOk(commandId);
+    }
+
+    private void setToError(CommandId commandId, Error error) {
+        commandStatusService.setToError(commandId, error);
+    }
+
+    private void setErrorStatus(CommandId commandId, Exception exception) {
+        commandStatusService.setToError(commandId, exception);
+    }
+
+    private void setFailureStatus(CommandId commandId, FailureThrowable failure) {
+        commandStatusService.setToFailure(commandId, failure);
     }
 
     /**

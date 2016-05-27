@@ -90,8 +90,15 @@ message CommandContext {
         // The delay between the moment of receiving a command at the server and its delivery to the target.
         google.protobuf.Duration delay = 1;
 
+        //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific OffsetDateTime.
+        // Name the field `at`;
+
+        //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence. Name the attribute `every`.
+        // The recurrence pattern should be a separate type somewhere under `time` package.
+
         // The time when the command was scheduled.
         // Is set automatically.
+        //TODO:2016-05-27:alexander.yevsyukov: Set automatically by whom? How do we use this attribute?
         google.protobuf.Timestamp scheduling_time = 2;
     }
 }
