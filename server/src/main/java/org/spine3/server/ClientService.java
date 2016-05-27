@@ -20,6 +20,7 @@
 
 package org.spine3.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.grpc.ServerBuilder;
@@ -108,7 +109,8 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         }));
     }
 
-    private boolean isShutdown() {
+    @VisibleForTesting
+    /* package */ boolean isShutdown() {
         return grpcServer == null;
     }
 
@@ -121,11 +123,10 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         grpcServer = null;
     }
 
-    //TODO:2016-05-25:alexander.yevsyukov: Hide from public API after changing Server example.
-    public static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService clientService, int port) {
+    private static io.grpc.Server createGrpcServer(ClientServiceGrpc.ClientService clientService, int port) {
         final ServerServiceDefinition service = ClientServiceGrpc.bindService(clientService);
-        final ServerBuilder builder = ServerBuilder.forPort(port);
-        builder.addService(service);
+        final ServerBuilder builder = ServerBuilder.forPort(port)
+                                                   .addService(service);
         return builder.build();
     }
 

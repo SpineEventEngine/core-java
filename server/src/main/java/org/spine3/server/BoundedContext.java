@@ -68,6 +68,10 @@ import static org.spine3.protobuf.Values.newStringValue;
 public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.ClientService,
                                        IntegrationEventSubscriber,
                                        AutoCloseable {
+    /**
+     * The default name for a {@code BoundedContext}.
+     */
+    public static final String DEFAULT_NAME = "Main";
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application with
@@ -142,6 +146,11 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
     }
 
     /**
+     * Obtains a name of the bounded context.
+     *
+     * <p>The name allows to identify a bounded context if a multi-context application.
+     * If the name was not defined, during the building process, the context would get {@link #DEFAULT_NAME}.
+     *
      * @return the name of this {@code BoundedContext}
      */
     public String getName() {
@@ -296,10 +305,6 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
     public static class Builder {
-        /**
-         * The default name of {@code BoundedContext}.
-         */
-        public static final String DEFAULT_NAME = "Main";
 
         private String name = DEFAULT_NAME;
         private StorageFactory storageFactory;
@@ -310,6 +315,16 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
         private EventBus eventBus;
         private boolean multitenant;
 
+        /**
+         * Sets the name for a new bounded context.
+         *
+         * <p>If the name is not defined in the builder, the context will get {@link #DEFAULT_NAME}.
+         *
+         * <p>It is the responsibility of an application developer to provide meaningful and unique
+         * names for bounded contexts. The framework does not check for duplication of names.
+         *
+         * @param name a name for a new bounded context. Cannot be null, empty, or blank
+         */
         public Builder setName(String name) {
             this.name = Validate.checkNotEmptyOrBlank(name, "name");
             return this;

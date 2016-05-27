@@ -42,13 +42,19 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(StorageFactory storageFactory) {
+        return create(BoundedContext.DEFAULT_NAME, storageFactory);
+    }
+
+    public static BoundedContext create(String name, StorageFactory storageFactory) {
         final CommandBus commandBus = newCommandBus(storageFactory);
         final EventBus eventBus = newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                .setStorageFactory(storageFactory)
-                .setCommandBus(spy(commandBus))
-                .setEventBus(spy(eventBus));
+                                                             .setName(name)
+                                                             .setStorageFactory(storageFactory)
+                                                             .setCommandBus(spy(commandBus))
+                                                             .setEventBus(spy(eventBus));
         return builder.build();
+
     }
 
     private BoundedContextTestStubs() {}
