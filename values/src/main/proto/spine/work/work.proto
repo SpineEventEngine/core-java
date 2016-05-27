@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package spine.work;
+
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_package = "org.spine3.work";
+option java_outer_classname = "WorkProto";
+
+// Represents the amount of work done in minutes.
+message Work {
+    int32 minutes = 1;
+}
+
