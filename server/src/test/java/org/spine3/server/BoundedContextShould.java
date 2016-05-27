@@ -221,13 +221,9 @@ public class BoundedContextShould {
 
         @Apply
         private void event(ProjectCreated event) {
-
-            final Project newState = Project.newBuilder(getState())
+            getBuilder()
                     .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED)
-                    .build();
-
-            incrementState(newState);
+                    .setStatus(Project.Status.CREATED);
 
             isProjectCreatedEventApplied = true;
         }
@@ -239,13 +235,10 @@ public class BoundedContextShould {
 
         @Apply
         private void event(ProjectStarted event) {
-
-            final Project newState = Project.newBuilder(getState())
+            getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)
                     .build();
-
-            incrementState(newState);
 
             isProjectStartedEventApplied = true;
         }
