@@ -64,6 +64,7 @@ public class Server {
 
     public void start() throws IOException {
         clientService.start();
+        clientService.addShutdownHook();
     }
 
     public void awaitTermination() throws InterruptedException {

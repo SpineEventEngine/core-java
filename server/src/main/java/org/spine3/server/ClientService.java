@@ -76,7 +76,6 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         checkState(grpcServer == null, "Already started");
         grpcServer = createGrpcServer(this, this.port);
         grpcServer.start();
-        addShutdownHook(this);
     }
 
     /**
@@ -87,18 +86,22 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
         grpcServer.awaitTermination();
     }
 
-
-    private static void addShutdownHook(final ClientService service) {
+    /**
+     * Makes the JVM shut down the service when it is shutting down itself.
+     *
+     * <p>Call this method when running the service in a separate JVM.
+     */
+    public void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             @Override
             public void run() {
-                final String serverClass = getClass().getName();
-                System.err.println("Shutting down " + serverClass + "  since JVM is shutting down...");
+                final String serverClass = ClientService.this.getClass().getName();
+                System.err.println("Shutting down " + serverClass + " since JVM is shutting down...");
                 try {
-                    if (!service.isShutdown()) {
-                        service.shutdown();
+                    if (!isShutdown()) {
+                        shutdown();
                     }
                 } catch (RuntimeException e) {
                     //noinspection CallToPrintStackTrace
