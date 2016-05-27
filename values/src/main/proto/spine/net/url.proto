@@ -19,8 +19,8 @@ message Url {
 
     // Structurized record.
     //
-    // This type represents parsed and structurized URL according to RFC 3986.
-    // Using this type helps avoiding the usage of invalid URLs and makes easier operating concrete URL attributes.
+    // This type represents URL according to RFC 3986.
+    // Using this type makes it easier to operate concrete URL attributes.
     // Please see https://tools.ietf.org/html/rfc3986.
     message Record {
 
