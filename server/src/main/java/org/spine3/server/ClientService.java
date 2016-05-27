@@ -138,7 +138,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
             handleUnsupported(request, responseObserver);
             return;
         }
-        boundedContext.post(request, responseObserver);
+        boundedContext.getCommandBus().post(request, responseObserver);
     }
 
     private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {

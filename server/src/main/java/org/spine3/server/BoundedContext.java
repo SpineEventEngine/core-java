@@ -31,8 +31,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.Responses;
-import org.spine3.client.grpc.Topic;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
@@ -65,9 +63,7 @@ import static org.spine3.protobuf.Values.newStringValue;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.ClientService,
-                                       IntegrationEventSubscriber,
-                                       AutoCloseable {
+public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable {
     /**
      * The default name for a {@code BoundedContext}.
      */
@@ -213,14 +209,6 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
     }
 
     @Override
-    public void post(Command command, StreamObserver<Response> responseObserver) {
-        checkNotNull(command);
-        checkNotNull(responseObserver);
-        commandBus.post(command, responseObserver);
-    }
-
-
-    @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         /**
          * TODO:2016-05-11:alexander.litus: use {@link StreamObserver#onError}
@@ -264,18 +252,6 @@ public class BoundedContext implements org.spine3.client.grpc.ClientServiceGrpc.
                 .setMessage(integrationEvent.getMessage())
                 .setContext(context);
         return result.build();
-    }
-
-    @Override
-    public void subscribe(Topic request, StreamObserver<Event> responseObserver) {
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
-    }
-
-    @Override
-    public void unsubscribe(Topic request, StreamObserver<Response> responseObserver) {
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-        //TODO:2016-01-14:alexander.yevsyukov: Implement
     }
 
     /**

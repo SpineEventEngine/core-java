@@ -26,7 +26,6 @@ import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
@@ -34,7 +33,6 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventSubscriber;
@@ -66,7 +64,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
 import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
@@ -138,17 +135,6 @@ public class BoundedContextShould {
         final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
-    }
-
-    @Test
-    public void post_commands_to_CommandBus() {
-        final TestResponseObserver responseObserver = new TestResponseObserver();
-        final CommandBus commandBus = boundedContext.getCommandBus();
-
-        final Command cmd = createProjectCmd();
-        boundedContext.post(cmd, responseObserver);
-
-        verify(commandBus, times(1)).post(cmd, responseObserver);
     }
 
     @Test
