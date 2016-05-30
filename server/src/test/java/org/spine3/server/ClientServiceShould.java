@@ -23,6 +23,7 @@ package org.spine3.server;
 
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.util.TimeUtil;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
 import org.spine3.base.PersonName;
 import org.spine3.base.Response;
@@ -39,6 +41,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.customer.Customer;
 import org.spine3.test.customer.CustomerId;
@@ -61,6 +64,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestCommands.createCommand;
 import static org.spine3.testdata.TestCommands.createProjectCmd;
 import static org.spine3.testdata.TestEventMessageFactory.*;
@@ -107,15 +111,25 @@ public class ClientServiceShould {
 
     @Test
     public void accept_commands_for_linked_bounded_contexts() {
-        final Command createProject = createProjectCmd();
         final TestResponseObserver responseObserver = new TestResponseObserver();
-
+        final Command createProject = createProjectCmd();
         clientService.post(createProject, responseObserver);
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
 
         final Command createCustomer = createCustomerCmd();
         clientService.post(createCustomer, responseObserver);
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
+    }
+
+    @Test
+    public void return_error_if_command_is_unsupported() {
+        final TestResponseObserver responseObserver = new TestResponseObserver();
+        final Command unsupportedCmd = Commands.create(StringValue.getDefaultInstance(), createCommandContext());
+
+        clientService.post(unsupportedCmd, responseObserver);
+
+        final Throwable exception = responseObserver.getThrowable().getCause();
+        assertEquals(UnsupportedCommandException.class, exception.getClass());
     }
 
     /*
@@ -234,6 +248,8 @@ public class ClientServiceShould {
 
         private Response responseHandled;
 
+        private Throwable throwable;
+
         @Override
         public void onNext(Response response) {
             this.responseHandled = response;
@@ -241,6 +257,7 @@ public class ClientServiceShould {
 
         @Override
         public void onError(Throwable throwable) {
+            this.throwable = throwable;
         }
 
         @Override
@@ -249,6 +266,10 @@ public class ClientServiceShould {
 
         public Response getResponseHandled() {
             return responseHandled;
+        }
+
+        public Throwable getThrowable() {
+            return throwable;
         }
     }
 
