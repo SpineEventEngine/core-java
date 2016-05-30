@@ -21,7 +21,7 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 

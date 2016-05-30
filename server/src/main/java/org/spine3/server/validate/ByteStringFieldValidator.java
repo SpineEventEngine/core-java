@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 

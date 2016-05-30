@@ -28,7 +28,7 @@ option java_package = "org.spine3.test.validate.msg";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-import "spine/validation.proto";
+import "spine/validate_options.proto";
 
 // Messages for "required" option tests.
 

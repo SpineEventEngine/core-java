@@ -31,7 +31,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
