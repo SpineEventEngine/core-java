@@ -79,12 +79,17 @@ public class Commands {
     /**
      * Creates a new command context with the current time.
      *
+     * <p>This method is not supposed to be called from outside the framework.
+     * Commands in client applications should be created by {@link CommandFactory#create(Message)},
+     * which creates {@code CommandContext} automatically.
+     *
+     * @param tenantId the ID of the tenant or {@code null} for single-tenant applications
      * @param userId the actor id
      * @param zoneOffset the offset of the timezone in which the user works
-     * @param tenantId the ID of the tenant or null for single-tenant applications
-     * @see CommandFactory
+     * @see CommandFactory#create(Message)
      */
-    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset, @Nullable TenantId tenantId) {
+    @Internal
+    public static CommandContext createContext(@Nullable TenantId tenantId, UserId userId, ZoneOffset zoneOffset) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
