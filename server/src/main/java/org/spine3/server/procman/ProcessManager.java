@@ -43,7 +43,9 @@ import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
+import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
@@ -367,8 +369,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         private Command produceCommand(Message newMessage) {
-            //TODO:2016-05-30:alexander.yevsyukov: get tenantId from CurrentTenant and pass it to context creation.
-            final CommandContext newContext = Commands.createContext(actor, zoneOffset, null);
+            final TenantId currentTenant = CurrentTenant.get();
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset, currentTenant);
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }

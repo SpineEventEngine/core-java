@@ -43,6 +43,7 @@ import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.type.CommandClass;
+import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
@@ -192,6 +193,11 @@ public class CommandBus implements AutoCloseable {
             scheduleAndStore(command, responseObserver);
             return;
         }
+
+        if (isMultitenant) {
+            CurrentTenant.set(command.getContext().getTenantId());
+        }
+
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
         doPost(command);
