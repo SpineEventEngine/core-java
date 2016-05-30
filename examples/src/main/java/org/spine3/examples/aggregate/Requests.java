@@ -37,11 +37,13 @@ import static org.spine3.time.ZoneOffsets.UTC;
  */
 /*package*/ class Requests {
 
+    //TODO:2016-05-30:alexander.yevsyukov: Use CommandFactory instead of Commands.createContext() and Commands.create()
+
     public static Command createOrder(UserId userId, OrderId orderId) {
         final CreateOrder msg = CreateOrder.newBuilder()
                 .setOrderId(orderId)
                 .build();
-        final CommandContext context = Commands.createContext(userId, UTC);
+        final CommandContext context = Commands.createContext(userId, UTC, null);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -64,7 +66,7 @@ import static org.spine3.time.ZoneOffsets.UTC;
         final AddOrderLine msg = AddOrderLine.newBuilder()
                 .setOrderId(orderId)
                 .setOrderLine(orderLine).build();
-        final CommandContext context = Commands.createContext(userId, UTC);
+        final CommandContext context = Commands.createContext(userId, UTC, null);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }
@@ -75,7 +77,7 @@ import static org.spine3.time.ZoneOffsets.UTC;
                 .setOrderId(orderId)
                 .setBillingInfo(billingInfo)
                 .build();
-        final CommandContext context = Commands.createContext(userId, UTC);
+        final CommandContext context = Commands.createContext(userId, UTC, null);
         final Command cmd = Commands.create(msg, context);
         return cmd;
     }

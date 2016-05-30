@@ -32,6 +32,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.type.TypeName;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -80,15 +81,19 @@ public class Commands {
      *
      * @param userId the actor id
      * @param zoneOffset the offset of the timezone in which the user works
+     * @param tenantId the ID of the tenant or null for single-tenant applications
      * @see CommandFactory
      */
-    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset) {
+    public static CommandContext createContext(UserId userId, ZoneOffset zoneOffset, @Nullable TenantId tenantId) {
         final CommandId commandId = generateId();
         final CommandContext.Builder result = newBuilder()
                 .setActor(userId)
                 .setTimestamp(getCurrentTime())
                 .setCommandId(commandId)
                 .setZoneOffset(zoneOffset);
+        if (tenantId != null) {
+            result.setTenantId(tenantId);
+        }
         return result.build();
     }
 

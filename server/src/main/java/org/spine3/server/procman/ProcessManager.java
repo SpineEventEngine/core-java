@@ -367,7 +367,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         private Command produceCommand(Message newMessage) {
-            final CommandContext newContext = Commands.createContext(actor, zoneOffset);
+            //TODO:2016-05-30:alexander.yevsyukov: get tenantId from CurrentTenant and pass it to context creation.
+            final CommandContext newContext = Commands.createContext(actor, zoneOffset, null);
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }
