@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.ui;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ColorProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.ui";
 
 // RGB definition of a color.
 message Color {

@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.ui;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "LanguageProto";
-option java_package = "org.spine3.client";
+option java_package = "org.spine3.ui";
 
 enum Language {
     UNDEFINED = 0;
