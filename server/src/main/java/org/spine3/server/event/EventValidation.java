@@ -27,7 +27,7 @@ import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
 import org.spine3.base.Response;
 import org.spine3.base.ValidationError;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 import java.util.Map;

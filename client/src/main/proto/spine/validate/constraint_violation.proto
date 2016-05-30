@@ -19,44 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test.validate.msg;
+package spine.validate;
 
-option java_generate_equals_and_hash = true;
+option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
-option java_outer_classname = "ValidationTestCommandsProto";
-option java_package = "org.spine3.test.validate.msg";
+option java_outer_classname = "ConstraintViolationProto";
+option java_package = "org.spine3.validate";
 
-import "google/protobuf/wrappers.proto";
-import "spine/validate_options.proto";
+import "google/protobuf/any.proto";
+import "spine/base/field_path.proto";
 
-// Messages for entity ID in commands validation tests.
+// A validation constraint violation for a message field.
+message ConstraintViolation {
+    // An error message format string for this constraint violation.
+    // Contains `%s` format specifiers if the violation has one or more parameters.
+    string msg_format = 1;
 
-message EntityIdMsgFieldValue {
-    google.protobuf.StringValue value = 1;
-}
+    // Parameters (as strings) referenced by the format specifiers in the error message format string.
+    repeated string param = 2;
 
-message EntityIdStringFieldValue {
-    string value = 1;
-}
+    // A path to an invalid field.
+    spine.base.FieldPath field_path = 3;
 
-message EntityIdIntFieldValue {
-    int32 value = 1;
-}
+    // A value of an invalid field.
+    // Contains a corresponding wrapper message for primitives
+    // (google.protobuf.StringValue for "string" field type and so on).
+    google.protobuf.Any field_value = 4;
 
-message EntityIdLongFieldValue {
-    int64 value = 1;
-}
-
-message EntityIdRepeatedFieldValue {
-    repeated string value = 1;
-}
-
-// Unsupported ID types.
-
-message EntityIdByteStringFieldValue {
-    bytes value = 1;
-}
-
-message EntityIdDoubleFieldValue {
-    double value = 1;
+    // Constraint violations for fields of this message field.
+    repeated ConstraintViolation violation = 5;
 }

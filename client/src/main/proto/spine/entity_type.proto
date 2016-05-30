@@ -19,10 +19,20 @@
 //
 syntax = "proto3";
 
+// The Protobuf package is not defined to allow shorter options for user-defined types.
+// This would allow to write:
+//
+//     option (state_of) = AGGREGATE;
+//
+// instead of:
+//
+//     option (spine.type.state_of) = spine.type.AGGREGATE;
+//
+
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_package = "org.spine3.client";
-option java_outer_classname = "EntityProto";
+option java_package = "org.spine3.type.internal";
+option java_outer_classname = "EntityTypeProto";
 
 import "google/protobuf/descriptor.proto";
 

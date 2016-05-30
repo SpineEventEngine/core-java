@@ -29,7 +29,7 @@ import org.spine3.base.Error;
 import org.spine3.base.ValidationError;
 import org.spine3.server.type.CommandClass;
 import org.spine3.type.TypeName;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import static org.spine3.base.Identifiers.idToString;
 
