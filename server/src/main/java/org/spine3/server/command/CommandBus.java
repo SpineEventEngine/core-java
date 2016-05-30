@@ -34,9 +34,9 @@ import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
-import org.spine3.base.Namespace;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.base.TenantId;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.command.error.CommandException;
@@ -88,7 +88,7 @@ public class CommandBus implements AutoCloseable {
     /**
      * Is true, if the {@code BoundedContext} (to which this {@code CommandBus} belongs) is multi-tenant.
      *
-     * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the {@code namespace} attribute
+     * <p>If the {@code CommandBus} is multi-tenant, the commands posted must have the {@code tenant_id} attribute
      * defined.
      */
     private boolean isMultitenant;
@@ -221,11 +221,11 @@ public class CommandBus implements AutoCloseable {
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
-        final Namespace namespace = command.getContext().getNamespace();
-        if (isMultitenant() && isDefault(namespace)) {
-            final CommandException noNamespace = InvalidCommandException.onMissingNamespace(command);
-            storeWithError(command, noNamespace);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(noNamespace));
+        final TenantId tenantId = command.getContext().getTenantId();
+        if (isMultitenant() && isDefault(tenantId)) {
+            final CommandException noTenantDefined = InvalidCommandException.onMissingTenantId(command);
+            storeWithError(command, noTenantDefined);
+            responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
             return false; // and nothing else matters
         }
         final List<ConstraintViolation> violations = CommandValidator.getInstance().validate(command);

@@ -23,17 +23,17 @@ package spine.base;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "NamespaceProto";
+option java_outer_classname = "TenantIdProto";
 option java_package = "org.spine3.base";
 
 import public "spine/base/domain.proto";
 
-// A namespace defines a boundary for organization's data.
+// An identifier of a tenant in a multitenant application.
 //
-// In a multi-tenant application a `CommandContext` must have `namespace` attribute defined.
-message Namespace {
+// In a multitenant application a `CommandContext` of a command must have `tenant_id` attribute defined.
+message TenantId {
     oneof kind {
-        // The namespace for the organization is defined by its Internet domain name.
+        // The tenant ID for the organization is defined by its Internet domain name.
         DomainName domain = 1;
 
         // Application-specific value.

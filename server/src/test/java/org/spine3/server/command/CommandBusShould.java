@@ -245,14 +245,14 @@ public class CommandBusShould {
      ***************************/
 
     @Test
-    public void verify_namespace_attribute_if_multitenant() {
+    public void verify_tenant_id_attribute_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmdWithoutContext();
 
         commandBus.post(cmd, responseObserver);
 
-        checkCommandError(responseObserver.getThrowable(), NAMESPACE_UNKNOWN, InvalidCommandException.class, cmd);
+        checkCommandError(responseObserver.getThrowable(), TENANT_UNKNOWN, InvalidCommandException.class, cmd);
         assertTrue(responseObserver.getResponses().isEmpty());
     }
 
