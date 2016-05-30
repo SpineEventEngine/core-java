@@ -22,11 +22,12 @@ package org.spine3.server.users;
 
 import org.spine3.SPI;
 import org.spine3.users.TenantId;
-import org.spine3.validate.Validate;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * This class allows to set a tenant when handling a command or a query
@@ -51,7 +52,7 @@ public class CurrentTenant {
      */
     public static void set(TenantId tenantId) {
         checkNotNull(tenantId);
-        Validate.checkNotDefault(tenantId);
+        checkArgument(isNotDefault(tenantId));
         threadLocal.set(tenantId);
     }
 
