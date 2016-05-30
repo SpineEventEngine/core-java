@@ -20,11 +20,11 @@
 syntax = "proto3";
 
 // We do not define the package for this file to allow shorter options for user-defined types.
-// This would allow to write...
+// This would allow to write:
 //
 //     [(required).value = true];
 //
-// instead of
+// instead of:
 //
 //     [(spine.base.required).value = true];
 //
@@ -32,11 +32,9 @@ syntax = "proto3";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "ValidationProto";
-option java_package = "org.spine3.validate.options";
+option java_package = "org.spine3.validate.internal";
 
 import "google/protobuf/descriptor.proto";
-import "google/protobuf/any.proto";
-import "spine/base/field_path.proto";
 
 
 extend google.protobuf.MessageOptions {
@@ -57,27 +55,6 @@ extend google.protobuf.FieldOptions {
     TimeOption when = 51005;
     PatternOption pattern = 51008;
     ValidOption valid = 51009;
-}
-
-// A validation constraint violation for a message field.
-message ConstraintViolation {
-    // An error message format string for this constraint violation.
-    // Contains `%s` format specifiers if the violation has one or more parameters.
-    string msg_format = 1;
-
-    // Parameters (as strings) referenced by the format specifiers in the error message format string.
-    repeated string param = 2;
-
-    // A path to an invalid field.
-    spine.base.FieldPath field_path = 3;
-
-    // A value of an invalid field.
-    // Contains a corresponding wrapper message for primitives
-    // (google.protobuf.StringValue for "string" field type and so on).
-    google.protobuf.Any field_value = 4;
-
-    // Constraint violations for fields of this message field.
-    repeated ConstraintViolation violation = 5;
 }
 
 // If the field type is `message`, it must be set to a non-default instance;

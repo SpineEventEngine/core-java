@@ -18,31 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.time;
+/**
+ * This package contains generated classes which are internal to Spine.
+ * Corresponding Protobuf types are the part of the public API.
+ *
+ * @see org.spine3.Internal
+ */
+@ParametersAreNonnullByDefault
+@Internal
+package org.spine3.validate.internal;
 
-import org.junit.Test;
+import org.spine3.Internal;
 
-import java.util.Calendar;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
-
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class LocalDatesShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
-    }
-
-    @Test
-    public void obtain_current_date() {
-        final LocalDate today = LocalDates.today();
-
-        final Calendar calendar = Calendar.getInstance();
-        assertEquals(calendar.get(Calendar.YEAR), today.getYear());
-        assertEquals(calendar.get(Calendar.MONTH) + 1, today.getMonthValue());
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), today.getDay());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

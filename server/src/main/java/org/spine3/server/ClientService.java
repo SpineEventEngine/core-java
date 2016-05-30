@@ -114,11 +114,12 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     @VisibleForTesting
     /* package */ boolean isShutdown() {
-        return grpcServer == null;
+        final boolean isShutdown = grpcServer == null;
+        return isShutdown;
     }
 
     /**
-     * Shuts the service down after completing queed requests.
+     * Shuts the service down after completing queued requests.
      */
     public void shutdown() {
         checkState(grpcServer != null);
@@ -210,7 +211,6 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
 
     private enum LogSingleton {
         INSTANCE;
-
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(ClientService.class);
     }

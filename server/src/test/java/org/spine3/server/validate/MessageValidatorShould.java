@@ -56,7 +56,7 @@ import org.spine3.test.validate.msg.RequiredStringFieldValue;
 import org.spine3.test.validate.msg.TimeInFutureFieldValue;
 import org.spine3.test.validate.msg.TimeInPastFieldValue;
 import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 

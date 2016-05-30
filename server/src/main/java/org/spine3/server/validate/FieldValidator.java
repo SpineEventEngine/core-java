@@ -28,9 +28,9 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.options.ConstraintViolation;
-import org.spine3.validate.options.RequiredOption;
-import org.spine3.validate.options.ValidationProto;
+import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.internal.RequiredOption;
+import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 

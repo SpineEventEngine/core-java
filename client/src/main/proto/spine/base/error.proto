@@ -27,7 +27,7 @@ option java_outer_classname = "ErrorProto";
 option java_package = "org.spine3.base";
 
 import public "google/protobuf/struct.proto";
-import "spine/validation.proto";
+import "spine/validate/constraint_violation.proto";
 
 // Information on a technical error occurred in the system.
 //
@@ -60,5 +60,5 @@ message Error {
 // An error indicating that a message did not pass validation.
 message ValidationError {
     // Validation constraint violations found by validator.
-    repeated ConstraintViolation constraint_violation = 1;
+    repeated spine.validate.ConstraintViolation constraint_violation = 1;
 }

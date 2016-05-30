@@ -46,7 +46,7 @@ import org.spine3.server.type.CommandClass;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
-import org.spine3.validate.options.ConstraintViolation;
+import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
