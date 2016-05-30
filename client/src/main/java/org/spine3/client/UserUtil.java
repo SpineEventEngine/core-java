@@ -20,7 +20,7 @@
 
 package org.spine3.client;
 
-import org.spine3.base.UserId;
+import org.spine3.users.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

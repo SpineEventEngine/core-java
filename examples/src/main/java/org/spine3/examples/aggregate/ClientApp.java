@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
-import org.spine3.base.UserId;
 import org.spine3.client.grpc.ClientServiceGrpc;
 import org.spine3.client.grpc.Topic;
 import org.spine3.protobuf.Messages;
+import org.spine3.users.UserId;
 
 import java.util.List;
 

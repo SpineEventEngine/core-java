@@ -19,15 +19,15 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.net;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "DomainProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "InternetDomainProto";
+option java_package = "org.spine3.net";
 
 // An Internet domain name.
-message DomainName {
+message InternetDomain {
     // The value of the domain name.
     //
     // It is the responsibility of the application to provide a correct value for this field.

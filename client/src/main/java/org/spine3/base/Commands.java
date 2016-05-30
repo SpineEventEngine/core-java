@@ -32,6 +32,7 @@ import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.type.TypeName;
+import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

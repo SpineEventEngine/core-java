@@ -26,15 +26,15 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.UserId;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
+import org.spine3.users.UserId;
 
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.*;
+import static org.spine3.client.UserUtil.newUserId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {

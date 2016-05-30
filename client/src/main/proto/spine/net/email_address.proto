@@ -19,24 +19,23 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.net;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "TenantIdProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "EmailAddressProto";
+option java_package = "org.spine3.net";
 
-import public "spine/base/domain.proto";
+// An email address.
+message EmailAddress {
 
-// An identifier of a tenant in a multitenant application.
-//
-// In a multitenant application a `CommandContext` of a command must have `tenant_id` attribute defined.
-message TenantId {
-    oneof kind {
-        // The tenant ID for the organization is defined by its Internet domain name.
-        DomainName domain = 1;
+    //TODO:2016-02-20:alexander.yevsyukov: Make it structured, to reflect http://www.ietf.org/rfc/rfc822.txt
+    // A minimum it should have fields like `user`, `domain`, `personal`, `suffix` - the part coming after `+`.
+    // See also InternetAddress from JavaMail: http://docs.oracle.com/javaee/6/api/javax/mail/internet/InternetAddress.html
+    // See how it's done for Url in url.proto and related utilities.
 
-        // Application-specific value.
-        string value = 2;
-    }
+    // String value of the address.
+    //
+    // No validation is performed for the passed value.
+    string value = 1;
 }

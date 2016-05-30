@@ -22,11 +22,11 @@ package org.spine3.examples.aggregate;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.UserId;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
 import org.spine3.protobuf.Messages;
+import org.spine3.users.UserId;
 
 import static org.spine3.time.ZoneOffsets.UTC;
 

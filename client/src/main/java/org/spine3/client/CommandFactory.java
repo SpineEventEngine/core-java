@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.UserId;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.UserId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

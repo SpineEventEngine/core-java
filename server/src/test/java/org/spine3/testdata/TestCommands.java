@@ -27,7 +27,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.base.UserId;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
@@ -35,6 +34,7 @@ import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.test.project.command.StartProject;
+import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Commands.create;

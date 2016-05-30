@@ -37,7 +37,6 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
-import org.spine3.base.UserId;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
@@ -45,6 +44,7 @@ import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

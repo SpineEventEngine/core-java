@@ -26,12 +26,12 @@ option java_multiple_files = true;
 option java_outer_classname = "CustomerProto";
 option java_package = "org.spine3.test.customer";
 
-import "spine/base/person.proto";
+import "spine/people/person_name.proto";
 import "spine/time/time.proto";
 
 message CustomerId {
     // The date the customer was registered.
-    spine.time.LocalDate registration_date = 1;
+    time.LocalDate registration_date = 1;
 
     // A consecutive number generated within the registration date.
     int32 number = 2;
@@ -43,5 +43,5 @@ message Customer {
     CustomerId id = 1;
 
     // The name of the customer.
-    spine.base.PersonName name = 2;
+    people.PersonName name = 2;
 }

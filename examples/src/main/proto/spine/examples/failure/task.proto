@@ -26,7 +26,7 @@ option java_outer_classname = "TaskProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/base/user_id.proto";
+import "spine/users/user_id.proto";
 
 message TaskId {
     uint32 number = 1;
@@ -53,5 +53,5 @@ message Task {
     }
 
     Status status = 4;
-    spine.base.UserId assignee = 5;
+    users.UserId assignee = 5;
 }

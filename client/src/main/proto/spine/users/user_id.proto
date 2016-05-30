@@ -19,21 +19,16 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "EmailProto";
-option java_package = "org.spine3.base";
+option java_outer_classname = "UserIdProto";
+option java_package = "org.spine3.users";
 
-// An email address.
-// No validation is performed for the passed value.
-message EmailAddress {
-
-    //TODO:2016-02-20:alexander.yevsyukov: Make it structured, to reflect http://www.ietf.org/rfc/rfc822.txt
-    // A minimum it should have fields like `user`, `domain`, `personal`, `suffix` - the part coming after `+`.
-    // See also InternetAddress from JavaMail: http://docs.oracle.com/javaee/6/api/javax/mail/internet/InternetAddress.html
-
-    // String value of the address.
-    string value = 1;
+// A string-based identifier of the user.
+message UserId {
+  // User ID value.
+  string value = 1;
 }
+

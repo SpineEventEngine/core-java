@@ -28,9 +28,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.spine3.base.UserId;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
+import org.spine3.users.UserId;
 
 import java.util.List;
 

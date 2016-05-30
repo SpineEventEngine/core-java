@@ -21,7 +21,7 @@
 package org.spine3.client;
 
 import org.junit.Test;
-import org.spine3.base.UserId;
+import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

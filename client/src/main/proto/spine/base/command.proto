@@ -30,8 +30,8 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/any.proto";
 
-import "spine/base/user_id.proto";
-import "spine/base/tenant_id.proto";
+import "spine/users/user_id.proto";
+import "spine/users/tenant_id.proto";
 import "spine/time/zone_offset.proto";
 
 // Command identifier.
@@ -68,7 +68,7 @@ message CommandContext {
     CommandId command_id = 1;
 
     // The user who created the command.
-    UserId actor = 2;
+    users.UserId actor = 2;
 
     // The time when the command was created.
     google.protobuf.Timestamp timestamp = 3;
@@ -77,7 +77,7 @@ message CommandContext {
     time.ZoneOffset zone_offset = 4;
 
     // The ID of a tenant in a multitenant application.
-    TenantId tenant_id = 5;
+    users.TenantId tenant_id = 5;
 
     // A command may be scheduled. This type defines scheduling options.
     message Schedule {

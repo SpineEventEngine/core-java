@@ -19,26 +19,30 @@
 //
 syntax = "proto3";
 
-package spine.sharing;
+package spine.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "GroupProto";
-option java_package = "org.spine3.sharing";
+option java_outer_classname = "TenantIdProto";
+option java_package = "org.spine3.users";
 
-import "spine/base/user_id.proto";
+import "spine/net/internet_domain.proto";
+import "spine/net/email_address.proto";
 
-message GroupId {
-    string value = 1;
-}
+// An identifier of a tenant in a multitenant application.
+//
+// In a multitenant application a `CommandContext` of a command must have `tenant_id` attribute defined.
+message TenantId {
+    oneof kind {
+        // The tenant has Internet domain name.
+        net.InternetDomain domain = 1;
 
-// A user group can hold users and other groups.
-message Group {
+        // The tenant is a person or an organization without a domain name.
+        net.EmailAddress email = 2;
 
-    GroupId id = 1;
+        // reserved 3 to 19;
 
-    repeated spine.base.UserId users = 2;
-
-    repeated GroupId groups = 3;
-
+        // Application-specific value.
+        string value = 20;
+    }
 }
