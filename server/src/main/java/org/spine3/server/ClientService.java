@@ -118,7 +118,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
     }
 
     /**
-     * Shuts the service down after completing queed requests.
+     * Shuts the service down after completing queued requests.
      */
     public void shutdown() {
         checkState(grpcServer != null);

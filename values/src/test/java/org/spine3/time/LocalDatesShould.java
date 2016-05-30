@@ -25,8 +25,16 @@ import org.junit.Test;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalDatesShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(LocalDates.class));
+    }
 
     @Test
     public void obtain_current_date() {
