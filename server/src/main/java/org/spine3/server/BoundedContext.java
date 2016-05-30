@@ -417,7 +417,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
                 commandBus = createCommandBus();
             }
             if (eventStore == null) {
-                createEventStore();
+                eventStore = createEventStore();
             }
             if (eventBus == null) {
                 eventBus = createEventBus();
