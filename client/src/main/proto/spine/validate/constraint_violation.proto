@@ -39,7 +39,7 @@ message ConstraintViolation {
     repeated string param = 2;
 
     // A path to an invalid field.
-    spine.base.FieldPath field_path = 3;
+    base.FieldPath field_path = 3;
 
     // A value of an invalid field.
     // Contains a corresponding wrapper message for primitives

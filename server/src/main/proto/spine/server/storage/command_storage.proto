@@ -47,16 +47,16 @@ message CommandStorageRecord {
     string command_id = 3;
 
     // The status of the command processing.
-    spine.base.CommandStatus status = 4;
+    base.CommandStatus status = 4;
 
     // `status_data` provides additional information on what went wrong
     // if the value of `status` is `ERROR` or `FAILURE`.
     oneof status_data {
         // The technical error occurred during command processing.
-        spine.base.Error error = 5;
+        base.Error error = 5;
 
         // A business failure occurred during command processing.
-        spine.base.Failure failure = 6;
+        base.Failure failure = 6;
     }
 
     reserved 7 to 9;
@@ -79,5 +79,5 @@ message CommandStorageRecord {
     google.protobuf.Any message = 20;
 
     // The context of the command.
-    spine.base.CommandContext context = 21;
+    base.CommandContext context = 21;
 }

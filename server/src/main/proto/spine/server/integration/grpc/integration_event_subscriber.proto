@@ -36,5 +36,5 @@ service IntegrationEventSubscriber {
     // The response is `ok` if the event is successfully received by the subscriber.
     // If the event is not handled because of a technical error, the response is `error`.
     // If the event cannot be handled because of business conditions, the response is `failure`.
-    rpc Notify(spine.server.integration.IntegrationEvent) returns (spine.base.Response);
+    rpc Notify(server.integration.IntegrationEvent) returns (base.Response);
 }

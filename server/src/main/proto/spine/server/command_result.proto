@@ -37,11 +37,11 @@ message CommandResult {
     // Events generated as the result of the command.
     //
     // Note that `CommandId` can be obtained from `EventId.command_id`.
-    repeated spine.base.Event event = 1;
+    repeated base.Event event = 1;
 
     // Errors that may occur during the command execution.
     repeated google.protobuf.Any error = 2;
 
     // Business failures occurred during the command execution.
-    repeated spine.base.Failure failure = 3;
+    repeated base.Failure failure = 3;
 }

@@ -45,9 +45,9 @@ message EventFilter {
     repeated google.protobuf.Any aggregate_id = 2;
 
     // Accepted event message field values.
-    repeated spine.base.FieldFilter event_field_filter = 3;
+    repeated base.FieldFilter event_field_filter = 3;
 
     // Accepted `EventContext` field values.
-    repeated spine.base.FieldFilter context_field_filter = 4;
+    repeated base.FieldFilter context_field_filter = 4;
 }
 

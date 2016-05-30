@@ -53,5 +53,5 @@ message EventStorageRecord {
     google.protobuf.Any message = 20;
 
     // Event context.
-    spine.base.EventContext context = 21;
+    base.EventContext context = 21;
 }

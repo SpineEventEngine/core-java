@@ -60,5 +60,5 @@ message Error {
 // An error indicating that a message did not pass validation.
 message ValidationError {
     // Validation constraint violations found by validator.
-    repeated spine.validate.ConstraintViolation constraint_violation = 1;
+    repeated validate.ConstraintViolation constraint_violation = 1;
 }
