@@ -46,7 +46,10 @@ public class CommandFactoryShould {
 
     @Before
     public void setUp() {
-        commandFactory = CommandFactory.newInstance(actor, zoneOffset);
+        commandFactory = CommandFactory.newBuilder()
+                                       .setActor(actor)
+                                       .setZoneOffset(zoneOffset)
+                                       .build();
     }
 
     @Test

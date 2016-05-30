@@ -52,7 +52,7 @@ public class TestCommandFactory extends CommandFactory {
     }
 
     protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
-        super(actor, zoneOffset);
+        super(newBuilder().setActor(actor).setZoneOffset(zoneOffset));
     }
 
     /**

@@ -25,7 +25,10 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,22 +41,22 @@ public class CommandFactory {
 
     private final UserId actor;
     private final ZoneOffset zoneOffset;
+    /**
+     * The ID of the tenant in a multitenant application.
+     *
+     * <p>This field is null in a single tenant application.
+     */
+    @Nullable
+    private final TenantId tenantId;
 
-    protected CommandFactory(UserId actor, ZoneOffset zoneOffset) {
-        this.actor = checkNotNull(actor);
-        this.zoneOffset = checkNotNull(zoneOffset);
+    protected CommandFactory(Builder builder) {
+        this.actor = builder.actor;
+        this.zoneOffset = builder.zoneOffset;
+        this.tenantId = builder.tenantId;
     }
 
-    /**
-     * Creates new instance of the factory for the user working at the timezone
-     * of the passed offset.
-     *
-     * @param actor the ID of the user generating commands
-     * @param zoneOffset the offset of the timezone the user works in
-     * @return a new factory instance
-     */
-    public static CommandFactory newInstance(UserId actor, ZoneOffset zoneOffset) {
-        return new CommandFactory(actor, zoneOffset);
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -63,7 +66,10 @@ public class CommandFactory {
      * @return new command factory at new time zone
      */
     public CommandFactory switchTimezone(ZoneOffset zoneOffset) {
-        return newInstance(getActor(), zoneOffset);
+        return newBuilder().setActor(getActor())
+                           .setZoneOffset(zoneOffset)
+                           .setTenantId(getTenantId())
+                           .build();
     }
 
     public UserId getActor() {
@@ -72,6 +78,11 @@ public class CommandFactory {
 
     public ZoneOffset getZoneOffset() {
         return zoneOffset;
+    }
+
+    @Nullable
+    public TenantId getTenantId() {
+        return tenantId;
     }
 
     /**
@@ -87,5 +98,65 @@ public class CommandFactory {
         final CommandContext context = Commands.createContext(getActor(), getZoneOffset());
         final Command result = Commands.create(message, context);
         return result;
+    }
+
+    public static class Builder {
+        private UserId actor;
+        private ZoneOffset zoneOffset;
+        @Nullable
+        private TenantId tenantId;
+
+        private Builder() {}
+
+        public UserId getActor() {
+            return actor;
+        }
+
+        /**
+         * Sets the ID for the user generating commands.
+         *
+         * @param actor the ID of the user generating commands
+         */
+        public Builder setActor(UserId actor) {
+            this.actor = checkNotNull(actor);
+            return this;
+        }
+
+        public ZoneOffset getZoneOffset() {
+            return zoneOffset;
+        }
+
+        /**
+         * Sets the time zone in which the user works.
+         *
+         * @param zoneOffset the offset of the timezone the user works in
+         */
+        public Builder setZoneOffset(ZoneOffset zoneOffset) {
+            this.zoneOffset = checkNotNull(zoneOffset);
+            return this;
+        }
+
+        @Nullable
+        public TenantId getTenantId() {
+            return tenantId;
+        }
+
+        /**
+         * Sets the ID of a tenant in a multitenant application to which this user belongs.
+         *
+         * @param tenantId the ID of the tenant or null for single-tenant applications
+         */
+        public Builder setTenantId(@Nullable TenantId tenantId) {
+            this.tenantId = tenantId;
+            return this;
+        }
+
+        public CommandFactory build() {
+            checkNotNull(actor, "`actor` must be defined");
+            checkNotNull(zoneOffset, "`zoneOffset` must be defined");
+
+            final CommandFactory result = new CommandFactory(this);
+            return result;
+        }
     }
 }
