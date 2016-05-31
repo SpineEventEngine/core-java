@@ -35,6 +35,7 @@ import org.spine3.client.grpc.Topic;
 import org.spine3.examples.aggregate.command.AddOrderLine;
 import org.spine3.examples.aggregate.command.CreateOrder;
 import org.spine3.examples.aggregate.command.PayForOrder;
+import org.spine3.money.Money;
 import org.spine3.protobuf.Messages;
 import org.spine3.time.ZoneOffsets;
 
@@ -44,6 +45,8 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.money.Currency.USD;
+import static org.spine3.money.MoneyUtil.newMoney;
 import static org.spine3.protobuf.Messages.toText;
 
 /**
@@ -54,6 +57,7 @@ import static org.spine3.protobuf.Messages.toText;
  * @author Alexander Litus
  */
 public class ClientApp {
+
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String SERVICE_HOST = "localhost";
 
@@ -108,19 +112,19 @@ public class ClientApp {
     }
 
     private Command addOrderLine(OrderId orderId) {
-        final double price = 51.33;
+        final int bookPriceUsd = 52;
         final Book book = Book.newBuilder()
                 .setBookId(BookId.newBuilder().setISBN("978-0321125217").build())
                 .setAuthor("Eric Evans")
                 .setTitle("Domain Driven Design.")
-                .setPrice(price)
+                .setPrice(newMoney(bookPriceUsd, USD))
                 .build();
         final int quantity = 1;
-        final double totalPrice = book.getPrice() * quantity;
+        final Money totalPrice = newMoney(bookPriceUsd * quantity, USD);
         final OrderLine orderLine = OrderLine.newBuilder()
                 .setProductId(Messages.toAny(book.getBookId()))
                 .setQuantity(quantity)
-                .setTotal(totalPrice)
+                .setPrice(totalPrice)
                 .build();
         final AddOrderLine msg = AddOrderLine.newBuilder()
                                              .setOrderId(orderId)
@@ -164,7 +168,6 @@ public class ClientApp {
      */
     private List<Command> generateRequests() {
         final List<Command> result = newLinkedList();
-
         for (int i = 0; i < 10; i++) {
             final OrderId orderId = OrderId.newBuilder().setValue(String.valueOf(i)).build();
             result.add(createOrder(orderId));
