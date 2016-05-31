@@ -143,7 +143,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
             private final CommandHandlerMethod.Factory value = new CommandHandlerMethod.Factory(); // use the FQN
         }
 

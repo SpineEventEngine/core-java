@@ -64,14 +64,12 @@ public class MessageClassShould {
 
     @Test
     public void be_not_equal_to_null() {
-        //noinspection ObjectEqualsNull
-        assertNotEquals(testMsgClass, null);
+        assertNotNull(testMsgClass);
     }
 
     @Test
     public void be_not_equal_to_object_of_another_class() {
         // Notice that we're creating a new object with the same value passed.
-        //noinspection EqualsBetweenInconvertibleTypes
         assertNotEquals(testMsgClass, new MessageClass(MSG_CLASS) {});
     }
 

@@ -103,7 +103,7 @@ import java.lang.reflect.Modifier;
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
             private final EventApplierMethod.Factory value = new EventApplierMethod.Factory(); // use the FQN
         }
 
