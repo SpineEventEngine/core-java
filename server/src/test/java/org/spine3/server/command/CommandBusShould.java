@@ -48,6 +48,7 @@ import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
+import org.spine3.test.Tests;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -118,8 +119,7 @@ public class CommandBusShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
-        // noinspection ConstantConditions
-        CommandBus.newInstance(null);
+        CommandBus.newInstance(Tests.<CommandStore>nullRef());
     }
 
     @Test

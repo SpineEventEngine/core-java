@@ -109,7 +109,6 @@ public class IoUtil {
      *
      * <p>Logs each {@link IOException} if it occurs.
      */
-    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static void close(Closeable... closeables) {
         close(FluentIterable.of(closeables));
     }
@@ -139,7 +138,6 @@ public class IoUtil {
      *
      * <p>Logs each {@link Exception} if it occurs.
      */
-    @SuppressWarnings("ConstantConditions"/*check for null is ok*/)
     public static void closeAll(AutoCloseable... closeables) {
         closeAll(FluentIterable.of(closeables));
     }

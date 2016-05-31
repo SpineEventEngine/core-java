@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.test.Tests;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestEntity;
@@ -93,14 +94,12 @@ public class EntityShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        // noinspection ConstantConditions
-        entity.setState(null, 0, TimeUtil.getCurrentTime());
+        entity.setState(Tests.<Project>nullRef(), 0, TimeUtil.getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_modification_time() {
-        // noinspection ConstantConditions
-        entity.setState(state, 0, null);
+        entity.setState(state, 0, Tests.<Timestamp>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)

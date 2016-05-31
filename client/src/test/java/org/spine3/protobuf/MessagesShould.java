@@ -52,16 +52,14 @@ public class MessagesShould {
         assertTrue(Tests.hasPrivateUtilityConstructor(Messages.class));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
-        Messages.toText(null);
+        Messages.toText(Tests.<Message>nullRef());
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toJson_fail_on_null() {
-        Messages.toJson(null);
+        Messages.toJson(Tests.<Message>nullRef());
     }
 
     @Test
@@ -94,16 +92,14 @@ public class MessagesShould {
         assertEquals(expected, actual);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_null_id() {
-        Messages.toAny(null);
+        Messages.toAny(Tests.<Message>nullRef());
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
-        Messages.fromAny(null);
+        Messages.fromAny(Tests.<Any>nullRef());
     }
 
     //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.

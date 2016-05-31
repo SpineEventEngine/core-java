@@ -21,6 +21,7 @@
 package org.spine3.server.users;
 
 import org.junit.Test;
+import org.spine3.test.Tests;
 import org.spine3.users.TenantId;
 
 import static org.junit.Assert.*;
@@ -34,10 +35,9 @@ public class CurrentTenantShould {
         assertTrue(hasPrivateUtilityConstructor(CurrentTenant.class));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void reject_null_value() {
-        CurrentTenant.set(null);
+        CurrentTenant.set(Tests.<TenantId>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)

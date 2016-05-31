@@ -78,7 +78,23 @@ public class Tests {
         return true;
     }
 
+    /**
+     * Returns the current time in seconds.
+     *
+     * @return a seconds value
+     */
     public static long currentTimeSeconds() {
-        return currentTimeMillis() / MSEC_IN_SECOND;
+        final long secs = currentTimeMillis() / MSEC_IN_SECOND;
+        return secs;
+    }
+
+    /**
+     * Returns {@code null}.
+     * Use it when it is needed to pass {@code null} to a method in tests so that no warnings suppression is needed.
+     */
+    public static <T> T nullRef() {
+        final T nullRef = null;
+        //noinspection ConstantConditions
+        return nullRef;
     }
 }

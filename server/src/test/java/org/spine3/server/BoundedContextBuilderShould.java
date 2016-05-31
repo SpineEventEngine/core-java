@@ -27,6 +27,7 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
 import static org.spine3.testdata.TestCommands.newCommandBus;
@@ -49,8 +50,7 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_StorageFactory() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setStorageFactory(null);
+        BoundedContext.newBuilder().setStorageFactory(Tests.<StorageFactory>nullRef());
     }
 
     @Test
@@ -62,8 +62,7 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setCommandBus(null);
+        BoundedContext.newBuilder().setCommandBus(Tests.<CommandBus>nullRef());
     }
 
     @Test
@@ -95,8 +94,7 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
-        //noinspection ConstantConditions
-        BoundedContext.newBuilder().setEventBus(null);
+        BoundedContext.newBuilder().setEventBus(Tests.<EventBus>nullRef());
     }
 
     @Test

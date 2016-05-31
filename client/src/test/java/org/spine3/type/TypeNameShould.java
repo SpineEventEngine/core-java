@@ -23,6 +23,7 @@ package org.spine3.type;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.RunTest;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -39,8 +41,7 @@ public class TypeNameShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_value() {
-        //noinspection ConstantConditions
-        TypeName.of((String)null);
+        TypeName.of(Tests.<String>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)

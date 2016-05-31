@@ -29,6 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -89,8 +90,7 @@ public class ValidateShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_checked_string_is_null() {
-        //noinspection ConstantConditions
-        Validate.checkNotEmptyOrBlank(null, "");
+        Validate.checkNotEmptyOrBlank(Tests.<String>nullRef(), "");
     }
 
     @Test(expected = IllegalArgumentException.class)

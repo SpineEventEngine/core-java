@@ -20,7 +20,9 @@
 
 package org.spine3.client;
 
+import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
@@ -47,9 +49,8 @@ public class UserUtilShould {
         assertEquals(expected, userId);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_UseId_value() {
-        newUserId(null);
+        newUserId(Tests.<String>nullRef());
     }
 }

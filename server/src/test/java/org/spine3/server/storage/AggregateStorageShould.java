@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Snapshot;
+import org.spine3.test.Tests;
 import org.spine3.test.project.Project;
 import org.spine3.test.project.ProjectId;
 import org.spine3.testdata.TestEventFactory;
@@ -107,32 +108,27 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_read_history_by_null_id() {
-        // noinspection ConstantConditions
-        storage.historyBackward(null);
+        storage.historyBackward(Tests.<ProjectId>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_event() {
-        // noinspection ConstantConditions
-        storage.writeEvent(id, null);
+        storage.writeEvent(id, Tests.<Event>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_event_by_null_id() {
-        // noinspection ConstantConditions
-        storage.writeEvent(null, Event.getDefaultInstance());
+        storage.writeEvent(Tests.<ProjectId>nullRef(), Event.getDefaultInstance());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_null_snapshot() {
-        // noinspection ConstantConditions
-        storage.write(id, (Snapshot) null);
+        storage.write(id, Tests.<AggregateEvents>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_write_snapshot_by_null_id() {
-        // noinspection ConstantConditions
-        storage.write(null, Snapshot.getDefaultInstance());
+        storage.write(Tests.<ProjectId>nullRef(), Snapshot.getDefaultInstance());
     }
 
     @Test
