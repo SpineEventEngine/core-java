@@ -74,6 +74,9 @@ import static org.spine3.validate.Validate.isDefault;
  */
 public class CommandBus implements AutoCloseable {
 
+    // TODO:2016-05-31:alexander.litus: consider extracting class(es), moving methods, etc,
+    // because this class is overly coupled and has too many methods.
+
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
 
     private final HandlerRegistry handlerRegistry = new HandlerRegistry();
@@ -195,7 +198,8 @@ public class CommandBus implements AutoCloseable {
         }
 
         if (isMultitenant) {
-            CurrentTenant.set(command.getContext().getTenantId());
+            CurrentTenant.set(command.getContext()
+                                     .getTenantId());
         }
 
         commandStore.store(command);
