@@ -25,13 +25,14 @@ option java_package="org.spine3.examples.aggregate";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
+import "spine/money/money.proto";
 
 message Order {
     OrderId order_id = 1;
 
     repeated OrderLine order_line = 2;
 
-    double total = 3;
+    spine.money.Money price = 3;
 
     enum Status {
         NEW = 0;
@@ -55,7 +56,7 @@ message OrderLine {
 
     int32 quantity = 3;
 
-    double total = 4;
+    spine.money.Money price = 4;
 }
 
 // This is an example so the BillingInfo

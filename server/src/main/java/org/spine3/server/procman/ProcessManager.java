@@ -37,14 +37,16 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Response;
-import org.spine3.base.UserId;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.reflect.Classes;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.server.reflect.MethodRegistry;
+import org.spine3.server.users.CurrentTenant;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.TenantId;
+import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -367,7 +369,8 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         }
 
         private Command produceCommand(Message newMessage) {
-            final CommandContext newContext = Commands.createContext(actor, zoneOffset);
+            final TenantId currentTenant = CurrentTenant.get();
+            final CommandContext newContext = Commands.createContext(currentTenant, actor, zoneOffset);
             final Command result = Commands.create(newMessage, newContext);
             return result;
         }

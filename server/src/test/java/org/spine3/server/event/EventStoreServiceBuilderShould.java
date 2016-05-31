@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.Tests;
 
 import java.util.concurrent.Executor;
 
@@ -43,14 +44,12 @@ public class EventStoreServiceBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_null_executor() {
-        //noinspection ConstantConditions
-        builder.setStreamExecutor(null);
+        builder.setStreamExecutor(Tests.<Executor>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_null_EventStorage() {
-        //noinspection ConstantConditions
-        builder.setStreamExecutor(null);
+        builder.setStreamExecutor(Tests.<Executor>nullRef());
     }
 
     @Test(expected = NullPointerException.class)

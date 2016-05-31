@@ -18,32 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
-
-import org.spine3.users.UserId;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * Utilities for working with user-related {@code Message} classes.
- *
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for server-side code
+ * managing access of users and tenants.
  */
-public class UserUtil {
 
-    /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
+@ParametersAreNonnullByDefault
+package org.spine3.server.users;
 
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
-
-    private UserUtil() {}
-}
+import javax.annotation.ParametersAreNonnullByDefault;

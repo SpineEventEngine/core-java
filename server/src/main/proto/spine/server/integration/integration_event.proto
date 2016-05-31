@@ -43,7 +43,7 @@ message IntegrationEvent {
 // Meta-information about an event.
 message IntegrationEventContext {
     // An id of the event.
-    spine.base.EventId event_id = 1;
+    base.EventId event_id = 1;
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 2;

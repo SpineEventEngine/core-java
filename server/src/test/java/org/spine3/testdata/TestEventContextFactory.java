@@ -28,8 +28,8 @@ import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.UserId;
 import org.spine3.server.integration.IntegrationEventContext;
+import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;

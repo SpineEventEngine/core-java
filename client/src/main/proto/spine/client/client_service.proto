@@ -43,12 +43,12 @@ message Topic {
 // A service for sending commands from clients.
 service ClientService {
     // Request to handle a command.
-    rpc Post(spine.base.Command) returns (spine.base.Response);
+    rpc Post(base.Command) returns (base.Response);
 
     // Request to receive events on the topic of interest.
-    rpc Subscribe(Topic) returns (stream spine.base.Event);
+    rpc Subscribe(Topic) returns (stream base.Event);
 
     // The request to unsubscribe from the topic.
     // This should close the stream opened by `Subscribe` call with the same `Topic` value.
-    rpc Unsubscribe(Topic) returns (spine.base.Response);
+    rpc Unsubscribe(Topic) returns (base.Response);
 }

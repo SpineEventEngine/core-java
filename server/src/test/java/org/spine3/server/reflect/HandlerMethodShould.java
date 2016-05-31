@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
+import org.spine3.test.Tests;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,8 +51,8 @@ public class HandlerMethodShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_method() {
-        //noinspection ConstantConditions,ResultOfObjectAllocationIgnored
-        new TwoParamMethod(null);
+        //noinspection ResultOfObjectAllocationIgnored
+        new TwoParamMethod(Tests.<Method>nullRef());
     }
 
     @Test

@@ -33,10 +33,9 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
-import org.spine3.base.PersonName;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.base.UserId;
+import org.spine3.people.PersonName;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -57,6 +56,7 @@ import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
+import org.spine3.users.UserId;
 
 import java.util.List;
 import java.util.Set;
@@ -224,7 +224,7 @@ public class ClientServiceShould {
 
     private static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
 
-        @SuppressWarnings({"PublicConstructorInNonPublicClass"}) // by convention (as it's used by Reflection).
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // by convention (as it's used by Reflection).
         public CustomerAggregate(CustomerId id) {
             super(id);
         }

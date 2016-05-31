@@ -18,39 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.server.users;
 
-import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.users.UserId;
+import org.spine3.users.TenantId;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.client.UserUtil.newUserId;
+import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class UserUtilShould {
+public class CurrentTenantShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(UserUtil.class));
-    }
-
-    @Test
-    public void create_UserId_by_string() {
-
-        final String testIdString = "12345";
-        final UserId userId = newUserId(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-
-        assertEquals(expected, userId);
+        assertTrue(hasPrivateUtilityConstructor(CurrentTenant.class));
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_UseId_value() {
-        newUserId(Tests.<String>nullRef());
+    public void reject_null_value() {
+        CurrentTenant.set(Tests.<TenantId>nullRef());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_default_value() {
+        CurrentTenant.set(TenantId.getDefaultInstance());
+    }
+
+    @Test
+    public void keep_set_value() {
+        final TenantId expected = TenantId.newBuilder().setValue(getClass().getSimpleName()).build();
+
+        CurrentTenant.set(expected);
+        assertEquals(expected, CurrentTenant.get());
+    }
+
+    @Test
+    public void clear_set_value() {
+        final TenantId value = TenantId.newBuilder().setValue(getClass().getSimpleName()).build();
+        CurrentTenant.set(value);
+
+        CurrentTenant.clear();
+
+        assertNull(CurrentTenant.get());
     }
 }

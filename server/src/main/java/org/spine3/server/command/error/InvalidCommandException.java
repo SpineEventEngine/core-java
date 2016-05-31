@@ -85,30 +85,30 @@ public class InvalidCommandException extends CommandException {
     }
 
     /**
-     * Creates an exception instance for a command with missing namespace attribute, which is required
-     * in a multitenant application.
+     * Creates an exception for a command with missing {@code tenant_id} attribute in the {@code CommandContext},
+     * which is required in a multitenant application.
      */
-    public static InvalidCommandException onMissingNamespace(Command command) {
+    public static InvalidCommandException onMissingTenantId(Command command) {
         final Message commandMessage = Commands.getMessage(command);
         final CommandContext context = command.getContext();
         final String errMsg = String.format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to multitenant Command Bus, " +
-                        "but has no namespace attribute in the context.",
+                        "but has no `tenant_id` attribute in the context.",
                 TypeName.of(commandMessage).value(),
                 CommandClass.of(commandMessage).value(),
                 idToString(context.getCommandId()));
-        final Error error = unknownNamespaceError(commandMessage, errMsg);
+        final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
     /**
-     * Creates an error instance for a command with missing namespace attribute, which is required
-     * in a multitenant application.
+     * Creates an error for a command with missing {@code tenant_id} attribute  attribute in the {@code CommandContext},
+     * which is required in a multitenant application.
      */
-    public static Error unknownNamespaceError(Message commandMessage, String errorText) {
+    public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
                 .setType(CommandValidationError.getDescriptor().getFullName())
-                .setCode(CommandValidationError.NAMESPACE_UNKNOWN.getNumber())
+                .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
                 .setMessage(errorText)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();

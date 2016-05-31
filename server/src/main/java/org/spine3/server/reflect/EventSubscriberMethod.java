@@ -98,7 +98,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
         private enum Singleton {
             INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            @SuppressWarnings({"NonSerializableFieldInSerializableClass", "UnnecessarilyQualifiedInnerClassAccess"})
             private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory(); // use the FQN
         }
 

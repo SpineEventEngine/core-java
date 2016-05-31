@@ -104,7 +104,6 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
                         shutdown();
                     }
                 } catch (RuntimeException e) {
-                    //noinspection CallToPrintStackTrace
                     e.printStackTrace(System.err);
                 }
                 System.err.println(serverClass + " shut down.");

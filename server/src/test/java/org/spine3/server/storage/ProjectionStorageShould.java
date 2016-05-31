@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
+import org.spine3.test.Tests;
 
 import static com.google.protobuf.util.TimeUtil.add;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -70,8 +71,7 @@ public abstract class ProjectionStorageShould<I> extends AbstractStorageShould<I
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_event_time() {
-        //noinspection ConstantConditions
-        storage.writeLastHandledEventTime(null);
+        storage.writeLastHandledEventTime(Tests.<Timestamp>nullRef());
     }
 
     @Test

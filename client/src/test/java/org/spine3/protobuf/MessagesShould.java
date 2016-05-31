@@ -28,9 +28,9 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.spine3.base.UserId;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
+import org.spine3.users.UserId;
 
 import java.util.List;
 
@@ -52,16 +52,14 @@ public class MessagesShould {
         assertTrue(Tests.hasPrivateUtilityConstructor(Messages.class));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
-        Messages.toText(null);
+        Messages.toText(Tests.<Message>nullRef());
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void toJson_fail_on_null() {
-        Messages.toJson(null);
+        Messages.toJson(Tests.<Message>nullRef());
     }
 
     @Test
@@ -94,16 +92,14 @@ public class MessagesShould {
         assertEquals(expected, actual);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_null_id() {
-        Messages.toAny(null);
+        Messages.toAny(Tests.<Message>nullRef());
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
-        Messages.fromAny(null);
+        Messages.fromAny(Tests.<Any>nullRef());
     }
 
     //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.

@@ -109,8 +109,7 @@ public class ProjectionRepositoryShould {
             incrementState(newState);
         }
 
-        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
-                                                 can have two parameters. */
+        /* EventContext parameter left to show that a projection subscriber can have two parameters. */
         @Subscribe
         public void on(ProjectStarted event, EventContext ignored) {
             keep(event);

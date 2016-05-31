@@ -30,8 +30,8 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/any.proto";
 
-import "spine/base/user_id.proto";
-import "spine/base/namespace.proto";
+import "spine/users/user_id.proto";
+import "spine/users/tenant_id.proto";
 import "spine/time/zone_offset.proto";
 
 // Command identifier.
@@ -68,7 +68,7 @@ message CommandContext {
     CommandId command_id = 1;
 
     // The user who created the command.
-    UserId actor = 2;
+    users.UserId actor = 2;
 
     // The time when the command was created.
     google.protobuf.Timestamp timestamp = 3;
@@ -76,16 +76,10 @@ message CommandContext {
     // The zone offset from which the command is made.
     time.ZoneOffset zone_offset = 4;
 
-    // The `namespace` attribute must be defined for commands in multitenant applications.
-    Namespace namespace = 5;
+    // The ID of a tenant in a multitenant application.
+    users.TenantId tenant_id = 5;
 
-    // The command scheduling options.
-    Schedule schedule = 6;
-
-    // The version of the entity for which this command is intended.
-    // A client app may not fill in this attribute if the command applies to any version of the entity.
-    int32 target_version = 7;
-
+    // A command may be scheduled. This type defines scheduling options.
     message Schedule {
         // The delay between the moment of receiving a command at the server and its delivery to the target.
         google.protobuf.Duration delay = 1;
@@ -101,6 +95,13 @@ message CommandContext {
         //TODO:2016-05-27:alexander.yevsyukov: Set automatically by whom? How do we use this attribute?
         google.protobuf.Timestamp scheduling_time = 2;
     }
+
+    // The schedule to execute the command.
+    Schedule schedule = 6;
+
+    // The version of the entity for which this command is intended.
+    // A client app may not fill in this attribute if the command applies to any version of the entity.
+    int32 target_version = 7;
 }
 
 // Enumeration of possible failures when validating a command.
@@ -114,8 +115,8 @@ enum CommandValidationError {
     // The command message is invalid according to custom Protobuf options set.
     INVALID_COMMAND = 2;
 
-    // The command context does not have `namespace` attribute defined in a multitenant application.
-    NAMESPACE_UNKNOWN = 3;
+    // The command context does not have `tenant_id` attribute defined in a multitenant application.
+    TENANT_UNKNOWN = 3;
 }
 
 // This enumeration defines possible statuses of command processing.

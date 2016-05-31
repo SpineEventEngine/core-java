@@ -49,10 +49,10 @@ message AggregateStorageRecord {
 
     oneof kind {
         // Event stored in the record, or...
-        spine.base.Event event = 20;
+        base.Event event = 20;
 
         // Snapshot of the aggregate.
-        spine.server.aggregate.Snapshot snapshot = 21;
+        server.aggregate.Snapshot snapshot = 21;
     }
 }
 
@@ -61,11 +61,11 @@ message AggregateEvents {
     // If the `snapshot` field is populated, it contains the last snapshot in the history of the aggregate.
     // This value will be used for restoring the aggregate state before playing events that occurred
     // after this snapshot was made.
-    spine.server.aggregate.Snapshot snapshot = 1;
+    server.aggregate.Snapshot snapshot = 1;
 
     // Events of the aggregate.
     //
     // If `snapshot` field is populated, events represent the 'tail' of the event history of the aggregate.
     // Otherwise, events are full history of the aggregate.
-    repeated spine.base.Event event = 2;
+    repeated base.Event event = 2;
 }

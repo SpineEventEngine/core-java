@@ -20,15 +20,16 @@
 
 package org.spine3.client.test;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.UserId;
 import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
+import org.spine3.users.UserId;
 
 import static org.spine3.client.UserUtil.newUserId;
 
@@ -39,6 +40,7 @@ import static org.spine3.client.UserUtil.newUserId;
  * @author Alexaner Yevsyukov
  */
 @Internal
+@VisibleForTesting
 public class TestCommandFactory extends CommandFactory {
 
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
@@ -50,7 +52,7 @@ public class TestCommandFactory extends CommandFactory {
     }
 
     protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
-        super(actor, zoneOffset);
+        super(newBuilder().setActor(actor).setZoneOffset(zoneOffset));
     }
 
     /**

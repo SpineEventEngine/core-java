@@ -26,10 +26,10 @@ option java_multiple_files = true;
 option java_outer_classname = "QueryProto";
 option java_package = "org.spine3.client";
 
-import public "spine/client/language.proto";
+import public "spine/ui/language.proto";
 
 message QueryContext {
 
-    Language language = 1;
+    ui.Language language = 1;
     //TODO:2015-12-16:alexander.yevsyukov: Finish
 }

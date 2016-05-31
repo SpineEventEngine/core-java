@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

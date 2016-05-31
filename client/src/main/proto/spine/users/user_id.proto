@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.users;
 
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "UserIdProto";
-option java_package = "org.spine3.base";
+option java_package = "org.spine3.users";
 
 // A string-based identifier of the user.
 message UserId {

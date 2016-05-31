@@ -34,6 +34,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.test.Tests;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.CreateProject;
 import org.spine3.type.TypeName;
@@ -245,26 +246,22 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_store_null() {
-        //noinspection ConstantConditions
-        storage.store(null);
+        storage.store(Tests.<Command>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
-        //noinspection ConstantConditions
-        storage.setOkStatus(null);
+        storage.setOkStatus(Tests.<CommandId>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_error_status_by_null_ID() {
-        //noinspection ConstantConditions
-        storage.updateStatus(null, Error.getDefaultInstance());
+        storage.updateStatus(Tests.<CommandId>nullRef(), Error.getDefaultInstance());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
-        //noinspection ConstantConditions
-        storage.updateStatus(null, Failure.getDefaultInstance());
+        storage.updateStatus(Tests.<CommandId>nullRef(), Failure.getDefaultInstance());
     }
 
     /*

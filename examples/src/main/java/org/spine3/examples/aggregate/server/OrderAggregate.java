@@ -33,6 +33,8 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 
+import static org.spine3.money.MoneyUtil.newMoney;
+
 /**
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
@@ -85,10 +87,11 @@ public class OrderAggregate extends Aggregate<OrderId, Order, Order.Builder> {
     private void event(OrderLineAdded event) {
         final OrderLine orderLine = event.getOrderLine();
         final Order currentState = getState();
+        final long newPriceAmount = currentState.getPrice().getAmount() + orderLine.getPrice().getAmount();
         getBuilder()
                 .setOrderId(event.getOrderId())
                 .addOrderLine(orderLine)
-                .setTotal(currentState.getTotal() + orderLine.getTotal());
+                .setPrice(newMoney(newPriceAmount, currentState.getPrice().getCurrency()));
     }
 
     @Apply
@@ -105,10 +108,10 @@ public class OrderAggregate extends Aggregate<OrderId, Order, Order.Builder> {
             throw new IllegalArgumentException("Product is not set");
         }
         if (orderLine.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0.");
+            throw new IllegalArgumentException("Product quantity must be greater than 0.");
         }
-        if (orderLine.getTotal() <= 0) {
-            throw new IllegalArgumentException("Total price must be positive.");
+        if (orderLine.getPrice().getAmount() <= 0) {
+            throw new IllegalArgumentException("Order line price must be positive.");
         }
     }
 

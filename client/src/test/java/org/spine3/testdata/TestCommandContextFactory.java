@@ -26,7 +26,8 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.base.UserId;
+import org.spine3.users.TenantId;
+import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
@@ -62,7 +63,8 @@ public class TestCommandContextFactory {
                                                              .setCommandId(commandId)
                                                              .setActor(userId)
                                                              .setTimestamp(when)
-                                                             .setZoneOffset(UTC);
+                                                             .setZoneOffset(UTC)
+                                                             .setTenantId(TenantId.newBuilder().setValue(newUuid()));
         return builder.build();
     }
 

@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.test.Tests;
 
 import static com.google.common.base.Throwables.propagate;
 import static org.junit.Assert.*;
@@ -94,20 +95,17 @@ public abstract class AbstractStorageShould<I, R extends Message> {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_read_by_null_id() {
-        //noinspection ConstantConditions
-        storage.read(null);
+        storage.read(Tests.<I>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_by_null_id() {
-        //noinspection ConstantConditions
-        storage.write(null, newStorageRecord());
+        storage.write(Tests.<I>nullRef(), newStorageRecord());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        //noinspection ConstantConditions
-        storage.write(newId(), null);
+        storage.write(newId(), Tests.<R>nullRef());
     }
 
     @Test

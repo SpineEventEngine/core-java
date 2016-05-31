@@ -26,15 +26,16 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.UserId;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
+import org.spine3.users.TenantId;
+import org.spine3.users.UserId;
 
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.*;
+import static org.spine3.client.UserUtil.newUserId;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class CommandFactoryShould {
@@ -46,13 +47,45 @@ public class CommandFactoryShould {
 
     @Before
     public void setUp() {
-        commandFactory = CommandFactory.newInstance(actor, zoneOffset);
+        commandFactory = CommandFactory.newBuilder()
+                                       .setActor(actor)
+                                       .setZoneOffset(zoneOffset)
+                                       .build();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void require_actor_in_Builder() {
+        CommandFactory.newBuilder()
+                      .setZoneOffset(zoneOffset)
+                      .build();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void require_zoneOffset_in_Builder() {
+        CommandFactory.newBuilder()
+                      .setActor(actor)
+                      .build();
+    }
+
+    @Test
+    public void return_set_values_in_Builder() {
+        final CommandFactory.Builder builder = CommandFactory.newBuilder()
+                                                             .setActor(actor)
+                                                             .setZoneOffset(zoneOffset);
+        assertNotNull(builder.getActor());
+        assertNotNull(builder.getZoneOffset());
+        assertNull(builder.getTenantId());
     }
 
     @Test
     public void create_instance_by_user_and_timezone() {
         assertEquals(actor, commandFactory.getActor());
         assertEquals(zoneOffset, commandFactory.getZoneOffset());
+    }
+
+    @Test
+    public void be_single_tenant_by_default() {
+        assertNull(commandFactory.getTenantId());
     }
 
     @Test
@@ -71,5 +104,20 @@ public class CommandFactoryShould {
         final Timestamp afterCall = TimeUtil.add(TimeUtil.getCurrentTime(), Durations.ofSeconds(1));
 
         assertTrue(Timestamps.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
+    }
+
+    @Test
+    public void set_tenant_ID_in_commands_when_created_with_tenant_ID() {
+        final TenantId tenantId = TenantId.newBuilder()
+                                       .setValue(getClass().getSimpleName())
+                                       .build();
+        final CommandFactory mtCommandFactory = CommandFactory.newBuilder()
+                                                            .setTenantId(tenantId)
+                                                            .setActor(actor)
+                                                            .setZoneOffset(zoneOffset)
+                                                            .build();
+
+        final Command command = mtCommandFactory.create(StringValue.getDefaultInstance());
+        assertEquals(tenantId, command.getContext().getTenantId());
     }
 }
