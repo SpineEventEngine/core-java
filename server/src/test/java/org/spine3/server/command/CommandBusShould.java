@@ -47,6 +47,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
+import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.failures.Failures;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
@@ -110,10 +111,21 @@ public class CommandBusShould {
         eventBus.close();
     }
 
+
+    /*
+     * Creation tests.
+     *********************/
+
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandStore_on_construction() {
         // noinspection ConstantConditions
         CommandBus.newInstance(null);
+    }
+
+    @Test
+    public void create_new_instance() {
+        final CommandBus commandBus = CommandBus.newInstance(commandStore);
+        assertNotNull(commandBus);
     }
 
     /*
@@ -305,11 +317,30 @@ public class CommandBusShould {
     @Test
     public void post_command_and_return_OK_response() {
         commandBus.register(createProjectHandler);
+
+        commandBus.post(createProjectCmd(), responseObserver);
+
+        assertResponseOkAndCompleted(responseObserver);
+    }
+
+    @Test
+    public void post_command_and_set_current_tenant_if_multitenant() {
+        commandBus.setMultitenant(true);
+        commandBus.register(createProjectHandler);
         final Command cmd = createProjectCmd();
 
         commandBus.post(cmd, responseObserver);
 
-        assertResponseOkAndCompleted(responseObserver);
+        assertEquals(cmd.getContext().getTenantId(), CurrentTenant.get());
+    }
+
+    @Test
+    public void post_command_and_do_not_set_current_tenant_if_not_multitenant() {
+        commandBus.register(createProjectHandler);
+
+        commandBus.post(createProjectCmd(), responseObserver);
+
+        assertNull(CurrentTenant.get());
     }
 
     @Test
@@ -423,6 +454,17 @@ public class CommandBusShould {
         return command;
     }
 
+    @Test
+    public void return_supported_classes() {
+        commandBus.register(createProjectHandler);
+        commandBus.register(new AddTaskDispatcher());
+
+        final Set<CommandClass> cmdClasses = commandBus.getSupportedCommandClasses();
+
+        assertTrue(cmdClasses.contains(CommandClass.of(CreateProject.class)));
+        assertTrue(cmdClasses.contains(CommandClass.of(AddTask.class)));
+    }
+
     /*
      * Scheduling tests.
      ********************/
@@ -498,8 +540,8 @@ public class CommandBusShould {
     }
 
     /*
-     * Utility methods.
-     ********************/
+     * Test utility methods.
+     ***********************/
 
     private static void assertResponseOkAndCompleted(TestResponseObserver observer) {
         final List<Response> responses = observer.getResponses();

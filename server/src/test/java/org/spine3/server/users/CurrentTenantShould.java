@@ -23,10 +23,16 @@ package org.spine3.server.users;
 import org.junit.Test;
 import org.spine3.users.TenantId;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class CurrentTenantShould {
+
+    @Test
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(CurrentTenant.class));
+    }
 
     @SuppressWarnings("ConstantConditions")
     @Test(expected = NullPointerException.class)

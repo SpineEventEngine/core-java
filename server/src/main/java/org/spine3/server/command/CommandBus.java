@@ -312,6 +312,8 @@ public class CommandBus implements AutoCloseable {
      * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
      *
      * <p>This set is changed when command dispatchers or handlers are registered or un-registered.
+     *
+     * @return a set of classes of supported commands
      */
     public Set<CommandClass> getSupportedCommandClasses() {
         final Set<CommandClass> result = Sets.union(dispatcherRegistry.getCommandClasses(),
