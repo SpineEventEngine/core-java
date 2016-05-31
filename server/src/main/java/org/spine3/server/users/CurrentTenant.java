@@ -33,6 +33,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * This class allows to set a tenant when handling a command or a query
  * in a multitenant application.
  *
+ * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
  * @author Alexander Yevsyukov
  */
 @SPI
