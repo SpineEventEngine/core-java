@@ -34,7 +34,7 @@ import org.spine3.SPI;
  * @author Alexander Yevsyukov
  */
 @SPI
-public abstract class AbstractStorage<I, R extends Message> implements AutoCloseable {
+public abstract class AbstractStorage<I, R extends Message> implements Storage {
 
     private boolean open = true;
 

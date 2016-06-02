@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.Classes;
+import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.CheckReturnValue;
@@ -69,7 +70,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     /**
      * The data storage for this repository.
      */
-    private AutoCloseable storage;
+    private Storage storage;
 
     /**
      * Creates the repository in the passed {@link BoundedContext}.
@@ -219,7 +220,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
      * @param factory the factory to create the storage
      * @return the created storage instance
      */
-    protected abstract AutoCloseable createStorage(StorageFactory factory);
+    protected abstract Storage createStorage(StorageFactory factory);
 
     /**
      * Closes the repository by closing the underlying storage.

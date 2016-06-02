@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nonnull;
@@ -53,8 +54,8 @@ public abstract class EntityRepository<I, E extends Entity<I, M>, M extends Mess
      * {@inheritDoc}
      */
     @Override
-    protected AutoCloseable createStorage(StorageFactory factory) {
-        final AutoCloseable result = factory.createEntityStorage(getEntityClass());
+    protected Storage createStorage(StorageFactory factory) {
+        final Storage result = factory.createEntityStorage(getEntityClass());
         return result;
     }
 

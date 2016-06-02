@@ -38,6 +38,7 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.ProjectionStorage;
+import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.type.TypeName;
@@ -117,7 +118,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
     @Override
     @SuppressWarnings("RefusedBequest") /* We do not call super.createStorage() because we create a specific
                                            type of a storage, not regular entity storage created in the parent. */
-    protected AutoCloseable createStorage(StorageFactory factory) {
+    protected Storage createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage = factory.createProjectionStorage(projectionClass);
         this.entityStorage = projectionStorage.getEntityStorage();
