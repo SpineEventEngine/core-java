@@ -204,7 +204,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements AutoClose
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
             throw new IllegalStateException(String.format(
-                    "Repository %s has already storage %s.", this, this.storage));
+                    "The repository %s already has storage %s.", this, this.storage));
         }
 
         this.storage = createStorage(factory);
