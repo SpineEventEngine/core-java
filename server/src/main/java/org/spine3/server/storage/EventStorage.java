@@ -67,6 +67,10 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         }
     };
 
+    protected EventStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     @Override
     public void write(EventId id, Event event) {
         checkNotClosed();

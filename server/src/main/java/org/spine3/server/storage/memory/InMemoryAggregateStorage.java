@@ -27,6 +27,7 @@ import org.spine3.protobuf.Timestamps;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageRecord;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -40,7 +41,6 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("ComparatorNotSerializable")
 /*package*/ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
@@ -50,11 +50,15 @@ import static com.google.common.collect.Maps.newHashMap;
 
     private final Map<I, Integer> eventCountMap = newHashMap();
 
+    protected InMemoryAggregateStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     /**
-     * Creates a new storage instance.
+     * Creates a new single-tenant storage instance.
      */
     protected static <I> InMemoryAggregateStorage<I> newInstance() {
-        return new InMemoryAggregateStorage<>();
+        return new InMemoryAggregateStorage<>(false);
     }
 
     @Override
@@ -88,11 +92,14 @@ import static com.google.common.collect.Maps.newHashMap;
     /**
      * Used for sorting by timestamp descending (from newer to older)
      */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord> {
+    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
+                                                                            Serializable {
         @Override
         public int compare(AggregateStorageRecord first, AggregateStorageRecord second) {
             final int result = Timestamps.compare(second.getTimestamp(), first.getTimestamp());
             return result;
         }
+
+        private static final long serialVersionUID = 0L;
     }
 }

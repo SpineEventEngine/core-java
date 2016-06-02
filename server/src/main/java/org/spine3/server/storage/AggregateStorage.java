@@ -51,6 +51,10 @@ public abstract class AggregateStorage<I> extends AbstractStorage<I, AggregateEv
 
     private static final String SNAPSHOT_TYPE_NAME = Snapshot.getDescriptor().getName();
 
+    protected AggregateStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     @Override
     public AggregateEvents read(I aggregateId) {
         checkNotClosed();

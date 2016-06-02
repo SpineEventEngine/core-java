@@ -58,6 +58,10 @@ import static org.spine3.validate.Validate.checkNotDefault;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandStorageRecord> {
 
+    protected CommandStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     /**
      * Stores a command with the {@link CommandStatus#RECEIVED} status by a command ID from a command context.
      *

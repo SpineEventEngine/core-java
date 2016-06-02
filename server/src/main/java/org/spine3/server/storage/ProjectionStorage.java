@@ -38,6 +38,10 @@ import javax.annotation.Nullable;
 @SPI
 public abstract class ProjectionStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
+    public ProjectionStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();

@@ -41,11 +41,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
      */
     private Timestamp timestampOfLastEvent;
 
-    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(entityStorage);
+    public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage, boolean multitenant) {
+        return new InMemoryProjectionStorage<>(entityStorage, multitenant);
     }
 
-    private InMemoryProjectionStorage(InMemoryEntityStorage<I> entityStorage) {
+    private InMemoryProjectionStorage(InMemoryEntityStorage<I> entityStorage, boolean multitenant) {
+        super(multitenant);
         this.entityStorage = entityStorage;
     }
 

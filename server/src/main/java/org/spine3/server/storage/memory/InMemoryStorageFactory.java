@@ -36,14 +36,25 @@ import org.spine3.server.storage.StorageFactory;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
+    private final boolean multitenant;
+
+    private InMemoryStorageFactory(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    @Override
+    public boolean isMultitenant() {
+        return this.multitenant;
+    }
+
     @Override
     public CommandStorage createCommandStorage() {
-        return new InMemoryCommandStorage();
+        return new InMemoryCommandStorage(isMultitenant());
     }
 
     @Override
     public EventStorage createEventStorage() {
-        return new InMemoryEventStorage();
+        return new InMemoryEventStorage(isMultitenant());
     }
 
     /**
@@ -51,7 +62,7 @@ public class InMemoryStorageFactory implements StorageFactory {
      */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> unused) {
-        return new InMemoryAggregateStorage<>();
+        return new InMemoryAggregateStorage<>(isMultitenant());
     }
 
     /**
@@ -61,13 +72,14 @@ public class InMemoryStorageFactory implements StorageFactory {
      */
     @Override
     public <I> EntityStorage<I> createEntityStorage(Class<? extends Entity<I, ?>> unused) {
-        return InMemoryEntityStorage.newInstance();
+        return InMemoryEntityStorage.newInstance(isMultitenant());
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
-        final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.newInstance();
-        return InMemoryProjectionStorage.newInstance(entityStorage);
+        final boolean multitenant = isMultitenant();
+        final InMemoryEntityStorage<I> entityStorage = InMemoryEntityStorage.newInstance(multitenant);
+        return InMemoryProjectionStorage.newInstance(entityStorage, multitenant);
     }
 
     @Override
@@ -76,14 +88,17 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     public static InMemoryStorageFactory getInstance() {
-        return Singleton.INSTANCE.value;
+        return Singleton.INSTANCE.singleTenantInstance;
     }
 
+    public static InMemoryStorageFactory getMultitenantInstance() {
+        return Singleton.INSTANCE.multitenantInstance;
+    }
+
+    @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private enum Singleton {
         INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final InMemoryStorageFactory value = new InMemoryStorageFactory();
+        private final InMemoryStorageFactory singleTenantInstance = new InMemoryStorageFactory(false);
+        private final InMemoryStorageFactory multitenantInstance = new InMemoryStorageFactory(true);
     }
-
-    private InMemoryStorageFactory() {}
 }

@@ -36,7 +36,20 @@ import org.spine3.SPI;
 @SPI
 public abstract class AbstractStorage<I, R extends Message> implements Storage {
 
+    private final boolean multitenant;
     private boolean open = true;
+
+    protected AbstractStorage(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isMultitenant() {
+        return multitenant;
+    }
 
     /**
      * Reads a record from the storage by the passed ID.
