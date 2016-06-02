@@ -20,10 +20,13 @@
 
 package org.spine3.server.storage;
 
+import org.spine3.SPI;
+
 /**
  * The base interface for storages.
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 public interface Storage extends AutoCloseable {
 }
