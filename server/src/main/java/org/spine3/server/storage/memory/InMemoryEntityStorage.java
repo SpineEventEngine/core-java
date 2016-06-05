@@ -22,9 +22,12 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.EntityStorageRecord;
+import org.spine3.server.users.CurrentTenant;
+import org.spine3.users.TenantId;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Maps.newHashMap;
 
 /**
@@ -32,22 +35,43 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-/*package*/ class InMemoryEntityStorage<I> extends EntityStorage<I> {
+/* package */ class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
-    private final Map<I, EntityStorageRecord> storage = newHashMap();
+    /**
+     * A stub instance of {@code TenantId} to be used by the storage in single-tenant context.
+     */
+    private static final TenantId singleTenant = TenantId.newBuilder().setValue("SINGLE_TENANT").build();
 
-    protected static <I> InMemoryEntityStorage<I> newInstance() {
-        return new InMemoryEntityStorage<>();
+    private final Map<TenantId, Map<I, EntityStorageRecord>> tenantToStorageMap = newHashMap();
+
+    protected InMemoryEntityStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
+    protected static <I> InMemoryEntityStorage<I> newInstance(boolean multitenant) {
+        return new InMemoryEntityStorage<>(multitenant);
+    }
+
+    private Map<I, EntityStorageRecord> getStorage() {
+        final TenantId tenantId = isMultitenant() ? CurrentTenant.get() : singleTenant;
+        checkState(tenantId != null, "Current tenant is null");
+
+        Map<I, EntityStorageRecord> storage = tenantToStorageMap.get(tenantId);
+        if (storage == null) {
+            storage = newHashMap();
+            tenantToStorageMap.put(tenantId, storage);
+        }
+        return storage;
     }
 
     @Override
     protected EntityStorageRecord readInternal(I id) {
-        return storage.get(id);
+        return getStorage().get(id);
     }
 
     @Override
     protected void writeInternal(I id, EntityStorageRecord record) {
-        storage.put(id, record);
+        getStorage().put(id, record);
     }
 
     @Override

@@ -20,25 +20,20 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.ProjectionStorage;
-import org.spine3.server.storage.ProjectionStorageShould;
+import org.junit.Test;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-/**
- * @author Alexander Litus
- */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+public class InMemoryStorageFactoryShould {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryEntityStorage<String> entityStorage = InMemoryEntityStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(entityStorage, false);
-        return storage;
+    @Test
+    public void have_single_tenant_instance() {
+        assertFalse(InMemoryStorageFactory.getInstance().isMultitenant());
     }
 
-    @Override
-    protected String newId() {
-        return newUuid();
+    @Test
+    public void have_multitenant_instance() {
+        assertTrue(InMemoryStorageFactory.getMultitenantInstance().isMultitenant());
     }
 }

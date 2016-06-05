@@ -34,6 +34,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.AggregateEvents;
 import org.spine3.server.storage.AggregateStorage;
+import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.type.CommandClass;
 
@@ -97,8 +98,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected AutoCloseable createStorage(StorageFactory factory) {
-        final AutoCloseable result = factory.createAggregateStorage(getAggregateClass());
+    protected Storage createStorage(StorageFactory factory) {
+        final Storage result = factory.createAggregateStorage(getAggregateClass());
         return result;
     }
 

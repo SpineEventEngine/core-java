@@ -18,27 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package org.spine3.server.storage;
 
-import org.spine3.server.storage.ProjectionStorage;
-import org.spine3.server.storage.ProjectionStorageShould;
-
-import static org.spine3.base.Identifiers.newUuid;
+import org.spine3.SPI;
+import org.spine3.server.users.CurrentTenant;
 
 /**
- * @author Alexander Litus
+ * The base interface for storages.
+ *
+ * @author Alexander Yevsyukov
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould<String> {
+@SPI
+public interface Storage extends AutoCloseable {
 
-    @Override
-    protected ProjectionStorage<String> getStorage() {
-        final InMemoryEntityStorage<String> entityStorage = InMemoryEntityStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(entityStorage, false);
-        return storage;
-    }
-
-    @Override
-    protected String newId() {
-        return newUuid();
-    }
+    /**
+     * Verifies is the storage is multitenant.
+     *
+     * <p>A multitenant storage should take into account a current tenant (obtained via {@link CurrentTenant#get()})
+     * when performing operations with the data it stores.
+     *
+     * @return {@code true} if the storage was created with multitenancy support, {@code false} otherwise
+     * @see CurrentTenant#get()
+     */
+    boolean isMultitenant();
 }

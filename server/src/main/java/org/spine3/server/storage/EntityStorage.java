@@ -38,6 +38,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SPI
 public abstract class EntityStorage<I> extends AbstractStorage<I, EntityStorageRecord> {
 
+    protected EntityStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     @Override
     public EntityStorageRecord read(I id) {
         checkNotClosed();

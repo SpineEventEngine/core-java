@@ -35,12 +35,12 @@ public class InMemoryEntityStorageShould extends EntityStorageShould<String> {
 
     @Override
     protected EntityStorage<String> getStorage() {
-        return InMemoryEntityStorage.newInstance();
+        return InMemoryEntityStorage.newInstance(false);
     }
 
     @Override
     protected <Id> EntityStorage<Id> getStorage(Class<? extends Entity<Id, ?>> entityClass) {
-        return InMemoryEntityStorage.newInstance();
+        return InMemoryEntityStorage.newInstance(false);
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.storage.EntityStorage;
+import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.project.Project;
@@ -75,7 +76,7 @@ public class RepositoryShould {
 
         @SuppressWarnings("ReturnOfNull")
         @Override
-        protected AutoCloseable createStorage(StorageFactory factory) {
+        protected Storage createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -112,7 +113,7 @@ public class RepositoryShould {
 
         @SuppressWarnings("ReturnOfNull")
         @Override
-        protected AutoCloseable createStorage(StorageFactory factory) {
+        protected Storage createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -149,7 +150,7 @@ public class RepositoryShould {
 
         @SuppressWarnings("ReturnOfNull")
         @Override
-        protected AutoCloseable createStorage(StorageFactory factory) {
+        protected Storage createStorage(StorageFactory factory) {
             return null;
         }
 
@@ -189,7 +190,7 @@ public class RepositoryShould {
         }
 
         @Override
-        protected AutoCloseable createStorage(StorageFactory factory) {
+        protected Storage createStorage(StorageFactory factory) {
             return factory.createEntityStorage(getEntityClass());
         }
     }
@@ -278,7 +279,7 @@ public class RepositoryShould {
 
         @SuppressWarnings("ReturnOfNull")
         @Override
-        protected AutoCloseable createStorage(StorageFactory factory) {
+        protected Storage createStorage(StorageFactory factory) {
             return null;
         }
     }

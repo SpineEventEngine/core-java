@@ -43,6 +43,10 @@ import static org.spine3.validate.Validate.checkNotDefault;
 
     private final Map<CommandId, CommandStorageRecord> storage = newHashMap();
 
+    protected InMemoryCommandStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     @Override
     public void write(CommandId id, CommandStorageRecord record) {
         checkNotClosed();

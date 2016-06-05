@@ -15,13 +15,13 @@ allprojects {
     apply plugin: 'jacoco'
 
     group = 'org.spine3'
-    version = '0.3'
+    version = '0.4'
 }
 
 project.ext {
     // NOTE: when updating Protobuf dependency, please check that TypeToClassMap.buildProtobufNamesMap() method
     // is updated with new Message types introduced in the new version of Protobuf.
-    PROTOBUF_VERSION = '3.0.0-beta-2';
+    PROTOBUF_VERSION = '3.0.0-beta-3';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
     SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.2"

@@ -28,9 +28,10 @@ import java.util.Date;
 
 import static com.google.protobuf.util.TimeUtil.*;
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Timestamps.MICROS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps.convertToDate;
-import static org.spine3.protobuf.Timestamps.convertToNanos;
+import static org.spine3.protobuf.Timestamps.NANOS_PER_MICROSECOND;
+import static org.spine3.protobuf.Timestamps.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -45,6 +46,33 @@ public class TimestampsShould {
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(Timestamps.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_have_negative_nanos() {
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos(-1).build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_have_negative_greater_than_NANOS_PER_SECOND() {
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setNanos((int)Timestamps.NANOS_PER_SECOND + 1).build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void have_seconds_greater_than_TIMESTAMP_SECONDS_MIN() {
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(TIMESTAMP_SECONDS_MIN).build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void have_seconds_lower_than_TIMESTAMP_SECONDS_MAX() {
+        Timestamps.checkTimestamp(Timestamp.newBuilder().setSeconds(TIMESTAMP_SECONDS_MAX).build());
+    }
+
+    @Test
+    @SuppressWarnings("MagicNumber")
+    public void expose_some_private_constants_from_TimeUtil() {
+        assertEquals(1000L, NANOS_PER_MICROSECOND);
+        assertEquals(1_000_000L, MICROS_PER_SECOND);
     }
 
     @Test

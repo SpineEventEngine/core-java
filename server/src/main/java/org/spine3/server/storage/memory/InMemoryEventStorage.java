@@ -57,6 +57,10 @@ import static com.google.common.collect.Iterators.filter;
             new EventStorageRecordComparator());
     private final Map<String, EventStorageRecord> index = Maps.newConcurrentMap();
 
+    protected InMemoryEventStorage(boolean multitenant) {
+        super(multitenant);
+    }
+
     /**
      * Compares event records by timestamps of events.
      */

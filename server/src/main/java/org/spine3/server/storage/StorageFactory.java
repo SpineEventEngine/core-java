@@ -33,6 +33,13 @@ import org.spine3.server.event.EventStore;
 public interface StorageFactory extends AutoCloseable {
 
     /**
+     * Verifies if the storage factory is configured to serve a multitenant application.
+     *
+     * @return {@code true} if the factory would produce multitenant storages, {@code false} otherwise
+     */
+    boolean isMultitenant();
+
+    /**
      * Creates a new {@link CommandStorage} instance.
      */
     CommandStorage createCommandStorage();
