@@ -59,7 +59,7 @@ public class Durations {
      * @return a non-null {@code Duration}
      */
     public static Duration ofSeconds(long seconds) {
-        final Duration result = createDurationFromMillis(safeMultiply(seconds, MILLIS_PER_SECOND));
+        final Duration result = createDurationFromMillis(safeMultiply(seconds, (int)MILLIS_PER_SECOND));
         return result;
     }
 

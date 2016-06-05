@@ -30,8 +30,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static com.google.protobuf.util.TimeUtil.subtract;
+import static com.google.protobuf.util.TimeUtil.*;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from {@link TimeUtil}.
@@ -42,17 +41,46 @@ import static com.google.protobuf.util.TimeUtil.subtract;
  */
 public class Timestamps {
 
-    private Timestamps() {}
+    private Timestamps() {
+    }
+
+    /**
+     * The following constants are taken from {@link com.google.protobuf.util.TimeUtil}
+     * in order to make them publicly visible to time management utils:
+     * <ul>
+     *   <li>{@link #NANOS_PER_SECOND}
+     *   <li>{@link #NANOS_PER_MILLISECOND}
+     *   <li>{@link #NANOS_PER_MICROSECOND}
+     *   <li>{@link #MILLIS_PER_SECOND}
+     *   <li>{@link #MICROS_PER_SECOND}
+     * </ul>
+     * Consider removing these constants if they become public in the Protobuf utils API.
+     **/
+
+    /**
+     * The count of nanoseconds in one second.
+     */
+    public static final long NANOS_PER_SECOND = 1_000_000_000L;
 
     /**
      * The count of nanoseconds in one millisecond.
      */
-    public static final long NANOS_PER_MILLISECOND = 1_000_000;
+    public static final long NANOS_PER_MILLISECOND = 1_000_000L;
 
     /**
      * The count of milliseconds in one second.
      */
-    public static final int MILLIS_PER_SECOND = 1000;
+    public static final long MILLIS_PER_SECOND = 1000L;
+
+    /**
+     * The count of nanoseconds in a microsecond.
+     */
+    public static final long NANOS_PER_MICROSECOND = 1000L;
+
+    /**
+     * The count of microseconds in one second.
+     */
+    public static final long MICROS_PER_SECOND = 1_000_000L;
 
     /**
      * The count of seconds in one minute.
@@ -63,7 +91,33 @@ public class Timestamps {
      * The count of minutes in one hour.
      */
     public static final int MINUTES_PER_HOUR = 60;
+
+    /**
+     * The count of hours per day.
+     */
     public static final int HOURS_PER_DAY = 24;
+
+    /**
+     * Verifies if the passed {@code Timestamp} instance is valid.
+     *
+     * <p>The {@code seconds} field value must be within the range
+     * {@code (TIMESTAMP_SECONDS_MIN, TIMESTAMP_SECONDS_MAX)}.
+     *
+     * <p>The {@code nanos} field value must be withing the range {@code (0, NANOS_PER_SECOND]}.
+     *
+     * @param value the value to check
+     * @return the passed value
+     * @throws IllegalArgumentException if {@link Timestamp} field values are not valid
+     */
+    public static Timestamp checkTimestamp(Timestamp value) throws IllegalArgumentException {
+        final long seconds = value.getSeconds();
+        checkArgument(seconds > TIMESTAMP_SECONDS_MIN && seconds < TIMESTAMP_SECONDS_MAX,
+                      "Timestamp is out of range.");
+        final int nanos = value.getNanos();
+        checkArgument(nanos >= 0 && nanos <= NANOS_PER_SECOND,
+                      "Timestamp has invalid nanos value.");
+        return value;
+    }
 
     /**
      * Compares two timestamps. Returns a negative integer, zero, or a positive integer
@@ -107,7 +161,7 @@ public class Timestamps {
      * Calculates if {@code timestamp} is later {@code thanTime} timestamp.
      *
      * @param timestamp the timestamp to check if it is later then {@code thanTime}
-     * @param thanTime the first point in time which is supposed to be before the {@code timestamp}
+     * @param thanTime  the first point in time which is supposed to be before the {@code timestamp}
      * @return true if the {@code timestamp} is later than {@code thanTime} timestamp, false otherwise
      */
     public static boolean isLaterThan(Timestamp timestamp, Timestamp thanTime) {
