@@ -162,7 +162,7 @@ void dependPublish(Project project) {
 }
 
 // Artifacts to publish
-def publishingProjects = ["client", "server", "values"];
+def publishingProjects = ["client", "server", "values", "testutil"];
 
 publishingProjects.each {
     project(":$it") { currentProject ->
