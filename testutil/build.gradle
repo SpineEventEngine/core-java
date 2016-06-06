@@ -3,6 +3,8 @@ dependencies {
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
     compile group: 'junit', name: 'junit', version: '4.12'
+
+    compile project(path: ':client');
 }
 
 // required for usage of test classes from other modules

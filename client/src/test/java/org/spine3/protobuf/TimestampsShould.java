@@ -77,7 +77,7 @@ public class TimestampsShould {
 
     @Test
     public void calculate_timestamp_of_moment_minute_ago_from_now() {
-        final Timestamp currentTime = getCurrentTime();
+        final Timestamp currentTime = Timestamps.getCurrentTime();
         final Timestamp expected = subtract(currentTime, MINUTE);
 
         final Timestamp actual = Timestamps.minutesAgo(1);
@@ -87,7 +87,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_return_negative_int_if_first_less_than_second_one() {
-        final Timestamp time1 = getCurrentTime();
+        final Timestamp time1 = Timestamps.getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
         final int result = Timestamps.compare(time1, time2);
@@ -97,7 +97,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_return_negative_int_if_first_is_null() {
-        final Timestamp currentTime = getCurrentTime();
+        final Timestamp currentTime = Timestamps.getCurrentTime();
 
         final int result = Timestamps.compare(null, currentTime);
 
@@ -131,7 +131,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_return_positive_int_if_first_greater_than_second_one() {
-        final Timestamp currentTime = getCurrentTime();
+        final Timestamp currentTime = Timestamps.getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
         final int result = Timestamps.compare(timeAfterCurrent, currentTime);
@@ -141,7 +141,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_return_positive_int_if_second_one_is_null() {
-        final Timestamp currentTime = getCurrentTime();
+        final Timestamp currentTime = Timestamps.getCurrentTime();
 
         final int result = Timestamps.compare(currentTime, null);
 
@@ -150,7 +150,7 @@ public class TimestampsShould {
 
     @Test
     public void return_true_if_timestamp_is_between_two_timestamps() {
-        final Timestamp start = getCurrentTime();
+        final Timestamp start = Timestamps.getCurrentTime();
         final Timestamp timeBetween = add(start, TEN_SECONDS);
         final Timestamp finish = add(timeBetween, TEN_SECONDS);
 
@@ -161,7 +161,7 @@ public class TimestampsShould {
 
     @Test
     public void return_false_if_timestamp_is_not_between_two_timestamps() {
-        final Timestamp start = getCurrentTime();
+        final Timestamp start = Timestamps.getCurrentTime();
         final Timestamp finish = add(start, TEN_SECONDS);
         final Timestamp timeNotBetween = add(finish, TEN_SECONDS);
 
@@ -172,7 +172,7 @@ public class TimestampsShould {
 
     @Test
     public void return_true_if_timestamp_is_after_another_one() {
-        final Timestamp fromPoint = getCurrentTime();
+        final Timestamp fromPoint = Timestamps.getCurrentTime();
         final Timestamp timeToCheck = add(fromPoint, TEN_SECONDS);
 
         final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
@@ -182,7 +182,7 @@ public class TimestampsShould {
 
     @Test
     public void return_false_if_timestamp_is_not_after_another_one() {
-        final Timestamp fromPoint = getCurrentTime();
+        final Timestamp fromPoint = Timestamps.getCurrentTime();
         final Timestamp timeToCheck = subtract(fromPoint, TEN_SECONDS);
 
         final boolean isAfter = Timestamps.isLaterThan(timeToCheck, fromPoint);
@@ -192,7 +192,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
-        final Timestamp time1 = getCurrentTime();
+        final Timestamp time1 = Timestamps.getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
         final int result = Timestamps.comparator()
@@ -222,7 +222,7 @@ public class TimestampsShould {
 
     @Test
     public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
-        final Timestamp currentTime = getCurrentTime();
+        final Timestamp currentTime = Timestamps.getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
         final int result = Timestamps.comparator()
@@ -234,7 +234,7 @@ public class TimestampsShould {
     @Test
     public void convert_timestamp_to_date_to_nearest_second() {
 
-        final Timestamp expectedTime = getCurrentTime();
+        final Timestamp expectedTime = Timestamps.getCurrentTime();
 
         final Date actualDate = convertToDate(expectedTime);
         final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
@@ -244,7 +244,7 @@ public class TimestampsShould {
 
     @Test
     public void convert_timestamp_to_nanos() {
-        final Timestamp expectedTime = getCurrentTime();
+        final Timestamp expectedTime = Timestamps.getCurrentTime();
 
         final long nanos = convertToNanos(expectedTime);
         final long expectedNanos = expectedTime.getSeconds() * NANOS_IN_SECOND + expectedTime.getNanos();
