@@ -20,9 +20,13 @@
 
 package org.spine3.util;
 
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.Durations;
+import org.spine3.protobuf.Timestamps;
 import org.spine3.test.Tests;
 
+import static com.google.protobuf.util.TimeUtil.subtract;
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -61,5 +65,14 @@ public class TestsShould {
         private ClassThrowingExceptionInConstructor() {
             throw new AssertionError("Private constructor must not be called.");
         }
+    }
+
+    @Test
+    public void have_frozen_time_provider() {
+        final Timestamp fiveMinutesAgo = subtract(Timestamps.getCurrentTime(), Durations.ofMinutes(5));
+
+        Timestamps.setProvider(new Tests.FrozenMadHatterParty(fiveMinutesAgo));
+
+        assertEquals(fiveMinutesAgo, Timestamps.getCurrentTime());
     }
 }

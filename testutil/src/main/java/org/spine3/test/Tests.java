@@ -20,10 +20,11 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.Timestamps;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-
-import static java.lang.System.currentTimeMillis;
 
 /**
  * Utilities for testing.
@@ -31,8 +32,6 @@ import static java.lang.System.currentTimeMillis;
  * @author Alexander Yevsyukov
  */
 public class Tests {
-
-    private static final long MSEC_IN_SECOND = 1000L;
 
     private Tests() {}
 
@@ -79,12 +78,12 @@ public class Tests {
     }
 
     /**
-     * Returns the current time in seconds.
+     * Returns the current time in seconds via {@link Timestamps#getCurrentTime()}.
      *
      * @return a seconds value
      */
     public static long currentTimeSeconds() {
-        final long secs = currentTimeMillis() / MSEC_IN_SECOND;
+        final long secs = Timestamps.getCurrentTime().getSeconds();
         return secs;
     }
 
@@ -96,5 +95,24 @@ public class Tests {
         final T nullRef = null;
         //noinspection ConstantConditions
         return nullRef;
+    }
+
+    /**
+     * The provider of current time, which is always the same.
+     */
+    public static class FrozenMadHatterParty implements Timestamps.Provider {
+        private final Timestamp frozenTime;
+
+        public FrozenMadHatterParty(Timestamp frozenTime) {
+            this.frozenTime = frozenTime;
+        }
+
+        /**
+         * @return the value passed to the constructor
+         */
+        @Override
+        public Timestamp getCurrentTime() {
+            return frozenTime;
+        }
     }
 }

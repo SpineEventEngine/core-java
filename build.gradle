@@ -15,7 +15,7 @@ allprojects {
     apply plugin: 'jacoco'
 
     group = 'org.spine3'
-    version = '0.4'
+    version = '0.4.1-SNAPSHOT'
 }
 
 project.ext {
@@ -162,7 +162,7 @@ void dependPublish(Project project) {
 }
 
 // Artifacts to publish
-def publishingProjects = ["client", "server", "values"];
+def publishingProjects = ["client", "server", "values", "testutil"];
 
 publishingProjects.each {
     project(":$it") { currentProject ->

@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.Internal;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -30,6 +31,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.TimeUtil.*;
 
 /**
@@ -96,6 +98,64 @@ public class Timestamps {
      * The count of hours per day.
      */
     public static final int HOURS_PER_DAY = 24;
+
+    private static final ThreadLocal<Provider> timeProvider = new ThreadLocal<Provider>() {
+        @SuppressWarnings("RefusedBequest") // We want to provide our default value.
+        @Override
+        protected Provider initialValue() {
+            return new SystemTimeProvider();
+        }
+    };
+
+    /**
+     * Obtains current time.
+     *
+     * <p>This method should be used instead of {@link TimeUtil#getCurrentTime()} for testability
+     * of time-related code.
+     *
+     * @return current time
+     */
+    public static Timestamp getCurrentTime() {
+        final Timestamp result = timeProvider.get()
+                                             .getCurrentTime();
+        return result;
+    }
+
+    /**
+     * The provider of the current time.
+     *
+     * <p>Implement this interface and pass the resulting class to
+     */
+    @Internal
+    public interface Provider {
+        Timestamp getCurrentTime();
+    }
+
+    /**
+     * Sets provider of the current time.
+     *
+     * <p>The most common scenario for using this method is test cases of code that deals
+     * with current time.
+     *
+     * @param provider the provider to set
+     */
+    @Internal
+    @VisibleForTesting
+    public static void setProvider(Provider provider) {
+        timeProvider.set(checkNotNull(provider));
+    }
+
+    /**
+     * Default implementation of current time provider based on {@link TimeUtil#getCurrentTime()}.
+     *
+     * <p>This is the only place, which should invoke obtaining current time from {@code TimeUtil} directly.
+     */
+    private static class SystemTimeProvider implements Provider {
+        @Override
+        public Timestamp getCurrentTime() {
+            return TimeUtil.getCurrentTime();
+        }
+    }
 
     /**
      * Verifies if the passed {@code Timestamp} instance is valid.
