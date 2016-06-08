@@ -19,29 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.examples.aggregate;
+package spine_examples.failure;
 
-option java_package="org.spine3.examples.aggregate.event";
-option java_outer_classname = "EventsProto";
+option java_package="org.spine3.examples.failure.commands";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
 
-import "spine/examples/aggregate/order.proto";
+import "spine_examples/failure/task.proto";
 
-message OrderCreated {
-    OrderId order_id = 1;
-}
-
-message OrderLineAdded {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message OrderLineRemoved {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
-}
-
-message OrderPaid {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
+// The command to cancel a task.
+// The task cannot be cancelled, if it's in progress.
+message CancelTask {
+    TaskId id = 1;
 }

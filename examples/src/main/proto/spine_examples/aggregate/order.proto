@@ -19,28 +19,48 @@
 //
 syntax = "proto3";
 
-package spine.examples.eventstore;
+package spine_examples.aggregate;
 
-option java_package="org.spine3.examples.eventstore";
+option java_package="org.spine3.examples.aggregate";
 option java_multiple_files = true;
 
-message ProjectId {
-    string code = 1;
+import "google/protobuf/any.proto";
+import "spine/money/money.proto";
+
+message Order {
+    OrderId order_id = 1;
+
+    repeated OrderLine order_line = 2;
+
+    spine.money.Money price = 3;
+
+    enum Status {
+        NEW = 0;
+        IN_PROGRESS = 1;
+        BILLED = 2;
+        PAID = 3;
+    }
+
+    Status status = 4;
+
+    BillingInfo BillingInfo = 5;
 }
 
-message TaskId {
-    uint32 number = 1;
+message OrderId {
+    string value = 1;
 }
 
-message Project {
-    ProjectId id = 1;
-    string name = 2;
-    string description = 3;
+message OrderLine {
+
+    google.protobuf.Any product_id = 2;
+
+    int32 quantity = 3;
+
+    spine.money.Money price = 4;
 }
 
-message Task {
-    TaskId id = 1;
-    ProjectId project_id = 2;
-    string name = 3;
-    string description = 4;
+// This is an example so the BillingInfo
+// is just a stub for the Spine sample.
+message BillingInfo {
+    string info = 1;
 }

@@ -18,7 +18,7 @@
 //
 syntax = "proto3";
 
-package spine.examples.failure;
+package spine_examples.failure;
 
 option java_package="org.spine3.test.failures";
 option java_multiple_files = false;

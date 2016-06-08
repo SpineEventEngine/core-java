@@ -19,47 +19,30 @@
 //
 syntax = "proto3";
 
-package spine.examples.importado;
+package spine_examples.eventstore;
 
-option java_package="org.spine3.examples.importado";
-option java_outer_classname = "TaskProto";
+option java_package="org.spine3.examples.eventstore.events";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/validate.proto";
 import "spine/users/user_id.proto";
 
-message TaskId {
-    uint32 number = 1;
+import "spine_examples/eventstore/project.proto";
+
+message ProjectCreated {
+    Project project = 1;
 }
 
-message Task {
-    // Declare that this message is the state of the aggregate.
-    option (state_of) = AGGREGATE;
+message TaskCreated {
+    Task task = 1;
+}
 
-    // A task must have a non-default ID.
-    TaskId id = 1 [(required).value = true];
+message TaskAssigned {
+    TaskId task_id = 1;
+    spine.users.UserId assignee = 2;
+}
 
-    // There cannot be a task without a name.
-    string name = 2 [(required).value = true];
-
-    string description = 3;
-
-    enum Status {
-        // Reserved for errors.
-        UNKNOWN = 0;
-        // The task is not assigned.
-        NOT_ASSIGNED = 1;
-        // The task is assigned to a person.
-        ASSIGNED = 2;
-        // The assignee is currently working on the task.
-        IN_PROGRESS = 3;
-        // Some work was done on the task, but it's not complete.
-        STOPPED = 4;
-        // The task is done.
-        DONE = 5;
-    }
-
-    Status status = 4;
-    spine.users.UserId assignee = 5;
+message TaskDone {
+    TaskId task_id = 1;
 }

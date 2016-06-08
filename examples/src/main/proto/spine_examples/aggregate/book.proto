@@ -19,30 +19,20 @@
 //
 syntax = "proto3";
 
-package spine.examples.eventstore;
+package spine_examples.aggregate;
 
-option java_package="org.spine3.examples.eventstore.events";
-option java_outer_classname = "EventsProto";
+option java_package="org.spine3.examples.aggregate";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
-import "spine/users/user_id.proto";
+import "spine/money/money.proto";
 
-import "spine/examples/eventstore/project.proto";
-
-message ProjectCreated {
-    Project project = 1;
+message BookId {
+    string ISBN = 1;
 }
 
-message TaskCreated {
-    Task task = 1;
-}
-
-message TaskAssigned {
-    TaskId task_id = 1;
-    users.UserId assignee = 2;
-}
-
-message TaskDone {
-    TaskId task_id = 1;
+message Book {
+    BookId book_id = 1;
+    string title = 2;
+    string author = 3;
+    spine.money.Money price = 4;
 }

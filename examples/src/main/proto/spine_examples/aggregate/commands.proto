@@ -19,13 +19,13 @@
 //
 syntax = "proto3";
 
-package spine.examples.aggregate;
+package spine_examples.aggregate;
 
 option java_package="org.spine3.examples.aggregate.command";
 option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
-import "spine/examples/aggregate/order.proto";
+import "spine_examples/aggregate/order.proto";
 
 message CreateOrder {
     OrderId order_id = 1;

@@ -24,7 +24,7 @@ project.ext {
     PROTOBUF_VERSION = '3.0.0-beta-3';
     PROTOBUF_DEPENDENCY = "com.google.protobuf:protoc:${project.PROTOBUF_VERSION}";
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
-    SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.2"
+    SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.3"
     GRPC_VERSION = '0.14.0'
 }
 

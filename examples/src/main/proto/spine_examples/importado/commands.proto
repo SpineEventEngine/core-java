@@ -19,15 +19,19 @@
 //
 syntax = "proto3";
 
-package spine.examples.failure;
+package spine_examples.importado;
 
-option java_package="org.spine3.examples.failure.events";
-option java_outer_classname = "EventsProto";
+option java_package="org.spine3.examples.importado.commands";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/examples/failure/task.proto";
+import "spine/base/event.proto";
 
-message TaskCancelled {
+import "spine_examples/importado/task.proto";
+
+// The command to import events into the task aggregate.
+message ImportEvents {
     TaskId id = 1;
+    repeated spine.base.Event event = 2;
 }

@@ -19,17 +19,47 @@
 //
 syntax = "proto3";
 
-package spine.examples.failure;
+package spine_examples.importado;
 
-option java_package="org.spine3.examples.failure.commands";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.examples.importado";
+option java_outer_classname = "TaskProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/examples/failure/task.proto";
+import "spine/validate.proto";
+import "spine/users/user_id.proto";
 
-// The command to cancel a task.
-// The task cannot be cancelled, if it's in progress.
-message CancelTask {
-    TaskId id = 1;
+message TaskId {
+    uint32 number = 1;
+}
+
+message Task {
+    // Declare that this message is the state of the aggregate.
+    option (state_of) = AGGREGATE;
+
+    // A task must have a non-default ID.
+    TaskId id = 1 [(required).value = true];
+
+    // There cannot be a task without a name.
+    string name = 2 [(required).value = true];
+
+    string description = 3;
+
+    enum Status {
+        // Reserved for errors.
+        UNKNOWN = 0;
+        // The task is not assigned.
+        NOT_ASSIGNED = 1;
+        // The task is assigned to a person.
+        ASSIGNED = 2;
+        // The assignee is currently working on the task.
+        IN_PROGRESS = 3;
+        // Some work was done on the task, but it's not complete.
+        STOPPED = 4;
+        // The task is done.
+        DONE = 5;
+    }
+
+    Status status = 4;
+    spine.users.UserId assignee = 5;
 }

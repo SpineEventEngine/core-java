@@ -19,30 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.examples.importado;
+package spine_examples.eventstore;
 
-option java_package="org.spine3.examples.importado.events";
-option java_outer_classname = "EventsProto";
+option java_package="org.spine3.examples.eventstore";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
-import "spine/validate.proto";
-import "spine/users/user_id.proto";
-import "spine/work/work.proto";
-
-import "spine/examples/importado/task.proto";
-
-message TaskCreated {
-    Task task = 1;
+message ProjectId {
+    string code = 1;
 }
 
-message WorkStarted {
+message TaskId {
+    uint32 number = 1;
+}
+
+message Project {
+    ProjectId id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message Task {
     TaskId id = 1;
-    spine.users.UserId assignee = 2 [(required).value = true];
+    ProjectId project_id = 2;
+    string name = 3;
+    string description = 4;
 }
-
-message TaskDone {
-    TaskId id = 1;
-    spine.work.Work amount_of_work = 2;
-}
-
