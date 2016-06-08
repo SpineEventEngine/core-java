@@ -138,6 +138,13 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         log().info(closed(nameForLogging()));
     }
 
+    private void shutDownRepositories() throws Exception {
+        for (Repository<?, ?> repository : repositories) {
+            repository.close();
+        }
+        repositories.clear();
+    }
+
     private String nameForLogging() {
         return getClass().getSimpleName() + ' ' + getName();
     }
@@ -160,13 +167,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
     @CheckReturnValue
     public boolean isMultitenant() {
         return multitenant;
-    }
-
-    private void shutDownRepositories() throws Exception {
-        for (Repository<?, ?> repository : repositories) {
-            unregister(repository);
-        }
-        repositories.clear();
     }
 
     /**
@@ -206,7 +206,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         if (repository instanceof EventDispatcher) {
             eventBus.unregister((EventDispatcher) repository);
         }
-        repository.close();
     }
 
     @Override
