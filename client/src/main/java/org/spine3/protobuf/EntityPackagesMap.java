@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
-import org.spine3.type.internal.EntityType;
+import org.spine3.validate.internal.EntityType;
 
 import javax.annotation.Nullable;
 import java.util.Map;

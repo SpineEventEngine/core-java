@@ -20,9 +20,44 @@
 
 package org.spine3.examples.importado;
 
+import org.spine3.base.CommandContext;
+import org.spine3.base.Event;
+import org.spine3.examples.importado.commands.ImportEvents;
+import org.spine3.examples.importado.events.TaskCreated;
+import org.spine3.examples.importado.events.TaskDone;
+import org.spine3.examples.importado.events.WorkStarted;
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.Apply;
+import org.spine3.server.command.Assign;
+
+import java.util.List;
+
 /**
  * A sample aggregate that can import events passed in the special command.
  */
-public class TaskAggregate {
+public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
+    public TaskAggregate(TaskId id) {
+        super(id);
+    }
+
+    @Assign
+    public List<Event> handle(ImportEvents command, CommandContext ctx) {
+        return command.getEventList();
+    }
+
+    @Apply
+    private void on(TaskCreated event) {
+        getBuilder().mergeFrom(event.getTask());
+    }
+
+    @Apply
+    private void on(WorkStarted event) {
+        getBuilder().setStatus(Task.Status.IN_PROGRESS);
+    }
+
+    @Apply
+    private void on(TaskDone event) {
+        getBuilder().setStatus(Task.Status.DONE);
+    }
 }
