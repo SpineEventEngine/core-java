@@ -312,6 +312,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         try {
             for (Message message : messages) {
                 apply(message);
+                //TODO:2016-06-08:alexander.yevsyukov: Do not create a new EventContext if we deal with importing events.
                 final EventContext eventContext = createEventContext(commandContext, message);
                 final Event event = Events.createEvent(message, eventContext);
                 putUncommitted(event);
