@@ -45,8 +45,8 @@ public class Server {
     public Server(StorageFactory storageFactory) {
         // Create a bounded context.
         this.boundedContext = BoundedContext.newBuilder()
-                                                            .setStorageFactory(storageFactory)
-                                                            .build();
+                                            .setStorageFactory(storageFactory)
+                                            .build();
         // Create and register a repository with the bounded context.
         final OrderRepository repository = new OrderRepository(boundedContext);
         boundedContext.register(repository);

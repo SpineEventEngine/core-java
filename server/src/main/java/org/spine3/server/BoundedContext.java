@@ -56,6 +56,7 @@ import static org.spine3.base.Responses.isOk;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.util.Logging.closed;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -134,7 +135,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
 
         shutDownRepositories();
 
-        log().info(nameForLogging() + " closed.");
+        log().info(closed(nameForLogging()));
     }
 
     private String nameForLogging() {

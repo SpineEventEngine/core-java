@@ -113,9 +113,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
                                                   CommandDispatcher dispatcher) {
         //noinspection TestOnlyProblems
         CommandBus.log().warn(
-                "Another dispatcher {} found when trying to unregister dispatcher {} for the command class {}." +
-                " Dispatcher for the command class {} will not be unregistered.",
-                registeredDispatcher, dispatcher, commandClass, commandClass);
+                "Another dispatcher {} found when trying to unregister the dispatcher {} for the command class {}." +
+                " There can be only one dispatcher per command class. The passed dispatcher cannot be unregistered. " +
+                " Please check dispatcher registration for this command class.",
+                registeredDispatcher, dispatcher, commandClass, dispatcher);
     }
 
     /* package */ boolean hasDispatcherFor(CommandClass commandClass) {

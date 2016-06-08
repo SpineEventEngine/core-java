@@ -18,31 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.time;
+package org.spine3.examples.importado;
 
-import java.util.Calendar;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.aggregate.AggregateRepository;
 
 /**
- * Routines for working with {@link LocalDate}.
+ * {@code TaskRepository} is responsible for storing task aggregates.
  */
-public class LocalDates {
+public class TaskRepository extends AggregateRepository <TaskId, TaskAggregate> {
 
-    private LocalDates() {}
-
-    /**
-     * Obtains the current date.
-     */
-    public static LocalDate today() {
-        final Calendar calendar = Calendar.getInstance();
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(year)
-                                          .setMonth(month)
-                                          .setDay(dayOfMonth)
-                                          .build();
-        return result;
+    public TaskRepository(BoundedContext boundedContext) {
+        super(boundedContext);
     }
 }
