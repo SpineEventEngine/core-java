@@ -80,11 +80,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
      * If `true` the bounded context serves many organizations.
      */
     private final boolean multitenant;
-    //TODO:2016-01-16:alexander.yevsyukov: Set all passed storages multitenant too.
-    // Or require storageFactory be multitenant and create correspondingly configured storages.
-    // There should be CurrentTenant, which keeps thread-local reference to the currently set TenantId.
-    // Implementations like namespace support of GCP would wrap over their APIs.
-
     private final StorageFactory storageFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
