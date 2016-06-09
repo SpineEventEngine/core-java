@@ -139,7 +139,7 @@ public class TaskImporter implements AutoCloseable {
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-        /* We use more variables to make the code more readable in this example. This example have the same value for
+        /* We use more variables to make the code more readable in this example. This example has the same value for
            all UserIds, while the real import code would create IDs from imported data. */
     private static List<Event> generateEvents(TaskId taskId) {
         final Task task = Task.newBuilder()
