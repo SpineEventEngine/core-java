@@ -502,15 +502,14 @@ public class CommandBusShould {
     }
 
     @Test
-    public void reschedule_commands_from_storage_on_startup() {
+    public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
         final Duration newDelayExpected = Durations.ofMinutes(2); // = 5 - 3
         final List<Command> commandsPrimary = newArrayList(createProjectCmd(), addTaskCmd(), startProjectCmd());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        // command bus creation must trigger commands rescheduling
-        commandBus = new CommandBus(commandStore, scheduler, log);
+        commandBus.rescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -528,8 +527,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        // command bus creation must trigger commands rescheduling
-        commandBus = new CommandBus(commandStore, scheduler, log);
+        commandBus.rescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);

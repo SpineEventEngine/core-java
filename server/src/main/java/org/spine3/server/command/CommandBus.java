@@ -107,6 +107,7 @@ public class CommandBus implements AutoCloseable {
         final CommandScheduler scheduler = createCommandScheduler();
         final ProblemLog log = new ProblemLog();
         final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
+        commandBus.rescheduleCommandsInParallel();
         return commandBus;
     }
 
@@ -123,8 +124,6 @@ public class CommandBus implements AutoCloseable {
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
-        //TODO:2016-05-27:alexander.yevsyukov: This must be handled in parallel. This call blocks the start.
-        rescheduleCommands();
     }
 
     /**
@@ -265,7 +264,18 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onCompleted();
     }
 
-    private void rescheduleCommands() {
+    private void rescheduleCommandsInParallel() {
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                rescheduleCommands();
+            }
+        });
+        thread.start();
+    }
+
+    @VisibleForTesting
+    /* package */ void rescheduleCommands() {
         final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
         while (commands.hasNext()) {
             final Command command = commands.next();
