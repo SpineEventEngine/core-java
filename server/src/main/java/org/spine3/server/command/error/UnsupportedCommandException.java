@@ -43,7 +43,6 @@ public class UnsupportedCommandException extends CommandException {
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
         final TypeName typeName = TypeName.ofCommand(command);
-        Commands.getMessage(command).getClass();
         final String result = String.format(
                 "There is no registered handler or dispatcher for the command of class: `%s`. Protobuf type: `%s`",
                 commandClass, typeName
