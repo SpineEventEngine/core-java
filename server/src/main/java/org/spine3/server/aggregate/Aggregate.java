@@ -47,7 +47,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static java.util.Collections.singletonList;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
@@ -361,32 +360,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
         invokeApplier(eventMessage);
         incrementVersion(); // This will also update whenModified field.
-    }
-
-    /**
-     * This method is provided <em>only</em> for the purpose of testing event appliers
-     * of an aggregate and must not be called from the production code.
-     *
-     * <p>Calls {@link #apply(Iterable, CommandContext)}.
-     */
-    @VisibleForTesting
-    public final void applyForTest(Message message, CommandContext commandContext) {
-        try {
-            apply(singletonList(message), commandContext);
-        } catch (InvocationTargetException e) {
-            throw propagate(e);
-        }
-    }
-
-    /**
-     * This method is provided <em>only</em> for the purpose of testing an aggregate and
-     * must not be called from the production code.
-     *
-     * <p>Calls {@link #incrementState(Message)}.
-     */
-    @VisibleForTesting
-    public final void incrementStateForTest(S newState) {
-        incrementState(newState);
     }
 
     /**
