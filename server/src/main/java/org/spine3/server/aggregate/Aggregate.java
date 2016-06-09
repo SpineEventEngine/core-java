@@ -363,7 +363,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         incrementVersion(); // This will also update whenModified field.
     }
 
-    //TODO:2016-06-09:alexander.yevsyukov: @Litus, see if we use this method in other projects. If not, remove.
     /**
      * This method is provided <em>only</em> for the purpose of testing event appliers
      * of an aggregate and must not be called from the production code.
@@ -379,7 +378,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         }
     }
 
-    //TODO:2016-06-09:alexander.yevsyukov: @Litus, can we avoid having this method?
     /**
      * This method is provided <em>only</em> for the purpose of testing an aggregate and
      * must not be called from the production code.
