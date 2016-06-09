@@ -84,7 +84,7 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private CommandBus.ProblemLog log;
+    private ProblemLog log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -95,7 +95,7 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new CommandBus.ProblemLog());
+        log = spy(new ProblemLog());
         // Do not create a spy of the command bus because it would be impossible to debug its code
         commandBus = new CommandBus(commandStore, scheduler, log);
         eventBus = newEventBus(storageFactory);

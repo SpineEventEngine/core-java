@@ -404,39 +404,6 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
-    /**
-     * Convenience wrapper for logging errors and warnings.
-     */
-    /* package */ static class ProblemLog {
-        /* package */ void errorDispatching(Exception exception, Command command) {
-            final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
-            log().error(msg, exception);
-        }
-
-        /* package */ void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Exception while handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().error(msg, exception);
-        }
-
-        /* package */ void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Business failure occurred when handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().warn(msg, flr);
-        }
-
-        /* package */ void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().error(msg, throwable);
-        }
-
-        /* package */ void errorExpiredCommand(Message commandMsg, CommandId id) {
-            final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
-            log().error(msg);
-        }
-    }
-
     private boolean isDispatcherRegistered(CommandClass cls) {
         final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
         return result;
@@ -479,7 +446,6 @@ public class CommandBus implements AutoCloseable {
     /**
      * The logger instance used by {@code CommandBus}.
      */
-    @VisibleForTesting
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
