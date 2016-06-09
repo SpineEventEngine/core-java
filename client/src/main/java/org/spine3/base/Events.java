@@ -128,10 +128,29 @@ public class Events {
      */
     public static <I> I getProducer(EventContext context) {
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
-        @SuppressWarnings("unchecked") // It is the caller responsibility to know the type of the wrapper ID.
+        @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I)aggregateId;
         return id;
 
+    }
+
+    /**
+     * Creates {@code EventContext} instance for an event generated during data import.
+     *
+     * <p>The method does not set {@code CommandContext} because there was no command.
+     *
+     * <p>The {@code version} attribute is not populated either. It is the responsiblity of the
+     * target aggregate to populate the missing fields.
+     *
+     * @param producerId the ID of the producer which generates the event
+     * @return new instance of {@code EventContext} for the imported event
+     */
+    public static EventContext createImportEventContext(Message producerId) {
+        final EventContext.Builder builder = EventContext.newBuilder()
+                                                         .setEventId(generateId())
+                                                         .setTimestamp(Timestamps.getCurrentTime())
+                                                         .setProducerId(Any.pack(producerId));
+        return builder.build();
     }
 
     /**

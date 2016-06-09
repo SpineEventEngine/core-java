@@ -24,12 +24,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.spine3.testdata.TestCommands.newCommandBus;
 import static org.spine3.testdata.TestEventFactory.newEventBus;
 
@@ -37,10 +39,12 @@ import static org.spine3.testdata.TestEventFactory.newEventBus;
 public class BoundedContextBuilderShould {
 
     private StorageFactory storageFactory;
+    private BoundedContext.Builder builder;
 
     @Before
     public void setUp() {
         storageFactory = InMemoryStorageFactory.getInstance();
+        builder = BoundedContext.newBuilder();
     }
 
     @After
@@ -50,79 +54,89 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_StorageFactory() {
-        BoundedContext.newBuilder().setStorageFactory(Tests.<StorageFactory>nullRef());
+        builder.setStorageFactory(Tests.<StorageFactory>nullRef());
     }
 
     @Test
-    public void return_StorageFactory_from_builder() {
+    public void return_StorageFactory() {
         final StorageFactory sf = InMemoryStorageFactory.getInstance();
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setStorageFactory(sf);
+        builder.setStorageFactory(sf);
         assertEquals(sf, builder.getStorageFactory());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
-        BoundedContext.newBuilder().setCommandBus(Tests.<CommandBus>nullRef());
+        builder.setCommandBus(Tests.<CommandBus>nullRef());
     }
 
     @Test
-    public void return_CommandBus_from_builder() {
+    public void return_CommandBus() {
         final CommandBus expected = newCommandBus(storageFactory);
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
+        builder = BoundedContext.newBuilder().setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
     }
 
     @Test
-    public void return_EventBus_from_builder() {
+    public void return_EventBus() {
         final EventBus expected = newEventBus(storageFactory);
-        final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
+        builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
 
     @Test
-    public void return_if_multitenant_from_builder() {
-        final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                .setMultitenant(true);
+    public void support_multitenantcy() {
+        builder.setMultitenant(true);
         assertTrue(builder.isMultitenant());
     }
 
     @Test
     public void be_not_multitenant_by_default() {
-        assertFalse(BoundedContext.newBuilder()
-                                  .isMultitenant());
+        assertFalse(builder.isMultitenant());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
-        BoundedContext.newBuilder().setEventBus(Tests.<EventBus>nullRef());
+        builder.setEventBus(Tests.<EventBus>nullRef());
     }
 
     @Test
     public void create_CommandBus_using_set_StorageFactory_if_CommandBus_was_not_set() {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                   .setStorageFactory(storageFactory)
-                                                   .setEventBus(newEventBus(storageFactory))
-                                                   .build();
+        final BoundedContext boundedContext = builder
+                .setStorageFactory(storageFactory)
+                .setEventBus(newEventBus(storageFactory))
+                .build();
         assertNotNull(boundedContext.getCommandBus());
     }
 
     @Test
     public void create_EventBus_using_set_StorageFactory_if_EventBus_was_not_set() {
         // Pass CommandBus to builder initialization, and do NOT pass EventBus.
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                   .setStorageFactory(storageFactory)
-                                                   .setCommandBus(newCommandBus(storageFactory))
-                                                   .build();
+        final BoundedContext boundedContext = builder
+                .setStorageFactory(storageFactory)
+                .setCommandBus(newCommandBus(storageFactory))
+                .build();
         assertNotNull(boundedContext.getEventBus());
     }
 
     @Test
     public void create_both_CommandBus_and_EventBus_if_not_set() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStorageFactory(storageFactory)
-                                                            .build();
+        final BoundedContext boundedContext = builder
+                .setStorageFactory(storageFactory)
+                .build();
         assertNotNull(boundedContext.getCommandBus());
         assertNotNull(boundedContext.getEventBus());
+    }
+
+    @Test
+    public void accept_CommandStore() {
+        final CommandStore commandStore = mock(CommandStore.class);
+        builder.setCommandStore(commandStore);
+        assertEquals(commandStore, builder.getCommandStore());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void reject_null_CommandStore() {
+        builder.setCommandStore(Tests.<CommandStore>nullRef());
     }
 }

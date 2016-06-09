@@ -133,10 +133,10 @@ public class AggregateRepositoryShould {
 
         public ProjectAggregate(ProjectId id) {
             super(id);
-            final Project expectedState = Project.newBuilder()
-                                                 .setId(id)
-                                                 .build();
-            incrementStateForTest(expectedState);
+            final Project state = Project.newBuilder()
+                                         .setId(id)
+                                         .build();
+            incrementState(state);
         }
 
         @Assign

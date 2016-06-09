@@ -8,6 +8,8 @@ buildscript {
 }
 
 dependencies {
+    compile group: 'io.grpc', name: 'grpc-all', version: "$GRPC_VERSION"
+
     compile project(path: ':client');
     compile project(path: ':values');
 

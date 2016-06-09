@@ -18,31 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.time;
-
-import java.util.Calendar;
-
 /**
- * Routines for working with {@link LocalDate}.
+ * This example shows how to add data to aggregates without firing commands.
+ * Such approach may be useful for:
+ * <ul>
+ *     <li>Importing data via transforming it to aggregate events (as facts in the past).
+ *     <li>Integrating with external data sources.
+ * </ul>
+ *
+ * The name of this package originates in the fact that {@code import} is the reserved Java word.
  */
-public class LocalDates {
 
-    private LocalDates() {}
+@ParametersAreNonnullByDefault
+package org.spine3.examples.importado;
 
-    /**
-     * Obtains the current date.
-     */
-    public static LocalDate today() {
-        final Calendar calendar = Calendar.getInstance();
-        final int year = calendar.get(Calendar.YEAR);
-        // The Calendar class assumes JANUARY is zero. Therefore add 1 to get the value of MonthOfYear.
-        final MonthOfYear month = MonthOfYear.forNumber(calendar.get(Calendar.MONTH) + 1);
-        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-        final LocalDate result = LocalDate.newBuilder()
-                                          .setYear(year)
-                                          .setMonth(month)
-                                          .setDay(dayOfMonth)
-                                          .build();
-        return result;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

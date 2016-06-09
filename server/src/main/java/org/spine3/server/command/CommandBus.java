@@ -107,6 +107,7 @@ public class CommandBus implements AutoCloseable {
         final CommandScheduler scheduler = createCommandScheduler();
         final ProblemLog log = new ProblemLog();
         final CommandBus commandBus = new CommandBus(checkNotNull(commandStore), scheduler, log);
+        commandBus.rescheduleCommandsInParallel();
         return commandBus;
     }
 
@@ -123,8 +124,6 @@ public class CommandBus implements AutoCloseable {
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
-        //TODO:2016-05-27:alexander.yevsyukov: This must be handled in parallel. This call blocks the start.
-        rescheduleCommands();
     }
 
     /**
@@ -265,7 +264,18 @@ public class CommandBus implements AutoCloseable {
         responseObserver.onCompleted();
     }
 
-    private void rescheduleCommands() {
+    private void rescheduleCommandsInParallel() {
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                rescheduleCommands();
+            }
+        });
+        thread.start();
+    }
+
+    @VisibleForTesting
+    /* package */ void rescheduleCommands() {
         final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
         while (commands.hasNext()) {
             final Command command = commands.next();
@@ -404,39 +414,6 @@ public class CommandBus implements AutoCloseable {
         this.isMultitenant = isMultitenant;
     }
 
-    /**
-     * Convenience wrapper for logging errors and warnings.
-     */
-    /* package */ static class ProblemLog {
-        /* package */ void errorDispatching(Exception exception, Command command) {
-            final String msg = formatCommandTypeAndId("Unable to dispatch command `%s` (ID: `%s`)", command);
-            log().error(msg, exception);
-        }
-
-        /* package */ void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Exception while handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().error(msg, exception);
-        }
-
-        /* package */ void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Business failure occurred when handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().warn(msg, flr);
-        }
-
-        /* package */ void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
-            final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
-                    commandMessage, commandId);
-            log().error(msg, throwable);
-        }
-
-        /* package */ void errorExpiredCommand(Message commandMsg, CommandId id) {
-            final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
-            log().error(msg);
-        }
-    }
-
     private boolean isDispatcherRegistered(CommandClass cls) {
         final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
         return result;
@@ -479,7 +456,6 @@ public class CommandBus implements AutoCloseable {
     /**
      * The logger instance used by {@code CommandBus}.
      */
-    @VisibleForTesting
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

@@ -19,44 +19,19 @@
 //
 syntax = "proto3";
 
-package spine.test.validate.msg;
+package spine_examples.importado;
 
-option java_generate_equals_and_hash = true;
+option java_package="org.spine3.examples.importado.commands";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
-option java_outer_classname = "ValidationTestCommandsProto";
-option java_package = "org.spine3.test.validate.msg";
+option java_generate_equals_and_hash = true;
 
-import "google/protobuf/wrappers.proto";
-import "spine/validate.proto";
+import "spine/base/event.proto";
 
-// Messages for entity ID in commands validation tests.
+import "spine_examples/importado/task.proto";
 
-message EntityIdMsgFieldValue {
-    google.protobuf.StringValue value = 1;
-}
-
-message EntityIdStringFieldValue {
-    string value = 1;
-}
-
-message EntityIdIntFieldValue {
-    int32 value = 1;
-}
-
-message EntityIdLongFieldValue {
-    int64 value = 1;
-}
-
-message EntityIdRepeatedFieldValue {
-    repeated string value = 1;
-}
-
-// Unsupported ID types.
-
-message EntityIdByteStringFieldValue {
-    bytes value = 1;
-}
-
-message EntityIdDoubleFieldValue {
-    double value = 1;
+// The command to import events into the task aggregate.
+message ImportEvents {
+    TaskId id = 1;
+    repeated spine.base.Event event = 2;
 }

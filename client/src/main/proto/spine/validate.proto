@@ -36,14 +36,33 @@ option java_package = "org.spine3.validate.internal";
 
 import "google/protobuf/descriptor.proto";
 
+// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
+
+// A type of an entity.
+enum EntityType {
+    // The default value (if the option value is not set).
+    ET_NOT_SET = 0;
+
+    AGGREGATE = 1;
+
+    PROCESS_MANAGER = 2;
+
+    PROJECTION = 3;
+}
 
 extend google.protobuf.MessageOptions {
     // The default format string for validation error message text.
     // The number of parameters and their types are determined by the type of field options.
     string default_message = 51001;
-}
 
-// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) from Google.
+    // Marks a message so that it is considered as a state of an entity (aggregate root, process manager, etc).
+    // Then the current package is considered as one which contains files for this type of entity (commands.proto, etc).
+    // A command for an entity must contain an entity ID as the first field.
+    // The first fields of these commands are checked then to have a valid type and value:
+    // for `message` type - a non-default message instance;
+    // for `string` type - a non-empty string.
+    EntityType state_of = 51146;
+}
 
 extend google.protobuf.FieldOptions {
     RequiredOption required = 51002;
@@ -221,7 +240,7 @@ message TimeOption {
 // This enumeration defines restriction for date/time values.
 enum Time {
     // The default value (if the time option is not set).
-    UNDEFINED = 0;
+    TIME_UNDEFINED = 0;
 
     // The value must be in the past.
     PAST = 1;

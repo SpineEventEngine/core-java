@@ -19,17 +19,20 @@
 //
 syntax = "proto3";
 
-package spine.examples.failure;
+package spine_examples.aggregate;
 
-option java_package="org.spine3.examples.failure.commands";
-option java_outer_classname = "CommandsProto";
+option java_package="org.spine3.examples.aggregate";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
-import "spine/examples/failure/task.proto";
+import "spine/money/money.proto";
 
-// The command to cancel a task.
-// The task cannot be cancelled, if it's in progress.
-message CancelTask {
-    TaskId id = 1;
+message BookId {
+    string ISBN = 1;
+}
+
+message Book {
+    BookId book_id = 1;
+    string title = 2;
+    string author = 3;
+    spine.money.Money price = 4;
 }

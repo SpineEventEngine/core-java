@@ -56,6 +56,7 @@ import static org.spine3.base.Responses.isOk;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.util.Logging.closed;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -79,11 +80,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
      * If `true` the bounded context serves many organizations.
      */
     private final boolean multitenant;
-    //TODO:2016-01-16:alexander.yevsyukov: Set all passed storages multitenant too.
-    // Or require storageFactory be multitenant and create correspondingly configured storages.
-    // There should be CurrentTenant, which keeps thread-local reference to the currently set TenantId.
-    // Implementations like namespace support of GCP would wrap over their APIs.
-
     private final StorageFactory storageFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
@@ -134,7 +130,14 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
 
         shutDownRepositories();
 
-        log().info(nameForLogging() + " closed.");
+        log().info(closed(nameForLogging()));
+    }
+
+    private void shutDownRepositories() throws Exception {
+        for (Repository<?, ?> repository : repositories) {
+            repository.close();
+        }
+        repositories.clear();
     }
 
     private String nameForLogging() {
@@ -159,13 +162,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
     @CheckReturnValue
     public boolean isMultitenant() {
         return multitenant;
-    }
-
-    private void shutDownRepositories() throws Exception {
-        for (Repository<?, ?> repository : repositories) {
-            unregister(repository);
-        }
-        repositories.clear();
     }
 
     /**
@@ -195,17 +191,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         if (!repository.storageAssigned()) {
             repository.initStorage(this.storageFactory);
         }
-    }
-
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandDispatcher) {
-            commandBus.unregister((CommandDispatcher) repository);
-        }
-        if (repository instanceof EventDispatcher) {
-            eventBus.unregister((EventDispatcher) repository);
-        }
-        repository.close();
     }
 
     @Override
