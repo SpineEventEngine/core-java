@@ -41,7 +41,7 @@ import "google/protobuf/descriptor.proto";
 // A type of an entity.
 enum EntityType {
     // The default value (if the option value is not set).
-    NOT_SET = 0;
+    ET_NOT_SET = 0;
 
     AGGREGATE = 1;
 
@@ -49,7 +49,6 @@ enum EntityType {
 
     PROJECTION = 3;
 }
-
 
 extend google.protobuf.MessageOptions {
     // The default format string for validation error message text.
@@ -241,7 +240,7 @@ message TimeOption {
 // This enumeration defines restriction for date/time values.
 enum Time {
     // The default value (if the time option is not set).
-    UNDEFINED = 0;
+    TIME_UNDEFINED = 0;
 
     // The value must be in the past.
     PAST = 1;

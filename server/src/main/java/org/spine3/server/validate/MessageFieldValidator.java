@@ -38,7 +38,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.internal.Time.FUTURE;
-import static org.spine3.validate.internal.Time.UNDEFINED;
+import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 
 /**
  * Validates fields of type {@link Message}.
@@ -108,7 +108,7 @@ import static org.spine3.validate.internal.Time.UNDEFINED;
 
     private void validateTimestamps() {
         final Time when = timeOption.getIn();
-        if (when == UNDEFINED) {
+        if (when == TIME_UNDEFINED) {
             return;
         }
         final Timestamp now = getCurrentTime();
