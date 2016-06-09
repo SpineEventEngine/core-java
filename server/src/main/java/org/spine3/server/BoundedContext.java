@@ -193,16 +193,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         }
     }
 
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private void unregister(Repository<?, ?> repository) throws Exception {
-        if (repository instanceof CommandDispatcher) {
-            commandBus.unregister((CommandDispatcher) repository);
-        }
-        if (repository instanceof EventDispatcher) {
-            eventBus.unregister((EventDispatcher) repository);
-        }
-    }
-
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
         /**
