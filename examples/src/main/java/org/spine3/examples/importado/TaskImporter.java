@@ -21,7 +21,9 @@
 package org.spine3.examples.importado;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
@@ -52,7 +54,7 @@ import static org.spine3.util.Logging.closed;
  * This example constructs a simple application that creates events outside of the
  * {@link TaskAggregate} and passes them to the aggregate via {@link ImportEvents} command.
  */
-@SuppressWarnings("UseOfSystemOutOrSystemErr") // Is OK for this example.
+@SuppressWarnings({"UseOfSystemOutOrSystemErr", "CallToPrintStackTrace"}) // Is OK for this example.
 public class TaskImporter implements AutoCloseable {
 
     private final StorageFactory storageFactory;
@@ -70,22 +72,26 @@ public class TaskImporter implements AutoCloseable {
         boundedContext.getEventBus().subscribe(printer);
     }
 
-    public void process(Iterable<Event> e) {
+    public void process(TaskId taskId, Iterable<Event> e) {
         final UserId actor = UserUtil.newUserId(getClass().getSimpleName());
         final CommandFactory commandFactory = CommandFactory.newBuilder()
                                                             .setActor(actor)
                                                             .setZoneOffset(ZoneOffsets.UTC)
                                                             .build();
-        final ImportEvents commandMessage = ImportEvents.newBuilder().addAllEvent(e).build();
+        final ImportEvents commandMessage = ImportEvents.newBuilder()
+                                                        .setId(taskId)
+                                                        .addAllEvent(e)
+                                                        .build();
         final Command command = commandFactory.create(commandMessage);
         boundedContext.getCommandBus().post(command, new StreamObserver<Response>() {
             @Override
             public void onNext(Response value) {
-                System.out.println("Command posted " + value);
+                System.out.println("Command posted " + TextFormat.shortDebugString(value));
             }
 
             @Override
             public void onError(Throwable t) {
+                t.printStackTrace();
             }
 
             @Override
@@ -105,19 +111,25 @@ public class TaskImporter implements AutoCloseable {
      * This class prints events to which it is subscribed via {@code System.out}.
      */
     private static class EventPrinter extends EventSubscriber implements Closeable  {
+
         @Subscribe
         public void on(TaskCreated event) {
-            System.out.println(event);
+            print(event);
         }
 
         @Subscribe
         public void on(WorkStarted event) {
-            System.out.println(event);
+            print(event);
         }
 
         @Subscribe
         public void on(TaskDone event) {
-            System.out.println(event);
+            print(event);
+        }
+
+        private static void print(Message event) {
+            System.out.println("Got from EventBus: " + event.getClass().getSimpleName() + ": "
+                                       + TextFormat.shortDebugString(event));
         }
 
         @Override
@@ -129,11 +141,7 @@ public class TaskImporter implements AutoCloseable {
     @SuppressWarnings("UnnecessaryLocalVariable")
         /* We use more variables to make the code more readable in this example. This example have the same value for
            all UserIds, while the real import code would create IDs from imported data. */
-    private static List<Event> generateEvents() {
-        @SuppressWarnings("MagicNumber") // It is!
-        final TaskId taskId = TaskId.newBuilder()
-                                    .setNumber(42)
-                                    .build();
+    private static List<Event> generateEvents(TaskId taskId) {
         final Task task = Task.newBuilder()
                               .setId(taskId)
                               .setName("Show how events can be imported into an aggregate")
@@ -163,11 +171,14 @@ public class TaskImporter implements AutoCloseable {
         return builder.build();
     }
 
-    @SuppressWarnings("CallToPrintStackTrace") // OK for the purpose of the example.
     public static void main(String[] args) {
         try(TaskImporter importer = new TaskImporter(InMemoryStorageFactory.getInstance())) {
-            final List<Event> events = generateEvents();
-            importer.process(events);
+            @SuppressWarnings("MagicNumber") // It is!
+            final TaskId taskId = TaskId.newBuilder()
+                                        .setNumber(42)
+                                        .build();
+            final List<Event> events = generateEvents(taskId);
+            importer.process(taskId, events);
         } catch (Exception e) {
             e.printStackTrace();
         }

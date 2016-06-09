@@ -20,6 +20,8 @@
 
 package org.spine3.examples.importado;
 
+import com.google.protobuf.Message;
+import com.google.protobuf.TextFormat;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.examples.importado.commands.ImportEvents;
@@ -49,15 +51,26 @@ public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
     @Apply
     private void on(TaskCreated event) {
         getBuilder().mergeFrom(event.getTask());
+        print(event);
     }
 
     @Apply
     private void on(WorkStarted event) {
         getBuilder().setStatus(Task.Status.IN_PROGRESS);
+        print(event);
     }
 
     @Apply
     private void on(TaskDone event) {
         getBuilder().setStatus(Task.Status.DONE);
+        print(event);
+    }
+
+    @SuppressWarnings("UseOfSystemOutOrSystemErr") // OK for this example.
+    private void print(Message event) {
+        final String aggregateClass = getClass().getSimpleName();
+        final String eventClass = event.getClass().getSimpleName();
+        final String eventData = TextFormat.shortDebugString(event);
+        System.out.printf("%s applied %s: %s%n", aggregateClass, eventClass, eventData);
     }
 }
