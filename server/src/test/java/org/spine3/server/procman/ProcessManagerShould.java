@@ -41,14 +41,13 @@ import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.command.StartProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommands;
+import org.spine3.test.procman.ProjectId;
+import org.spine3.test.procman.command.AddTask;
+import org.spine3.test.procman.command.CreateProject;
+import org.spine3.test.procman.command.StartProject;
+import org.spine3.test.procman.event.ProjectCreated;
+import org.spine3.test.procman.event.ProjectStarted;
+import org.spine3.test.procman.event.TaskAdded;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -59,14 +58,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestEventMessageFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
 
-    private static final ProjectId ID = newProjectId();
+    private static final ProjectId ID = Given.AggregateId.newProjectId();
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
     private static final CommandContext COMMAND_CONTEXT = CommandContext.getDefaultInstance();
 
@@ -89,14 +85,14 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_event() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg());
+        testDispatchEvent(Given.EventMessage.projectCreatedMsg());
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg());
-        testDispatchEvent(taskAddedMsg());
-        testDispatchEvent(projectStartedMsg());
+        testDispatchEvent(Given.EventMessage.projectCreatedMsg());
+        testDispatchEvent(Given.EventMessage.taskAddedMsg());
+        testDispatchEvent(Given.EventMessage.projectStartedMsg());
     }
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
@@ -106,7 +102,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        testDispatchCommand(addTaskMsg(ID));
+        testDispatchCommand(Given.Command.addTaskMsg(ID));
     }
 
     @Test
@@ -114,9 +110,9 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        testDispatchCommand(createProjectMsg(ID));
-        testDispatchCommand(addTaskMsg(ID));
-        testDispatchCommand(startProjectMsg(ID));
+        testDispatchCommand(Given.Command.createProjectMsg(ID));
+        testDispatchCommand(Given.Command.addTaskMsg(ID));
+        testDispatchCommand(Given.Command.startProjectMsg(ID));
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
@@ -127,7 +123,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final List<Event> events = testDispatchCommand(createProjectMsg(ID));
+        final List<Event> events = testDispatchCommand(Given.Command.createProjectMsg(ID));
 
         assertEquals(1, events.size());
         final Event event = events.get(0);
@@ -147,7 +143,7 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        final List<Event> events = testDispatchCommand(startProjectMsg(ID));
+        final List<Event> events = testDispatchCommand(Given.Command.startProjectMsg(ID));
 
         // There's only one event generated.
         assertEquals(1, events.size());
@@ -237,20 +233,20 @@ public class ProcessManagerShould {
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
             incrementState(toAny(command));
-            return projectCreatedMsg(command.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
             incrementState(toAny(command));
-            return taskAddedMsg(command.getProjectId());
+            return Given.EventMessage.taskAddedMsg(command.getProjectId());
         }
 
         @Assign
         public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toAny(command));
 
-            final Message addTask = TestCommands.addTaskMsg(command.getProjectId());
+            final Message addTask = Given.Command.addTaskMsg(command.getProjectId());
             final CommandRouted route = newRouter().of(command, context)
                                                    .add(addTask)
                                                    .route();
