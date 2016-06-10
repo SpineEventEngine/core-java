@@ -28,9 +28,12 @@ option java_package = "org.spine3.server.aggregate";
 
 import public "google/protobuf/any.proto";
 import public "google/protobuf/timestamp.proto";
+import "spine/annotations.proto";
 
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {
+    option (SPI_type) = true;
+
     // The state of the aggregate.
     google.protobuf.Any state = 1;
 
