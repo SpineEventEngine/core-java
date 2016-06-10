@@ -19,13 +19,36 @@
  */
 
 package org.spine3.server.aggregate;
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 import org.spine3.test.aggregate.ProjectId;
+
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.test.aggregate.event.ProjectStarted;
 
-import static org.spine3.base.Identifiers.newUuid;
+import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.command.StartProject;
+import org.spine3.users.UserId;
+
 
 public class Generate {
     public static class AggregateId {
@@ -62,6 +85,128 @@ public class Generate {
 
         public static TaskAdded taskAddedMsg(ProjectId id) {
             return TaskAdded.newBuilder().setProjectId(id).build();
+        }
+
+        public static ProjectStarted projectStartedMsg(ProjectId id) {
+            return ProjectStarted.newBuilder().setProjectId(id).build();
+        }
+    }
+
+
+    public static class Command{
+
+        private static final UserId USER_ID = newUserId(newUuid());
+        private static final ProjectId PROJECT_ID = Generate.AggregateId.newProjectId();
+
+        private Command() {
+        }
+
+        /**
+         * Creates a new {@link CreateProject} command with the given project ID.
+         */
+        public static CreateProject createProjectMsg(ProjectId id) {
+            return CreateProject.newBuilder().setProjectId(id).build();
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
+         */
+        public static org.spine3.base.Command createProjectCmd() {
+            return createProjectCmd(getCurrentTime());
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
+         */
+        public static org.spine3.base.Command createProjectCmd(Timestamp when) {
+            return createProjectCmd(USER_ID, PROJECT_ID, when);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
+         */
+        public static org.spine3.base.Command createProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
+            final CreateProject command = createProjectMsg(projectId);
+            return createCommand(command, userId, when);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
+         * {@link CommandId} instance.
+         */
+        public static org.spine3.base.Command createCommand(Message command, UserId userId, Timestamp when) {
+            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final org.spine3.base.Command result = Commands.create(command, context);
+            return result;
+        }
+
+        /**
+         * Creates a new {@link AddTask} command with the given project ID.
+         */
+        public static AddTask addTaskMsg(ProjectId id) {
+            return AddTask.newBuilder().setProjectId(id).build();
+        }
+
+        /**
+         * Creates a new {@link StartProject} command with the given project ID.
+         */
+        public static StartProject startProjectMsg(ProjectId id) {
+            return StartProject.newBuilder().setProjectId(id).build();
+        }
+    }
+
+
+    public static class Event{
+        private static final ProjectId PROJECT_ID = Generate.AggregateId.newProjectId();
+
+        private Event() {
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with default properties.
+         */
+        public static org.spine3.base.Event projectCreatedEvent() {
+            return projectCreatedEvent(PROJECT_ID);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with the given projectId.
+         */
+        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId) {
+            return projectCreatedEvent(projectId, createEventContext(projectId));
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
+         */
+        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
+            final ProjectCreated eventMessage = Generate.EventMessage.projectCreatedMsg(projectId);
+            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
+                                                                               .setContext(eventContext)
+                                                                               .setMessage(toAny(eventMessage));
+            return builder.build();
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
+         */
+        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
+            final TaskAdded eventMessage = Generate.EventMessage.taskAddedMsg(projectId);
+            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
+                                                                               .setContext(eventContext)
+                                                                               .setMessage(toAny(eventMessage));
+            return builder.build();
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
+         */
+        public static org.spine3.base.Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
+            final ProjectStarted eventMessage = Generate.EventMessage.projectStartedMsg(projectId);
+            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
+                                                                               .setContext(eventContext)
+                                                                               .setMessage(toAny(eventMessage));
+            return builder.build();
         }
     }
 }
