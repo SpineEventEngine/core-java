@@ -34,7 +34,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
@@ -76,7 +75,14 @@ public class Generate {
 
     public static class EventMessage {
 
+        private static final ProjectId DUMMY_PROJECT_ID = Generate.AggregateId.newProjectId();
+        private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
+
         private EventMessage() {
+        }
+
+        public static ProjectCreated projectCreatedMsg() {
+            return PROJECT_CREATED;
         }
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
