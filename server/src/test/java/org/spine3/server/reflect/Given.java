@@ -123,62 +123,6 @@ public class Given {
             final EventBus eventBus = EventBus.newInstance(store);
             return eventBus;
         }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
-        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId) {
-            return projectCreatedEvent(projectId, createEventContext(projectId));
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
-        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
-
-            final ProjectCreated eventMessage = EventMessage.projectCreatedMsg(projectId);
-
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
-            return builder.build();
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId) {
-            return taskAddedEvent(projectId, createEventContext(projectId));
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded event = EventMessage.taskAddedMsg(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(event));
-            return builder.build();
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
-        public static org.spine3.base.Event projectStartedEvent(ProjectId projectId) {
-            return projectStartedEvent(projectId, createEventContext(projectId));
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
-        public static org.spine3.base.Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectStarted event = EventMessage.projectStartedMsg(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(event));
-            return builder.build();
-        }
     }
 
 }
