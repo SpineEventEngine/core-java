@@ -21,7 +21,7 @@
 package org.spine3.server.command;
 
 import org.spine3.base.CommandId;
-import org.spine3.server.failure.FailureThrowable;
+import org.spine3.base.FailureThrowable;
 
 /**
  * The service for updating a status of a command.

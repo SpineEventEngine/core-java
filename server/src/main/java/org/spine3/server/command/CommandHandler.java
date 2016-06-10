@@ -31,9 +31,9 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.FailureThrowable;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.MethodRegistry;
 
