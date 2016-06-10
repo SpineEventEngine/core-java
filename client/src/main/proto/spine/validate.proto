@@ -35,6 +35,10 @@ option java_outer_classname = "ValidationProto";
 option java_package = "org.spine3.validate.internal";
 
 import "google/protobuf/descriptor.proto";
+import "spine/annotations.proto";
+
+
+option (internal_all) = true;
 
 // TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
 
