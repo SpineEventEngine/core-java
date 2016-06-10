@@ -27,13 +27,15 @@ option java_outer_classname = "EventStoreProto";
 // Put under the 'grpc' sub-package, which is @Internal.
 option java_package = "org.spine3.server.event.grpc";
 
-import public "spine/base/event.proto";
-import public "spine/base/response.proto";
+import "spine/annotations.proto";
+import "spine/base/event.proto";
+import "spine/base/response.proto";
 
-import public "spine/server/event/event_stream_query.proto";
+import "spine/server/event/event_stream_query.proto";
 
 // `EventStore` service allows to store events and read them via streams.
 service EventStore {
+    option (SPI_service) = true;
     // Request to append events to the storage.
     rpc Append(base.Event) returns (base.Response);
 
