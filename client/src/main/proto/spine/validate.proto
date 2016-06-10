@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-// We do not define the package for this file to allow shorter options for user-defined types.
+// We do not define a package for this file to allow shorter options for user-defined types.
 // This would allow to write:
 //
 //     [(required).value = true];
@@ -34,7 +34,11 @@ option java_multiple_files = true;
 option java_outer_classname = "ValidationProto";
 option java_package = "org.spine3.validate.internal";
 
+option (internal_all) = true;
+
 import "google/protobuf/descriptor.proto";
+
+import "spine/annotations.proto";
 
 // TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
 

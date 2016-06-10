@@ -105,3 +105,8 @@ extend google.protobuf.FileOptions {
     // See more info in `annotations.proto`.
     bool beta_all = 58011;
 }
+
+extend google.protobuf.ServiceOptions {
+    // Indicates that the service is a part of Service Provider Interface (SPI).
+    bool SPI_service = 58012;
+}
