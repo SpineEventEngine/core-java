@@ -87,6 +87,8 @@ public class CommandBus implements AutoCloseable {
 
     private final CommandScheduler scheduler;
 
+    private final CommandRescheduler rescheduler;
+
     private final ProblemLog problemLog;
 
     /**
@@ -119,11 +121,14 @@ public class CommandBus implements AutoCloseable {
      * @param problemLog a problem logger
      */
     @VisibleForTesting
-    /* package */ CommandBus(CommandStore commandStore, CommandScheduler scheduler, ProblemLog problemLog) {
+    /* package */ CommandBus(CommandStore commandStore,
+                             CommandScheduler scheduler,
+                             ProblemLog problemLog) {
         this.commandStore = checkNotNull(commandStore);
         this.commandStatusService = new CommandStatusService(commandStore);
         this.scheduler = scheduler;
         this.problemLog = problemLog;
+        this.rescheduler = new CommandRescheduler();
     }
 
     /**
@@ -266,43 +271,10 @@ public class CommandBus implements AutoCloseable {
         final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                rescheduleCommands();
+                rescheduler.rescheduleCommands();
             }
         });
         thread.start();
-    }
-
-    @VisibleForTesting
-    /* package */ void rescheduleCommands() {
-        final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
-        while (commands.hasNext()) {
-            final Command command = commands.next();
-            final Timestamp now = getCurrentTime();
-            final Timestamp timeToPost = getTimeToPost(command);
-            if (isLaterThan(now, /*than*/ timeToPost)) {
-                onScheduledCommandExpired(command);
-            } else {
-                final Interval interval = between(now, timeToPost);
-                final Duration newDelay = toDuration(interval);
-                final Command commandUpdated = setSchedule(command, newDelay, now);
-                scheduler.schedule(commandUpdated);
-            }
-        }
-    }
-
-    private static Timestamp getTimeToPost(Command command) {
-        final Schedule schedule = command.getContext().getSchedule();
-        final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
-        return timeToPost;
-    }
-
-    private void onScheduledCommandExpired(Command command) {
-        // We cannot post this command because there is no handler/dispatcher registered yet.
-        // Also, posting it can be undesirable.
-        final Message msg = getMessage(command);
-        final CommandId id = getId(command);
-        problemLog.errorExpiredCommand(msg, id);
-        commandStatusService.setToError(id, commandExpiredError(msg));
     }
 
     /**
@@ -338,6 +310,11 @@ public class CommandBus implements AutoCloseable {
      */
     public CommandStatusService getCommandStatusService() {
         return commandStatusService;
+    }
+
+    @VisibleForTesting
+    /* package */ CommandRescheduler getRescheduler() {
+        return rescheduler;
     }
 
     private void dispatch(Command command) {
@@ -409,6 +386,43 @@ public class CommandBus implements AutoCloseable {
         handlerRegistry.unregisterAll();
         commandStore.close();
         scheduler.shutdown();
+    }
+
+    @VisibleForTesting
+    /* package */ class CommandRescheduler {
+
+        @VisibleForTesting
+        /* package */ void rescheduleCommands() {
+            final Iterator<Command> commands = commandStore.iterator(SCHEDULED);
+            while (commands.hasNext()) {
+                final Command command = commands.next();
+                final Timestamp now = getCurrentTime();
+                final Timestamp timeToPost = getTimeToPost(command);
+                if (isLaterThan(now, /*than*/ timeToPost)) {
+                    onScheduledCommandExpired(command);
+                } else {
+                    final Interval interval = between(now, timeToPost);
+                    final Duration newDelay = toDuration(interval);
+                    final Command commandUpdated = setSchedule(command, newDelay, now);
+                    scheduler.schedule(commandUpdated);
+                }
+            }
+        }
+
+        private Timestamp getTimeToPost(Command command) {
+            final Schedule schedule = command.getContext().getSchedule();
+            final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
+            return timeToPost;
+        }
+
+        private void onScheduledCommandExpired(Command command) {
+            // We cannot post this command because there is no handler/dispatcher registered yet.
+            // Also, posting it can be undesirable.
+            final Message msg = getMessage(command);
+            final CommandId id = getId(command);
+            problemLog.errorExpiredCommand(msg, id);
+            commandStatusService.setToError(id, commandExpiredError(msg));
+        }
     }
 
     private enum LogSingleton {
