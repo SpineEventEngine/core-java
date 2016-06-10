@@ -28,6 +28,10 @@ option java_package = "org.spine3.server.storage";
 
 import public "google/protobuf/timestamp.proto";
 import public "google/protobuf/any.proto";
+import "spine/annotations.proto";
+
+
+option (SPI_all) = true;
 
 // Used to store entities in the entity storage.
 message EntityStorageRecord {

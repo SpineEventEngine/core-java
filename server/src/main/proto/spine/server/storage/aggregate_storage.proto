@@ -28,6 +28,10 @@ option java_generate_equals_and_hash = true;
 
 import public "spine/server/aggregate/snapshot.proto";
 import public "spine/base/event.proto";
+import "spine/annotations.proto";
+
+
+option (SPI_all) = true;
 
 // A record in the storage of events and snapshots of an aggregate type.
 //
