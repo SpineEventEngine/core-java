@@ -19,13 +19,13 @@
 //
 syntax = "proto3";
 
-package spine.test.boundedContext.command;
+package spine.test.bc.command;
 
-import "spine/test/boundedContext/project.proto";
-import "spine/test/boundedContext/task.proto";
+import "spine/test/bc/project.proto";
+import "spine/test/bc/task.proto";
 
-option java_package="org.spine3.test.boundedContext.command";
-option java_outer_classname = "BoundedContextCommandsProto";
+option java_package="org.spine3.test.bc.command";
+option java_outer_classname = "BCCommandsProto";
 option java_multiple_files = true;
 
 message CreateProject {

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.bc;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -47,14 +48,14 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.command.StartProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
+import org.spine3.test.bc.Project;
+import org.spine3.test.bc.ProjectId;
+import org.spine3.test.bc.command.AddTask;
+import org.spine3.test.bc.command.CreateProject;
+import org.spine3.test.bc.command.StartProject;
+import org.spine3.test.bc.event.ProjectCreated;
+import org.spine3.test.bc.event.ProjectStarted;
+import org.spine3.test.bc.event.TaskAdded;
 
 import java.util.List;
 
@@ -64,10 +65,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestCommands.newCommandBus;
-import static org.spine3.testdata.TestEventFactory.newEventBus;
-import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
-import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -141,7 +138,7 @@ public class BoundedContextShould {
     public void notify_integration_event_subscribers() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = projectCreatedIntegrationEvent();
+        final IntegrationEvent event = Given.Event.projectCreatedIntegrationEvent();
         final Message msg = fromAny(event.getMessage());
 
         boundedContext.notify(event, observer);
@@ -154,8 +151,8 @@ public class BoundedContextShould {
     public void tell_if_set_multitenant() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                                .setCommandBus(newCommandBus(storageFactory))
-                                                .setEventBus(newEventBus(storageFactory))
+                                                .setCommandBus(Given.Command.newCommandBus(storageFactory))
+                                                .setEventBus(Given.Event.newEventBus(storageFactory))
                                                 .setMultitenant(true)
                                                 .build();
         assertTrue(bc.isMultitenant());
@@ -203,19 +200,19 @@ public class BoundedContextShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message = Given.EventMessage.projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
         }
 

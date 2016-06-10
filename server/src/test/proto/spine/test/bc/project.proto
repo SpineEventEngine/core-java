@@ -19,17 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test.boundedContext;
+package spine.test.bc;
 
-option java_package="org.spine3.test.boundedContext";
+option java_package="org.spine3.test.bc";
 option java_multiple_files = true;
 
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string status = 3;
+import "spine/test/bc/task.proto";
+
+message ProjectId {
+    string id = 1;
 }
 
-message TaskId {
-    int32 id = 1;
+message Project {
+
+    ProjectId id = 1;
+
+    string name = 2;
+
+    repeated Task task = 3;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+
+    Status status = 4;
 }
+

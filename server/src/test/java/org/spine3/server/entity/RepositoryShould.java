@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.bc.BoundedContextTestStubs;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;

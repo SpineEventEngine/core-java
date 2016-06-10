@@ -19,13 +19,13 @@
 //
 syntax = "proto3";
 
-package spine.test.boundedContext.event;
+package spine.test.bc.event;
 
-import "spine/test/boundedContext/project.proto";
-import "spine/test/boundedContext/task.proto";
+import "spine/test/bc/project.proto";
+import "spine/test/bc/task.proto";
 
-option java_package="org.spine3.test.boundedContext.event";
-option java_outer_classname = "BoundedContextEventsProto";
+option java_package="org.spine3.test.bc.event";
+option java_outer_classname = "BCEventsProto";
 option java_multiple_files = true;
 
 message ProjectCreated {

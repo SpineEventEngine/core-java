@@ -18,16 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.bc;
 
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 import static org.mockito.Mockito.spy;
-import static org.spine3.testdata.TestCommands.newCommandBus;
-import static org.spine3.testdata.TestEventFactory.newEventBus;
 
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
@@ -46,8 +45,8 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(String name, StorageFactory storageFactory) {
-        final CommandBus commandBus = newCommandBus(storageFactory);
-        final EventBus eventBus = newEventBus(storageFactory);
+        final CommandBus commandBus = Given.Command.newCommandBus(storageFactory);
+        final EventBus eventBus = Given.Event.newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setName(name)
                                                              .setStorageFactory(storageFactory)

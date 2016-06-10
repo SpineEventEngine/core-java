@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.server.bc.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

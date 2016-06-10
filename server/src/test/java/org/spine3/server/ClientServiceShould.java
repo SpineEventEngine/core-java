@@ -39,6 +39,7 @@ import org.spine3.people.PersonName;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
+import org.spine3.server.bc.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

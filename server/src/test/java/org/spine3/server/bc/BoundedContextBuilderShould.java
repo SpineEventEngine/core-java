@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.bc;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
@@ -30,8 +31,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
-import static org.spine3.testdata.TestCommands.newCommandBus;
-import static org.spine3.testdata.TestEventFactory.newEventBus;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextBuilderShould {
@@ -67,14 +66,14 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_CommandBus_from_builder() {
-        final CommandBus expected = newCommandBus(storageFactory);
+        final CommandBus expected = Given.Command.newCommandBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
     }
 
     @Test
     public void return_EventBus_from_builder() {
-        final EventBus expected = newEventBus(storageFactory);
+        final EventBus expected = Given.Event.newEventBus(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder().setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
@@ -102,7 +101,7 @@ public class BoundedContextBuilderShould {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                    .setStorageFactory(storageFactory)
-                                                   .setEventBus(newEventBus(storageFactory))
+                                                   .setEventBus(Given.Event.newEventBus(storageFactory))
                                                    .build();
         assertNotNull(boundedContext.getCommandBus());
     }
@@ -112,7 +111,7 @@ public class BoundedContextBuilderShould {
         // Pass CommandBus to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                    .setStorageFactory(storageFactory)
-                                                   .setCommandBus(newCommandBus(storageFactory))
+                                                   .setCommandBus(Given.Command.newCommandBus(storageFactory))
                                                    .build();
         assertNotNull(boundedContext.getEventBus());
     }
