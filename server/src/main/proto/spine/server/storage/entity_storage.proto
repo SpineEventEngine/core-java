@@ -26,12 +26,12 @@ option java_multiple_files = true;
 option java_outer_classname = "EntityStorageProto";
 option java_package = "org.spine3.server.storage";
 
-import public "google/protobuf/timestamp.proto";
-import public "google/protobuf/any.proto";
-import "spine/annotations.proto";
-
-
 option (SPI_all) = true;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+import "spine/annotations.proto";
 
 // Used to store entities in the entity storage.
 message EntityStorageRecord {

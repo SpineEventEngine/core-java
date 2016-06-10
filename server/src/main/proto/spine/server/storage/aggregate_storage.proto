@@ -26,12 +26,11 @@ option java_outer_classname = "AggregateStorageProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+option (SPI_all) = true;
+
 import public "spine/server/aggregate/snapshot.proto";
 import public "spine/base/event.proto";
 import "spine/annotations.proto";
-
-
-option (SPI_all) = true;
 
 // A record in the storage of events and snapshots of an aggregate type.
 //
