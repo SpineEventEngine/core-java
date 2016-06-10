@@ -75,7 +75,7 @@ import static org.spine3.validate.Validate.isDefault;
 public class CommandBus implements AutoCloseable {
 
     // TODO:2016-05-31:alexander.litus: consider extracting class(es), moving methods, etc,
-    // because this class is overly coupled and has too many methods.
+    // because this class is overly coupled.
 
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
 
