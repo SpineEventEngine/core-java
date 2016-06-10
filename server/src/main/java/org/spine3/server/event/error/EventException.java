@@ -21,11 +21,13 @@
 package org.spine3.server.event.error;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
 import org.spine3.type.TypeName;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -35,8 +37,11 @@ import java.util.Map;
  */
 public abstract class EventException extends RuntimeException {
 
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private final Message eventMessage;
+    /**
+     * Use {@link GeneratedMessage} because it is {@link Serializable}.
+     */
+    private final GeneratedMessage eventMessage;
+
     private final Error error;
 
     /**
@@ -46,9 +51,9 @@ public abstract class EventException extends RuntimeException {
      * @param eventMessage a related event
      * @param error an error occurred
      */
-    public EventException(String messageText, Message eventMessage, Error error) {
+    protected EventException(String messageText, Message eventMessage, Error error) {
         super(messageText);
-        this.eventMessage = eventMessage;
+        this.eventMessage = (GeneratedMessage) eventMessage;
         this.error = error;
     }
 

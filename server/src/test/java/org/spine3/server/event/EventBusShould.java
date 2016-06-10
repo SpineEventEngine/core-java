@@ -166,7 +166,7 @@ public class EventBusShould {
 
     @Test
     public void register_dispatchers() {
-        final BareDispatcher dispatcher = new BareDispatcher();
+        final EventDispatcher dispatcher = new BareDispatcher();
 
         eventBus.register(dispatcher);
 
@@ -186,8 +186,8 @@ public class EventBusShould {
 
     @Test
     public void unregister_dispatchers() {
-        final BareDispatcher dispatcherOne = new BareDispatcher();
-        final BareDispatcher dispatcherTwo = new BareDispatcher();
+        final EventDispatcher dispatcherOne = new BareDispatcher();
+        final EventDispatcher dispatcherTwo = new BareDispatcher();
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         eventBus.register(dispatcherOne);
         eventBus.register(dispatcherTwo);
