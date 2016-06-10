@@ -24,7 +24,8 @@ package spine.server.event;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EventStoreProto";
-// Put under the 'grpc' sub-package, which is @Internal.
+
+// Put generated code under the 'grpc' sub-package, which is annotated @SPI.
 option java_package = "org.spine3.server.event.grpc";
 
 import "spine/annotations.proto";
