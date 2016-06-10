@@ -33,9 +33,6 @@ import org.spine3.test.reflect.event.ProjectStarted;
 import org.spine3.test.reflect.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
 public class Given {
