@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -73,11 +74,11 @@ public class Given {
 
     }
 
-
     public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = Given.AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
+        private static final Any PROJECT_CREATED_ANY = toAny(PROJECT_CREATED);
 
         private EventMessage() {
         }
@@ -97,15 +98,35 @@ public class Given {
         public static ProjectStarted projectStartedMsg(ProjectId id) {
             return ProjectStarted.newBuilder().setProjectId(id).build();
         }
-    }
 
+        public static Any projectCreatedEventAny() {
+            return PROJECT_CREATED_ANY;
+        }
+    }
 
     public static class Command{
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Command() {
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
+         * {@link CommandId} instance.
+         */
+        public static org.spine3.base.Command createCommand(Message command, UserId userId, Timestamp when) {
+            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final org.spine3.base.Command result = Commands.create(command, context);
+            return result;
+        }
+
+        /**
+         * Creates a new {@link org.spine3.test.project.command.CreateProject} command with the generated project ID.
+         */
+        public static CreateProject createProjectMsg() {
+            return CreateProject.newBuilder().setProjectId(AggregateId.newProjectId()).build();
         }
 
         /**
@@ -138,13 +159,33 @@ public class Given {
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
-         * {@link CommandId} instance.
+         * Creates a new {@link org.spine3.base.Command}.
          */
-        public static org.spine3.base.Command createCommand(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
-            final org.spine3.base.Command result = Commands.create(command, context);
-            return result;
+        public static org.spine3.base.Command addTaskCmd() {
+            return addTaskCmd(USER_ID, PROJECT_ID, getCurrentTime());
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
+         */
+        public static org.spine3.base.Command addTaskCmd(UserId userId, ProjectId projectId, Timestamp when) {
+            final AddTask command = addTaskMsg(projectId);
+            return createCommand(command, userId, when);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command}.
+         */
+        public static org.spine3.base.Command startProjectCmd() {
+            return startProjectCmd(USER_ID, PROJECT_ID, getCurrentTime());
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
+         */
+        public static org.spine3.base.Command startProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
+            final StartProject command = startProjectMsg(projectId);
+            return createCommand(command, userId, when);
         }
 
         /**
@@ -161,7 +202,6 @@ public class Given {
             return StartProject.newBuilder().setProjectId(id).build();
         }
     }
-
 
     public static class Event{
         private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
