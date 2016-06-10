@@ -57,7 +57,6 @@ public class Given {
 
     }
 
-
     public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
