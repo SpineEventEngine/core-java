@@ -34,6 +34,8 @@ import "spine/users/user_id.proto";
 import "spine/users/tenant_id.proto";
 import "spine/time/zone_offset.proto";
 
+import "spine/annotations.proto";
+
 // Command identifier.
 message CommandId {
     string uuid = 1;
@@ -92,7 +94,7 @@ message CommandContext {
 
         // The time when the command was scheduled.
         // Is set automatically and used only by Spine when re-scheduling a command.
-        google.protobuf.Timestamp scheduling_time = 2;
+        google.protobuf.Timestamp scheduling_time = 2 [(internal) = true];
     }
 
     // The schedule to execute the command.
