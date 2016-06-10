@@ -278,14 +278,12 @@ public class EventBus implements AutoCloseable {
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            // TODO:2016-06-09:alexander.litus: consider storing an event with `Error` status
             responseObserver.onError(Statuses.invalidArgumentWithCause(unsupportedEvent));
             return false;
         }
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent = InvalidEventException.onConstraintViolations(event, violations);
-            // TODO:2016-06-09:alexander.litus: consider storing an event with `Error` status
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
             return false;
         }
