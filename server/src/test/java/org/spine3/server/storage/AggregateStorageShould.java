@@ -84,7 +84,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Override
     protected AggregateEvents newStorageRecord() {
-        final List<AggregateStorageRecord> records = Given.Storage.createSequentialRecords(id);
+        final List<AggregateStorageRecord> records = Given.RecordStorage.createSequentialRecords(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
         final AggregateEvents aggregateEvents = AggregateEvents.newBuilder().addAllEvent(expectedEvents).build();
         return aggregateEvents;
@@ -155,7 +155,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_and_read_one_record() {
-        final AggregateStorageRecord expected = Given.Storage.newAggregateStorageRecord(getCurrentTime());
+        final AggregateStorageRecord expected = Given.RecordStorage.newAggregateStorageRecord(getCurrentTime());
 
         storage.writeInternal(id, expected);
 
@@ -168,7 +168,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
 
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
-        final List<AggregateStorageRecord> records = Given.Storage.createSequentialRecords(id);
+        final List<AggregateStorageRecord> records = Given.RecordStorage.createSequentialRecords(id);
 
         writeAll(id, records);
 
@@ -203,7 +203,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
         final Timestamp time2 = add(time1, delta);
         final Timestamp time3 = add(time2, delta);
 
-        storage.writeInternal(id, Given.Storage.newAggregateStorageRecord(time1));
+        storage.writeInternal(id, Given.RecordStorage.newAggregateStorageRecord(time1));
         storage.write(id, newSnapshot(time2));
 
         testWriteRecordsAndLoadHistory(time3);
@@ -270,7 +270,7 @@ public abstract class AggregateStorageShould extends AbstractStorageShould<Proje
     }
 
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
-        final List<AggregateStorageRecord> records = Given.Storage.createSequentialRecords(id, firstRecordTime);
+        final List<AggregateStorageRecord> records = Given.RecordStorage.createSequentialRecords(id, firstRecordTime);
 
         writeAll(id, records);
 

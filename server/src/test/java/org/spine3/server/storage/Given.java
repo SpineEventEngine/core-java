@@ -36,6 +36,7 @@ import org.spine3.test.storage.command.StartProject;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.test.storage.event.ProjectStarted;
 import org.spine3.test.storage.event.TaskAdded;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import java.util.List;
@@ -47,8 +48,12 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
+import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
+import static org.spine3.testdata.TestEventMessageFactory.projectStartedEventAny;
+import static org.spine3.testdata.TestEventMessageFactory.taskAddedEventAny;
 
 
 public class Given {
@@ -59,7 +64,9 @@ public class Given {
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
 
         /**
@@ -69,7 +76,9 @@ public class Given {
          * @return ProjectId instance
          */
         public static ProjectId newProjectId(String uuid) {
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
 
     }
@@ -88,15 +97,21 @@ public class Given {
         }
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
-            return ProjectCreated.newBuilder().setProjectId(id).build();
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
         public static TaskAdded taskAddedMsg(ProjectId id) {
-            return TaskAdded.newBuilder().setProjectId(id).build();
+            return TaskAdded.newBuilder()
+                            .setProjectId(id)
+                            .build();
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
         public static Any projectCreatedEventAny() {
@@ -104,7 +119,7 @@ public class Given {
         }
     }
 
-    public static class Command{
+    public static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -126,14 +141,18 @@ public class Given {
          * Creates a new {@link org.spine3.test.project.command.CreateProject} command with the generated project ID.
          */
         public static CreateProject createProjectMsg() {
-            return CreateProject.newBuilder().setProjectId(AggregateId.newProjectId()).build();
+            return CreateProject.newBuilder()
+                                .setProjectId(AggregateId.newProjectId())
+                                .build();
         }
 
         /**
          * Creates a new {@link CreateProject} command with the given project ID.
          */
         public static CreateProject createProjectMsg(ProjectId id) {
-            return CreateProject.newBuilder().setProjectId(id).build();
+            return CreateProject.newBuilder()
+                                .setProjectId(id)
+                                .build();
         }
 
         /**
@@ -192,18 +211,22 @@ public class Given {
          * Creates a new {@link AddTask} command with the given project ID.
          */
         public static AddTask addTaskMsg(ProjectId id) {
-            return AddTask.newBuilder().setProjectId(id).build();
+            return AddTask.newBuilder()
+                          .setProjectId(id)
+                          .build();
         }
 
         /**
          * Creates a new {@link StartProject} command with the given project ID.
          */
         public static StartProject startProjectMsg(ProjectId id) {
-            return StartProject.newBuilder().setProjectId(id).build();
+            return StartProject.newBuilder()
+                               .setProjectId(id)
+                               .build();
         }
     }
 
-    public static class Event{
+    public static class Event {
         private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
 
         private Event() {
@@ -257,9 +280,9 @@ public class Given {
         }
     }
 
-    public static class Storage{
+    public static class RecordStorage {
 
-        private Storage() {
+        private RecordStorage() {
         }
 
         /**
@@ -282,15 +305,16 @@ public class Given {
         }
 
         /*
-             * Returns several records sorted by timestamp ascending.
-             * First record's timestamp is current time.
-             */
+              Returns several records sorted by timestamp ascending.
+              First record's timestamp is current time.
+        **/
         public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id) {
             return createSequentialRecords(id, getCurrentTime());
         }
 
         /**
          * Returns several records sorted by timestamp ascending.
+         *
          * @param timestamp1 the timestamp of first record.
          */
         public static List<AggregateStorageRecord> createSequentialRecords(ProjectId id, Timestamp timestamp1) {
@@ -306,6 +330,65 @@ public class Given {
                                                                              Event.projectStartedEvent(id, createEventContext(timestamp3)));
 
             return newArrayList(record1, record2, record3);
+        }
+    }
+
+    public static class EventStorage {
+
+        private EventStorage() {
+        }
+
+        public static EventStorageRecord projectCreated() {
+            final Timestamp time = getCurrentTime();
+            final ProjectId projectId = AggregateId.newProjectId();
+            final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
+                                                                         .setMessage(projectCreatedEventAny())
+                                                                         .setTimestamp(time)
+                                                                         .setEventId("project_created")
+                                                                         .setEventType(TypeName.of(org.spine3.test.project.event.ProjectCreated.getDescriptor())
+                                                                                               .value())
+                                                                         .setProducerId(projectId.getId())
+                                                                         .setContext(createEventContext(projectId, time));
+            return builder.build();
+        }
+
+        public static EventStorageRecord projectCreated(Timestamp when) {
+            final ProjectId projectId = AggregateId.newProjectId();
+            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                                                                        .setMessage(projectCreatedEventAny())
+                                                                        .setTimestamp(when)
+                                                                        .setEventId("project_created_" + when.getSeconds())
+                                                                        .setEventType(TypeName.of(org.spine3.test.project.event.ProjectCreated.getDescriptor())
+                                                                                              .value())
+                                                                        .setProducerId(projectId.getId())
+                                                                        .setContext(createEventContext(projectId, when));
+            return result.build();
+        }
+
+        public static EventStorageRecord taskAdded(Timestamp when) {
+            final ProjectId projectId = AggregateId.newProjectId();
+            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                                                                        .setMessage(taskAddedEventAny())
+                                                                        .setTimestamp(when)
+                                                                        .setEventId("task_added_" + when.getSeconds())
+                                                                        .setEventType(TypeName.of(org.spine3.test.project.event.TaskAdded.getDescriptor())
+                                                                                              .value())
+                                                                        .setProducerId(projectId.getId())
+                                                                        .setContext(createEventContext(projectId, when));
+            return result.build();
+        }
+
+        public static EventStorageRecord projectStarted(Timestamp when) {
+            final ProjectId projectId = AggregateId.newProjectId();
+            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
+                                                                        .setMessage(projectStartedEventAny())
+                                                                        .setTimestamp(when)
+                                                                        .setEventId("project_started_" + when.getSeconds())
+                                                                        .setEventType(TypeName.of(org.spine3.test.project.event.ProjectStarted.getDescriptor())
+                                                                                              .value())
+                                                                        .setProducerId(projectId.getId())
+                                                                        .setContext(createEventContext(projectId, when));
+            return result.build();
         }
     }
 }

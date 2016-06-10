@@ -30,7 +30,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.testdata.TestEventFactory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -44,8 +43,6 @@ import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.storage.EventStorage.toEvent;
 import static org.spine3.server.storage.EventStorage.toEventList;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestEventStorageRecordFactory.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event> {
@@ -98,7 +95,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Override
     protected Event newStorageRecord() {
-        return TestEventFactory.projectCreatedEvent();
+        return Given.Event.projectCreatedEvent();
     }
 
     @Override
@@ -115,7 +112,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Test
     public void writeInternal_and_read_one_event() {
-        final EventStorageRecord recordToStore = projectCreated();
+        final EventStorageRecord recordToStore = Given.EventStorage.projectCreated();
         final EventId id = EventId.newBuilder().setUuid(recordToStore.getEventId()).build();
         final Event expected = toEvent(recordToStore);
 
@@ -160,7 +157,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void filter_events_by_aggregate_id() {
         givenSequentialRecords();
-        final Any id = idToAny(newProjectId(record1.getProducerId()));
+        final Any id = idToAny(Given.AggregateId.newProjectId(record1.getProducerId()));
         final EventFilter filter = EventFilter.newBuilder().addAggregateId(id).build();
         final EventStreamQuery query = EventStreamQuery.newBuilder().addFilter(filter).build();
         final List<Event> expected = toEventList(record1);
@@ -364,7 +361,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     private static EventFilter newEventFilterFor(EventStorageRecord record) {
         final String typeName = record.getEventType();
-        final Any id = idToAny(newProjectId(record.getProducerId()));
+        final Any id = idToAny(Given.AggregateId.newProjectId(record.getProducerId()));
         return EventFilter.newBuilder()
                           .setEventType(typeName)
                           .addAggregateId(id)
@@ -378,11 +375,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
         final Duration delta = Duration.newBuilder().setSeconds(deltaSeconds).setNanos(deltaNanos).build();
         time1 = getCurrentTime().toBuilder().setNanos(POSITIVE_DELTA * 10).build(); // to be sure that nanos are bigger than delta
-        record1 = projectCreated(time1);
+        record1 = Given.EventStorage.projectCreated(time1);
         time2 = add(time1, delta);
-        record2 = taskAdded(time2);
+        record2 = Given.EventStorage.taskAdded(time2);
         time3 = add(time2, delta);
-        record3 = projectStarted(time3);
+        record3 = Given.EventStorage.projectStarted(time3);
 
         writeAll(record1, record2, record3);
     }
