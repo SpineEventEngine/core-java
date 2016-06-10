@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.storage.AggregateStorage;
 import org.spine3.server.storage.AggregateStorageShould;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.storage.ProjectId;
 
 /**
  * @author Alexander Litus
