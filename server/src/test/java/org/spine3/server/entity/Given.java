@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 
+import org.spine3.test.entity.command.CreateProject;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.Project;
 
@@ -38,6 +39,22 @@ public class Given {
             return ProjectId.newBuilder()
                             .setId(uuid)
                             .build();
+        }
+
+    }
+
+    public static class Command {
+
+        private Command() {
+        }
+
+        /**
+         * Creates a new {@link org.spine3.test.command.command.CreateProject} command with the generated project ID.
+         */
+        public static CreateProject createProjectMsg() {
+            return CreateProject.newBuilder()
+                                .setProjectId(AggregateId.newProjectId())
+                                .build();
         }
 
     }

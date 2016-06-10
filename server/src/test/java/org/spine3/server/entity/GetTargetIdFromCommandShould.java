@@ -23,12 +23,11 @@ package org.spine3.server.entity;
 import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.entity.command.CreateProject;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.testdata.TestCommands.createProjectMsg;
 
 /**
  * @author Alexander Litus
@@ -45,7 +44,7 @@ public class GetTargetIdFromCommandShould {
 
     @Test
     public void get_ID_from_command_message() {
-        final CreateProject msg = createProjectMsg();
+        final CreateProject msg = Given.Command.createProjectMsg();
 
         final Optional id = GetTargetIdFromCommand.asOptional(msg);
 
