@@ -41,7 +41,7 @@ public class EventApplierMethodShould {
     public void invoke_applier_method() throws InvocationTargetException {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = new EventApplierMethod(applierObject.getMethod());
-        final ProjectCreated event = Generate.EventMessage.projectCreatedMsg();
+        final ProjectCreated event = Given.EventMessage.projectCreatedMsg();
 
         applier.invoke(applierObject, event);
 

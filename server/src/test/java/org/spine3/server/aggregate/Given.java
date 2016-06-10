@@ -23,14 +23,11 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
@@ -49,7 +46,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.users.UserId;
 
 
-public class Generate {
+public class Given {
     public static class AggregateId {
 
         private AggregateId() {
@@ -75,7 +72,7 @@ public class Generate {
 
     public static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = Generate.AggregateId.newProjectId();
+        private static final ProjectId DUMMY_PROJECT_ID = Given.AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
 
         private EventMessage() {
@@ -102,7 +99,7 @@ public class Generate {
     public static class Command{
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = Generate.AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
 
         private Command() {
         }
@@ -163,7 +160,7 @@ public class Generate {
 
 
     public static class Event{
-        private static final ProjectId PROJECT_ID = Generate.AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
 
         private Event() {
         }
@@ -186,7 +183,7 @@ public class Generate {
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectCreated eventMessage = Generate.EventMessage.projectCreatedMsg(projectId);
+            final ProjectCreated eventMessage = Given.EventMessage.projectCreatedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
@@ -197,7 +194,7 @@ public class Generate {
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded eventMessage = Generate.EventMessage.taskAddedMsg(projectId);
+            final TaskAdded eventMessage = Given.EventMessage.taskAddedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
@@ -208,7 +205,7 @@ public class Generate {
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectStarted eventMessage = Generate.EventMessage.projectStartedMsg(projectId);
+            final ProjectStarted eventMessage = Given.EventMessage.projectStartedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));

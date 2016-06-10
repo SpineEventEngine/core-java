@@ -63,7 +63,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void return_default_aggregate_instance_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Generate.AggregateId.newProjectId());
+        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId());
         final Project state = aggregate.getState();
 
         assertTrue(isDefault(state));
@@ -71,7 +71,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = Generate.AggregateId.newProjectId();
+        final ProjectId id = Given.AggregateId.newProjectId();
         final ProjectAggregate expected = new ProjectAggregate(id);
         repository.store(expected);
 
@@ -138,12 +138,12 @@ public class AggregateRepositoryShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return Generate.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return Generate.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
         }
 
         @Apply
@@ -161,7 +161,7 @@ public class AggregateRepositoryShould {
         @Override
         @SuppressWarnings("RefusedBequest")
         /* package */ List<Event> getUncommittedEvents() {
-            final ProjectCreated msg = Generate.EventMessage.projectCreatedMsg(getId());
+            final ProjectCreated msg = Given.EventMessage.projectCreatedMsg(getId());
             final Event event = createEvent(msg, TestEventContextFactory.createEventContext());
             final List<Event> events = newArrayList(event);
             return events;

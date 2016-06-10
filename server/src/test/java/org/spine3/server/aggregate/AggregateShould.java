@@ -64,14 +64,14 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 @SuppressWarnings({"TypeMayBeWeakened", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class AggregateShould {
 
-    private static final ProjectId ID = Generate.AggregateId.newProjectId();
+    private static final ProjectId ID = Given.AggregateId.newProjectId();
 
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);
 
-    private final CreateProject createProject = Generate.Command.createProjectMsg(ID);
-    private final AddTask addTask = Generate.Command.addTaskMsg(ID);
-    private final StartProject startProject = Generate.Command.startProjectMsg(ID);
+    private final CreateProject createProject = Given.Command.createProjectMsg(ID);
+    private final AddTask addTask = Given.Command.addTaskMsg(ID);
+    private final StartProject startProject = Given.Command.startProjectMsg(ID);
 
     private TestAggregate aggregate;
 
@@ -362,9 +362,9 @@ public class AggregateShould {
 
     private static List<Event> getProjectEvents() {
         final List<Event> events = newLinkedList();
-        events.add(Generate.Event.projectCreatedEvent(ID, EVENT_CONTEXT));
-        events.add(Generate.Event.taskAddedEvent(ID, EVENT_CONTEXT));
-        events.add(Generate.Event.projectStartedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectCreatedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.taskAddedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectStartedEvent(ID, EVENT_CONTEXT));
         return events;
     }
     
@@ -401,19 +401,19 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Generate.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return Generate.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = Generate.EventMessage.projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message = Given.EventMessage.projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -464,7 +464,7 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Generate.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
         }
     }
 
@@ -542,7 +542,7 @@ public class AggregateShould {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }
-            return Generate.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
         }
 
         @Apply
@@ -563,7 +563,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_handler_throws() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
-        final Command command = Generate.Command.createProjectCmd();
+        final Command command = Given.Command.createProjectCmd();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
@@ -578,7 +578,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_applier_throws() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
 
-        final Command command = Generate.Command.createProjectCmd();
+        final Command command = Given.Command.createProjectCmd();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
@@ -593,7 +593,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_play_raises_exception() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
         try {
-            faultyAggregate.play(ImmutableList.of(Generate.Event.projectCreatedEvent()));
+            faultyAggregate.play(ImmutableList.of(Given.Event.projectCreatedEvent()));
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
