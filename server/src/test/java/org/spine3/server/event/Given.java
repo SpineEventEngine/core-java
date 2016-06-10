@@ -77,17 +77,6 @@ public class Given {
         }
     }
 
-
-    public static class Command {
-
-
-        private Command() {
-        }
-
-
-    }
-
-
     public static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
