@@ -25,7 +25,7 @@ import org.spine3.test.project.ProjectId;
 import static org.spine3.base.Identifiers.newUuid;
 
 /**
- * The utility class which is used for creating Aggregate Ids for tests.
+ * The utility class which is used for creating AggregateId Ids for tests.
  *
  * @author Mikhail Mikhaylov
  */
