@@ -28,8 +28,8 @@ import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.entity.Project;
+import org.spine3.test.entity.ProjectId;
 
 import javax.annotation.Nullable;
 
