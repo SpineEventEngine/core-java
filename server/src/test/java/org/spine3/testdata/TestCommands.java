@@ -27,13 +27,9 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.command.AddTask;
 import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.command.StartProject;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -86,35 +82,6 @@ public class TestCommands {
         return createCommand(command, userId, when);
     }
 
-    /**
-     * Creates a new {@link Command}.
-     */
-    public static Command addTaskCmd() {
-        return addTaskCmd(USER_ID, PROJECT_ID, getCurrentTime());
-    }
-
-    /**
-     * Creates a new {@link Command} with the given userId, projectId and timestamp.
-     */
-    public static Command addTaskCmd(UserId userId, ProjectId projectId, Timestamp when) {
-        final AddTask command = addTaskMsg(projectId);
-        return createCommand(command, userId, when);
-    }
-
-    /**
-     * Creates a new {@link Command}.
-     */
-    public static Command startProjectCmd() {
-        return startProjectCmd(USER_ID, PROJECT_ID, getCurrentTime());
-    }
-
-    /**
-     * Creates a new {@link Command} with the given userId, projectId and timestamp.
-     */
-    public static Command startProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
-        final StartProject command = startProjectMsg(projectId);
-        return createCommand(command, userId, when);
-    }
 
     /**
      * Creates a new {@link Command} with the given command, userId and timestamp using default
@@ -170,30 +137,4 @@ public class TestCommands {
                 .build();
     }
 
-    /**
-     * Creates a new {@link StartProject} command with the given project ID.
-     */
-    public static StartProject startProjectMsg(ProjectId id) {
-        return StartProject.newBuilder().setProjectId(id).build();
-    }
-
-    /**
-     * Creates {@link StartProject} command for the passed project ID.
-     */
-    public static StartProject startProjectMsg(String projectId) {
-        return StartProject.newBuilder()
-                .setProjectId(ProjectId.newBuilder()
-                                       .setId(projectId)
-                                       .build())
-                .build();
-    }
-
-    /**
-     * Creates a new command bus with the given storage factory.
-     */
-    public static CommandBus newCommandBus(StorageFactory storageFactory) {
-        final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-        final CommandBus commandBus = CommandBus.newInstance(store);
-        return commandBus;
-    }
 }

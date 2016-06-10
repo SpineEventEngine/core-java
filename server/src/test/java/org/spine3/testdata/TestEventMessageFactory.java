@@ -20,14 +20,10 @@
 
 package org.spine3.testdata;
 
-import com.google.protobuf.Any;
 import org.spine3.test.project.ProjectId;
 import org.spine3.test.project.event.ProjectCreated;
 import org.spine3.test.project.event.ProjectStarted;
 import org.spine3.test.project.event.TaskAdded;
-
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 /**
  * Contains events for tests.
@@ -36,58 +32,19 @@ import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
  */
 public class TestEventMessageFactory {
 
-    private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-
-    private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
-    private static final TaskAdded TASK_ADDED = taskAddedMsg(DUMMY_PROJECT_ID);
-    private static final ProjectStarted PROJECT_STARTED = projectStartedMsg(DUMMY_PROJECT_ID);
-
-    private static final Any PROJECT_CREATED_ANY = toAny(PROJECT_CREATED);
-    private static final Any TASK_ADDED_ANY = toAny(TASK_ADDED);
-    private static final Any PROJECT_STARTED_ANY = toAny(PROJECT_STARTED);
-
     private TestEventMessageFactory() {}
-
-
-    public static ProjectCreated projectCreatedMsg() {
-        return PROJECT_CREATED;
-    }
-
-    public static ProjectCreated projectCreatedMsg(String projectId) {
-        return ProjectCreated.newBuilder().setProjectId(
-                ProjectId.newBuilder().setId(projectId).build()
-        ).build();
-    }
 
     public static ProjectCreated projectCreatedMsg(ProjectId id) {
         return ProjectCreated.newBuilder().setProjectId(id).build();
-    }
-
-    public static TaskAdded taskAddedMsg() {
-        return TASK_ADDED;
     }
 
     public static TaskAdded taskAddedMsg(ProjectId id) {
         return TaskAdded.newBuilder().setProjectId(id).build();
     }
 
-    public static ProjectStarted projectStartedMsg() {
-        return PROJECT_STARTED;
-    }
-
     public static ProjectStarted projectStartedMsg(ProjectId id) {
         return ProjectStarted.newBuilder().setProjectId(id).build();
     }
 
-    public static Any projectCreatedEventAny() {
-        return PROJECT_CREATED_ANY;
-    }
 
-    public static Any taskAddedEventAny() {
-        return TASK_ADDED_ANY;
-    }
-
-    public static Any projectStartedEventAny() {
-        return PROJECT_STARTED_ANY;
-    }
 }

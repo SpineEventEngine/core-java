@@ -37,7 +37,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
 import org.spine3.test.bc.command.CreateProject;
-import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
@@ -50,10 +49,9 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedMsg;
 
 
-public class Given {
+/*package */ class Given {
     public static class AggregateId {
 
         private AggregateId() {
