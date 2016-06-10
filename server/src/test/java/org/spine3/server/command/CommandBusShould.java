@@ -286,7 +286,8 @@ public class CommandBusShould {
         commandBus.post(cmd, responseObserver);
 
         checkCommandError(responseObserver.getThrowable(), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
+        assertTrue(responseObserver.getResponses()
+                                   .isEmpty());
     }
 
     private static <E extends CommandException> void checkCommandError(
@@ -300,9 +301,11 @@ public class CommandBusShould {
         final E exception = (E) cause;
         assertEquals(cmd, exception.getCommand());
         final Error error = exception.getError();
-        assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
+        assertEquals(CommandValidationError.getDescriptor()
+                                           .getFullName(), error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
-        assertFalse(error.getMessage().isEmpty());
+        assertFalse(error.getMessage()
+                         .isEmpty());
         if (validationError == INVALID_COMMAND) {
             assertFalse(error.getValidationError()
                              .getConstraintViolationList()
@@ -331,7 +334,8 @@ public class CommandBusShould {
 
         commandBus.post(cmd, responseObserver);
 
-        assertEquals(cmd.getContext().getTenantId(), CurrentTenant.get());
+        assertEquals(cmd.getContext()
+                        .getTenantId(), CurrentTenant.get());
     }
 
     @Test
@@ -509,7 +513,7 @@ public class CommandBusShould {
         final List<Command> commandsPrimary = newArrayList(createProjectCmd(), addTaskCmd(), startProjectCmd());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        commandBus.rescheduleCommands();
+        commandBus.getRescheduler().rescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -527,7 +531,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        commandBus.rescheduleCommands();
+        commandBus.getRescheduler().rescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);

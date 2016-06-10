@@ -26,10 +26,8 @@ import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
@@ -52,7 +50,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Responses.isOk;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -195,34 +192,12 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
-        /**
-         * TODO:2016-05-11:alexander.litus: use {@link StreamObserver#onError}
-         * instead of returning responses, see {@link CommandBus#post(Command, StreamObserver)}.
-         */
-        try {
-            final Message message = fromAny(integrationEvent.getMessage());
-            final Response response = validateIntegrationEventMessage(message);
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
-            if (isOk(response)) {
-                final Event event = toEvent(integrationEvent);
-                eventBus.post(event);
-            }
-        } catch (RuntimeException e) {
-            responseObserver.onError(e);
+        final Message eventMsg = fromAny(integrationEvent.getMessage());
+        final boolean isValid = eventBus.validate(eventMsg, responseObserver);
+        if (isValid) {
+            final Event event = toEvent(integrationEvent);
+            eventBus.post(event);
         }
-    }
-
-    /**
-     * Validates an incoming integration event message.
-     *
-     * @param eventMessage a message to validate
-     * @return a response with {@code OK} value if the command is valid, or
-     *          with {@link org.spine3.base.Error}/{@link Failure} value otherwise
-     */
-    protected Response validateIntegrationEventMessage(Message eventMessage) {
-        final Response response = eventBus.validate(eventMessage);
-        return response;
     }
 
     private static Event toEvent(IntegrationEvent integrationEvent) {
@@ -346,6 +321,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
          *
          * @see #setEventStoreStreamExecutor(Executor)
          */
+        @SuppressWarnings("unused")
         public Builder setEventStore(EventStore eventStore) {
             checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
             this.eventStore = checkNotNull(eventStore);

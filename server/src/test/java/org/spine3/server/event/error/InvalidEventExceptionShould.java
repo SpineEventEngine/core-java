@@ -18,38 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.server.event.error;
 
+import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.validate.ConstraintViolation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.protobuf.Values.newStringValue;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
-public class ResponsesShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(Responses.class));
-    }
-
-    @Test
-    public void return_OK_response() {
-        checkNotNull(Responses.ok());
-    }
+/**
+ * @author Alexander Litus
+ */
+@SuppressWarnings({"InstanceMethodNamingConvention", "ThrowableResultOfMethodCallIgnored"})
+public class InvalidEventExceptionShould {
 
     @Test
-    public void recognize_OK_response() {
-        assertTrue(Responses.isOk(Responses.ok()));
-    }
+    public void create_exception_with_violations() {
+        final StringValue msg = newStringValue("");
 
-    @Test
-    public void return_false_if_not_OK_response() {
-        final Response error = Response.newBuilder()
-                                       .setError(Error.getDefaultInstance())
-                                       .build();
-        assertFalse(Responses.isOk(error));
+        final InvalidEventException exception = InvalidEventException.onConstraintViolations(
+                msg,
+                singletonList(ConstraintViolation.getDefaultInstance()));
+
+        assertNotNull(exception.getMessage());
+        assertNotNull(exception.getError());
+        assertEquals(msg, exception.getEventMessage());
     }
 }
