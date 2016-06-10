@@ -180,6 +180,18 @@ public class Given {
         }
 
         /**
+         * Creates {@link org.spine3.test.project.command.CreateProject} command for the passed project ID.
+         */
+        public static CreateProject createProjectMsg(String projectId) {
+            return CreateProject.newBuilder()
+                                .setProjectId(
+                                        ProjectId.newBuilder()
+                                                 .setId(projectId)
+                                                 .build())
+                                .build();
+        }
+
+        /**
          * Creates a new {@link org.spine3.base.Command}.
          */
         public static org.spine3.base.Command startProjectCmd() {
@@ -198,7 +210,9 @@ public class Given {
          * Creates a new {@link StartProject} command with the given project ID.
          */
         public static StartProject startProjectMsg(ProjectId id) {
-            return StartProject.newBuilder().setProjectId(id).build();
+            return StartProject.newBuilder()
+                               .setProjectId(id)
+                               .build();
         }
     }
 
