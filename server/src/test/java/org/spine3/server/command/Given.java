@@ -65,6 +65,9 @@ public class Given {
 
     public static class EventMessage {
 
+        private EventMessage() {
+        }
+
         public static TaskAdded taskAddedMsg(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
@@ -78,6 +81,9 @@ public class Given {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+
+        private Command() {
+        }
 
         /**
          * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
