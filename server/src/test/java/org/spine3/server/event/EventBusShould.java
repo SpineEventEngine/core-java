@@ -32,8 +32,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.testdata.TestEventFactory;
+import org.spine3.test.event.event.ProjectCreated;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.Collection;
@@ -46,7 +45,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.spine3.base.Responses.*;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedMsg;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
@@ -150,7 +148,7 @@ public class EventBusShould {
         final ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
 
         eventBus.subscribe(subscriber);
-        eventBus.post(TestEventFactory.projectCreatedEvent());
+        eventBus.post(Given.Event.projectCreatedEvent());
 
         assertTrue(subscriber.isMethodCalled());
     }
@@ -170,7 +168,7 @@ public class EventBusShould {
 
         eventBus.register(dispatcher);
 
-        eventBus.post(TestEventFactory.projectCreatedEvent());
+        eventBus.post(Given.Event.projectCreatedEvent());
 
         assertTrue(dispatcher.isDispatchCalled());
     }
@@ -200,7 +198,7 @@ public class EventBusShould {
         final FaultySubscriber faultySubscriber = new FaultySubscriber();
 
         eventBus.subscribe(faultySubscriber);
-        eventBus.post(TestEventFactory.projectCreatedEvent());
+        eventBus.post(Given.Event.projectCreatedEvent());
 
         assertTrue(faultySubscriber.isMethodCalled());
     }
@@ -209,7 +207,7 @@ public class EventBusShould {
     public void return_ok_response_if_event_is_valid() {
         eventBus.subscribe(new TestEventSubscriber());
 
-        final Response response = eventBus.validate(projectCreatedMsg());
+        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
         assertTrue(isOk(response));
     }
 
@@ -222,13 +220,13 @@ public class EventBusShould {
                 .validate(any(Message.class));
         eventBus.setMessageValidator(validator);
 
-        final Response response = eventBus.validate(projectCreatedMsg());
+        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
         assertTrue(isInvalidMessage(response));
     }
 
     @Test
     public void return_unsupported_event_response_if_event_is_not_supported() {
-        final Response response = eventBus.validate(projectCreatedMsg());
+        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
 
         assertTrue(isUnsupportedEvent(response));
     }
