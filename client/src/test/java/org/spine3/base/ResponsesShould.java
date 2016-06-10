@@ -21,25 +21,14 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.validate.ConstraintViolation;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ResponsesShould {
-
-    private static final Response RESPONSE_UNSUPPORTED_EVENT = Response.newBuilder()
-            .setError(Error.newBuilder()
-                           .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber()))
-            .build();
-
-    private static final Response RESPONSE_INVALID_MESSAGE = newInvalidMessageResponse();
 
     @Test
     public void have_private_constructor() {
@@ -58,40 +47,9 @@ public class ResponsesShould {
 
     @Test
     public void return_false_if_not_OK_response() {
-        assertFalse(Responses.isOk(RESPONSE_INVALID_MESSAGE));
-    }
-
-    @Test
-    public void recognize_UNSUPPORTED_EVENT_response() {
-        assertTrue(Responses.isUnsupportedEvent(RESPONSE_UNSUPPORTED_EVENT));
-    }
-
-    @Test
-    public void return_false_if_not_UNSUPPORTED_EVENT_response() {
-        assertFalse(Responses.isUnsupportedEvent(Responses.ok()));
-    }
-
-    @Test
-    public void recognize_INVALID_MESSAGE_response() {
-        assertTrue(Responses.isInvalidMessage(RESPONSE_INVALID_MESSAGE));
-    }
-
-    @Test
-    public void return_false_if_not_INVALID_MESSAGES_response() {
-        assertFalse(Responses.isInvalidMessage(Responses.ok()));
-    }
-
-    private static Response newInvalidMessageResponse() {
-        final List<ConstraintViolation> violations = newArrayList(ConstraintViolation.getDefaultInstance());
-        final ValidationError validationError = ValidationError.newBuilder()
-                                                               .addAllConstraintViolation(violations)
-                                                               .build();
-        final Error error = Error.newBuilder()
-                                 .setValidationError(validationError)
-                                 .build();
-        final Response response = Response.newBuilder()
-                                          .setError(error)
-                                          .build();
-        return response;
+        final Response error = Response.newBuilder()
+                                       .setError(Error.getDefaultInstance())
+                                       .build();
+        assertFalse(Responses.isOk(error));
     }
 }

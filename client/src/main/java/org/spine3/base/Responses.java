@@ -58,39 +58,4 @@ public class Responses {
         final boolean result = response.getStatusCase() == OK;
         return result;
     }
-
-    /**
-     * Checks if the response is `unsupported event`.
-     *
-     * @return {@code true} if the passed response represents `unsupported event` error,
-     *         {@code false} otherwise
-     */
-    public static boolean isUnsupportedEvent(Response response) {
-        if (isError(response)) {
-            final Error error = response.getError();
-            final boolean isUnsupported = error.getCode() == EventValidationError.UNSUPPORTED_EVENT.getNumber();
-            return isUnsupported;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the response is `invalid message`.
-     *
-     * @return {@code true} if the passed response represents `invalid message` error,
-     *         {@code false} otherwise
-     */
-    public static boolean isInvalidMessage(Response response) {
-        if (isError(response)) {
-            final ValidationError error = response.getError().getValidationError();
-            final boolean isInvalid = !error.getConstraintViolationList().isEmpty();
-            return isInvalid;
-        }
-        return false;
-    }
-
-    private static boolean isError(Response response) {
-        final boolean isError = response.getStatusCase() == ERROR;
-        return isError;
-    }
 }
