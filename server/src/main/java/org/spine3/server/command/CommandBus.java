@@ -195,12 +195,10 @@ public class CommandBus implements AutoCloseable {
             scheduleAndStore(command, responseObserver);
             return;
         }
-
         if (isMultitenant) {
             CurrentTenant.set(command.getContext()
                                      .getTenantId());
         }
-
         commandStore.store(command);
         responseObserver.onNext(Responses.ok());
         doPost(command);
@@ -219,9 +217,9 @@ public class CommandBus implements AutoCloseable {
         final Message message = getMessage(command);
         final CommandClass commandClass = CommandClass.of(message);
         final CommandContext commandContext = command.getContext();
-        if (isDispatcherRegistered(commandClass)) {
+        if (dispatcherRegistry.hasDispatcherFor(commandClass)) {
             dispatch(command);
-        } else if (isHandlerRegistered(commandClass)) {
+        } else if (handlerRegistry.handlerRegistered(commandClass)) {
             invokeHandler(message, commandContext);
         }
     }
@@ -231,7 +229,7 @@ public class CommandBus implements AutoCloseable {
      */
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final TenantId tenantId = command.getContext().getTenantId();
-        if (isMultitenant() && isDefault(tenantId)) {
+        if (isMultitenant && isDefault(tenantId)) {
             final CommandException noTenantDefined = InvalidCommandException.onMissingTenantId(command);
             storeWithError(command, noTenantDefined);
             responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
@@ -247,14 +245,14 @@ public class CommandBus implements AutoCloseable {
         return true;
     }
 
-    private void storeWithError(Command command, CommandException exception) {
-        commandStore.store(command, exception.getError());
-    }
-
     private void handleUnsupported(Command command, StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(command);
         storeWithError(command, unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+    }
+
+    private void storeWithError(Command command, CommandException exception) {
+        commandStore.store(command, exception.getError());
     }
 
     private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
@@ -304,7 +302,7 @@ public class CommandBus implements AutoCloseable {
         final Message msg = getMessage(command);
         final CommandId id = getId(command);
         problemLog.errorExpiredCommand(msg, id);
-        setToError(id, commandExpiredError(msg));
+        commandStatusService.setToError(id, commandExpiredError(msg));
     }
 
     /**
@@ -316,8 +314,8 @@ public class CommandBus implements AutoCloseable {
      */
     @VisibleForTesting
     /* package */ boolean isSupportedCommand(CommandClass commandClass) {
-        final boolean dispatcherRegistered = isDispatcherRegistered(commandClass);
-        final boolean handlerRegistered = isHandlerRegistered(commandClass);
+        final boolean dispatcherRegistered = dispatcherRegistry.hasDispatcherFor(commandClass);
+        final boolean handlerRegistered = handlerRegistry.handlerRegistered(commandClass);
         final boolean isSupported = dispatcherRegistered || handlerRegistered;
         return isSupported;
     }
@@ -335,10 +333,6 @@ public class CommandBus implements AutoCloseable {
         return result;
     }
 
-    private boolean isMultitenant() {
-        return this.isMultitenant;
-    }
-
     /**
      * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
      */
@@ -348,13 +342,13 @@ public class CommandBus implements AutoCloseable {
 
     private void dispatch(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final CommandDispatcher dispatcher = getDispatcher(commandClass);
+        final CommandDispatcher dispatcher = dispatcherRegistry.getDispatcher(commandClass);
         final CommandId commandId = getId(command);
         try {
             dispatcher.dispatch(command);
         } catch (Exception e) {
             problemLog.errorDispatching(e, command);
-            setErrorStatus(commandId, e);
+            commandStatusService.setToError(commandId, e);
         }
     }
 
@@ -364,7 +358,7 @@ public class CommandBus implements AutoCloseable {
         final CommandId commandId = context.getCommandId();
         try {
             handler.handle(msg, context);
-            setOkStatus(commandId);
+            commandStatusService.setOk(commandId);
         } catch (InvocationTargetException e) {
             final Throwable cause = e.getCause();
             onHandlerException(msg, commandId, cause);
@@ -376,32 +370,16 @@ public class CommandBus implements AutoCloseable {
         if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             problemLog.errorHandling(exception, msg, commandId);
-            setErrorStatus(commandId, exception);
+            commandStatusService.setToError(commandId, exception);
         } else if (cause instanceof FailureThrowable){
             final FailureThrowable failure = (FailureThrowable) cause;
             problemLog.failureHandling(failure, msg, commandId);
-            setFailureStatus(commandId, failure);
+            commandStatusService.setToFailure(commandId, failure);
         } else {
             problemLog.errorHandlingUnknown(cause, msg, commandId);
             final Error error = Errors.fromThrowable(cause);
-            setToError(commandId, error);
+            commandStatusService.setToError(commandId, error);
         }
-    }
-
-    private void setOkStatus(CommandId commandId) {
-        commandStatusService.setOk(commandId);
-    }
-
-    private void setToError(CommandId commandId, Error error) {
-        commandStatusService.setToError(commandId, error);
-    }
-
-    private void setErrorStatus(CommandId commandId, Exception exception) {
-        commandStatusService.setToError(commandId, exception);
-    }
-
-    private void setFailureStatus(CommandId commandId, FailureThrowable failure) {
-        commandStatusService.setToFailure(commandId, failure);
     }
 
     /**
@@ -412,20 +390,6 @@ public class CommandBus implements AutoCloseable {
     @Internal /** Is used by {@link BoundedContext} to set its multitenancy status. */
     public void setMultitenant(boolean isMultitenant) {
         this.isMultitenant = isMultitenant;
-    }
-
-    private boolean isDispatcherRegistered(CommandClass cls) {
-        final boolean result = dispatcherRegistry.hasDispatcherFor(cls);
-        return result;
-    }
-
-    private boolean isHandlerRegistered(CommandClass cls) {
-        final boolean result = handlerRegistry.handlerRegistered(cls);
-        return result;
-    }
-
-    private CommandDispatcher getDispatcher(CommandClass commandClass) {
-        return dispatcherRegistry.getDispatcher(commandClass);
     }
 
     private static CommandScheduler createCommandScheduler() {
