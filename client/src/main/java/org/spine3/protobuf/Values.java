@@ -19,6 +19,7 @@
  */
 package org.spine3.protobuf;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
@@ -50,6 +51,13 @@ public class Values {
     }
 
     /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(String value) {
+        return Any.pack(newStringValue(value));
+    }
+
+    /**
      * Creates a new DoubleValue wrapping the passed number.
      *
      * @param value the value to wrap
@@ -60,6 +68,13 @@ public class Values {
                                               .setValue(value)
                                               .build();
         return result;
+    }
+
+    /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(double value) {
+        return Any.pack(newDoubleValue(value));
     }
 
     /**
@@ -76,6 +91,13 @@ public class Values {
     }
 
     /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(float value) {
+        return Any.pack(newFloatValue(value));
+    }
+
+    /**
      * Creates a new Int32Value wrapping the passed number.
      *
      * @param value the value to wrap
@@ -86,6 +108,13 @@ public class Values {
                                             .setValue(value)
                                             .build();
         return result;
+    }
+
+    /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(int value) {
+        return Any.pack(newIntegerValue(value));
     }
 
     /**
@@ -102,6 +131,13 @@ public class Values {
     }
 
     /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(long value) {
+        return Any.pack(newLongValue(value));
+    }
+
+    /**
      * Creates a new BoolValue wrapping the passed value.
      *
      * @param value the value to wrap
@@ -112,5 +148,12 @@ public class Values {
                                           .setValue(value)
                                           .build();
         return result;
+    }
+
+    /**
+     * Packs the passed value in to {@link Any}.
+     */
+    public static Any pack(boolean value) {
+        return Any.pack(newBoolValue(value));
     }
 }
