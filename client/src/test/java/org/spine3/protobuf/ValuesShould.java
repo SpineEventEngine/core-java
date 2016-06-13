@@ -20,17 +20,20 @@
 
 package org.spine3.protobuf;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
@@ -38,6 +41,8 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ValuesShould {
+
+    public static final double DELTA = 0.01;
 
     @Test
     public void have_private_constructor() {
@@ -52,10 +57,26 @@ public class ValuesShould {
     }
 
     @Test
+    public void create_new_Any_from_String() {
+        final String value = newUuid();
+        final Any msg = Values.pack(value);
+        final StringValue unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue());
+    }
+
+    @Test
     public void create_new_DoubleValue() {
         final double value = 0.5;
         final DoubleValue msg = Values.newDoubleValue(value);
         assertEquals(value, msg.getValue(), 0);
+    }
+
+    @Test
+    public void create_new_Any_from_double() {
+        final double value = 0.5;
+        final Any msg = Values.pack(value);
+        final DoubleValue unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue(), DELTA);
     }
 
     @Test
@@ -66,10 +87,26 @@ public class ValuesShould {
     }
 
     @Test
+    public void create_new_Any_from_float() {
+        final float value = 0.5F;
+        final Any msg = Values.pack(value);
+        final FloatValue unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue(), DELTA);
+    }
+
+    @Test
     public void create_new_Int32Value() {
         final int value = 2;
         final Int32Value msg = Values.newIntegerValue(value);
         assertEquals(value, msg.getValue());
+    }
+
+    @Test
+    public void create_new_Any_from_int32() {
+        final int value = 2;
+        final Any msg = Values.pack(value);
+        final Int32Value unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue());
     }
 
     @Test
@@ -80,9 +117,25 @@ public class ValuesShould {
     }
 
     @Test
+    public void create_new_Any_from_int64() {
+        final long value = 2L;
+        final Any msg = Values.pack(value);
+        final Int64Value unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue());
+    }
+
+    @Test
     public void create_new_BoolValue() {
         final boolean value = true;
         final BoolValue msg = Values.newBoolValue(value);
         assertEquals(value, msg.getValue());
+    }
+
+    @Test
+    public void create_new_Any_from_boolean() {
+        final boolean value = true;
+        final Any msg = Values.pack(value);
+        final BoolValue unpackedMsg= fromAny(msg);
+        assertEquals(value, unpackedMsg.getValue());
     }
 }
