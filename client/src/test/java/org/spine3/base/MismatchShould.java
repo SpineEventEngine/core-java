@@ -20,9 +20,12 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Andrey Lavrov
@@ -33,6 +36,7 @@ public class MismatchShould {
     private static final String EXPECTED = "expected";
     private static final String FOUND = "found";
     private static final int VERSION = 0;
+    public static final String DEFAULT_VALUE = "";
 
     @Test
     public void has_private_constructor() {
@@ -40,26 +44,62 @@ public class MismatchShould {
     }
 
     @Test
-    public void return_value_with_default_expected_field_if_it_was_passed_as_null() {
+    public void return_default_expected_value_if_it_was_passed_as_null() {
         final ValueMismatch mismatch = Mismatch.of(null, FOUND, REQUESTED, VERSION);
         final String expected = mismatch.getExpected()
                                         .toString();
-        assertEquals("", expected);
+
+        assertEquals(DEFAULT_VALUE, expected);
     }
 
     @Test
-    public void return_value_with_default_found_field_if_it_was_passed_as_null() {
+    public void return_default_found_value_if_it_was_passed_as_null() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, null, REQUESTED, VERSION);
         final String actual = mismatch.getActual()
                                       .toString();
-        assertEquals("", actual);
+
+        assertEquals(DEFAULT_VALUE, actual);
     }
 
     @Test
-    public void return_value_with_passed_values() {
+    public void return_mismatch_object_with_specified_values_string_overload() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, FOUND, REQUESTED, VERSION);
-        assertTrue(mismatch.hasExpected());
-        assertTrue(mismatch.hasActual());
-        assertTrue(mismatch.hasRequested());
+        final StringValue expected = fromAny(mismatch.getExpected());
+        final StringValue found = fromAny(mismatch.getActual());
+        final StringValue requested = fromAny(mismatch.getRequested());
+
+        assertEquals(EXPECTED, expected.getValue());
+        assertEquals(FOUND, found.getValue());
+        assertEquals(REQUESTED, requested.getValue());
+    }
+
+    @Test
+    public void return_default_expected_value_if_it_was_passed_as_null_message_overload() {
+        final ValueMismatch mismatch = Mismatch.of(null, newStringValue(FOUND), newStringValue(REQUESTED), VERSION);
+        final String expected = mismatch.getExpected()
+                                        .toString();
+
+        assertEquals(DEFAULT_VALUE, expected);
+    }
+
+    @Test
+    public void return_default_found_value_if_it_was_passed_as_null_message_overload() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), null, newStringValue(REQUESTED), VERSION);
+        final String actual = mismatch.getActual()
+                                      .toString();
+
+        assertEquals(DEFAULT_VALUE, actual);
+    }
+
+    @Test
+    public void return_mismatch_object_with_specified_values_message_overload() {
+        final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(FOUND), newStringValue(REQUESTED), VERSION);
+        final StringValue expected = fromAny(mismatch.getExpected());
+        final StringValue found = fromAny(mismatch.getActual());
+        final StringValue requested = fromAny(mismatch.getRequested());
+
+        assertEquals(EXPECTED, expected.getValue());
+        assertEquals(FOUND, found.getValue());
+        assertEquals(REQUESTED, requested.getValue());
     }
 }
