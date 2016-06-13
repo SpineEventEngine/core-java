@@ -34,6 +34,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
+@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {
@@ -43,7 +44,9 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
 
     }
@@ -61,20 +64,26 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
-            return ProjectCreated.newBuilder().setProjectId(id).build();
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
         public static TaskAdded taskAddedMsg(ProjectId id) {
-            return TaskAdded.newBuilder().setProjectId(id).build();
+            return TaskAdded.newBuilder()
+                            .setProjectId(id)
+                            .build();
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
     }
 
-    /* package */ static class Command{
+    /* package */ static class Command {
 
         private Command() {
         }
@@ -83,12 +92,14 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
          * Creates a new {@link CreateProject} command with the given project ID.
          */
         public static CreateProject createProjectMsg(ProjectId id) {
-            return CreateProject.newBuilder().setProjectId(id).build();
+            return CreateProject.newBuilder()
+                                .setProjectId(id)
+                                .build();
         }
 
     }
 
-    /* package */ static class Event{
+    /* package */ static class Event {
 
         private Event() {
         }

@@ -43,7 +43,8 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
-/* package */ class Given {
+@SuppressWarnings("EmptyClass")
+/* package */class Given {
 
     /* package */ static class AggregateId {
 

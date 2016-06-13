@@ -34,7 +34,7 @@ import org.spine3.test.reflect.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
 
-
+@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {
@@ -73,7 +73,7 @@ import static org.spine3.base.Identifiers.newUuid;
         }
 
         /**
-         * Creates a new {@link org.spine3.test.project.command.CreateProject} command with the generated project ID.
+         * Creates a new {@link org.spine3.test.reflect.command.CreateProject} command with the generated project ID.
          */
         public static CreateProject createProjectMsg() {
             return CreateProject.newBuilder().setProjectId(AggregateId.newProjectId()).build();

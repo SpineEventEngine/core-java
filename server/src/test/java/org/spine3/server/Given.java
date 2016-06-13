@@ -20,7 +20,6 @@
 
 package org.spine3.server;
 
-
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -52,6 +51,8 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
+
+@SuppressWarnings("EmptyClass")
 /* package */ class Given {
 
     /* package */ static class AggregateId {
@@ -86,7 +87,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
     }
@@ -167,7 +170,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates {@link org.spine3.test.project.command.CreateProject} command for the passed project ID.
+         * Creates {@link org.spine3.test.reflect.command.CreateProject} command for the passed project ID.
          */
         public static CreateProject createProjectMsg(String projectId) {
             return CreateProject.newBuilder()
@@ -220,6 +223,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
         }
 
-        private BoundedContextTestStubs() {}
+        private BoundedContextTestStubs() {
+        }
     }
 }
