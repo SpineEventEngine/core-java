@@ -44,8 +44,8 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-/*package*/ class Given {
-    /*package*/ static class AggregateId {
+/* package */ class Given {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -59,7 +59,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private EventMessage() {
         }
@@ -72,7 +72,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /*package*/ static class Command {
+    /* package */ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -212,7 +212,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /*package*/ static class Event {
+    /* package */ static class Event {
 
         private Event() {
         }

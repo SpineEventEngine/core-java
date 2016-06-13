@@ -29,26 +29,32 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
+import org.spine3.server.command.CommandBus;
+import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.test.command.ProjectId;
-import org.spine3.test.command.command.AddTask;
-import org.spine3.test.command.command.CreateProject;
-import org.spine3.test.command.command.StartProject;
-import org.spine3.test.command.event.TaskAdded;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.clientservice.service.ProjectId;
+import org.spine3.test.clientservice.service.command.AddTask;
+import org.spine3.test.clientservice.service.command.CreateProject;
+import org.spine3.test.clientservice.service.command.StartProject;
+import org.spine3.test.clientservice.service.event.ProjectCreated;
+import org.spine3.test.clientservice.service.event.ProjectStarted;
+import org.spine3.test.clientservice.service.event.TaskAdded;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
+import static org.mockito.Mockito.spy;
 import static org.spine3.base.Commands.create;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-/*package*/ class Given {
+/* package */ class Given {
 
-    /*package*/ static class AggregateId {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -62,7 +68,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private EventMessage() {
         }
@@ -73,14 +79,33 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                             .build();
         }
 
+        public static ProjectCreated projectCreatedMsg(ProjectId id) {
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
+        }
+
+        public static ProjectStarted projectStartedMsg(ProjectId id) {
+            return ProjectStarted.newBuilder().setProjectId(id).build();
+        }
+
     }
 
-    /*package*/ static class Command {
+    /* package */ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Command() {
+        }
+
+        /**
+         * Creates a new command bus with the given storage factory.
+         */
+        public static CommandBus newCommandBus(StorageFactory storageFactory) {
+            final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
+            final CommandBus commandBus = CommandBus.newInstance(store);
+            return commandBus;
         }
 
         /**
@@ -91,42 +116,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
             final org.spine3.base.Command result = Commands.create(command, context);
             return result;
-        }
-
-        /**
-         * Creates a new {@link AddTask} command with the given project ID.
-         */
-        public static AddTask addTaskMsg(String projectId) {
-            return AddTask.newBuilder()
-                          .setProjectId(
-                                  ProjectId.newBuilder()
-                                           .setId(projectId)
-                                           .build())
-                          .build();
-        }
-
-        /**
-         * Creates a new {@link AddTask} command with the given project ID.
-         */
-        public static AddTask addTaskMsg(ProjectId id) {
-            return AddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
-        public static org.spine3.base.Command addTaskCmd() {
-            return addTaskCmd(USER_ID, PROJECT_ID, getCurrentTime());
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
-        public static org.spine3.base.Command addTaskCmd(UserId userId, ProjectId projectId, Timestamp when) {
-            final AddTask command = addTaskMsg(projectId);
-            return createCommand(command, userId, when);
         }
 
         /**
@@ -188,33 +177,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                                  .build())
                                 .build();
         }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command}.
-         */
-        public static org.spine3.base.Command startProjectCmd() {
-            return startProjectCmd(USER_ID, PROJECT_ID, getCurrentTime());
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
-        public static org.spine3.base.Command startProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
-            final StartProject command = startProjectMsg(projectId);
-            return createCommand(command, userId, when);
-        }
-
-        /**
-         * Creates a new {@link StartProject} command with the given project ID.
-         */
-        public static StartProject startProjectMsg(ProjectId id) {
-            return StartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
-        }
     }
 
-    /*package*/ static class Event {
+    /* package */ static class Event {
 
         private Event() {
         }
@@ -230,17 +195,31 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             final EventBus eventBus = EventBus.newInstance(store);
             return eventBus;
         }
-
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded eventMessage = EventMessage.taskAddedMsg(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
-            return builder.build();
-        }
     }
 
+    /* package */ static class BoundedContextTestStubs {
+
+        public static BoundedContext create() {
+            final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+            return create(storageFactory);
+        }
+
+        public static BoundedContext create(StorageFactory storageFactory) {
+            return create(BoundedContext.DEFAULT_NAME, storageFactory);
+        }
+
+        public static BoundedContext create(String name, StorageFactory storageFactory) {
+            final CommandBus commandBus = Command.newCommandBus(storageFactory);
+            final EventBus eventBus = Event.newEventBus(storageFactory);
+            final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                                 .setName(name)
+                                                                 .setStorageFactory(storageFactory)
+                                                                 .setCommandBus(spy(commandBus))
+                                                                 .setEventBus(spy(eventBus));
+            return builder.build();
+
+        }
+
+        private BoundedContextTestStubs() {}
+    }
 }

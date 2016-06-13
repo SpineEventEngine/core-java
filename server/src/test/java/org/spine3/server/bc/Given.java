@@ -40,7 +40,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
 /*package */ class Given {
 
-    /*package*/ static class AggregateId {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -53,7 +53,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private EventMessage() {
         }
@@ -77,7 +77,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
     }
 
-    /*package*/ static class Command {
+    /* package */ static class Command {
 
         private Command() {
         }
@@ -93,7 +93,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
     }
 
-    /*package*/ static class Event {
+    /* package */ static class Event {
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Event() {

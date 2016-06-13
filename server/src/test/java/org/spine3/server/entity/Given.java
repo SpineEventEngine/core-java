@@ -27,9 +27,9 @@ import org.spine3.test.entity.command.CreateProject;
 
 import static org.spine3.base.Identifiers.newUuid;
 
-/*package*/ class Given {
+/* package */ class Given {
 
-    /*package*/ static class AggregateId {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -43,7 +43,7 @@ import static org.spine3.base.Identifiers.newUuid;
 
     }
 
-    /*package*/ static class Command {
+    /* package */ static class Command {
 
         private Command() {
         }
@@ -64,11 +64,11 @@ import static org.spine3.base.Identifiers.newUuid;
      *
      * @author Mikhail Mikhaylov
      */
-    /*package*/ static class TestEntity extends Entity<String, Project> {
+    /* package */ static class TestEntity extends Entity<String, Project> {
 
         private boolean isValidateMethodCalled = false;
 
-        /*package*/ TestEntity(String id) {
+        /* package */ TestEntity(String id) {
             super(id);
         }
 

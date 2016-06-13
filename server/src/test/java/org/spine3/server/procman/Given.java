@@ -31,9 +31,9 @@ import org.spine3.test.procman.event.TaskAdded;
 import static org.spine3.base.Identifiers.newUuid;
 
 
-/*package*/ class Given {
+/* package */ class Given {
 
-    /*package*/ static class AggregateId {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -45,7 +45,7 @@ import static org.spine3.base.Identifiers.newUuid;
 
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
@@ -81,7 +81,7 @@ import static org.spine3.base.Identifiers.newUuid;
 
     }
 
-    /*package*/ static class Command{
+    /* package */ static class Command{
 
         private Command() {
         }

@@ -43,9 +43,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
-/*package*/ class Given {
+/* package */ class Given {
 
-    /*package*/ static class AggregateId {
+    /* package */ static class AggregateId {
 
         private AggregateId() {
         }
@@ -59,7 +59,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
@@ -91,7 +91,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     }
 
-    /*package*/ static class Command {
+    /* package */ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -160,7 +160,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     }
 
-    /*package*/ static class Event {
+    /* package */ static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 

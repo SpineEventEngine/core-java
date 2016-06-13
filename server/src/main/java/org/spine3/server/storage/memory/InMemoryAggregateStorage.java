@@ -41,7 +41,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alexander Litus
  */
-/*package*/ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
+/* package */ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
 
     private final Multimap<I, AggregateStorageRecord> recordMap = TreeMultimap.create(
             Ordering.arbitrary(), // key comparator

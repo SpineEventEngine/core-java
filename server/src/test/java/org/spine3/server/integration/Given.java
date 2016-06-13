@@ -29,14 +29,14 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 
 
-/*package*/ class Given {
+/* package */ class Given {
 
     /*package */ static class AggregateId {
 
         private AggregateId() {
         }
 
-        /*package*/
+        /* package */
         static ProjectId newProjectId() {
             final String uuid = newUuid();
             return ProjectId.newBuilder()
@@ -46,7 +46,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
     }
 
-    /*package*/ static class EventMessage {
+    /* package */ static class EventMessage {
 
         private EventMessage() {
         }
@@ -65,7 +65,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
     }
 
-    /*package*/ static class Event {
+    /* package */ static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
