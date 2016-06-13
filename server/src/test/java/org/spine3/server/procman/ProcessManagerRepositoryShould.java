@@ -34,6 +34,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
@@ -41,7 +42,6 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.IdFunction;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
-import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
@@ -64,8 +64,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.testdata.TestCommands.*;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**

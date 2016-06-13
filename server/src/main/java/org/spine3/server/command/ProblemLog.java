@@ -23,7 +23,7 @@ package org.spine3.server.command;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
-import org.spine3.server.failure.FailureThrowable;
+import org.spine3.base.FailureThrowable;
 
 import static org.spine3.base.Commands.formatCommandTypeAndId;
 import static org.spine3.base.Commands.formatMessageTypeAndId;
