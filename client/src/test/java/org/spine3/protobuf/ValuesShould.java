@@ -60,7 +60,7 @@ public class ValuesShould {
     public void create_new_Any_from_String() {
         final String value = newUuid();
         final Any msg = Values.pack(value);
-        final StringValue unpackedMsg= fromAny(msg);
+        final StringValue unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
 
@@ -75,7 +75,7 @@ public class ValuesShould {
     public void create_new_Any_from_double() {
         final double value = 0.5;
         final Any msg = Values.pack(value);
-        final DoubleValue unpackedMsg= fromAny(msg);
+        final DoubleValue unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue(), DELTA);
     }
 
@@ -90,7 +90,7 @@ public class ValuesShould {
     public void create_new_Any_from_float() {
         final float value = 0.5F;
         final Any msg = Values.pack(value);
-        final FloatValue unpackedMsg= fromAny(msg);
+        final FloatValue unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue(), DELTA);
     }
 
@@ -105,7 +105,7 @@ public class ValuesShould {
     public void create_new_Any_from_int32() {
         final int value = 2;
         final Any msg = Values.pack(value);
-        final Int32Value unpackedMsg= fromAny(msg);
+        final Int32Value unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
 
@@ -120,7 +120,7 @@ public class ValuesShould {
     public void create_new_Any_from_int64() {
         final long value = 2L;
         final Any msg = Values.pack(value);
-        final Int64Value unpackedMsg= fromAny(msg);
+        final Int64Value unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
 
@@ -135,7 +135,7 @@ public class ValuesShould {
     public void create_new_Any_from_boolean() {
         final boolean value = true;
         final Any msg = Values.pack(value);
-        final BoolValue unpackedMsg= fromAny(msg);
+        final BoolValue unpackedMsg = fromAny(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
 }

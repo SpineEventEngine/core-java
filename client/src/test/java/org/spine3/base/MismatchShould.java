@@ -27,10 +27,12 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import org.junit.Test;
 import com.google.protobuf.StringValue;
+
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+
 /**
  * @author Andrey Lavrov
  */
@@ -80,77 +82,77 @@ public class MismatchShould {
 
     @Test
     public void return_mismatch_object_with_int32_values() {
-        final int value0 = 0;
+        final int expected = 0;
         final int value1 = 1;
         final int value2 = 2;
-        final ValueMismatch mismatch = Mismatch.of(value0, value1, value2, VERSION);
-        final Int32Value expected = fromAny(mismatch.getExpected());
+        final ValueMismatch mismatch = Mismatch.of(expected, value1, value2, VERSION);
+        final Int32Value expectedAny = fromAny(mismatch.getExpected());
         final Int32Value actual = fromAny(mismatch.getActual());
         final Int32Value requested = fromAny(mismatch.getRequested());
 
-        assertEquals(value0, expected.getValue());
+        assertEquals(expected, expectedAny.getValue());
         assertEquals(value1, actual.getValue());
         assertEquals(value2, requested.getValue());
     }
 
     @Test
     public void return_mismatch_object_with_int64_values() {
-        final long value0 = 0L;
-        final long value1 = 1L;
-        final long value2 = 2L;
-        final ValueMismatch mismatch = Mismatch.of(value0, value1, value2,  VERSION);
-        final Int64Value expected = fromAny(mismatch.getExpected());
-        final Int64Value actual = fromAny(mismatch.getActual());
-        final Int64Value requested = fromAny(mismatch.getRequested());
+        final long expected = 0L;
+        final long actual = 1L;
+        final long requested = 2L;
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final Int64Value expectedWrapped = fromAny(mismatch.getExpected());
+        final Int64Value actualWrapped = fromAny(mismatch.getActual());
+        final Int64Value requestedWrapped = fromAny(mismatch.getRequested());
 
-        assertEquals(value0, expected.getValue());
-        assertEquals(value1, actual.getValue());
-        assertEquals(value2, requested.getValue());
+        assertEquals(expected, expectedWrapped.getValue());
+        assertEquals(actual, actualWrapped.getValue());
+        assertEquals(requested, requestedWrapped.getValue());
     }
 
     @Test
     public void return_mismatch_object_with_float_values() {
-        final float value0 = 0.0F;
-        final float value1 = 1.0F;
-        final float value2 = 2.0F;
-        final ValueMismatch mismatch = Mismatch.of(value0, value1, value2, VERSION);
-        final FloatValue expected = fromAny(mismatch.getExpected());
-        final FloatValue actual = fromAny(mismatch.getActual());
-        final FloatValue requested = fromAny(mismatch.getRequested());
+        final float expected = 0.0F;
+        final float actual = 1.0F;
+        final float requested = 2.0F;
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final FloatValue expectedWrapped = fromAny(mismatch.getExpected());
+        final FloatValue actualWrapped = fromAny(mismatch.getActual());
+        final FloatValue requestedWrapped = fromAny(mismatch.getRequested());
 
-        assertEquals(value0, expected.getValue(), DELTA);
-        assertEquals(value1, actual.getValue(), DELTA);
-        assertEquals(value2, requested.getValue(), DELTA);
+        assertEquals(expected, expectedWrapped.getValue(), DELTA);
+        assertEquals(actual, actualWrapped.getValue(), DELTA);
+        assertEquals(requested, requestedWrapped.getValue(), DELTA);
     }
 
     @Test
     public void return_mismatch_object_with_double_values() {
-        final double value0 = 0.1;
-        final double value1 = 0.1;
-        final double value2 = 0.1;
-        final ValueMismatch mismatch = Mismatch.of(value0, value1, value2, VERSION);
-        final DoubleValue expected = fromAny(mismatch.getExpected());
-        final DoubleValue actual = fromAny(mismatch.getActual());
-        final DoubleValue requested = fromAny(mismatch.getRequested());
+        final double expected = 0.1;
+        final double actual = 0.2;
+        final double requested = 0.3;
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final DoubleValue expectedWrapped = fromAny(mismatch.getExpected());
+        final DoubleValue actualWrapped = fromAny(mismatch.getActual());
+        final DoubleValue requestedWrapped = fromAny(mismatch.getRequested());
 
-        assertEquals(value0, expected.getValue(), DELTA);
-        assertEquals(value1, actual.getValue(), DELTA);
-        assertEquals(value2, requested.getValue(), DELTA);
+        assertEquals(expected, expectedWrapped.getValue(), DELTA);
+        assertEquals(actual, actualWrapped.getValue(), DELTA);
+        assertEquals(requested, requestedWrapped.getValue(), DELTA);
     }
 
     @Test
     public void return_mismatch_object_with_boolean_values() {
-        final boolean value0 = true;
-        final boolean value1 = true;
-        final boolean value2 = true;
-        final ValueMismatch mismatch = Mismatch.of(value0, value1, value2, VERSION);
-        final BoolValue expected = fromAny(mismatch.getExpected());
-        final BoolValue actual = fromAny(mismatch.getActual());
-        final BoolValue requested = fromAny(mismatch.getRequested());
+        final boolean expected = true;
+        final boolean actual = false;
+        final boolean requested = true;
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final BoolValue expectedWrapped = fromAny(mismatch.getExpected());
+        final BoolValue actualWrapped = fromAny(mismatch.getActual());
+        final BoolValue requestedWrapped = fromAny(mismatch.getRequested());
 
-        assertEquals(value0, expected.getValue());
-        assertEquals(value1, actual.getValue());
-        assertEquals(value2, requested.getValue());
+        assertEquals(expected, expectedWrapped.getValue());
+        assertEquals(actual, actualWrapped.getValue());
+        assertEquals(requested, requestedWrapped.getValue());
     }
 
     @Test
