@@ -32,7 +32,8 @@ import static org.spine3.base.Identifiers.newUuid;
 
 
 /*package*/ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
@@ -44,8 +45,7 @@ import static org.spine3.base.Identifiers.newUuid;
 
     }
 
-
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
@@ -78,10 +78,10 @@ import static org.spine3.base.Identifiers.newUuid;
         public static ProjectStarted projectStartedMsg(ProjectId id) {
             return ProjectStarted.newBuilder().setProjectId(id).build();
         }
+
     }
 
-
-    public static class Command{
+    /*package*/ static class Command{
 
         private Command() {
         }
@@ -106,6 +106,7 @@ import static org.spine3.base.Identifiers.newUuid;
         public static StartProject startProjectMsg(ProjectId id) {
             return StartProject.newBuilder().setProjectId(id).build();
         }
+
     }
 
 }

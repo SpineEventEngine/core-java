@@ -68,7 +68,7 @@ import static org.spine3.base.Identifiers.newUuid;
 
         private boolean isValidateMethodCalled = false;
 
-        public TestEntity(String id) {
+        /*package*/ TestEntity(String id) {
             super(id);
         }
 

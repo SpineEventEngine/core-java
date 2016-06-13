@@ -35,7 +35,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
 /*package*/ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
@@ -47,12 +48,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     }
 
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStartedMsg(DUMMY_PROJECT_ID);
-        private static final TaskAdded TASK_ADDED = taskAddedMsg(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
@@ -65,24 +64,17 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             return ProjectCreated.newBuilder().setProjectId(id).build();
         }
 
-        public static TaskAdded taskAddedMsg() {
-            return TASK_ADDED;
-        }
-
         public static TaskAdded taskAddedMsg(ProjectId id) {
             return TaskAdded.newBuilder().setProjectId(id).build();
-        }
-
-        public static ProjectStarted projectStartedMsg() {
-            return PROJECT_STARTED;
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
             return ProjectStarted.newBuilder().setProjectId(id).build();
         }
+
     }
 
-    public static class Command{
+    /*package*/ static class Command{
 
         private Command() {
         }
@@ -93,9 +85,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         public static CreateProject createProjectMsg(ProjectId id) {
             return CreateProject.newBuilder().setProjectId(id).build();
         }
+
     }
 
-    public static class Event{
+    /*package*/ static class Event{
 
         private Event() {
         }
