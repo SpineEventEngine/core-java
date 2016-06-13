@@ -54,7 +54,8 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(String value) {
-        return Any.pack(newStringValue(value));
+        final Any result = Any.pack(newStringValue(value));
+        return result;
     }
 
     /**
@@ -74,7 +75,8 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(double value) {
-        return Any.pack(newDoubleValue(value));
+        final Any result = Any.pack(newDoubleValue(value));
+        return result;
     }
 
     /**
@@ -94,7 +96,8 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(float value) {
-        return Any.pack(newFloatValue(value));
+        final Any result = Any.pack(newFloatValue(value));
+        return result;
     }
 
     /**
@@ -114,7 +117,8 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(int value) {
-        return Any.pack(newIntegerValue(value));
+        final Any result = Any.pack(newIntegerValue(value));
+        return result;
     }
 
     /**
@@ -134,7 +138,8 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(long value) {
-        return Any.pack(newLongValue(value));
+        final Any result = Any.pack(newLongValue(value));
+        return result;
     }
 
     /**
@@ -154,6 +159,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(boolean value) {
-        return Any.pack(newBoolValue(value));
+        final Any result = Any.pack(newBoolValue(value));
+        return result;
     }
 }
