@@ -83,16 +83,16 @@ public class MismatchShould {
     @Test
     public void return_mismatch_object_with_int32_values() {
         final int expected = 0;
-        final int value1 = 1;
-        final int value2 = 2;
-        final ValueMismatch mismatch = Mismatch.of(expected, value1, value2, VERSION);
-        final Int32Value expectedAny = fromAny(mismatch.getExpected());
-        final Int32Value actual = fromAny(mismatch.getActual());
-        final Int32Value requested = fromAny(mismatch.getRequested());
+        final int actual = 1;
+        final int requested = 2;
+        final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
+        final Int32Value expectedWrapper = fromAny(mismatch.getExpected());
+        final Int32Value actualWrapper = fromAny(mismatch.getActual());
+        final Int32Value requestedWrapper = fromAny(mismatch.getRequested());
 
-        assertEquals(expected, expectedAny.getValue());
-        assertEquals(value1, actual.getValue());
-        assertEquals(value2, requested.getValue());
+        assertEquals(expected, expectedWrapper.getValue());
+        assertEquals(actual, actualWrapper.getValue());
+        assertEquals(requested, requestedWrapper.getValue());
     }
 
     @Test
