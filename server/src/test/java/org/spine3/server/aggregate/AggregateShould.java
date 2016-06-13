@@ -123,7 +123,6 @@ public class AggregateShould {
         }
     }
 
-
     @Test(expected = IllegalArgumentException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void not_accept_to_constructor_id_of_unsupported_type() {
@@ -171,7 +170,7 @@ public class AggregateShould {
     public void throw_exception_if_missing_command_handler() {
         final TestAggregateForCaseMissingHandlerOrApplier aggregate =
                 new TestAggregateForCaseMissingHandlerOrApplier(ID);
-        
+
         aggregate.dispatchForTest(addTask, COMMAND_CONTEXT);
     }
 
@@ -191,10 +190,11 @@ public class AggregateShould {
     public void return_command_classes_which_are_handled_by_aggregate() {
         final Set<Class<? extends Message>> classes = Aggregate.getCommandClasses(TestAggregate.class);
 
-        assertTrue(classes.size() == 3);
+        assertTrue(classes.size() == 4);
         assertTrue(classes.contains(CreateProject.class));
         assertTrue(classes.contains(AddTask.class));
         assertTrue(classes.contains(StartProject.class));
+        assertTrue(classes.contains(ImportEvents.class));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class AggregateShould {
         final Set<Class<? extends Message>> classes = Aggregate.getEventClasses(TestAggregate.class);
 
         assertContains(classes,
-                ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
@@ -225,10 +225,12 @@ public class AggregateShould {
     @Test
     public void return_current_state_after_several_dispatches() {
         aggregate.dispatchForTest(createProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState()
+                                                      .getStatus());
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState()
+                                                      .getStatus());
     }
 
     @Test
@@ -250,10 +252,12 @@ public class AggregateShould {
     @Test
     public void play_events() {
         final List<Event> events = getProjectEvents();
-        
+
         aggregate.play(events);
-        
-        assertProjectEventsApplied(aggregate);
+
+        assertTrue(aggregate.isProjectCreatedEventApplied);
+        assertTrue(aggregate.isTaskAddedEventApplied);
+        assertTrue(aggregate.isProjectStartedEventApplied);
     }
 
     @Test
@@ -263,17 +267,19 @@ public class AggregateShould {
         final Snapshot snapshotNewProject = aggregate.toSnapshot();
 
         aggregate.dispatchForTest(startProject, COMMAND_CONTEXT);
-        assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.STARTED, aggregate.getState()
+                                                      .getStatus());
 
         final List<Event> events = newArrayList(snapshotToEvent(snapshotNewProject));
         aggregate.play(events);
-        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState()
+                                                      .getStatus());
     }
 
     @Test
     public void not_return_any_uncommitted_event_records_by_default() {
         final List<Event> events = aggregate.getUncommittedEvents();
-        
+
         assertTrue(events.isEmpty());
     }
 
@@ -284,13 +290,13 @@ public class AggregateShould {
         final List<Event> events = aggregate.getUncommittedEvents();
 
         assertContains(eventsToClasses(events),
-                ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
     public void not_return_any_event_records_when_commit_by_default() {
         final List<Event> events = aggregate.commitEvents();
-        
+
         assertTrue(events.isEmpty());
     }
 
@@ -301,7 +307,7 @@ public class AggregateShould {
         final List<Event> events = aggregate.commitEvents();
 
         assertContains(eventsToClasses(events),
-                ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
+                       ProjectCreated.class, TaskAdded.class, ProjectStarted.class);
     }
 
     @Test
@@ -338,44 +344,20 @@ public class AggregateShould {
         assertEquals(Project.Status.STARTED, aggregate.getState().getStatus());
 
         aggregate.restore(snapshotNewProject);
-        assertEquals(Project.Status.CREATED, aggregate.getState().getStatus());
+        assertEquals(Project.Status.CREATED, aggregate.getState()
+                                                      .getStatus());
     }
 
-    private static Collection<Class<? extends Message>> eventsToClasses(Collection<Event> events) {
-        return transform(events, new Function<Event, Class<? extends Message>>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public Class<? extends Message> apply(@Nullable Event record) {
-                if (record == null) {
-                    return null;
-                }
-                return fromAny(record.getMessage()).getClass();
-            }
-        });
-    }
+    @Test
+    public void import_events() {
+        final ImportEvents importCmd = ImportEvents.newBuilder()
+                                                   .addEvent(TestEventFactory.projectCreatedEvent(aggregate.getId()))
+                                                   .addEvent(TestEventFactory.taskAddedEvent(aggregate.getId()))
+                                                   .build();
+        aggregate.dispatchCommands(importCmd);
 
-    private static void assertContains(Collection<Class<? extends Message>> actualClasses,
-                                       Class... expectedClasses) {
-        assertTrue(actualClasses.containsAll(newArrayList(expectedClasses)));
-        assertEquals(expectedClasses.length, actualClasses.size());
-    }
-
-    private static List<Event> getProjectEvents() {
-        final List<Event> events = newLinkedList();
-        events.add(Given.Event.projectCreatedEvent(ID, EVENT_CONTEXT));
-        events.add(Given.Event.taskAddedEvent(ID, EVENT_CONTEXT));
-        events.add(Given.Event.projectStartedEvent(ID, EVENT_CONTEXT));
-        return events;
-    }
-    
-    private static void assertProjectEventsApplied(TestAggregate a) {
-        assertTrue(a.isProjectCreatedEventApplied);
-        assertTrue(a.isTaskAddedEventApplied);
-        assertTrue(a.isProjectStartedEventApplied);
-    }
-
-    private static Event snapshotToEvent(Snapshot snapshot) {
-        return Event.newBuilder().setContext(EVENT_CONTEXT).setMessage(toAny(snapshot)).build();
+        assertTrue(aggregate.isProjectCreatedEventApplied);
+        assertTrue(aggregate.isTaskAddedEventApplied);
     }
 
     @SuppressWarnings("unused")
@@ -415,6 +397,11 @@ public class AggregateShould {
             isStartProjectCommandHandled = true;
             final ProjectStarted message = Given.EventMessage.projectStartedMsg(cmd.getProjectId());
             return newArrayList(message);
+        }
+
+        @Assign
+        public List<Event> handle(ImportEvents command, CommandContext ctx) {
+            return command.getEventList();
         }
 
         @Apply
@@ -491,7 +478,6 @@ public class AggregateShould {
             super(id);
         }
     }
-
 
     @Test
     public void increment_version_when_applying_state_changing_event() {
@@ -605,5 +591,40 @@ public class AggregateShould {
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_getting_state_builder_from_outside_the_event_applier() {
         new TestAggregateWithIdInteger(100).getBuilder();
+    }
+
+    /*
+     * Utility methods.
+     ********************************/
+
+    private static Collection<Class<? extends Message>> eventsToClasses(Collection<Event> events) {
+        return transform(events, new Function<Event, Class<? extends Message>>() {
+            @Nullable // return null because an exception won't be propagated in this case
+            @Override
+            public Class<? extends Message> apply(@Nullable Event record) {
+                if (record == null) {
+                    return null;
+                }
+                return fromAny(record.getMessage()).getClass();
+            }
+        });
+    }
+
+    private static void assertContains(Collection<Class<? extends Message>> actualClasses,
+            Class... expectedClasses) {
+        assertTrue(actualClasses.containsAll(newArrayList(expectedClasses)));
+        assertEquals(expectedClasses.length, actualClasses.size());
+    }
+
+    private static List<Event> getProjectEvents() {
+        final List<Event> events = newLinkedList();
+        events.add(projectCreatedEvent(ID, EVENT_CONTEXT));
+        events.add(taskAddedEvent(ID, EVENT_CONTEXT));
+        events.add(projectStartedEvent(ID, EVENT_CONTEXT));
+        return events;
+    }
+
+    private static Event snapshotToEvent(Snapshot snapshot) {
+        return Event.newBuilder().setContext(EVENT_CONTEXT).setMessage(toAny(snapshot)).build();
     }
 }

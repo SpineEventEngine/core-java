@@ -1,0 +1,55 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+// We do not define the package for this file to allow shorter options for user-defined types.
+// This would allow to write:
+//
+//     option (events) = "MyFirstEvent, MySecondEvent";
+//
+// instead of:
+//
+//      option (spine.annotations.events) = "MyFirstEvent, MySecondEvent";
+//
+
+option java_generate_equals_and_hash = false;
+option java_multiple_files = true;
+option java_outer_classname = "CommandAnnotationsProto";
+option java_package = "org.spine3.annotations";
+
+import "google/protobuf/descriptor.proto";
+
+
+//TODO:2016-06-10:alexander.yevsyukov: Obtain globally unique field numbers for options from Google.
+
+extend google.protobuf.MessageOptions {
+    // Specifies Protobuf type names of the events that are produced after a command is handled.
+    // The type names should be separated with commas. Space characters are allowed.
+    // If the events are of the same aggregate with the command, non-qualified names can be used.
+    // Otherwise, please use fully qualified names.
+    string events = 59000;
+
+    // Specifies Protobuf type names of the failures that can be returned to the attempt to handle
+    // a command if business conditions do not allow the command execution.
+    // The type names should be separated with commas. Space characters are allowed.
+    // If the failures are of the same aggregate with the command, non-qualified names can be used.
+    // Otherwise, please use fully qualified names.
+    string failures = 59001;
+}

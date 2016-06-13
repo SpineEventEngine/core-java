@@ -26,12 +26,15 @@ option java_multiple_files = true;
 option java_outer_classname = "CommandStoreProto";
 option java_generate_equals_and_hash = true;
 
+option (SPI_all) = true;
+
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
 import "spine/base/command.proto";
 import "spine/base/error.proto";
 import "spine/base/failure.proto";
+import "spine/annotations.proto";
 
 // This type defines the way commands are stored in command storage.
 // Some of the fields are defined as string representation of corresponding message types

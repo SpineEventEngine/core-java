@@ -62,6 +62,7 @@ public class InvalidCommandException extends CommandException {
         final Error error = invalidCommandMessageError(Commands.getMessage(command), violations, MSG_VALIDATION_ERROR);
         final String text = MSG_VALIDATION_ERROR + " Message class: " + CommandClass.of(command) +
                 " See Error.getValidationError() for details.";
+        //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.
         return new InvalidCommandException(text, command, error);
     }
 

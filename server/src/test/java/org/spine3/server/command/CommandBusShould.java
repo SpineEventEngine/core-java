@@ -35,6 +35,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
+import org.spine3.base.FailureThrowable;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.client.CommandFactory;
@@ -44,7 +45,6 @@ import org.spine3.server.command.error.CommandException;
 import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.failure.FailureThrowable;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
@@ -82,7 +82,7 @@ public class CommandBusShould {
     private CommandBus commandBus;
     private CommandStore commandStore;
     private CommandFactory commandFactory;
-    private CommandBus.ProblemLog log;
+    private ProblemLog log;
     private EventBus eventBus;
     private ExecutorCommandScheduler scheduler;
     private CreateProjectHandler createProjectHandler;
@@ -93,7 +93,7 @@ public class CommandBusShould {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new CommandBus.ProblemLog());
+        log = spy(new ProblemLog());
         // Do not create a spy of the command bus because it would be impossible to debug its code
         commandBus = new CommandBus(commandStore, scheduler, log);
         eventBus = Given.Event.newEventBus(storageFactory);
@@ -284,7 +284,8 @@ public class CommandBusShould {
         commandBus.post(cmd, responseObserver);
 
         checkCommandError(responseObserver.getThrowable(), UNSUPPORTED_COMMAND, UnsupportedCommandException.class, cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
+        assertTrue(responseObserver.getResponses()
+                                   .isEmpty());
     }
 
     private static <E extends CommandException> void checkCommandError(
@@ -298,9 +299,11 @@ public class CommandBusShould {
         final E exception = (E) cause;
         assertEquals(cmd, exception.getCommand());
         final Error error = exception.getError();
-        assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
+        assertEquals(CommandValidationError.getDescriptor()
+                                           .getFullName(), error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
-        assertFalse(error.getMessage().isEmpty());
+        assertFalse(error.getMessage()
+                         .isEmpty());
         if (validationError == INVALID_COMMAND) {
             assertFalse(error.getValidationError()
                              .getConstraintViolationList()
@@ -329,7 +332,8 @@ public class CommandBusShould {
 
         commandBus.post(cmd, responseObserver);
 
-        assertEquals(cmd.getContext().getTenantId(), CurrentTenant.get());
+        assertEquals(cmd.getContext()
+                        .getTenantId(), CurrentTenant.get());
     }
 
     @Test
@@ -500,15 +504,14 @@ public class CommandBusShould {
     }
 
     @Test
-    public void reschedule_commands_from_storage_on_startup() {
+    public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
         final Duration newDelayExpected = Durations.ofMinutes(2); // = 5 - 3
         final List<Command> commandsPrimary = newArrayList(Given.Command.createProjectCmd(), Given.Command.addTaskCmd(), Given.Command.startProjectCmd());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        // command bus creation must trigger commands rescheduling
-        commandBus = new CommandBus(commandStore, scheduler, log);
+        commandBus.getRescheduler().rescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -526,8 +529,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        // command bus creation must trigger commands rescheduling
-        commandBus = new CommandBus(commandStore, scheduler, log);
+        commandBus.getRescheduler().rescheduleCommands();
 
         for (Command cmd : commands) {
             final Message msg = getMessage(cmd);

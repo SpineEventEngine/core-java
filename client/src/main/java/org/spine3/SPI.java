@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  *
  * <p>SPI is used to enable framework extension and replaceable components (implement a new storage, etc).
  *
- * <p>See Effective Java 2nd Edition, chapter 2, item 1 for more info about service provider framework pattern.
+ * <p>See "Effective Java 2nd Edition", chapter 2, item 1 for more info about service provider framework pattern.
  *
  * @author Alexander Litus
  */

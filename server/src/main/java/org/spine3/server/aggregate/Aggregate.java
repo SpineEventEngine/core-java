@@ -47,7 +47,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static java.util.Collections.singletonList;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
@@ -252,7 +251,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             throws InvocationTargetException {
         final Class<? extends Message> commandClass = commandMessage.getClass();
         final CommandHandlerMethod method = MethodRegistry.getInstance()
-                                                          .get(getClass(), commandClass, CommandHandlerMethod.factory());
+                                                          .get(getClass(),
+                                                               commandClass,
+                                                               CommandHandlerMethod.factory());
         if (method == null) {
             throw missingCommandHandler(commandClass);
         }
@@ -268,7 +269,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     private void invokeApplier(Message eventMessage) throws InvocationTargetException {
         final EventApplierMethod method = MethodRegistry.getInstance()
-                .get(getClass(), eventMessage.getClass(), EventApplierMethod.factory());
+                                                        .get(getClass(),
+                                                             eventMessage.getClass(),
+                                                             EventApplierMethod.factory());
         if (method == null) {
             throw missingEventApplier(eventMessage.getClass());
         }
@@ -278,7 +281,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Plays passed events on the aggregate.
      *
-     * @param events the list of the events
+     * <p>The events passed to this method is the aggregates data loaded by a repository and passed
+     * to the aggregate so that it restores its state.
+     *
+     * @param events the list of the aggregate events
      * @throws RuntimeException if applying events caused an exception. This exception is set as the {@code cause}
      *                          for the thrown {@code RuntimeException}
      */
@@ -301,50 +307,40 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Applies events to the aggregate.
+     * Applies event messages to the aggregate.
      *
      * @param messages the event message to apply
      * @param commandContext the context of the command, execution of which produces the passed events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> messages, CommandContext commandContext) throws InvocationTargetException {
+    private void apply(Iterable<? extends Message> messages, CommandContext commandContext)
+            throws InvocationTargetException {
         createBuilder();
         try {
             for (Message message : messages) {
-                apply(message);
-                final EventContext eventContext = createEventContext(commandContext, message);
+                final EventContext eventContext;
+                if (message instanceof Event) {
+                    // We are receiving the event during import or integration. This happened because
+                    // an aggregate's command handler returned either List<Event> or Event.
+                    final Event receivedEvent = (Event) message;
+                    message = Events.getMessage(receivedEvent);
+                    apply(message);
+                    // Copy event context and set command context and the aggregate version.
+                    eventContext = receivedEvent.getContext()
+                                                .toBuilder()
+                                                .setCommandContext(commandContext)
+                                                .setVersion(getVersion())
+                                                .build();
+                } else {
+                    apply(message);
+                    eventContext = createEventContext(commandContext, message);
+                }
                 final Event event = Events.createEvent(message, eventContext);
                 putUncommitted(event);
             }
         } finally {
             updateState();
         }
-    }
-
-    /**
-     * This method is provided <em>only</em> for the purpose of testing event appliers
-     * of an aggregate and must not be called from the production code.
-     *
-     * <p>Calls {@link #apply(Iterable, CommandContext)}.
-     */
-    @VisibleForTesting
-    public final void applyForTest(Message message, CommandContext commandContext) {
-        try {
-            apply(singletonList(message), commandContext);
-        } catch (InvocationTargetException e) {
-            throw propagate(e);
-        }
-    }
-
-    /**
-     * This method is provided <em>only</em> for the purpose of testing an aggregate and
-     * must not be called from the production code.
-     *
-     * <p>Calls {@link #incrementState(Message)}.
-     */
-    @VisibleForTesting
-    public final void incrementStateForTest(S newState) {
-        incrementState(newState);
     }
 
     /**
@@ -414,7 +410,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Creates a context for an event.
+     * Creates a context for an event message.
      *
      * <p>The context may optionally have custom attributes added by
      * {@link #extendEventContext(Message, EventContext.Builder, CommandContext)}.

@@ -21,13 +21,17 @@ package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.server.Statuses;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.event.error.InvalidEventException;
+import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
@@ -42,8 +46,6 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.server.event.EventValidation.invalidEvent;
-import static org.spine3.server.event.EventValidation.unsupportedEvent;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -268,18 +270,26 @@ public class EventBus implements AutoCloseable {
      * The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param event the event message to check
-     * @return an appropriate response: `OK`, `unsupported` or `invalid` event
+     * @param responseObserver the observer to obtain the result of the call;
+     *          {@link StreamObserver#onError(Throwable)} is called if an event is unsupported or invalid
+     * @return {@code true} if event is supported and valid and can be posted, {@code false} otherwise
      */
-    public Response validate(Message event) {
+    public boolean validate(Message event, StreamObserver<Response> responseObserver) {
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
-            return unsupportedEvent(event);
+            final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
+            responseObserver.onError(Statuses.invalidArgumentWithCause(unsupportedEvent));
+            return false;
         }
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
-            return invalidEvent(event, violations);
+            final InvalidEventException invalidEvent = InvalidEventException.onConstraintViolations(event, violations);
+            responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
+            return false;
         }
-        return Responses.ok();
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+        return true;
     }
 
     private boolean isUnsupportedEvent(EventClass eventClass) {

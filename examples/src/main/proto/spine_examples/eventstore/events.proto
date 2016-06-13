@@ -19,29 +19,30 @@
 //
 syntax = "proto3";
 
-package spine.examples.aggregate;
+package spine_examples.eventstore;
 
-option java_package="org.spine3.examples.aggregate.event";
+option java_package="org.spine3.examples.eventstore.events";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
+option java_generate_equals_and_hash = true;
 
-import "spine/examples/aggregate/order.proto";
+import "spine/users/user_id.proto";
 
-message OrderCreated {
-    OrderId order_id = 1;
+import "spine_examples/eventstore/project.proto";
+
+message ProjectCreated {
+    Project project = 1;
 }
 
-message OrderLineAdded {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
+message TaskCreated {
+    Task task = 1;
 }
 
-message OrderLineRemoved {
-    OrderId order_id = 1;
-    OrderLine order_line = 2;
+message TaskAssigned {
+    TaskId task_id = 1;
+    spine.users.UserId assignee = 2;
 }
 
-message OrderPaid {
-    OrderId order_id = 1;
-    BillingInfo billing_info = 2;
+message TaskDone {
+    TaskId task_id = 1;
 }

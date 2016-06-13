@@ -18,24 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.examples.failure.failures;
+package org.spine3.server.event.error;
 
-import org.spine3.examples.failure.TaskId;
-import org.spine3.server.failure.FailureThrowable;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
+import org.spine3.validate.ConstraintViolation;
+
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Alexander Litus
  */
-public class CannotCancelTaskInProgress extends FailureThrowable {
+@SuppressWarnings({"InstanceMethodNamingConvention", "ThrowableResultOfMethodCallIgnored"})
+public class InvalidEventExceptionShould {
 
-    private static final long serialVersionUID = 0L;
+    @Test
+    public void create_exception_with_violations() {
+        final StringValue msg = newStringValue("");
 
-    public CannotCancelTaskInProgress(TaskId taskId) {
-        super(Failures.CannotCancelTaskInProgress.newBuilder().setId(taskId).build());
-    }
+        final InvalidEventException exception = InvalidEventException.onConstraintViolations(
+                msg,
+                singletonList(ConstraintViolation.getDefaultInstance()));
 
-    @Override
-    public Failures.CannotCancelTaskInProgress getFailure() {
-        return (Failures.CannotCancelTaskInProgress) super.getFailure();
+        assertNotNull(exception.getMessage());
+        assertNotNull(exception.getError());
+        assertEquals(msg, exception.getEventMessage());
     }
 }

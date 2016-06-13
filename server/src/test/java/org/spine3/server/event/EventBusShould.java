@@ -23,11 +23,15 @@ package org.spine3.server.event;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
+import org.spine3.base.Responses;
+import org.spine3.server.event.error.InvalidEventException;
+import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
@@ -49,8 +53,13 @@ import static org.spine3.base.Responses.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
 
+    //TODO:2016-01-27:alexander.yevsyukov: Check that EventStore is closed on close() too. Using Mocks?
+
+    //TODO:2016-01-27:alexander.yevsyukov: Reach 100% coverage.
+
     private EventStore eventStore;
     private EventBus eventBus;
+    private TestResponseObserver responseObserver;
 
     @Before
     public void setUp() {
@@ -61,6 +70,7 @@ public class EventBusShould {
                 .setLogger(EventStore.log())
                 .build();
         this.eventBus = EventBus.newInstance(eventStore, MoreExecutors.directExecutor());
+        this.responseObserver = new TestResponseObserver();
     }
 
     @Test
@@ -155,7 +165,7 @@ public class EventBusShould {
 
     @Test
     public void register_dispatchers() {
-        final BareDispatcher dispatcher = new BareDispatcher();
+        final EventDispatcher dispatcher = new BareDispatcher();
 
         eventBus.register(dispatcher);
 
@@ -175,8 +185,8 @@ public class EventBusShould {
 
     @Test
     public void unregister_dispatchers() {
-        final BareDispatcher dispatcherOne = new BareDispatcher();
-        final BareDispatcher dispatcherTwo = new BareDispatcher();
+        final EventDispatcher dispatcherOne = new BareDispatcher();
+        final EventDispatcher dispatcherTwo = new BareDispatcher();
         final EventClass eventClass = EventClass.of(ProjectCreated.class);
         eventBus.register(dispatcherOne);
         eventBus.register(dispatcherTwo);
@@ -207,12 +217,15 @@ public class EventBusShould {
     public void return_ok_response_if_event_is_valid() {
         eventBus.subscribe(new TestEventSubscriber());
 
-        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
-        assertTrue(isOk(response));
+        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
+        assertTrue(isValid);
+        assertEquals(Responses.ok(), responseObserver.getResponse());
+        assertTrue(responseObserver.isCompleted());
+        assertNull(responseObserver.getThrowable());
     }
 
     @Test
-    public void return_invalid_event_response_if_event_is_invalid() {
+    public void call_onError_if_event_is_invalid() {
         eventBus.subscribe(new TestEventSubscriber());
         final MessageValidator validator = mock(MessageValidator.class);
         doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
@@ -220,15 +233,22 @@ public class EventBusShould {
                 .validate(any(Message.class));
         eventBus.setMessageValidator(validator);
 
-        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
-        assertTrue(isInvalidMessage(response));
+        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
+
+        assertFalse(isValid);
+        final Throwable cause = responseObserver.getThrowable().getCause();
+        assertEquals(InvalidEventException.class, cause.getClass());
+        assertNull(responseObserver.getResponse());
     }
 
     @Test
-    public void return_unsupported_event_response_if_event_is_not_supported() {
-        final Response response = eventBus.validate(Given.EventMessage.projectCreatedMsg());
+    public void call_onError_if_event_is_unsupported() {
+        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
 
-        assertTrue(isUnsupportedEvent(response));
+        assertFalse(isValid);
+        final Throwable cause = responseObserver.getThrowable().getCause();
+        assertEquals(UnsupportedEventException.class, cause.getClass());
+        assertNull(responseObserver.getResponse());
     }
 
     private static class TestEventSubscriber extends EventSubscriber {
@@ -291,7 +311,37 @@ public class EventBusShould {
         assertTrue(eventBus.getSubscribers(eventClass).isEmpty());
     }
 
-    //TODO:2016-01-27:alexander.yevsyukov: Check that EventStore is closed on close() too. Using Mocks?
+    private static class TestResponseObserver implements StreamObserver<Response> {
 
-    //TODO:2016-01-27:alexander.yevsyukov: Reach 100% coverage.
+        private Response response;
+        private Throwable throwable;
+        private boolean completed = false;
+
+        @Override
+        public void onNext(Response response) {
+            this.response = response;
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.completed = true;
+        }
+
+        /* package */ Response getResponse() {
+            return response;
+        }
+
+        /* package */ Throwable getThrowable() {
+            return throwable;
+        }
+
+        /* package */ boolean isCompleted() {
+            return this.completed;
+        }
+    }
 }
