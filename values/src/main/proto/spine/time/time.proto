@@ -27,8 +27,8 @@ option java_outer_classname = "TimeProto";
 option java_package = "org.spine3.time";
 
 import "spine/validate.proto";
-
 import "spine/time/zone_offset.proto";
+
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
