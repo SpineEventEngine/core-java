@@ -20,9 +20,8 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.StringValue;
 import org.junit.Test;
-
+import com.google.protobuf.StringValue;
 import static org.junit.Assert.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -36,7 +35,7 @@ public class MismatchShould {
     private static final String EXPECTED = "expected";
     private static final String FOUND = "found";
     private static final int VERSION = 0;
-    public static final String DEFAULT_VALUE = "";
+    private static final String DEFAULT_VALUE = "";
 
     @Test
     public void has_private_constructor() {
