@@ -38,7 +38,7 @@ public class Values {
     private Values() {}
 
     /**
-     * Creates a new StringValue wrapping the passed string.
+     * Creates a new {@code StringValue} wrapping the passed string.
      *
      * @param value the value to wrap
      * @return a new StringValue instance
@@ -51,14 +51,14 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(String value) {
         return Any.pack(newStringValue(value));
     }
 
     /**
-     * Creates a new DoubleValue wrapping the passed number.
+     * Creates a new {@code DoubleValue} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new DoubleValue instance
@@ -71,14 +71,14 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(double value) {
         return Any.pack(newDoubleValue(value));
     }
 
     /**
-     * Creates a new FloatValue wrapping the passed number.
+     * Creates a new {@code FloatValue} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new FloatValue instance
@@ -91,14 +91,14 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(float value) {
         return Any.pack(newFloatValue(value));
     }
 
     /**
-     * Creates a new Int32Value wrapping the passed number.
+     * Creates a new {@code Int32Value} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new Int32Value instance
@@ -111,14 +111,14 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(int value) {
         return Any.pack(newIntegerValue(value));
     }
 
     /**
-     * Creates a new Int64Value wrapping the passed number.
+     * Creates a new {@code Int64Value} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new Int64Value instance
@@ -131,14 +131,14 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(long value) {
         return Any.pack(newLongValue(value));
     }
 
     /**
-     * Creates a new BoolValue wrapping the passed value.
+     * Creates a new {@code BoolValue} wrapping the passed value.
      *
      * @param value the value to wrap
      * @return a new BoolValue instance
@@ -151,7 +151,7 @@ public class Values {
     }
 
     /**
-     * Packs the passed value in to {@link Any}.
+     * Packs the passed value into {@link Any}.
      */
     public static Any pack(boolean value) {
         return Any.pack(newBoolValue(value));
