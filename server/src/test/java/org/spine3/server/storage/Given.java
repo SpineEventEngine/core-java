@@ -52,7 +52,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {

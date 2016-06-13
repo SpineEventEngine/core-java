@@ -46,7 +46,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.users.UserId;
 
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {
@@ -188,6 +188,13 @@ public class Given {
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
             return builder.build();
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Event} with the given projectId.
+         */
+        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId) {
+            return taskAddedEvent(projectId, createEventContext(projectId));
         }
 
         /**

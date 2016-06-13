@@ -217,7 +217,7 @@ public class EventBusShould {
     public void return_ok_response_if_event_is_valid() {
         eventBus.subscribe(new TestEventSubscriber());
 
-        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreatedMsg(), responseObserver);
         assertTrue(isValid);
         assertEquals(Responses.ok(), responseObserver.getResponse());
         assertTrue(responseObserver.isCompleted());
@@ -233,7 +233,7 @@ public class EventBusShould {
                 .validate(any(Message.class));
         eventBus.setMessageValidator(validator);
 
-        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreatedMsg(), responseObserver);
 
         assertFalse(isValid);
         final Throwable cause = responseObserver.getThrowable().getCause();
@@ -243,7 +243,7 @@ public class EventBusShould {
 
     @Test
     public void call_onError_if_event_is_unsupported() {
-        final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
+        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreatedMsg(), responseObserver);
 
         assertFalse(isValid);
         final Throwable cause = responseObserver.getThrowable().getCause();

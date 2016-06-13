@@ -35,7 +35,7 @@ import org.spine3.test.reflect.event.TaskAdded;
 import static org.spine3.base.Identifiers.newUuid;
 
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {

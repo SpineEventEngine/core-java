@@ -38,6 +38,7 @@ import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
+import org.spine3.test.aggregate.command.ImportEvents;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
@@ -351,8 +352,8 @@ public class AggregateShould {
     @Test
     public void import_events() {
         final ImportEvents importCmd = ImportEvents.newBuilder()
-                                                   .addEvent(TestEventFactory.projectCreatedEvent(aggregate.getId()))
-                                                   .addEvent(TestEventFactory.taskAddedEvent(aggregate.getId()))
+                                                   .addEvent(Given.Event.projectCreatedEvent(aggregate.getId()))
+                                                   .addEvent(Given.Event.taskAddedEvent(aggregate.getId()))
                                                    .build();
         aggregate.dispatchCommands(importCmd);
 
@@ -618,9 +619,9 @@ public class AggregateShould {
 
     private static List<Event> getProjectEvents() {
         final List<Event> events = newLinkedList();
-        events.add(projectCreatedEvent(ID, EVENT_CONTEXT));
-        events.add(taskAddedEvent(ID, EVENT_CONTEXT));
-        events.add(projectStartedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectCreatedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.taskAddedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectStartedEvent(ID, EVENT_CONTEXT));
         return events;
     }
 

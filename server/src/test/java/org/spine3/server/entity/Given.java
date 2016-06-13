@@ -27,7 +27,7 @@ import org.spine3.test.entity.Project;
 
 import static org.spine3.base.Identifiers.newUuid;
 
-public class Given {
+/*package*/ class Given {
 
     public static class AggregateId {
 

@@ -46,7 +46,7 @@ import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {

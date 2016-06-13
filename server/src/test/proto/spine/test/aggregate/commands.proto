@@ -23,6 +23,7 @@ package spine.test.aggregate.command;
 
 import "spine/test/aggregate/project.proto";
 import "spine/test/aggregate/task.proto";
+import "spine/base/event.proto";
 
 option java_package="org.spine3.test.aggregate.command";
 option java_outer_classname = "AggregateCommandsProto";
@@ -39,4 +40,9 @@ message AddTask {
 
 message StartProject {
     ProjectId project_id = 1;
+}
+
+message ImportEvents {
+    ProjectId project_id = 1;
+    repeated spine.base.Event event = 2;
 }

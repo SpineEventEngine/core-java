@@ -29,7 +29,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {

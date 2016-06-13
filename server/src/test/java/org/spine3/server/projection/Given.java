@@ -20,7 +20,6 @@
 
 package org.spine3.server.projection;
 
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.AddTask;
@@ -35,7 +34,7 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
-public class Given {
+/*package*/ class Given {
     public static class AggregateId {
 
         private AggregateId() {
