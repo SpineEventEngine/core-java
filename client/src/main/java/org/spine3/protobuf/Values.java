@@ -19,6 +19,7 @@
  */
 package org.spine3.protobuf;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
@@ -37,7 +38,7 @@ public class Values {
     private Values() {}
 
     /**
-     * Creates a new StringValue wrapping the passed string.
+     * Creates a new {@code StringValue} wrapping the passed string.
      *
      * @param value the value to wrap
      * @return a new StringValue instance
@@ -50,7 +51,15 @@ public class Values {
     }
 
     /**
-     * Creates a new DoubleValue wrapping the passed number.
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(String value) {
+        final Any result = Any.pack(newStringValue(value));
+        return result;
+    }
+
+    /**
+     * Creates a new {@code DoubleValue} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new DoubleValue instance
@@ -63,7 +72,15 @@ public class Values {
     }
 
     /**
-     * Creates a new FloatValue wrapping the passed number.
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(double value) {
+        final Any result = Any.pack(newDoubleValue(value));
+        return result;
+    }
+
+    /**
+     * Creates a new {@code FloatValue} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new FloatValue instance
@@ -76,7 +93,15 @@ public class Values {
     }
 
     /**
-     * Creates a new Int32Value wrapping the passed number.
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(float value) {
+        final Any result = Any.pack(newFloatValue(value));
+        return result;
+    }
+
+    /**
+     * Creates a new {@code Int32Value} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new Int32Value instance
@@ -89,7 +114,15 @@ public class Values {
     }
 
     /**
-     * Creates a new Int64Value wrapping the passed number.
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(int value) {
+        final Any result = Any.pack(newIntegerValue(value));
+        return result;
+    }
+
+    /**
+     * Creates a new {@code Int64Value} wrapping the passed number.
      *
      * @param value the value to wrap
      * @return a new Int64Value instance
@@ -102,7 +135,15 @@ public class Values {
     }
 
     /**
-     * Creates a new BoolValue wrapping the passed value.
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(long value) {
+        final Any result = Any.pack(newLongValue(value));
+        return result;
+    }
+
+    /**
+     * Creates a new {@code BoolValue} wrapping the passed value.
      *
      * @param value the value to wrap
      * @return a new BoolValue instance
@@ -111,6 +152,14 @@ public class Values {
         final BoolValue result = BoolValue.newBuilder()
                                           .setValue(value)
                                           .build();
+        return result;
+    }
+
+    /**
+     * Packs the passed value into {@link Any}.
+     */
+    public static Any pack(boolean value) {
+        final Any result = Any.pack(newBoolValue(value));
         return result;
     }
 }

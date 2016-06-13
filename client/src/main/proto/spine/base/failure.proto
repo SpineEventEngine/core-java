@@ -50,3 +50,21 @@ message Failure {
     // Additional information on the failure.
     map<string, google.protobuf.Value> attributes = 4;
 }
+
+// A failure to handle a command because an entity contains a value different than requested in a command.
+message ValueMismatch {
+    // An expected value.
+    // This field is not populated if the command expects to initialize the attribute.
+    google.protobuf.Any expected = 1;
+
+    // An actual value in the entity.
+    // This field is not populated if the entity does not have the attribute set.
+    google.protobuf.Any actual = 2;
+
+    // An optional attribute that may contain a value requested as the replacement
+    // for the `expected` value in the failed command.
+    google.protobuf.Any requested = 3;
+
+    // A version of the entity, which generated the failure.
+    int32 version = 4;
+}
