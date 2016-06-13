@@ -47,7 +47,8 @@ import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /*package*/ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
@@ -61,8 +62,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private EventMessage() {
         }
@@ -75,8 +75,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-
-    public static class Command {
+    /*package*/ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -215,8 +214,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
     }
 
-
-    public static class Event {
+    /*package*/ static class Event {
 
         private Event() {
         }
@@ -244,4 +242,5 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             return builder.build();
         }
     }
+
 }

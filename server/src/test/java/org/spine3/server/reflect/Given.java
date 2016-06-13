@@ -53,7 +53,6 @@ import static org.spine3.base.Identifiers.newUuid;
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStartedMsg(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
@@ -64,14 +63,6 @@ import static org.spine3.base.Identifiers.newUuid;
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
             return ProjectCreated.newBuilder().setProjectId(id).build();
-        }
-
-        public static ProjectStarted projectStartedMsg() {
-            return PROJECT_STARTED;
-        }
-
-        public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
         }
 
     }
@@ -94,6 +85,7 @@ import static org.spine3.base.Identifiers.newUuid;
         public static CreateProject createProjectMsg(ProjectId id) {
             return CreateProject.newBuilder().setProjectId(id).build();
         }
+
     }
 
     /*package*/ static class Event{
@@ -113,6 +105,7 @@ import static org.spine3.base.Identifiers.newUuid;
             final EventBus eventBus = EventBus.newInstance(store);
             return eventBus;
         }
+
     }
 
 }
