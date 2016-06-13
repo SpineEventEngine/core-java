@@ -57,22 +57,12 @@ import org.spine3.users.UserId;
             return ProjectId.newBuilder().setId(uuid).build();
         }
 
-        /**
-         * Creates a new ProjectId with the given UUID value.
-         *
-         * @param uuid the project id
-         * @return ProjectId instance
-         */
-        public static ProjectId newProjectId(String uuid) {
-            return ProjectId.newBuilder().setId(uuid).build();
-        }
-
     }
 
 
     public static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = Given.AggregateId.newProjectId();
+        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
 
         private EventMessage() {
@@ -99,7 +89,7 @@ import org.spine3.users.UserId;
     public static class Command{
 
         private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Command() {
         }
@@ -160,7 +150,7 @@ import org.spine3.users.UserId;
 
 
     public static class Event{
-        private static final ProjectId PROJECT_ID = Given.AggregateId.newProjectId();
+        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Event() {
         }
@@ -183,7 +173,7 @@ import org.spine3.users.UserId;
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectCreated eventMessage = Given.EventMessage.projectCreatedMsg(projectId);
+            final ProjectCreated eventMessage = EventMessage.projectCreatedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
@@ -201,7 +191,7 @@ import org.spine3.users.UserId;
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded eventMessage = Given.EventMessage.taskAddedMsg(projectId);
+            final TaskAdded eventMessage = EventMessage.taskAddedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
@@ -212,7 +202,7 @@ import org.spine3.users.UserId;
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
         public static org.spine3.base.Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectStarted eventMessage = Given.EventMessage.projectStartedMsg(projectId);
+            final ProjectStarted eventMessage = EventMessage.projectStartedMsg(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));

@@ -234,15 +234,5 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             return eventBus;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded eventMessage = EventMessage.taskAddedMsg(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
-            return builder.build();
-        }
     }
 }
