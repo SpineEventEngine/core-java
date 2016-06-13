@@ -30,7 +30,8 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
 /*package*/ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
@@ -42,21 +43,9 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .build();
         }
 
-        /**
-         * Creates a new ProjectId with the given UUID value.
-         *
-         * @param uuid the project id
-         * @return ProjectId instance
-         */
-        public static ProjectId newProjectId(String uuid) {
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
-
     }
 
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
@@ -73,9 +62,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                  .setProjectId(id)
                                  .build();
         }
+
     }
 
-    public static class Event {
+    /*package*/ static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
@@ -106,5 +96,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                .setMessage(toAny(event));
             return builder.build();
         }
+
     }
+
 }

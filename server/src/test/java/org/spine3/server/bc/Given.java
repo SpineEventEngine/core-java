@@ -39,36 +39,45 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
 
 /*package */ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
     }
 
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private EventMessage() {
         }
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
-            return ProjectCreated.newBuilder().setProjectId(id).build();
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
         public static TaskAdded taskAddedMsg(ProjectId id) {
-            return TaskAdded.newBuilder().setProjectId(id).build();
+            return TaskAdded.newBuilder()
+                            .setProjectId(id)
+                            .build();
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
     }
 
-    public static class Command{
+    /*package*/ static class Command {
 
         private Command() {
         }
@@ -84,7 +93,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
     }
 
-    public static class Event{
+    /*package*/ static class Event {
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Event() {
@@ -128,4 +137,5 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
             return builder.build();
         }
     }
+
 }

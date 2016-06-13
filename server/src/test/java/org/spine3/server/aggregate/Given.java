@@ -19,7 +19,6 @@
  */
 
 package org.spine3.server.aggregate;
-import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -27,40 +26,40 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
+import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.command.StartProject;
+import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.test.aggregate.event.ProjectStarted;
+import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.users.UserId;
 
+import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-import org.spine3.test.aggregate.ProjectId;
-
-import org.spine3.test.aggregate.event.ProjectCreated;
-import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.test.aggregate.event.ProjectStarted;
-
-import org.spine3.test.aggregate.command.CreateProject;
-import org.spine3.test.aggregate.command.AddTask;
-import org.spine3.test.aggregate.command.StartProject;
-import org.spine3.users.UserId;
-
 
 /*package*/ class Given {
-    public static class AggregateId {
+
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
 
     }
 
-
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
@@ -73,20 +72,26 @@ import org.spine3.users.UserId;
         }
 
         public static ProjectCreated projectCreatedMsg(ProjectId id) {
-            return ProjectCreated.newBuilder().setProjectId(id).build();
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
         public static TaskAdded taskAddedMsg(ProjectId id) {
-            return TaskAdded.newBuilder().setProjectId(id).build();
+            return TaskAdded.newBuilder()
+                            .setProjectId(id)
+                            .build();
         }
 
         public static ProjectStarted projectStartedMsg(ProjectId id) {
-            return ProjectStarted.newBuilder().setProjectId(id).build();
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
+
     }
 
-
-    public static class Command{
+    /*package*/ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -98,7 +103,9 @@ import org.spine3.users.UserId;
          * Creates a new {@link CreateProject} command with the given project ID.
          */
         public static CreateProject createProjectMsg(ProjectId id) {
-            return CreateProject.newBuilder().setProjectId(id).build();
+            return CreateProject.newBuilder()
+                                .setProjectId(id)
+                                .build();
         }
 
         /**
@@ -137,19 +144,24 @@ import org.spine3.users.UserId;
          * Creates a new {@link AddTask} command with the given project ID.
          */
         public static AddTask addTaskMsg(ProjectId id) {
-            return AddTask.newBuilder().setProjectId(id).build();
+            return AddTask.newBuilder()
+                          .setProjectId(id)
+                          .build();
         }
 
         /**
          * Creates a new {@link StartProject} command with the given project ID.
          */
         public static StartProject startProjectMsg(ProjectId id) {
-            return StartProject.newBuilder().setProjectId(id).build();
+            return StartProject.newBuilder()
+                               .setProjectId(id)
+                               .build();
         }
+
     }
 
+    /*package*/ static class Event {
 
-    public static class Event{
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Event() {
@@ -208,5 +220,7 @@ import org.spine3.users.UserId;
                                                                                .setMessage(toAny(eventMessage));
             return builder.build();
         }
+
     }
+
 }

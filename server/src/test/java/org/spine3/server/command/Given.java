@@ -25,30 +25,27 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.command.ProjectId;
-import org.spine3.test.command.event.TaskAdded;
 import org.spine3.test.command.command.AddTask;
 import org.spine3.test.command.command.CreateProject;
 import org.spine3.test.command.command.StartProject;
+import org.spine3.test.command.event.TaskAdded;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Commands.create;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /*package*/ class Given {
-    public static class AggregateId {
+    /*package*/ static class AggregateId {
 
         private AggregateId() {
         }
@@ -62,8 +59,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-
-    public static class EventMessage {
+    /*package*/ static class EventMessage {
 
         private EventMessage() {
         }
@@ -76,8 +72,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-
-    public static class Command {
+    /*package*/ static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -214,10 +209,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                .setProjectId(id)
                                .build();
         }
+
     }
 
-
-    public static class Event {
+    /*package*/ static class Event {
 
         private Event() {
         }
