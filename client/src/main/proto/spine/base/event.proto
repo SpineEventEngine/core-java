@@ -77,10 +77,26 @@ message EventContext {
     // The version of the entity after the event was applied.
     int32 version = 5;
 
+    // An event can be enriched with one or more messages. Or, event enrichment can be disabled.
+    oneof enrichment_mode {
+        // One or more enrichments of the event.
+        Enrichments enrichments = 6; // We are having a wrapper type because maps are not allowed in `oneof`s.
+
+        // The instruction not to enrich the event.
+        bool do_not_enrich = 7;
+    }
+
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.
-    map<string, google.protobuf.Any> attributes = 6;
+    map<string, google.protobuf.Any> attributes = 9;
 }
+
+// A container for event enrichments.
+message Enrichments {
+    // A map from a fully qualified Protobuf type name of an enrichment, to its wrapped instance.
+    map<string, google.protobuf.Any> map = 1;
+}
+
 
 // Enumeration of possible event validation technical error reasons.
 enum EventValidationError {
