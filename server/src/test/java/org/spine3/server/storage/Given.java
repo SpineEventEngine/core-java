@@ -77,7 +77,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                             .setId(uuid)
                             .build();
         }
-
     }
 
     /* package */ static class EventMessage {
@@ -122,7 +121,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         public static Any projectStartedAny() {
             return PROJECT_STARTED_ANY;
         }
-
     }
 
     /* package */ static class Command {
@@ -285,7 +283,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                .setMessage(toAny(eventMessage));
             return builder.build();
         }
-
     }
 
     /* package */ static class AggregateStorageRecord {
@@ -339,7 +336,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
             return newArrayList(record1, record2, record3);
         }
-
     }
 
     /* package */ static class EventStorage {
@@ -399,7 +395,5 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                         .setContext(createEventContext(projectId, when));
             return result.build();
         }
-
     }
-
 }

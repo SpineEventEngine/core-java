@@ -52,7 +52,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                             .setId(uuid)
                             .build();
         }
-
     }
 
     /* package */ static class EventMessage {
@@ -77,7 +76,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
                                  .setProjectId(id)
                                  .build();
         }
-
     }
 
     /* package */ static class Command {
@@ -128,7 +126,5 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             final CreateProject command = createProject(projectId);
             return create(command, userId, when);
         }
-
     }
-
 }

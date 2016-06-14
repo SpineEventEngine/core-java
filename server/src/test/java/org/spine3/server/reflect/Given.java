@@ -40,7 +40,6 @@ import static org.spine3.base.Identifiers.newUuid;
                             .setId(uuid)
                             .build();
         }
-
     }
 
     /* package */ static class EventMessage {
@@ -60,7 +59,6 @@ import static org.spine3.base.Identifiers.newUuid;
                                  .setProjectId(id)
                                  .build();
         }
-
     }
 
     /* package */ static class Command {
@@ -76,7 +74,5 @@ import static org.spine3.base.Identifiers.newUuid;
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
         }
-
     }
-
 }

@@ -41,7 +41,6 @@ import static org.spine3.base.Identifiers.newUuid;
                             .setId(uuid)
                             .build();
         }
-
     }
 
     /* package */ static class Command {
@@ -50,14 +49,13 @@ import static org.spine3.base.Identifiers.newUuid;
         }
 
         /**
-         * Creates a new {@link org.spine3.test.command.command.CreateProject} command with the generated project ID.
+         * Creates a new {@link org.spine3.test.command.CreateProject} command with the generated project ID.
          */
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())
                                 .build();
         }
-
     }
 
     /**
@@ -82,7 +80,5 @@ import static org.spine3.base.Identifiers.newUuid;
         public boolean isValidateMethodCalled() {
             return isValidateMethodCalled;
         }
-
     }
-
 }

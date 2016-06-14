@@ -44,7 +44,6 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                             .setId(uuid)
                             .build();
         }
-
     }
 
     /* package */ static class EventMessage {
@@ -63,7 +62,6 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                             .setProjectId(id)
                             .build();
         }
-
     }
 
     /* package */ static class Event {
@@ -124,7 +122,5 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                                                                      .setMessage(toAny(event));
             return builder.build();
         }
-
     }
-
 }
