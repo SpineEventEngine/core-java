@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.test.event.event;
+package spine.test.event;
 
 import "spine/test/event/project.proto";
 import "spine/test/event/task.proto";
 
-option java_package="org.spine3.test.event.event";
+option java_package="org.spine3.test.event";
 option java_outer_classname = "EventEventsProto";
 option java_multiple_files = true;
 

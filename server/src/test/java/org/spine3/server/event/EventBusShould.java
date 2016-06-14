@@ -36,7 +36,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
-import org.spine3.test.event.event.ProjectCreated;
+import org.spine3.test.event.ProjectCreated;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.Collection;
