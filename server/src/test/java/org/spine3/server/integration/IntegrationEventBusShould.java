@@ -39,7 +39,7 @@ public class IntegrationEventBusShould {
     private IntegrationEventBus eventBus;
     private TestIntEventSubscriber subscriber;
 
-    private final IntegrationEvent event = Given.Event.projectCreatedIntegration();
+    private final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
 
     @Before
     public void setUp() {
@@ -62,7 +62,7 @@ public class IntegrationEventBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_no_subscribers_for_event() {
-        eventBus.post(Given.Event.taskAddedIntegration());
+        eventBus.post(Given.IntegrationEvent.taskAdded());
     }
 
     @Test
