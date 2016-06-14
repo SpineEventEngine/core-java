@@ -20,18 +20,11 @@
 
 package org.spine3.server;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.clientservice.command.CreateProject;
 import org.spine3.test.clientservice.event.ProjectCreated;
@@ -40,7 +33,6 @@ import org.spine3.test.clientservice.event.TaskAdded;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.mockito.Mockito.spy;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;

@@ -20,11 +20,6 @@
 
 package org.spine3.server.reflect;
 
-import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
-import org.spine3.server.storage.EventStorage;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.reflect.ProjectId;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;

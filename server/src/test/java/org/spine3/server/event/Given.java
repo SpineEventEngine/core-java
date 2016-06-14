@@ -21,8 +21,8 @@
 package org.spine3.server.event;
 
 import org.spine3.base.EventContext;
-import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectId;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.toAny;

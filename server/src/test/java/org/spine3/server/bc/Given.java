@@ -20,14 +20,8 @@
 
 package org.spine3.server.bc;
 
-import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
