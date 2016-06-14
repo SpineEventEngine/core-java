@@ -112,7 +112,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Test
     public void writeInternal_and_read_one_event() {
-        final EventStorageRecord recordToStore = Given.EventStorage.projectCreated();
+        final EventStorageRecord recordToStore = Given.EventStorageRecord.projectCreated();
         final EventId id = EventId.newBuilder().setUuid(recordToStore.getEventId()).build();
         final Event expected = toEvent(recordToStore);
 
@@ -375,11 +375,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
         final Duration delta = Duration.newBuilder().setSeconds(deltaSeconds).setNanos(deltaNanos).build();
         time1 = getCurrentTime().toBuilder().setNanos(POSITIVE_DELTA * 10).build(); // to be sure that nanos are bigger than delta
-        record1 = Given.EventStorage.projectCreated(time1);
+        record1 = Given.EventStorageRecord.projectCreated(time1);
         time2 = add(time1, delta);
-        record2 = Given.EventStorage.taskAdded(time2);
+        record2 = Given.EventStorageRecord.taskAdded(time2);
         time3 = add(time2, delta);
-        record3 = Given.EventStorage.projectStarted(time3);
+        record3 = Given.EventStorageRecord.projectStarted(time3);
 
         writeAll(record1, record2, record3);
     }

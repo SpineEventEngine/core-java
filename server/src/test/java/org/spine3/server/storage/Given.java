@@ -338,61 +338,61 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventStorage {
+    /* package */ static class EventStorageRecord {
 
-        private EventStorage() {
+        private EventStorageRecord() {
         }
 
-        public static EventStorageRecord projectCreated() {
+        public static org.spine3.server.storage.EventStorageRecord projectCreated() {
             final Timestamp time = getCurrentTime();
             final ProjectId projectId = AggregateId.newProjectId();
-            final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
-                                                                         .setMessage(EventMessage.projectCreatedAny())
-                                                                         .setTimestamp(time)
-                                                                         .setEventId("project_created")
-                                                                         .setEventType(TypeName.of(ProjectCreated.getDescriptor())
+            final org.spine3.server.storage.EventStorageRecord.Builder builder = org.spine3.server.storage.EventStorageRecord.newBuilder()
+                                                                                                                             .setMessage(EventMessage.projectCreatedAny())
+                                                                                                                             .setTimestamp(time)
+                                                                                                                             .setEventId("project_created")
+                                                                                                                             .setEventType(TypeName.of(ProjectCreated.getDescriptor())
                                                                                                .value())
-                                                                         .setProducerId(projectId.getId())
-                                                                         .setContext(createEventContext(projectId, time));
+                                                                                                                             .setProducerId(projectId.getId())
+                                                                                                                             .setContext(createEventContext(projectId, time));
             return builder.build();
         }
 
-        public static EventStorageRecord projectCreated(Timestamp when) {
+        public static org.spine3.server.storage.EventStorageRecord projectCreated(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                                                                        .setMessage(EventMessage.projectCreatedAny())
-                                                                        .setTimestamp(when)
-                                                                        .setEventId("project_created_" + when.getSeconds())
-                                                                        .setEventType(TypeName.of(ProjectCreated.getDescriptor())
+            final org.spine3.server.storage.EventStorageRecord.Builder result = org.spine3.server.storage.EventStorageRecord.newBuilder()
+                                                                                                                            .setMessage(EventMessage.projectCreatedAny())
+                                                                                                                            .setTimestamp(when)
+                                                                                                                            .setEventId("project_created_" + when.getSeconds())
+                                                                                                                            .setEventType(TypeName.of(ProjectCreated.getDescriptor())
                                                                                               .value())
-                                                                        .setProducerId(projectId.getId())
-                                                                        .setContext(createEventContext(projectId, when));
+                                                                                                                            .setProducerId(projectId.getId())
+                                                                                                                            .setContext(createEventContext(projectId, when));
             return result.build();
         }
 
-        public static EventStorageRecord taskAdded(Timestamp when) {
+        public static org.spine3.server.storage.EventStorageRecord taskAdded(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                                                                        .setMessage(EventMessage.taskAddedAny())
-                                                                        .setTimestamp(when)
-                                                                        .setEventId("task_added_" + when.getSeconds())
-                                                                        .setEventType(TypeName.of(TaskAdded.getDescriptor())
+            final org.spine3.server.storage.EventStorageRecord.Builder result = org.spine3.server.storage.EventStorageRecord.newBuilder()
+                                                                                                                            .setMessage(EventMessage.taskAddedAny())
+                                                                                                                            .setTimestamp(when)
+                                                                                                                            .setEventId("task_added_" + when.getSeconds())
+                                                                                                                            .setEventType(TypeName.of(TaskAdded.getDescriptor())
                                                                                               .value())
-                                                                        .setProducerId(projectId.getId())
-                                                                        .setContext(createEventContext(projectId, when));
+                                                                                                                            .setProducerId(projectId.getId())
+                                                                                                                            .setContext(createEventContext(projectId, when));
             return result.build();
         }
 
-        public static EventStorageRecord projectStarted(Timestamp when) {
+        public static org.spine3.server.storage.EventStorageRecord projectStarted(Timestamp when) {
             final ProjectId projectId = AggregateId.newProjectId();
-            final EventStorageRecord.Builder result = EventStorageRecord.newBuilder()
-                                                                        .setMessage(EventMessage.projectStartedAny())
-                                                                        .setTimestamp(when)
-                                                                        .setEventId("project_started_" + when.getSeconds())
-                                                                        .setEventType(TypeName.of(ProjectStarted.getDescriptor())
+            final org.spine3.server.storage.EventStorageRecord.Builder result = org.spine3.server.storage.EventStorageRecord.newBuilder()
+                                                                                                                            .setMessage(EventMessage.projectStartedAny())
+                                                                                                                            .setTimestamp(when)
+                                                                                                                            .setEventId("project_started_" + when.getSeconds())
+                                                                                                                            .setEventType(TypeName.of(ProjectStarted.getDescriptor())
                                                                                               .value())
-                                                                        .setProducerId(projectId.getId())
-                                                                        .setContext(createEventContext(projectId, when));
+                                                                                                                            .setProducerId(projectId.getId())
+                                                                                                                            .setContext(createEventContext(projectId, when));
             return result.build();
         }
     }
