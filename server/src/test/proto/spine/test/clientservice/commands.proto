@@ -19,14 +19,14 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice.service;
+package spine.test.clientservice;
 
-import "spine/test/clientservice/service/project.proto";
-import "spine/test/clientservice/service/task.proto";
+import "spine/test/clientservice/project.proto";
+import "spine/test/clientservice/task.proto";
 import "spine/base/event.proto";
 
-option java_package="org.spine3.test.clientservice.service.command";
-option java_outer_classname = "ServiceCommandsProto";
+option java_package="org.spine3.test.clientservice.command";
+option java_outer_classname = "ClientServiceCommandsProto";
 option java_multiple_files = true;
 
 message CreateProject {

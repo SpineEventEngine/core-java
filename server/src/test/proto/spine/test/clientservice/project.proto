@@ -19,24 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice.service;
+package spine.test.clientservice;
 
-import "spine/test/clientservice/service/project.proto";
-import "spine/test/clientservice/service/task.proto";
-
-option java_package="org.spine3.test.clientservice.service.event";
-option java_outer_classname = "ServiceEventsProto";
+option java_package="org.spine3.test.clientservice";
 option java_multiple_files = true;
 
-message ProjectCreated {
-    ProjectId project_id = 1;
+import "spine/test/clientservice/task.proto";
+
+message ProjectId {
+    string id = 1;
 }
 
-message TaskAdded {
-    ProjectId project_id = 1;
-    Task task = 2;
+message Project {
+
+    ProjectId id = 1;
+
+    string name = 2;
+
+    repeated Task task = 3;
+
+    enum Status {
+        UNDEFINED = 0;
+        CREATED = 1;
+        STARTED = 2;
+        DONE = 3;
+        CANCELLED = 4;
+    }
+
+    Status status = 4;
 }
 
-message ProjectStarted {
-    ProjectId project_id = 1;
-}

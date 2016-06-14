@@ -19,9 +19,9 @@
 //
 syntax = "proto3";
 
-package spine.test.clientservice.service;
+package spine.test.clientservice;
 
-option java_package="org.spine3.test.clientservice.service";
+option java_package="org.spine3.test.clientservice";
 option java_multiple_files = true;
 
 message Task {
