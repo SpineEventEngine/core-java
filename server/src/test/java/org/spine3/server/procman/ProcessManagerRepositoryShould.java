@@ -36,7 +36,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.IdFunction;
@@ -45,16 +45,15 @@ import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.type.EventClass;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.Task;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.command.StartProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestCommands;
+import org.spine3.test.procman.Project;
+import org.spine3.test.procman.ProjectId;
+import org.spine3.test.procman.Task;
+import org.spine3.test.procman.command.AddTask;
+import org.spine3.test.procman.command.CreateProject;
+import org.spine3.test.procman.command.StartProject;
+import org.spine3.test.procman.event.ProjectCreated;
+import org.spine3.test.procman.event.ProjectStarted;
+import org.spine3.test.procman.event.TaskAdded;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
@@ -63,10 +62,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -74,7 +70,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProcessManagerRepositoryShould {
 
-    private static final ProjectId ID = newProjectId();
+    private static final ProjectId ID = Given.AggregateId.newProjectId();
 
     private static final CommandContext CMD_CONTEXT = createCommandContext();
 
@@ -111,14 +107,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_manager() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg(ID));
-        testDispatchEvent(taskAddedMsg(ID));
-        testDispatchEvent(projectStartedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
+        testDispatchEvent(Given.EventMessage.taskAdded(ID));
+        testDispatchEvent(Given.EventMessage.projectStarted(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -129,14 +125,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(addTaskMsg(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(createProjectMsg(ID));
-        testDispatchCommand(addTaskMsg(ID));
-        testDispatchCommand(startProjectMsg(ID));
+        testDispatchCommand(Given.CommandMessage.createProject(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.startProject(ID));
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
@@ -147,7 +143,7 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(addTaskMsg(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -294,7 +290,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            return projectCreatedMsg(command.getProjectId());
+            return Given.EventMessage.projectCreated(command.getProjectId());
         }
 
         @Assign
@@ -302,7 +298,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            return taskAddedMsg(command.getProjectId());
+            return Given.EventMessage.taskAdded(command.getProjectId());
         }
 
         @Assign
@@ -310,7 +306,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = TestCommands.addTaskMsg(command.getProjectId());
+            final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
 
             return newRouter().of(command, context)
                     .add(addTask)

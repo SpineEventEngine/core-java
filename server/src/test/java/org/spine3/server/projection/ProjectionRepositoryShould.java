@@ -30,28 +30,25 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.EventClass;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
-import org.spine3.testdata.TestEventFactory;
+import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.test.projection.event.ProjectStarted;
+import org.spine3.test.projection.event.TaskAdded;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.spine3.test.Verify.assertContainsAll;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
-import static org.spine3.testdata.TestEventMessageFactory.*;
 
 /**
  * @author Alexander Litus
@@ -59,7 +56,7 @@ import static org.spine3.testdata.TestEventMessageFactory.*;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ProjectionRepositoryShould {
 
-    private static final ProjectId ID = newProjectId();
+    private static final ProjectId ID = Given.AggregateId.newProjectId();
 
     /**
      * The projection stub used in tests.
@@ -152,14 +149,14 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_projection() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(projectCreatedMsg(ID));
-        testDispatchEvent(taskAddedMsg(ID));
-        testDispatchEvent(projectStartedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
+        testDispatchEvent(Given.EventMessage.taskAdded(ID));
+        testDispatchEvent(Given.EventMessage.projectStarted(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -186,7 +183,7 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(projectCreatedMsg(ID), createEventContext(ID));
+        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
         assertEquals(ID, actual);
     }
 
@@ -202,13 +199,13 @@ public class ProjectionRepositoryShould {
                                                     .getEventStore();
 
         // Put events into the EventStore.
-        final Event projectCreatedEvent = TestEventFactory.projectCreatedEvent(ID);
+        final Event projectCreatedEvent = Given.Event.projectCreated(ID);
         eventStore.append(projectCreatedEvent);
 
-        final Event taskAddedEvent = TestEventFactory.taskAddedEvent(ID);
+        final Event taskAddedEvent = Given.Event.taskAdded(ID);
         eventStore.append(taskAddedEvent);
 
-        final Event projectStartedEvent = TestEventFactory.projectStartedEvent(ID);
+        final Event projectStartedEvent = Given.Event.projectStarted(ID);
         eventStore.append(projectStartedEvent);
 
         repository.catchUp();

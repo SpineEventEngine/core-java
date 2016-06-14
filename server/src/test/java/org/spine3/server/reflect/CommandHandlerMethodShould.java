@@ -26,10 +26,9 @@ import org.spine3.base.CommandContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.testdata.TestEventFactory;
-import org.spine3.testdata.TestEventMessageFactory;
+import org.spine3.test.reflect.command.CreateProject;
+import org.spine3.test.reflect.event.ProjectCreated;
+import org.spine3.testdata.EventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,7 +38,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestCommands.createProjectMsg;
 
 /**
  * @author Alexander Litus
@@ -47,7 +45,7 @@ import static org.spine3.testdata.TestCommands.createProjectMsg;
 @SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened"})
 public class CommandHandlerMethodShould {
 
-    private final EventBus eventBus = TestEventFactory.newEventBus();
+    private final EventBus eventBus = EventBusFactory.create();
 
 
     @Test
@@ -78,7 +76,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProjectMsg();
+        final CreateProject cmd = Given.CommandMessage.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -92,7 +90,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
         final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = createProjectMsg();
+        final CreateProject cmd = Given.CommandMessage.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -198,7 +196,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -206,7 +204,7 @@ public class CommandHandlerMethodShould {
         @Assign
         public List<Message> handleTest(CreateProject cmd) {
             final List<Message> result = newLinkedList();
-            result.add(TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId()));
+            result.add(Given.EventMessage.projectCreated(cmd.getProjectId()));
             return result;
         }
     }
@@ -215,7 +213,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -224,7 +222,7 @@ public class CommandHandlerMethodShould {
         @SuppressWarnings("unused")
         public List<Message> handleTest(CreateProject cmd, CommandContext context) {
             final List<Message> result = newLinkedList();
-            result.add(TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId()));
+            result.add(Given.EventMessage.projectCreated(cmd.getProjectId()));
             return result;
         }
     }
@@ -233,7 +231,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         private ProjectCreated handleTest(CreateProject cmd) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -244,7 +242,7 @@ public class CommandHandlerMethodShould {
     private class InvalidHandlerNoAnnotation extends TestCommandHandler {
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -260,7 +258,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context, Object redundant) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -284,7 +282,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, Exception invalid) {
-            return TestEventMessageFactory.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 

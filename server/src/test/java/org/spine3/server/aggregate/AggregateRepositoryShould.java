@@ -25,17 +25,17 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.TaskAdded;
+import org.spine3.test.aggregate.Project;
+import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.TestEventContextFactory;
 
 import java.util.List;
@@ -45,9 +45,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.createEvent;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedMsg;
-import static org.spine3.testdata.TestEventMessageFactory.taskAddedMsg;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -66,7 +63,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void return_default_aggregate_instance_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(newProjectId());
+        final ProjectAggregate aggregate = repository.load(Given.AggregateId.newProjectId());
         final Project state = aggregate.getState();
 
         assertTrue(isDefault(state));
@@ -74,7 +71,7 @@ public class AggregateRepositoryShould {
 
     @Test
     public void store_and_load_aggregate() {
-        final ProjectId id = newProjectId();
+        final ProjectId id = Given.AggregateId.newProjectId();
         final ProjectAggregate expected = new ProjectAggregate(id);
         repository.store(expected);
 
@@ -141,12 +138,12 @@ public class AggregateRepositoryShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Apply
@@ -164,7 +161,7 @@ public class AggregateRepositoryShould {
         @Override
         @SuppressWarnings("RefusedBequest")
         /* package */ List<Event> getUncommittedEvents() {
-            final ProjectCreated msg = projectCreatedMsg(getId());
+            final ProjectCreated msg = Given.EventMessage.projectCreated(getId());
             final Event event = createEvent(msg, TestEventContextFactory.createEventContext());
             final List<Event> events = newArrayList(event);
             return events;
