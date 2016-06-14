@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.test.command.command;
+package spine.test.command;
 
 import "spine/test/command/project.proto";
 import "spine/test/command/task.proto";
 
-option java_package="org.spine3.test.command.command";
+option java_package="org.spine3.test.command";
 option java_outer_classname = "CommandCommandsProto";
 option java_multiple_files = true;
 

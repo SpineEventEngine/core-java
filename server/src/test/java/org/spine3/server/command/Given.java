@@ -20,20 +20,16 @@
 
 package org.spine3.server.command;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
-import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStore;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.test.command.ProjectId;
-import org.spine3.test.command.command.AddTask;
-import org.spine3.test.command.command.CreateProject;
-import org.spine3.test.command.command.StartProject;
+import org.spine3.test.command.AddTask;
+import org.spine3.test.command.CreateProject;
+import org.spine3.test.command.StartProject;
 import org.spine3.users.UserId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
@@ -78,7 +74,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates a new {@link org.spine3.test.command.command.AddTask} command with the given project ID.
+         * Creates a new {@link org.spine3.test.command.AddTask} command with the given project ID.
          */
         public static AddTask addTask(String projectId) {
             return AddTask.newBuilder()
@@ -90,7 +86,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates a new {@link org.spine3.test.command.command.AddTask} command with the given project ID.
+         * Creates a new {@link org.spine3.test.command.AddTask} command with the given project ID.
          */
         public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
@@ -114,7 +110,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates a new {@link org.spine3.test.command.command.CreateProject} command with the generated project ID.
+         * Creates a new {@link org.spine3.test.command.CreateProject} command with the generated project ID.
          */
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
