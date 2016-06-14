@@ -70,9 +70,9 @@ public class AggregateShould {
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);
 
-    private final CreateProject createProject = Given.Command.createProject(ID);
-    private final AddTask addTask = Given.Command.addTask(ID);
-    private final StartProject startProject = Given.Command.startProject(ID);
+    private final CreateProject createProject = Given.CommandMessage.createProject(ID);
+    private final AddTask addTask = Given.CommandMessage.addTask(ID);
+    private final StartProject startProject = Given.CommandMessage.startProject(ID);
 
     private TestAggregate aggregate;
 
@@ -550,7 +550,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_handler_throws() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
-        final Command command = Given.Command.createProjectCmd();
+        final Command command = Given.Command.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
@@ -565,7 +565,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_applier_throws() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
 
-        final Command command = Given.Command.createProjectCmd();
+        final Command command = Given.Command.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {

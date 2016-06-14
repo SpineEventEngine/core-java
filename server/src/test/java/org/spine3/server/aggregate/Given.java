@@ -90,74 +90,6 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Command {
-
-        private static final UserId USER_ID = newUserId(newUuid());
-        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
-
-        private Command() {
-        }
-
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
-        public static CreateProject createProject(ProjectId id) {
-            return CreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
-         */
-        public static org.spine3.base.Command createProjectCmd() {
-            return createProjectCmd(getCurrentTime());
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
-         */
-        public static org.spine3.base.Command createProjectCmd(Timestamp when) {
-            return createProjectCmd(USER_ID, PROJECT_ID, when);
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
-        public static org.spine3.base.Command createProjectCmd(UserId userId, ProjectId projectId, Timestamp when) {
-            final CreateProject command = createProject(projectId);
-            return create(command, userId, when);
-        }
-
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
-         * {@link CommandId} instance.
-         */
-        public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
-            final org.spine3.base.Command result = Commands.create(command, context);
-            return result;
-        }
-
-        /**
-         * Creates a new {@link AddTask} command with the given project ID.
-         */
-        public static AddTask addTask(ProjectId id) {
-            return AddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
-        }
-
-        /**
-         * Creates a new {@link StartProject} command with the given project ID.
-         */
-        public static StartProject startProject(ProjectId id) {
-            return StartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
-        }
-    }
-
     /* package */ static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
@@ -217,6 +149,81 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(eventMessage));
             return builder.build();
+        }
+
+    }
+
+    /* package */ static class Command {
+
+        private static final UserId USER_ID = newUserId(newUuid());
+        private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+
+        private Command() {
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
+         */
+        public static org.spine3.base.Command createProject() {
+            return createProject(getCurrentTime());
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
+         */
+        public static org.spine3.base.Command createProject(Timestamp when) {
+            return createProject(USER_ID, PROJECT_ID, when);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
+         */
+        public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
+            final CreateProject command = CommandMessage.createProject(projectId);
+            return create(command, userId, when);
+        }
+
+        /**
+         * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
+         * {@link CommandId} instance.
+         */
+        public static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
+            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final org.spine3.base.Command result = Commands.create(command, context);
+            return result;
+        }
+    }
+
+    /* package */ static class CommandMessage {
+
+        private CommandMessage() {
+        }
+
+        /**
+         * Creates a new {@link CreateProject} command with the given project ID.
+         */
+        public static CreateProject createProject(ProjectId id) {
+            return CreateProject.newBuilder()
+                                .setProjectId(id)
+                                .build();
+        }
+
+        /**
+         * Creates a new {@link AddTask} command with the given project ID.
+         */
+        public static AddTask addTask(ProjectId id) {
+            return AddTask.newBuilder()
+                          .setProjectId(id)
+                          .build();
+        }
+
+        /**
+         * Creates a new {@link StartProject} command with the given project ID.
+         */
+        public static StartProject startProject(ProjectId id) {
+            return StartProject.newBuilder()
+                               .setProjectId(id)
+                               .build();
         }
     }
 }
