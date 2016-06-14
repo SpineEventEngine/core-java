@@ -110,7 +110,7 @@ public class ClientServiceShould {
     @Test
     public void accept_commands_for_linked_bounded_contexts() {
         final TestResponseObserver responseObserver = new TestResponseObserver();
-        final Command createProject = Given.Command.createProjectCmd();
+        final Command createProject = Given.Command.createProject();
         clientService.post(createProject, responseObserver);
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
 
