@@ -102,7 +102,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException {
-        testDispatchCommand(Given.Command.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
     }
 
     @Test
@@ -110,9 +110,9 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        testDispatchCommand(Given.Command.createProject(ID));
-        testDispatchCommand(Given.Command.addTask(ID));
-        testDispatchCommand(Given.Command.startProject(ID));
+        testDispatchCommand(Given.CommandMessage.createProject(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.startProject(ID));
     }
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
@@ -123,7 +123,7 @@ public class ProcessManagerShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException {
-        final List<Event> events = testDispatchCommand(Given.Command.createProject(ID));
+        final List<Event> events = testDispatchCommand(Given.CommandMessage.createProject(ID));
 
         assertEquals(1, events.size());
         final Event event = events.get(0);
@@ -143,7 +143,7 @@ public class ProcessManagerShould {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
-        final List<Event> events = testDispatchCommand(Given.Command.startProject(ID));
+        final List<Event> events = testDispatchCommand(Given.CommandMessage.startProject(ID));
 
         // There's only one event generated.
         assertEquals(1, events.size());
@@ -246,7 +246,7 @@ public class ProcessManagerShould {
         public CommandRouted handle(StartProject command, CommandContext context) {
             incrementState(toAny(command));
 
-            final Message addTask = Given.Command.addTask(command.getProjectId());
+            final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
             final CommandRouted route = newRouter().of(command, context)
                                                    .add(addTask)
                                                    .route();

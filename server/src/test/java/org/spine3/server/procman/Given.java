@@ -88,9 +88,9 @@ import static org.spine3.base.Identifiers.newUuid;
         }
     }
 
-    /* package */ static class Command {
+    /* package */ static class CommandMessage {
 
-        private Command() {
+        private CommandMessage() {
         }
 
         /**

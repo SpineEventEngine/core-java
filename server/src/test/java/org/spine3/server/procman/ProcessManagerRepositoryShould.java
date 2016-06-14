@@ -125,14 +125,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.createProject(ID));
-        testDispatchCommand(Given.Command.addTask(ID));
-        testDispatchCommand(Given.Command.startProject(ID));
+        testDispatchCommand(Given.CommandMessage.createProject(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.startProject(ID));
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
@@ -143,7 +143,7 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.addTask(ID));
+        testDispatchCommand(Given.CommandMessage.addTask(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -306,7 +306,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = Given.Command.addTask(command.getProjectId());
+            final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
 
             return newRouter().of(command, context)
                     .add(addTask)
