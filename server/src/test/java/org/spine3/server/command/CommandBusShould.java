@@ -280,7 +280,7 @@ public class CommandBusShould {
 
     @Test
     public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
-        final Command cmd = commandFactory.create(Given.Command.addTask(newUuid()));
+        final Command cmd = commandFactory.create(Given.CommandMessage.addTask(newUuid()));
 
         commandBus.post(cmd, responseObserver);
 
@@ -320,7 +320,7 @@ public class CommandBusShould {
     public void post_command_and_return_OK_response() {
         commandBus.register(createProjectHandler);
 
-        commandBus.post(Given.Command.createProjectCmd(), responseObserver);
+        commandBus.post(Given.Command.createProject(), responseObserver);
 
         assertResponseOkAndCompleted(responseObserver);
     }
@@ -329,7 +329,7 @@ public class CommandBusShould {
     public void post_command_and_set_current_tenant_if_multitenant() {
         commandBus.setMultitenant(true);
         commandBus.register(createProjectHandler);
-        final Command cmd = Given.Command.createProjectCmd();
+        final Command cmd = Given.Command.createProject();
 
         commandBus.post(cmd, responseObserver);
 
@@ -341,7 +341,7 @@ public class CommandBusShould {
     public void post_command_and_do_not_set_current_tenant_if_not_multitenant() {
         commandBus.register(createProjectHandler);
 
-        commandBus.post(Given.Command.createProjectCmd(), responseObserver);
+        commandBus.post(Given.Command.createProject(), responseObserver);
 
         assertNull(CurrentTenant.get());
     }
@@ -349,7 +349,7 @@ public class CommandBusShould {
     @Test
     public void store_command_when_posted() {
         commandBus.register(createProjectHandler);
-        final Command cmd = Given.Command.createProjectCmd();
+        final Command cmd = Given.Command.createProject();
 
         commandBus.post(cmd, responseObserver);
 
@@ -369,7 +369,7 @@ public class CommandBusShould {
     @Test
     public void invoke_handler_when_command_posted() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(Given.Command.createProject());
+        final Command command = commandFactory.create(Given.CommandMessage.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -380,7 +380,7 @@ public class CommandBusShould {
     public void invoke_dispatcher_when_command_posted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.Command.addTask(newUuid()));
+        final Command command = commandFactory.create(Given.CommandMessage.addTask(newUuid()));
 
         commandBus.post(command, responseObserver);
 
@@ -390,7 +390,7 @@ public class CommandBusShould {
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(Given.Command.createProject());
+        final Command command = commandFactory.create(Given.CommandMessage.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -402,7 +402,7 @@ public class CommandBusShould {
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.Command.createProject());
+        final Command command = commandFactory.create(Given.CommandMessage.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -452,7 +452,7 @@ public class CommandBusShould {
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
-        final CreateProject msg = Given.Command.createProject();
+        final CreateProject msg = Given.CommandMessage.createProject();
         final Command command = commandFactory.create(msg);
         return command;
     }
@@ -475,7 +475,7 @@ public class CommandBusShould {
     @Test
     public void schedule_command_if_delay_is_set() {
         commandBus.register(createProjectHandler);
-        final Command cmd = Given.Command.createProjectCmd(/*delay=*/minutes(1));
+        final Command cmd = Given.Command.createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, responseObserver);
 
@@ -485,7 +485,7 @@ public class CommandBusShould {
     @Test
     public void store_scheduled_command_and_return_OK() {
         commandBus.register(createProjectHandler);
-        final Command cmd = Given.Command.createProjectCmd(/*delay=*/minutes(1));
+        final Command cmd = Given.Command.createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, responseObserver);
 
@@ -496,7 +496,7 @@ public class CommandBusShould {
     @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler(newUuid()));
-        final Command cmd = commandFactory.create(Given.Command.createProject());
+        final Command cmd = commandFactory.create(Given.CommandMessage.createProject());
 
         commandBus.post(cmd, responseObserver);
 
@@ -509,7 +509,7 @@ public class CommandBusShould {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations.ofMinutes(5);
         final Duration newDelayExpected = Durations.ofMinutes(2); // = 5 - 3
-        final List<Command> commandsPrimary = newArrayList(Given.Command.createProjectCmd(), Given.Command.addTaskCmd(), Given.Command.startProjectCmd());
+        final List<Command> commandsPrimary = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
         commandBus.getRescheduler().rescheduleCommands();
@@ -525,7 +525,7 @@ public class CommandBusShould {
 
     @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
-        final List<Command> commands = newArrayList(Given.Command.createProjectCmd(), Given.Command.addTaskCmd(), Given.Command.startProjectCmd());
+        final List<Command> commands = newArrayList(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
         final Duration delay = Durations.ofMinutes(5);
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
@@ -553,7 +553,7 @@ public class CommandBusShould {
     }
 
     private static Command createProjectCmdWithoutContext() {
-        final Command cmd = Given.Command.createProjectCmd();
+        final Command cmd = Given.Command.createProject();
         final Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
                                       .build();
