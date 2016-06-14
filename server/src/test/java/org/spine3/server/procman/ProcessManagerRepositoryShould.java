@@ -107,14 +107,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_manager() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreatedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreatedMsg(ID));
-        testDispatchEvent(Given.EventMessage.taskAddedMsg(ID));
-        testDispatchEvent(Given.EventMessage.projectStartedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
+        testDispatchEvent(Given.EventMessage.taskAdded(ID));
+        testDispatchEvent(Given.EventMessage.projectStarted(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -125,14 +125,14 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.addTaskMsg(ID));
+        testDispatchCommand(Given.Command.addTask(ID));
     }
 
     @Test
     public void dispatch_several_commands() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.createProjectMsg(ID));
-        testDispatchCommand(Given.Command.addTaskMsg(ID));
-        testDispatchCommand(Given.Command.startProjectMsg(ID));
+        testDispatchCommand(Given.Command.createProject(ID));
+        testDispatchCommand(Given.Command.addTask(ID));
+        testDispatchCommand(Given.Command.startProject(ID));
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException, FailureThrowable {
@@ -143,7 +143,7 @@ public class ProcessManagerRepositoryShould {
 
     @Test
     public void dispatch_command_and_return_events() throws InvocationTargetException, FailureThrowable {
-        testDispatchCommand(Given.Command.addTaskMsg(ID));
+        testDispatchCommand(Given.Command.addTask(ID));
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
@@ -290,7 +290,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleProjectCreated(command.getProjectId());
-            return Given.EventMessage.projectCreatedMsg(command.getProjectId());
+            return Given.EventMessage.projectCreated(command.getProjectId());
         }
 
         @Assign
@@ -298,7 +298,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleTaskAdded(command.getTask());
-            return Given.EventMessage.taskAddedMsg(command.getProjectId());
+            return Given.EventMessage.taskAdded(command.getProjectId());
         }
 
         @Assign
@@ -306,7 +306,7 @@ public class ProcessManagerRepositoryShould {
             keep(command);
 
             handleProjectStarted();
-            final Message addTask = Given.Command.addTaskMsg(command.getProjectId());
+            final Message addTask = Given.Command.addTask(command.getProjectId());
 
             return newRouter().of(command, context)
                     .add(addTask)

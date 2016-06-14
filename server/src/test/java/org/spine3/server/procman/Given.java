@@ -51,38 +51,38 @@ import static org.spine3.base.Identifiers.newUuid;
     /* package */ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStartedMsg(DUMMY_PROJECT_ID);
-        private static final TaskAdded TASK_ADDED = taskAddedMsg(DUMMY_PROJECT_ID);
+        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
+        private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
+        private static final TaskAdded TASK_ADDED = taskAdded(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreatedMsg() {
+        public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
         }
 
-        public static ProjectCreated projectCreatedMsg(ProjectId id) {
+        public static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static TaskAdded taskAddedMsg() {
+        public static TaskAdded taskAdded() {
             return TASK_ADDED;
         }
 
-        public static TaskAdded taskAddedMsg(ProjectId id) {
+        public static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectStarted projectStartedMsg() {
+        public static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
         }
 
-        public static ProjectStarted projectStartedMsg(ProjectId id) {
+        public static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
@@ -98,7 +98,7 @@ import static org.spine3.base.Identifiers.newUuid;
         /**
          * Creates a new {@link CreateProject} command with the given project ID.
          */
-        public static CreateProject createProjectMsg(ProjectId id) {
+        public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
@@ -107,7 +107,7 @@ import static org.spine3.base.Identifiers.newUuid;
         /**
          * Creates a new {@link AddTask} command with the given project ID.
          */
-        public static AddTask addTaskMsg(ProjectId id) {
+        public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
                           .setProjectId(id)
                           .build();
@@ -116,7 +116,7 @@ import static org.spine3.base.Identifiers.newUuid;
         /**
          * Creates a new {@link StartProject} command with the given project ID.
          */
-        public static StartProject startProjectMsg(ProjectId id) {
+        public static StartProject startProject(ProjectId id) {
             return StartProject.newBuilder()
                                .setProjectId(id)
                                .build();
