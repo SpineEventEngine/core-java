@@ -84,25 +84,4 @@ import static org.spine3.base.Identifiers.newUuid;
 
     }
 
-    /* package */ static class Event {
-
-        private Event() {
-        }
-
-        /**
-         * Creates a new event bus with the {@link InMemoryStorageFactory}.
-         */
-        public static EventBus newEventBus() {
-            final EventStorage storage = InMemoryStorageFactory.getInstance()
-                                                               .createEventStorage();
-            final EventStore store = EventStore.newBuilder()
-                                               .setStreamExecutor(MoreExecutors.directExecutor())
-                                               .setStorage(storage)
-                                               .build();
-            final EventBus eventBus = EventBus.newInstance(store);
-            return eventBus;
-        }
-
-    }
-
 }

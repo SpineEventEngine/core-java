@@ -33,6 +33,7 @@ import static org.mockito.Mockito.spy;
  *
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("UtilityClass")
 public class BoundedContextTestStubs {
 
     public static BoundedContext create() {
