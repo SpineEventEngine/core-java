@@ -21,7 +21,6 @@
 package org.spine3.server.reflect;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.EventStorage;
@@ -29,8 +28,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.reflect.ProjectId;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;
-import org.spine3.test.reflect.event.ProjectStarted;
-import org.spine3.test.reflect.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
 
@@ -44,7 +41,9 @@ import static org.spine3.base.Identifiers.newUuid;
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
-            return ProjectId.newBuilder().setId(uuid).build();
+            return ProjectId.newBuilder()
+                            .setId(uuid)
+                            .build();
         }
 
     }
@@ -52,22 +51,24 @@ import static org.spine3.base.Identifiers.newUuid;
     /* package */ static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
+        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreatedMsg() {
+        public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
         }
 
-        public static ProjectCreated projectCreatedMsg(ProjectId id) {
-            return ProjectCreated.newBuilder().setProjectId(id).build();
+        public static ProjectCreated projectCreated(ProjectId id) {
+            return ProjectCreated.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
         }
 
     }
 
-    /* package */ static class Command{
+    /* package */ static class Command {
 
         private Command() {
         }
@@ -75,20 +76,15 @@ import static org.spine3.base.Identifiers.newUuid;
         /**
          * Creates a new {@link org.spine3.test.reflect.command.CreateProject} command with the generated project ID.
          */
-        public static CreateProject createProjectMsg() {
-            return CreateProject.newBuilder().setProjectId(AggregateId.newProjectId()).build();
-        }
-
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
-        public static CreateProject createProjectMsg(ProjectId id) {
-            return CreateProject.newBuilder().setProjectId(id).build();
+        public static CreateProject createProject() {
+            return CreateProject.newBuilder()
+                                .setProjectId(AggregateId.newProjectId())
+                                .build();
         }
 
     }
 
-    /* package */ static class Event{
+    /* package */ static class Event {
 
         private Event() {
         }
@@ -97,7 +93,8 @@ import static org.spine3.base.Identifiers.newUuid;
          * Creates a new event bus with the {@link InMemoryStorageFactory}.
          */
         public static EventBus newEventBus() {
-            final EventStorage storage = InMemoryStorageFactory.getInstance().createEventStorage();
+            final EventStorage storage = InMemoryStorageFactory.getInstance()
+                                                               .createEventStorage();
             final EventStore store = EventStore.newBuilder()
                                                .setStreamExecutor(MoreExecutors.directExecutor())
                                                .setStorage(storage)

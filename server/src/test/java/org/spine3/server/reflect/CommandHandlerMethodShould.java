@@ -75,7 +75,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_which_returns_one_message() throws InvocationTargetException {
         final ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = Given.Command.createProjectMsg();
+        final CreateProject cmd = Given.Command.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -89,7 +89,7 @@ public class CommandHandlerMethodShould {
     public void invoke_handler_method_and_return_message_list() throws InvocationTargetException {
         final ValidHandlerOneParamReturnsList handlerObject = spy(new ValidHandlerOneParamReturnsList());
         final CommandHandlerMethod handler = new CommandHandlerMethod(handlerObject.getHandler());
-        final CreateProject cmd = Given.Command.createProjectMsg();
+        final CreateProject cmd = Given.Command.createProject();
 
         final List<? extends Message> events = handler.invoke(handlerObject, cmd, CommandContext.getDefaultInstance());
 
@@ -195,7 +195,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -203,7 +203,7 @@ public class CommandHandlerMethodShould {
         @Assign
         public List<Message> handleTest(CreateProject cmd) {
             final List<Message> result = newLinkedList();
-            result.add(Given.EventMessage.projectCreatedMsg(cmd.getProjectId()));
+            result.add(Given.EventMessage.projectCreated(cmd.getProjectId()));
             return result;
         }
     }
@@ -212,7 +212,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -221,7 +221,7 @@ public class CommandHandlerMethodShould {
         @SuppressWarnings("unused")
         public List<Message> handleTest(CreateProject cmd, CommandContext context) {
             final List<Message> result = newLinkedList();
-            result.add(Given.EventMessage.projectCreatedMsg(cmd.getProjectId()));
+            result.add(Given.EventMessage.projectCreated(cmd.getProjectId()));
             return result;
         }
     }
@@ -230,7 +230,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         private ProjectCreated handleTest(CreateProject cmd) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -241,7 +241,7 @@ public class CommandHandlerMethodShould {
     private class InvalidHandlerNoAnnotation extends TestCommandHandler {
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -257,7 +257,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, CommandContext context, Object redundant) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -281,7 +281,7 @@ public class CommandHandlerMethodShould {
         @Assign
         @SuppressWarnings("unused")
         public ProjectCreated handleTest(CreateProject cmd, Exception invalid) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 

@@ -65,7 +65,7 @@ public class EventSubscriberMethodShould {
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
         final EventSubscriberMethod subscriber = new EventSubscriberMethod(subscriberObject.getMethod());
-        final ProjectCreated msg = Given.EventMessage.projectCreatedMsg();
+        final ProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 

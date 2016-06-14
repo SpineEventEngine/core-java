@@ -133,6 +133,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                .setMessage(toAny(event));
             return builder.build();
         }
+        
     }
 
 }
