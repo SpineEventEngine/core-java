@@ -91,9 +91,11 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
          */
         public static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId, IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final org.spine3.server.integration.IntegrationEvent.Builder builder = org.spine3.server.integration.IntegrationEvent.newBuilder()
-                                                                                                                                 .setContext(eventContext)
-                                                                                                                                 .setMessage(toAny(event));
+            final org.spine3.server.integration.IntegrationEvent.Builder builder =
+                    org.spine3.server.integration.IntegrationEvent
+                            .newBuilder()
+                            .setContext(eventContext)
+                            .setMessage(toAny(event));
             return builder.build();
         }
 
@@ -117,9 +119,11 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
          */
         public static org.spine3.server.integration.IntegrationEvent taskAdded(ProjectId projectId, IntegrationEventContext context) {
             final TaskAdded event = EventMessage.taskAdded(projectId);
-            final org.spine3.server.integration.IntegrationEvent.Builder builder = org.spine3.server.integration.IntegrationEvent.newBuilder()
-                                                                                                                                 .setContext(context)
-                                                                                                                                 .setMessage(toAny(event));
+            final org.spine3.server.integration.IntegrationEvent.Builder builder =
+                    org.spine3.server.integration.IntegrationEvent
+                            .newBuilder()
+                            .setContext(context)
+                            .setMessage(toAny(event));
             return builder.build();
         }
     }

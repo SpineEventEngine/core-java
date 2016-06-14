@@ -90,9 +90,11 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
          */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(event));
+            final org.spine3.base.Event.Builder builder =
+                    org.spine3.base.Event
+                            .newBuilder()
+                            .setContext(eventContext)
+                            .setMessage(toAny(event));
             return builder.build();
         }
     }

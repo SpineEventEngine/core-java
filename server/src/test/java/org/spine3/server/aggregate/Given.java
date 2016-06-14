@@ -116,9 +116,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
          */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated eventMessage = EventMessage.projectCreated(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
+            final org.spine3.base.Event.Builder builder =
+                    org.spine3.base.Event.newBuilder()
+                                         .setContext(eventContext)
+                                         .setMessage(toAny(eventMessage));
             return builder.build();
         }
 
@@ -134,9 +135,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
          */
         public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext eventContext) {
             final TaskAdded eventMessage = EventMessage.taskAdded(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
+            final org.spine3.base.Event.Builder builder =
+                    org.spine3.base.Event.newBuilder()
+                                         .setContext(eventContext)
+                                         .setMessage(toAny(eventMessage));
             return builder.build();
         }
 
@@ -145,9 +147,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
          */
         public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext eventContext) {
             final ProjectStarted eventMessage = EventMessage.projectStarted(projectId);
-            final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
-                                                                               .setContext(eventContext)
-                                                                               .setMessage(toAny(eventMessage));
+            final org.spine3.base.Event.Builder builder =
+                    org.spine3.base.Event.newBuilder()
+                                         .setContext(eventContext)
+                                         .setMessage(toAny(eventMessage));
             return builder.build();
         }
 

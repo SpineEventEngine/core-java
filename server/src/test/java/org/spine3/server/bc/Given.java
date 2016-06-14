@@ -99,9 +99,10 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
          */
         public static IntegrationEvent projectCreatedIntegration(ProjectId projectId, IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final IntegrationEvent.Builder builder = IntegrationEvent.newBuilder()
-                                                                     .setContext(eventContext)
-                                                                     .setMessage(toAny(event));
+            final IntegrationEvent.Builder builder =
+                    IntegrationEvent.newBuilder()
+                                    .setContext(eventContext)
+                                    .setMessage(toAny(event));
             return builder.build();
         }
     }
