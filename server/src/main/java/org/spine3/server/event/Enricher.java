@@ -63,19 +63,19 @@ public final class Enricher {
     /**
      * Available enrichments per event message class.
      */
-    private final ImmutableMultimap<Class<? extends Message>, EnrichmentType<?, ?>> enrichments;
+    private final ImmutableMultimap<EventClass, EnrichmentType<?, ?>> enrichments;
 
     private Enricher(Builder builder) {
         final Map<EnrichmentType<?, ?>, Function<?, ?>> translators = builder.getTranslators();
         this.translators = ImmutableMap.copyOf(translators);
 
-        final ImmutableMultimap.Builder<Class<? extends Message>, EnrichmentType<?, ?>>
+        // Build the multi-map of all enrichments available per event class.
+        final ImmutableMultimap.Builder<EventClass, EnrichmentType<?, ?>>
                 enrichmentsBuilder = ImmutableMultimap.builder();
         final Set<EnrichmentType<?, ?>> enrichmentTypes = translators.keySet();
         for (EnrichmentType<?, ?> enrichmentType : enrichmentTypes) {
-            enrichmentsBuilder.put(enrichmentType.getSource(), enrichmentType);
+            enrichmentsBuilder.put(EventClass.of(enrichmentType.getSource()), enrichmentType);
         }
-
         this.enrichments = enrichmentsBuilder.build();
     }
 

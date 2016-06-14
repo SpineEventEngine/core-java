@@ -20,20 +20,21 @@
 
 package org.spine3.server.event;
 
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * {@code EnrichmentType} defines a couple of classes that participate in the event enrichment
- * process.
+ * {@code EnrichmentType} defines a couple of classes that participate in the event enrichment process.
  *
- * <p>The first class is a event message class, which needs to be enriched. The second class is
- * a class of message enrichment.
+ * <p>The first class is a class of an event message, which needs to be enriched.
+ * The second class is a class of the enrichment.
  *
- * <p>Instances of {@code EnrichmentType} serves as an instruction for {@link Enricher} to augment
- * passed events.
+ * <p>Instances of {@code EnrichmentType} serves as an instruction for {@link Enricher} to augment passed events.
  *
  * @param <M> a type of an event message to enrich
  * @param <E> a type of an enrichment
@@ -41,17 +42,35 @@ import java.util.Objects;
  */
 public final class EnrichmentType<M extends Class<? extends Message>, E extends Class<? extends Message>> {
 
+    /**
+     * We are having the generified class (instead of working with {@link org.spine3.server.type.EventClass})
+     * to be able to bound the types of messages and the translation function when building the {@link Enricher}.
+     *
+     * @see org.spine3.server.event.Enricher.Builder#add(EnrichmentType, Function)
+     **/
+
+    /**
+     * The event message class.
+     */
     private final M source;
+
+    /**
+     * The enrichment class.
+     */
     private final E target;
 
-    public static <M extends Class<? extends Message>, E extends Class<? extends Message>> EnrichmentType<M, E>
-        of(M source, E target) {
-        return new EnrichmentType<>(source, target);
+    /**
+     * Creates a new instance of the enrichment type.
+     */
+    public static <M extends Class<? extends Message>,
+                   E extends Class<? extends Message>> EnrichmentType<M, E> of(M source, E target) {
+        final EnrichmentType<M, E> result = new EnrichmentType<>(source, target);
+        return result;
     }
 
     private EnrichmentType(M source, E target) {
-        this.source = source;
-        this.target = target;
+        this.source = checkNotNull(source);
+        this.target = checkNotNull(target);
     }
 
     public M getSource() {

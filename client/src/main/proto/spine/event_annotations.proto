@@ -1,0 +1,62 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+// We do not define the package for this file to allow shorter options for user-defined types.
+// This would allow to write:
+//
+//     option (by) = "user_id";
+//
+// instead of:
+//
+//      option (spine.annotations.by) = "user_id";
+//
+
+option java_generate_equals_and_hash = false;
+option java_multiple_files = true;
+option java_outer_classname = "EventAnnotationsProto";
+option java_package = "org.spine3.annotations";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+    // An instruction to associate an enrichment message field with a field from a source event message.
+    //
+    // For example:
+    // <pre>
+    // message MyEvent {
+    //    spine.users.UserId user_id = 1;
+    //    ...
+    //    message Enrichment {
+    //       spine.people.PersonName name = 1 [(by) = "user_id"];
+    //    }
+    // }
+    // </pre>
+    //
+    // If the enrichment message is not enclosed into the event message, the source field name must be prefixed
+    // with the source event message type name:
+    //
+    // <pre>
+    //     spine.people.PersonName name = 1 [(by) = "MyEvent.user_id"];
+    // </pre>
+    //
+    // If the source message is not in the same package, the type name must be fully-qualified.
+    string by = 59100;
+}

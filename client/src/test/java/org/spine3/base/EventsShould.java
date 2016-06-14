@@ -32,6 +32,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
+import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
@@ -57,40 +58,40 @@ public class EventsShould {
 
     @Test
     public void generate_event_id() {
-        final EventId result = Events.generateId();
+        final EventId result = generateId();
 
         assertFalse(result.getUuid().isEmpty());
     }
 
     @Test
     public void return_null_from_null_input_in_IsAfter_predicate() {
-        assertFalse(new Events.IsAfter(secondsAgo(5)).apply(null));
+        assertFalse(new IsAfter(secondsAgo(5)).apply(null));
     }
 
     @Test
     public void return_null_from_null_input_in_IsBefore_predicate() {
-        assertFalse(new Events.IsBefore(secondsAgo(5)).apply(null));
+        assertFalse(new IsBefore(secondsAgo(5)).apply(null));
     }
 
     @Test
     public void return_null_from_null_input_in_IsBetween_predicate() {
-        assertFalse(new Events.IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+        assertFalse(new IsBetween(secondsAgo(5), secondsAgo(1)).apply(null));
     }
 
     @Test
     public void return_actor_from_EventContext() {
-        assertEquals(context.getCommandContext().getActor(), Events.getActor(context));
+        assertEquals(context.getCommandContext().getActor(), getActor(context));
     }
 
     @Test
     public void sort_events_by_time() {
-        final Event event1 = Events.createEvent(stringValue, newEventContext(minutesAgo(30)));
-        final Event event2 = Events.createEvent(boolValue, newEventContext(minutesAgo(20)));
-        final Event event3 = Events.createEvent(doubleValue, newEventContext(secondsAgo(10)));
+        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(30)));
+        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(20)));
+        final Event event3 = createEvent(doubleValue, newEventContext(secondsAgo(10)));
         final List<Event> sortedEvents = newArrayList(event1, event2, event3);
         final List<Event> eventsToSort = newArrayList(event2, event1, event3);
 
-        Events.sort(eventsToSort);
+        sort(eventsToSort);
 
         assertEquals(sortedEvents, eventsToSort);
     }
@@ -103,7 +104,7 @@ public class EventsShould {
     }
 
     private void createEventTest(Message msg) {
-        final Event event = Events.createEvent(msg, context);
+        final Event event = createEvent(msg, context);
 
         assertEquals(msg, fromAny(event.getMessage()));
         assertEquals(context, event.getContext());
@@ -111,29 +112,29 @@ public class EventsShould {
 
     @Test
     public void get_message_from_event() {
-        getMsgFromEventTest(stringValue);
-        getMsgFromEventTest(boolValue);
-        getMsgFromEventTest(doubleValue);
+        creatEventAndAssertReturnedMessageFor(stringValue);
+        creatEventAndAssertReturnedMessageFor(boolValue);
+        creatEventAndAssertReturnedMessageFor(doubleValue);
     }
 
-    private void getMsgFromEventTest(Message msg) {
-        final Event event = Events.createEvent(msg, context);
+    private void creatEventAndAssertReturnedMessageFor(Message msg) {
+        final Event event = createEvent(msg, context);
 
-        assertEquals(msg, Events.getMessage(event));
+        assertEquals(msg, getMessage(event));
     }
 
     @Test
     public void get_timestamp_from_event() {
-        final Event event = Events.createEvent(stringValue, context);
+        final Event event = createEvent(stringValue, context);
 
-        assertEquals(context.getTimestamp(), Events.getTimestamp(event));
+        assertEquals(context.getTimestamp(), getTimestamp(event));
     }
 
     @Test
     public void get_producer_from_event_context() {
         final StringValue msg = fromAny(context.getProducerId());
 
-        final String id = Events.getProducer(context);
+        final String id = getProducer(context);
 
         assertEquals(msg.getValue(), id);
     }
@@ -143,7 +144,7 @@ public class EventsShould {
     }
 
     private static EventContext newEventContext(Timestamp time) {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = generateId();
         final StringValue producerId = newStringValue(newUuid());
         final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -152,5 +153,15 @@ public class EventsShould {
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();
+    }
+
+    @Test
+    public void check_enrichment_attribute_of_EventContext() {
+        assertTrue(isEnrichmentEnabled(createEvent(stringValue, context)));
+
+        final EventContext withDisabledEnrichment = context.toBuilder()
+                                                           .setDoNotEnrich(true)
+                                                           .build();
+        assertFalse(isEnrichmentEnabled(createEvent(stringValue, withDisabledEnrichment)));
     }
 }
