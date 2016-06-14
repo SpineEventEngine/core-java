@@ -31,6 +31,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 import org.spine3.testdata.CommandBusFactory;
+import org.spine3.testdata.EventBusFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -78,7 +79,7 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_EventBus() {
-        final EventBus expected = Given.Event.newEventBus(storageFactory);
+        final EventBus expected = EventBusFactory.create(storageFactory);
         builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus());
     }
@@ -104,7 +105,7 @@ public class BoundedContextBuilderShould {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
                 .setStorageFactory(storageFactory)
-                .setEventBus(Given.Event.newEventBus(storageFactory))
+                .setEventBus(EventBusFactory.create(storageFactory))
                 .build();
         assertNotNull(boundedContext.getCommandBus());
     }

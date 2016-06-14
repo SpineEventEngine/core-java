@@ -23,7 +23,9 @@ package org.spine3.testdata;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
  * Creates {@link org.spine3.server.command.CommandBus}s for tests.
@@ -35,6 +37,17 @@ import org.spine3.server.storage.StorageFactory;
 public class EventBusFactory {
 
     private EventBusFactory() {
+    }
+
+    public static EventBus create() {
+        final EventStorage storage = InMemoryStorageFactory.getInstance()
+                                                           .createEventStorage();
+        final EventStore store = EventStore.newBuilder()
+                                           .setStreamExecutor(MoreExecutors.directExecutor())
+                                           .setStorage(storage)
+                                           .build();
+        final EventBus eventBus = EventBus.newInstance(store);
+        return eventBus;
     }
 
     /**
