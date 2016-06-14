@@ -70,9 +70,9 @@ public class AggregateShould {
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
     private static final EventContext EVENT_CONTEXT = createEventContext(ID);
 
-    private final CreateProject createProject = Given.Command.createProjectMsg(ID);
-    private final AddTask addTask = Given.Command.addTaskMsg(ID);
-    private final StartProject startProject = Given.Command.startProjectMsg(ID);
+    private final CreateProject createProject = Given.Command.createProject(ID);
+    private final AddTask addTask = Given.Command.addTask(ID);
+    private final StartProject startProject = Given.Command.startProject(ID);
 
     private TestAggregate aggregate;
 
@@ -352,8 +352,8 @@ public class AggregateShould {
     @Test
     public void import_events() {
         final ImportEvents importCmd = ImportEvents.newBuilder()
-                                                   .addEvent(Given.Event.projectCreatedEvent(aggregate.getId()))
-                                                   .addEvent(Given.Event.taskAddedEvent(aggregate.getId()))
+                                                   .addEvent(Given.Event.projectCreated(aggregate.getId()))
+                                                   .addEvent(Given.Event.taskAdded(aggregate.getId()))
                                                    .build();
         aggregate.dispatchCommands(importCmd);
 
@@ -384,19 +384,19 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = Given.EventMessage.projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -452,7 +452,7 @@ public class AggregateShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
     }
 
@@ -529,7 +529,7 @@ public class AggregateShould {
             if (brokenHandler) {
                 throw new IllegalStateException(BROKEN_HANDLER);
             }
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Apply
@@ -580,7 +580,7 @@ public class AggregateShould {
     public void propagate_RuntimeException_when_play_raises_exception() {
         final FaultyAggregate faultyAggregate = new FaultyAggregate(ID, false, true);
         try {
-            faultyAggregate.play(ImmutableList.of(Given.Event.projectCreatedEvent()));
+            faultyAggregate.play(ImmutableList.of(Given.Event.projectCreated()));
         } catch (RuntimeException e) {
             @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
             final Throwable cause = Throwables.getRootCause(e);
@@ -619,9 +619,9 @@ public class AggregateShould {
 
     private static List<Event> getProjectEvents() {
         final List<Event> events = newLinkedList();
-        events.add(Given.Event.projectCreatedEvent(ID, EVENT_CONTEXT));
-        events.add(Given.Event.taskAddedEvent(ID, EVENT_CONTEXT));
-        events.add(Given.Event.projectStartedEvent(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectCreated(ID, EVENT_CONTEXT));
+        events.add(Given.Event.taskAdded(ID, EVENT_CONTEXT));
+        events.add(Given.Event.projectStarted(ID, EVENT_CONTEXT));
         return events;
     }
 

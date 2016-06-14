@@ -138,12 +138,12 @@ public class AggregateRepositoryShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Apply
@@ -161,7 +161,7 @@ public class AggregateRepositoryShould {
         @Override
         @SuppressWarnings("RefusedBequest")
         /* package */ List<Event> getUncommittedEvents() {
-            final ProjectCreated msg = Given.EventMessage.projectCreatedMsg(getId());
+            final ProjectCreated msg = Given.EventMessage.projectCreated(getId());
             final Event event = createEvent(msg, TestEventContextFactory.createEventContext());
             final List<Event> events = newArrayList(event);
             return events;
