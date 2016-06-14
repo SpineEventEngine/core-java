@@ -36,7 +36,7 @@ option java_package = "org.spine3.annotations";
 
 import "google/protobuf/descriptor.proto";
 
-extend google.protobuf.MessageOptions {
+extend google.protobuf.FieldOptions {
     // An instruction to associate an enrichment message field with a field from a source event message.
     //
     // For example:
@@ -57,6 +57,8 @@ extend google.protobuf.MessageOptions {
     //     spine.people.PersonName name = 1 [(by) = "MyEvent.user_id"];
     // </pre>
     //
-    // If the source message is not in the same package, the type name must be fully-qualified.
+    // If the source message is not in the same package, the type name prefixing the field reference
+    // must be fully-qualified.
+    //
     string by = 59100;
 }
