@@ -155,7 +155,7 @@ public class ClientServiceShould {
                                                                                   .setHonorificSuffix("Cmd")))
                                           .build();
         final UserId userId = newUserId(Identifiers.newUuid());
-        final Command result = Given.Command.createCommand(msg, userId, TimeUtil.getCurrentTime());
+        final Command result = Given.Command.create(msg, userId, TimeUtil.getCurrentTime());
 
         return result;
     }
@@ -179,17 +179,17 @@ public class ClientServiceShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            final ProjectStarted message =  Given.EventMessage.projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message =  Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
