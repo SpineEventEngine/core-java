@@ -15,7 +15,7 @@ allprojects {
     apply plugin: 'jacoco'
 
     group = 'org.spine3'
-    version = '0.4.4'
+    version = '0.4.5-SNAPSHOT'
 }
 
 project.ext {
