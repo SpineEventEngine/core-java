@@ -44,7 +44,7 @@ public class GetTargetIdFromCommandShould {
 
     @Test
     public void get_ID_from_command_message() {
-        final CreateProject msg = Given.Command.createProjectMsg();
+        final CreateProject msg = Given.Command.createProject();
 
         final Optional id = GetTargetIdFromCommand.asOptional(msg);
 

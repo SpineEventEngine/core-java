@@ -217,4 +217,5 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
     }
+
 }
