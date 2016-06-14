@@ -60,7 +60,7 @@ public class CommandValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(Given.Command.createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.create(Given.Command.createProject(), CommandContext.getDefaultInstance());
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
@@ -83,7 +83,7 @@ public class CommandValidatorShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void check_command_and_throw_exception_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(Given.Command.createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.create(Given.Command.createProject(), CommandContext.getDefaultInstance());
 
         CommandValidator.checkCommand(cmd);
     }

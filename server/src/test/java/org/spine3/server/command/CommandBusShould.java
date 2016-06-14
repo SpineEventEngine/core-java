@@ -279,7 +279,7 @@ public class CommandBusShould {
 
     @Test
     public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
-        final Command cmd = commandFactory.create(Given.Command.addTaskMsg(newUuid()));
+        final Command cmd = commandFactory.create(Given.Command.addTask(newUuid()));
 
         commandBus.post(cmd, responseObserver);
 
@@ -368,7 +368,7 @@ public class CommandBusShould {
     @Test
     public void invoke_handler_when_command_posted() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(Given.Command.createProjectMsg());
+        final Command command = commandFactory.create(Given.Command.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -379,7 +379,7 @@ public class CommandBusShould {
     public void invoke_dispatcher_when_command_posted() {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.Command.addTaskMsg(newUuid()));
+        final Command command = commandFactory.create(Given.Command.addTask(newUuid()));
 
         commandBus.post(command, responseObserver);
 
@@ -389,7 +389,7 @@ public class CommandBusShould {
     @Test
     public void set_command_status_to_OK_when_handler_returns() {
         commandBus.register(createProjectHandler);
-        final Command command = commandFactory.create(Given.Command.createProjectMsg());
+        final Command command = commandFactory.create(Given.Command.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -401,7 +401,7 @@ public class CommandBusShould {
     public void set_command_status_to_error_when_dispatcher_throws() throws Exception {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.create(Given.Command.createProjectMsg());
+        final Command command = commandFactory.create(Given.Command.createProject());
 
         commandBus.post(command, responseObserver);
 
@@ -451,7 +451,7 @@ public class CommandBusShould {
     private <E extends Throwable> Command givenThrowingHandler(E throwable) {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
-        final CreateProject msg = Given.Command.createProjectMsg();
+        final CreateProject msg = Given.Command.createProject();
         final Command command = commandFactory.create(msg);
         return command;
     }
@@ -495,7 +495,7 @@ public class CommandBusShould {
     @Test
     public void do_not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler(newUuid()));
-        final Command cmd = commandFactory.create(Given.Command.createProjectMsg());
+        final Command cmd = commandFactory.create(Given.Command.createProject());
 
         commandBus.post(cmd, responseObserver);
 
