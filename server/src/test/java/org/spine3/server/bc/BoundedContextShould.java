@@ -138,7 +138,7 @@ public class BoundedContextShould {
     public void notify_integration_event_subscribers() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = Given.Event.projectCreatedIntegrationEvent();
+        final IntegrationEvent event = Given.Event.projectCreatedIntegration();
         final Message msg = fromAny(event.getMessage());
 
         boundedContext.notify(event, observer);
@@ -200,19 +200,19 @@ public class BoundedContextShould {
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
-            return Given.EventMessage.taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
             isStartProjectCommandHandled = true;
-            final ProjectStarted message = Given.EventMessage.projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 

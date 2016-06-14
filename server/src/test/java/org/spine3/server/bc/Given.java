@@ -52,6 +52,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                             .setId(uuid)
                             .build();
         }
+
     }
 
     /* package */ static class EventMessage {
@@ -59,23 +60,24 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreatedMsg(ProjectId id) {
+        public static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static TaskAdded taskAddedMsg(ProjectId id) {
+        public static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectStarted projectStartedMsg(ProjectId id) {
+        public static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
+
     }
 
     /* package */ static class Command {
@@ -95,6 +97,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
     }
 
     /* package */ static class Event {
+
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
         private Event() {
@@ -115,23 +118,23 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         /**
          * Creates a new {@link IntegrationEvent} with default properties.
          */
-        public static IntegrationEvent projectCreatedIntegrationEvent() {
-            return projectCreatedIntegrationEvent(PROJECT_ID);
+        public static IntegrationEvent projectCreatedIntegration() {
+            return projectCreatedIntegration(PROJECT_ID);
         }
 
         /**
          * Creates a new {@link IntegrationEvent} with the given projectId.
          */
-        public static IntegrationEvent projectCreatedIntegrationEvent(ProjectId projectId) {
+        public static IntegrationEvent projectCreatedIntegration(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
-            return projectCreatedIntegrationEvent(projectId, context);
+            return projectCreatedIntegration(projectId, context);
         }
 
         /**
          * Creates a new {@link IntegrationEvent} with the given projectId and eventContext.
          */
-        public static IntegrationEvent projectCreatedIntegrationEvent(ProjectId projectId, IntegrationEventContext eventContext) {
-            final ProjectCreated event = EventMessage.projectCreatedMsg(projectId);
+        public static IntegrationEvent projectCreatedIntegration(ProjectId projectId, IntegrationEventContext eventContext) {
+            final ProjectCreated event = EventMessage.projectCreated(projectId);
             final IntegrationEvent.Builder builder = IntegrationEvent.newBuilder()
                                                                      .setContext(eventContext)
                                                                      .setMessage(toAny(event));
