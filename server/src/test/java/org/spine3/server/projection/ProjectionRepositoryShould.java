@@ -149,14 +149,14 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void dispatch_event_and_load_projection() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreatedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
     }
 
     @Test
     public void dispatch_several_events() throws InvocationTargetException {
-        testDispatchEvent(Given.EventMessage.projectCreatedMsg(ID));
-        testDispatchEvent(Given.EventMessage.taskAddedMsg(ID));
-        testDispatchEvent(Given.EventMessage.projectStartedMsg(ID));
+        testDispatchEvent(Given.EventMessage.projectCreated(ID));
+        testDispatchEvent(Given.EventMessage.taskAdded(ID));
+        testDispatchEvent(Given.EventMessage.projectStarted(ID));
     }
 
     private void testDispatchEvent(Message eventMessage) throws InvocationTargetException {
@@ -183,7 +183,7 @@ public class ProjectionRepositoryShould {
 
     @Test
     public void return_id_from_event_message() {
-        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreatedMsg(ID), createEventContext(ID));
+        final ProjectId actual = repository.getEntityId(Given.EventMessage.projectCreated(ID), createEventContext(ID));
         assertEquals(ID, actual);
     }
 
@@ -199,13 +199,13 @@ public class ProjectionRepositoryShould {
                                                     .getEventStore();
 
         // Put events into the EventStore.
-        final Event projectCreatedEvent = Given.Event.projectCreatedEvent(ID);
+        final Event projectCreatedEvent = Given.Event.projectCreated(ID);
         eventStore.append(projectCreatedEvent);
 
-        final Event taskAddedEvent = Given.Event.taskAddedEvent(ID);
+        final Event taskAddedEvent = Given.Event.taskAdded(ID);
         eventStore.append(taskAddedEvent);
 
-        final Event projectStartedEvent = Given.Event.projectStartedEvent(ID);
+        final Event projectStartedEvent = Given.Event.projectStarted(ID);
         eventStore.append(projectStartedEvent);
 
         repository.catchUp();

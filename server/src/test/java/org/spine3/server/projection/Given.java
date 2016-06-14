@@ -22,9 +22,6 @@ package org.spine3.server.projection;
 
 import org.spine3.base.EventContext;
 import org.spine3.test.projection.ProjectId;
-import org.spine3.test.projection.command.AddTask;
-import org.spine3.test.projection.command.CreateProject;
-import org.spine3.test.projection.command.StartProject;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
@@ -53,48 +50,25 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
     /* package */ static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreatedMsg(DUMMY_PROJECT_ID);
-
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreatedMsg() {
-            return PROJECT_CREATED;
-        }
-
-        public static ProjectCreated projectCreatedMsg(ProjectId id) {
+        public static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static TaskAdded taskAddedMsg(ProjectId id) {
+        public static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
         }
 
-        public static ProjectStarted projectStartedMsg(ProjectId id) {
+        public static ProjectStarted projectStarted(ProjectId id) {
             return ProjectStarted.newBuilder()
                                  .setProjectId(id)
                                  .build();
-        }
-
-    }
-
-    /* package */ static class Command {
-
-        private Command() {
-        }
-
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
-        public static CreateProject createProjectMsg(ProjectId id) {
-            return CreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
         }
 
     }
@@ -107,16 +81,16 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId.
          */
-        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId) {
-            return projectCreatedEvent(projectId, createEventContext(projectId));
+        public static org.spine3.base.Event projectCreated(ProjectId projectId) {
+            return projectCreated(projectId, createEventContext(projectId));
         }
 
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
-        public static org.spine3.base.Event projectCreatedEvent(ProjectId projectId, EventContext eventContext) {
+        public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
 
-            final ProjectCreated eventMessage = EventMessage.projectCreatedMsg(projectId);
+            final ProjectCreated eventMessage = EventMessage.projectCreated(projectId);
 
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
@@ -127,15 +101,15 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId.
          */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId) {
-            return taskAddedEvent(projectId, createEventContext(projectId));
+        public static org.spine3.base.Event taskAdded(ProjectId projectId) {
+            return taskAdded(projectId, createEventContext(projectId));
         }
 
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
-        public static org.spine3.base.Event taskAddedEvent(ProjectId projectId, EventContext eventContext) {
-            final TaskAdded event = EventMessage.taskAddedMsg(projectId);
+        public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext eventContext) {
+            final TaskAdded event = EventMessage.taskAdded(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(event));
@@ -145,15 +119,15 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId.
          */
-        public static org.spine3.base.Event projectStartedEvent(ProjectId projectId) {
-            return projectStartedEvent(projectId, createEventContext(projectId));
+        public static org.spine3.base.Event projectStarted(ProjectId projectId) {
+            return projectStarted(projectId, createEventContext(projectId));
         }
 
         /**
          * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
          */
-        public static org.spine3.base.Event projectStartedEvent(ProjectId projectId, EventContext eventContext) {
-            final ProjectStarted event = EventMessage.projectStartedMsg(projectId);
+        public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext eventContext) {
+            final ProjectStarted event = EventMessage.projectStarted(projectId);
             final org.spine3.base.Event.Builder builder = org.spine3.base.Event.newBuilder()
                                                                                .setContext(eventContext)
                                                                                .setMessage(toAny(event));
