@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.bc;
+package org.spine3.testdata;
 
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
@@ -45,8 +45,8 @@ public class BoundedContextTestStubs {
     }
 
     public static BoundedContext create(String name, StorageFactory storageFactory) {
-        final CommandBus commandBus = Given.Command.newCommandBus(storageFactory);
-        final EventBus eventBus = Given.Event.newEventBus(storageFactory);
+        final CommandBus commandBus = CommandBusFactory.create(storageFactory);
+        final EventBus eventBus = EventBusFactory.create(storageFactory);
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
                                                              .setName(name)
                                                              .setStorageFactory(storageFactory)
@@ -57,4 +57,5 @@ public class BoundedContextTestStubs {
     }
 
     private BoundedContextTestStubs() {}
+
 }

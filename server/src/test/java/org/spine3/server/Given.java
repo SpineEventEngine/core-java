@@ -97,15 +97,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         }
 
         /**
-         * Creates a new command bus with the given storage factory.
-         */
-        public static CommandBus newCommandBus(StorageFactory storageFactory) {
-            final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-            final CommandBus commandBus = CommandBus.newInstance(store);
-            return commandBus;
-        }
-
-        /**
          * Creates a new {@link org.spine3.base.Command} with the given command, userId and timestamp using default
          * {@link CommandId} instance.
          */
@@ -148,49 +139,4 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /* package */ static class Event {
-
-        private Event() {
-        }
-
-        /**
-         * Creates a new event bus with the given storage factory.
-         */
-        public static EventBus newEventBus(StorageFactory storageFactory) {
-            final EventStore store = EventStore.newBuilder()
-                                               .setStreamExecutor(MoreExecutors.directExecutor())
-                                               .setStorage(storageFactory.createEventStorage())
-                                               .build();
-            final EventBus eventBus = EventBus.newInstance(store);
-            return eventBus;
-        }
-    }
-
-    /* package */ static class BoundedContextTestStubs {
-
-        public static BoundedContext create() {
-            final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-            return create(storageFactory);
-        }
-
-        public static BoundedContext create(StorageFactory storageFactory) {
-            return create(BoundedContext.DEFAULT_NAME, storageFactory);
-        }
-
-        public static BoundedContext create(String name, StorageFactory storageFactory) {
-            final CommandBus commandBus = Command.newCommandBus(storageFactory);
-            final EventBus eventBus = Event.newEventBus(storageFactory);
-            final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                                 .setName(name)
-                                                                 .setStorageFactory(storageFactory)
-                                                                 .setCommandBus(spy(commandBus))
-                                                                 .setEventBus(spy(eventBus));
-            return builder.build();
-
-        }
-
-        private BoundedContextTestStubs() {
-        }
-
-    }
 }

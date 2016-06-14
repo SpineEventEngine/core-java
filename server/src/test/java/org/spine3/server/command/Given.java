@@ -199,23 +199,4 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 
     }
 
-    /* package */ static class Event {
-
-        private Event() {
-        }
-
-        /**
-         * Creates a new event bus with the given storage factory.
-         */
-        public static EventBus newEventBus(StorageFactory storageFactory) {
-            final EventStore store = EventStore.newBuilder()
-                                               .setStreamExecutor(MoreExecutors.directExecutor())
-                                               .setStorage(storageFactory.createEventStorage())
-                                               .build();
-            final EventBus eventBus = EventBus.newInstance(store);
-            return eventBus;
-        }
-
-    }
-
 }

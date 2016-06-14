@@ -54,6 +54,7 @@ import org.spine3.test.clientservice.command.StartProject;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
@@ -75,13 +76,13 @@ public class ClientServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        final BoundedContext projectsContext = Given.BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext projectsContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
         final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        final BoundedContext customersContext = Given.BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext customersContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
         final CustomerAggregateRepository customerRepo = new CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);

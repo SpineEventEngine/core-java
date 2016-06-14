@@ -80,22 +80,6 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
 
     }
 
-    /* package */ static class Command {
-
-        private Command() {
-        }
-
-        /**
-         * Creates a new command bus with the given storage factory.
-         */
-        public static CommandBus newCommandBus(StorageFactory storageFactory) {
-            final CommandStore store = new CommandStore(storageFactory.createCommandStorage());
-            final CommandBus commandBus = CommandBus.newInstance(store);
-            return commandBus;
-        }
-
-    }
-
     /* package */ static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
