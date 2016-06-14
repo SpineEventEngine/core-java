@@ -134,7 +134,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.create(Given.Command.createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command command = Commands.create(Given.Command.createProject(), CommandContext.getDefaultInstance());
         final Error error = newError();
 
         storage.store(command, error);
@@ -353,7 +353,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     private static Failure newFailure() {
         return Failure.newBuilder()
-                .setInstance(Given.EventMessage.projectCreatedEventAny())
+                .setInstance(Given.EventMessage.projectCreatedAny())
                 .setStacktrace("failure stacktrace")
                 .setTimestamp(TimeUtil.getCurrentTime())
                 .build();

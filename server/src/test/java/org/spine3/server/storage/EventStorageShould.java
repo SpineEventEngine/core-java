@@ -95,7 +95,7 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
 
     @Override
     protected Event newStorageRecord() {
-        return Given.Event.projectCreatedEvent();
+        return Given.Event.projectCreated();
     }
 
     @Override
