@@ -351,7 +351,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                                                              .setTimestamp(time)
                                                                                                                              .setEventId("project_created")
                                                                                                                              .setEventType(TypeName.of(ProjectCreated.getDescriptor())
-                                                                                               .value())
+                                                                                                                                                   .value())
                                                                                                                              .setProducerId(projectId.getId())
                                                                                                                              .setContext(createEventContext(projectId, time));
             return builder.build();
@@ -364,7 +364,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                                                             .setTimestamp(when)
                                                                                                                             .setEventId("project_created_" + when.getSeconds())
                                                                                                                             .setEventType(TypeName.of(ProjectCreated.getDescriptor())
-                                                                                              .value())
+                                                                                                                                                  .value())
                                                                                                                             .setProducerId(projectId.getId())
                                                                                                                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -377,7 +377,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                                                             .setTimestamp(when)
                                                                                                                             .setEventId("task_added_" + when.getSeconds())
                                                                                                                             .setEventType(TypeName.of(TaskAdded.getDescriptor())
-                                                                                              .value())
+                                                                                                                                                  .value())
                                                                                                                             .setProducerId(projectId.getId())
                                                                                                                             .setContext(createEventContext(projectId, when));
             return result.build();
@@ -390,7 +390,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
                                                                                                                             .setTimestamp(when)
                                                                                                                             .setEventId("project_started_" + when.getSeconds())
                                                                                                                             .setEventType(TypeName.of(ProjectStarted.getDescriptor())
-                                                                                              .value())
+                                                                                                                                                  .value())
                                                                                                                             .setProducerId(projectId.getId())
                                                                                                                             .setContext(createEventContext(projectId, when));
             return result.build();
