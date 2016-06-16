@@ -37,12 +37,20 @@ import javax.annotation.Nullable;
  */
 @VisibleForTesting
 /* package */ class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
+
+    private EnricherImpl enricher;
+
+    /* package */ void setEnricherImpl(EnricherImpl enricher) {
+        this.enricher = enricher;
+    }
+
     @Nullable
     @Override
     public E apply(@Nullable M input) {
         if (input == null) {
             return null;
         }
+
 
         //TODO:2016-06-14:alexander.yevsyukov: Implement
         return null;

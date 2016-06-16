@@ -85,8 +85,7 @@ public interface Enricher {
         /**
          * Adds an {@code EnrichmentType} with a custom translation function.
          */
-        public <M extends Message, E extends Message> Builder add(
-                EnrichmentFunction<M, E> function) {
+        public <M extends Message, E extends Message> Builder add(EnrichmentFunction<M, E> function) {
             checkNotNull(function);
             checkDuplicate(function);
             functions.add(function);
@@ -151,6 +150,8 @@ public interface Enricher {
          */
         public Enricher build() {
             final EnricherImpl result = new EnricherImpl(this);
+            // Inject EnricherImpl into default function instances.
+
             return result;
         }
 
