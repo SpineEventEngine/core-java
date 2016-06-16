@@ -55,8 +55,6 @@ public class EventBusShould {
 
     //TODO:2016-01-27:alexander.yevsyukov: Check that EventStore is closed on close() too. Using Mocks?
 
-    //TODO:2016-01-27:alexander.yevsyukov: Reach 100% coverage.
-
     private EventStore eventStore;
     private EventBus eventBus;
     private TestResponseObserver responseObserver;
@@ -345,5 +343,10 @@ public class EventBusShould {
         /* package */ boolean isCompleted() {
             return this.completed;
         }
+    }
+
+    @Test
+    public void have_log() {
+        assertNotNull(EventBus.log());
     }
 }

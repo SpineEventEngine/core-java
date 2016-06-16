@@ -331,7 +331,6 @@ public class EventBus implements AutoCloseable {
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        @Nullable
         private Executor executor;
 
         /**
@@ -339,7 +338,6 @@ public class EventBus implements AutoCloseable {
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        @Nullable
         private MessageValidator eventValidator;
 
         private Builder() {}
