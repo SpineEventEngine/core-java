@@ -112,7 +112,7 @@ public class EventBus implements AutoCloseable {
     /**
      * The validator for events posted to the bus.
      */
-    private MessageValidator eventValidator;
+    private final MessageValidator eventValidator;
 
     private EventBus(Builder builder) {
         this.eventStore = builder.eventStore;
@@ -319,11 +319,6 @@ public class EventBus implements AutoCloseable {
         dispatcherRegistry.unregisterAll();
         subscriberRegistry.unsubscribeAll();
         eventStore.close();
-    }
-
-    @VisibleForTesting
-    /* package */ void setEventValidator(MessageValidator eventValidator) {
-        this.eventValidator = eventValidator;
     }
 
     /**

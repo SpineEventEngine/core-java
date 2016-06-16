@@ -69,7 +69,9 @@ public class EventBusShould {
                 .setStorage(storageFactory.createEventStorage())
                 .setLogger(EventStore.log())
                 .build();
-        this.eventBus = EventBus.newBuilder().setEventStore(eventStore).build();
+        this.eventBus = EventBus.newBuilder()
+                                .setEventStore(eventStore)
+                                .build();
         this.responseObserver = new TestResponseObserver();
     }
 
@@ -222,12 +224,16 @@ public class EventBusShould {
 
     @Test
     public void call_onError_if_event_is_invalid() {
-        eventBus.subscribe(new TestEventSubscriber());
         final MessageValidator validator = mock(MessageValidator.class);
         doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
                 .when(validator)
                 .validate(any(Message.class));
-        eventBus.setEventValidator(validator);
+
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(eventStore)
+                                          .setEventValidator(validator)
+                                          .build();
+        eventBus.subscribe(new TestEventSubscriber());
 
         final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
 
