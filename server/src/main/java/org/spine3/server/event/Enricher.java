@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -107,7 +108,8 @@ public final class Enricher {
      * @param <M> a type of the message of the event to enrich
      * @param <E> a type of the enrichment message
      */
-    private static class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
+    @VisibleForTesting
+    /* package */ static class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
         @Nullable
         @Override
         public E apply(@Nullable M input) {
@@ -125,7 +127,11 @@ public final class Enricher {
      * and set a custom translation function, if needed.
      */
     public static class Builder {
-        private final Map<EnrichmentType<?, ?>, Function<?, ?>> translators = Maps.newHashMap();
+        /**
+         * A map from an enrichment type to a translation function which performs the enrichment.
+         */
+        private final Map<EnrichmentType<? extends Class<?>, ? extends Class<?>>,
+                          Function<?, ?>> translators = Maps.newHashMap();
 
         /**
          * Adds an {@code EnrichmentType} with the default translation.

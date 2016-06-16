@@ -422,8 +422,9 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
             if (eventStore == null) {
                 this.eventStore = createEventStore();
             }
-            final EventBus eventBus = EventBus.newInstance(eventStore);
-            return eventBus;
+            final EventBus result = EventBus.newBuilder().setEventStore(eventStore)
+                                            .build();
+            return result;
         }
     }
 

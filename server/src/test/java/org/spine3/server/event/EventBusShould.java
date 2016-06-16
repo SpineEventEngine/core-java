@@ -42,7 +42,6 @@ import org.spine3.validate.ConstraintViolation;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
@@ -70,24 +69,20 @@ public class EventBusShould {
                 .setStorage(storageFactory.createEventStorage())
                 .setLogger(EventStore.log())
                 .build();
-        this.eventBus = EventBus.newInstance(eventStore, MoreExecutors.directExecutor());
+        this.eventBus = EventBus.newBuilder().setEventStore(eventStore).build();
         this.responseObserver = new TestResponseObserver();
     }
 
     @Test
-    public void create_direct_executor_instance() {
-        assertNotNull(EventBus.newInstance(eventStore));
-    }
-
-    @Test
-    public void create_instance_with_executor() {
-        assertNotNull(EventBus.newInstance(eventStore, Executors.newSingleThreadExecutor()));
+    public void have_builder() {
+        assertNotNull(EventBus.newBuilder());
     }
 
     @Test
     public void return_associated_EventStore() {
-        final EventBus bus = EventBus.newInstance(eventStore);
-        assertNotNull(bus.getEventStore());
+        final EventBus result = EventBus.newBuilder().setEventStore(eventStore)
+                                        .build();
+        assertNotNull(result.getEventStore());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -232,7 +227,7 @@ public class EventBusShould {
         doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
                 .when(validator)
                 .validate(any(Message.class));
-        eventBus.setMessageValidator(validator);
+        eventBus.setEventValidator(validator);
 
         final boolean isValid = eventBus.validate(projectCreatedMsg(), responseObserver);
 

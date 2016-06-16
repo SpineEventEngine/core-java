@@ -37,7 +37,7 @@ import org.spine3.test.project.event.TaskAdded;
 
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
-import static org.spine3.testdata.TestEventContextFactory.*;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
 import static org.spine3.testdata.TestEventMessageFactory.*;
 
@@ -187,8 +187,9 @@ public class TestEventFactory {
                                            .setStreamExecutor(MoreExecutors.directExecutor())
                                            .setStorage(storageFactory.createEventStorage())
                                            .build();
-        final EventBus eventBus = EventBus.newInstance(store);
-        return eventBus;
+        final EventBus result = EventBus.newBuilder().setEventStore(store)
+                                        .build();
+        return result;
     }
 
     /**
@@ -200,7 +201,9 @@ public class TestEventFactory {
                                            .setStreamExecutor(MoreExecutors.directExecutor())
                                            .setStorage(storage)
                                            .build();
-        final EventBus eventBus = EventBus.newInstance(store);
-        return eventBus;
+        final EventBus result = EventBus.newBuilder()
+                                        .setEventStore(store)
+                                        .build();
+        return result;
     }
 }
