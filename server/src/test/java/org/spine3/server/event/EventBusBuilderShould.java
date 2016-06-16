@@ -30,8 +30,8 @@ import org.spine3.test.Tests;
 
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class EventBusBuilderShould {
 
@@ -106,5 +106,20 @@ public class EventBusBuilderShould {
                               .setEventStore(eventStore)
                               .build()
                               .getEventValidator());
+    }
+
+    @Test
+    public void accept_null_Enricher() {
+        assertNull(EventBus.newBuilder().setEnricher(Tests.<EnricherImpl>nullRef()).getEnricher());
+    }
+
+    @Test
+    public void return_set_Enricher() {
+        final EnricherImpl enricher = mock(EnricherImpl.class);
+
+        assertEquals(enricher, EventBus.newBuilder()
+                                       .setEventStore(eventStore)
+                                       .setEnricher(enricher)
+                                       .getEnricher());
     }
 }

@@ -20,19 +20,15 @@
 
 package org.spine3.server.event;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
-import org.spine3.base.Events;
-import org.spine3.server.type.EventClass;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,45 +36,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * {@code Enricher} extends information of an event basing on its type and content.
  *
- * <p>The class implements
+ * <p>The interface implements
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
  * Enterprise Integration pattern.
  *
- * <p>There is one instance of this class per {@code BoundedContext}. This instance is called by an {@link EventBus}
- * of to enrich a new event before it is passed to further processing by dispatchers or handlers.
+ * <p>There is one instance of an {@code Enricher} per {@code BoundedContext}. This instance is called by an
+ * {@link EventBus} of to enrich a new event before it is passed to further processing by dispatchers or handlers.
  *
  * <p>The event is passed to enrichment <em>after</em> it was passed to the {@link EventStore}.
  *
- * //TODO:2016-06-14:alexander.yevsyukov: Finish documentation
- *
  * @author Alexander Yevsyukov
  */
-public final class Enricher {
-
-    /**
-     * Translation functions for supported enrichment types.
-     */
-    private final ImmutableMap<EnrichmentType<? extends Class<?>, ? extends Class<?>>,
-                               Function<?, ?>> translators;
-
-    /**
-     * Available enrichments per event message class.
-     */
-    private final ImmutableMultimap<EventClass, EnrichmentType<?, ?>> enrichments;
-
-    private Enricher(Builder builder) {
-        final Map<EnrichmentType<?, ?>, Function<?, ?>> translators = builder.getTranslators();
-        this.translators = ImmutableMap.copyOf(translators);
-
-        // Build the multi-map of all enrichments available per event class.
-        final ImmutableMultimap.Builder<EventClass, EnrichmentType<?, ?>>
-                enrichmentsBuilder = ImmutableMultimap.builder();
-        final Set<EnrichmentType<?, ?>> enrichmentTypes = translators.keySet();
-        for (EnrichmentType<?, ?> enrichmentType : enrichmentTypes) {
-            enrichmentsBuilder.put(EventClass.of(enrichmentType.getSource()), enrichmentType);
-        }
-        this.enrichments = enrichmentsBuilder.build();
-    }
+public interface Enricher {
 
     /**
      * Verifies if the passed event class can be enriched.
@@ -86,83 +55,94 @@ public final class Enricher {
      * <p>An event can be enriched if the following conditions are met:
      *
      * <ol>
-     *     <li>There is one or more functions registered for an {@link EnrichmentType} where
+     *     <li>There is one or more functions registered for an {@link EnrichmentFunction} where
      *     the passed class is the {@code source}.
      *     <li>The flag {@code do_not_enrich} is not set in the {@code EventContext} of the passed event.
      * </ol>
      *
      * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
      */
-    public boolean canBeEnriched(Event event) {
-        final Class<? extends Message> eventClass = EventClass.of(event)
-                                                         .value();
-        final boolean containsKey = enrichments.containsKey(eventClass);
-        final boolean enrichmentEnabled = Events.isEnrichmentEnabled(event);
-        return containsKey && enrichmentEnabled;
-    }
+    boolean canBeEnriched(Event event);
 
     /**
-     * The default mechanism for enriching messages based on {@code FieldOptions} of
-     * Protobuf message definitions.
+     * Enriches the passed event.
      *
-     * @param <M> a type of the message of the event to enrich
-     * @param <E> a type of the enrichment message
+     * @throws IllegalArgumentException if the passed event cannot be enriched
+     * @see #canBeEnriched(Event)
      */
-    @VisibleForTesting
-    /* package */ static class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
-        @Nullable
-        @Override
-        public E apply(@Nullable M input) {
-            if (input == null) {
-                return null;
-            }
-
-            //TODO:2016-06-14:alexander.yevsyukov: Implement
-            return null;
-        }
-    }
+    Event enrich(Event event);
 
     /**
-     * The {@code Builder} allows to register {@link EnrichmentType}s handled by the {@code Enricher}
+     * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by the {@code Enricher}
      * and set a custom translation function, if needed.
      */
-    public static class Builder {
+    class Builder {
         /**
          * A map from an enrichment type to a translation function which performs the enrichment.
          */
-        private final Map<EnrichmentType<? extends Class<?>, ? extends Class<?>>,
-                          Function<?, ?>> translators = Maps.newHashMap();
-
-        /**
-         * Adds an {@code EnrichmentType} with the default translation.
-         */
-        public <M extends Message, E extends Message> Builder add(
-                EnrichmentType<Class<? extends M>, Class<? extends E>> entry) {
-            translators.put(entry, new DefaultTranslator<M, E>());
-            return this;
-        }
+        private final Set<EnrichmentFunction<? extends Message, ? extends Message>> functions = Sets.newHashSet();
 
         /**
          * Adds an {@code EnrichmentType} with a custom translation function.
          */
         public <M extends Message, E extends Message> Builder add(
-                EnrichmentType<Class<? extends M>, Class<? extends E>> type,
-                Function<M, E> translator) {
-            checkNotNull(type);
-            checkNotNull(translator);
-            if (translators.containsKey(type)) {
-                throw new IllegalArgumentException("Enrichment type already added: " + type);
+                EnrichmentFunction<M, E> function) {
+            checkNotNull(function);
+            checkDuplicate(function);
+            functions.add(function);
+            return this;
+        }
+
+        /**
+         * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
+         * source and target classes
+         */
+        private <M extends Message, E extends Message> void checkDuplicate(EnrichmentFunction<M, E> function) {
+            final Optional<EnrichmentFunction<? extends Message, ? extends Message>> duplicate =
+                    FluentIterable.from(functions)
+                                  .firstMatch(new SameTransition(function));
+            if (duplicate.isPresent()) {
+                final String msg = String.format("Enrichment from %s to %s already added with function: %s ",
+                        function.getSourceClass(),
+                        function.getTargetClass(),
+                        duplicate.get().getTranslator());
+                throw new IllegalArgumentException(msg);
+            }
+        }
+
+        /**
+         * A helper predicate that allows to find functions with the same transition from
+         * source to target class
+         *
+         * <p>Such functions are not necessarily equal because they may have different translators.
+         * @see EnrichmentFunction
+         */
+        private static class SameTransition implements Predicate<EnrichmentFunction> {
+
+            private final EnrichmentFunction function;
+
+            private SameTransition(EnrichmentFunction function) {
+                this.function = checkNotNull(function);
             }
 
-            translators.put(type, translator);
-            return this;
+            @Override
+            public boolean apply(@Nullable EnrichmentFunction input) {
+                if (input == null) {
+                    return false;
+                }
+                final boolean sameSourceClass = function.getSourceClass()
+                                                        .equals(input.getSourceClass());
+                final boolean sameTargetClass = function.getTargetClass()
+                                                        .equals(input.getTargetClass());
+                return sameSourceClass && sameTargetClass;
+            }
         }
 
         /**
          * Removes a translation for the passed type.
          */
-        public Builder remove(EnrichmentType entry) {
-            translators.remove(entry);
+        public Builder remove(EnrichmentFunction entry) {
+            functions.remove(entry);
             return this;
         }
 
@@ -170,12 +150,12 @@ public final class Enricher {
          * Creates new {@code Enricher}.
          */
         public Enricher build() {
-            final Enricher result = new Enricher(this);
+            final EnricherImpl result = new EnricherImpl(this);
             return result;
         }
 
-        /* package */ Map<EnrichmentType<?, ?>, Function<?, ?>> getTranslators() {
-            return Collections.unmodifiableMap(translators);
+        /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
+            return Collections.unmodifiableSet(functions);
         }
     }
 }

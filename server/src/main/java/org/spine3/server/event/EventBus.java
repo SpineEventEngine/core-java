@@ -114,10 +114,20 @@ public class EventBus implements AutoCloseable {
      */
     private final MessageValidator eventValidator;
 
+    /**
+     * The enricher for posted events or {@code null} if the enrichment is not supported.
+     */
+    @Nullable
+    private final Enricher enricher;
+
+    /**
+     * Creates new instance by the passed builder.
+     */
     private EventBus(Builder builder) {
         this.eventStore = builder.eventStore;
         this.executor = builder.executor;
         this.eventValidator = builder.eventValidator;
+        this.enricher = builder.enricher;
     }
 
     /**
@@ -144,6 +154,12 @@ public class EventBus implements AutoCloseable {
     @VisibleForTesting
     /* package */ MessageValidator getEventValidator() {
         return eventValidator;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    /* package */ Enricher getEnricher() {
+        return enricher;
     }
 
     /**
@@ -226,8 +242,16 @@ public class EventBus implements AutoCloseable {
     }
 
     private Event enrich(Event event) {
-        //TODO:2016-06-14:alexander.yevsyukov: Implement enrichment
-        return event;
+        if (enricher == null) {
+            return event;
+        }
+
+        if (!enricher.canBeEnriched(event)) {
+            return event;
+        }
+
+        final Event enriched = enricher.enrich(event);
+        return enriched;
     }
 
     private void callDispatchers(Event event) {
@@ -340,6 +364,9 @@ public class EventBus implements AutoCloseable {
          */
         private MessageValidator eventValidator;
 
+        @Nullable
+        private Enricher enricher;
+
         private Builder() {}
 
         public Builder setEventStore(EventStore eventStore) {
@@ -347,6 +374,7 @@ public class EventBus implements AutoCloseable {
             return this;
         }
 
+        @Nullable
         public EventStore getEventStore() {
             return eventStore;
         }
@@ -375,6 +403,23 @@ public class EventBus implements AutoCloseable {
         @Nullable
         public MessageValidator getEventValidator() {
             return eventValidator;
+        }
+
+        /**
+         * Sets a custom {@link Enricher} for events posted to the {@code EventBus} which is being built.
+         *
+         * <p>If the {@code Enricher} is not set, a default instance will be provided.
+         *
+         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is not supported
+         */
+        public Builder setEnricher(Enricher enricher) {
+            this.enricher = enricher;
+            return this;
+        }
+
+        @Nullable
+        public Enricher getEnricher() {
+            return enricher;
         }
 
         public EventBus build() {
