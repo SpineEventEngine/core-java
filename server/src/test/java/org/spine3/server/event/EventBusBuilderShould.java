@@ -115,7 +115,7 @@ public class EventBusBuilderShould {
 
     @Test
     public void return_set_Enricher() {
-        final EnricherImpl enricher = mock(EnricherImpl.class);
+        final Enricher enricher = mock(Enricher.class);
 
         assertEquals(enricher, EventBus.newBuilder()
                                        .setEventStore(eventStore)

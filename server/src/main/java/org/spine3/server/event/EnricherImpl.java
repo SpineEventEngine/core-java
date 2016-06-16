@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * Available enrichments per event message class.
      */
-    private final ImmutableMultimap<EventClass, EnrichmentFunction<?, ?>> enrichments;
+    private final ImmutableMultimap<EventClass, EnrichmentFunction<?, ?>> functions;
 
     /* package */ EnricherImpl(Builder builder) {
         final Set<EnrichmentFunction<?, ?>> functions = builder.getFunctions();
@@ -57,7 +57,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         for (EnrichmentFunction<?, ?> function : functions) {
             enrichmentsBuilder.put(EventClass.of(function.getSourceClass()), function);
         }
-        this.enrichments = enrichmentsBuilder.build();
+        this.functions = enrichmentsBuilder.build();
     }
 
     @Override
@@ -73,7 +73,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
     private boolean enrichmentRegistered(Event event) {
         final Class<? extends Message> eventClass = EventClass.of(event)
                                                               .value();
-        final boolean result = enrichments.containsKey(eventClass);
+        final boolean result = functions.containsKey(eventClass);
         return result;
     }
 
@@ -86,14 +86,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
         final EventClass eventClass = EventClass.of(event);
 
         // There can be more than one enrichment function per event message class.
-        final Collection<EnrichmentFunction<?, ?>> availableFunctions = enrichments.get(eventClass);
+        final Collection<EnrichmentFunction<?, ?>> availableFunctions = functions.get(eventClass);
 
         // Build enrichment using all the functions.
         final Enrichments.Builder enrichmentsBuilder = Enrichments.newBuilder();
         for (EnrichmentFunction function : availableFunctions) {
             @SuppressWarnings("unchecked") /** It is OK suppress because we ensure types when we...
                 (a) create enrichments,
-                (b) put them into {@link #enrichments} by their source message class. **/
+                (b) put them into {@link #functions} by their source message class. **/
             final Message enriched = function.apply(eventMessage);
             checkNotNull(enriched, "Enrichment %s produced null from event message %s", function, eventMessage);
             final String typeName = TypeName.of(enriched)
