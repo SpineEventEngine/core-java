@@ -19,12 +19,15 @@
  */
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -35,6 +38,7 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
@@ -97,6 +101,19 @@ public class Events {
     }
 
     /**
+     * Creates {@code Event} instance for import or integration operations.
+     *
+     * @param event the event message
+     * @param producerId the ID of an entity which is generating the event
+     * @return event with data from an external source
+     */
+    public static Event createImportEvent(Message event, Message producerId) {
+        final EventContext context = createImportEventContext(producerId);
+        final Event result = createEvent(event, context);
+        return result;
+    }
+
+    /**
      * Extracts the event instance from the passed record.
      */
     public static Message getMessage(Event event) {
@@ -146,6 +163,7 @@ public class Events {
      * @return new instance of {@code EventContext} for the imported event
      */
     public static EventContext createImportEventContext(Message producerId) {
+        checkNotNull(producerId);
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
                                                          .setTimestamp(Timestamps.getCurrentTime())
@@ -233,5 +251,47 @@ public class Events {
         final EventContext context = event.getContext();
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
         return mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+    }
+
+    public static Optional<Enrichments> getEnrichments(EventContext context) {
+        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
+        if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
+            return Optional.of(context.getEnrichments());
+        }
+        return Optional.absent();
+    }
+
+    public static <T extends Message> Optional<T> getEnrichment(Class<T> attachmentClass, EventContext context) {
+        final Optional<Enrichments> value = getEnrichments(context);
+        if (!value.isPresent()) {
+            return Optional.absent();
+        }
+
+        final Enrichments enrichments = value.get();
+        final TypeName typeName = TypeName.of(attachmentClass);
+
+        final Any any = enrichments.getMap()
+                                   .get(typeName.value());
+        if (any == null) {
+            return Optional.absent();
+        }
+
+        final T result = unpack(attachmentClass, any);
+
+        return Optional.fromNullable(result);
+    }
+
+    //TODO:2016-06-17:alexander.yevsyukov: Evaluate using this function instead of Messages.fromAny() in general.
+    // The below approach may already work.
+
+    private static <T extends Message> T unpack(Class<T> clazz, Any any) {
+        final T result;
+        try {
+            result = any.unpack(clazz);
+            return result;
+        } catch (InvalidProtocolBufferException e) {
+            propagate(e);
+        }
+        return null; // cannot really get here
     }
 }

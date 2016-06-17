@@ -27,11 +27,15 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 import org.spine3.testdata.CommandBusFactory;
 import org.spine3.testdata.EventBusFactory;
+
+import java.util.concurrent.Executor;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -73,7 +77,8 @@ public class BoundedContextBuilderShould {
     @Test
     public void return_CommandBus() {
         final CommandBus expected = CommandBusFactory.create(storageFactory);
-        builder = BoundedContext.newBuilder().setCommandBus(expected);
+        builder = BoundedContext.newBuilder()
+                                .setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus());
     }
 
@@ -93,6 +98,27 @@ public class BoundedContextBuilderShould {
     @Test
     public void be_not_multitenant_by_default() {
         assertFalse(builder.isMultitenant());
+    }
+
+    @Test
+    public void return_EventStore_if_set() {
+        final EventStore mock = mock(EventStore.class);
+        assertEquals(mock, builder.setEventStore(mock)
+                                  .getEventStore());
+    }
+
+    @Test
+    public void return_stream_Executor_for_EventStore_if_set() {
+        final Executor mock = mock(Executor.class);
+        assertEquals(mock, builder.setEventStoreStreamExecutor(mock)
+                                  .getEventStoreStreamExecutor());
+    }
+
+    @Test
+    public void return_EventEnricher_if_set() {
+        final EventEnricher mock = mock(EventEnricher.class);
+        assertEquals(mock, builder.setEventEnricher(mock)
+                                  .getEventEnricher());
     }
 
     @Test(expected = NullPointerException.class)
@@ -140,4 +166,5 @@ public class BoundedContextBuilderShould {
     public void reject_null_CommandStore() {
         builder.setCommandStore(Tests.<CommandStore>nullRef());
     }
+
 }

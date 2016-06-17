@@ -119,6 +119,15 @@ public final class TypeName extends StringTypeValue {
         return commandType;
     }
 
+    /**
+     * Obtains type name for the passed message class.
+     */
+    public static TypeName of(Class<? extends Message> clazz) {
+        final Message defaultInstance = com.google.protobuf.Internal.getDefaultInstance(clazz);
+        final TypeName result = of(defaultInstance);
+        return result;
+    }
+
     private static final String TYPE_URL_PREFIX = "type.googleapis.com";
 
     private static final String TYPE_URL_SEPARATOR = "/";
