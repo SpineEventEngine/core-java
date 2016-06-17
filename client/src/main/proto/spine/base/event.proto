@@ -88,7 +88,7 @@ message EventContext {
 
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.
-    map<string, google.protobuf.Any> attributes = 9;
+    map<string, google.protobuf.Any> attributes = 8;
 }
 
 // A container for event enrichments.
@@ -96,7 +96,6 @@ message Enrichments {
     // A map from a fully qualified Protobuf type name of an enrichment, to its wrapped instance.
     map<string, google.protobuf.Any> map = 1;
 }
-
 
 // Enumeration of possible event validation technical error reasons.
 enum EventValidationError {
