@@ -20,7 +20,6 @@
 
 package org.spine3.server.event;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 
@@ -35,7 +34,6 @@ import javax.annotation.Nullable;
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
 /* package */ class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
 
     private EnricherImpl enricher;

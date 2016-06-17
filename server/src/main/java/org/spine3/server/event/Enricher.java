@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -32,6 +33,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.event.EnrichmentFunction.createCustom;
+import static org.spine3.server.event.EnrichmentFunction.createDefault;
 
 /**
  * {@code Enricher} extends information of an event basing on its type and content.
@@ -82,13 +85,29 @@ public interface Enricher {
          */
         private final Set<EnrichmentFunction<? extends Message, ? extends Message>> functions = Sets.newHashSet();
 
-        /**
-         * Adds an {@code EnrichmentType} with a custom translation function.
-         */
-        public <M extends Message, E extends Message> Builder add(EnrichmentFunction<M, E> function) {
-            checkNotNull(function);
-            checkDuplicate(function);
-            functions.add(function);
+        public static Builder newInstance() {
+            return new Builder();
+        }
+
+        private Builder() {}
+
+        public <M extends Message, E extends Message> Builder addEventEnrichment(Class<M> eventMessageClass,
+                Class<E> enrichmentClass) {
+            checkNotNull(eventMessageClass);
+            checkNotNull(enrichmentClass);
+            final EnrichmentFunction<M, E> newEntry = createDefault(eventMessageClass, enrichmentClass);
+            checkDuplicate(newEntry);
+            functions.add(newEntry);
+            return this;
+        }
+
+        public <M extends Message, E extends Message> Builder addFieldEnrichment(Class<M> eventMessageClass,
+        Class<E> enrichmentClass, Function<M, E> function) {
+            checkNotNull(eventMessageClass);
+            checkNotNull(enrichmentClass);
+            final EnrichmentFunction<M, E> newEntry = createCustom(eventMessageClass, enrichmentClass, function);
+            checkDuplicate(newEntry);
+            functions.add(newEntry);
             return this;
         }
 
@@ -150,9 +169,33 @@ public interface Enricher {
          */
         public Enricher build() {
             final EnricherImpl result = new EnricherImpl(this);
-            // Inject EnricherImpl into default function instances.
-
+            injectResult(result);
+            validateCompleteness(result);
             return result;
+        }
+
+        /**
+         * @throws IllegalStateException if there is a missing function for field enrichments entailed
+         * from annotations defined in the added event enrichments
+         */
+        private void validateCompleteness(EnricherImpl result) {
+            //TODO:2016-06-17:alexander.yevsyukov: Validate completeness of the translation schema by traversing
+            // DefaultTranslator instances and checking if the field definitions are also covered by functions we have.
+        }
+
+        /**
+         * Injects the resulting {@code EnricherIml} instance into {@code DefaultTranslator} instances
+         * so that they can use field enrichment functions.
+         */
+        private void injectResult(EnricherImpl result) {
+            // Inject EnricherImpl into default function instances.
+            for (EnrichmentFunction<? extends Message, ? extends Message> function : functions) {
+                final Function<? extends Message, ? extends Message> translator = function.getTranslator();
+                if (translator instanceof DefaultTranslator) {
+                    final DefaultTranslator<?, ?> defaultTranslator = (DefaultTranslator<?, ?>) translator;
+                    defaultTranslator.setEnricherImpl(result);
+                }
+            }
         }
 
         /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
