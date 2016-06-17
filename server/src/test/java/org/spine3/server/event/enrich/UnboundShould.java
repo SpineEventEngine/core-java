@@ -18,15 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 
-public class EnricherShould {
+import static org.junit.Assert.assertNull;
+import static org.spine3.server.event.enrich.EventMessageEnricher.unboundInstance;
+
+public class UnboundShould {
 
     @Test
-    public void reject_enrichment_if_EventContext_disallows_it() {
-        //TODO:2016-06-14:alexander.yevsyukov: Implement
+    public void return_null_on_getFunction() throws Exception {
+        assertNull(unboundInstance(StringValue.class, Int64Value.class).getFunction());
+    }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void throw_unsupported_on_apply() {
+        unboundInstance(BoolValue.class, StringValue.class).apply(BoolValue.getDefaultInstance());
     }
 }

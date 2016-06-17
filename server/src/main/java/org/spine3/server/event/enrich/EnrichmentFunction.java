@@ -59,15 +59,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
      */
     private final Class<E> targetClass;
 
-    /**
-     * A function, which performs the enrichment.
-     */
-    private final Function<M, E> function;
-
-    /* package */ EnrichmentFunction(Class<M> sourceClass, Class<E> targetClass, Function<M, E> function) {
+    /* package */ EnrichmentFunction(Class<M> sourceClass, Class<E> targetClass) {
         this.sourceClass = checkNotNull(sourceClass);
         this.targetClass = checkNotNull(targetClass);
-        this.function = checkNotNull(function);
         checkArgument(!sourceClass.equals(targetClass),
                       "Source and target class must not be equal. Passed two values of %", sourceClass);
     }
@@ -80,31 +74,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return targetClass;
     }
 
-    public Function<M, E> getFunction() {
-        return function;
-    }
+    public abstract Function<M, E> getFunction();
 
     /**
      * Validates the instance.
      *
-     * @throws IllegalStateException if the function cannot perform {@link #apply(Message)} in its current state
+     * @throws IllegalStateException if the function cannot perform the conversion in its current state
      * or because of the state of its environment
      */
     /* package */ abstract void validate();
 
     @Override
-    @Nullable
-    public E apply(@Nullable M message) {
-        if (message == null) {
-            return null;
-        }
-        final E result = function.apply(message);
-        return result;
-    }
-
-    @Override
     public int hashCode() {
-        return Objects.hash(sourceClass, targetClass, function);
+        return Objects.hash(sourceClass, targetClass);
     }
 
     @Override
@@ -119,7 +101,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         final EnrichmentFunction other = (EnrichmentFunction) obj;
         return Objects.equals(this.sourceClass, other.sourceClass)
                 && Objects.equals(this.targetClass, other.targetClass)
-                && Objects.equals(this.function, other.function);
+                && Objects.equals(this.getFunction(), other.getFunction());
     }
 
     @Override
@@ -127,7 +109,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return MoreObjects.toStringHelper(this)
                           .add("source", sourceClass)
                           .add("target", targetClass)
-                          .add("function", function)
+                          .add("function", getFunction())
                           .toString();
     }
 }

@@ -23,6 +23,10 @@ package org.spine3.server.event.enrich;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * This class performs enrichment conversion using the passed function.
  *
@@ -30,8 +34,14 @@ import com.google.protobuf.Message;
  */
 /* package */ class FieldEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
 
+    /**
+     * A function, which performs the enrichment.
+     */
+    private final Function<M, E> function;
+
     private FieldEnricher(Class<M> sourceClass, Class<E> targetClass, Function<M, E> function) {
-        super(sourceClass, targetClass, function);
+        super(sourceClass, targetClass);
+        this.function = checkNotNull(function);
     }
 
     /**
@@ -54,4 +64,21 @@ import com.google.protobuf.Message;
     /* package */ void validate() {
         // Do nothing. Field enrichment relies only on the aggregated function.
     }
+
+    @Override
+    public Function<M, E> getFunction() {
+        return function;
+    }
+
+    @Override
+    @Nullable
+    public E apply(@Nullable M message) {
+        if (message == null) {
+            return null;
+        }
+        final E result = function.apply(message);
+        return result;
+    }
+
+
 }

@@ -86,8 +86,8 @@ public class EventEnricher {
                 enrichmentsBuilder = ImmutableMultimap.builder();
 
         for (EnrichmentFunction<?, ?> function : functions) {
-            if (function instanceof EventMessageEnricher.Unbound) {
-                final EventMessageEnricher.Unbound unbound = (EventMessageEnricher.Unbound) function;
+            if (function instanceof Unbound) {
+                final Unbound unbound = (Unbound) function;
                 //noinspection ThisEscapedInObjectConstruction
                 function = unbound.toBound(this);
             }
@@ -147,8 +147,9 @@ public class EventEnricher {
             @SuppressWarnings("unchecked") /** It is OK suppress because we ensure types when we...
              (a) create enrichments,
              (b) put them into {@link #functions} by their source message class. **/
-            final Message enriched = function.apply(eventMessage);
-            checkNotNull(enriched, "Enrichment %s produced null from event message %s", function, eventMessage);
+            final Message enriched = (Message) function.apply(eventMessage);
+            checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
+                                    function, eventMessage);
             final String typeName = TypeName.of(enriched)
                                             .toString();
             enrichmentsBuilder.getMap().put(typeName, Any.pack(enriched));
@@ -161,11 +162,11 @@ public class EventEnricher {
         return result;
     }
 
-    /* package */ boolean hasFunctionFor(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+    /* package */ Optional<EnrichmentFunction<?, ?>> functionFor(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
         final Optional<EnrichmentFunction<?, ?>> func =
                 FluentIterable.from(functions.values())
                               .firstMatch(SupportsFieldConversion.of(sourceFieldClass, targetFieldClass));
-        return func.isPresent();
+        return func;
     }
 
     private static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
@@ -241,10 +242,10 @@ public class EventEnricher {
                     FluentIterable.from(functions)
                                   .firstMatch(SameTransition.asFor(function));
             if (duplicate.isPresent()) {
-                final String msg = String.format("Enrichment from %s to %s already added with function: %s ",
+                final String msg = String.format("Enrichment from %s to %s already added as: %s",
                         function.getSourceClass(),
                         function.getTargetClass(),
-                        duplicate.get().getFunction());
+                        duplicate.get());
                 throw new IllegalArgumentException(msg);
             }
         }

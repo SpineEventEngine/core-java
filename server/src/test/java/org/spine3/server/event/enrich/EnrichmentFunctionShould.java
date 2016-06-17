@@ -26,18 +26,35 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
 import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.*;
 import static org.spine3.server.event.enrich.EventMessageEnricher.unboundInstance;
 import static org.spine3.server.event.enrich.FieldEnricher.newInstance;
 
 public class EnrichmentFunctionShould {
+
+    private Function<Int32Value, StringValue> function;
+
+    @Before
+    public void setUp() {
+        function = new Function<Int32Value, StringValue>() {
+            @Nullable
+            @Override
+            public StringValue apply(@Nullable Int32Value input) {
+                if (input == null) {
+                    return null;
+                }
+                final String inputStr = String.valueOf(input.getValue());
+                return Values.newStringValue(inputStr + '+' + inputStr);
+            }
+        };
+    }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class() {
@@ -70,46 +87,22 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void return_translator() throws Exception {
-        checkNotNull(unboundInstance(StringValue.class, Int64Value.class).getFunction());
-    }
-
-    @Test
     public void create_custom_instances() throws Exception {
-        final Function<Int32Value, StringValue> doubler = new Function<Int32Value, StringValue>() {
-            @Nullable
-            @Override
-            public StringValue apply(@Nullable Int32Value input) {
-                return Values.newStringValue(input + " + " + input);
-            }
-        };
-
         final EnrichmentFunction<Int32Value, StringValue> c1 = newInstance(Int32Value.class,
                                                                            StringValue.class,
-                                                                           doubler);
+                                                                           function);
         final EnrichmentFunction<Int32Value, StringValue> c2 = newInstance(Int32Value.class,
                                                                            StringValue.class,
-                                                                           doubler);
+                                                                           function);
         assertEquals(c1, c2);
     }
 
     @Test
     public void apply_enrichment() throws Exception {
-        final Function<Int32Value, StringValue> doubler = new Function<Int32Value, StringValue>() {
-            @Nullable
-            @Override
-            public StringValue apply(@Nullable Int32Value input) {
-                if (input == null) {
-                    return null;
-                }
-                final String inputStr = String.valueOf(input.getValue());
-                return Values.newStringValue(inputStr + '+' + inputStr);
-            }
-        };
 
         final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
                                                                              StringValue.class,
-                                                                             doubler);
+                                                                             function);
 
         final StringValue encriched = func.apply(Values.newIntegerValue(2));
         assertNotNull(encriched);
@@ -124,23 +117,30 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_toString() throws Exception {
-        final EnrichmentFunction<BoolValue, StringValue> function = unboundInstance(BoolValue.class, StringValue.class);
-        final String out = function.toString();
-        assertTrue(out.contains(BoolValue.class.getName()));
+        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
+                                                                             StringValue.class,
+                                                                             function);
+        final String out = func.toString();
+        assertTrue(out.contains(Int32Value.class.getName()));
         assertTrue(out.contains(StringValue.class.getName()));
-        assertTrue(out.contains(function.getFunction().toString()));
+        assertTrue(out.contains(func.getFunction().toString()));
     }
 
     @Test
     public void return_null_on_applying_null() {
-        assertNull(unboundInstance(BoolValue.class, StringValue.class).apply(Tests.<BoolValue>nullRef()));
+        final FieldEnricher<Int32Value, StringValue> fieldEnricher = newInstance(Int32Value.class,
+                                                                                 StringValue.class,
+                                                                                 function);
+        assertNull(fieldEnricher.apply(Tests.<Int32Value>nullRef()));
     }
 
     @Test
     public void have_smart_equals() {
-        final EnrichmentFunction<BoolValue, StringValue> func = unboundInstance(BoolValue.class, StringValue.class);
+        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
+                                                                            StringValue.class,
+                                                                            function);
         //noinspection EqualsWithItself
         assertTrue(func.equals(func));
-        assertFalse(func.equals(Tests.<EnrichmentFunction<BoolValue, StringValue>>nullRef()));
+        assertFalse(func.equals(Tests.<EnrichmentFunction<Int32Value, StringValue>>nullRef()));
     }
 }

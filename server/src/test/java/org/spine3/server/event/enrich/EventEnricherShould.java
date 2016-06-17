@@ -30,4 +30,6 @@ public class EventEnricherShould {
     public void have_builder() {
         assertNotNull(EventEnricher.newBuilder());
     }
+
+    //TODO:2016-06-17:alexander.yevsyukov: Add more tests.
 }
