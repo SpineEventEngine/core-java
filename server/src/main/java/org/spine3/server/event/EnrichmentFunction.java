@@ -31,25 +31,21 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * {@code EnrichmentFunction} defines a couple of classes that participate in the event enrichment process
- * and the function which transforms the instance of a source class into the the instance of the target class.
+ * {@code EnrichmentFunction} defines how a source message class can be transformed into a target message class.
  *
- * <p>The source class is the class of an event message, which needs to be enriched.
- * The target class is the class of the enrichment.
+ * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events passed to {@link EventBus}.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events passed to {@link EventBus}.
- *
- * @param <M> a type of the event message to enrich
+ * @param <M> a type of the source message to enrich
  * @param <E> a type of the enrichment
  * @author Alexander Yevsyukov
  */
-public final class EnrichmentFunction<M extends Message, E extends Message> implements Function<M, E> {
+/* package */ abstract class EnrichmentFunction<M extends Message, E extends Message> implements Function<M, E> {
 
     /**
-     * We are having the generified class (instead of working with {@link org.spine3.server.type.EventClass})
-     * to be able to bound the types of messages and the translation function when building the {@link EnricherImpl}.
+     * We are having the generified class to be able to bound the types of messages and the
+     * translation function when building the {@link EventEnricher}.
      *
-     * @see EnricherImpl.Builder#add(EnrichmentFunction, Function)
+     * @see EventEnricher.Builder#addFieldEnrichment(Class, Class, Function)
      **/
 
     /**
@@ -65,27 +61,12 @@ public final class EnrichmentFunction<M extends Message, E extends Message> impl
     /**
      * A function, which performs the enrichment.
      */
-    private final Function<M, E> translator;
+    private final Function<M, E> function;
 
-    /**
-     * Creates a new instance of the enrichment type.
-     */
-    public static <M extends Message, E extends Message>
-    EnrichmentFunction<M, E> createDefault(Class<M> source, Class<E> target) {
-        final EnrichmentFunction<M, E> result = new EnrichmentFunction<>(source, target, new DefaultTranslator<M, E>());
-        return result;
-    }
-
-    public static <M extends Message, E extends Message>
-    EnrichmentFunction<M, E> createCustom(Class<M> source, Class<E> target, Function<M, E> translator) {
-        final EnrichmentFunction<M, E> result = new EnrichmentFunction<>(source, target, translator);
-        return result;
-    }
-
-    private EnrichmentFunction(Class<M> sourceClass, Class<E> targetClass, Function<M, E> translator) {
+    /* package */ EnrichmentFunction(Class<M> sourceClass, Class<E> targetClass, Function<M, E> function) {
         this.sourceClass = checkNotNull(sourceClass);
         this.targetClass = checkNotNull(targetClass);
-        this.translator = checkNotNull(translator);
+        this.function = checkNotNull(function);
         checkArgument(!sourceClass.equals(targetClass),
                       "Source and target class must not be equal. Passed two values of %", sourceClass);
     }
@@ -98,9 +79,17 @@ public final class EnrichmentFunction<M extends Message, E extends Message> impl
         return targetClass;
     }
 
-    public Function<M, E> getTranslator() {
-        return translator;
+    public Function<M, E> getFunction() {
+        return function;
     }
+
+    /**
+     * Validates the instance.
+     *
+     * @throws IllegalStateException if the function cannot perform {@link #apply(Message)} in its current state
+     * or because of the state of its environment
+     */
+    /* package */ abstract void validate();
 
     @Override
     @Nullable
@@ -108,13 +97,13 @@ public final class EnrichmentFunction<M extends Message, E extends Message> impl
         if (message == null) {
             return null;
         }
-        final E result = translator.apply(message);
+        final E result = function.apply(message);
         return result;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceClass, targetClass);
+        return Objects.hash(sourceClass, targetClass, function);
     }
 
     @Override
@@ -129,7 +118,7 @@ public final class EnrichmentFunction<M extends Message, E extends Message> impl
         final EnrichmentFunction other = (EnrichmentFunction) obj;
         return Objects.equals(this.sourceClass, other.sourceClass)
                 && Objects.equals(this.targetClass, other.targetClass)
-                && Objects.equals(this.translator, other.translator);
+                && Objects.equals(this.function, other.function);
     }
 
     @Override
@@ -137,8 +126,7 @@ public final class EnrichmentFunction<M extends Message, E extends Message> impl
         return MoreObjects.toStringHelper(this)
                           .add("source", sourceClass)
                           .add("target", targetClass)
-                          .add("function", translator)
+                          .add("function", function)
                           .toString();
     }
-
 }

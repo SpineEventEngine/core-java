@@ -33,12 +33,12 @@ import javax.annotation.Nullable;
 
 public class EnricherBuilderShould {
 
-    private Enricher.Builder builder;
+    private EventEnricher.Builder builder;
     private Function<Timestamp, StringValue> function;
 
     @Before
     public void setUp() {
-        builder = Enricher.Builder.newInstance();
+        builder = EventEnricher.newBuilder();
         function = new Function<Timestamp, StringValue>() {
             @Nullable
             @Override

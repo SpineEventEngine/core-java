@@ -23,34 +23,35 @@ package org.spine3.server.event;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 
-import javax.annotation.Nullable;
-
 /**
- * The default mechanism for enriching messages based on {@code FieldOptions} of
- * Protobuf message definitions.
- *
- * @param <M> a type of the message of the event to enrich
- * @param <E> a type of the enrichment message
+ * {@code FieldEnrichment} performs transformation only using the passed function.
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class DefaultTranslator<M extends Message, E extends Message> implements Function<M, E> {
+/* package */ class FieldEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
 
-    private EnricherImpl enricher;
-
-    /* package */ void setEnricherImpl(EnricherImpl enricher) {
-        this.enricher = enricher;
+    private FieldEnricher(Class<M> sourceClass, Class<E> targetClass, Function<M, E> function) {
+        super(sourceClass, targetClass, function);
     }
 
-    @Nullable
+    /**
+     * Creates a new instance.
+     *
+     * @param source a class of the field in the event message
+     * @param target a class of the field in the enrichment message
+     * @param translator a conversion function
+     * @param <M> the type of the field in the event message
+     * @param <E> the type of the field in the enrichment message
+     * @return new instance
+     */
+    /* package */ static <M extends Message, E extends Message>
+    FieldEnricher<M, E> newInstance(Class<M> source, Class<E> target, Function<M, E> translator) {
+        final FieldEnricher<M, E> result = new FieldEnricher<>(source, target, translator);
+        return result;
+    }
+
     @Override
-    public E apply(@Nullable M input) {
-        if (input == null) {
-            return null;
-        }
-
-
-        //TODO:2016-06-14:alexander.yevsyukov: Implement
-        return null;
+    /* package */ void validate() {
+        // Do nothing. Field enrichment relies only on the aggregated function.
     }
 }

@@ -110,12 +110,12 @@ public class EventBusBuilderShould {
 
     @Test
     public void accept_null_Enricher() {
-        assertNull(EventBus.newBuilder().setEnricher(Tests.<EnricherImpl>nullRef()).getEnricher());
+        assertNull(EventBus.newBuilder().setEnricher(Tests.<EventEnricher>nullRef()).getEnricher());
     }
 
     @Test
     public void return_set_Enricher() {
-        final Enricher enricher = mock(Enricher.class);
+        final EventEnricher enricher = mock(EventEnricher.class);
 
         assertEquals(enricher, EventBus.newBuilder()
                                        .setEventStore(eventStore)

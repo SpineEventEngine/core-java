@@ -38,7 +38,7 @@ import java.lang.reflect.Type;
 public class Classes {
 
     /**
-     * Returns the class of the generic type of the passed class.
+     * Returns a class of the generic type of the passed class.
      *
      * <p>Two restrictions apply to the passed class:
      * <ol>
@@ -47,7 +47,7 @@ public class Classes {
      * </ol>
      *
      * @param clazz the class to check
-     * @param paramNumber the number of the generic parameter
+     * @param paramNumber a zero-based index of the generic parameter in the class declaration
      * @param <T> the generic type
      * @return the class reference for the generic type
      */

@@ -34,44 +34,44 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.*;
-import static org.spine3.server.event.EnrichmentFunction.createCustom;
-import static org.spine3.server.event.EnrichmentFunction.createDefault;
+import static org.spine3.server.event.EventMessageEnricher.unboundInstance;
+import static org.spine3.server.event.FieldEnricher.newInstance;
 
 public class EnrichmentFunctionShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class() {
-        createDefault(Tests.<Class<? extends Message>>nullRef(), StringValue.class);
+        unboundInstance(Tests.<Class<? extends Message>>nullRef(), StringValue.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target_class() {
-        createDefault(StringValue.class, Tests.<Class<? extends Message>>nullRef());
+        unboundInstance(StringValue.class, Tests.<Class<? extends Message>>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_same_source_and_target_class() {
-        createDefault(StringValue.class, StringValue.class);
+        unboundInstance(StringValue.class, StringValue.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_translator() {
-        createCustom(BoolValue.class, StringValue.class, Tests.<Function<BoolValue, StringValue>>nullRef());
+        newInstance(BoolValue.class, StringValue.class, Tests.<Function<BoolValue, StringValue>>nullRef());
     }
 
     @Test
     public void return_sourceClass() throws Exception {
-        assertEquals(Int32Value.class, createDefault(Int32Value.class, Int64Value.class).getSourceClass());
+        assertEquals(Int32Value.class, unboundInstance(Int32Value.class, Int64Value.class).getSourceClass());
     }
 
     @Test
     public void return_targetClass() throws Exception {
-        assertEquals(Int64Value.class, createDefault(Int32Value.class, Int64Value.class).getTargetClass());
+        assertEquals(Int64Value.class, unboundInstance(Int32Value.class, Int64Value.class).getTargetClass());
     }
 
     @Test
     public void return_translator() throws Exception {
-        checkNotNull(createDefault(StringValue.class, Int64Value.class).getTranslator());
+        checkNotNull(unboundInstance(StringValue.class, Int64Value.class).getFunction());
     }
 
     @Test
@@ -84,12 +84,12 @@ public class EnrichmentFunctionShould {
             }
         };
 
-        final EnrichmentFunction<Int32Value, StringValue> c1 = createCustom(Int32Value.class,
-                                                                            StringValue.class,
-                                                                            doubler);
-        final EnrichmentFunction<Int32Value, StringValue> c2 = createCustom(Int32Value.class,
-                                                                            StringValue.class,
-                                                                            doubler);
+        final EnrichmentFunction<Int32Value, StringValue> c1 = newInstance(Int32Value.class,
+                                                                           StringValue.class,
+                                                                           doubler);
+        final EnrichmentFunction<Int32Value, StringValue> c2 = newInstance(Int32Value.class,
+                                                                           StringValue.class,
+                                                                           doubler);
         assertEquals(c1, c2);
     }
 
@@ -107,9 +107,9 @@ public class EnrichmentFunctionShould {
             }
         };
 
-        final EnrichmentFunction<Int32Value, StringValue> func = createCustom(Int32Value.class,
-                                                                              StringValue.class,
-                                                                              doubler);
+        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
+                                                                             StringValue.class,
+                                                                             doubler);
 
         final StringValue encriched = func.apply(Values.newIntegerValue(2));
         assertNotNull(encriched);
@@ -118,27 +118,27 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_hashCode() throws Exception {
-        final EnrichmentFunction<BoolValue, StringValue> function = createDefault(BoolValue.class, StringValue.class);
+        final EnrichmentFunction<BoolValue, StringValue> function = unboundInstance(BoolValue.class, StringValue.class);
         assertTrue(function.hashCode() != System.identityHashCode(function));
     }
 
     @Test
     public void have_toString() throws Exception {
-        final EnrichmentFunction<BoolValue, StringValue> function = createDefault(BoolValue.class, StringValue.class);
+        final EnrichmentFunction<BoolValue, StringValue> function = unboundInstance(BoolValue.class, StringValue.class);
         final String out = function.toString();
         assertTrue(out.contains(BoolValue.class.getName()));
         assertTrue(out.contains(StringValue.class.getName()));
-        assertTrue(out.contains(function.getTranslator().toString()));
+        assertTrue(out.contains(function.getFunction().toString()));
     }
 
     @Test
     public void return_null_on_applying_null() {
-        assertNull(createDefault(BoolValue.class, StringValue.class).apply(Tests.<BoolValue>nullRef()));
+        assertNull(unboundInstance(BoolValue.class, StringValue.class).apply(Tests.<BoolValue>nullRef()));
     }
 
     @Test
     public void have_smart_equals() {
-        final EnrichmentFunction<BoolValue, StringValue> func = createDefault(BoolValue.class, StringValue.class);
+        final EnrichmentFunction<BoolValue, StringValue> func = unboundInstance(BoolValue.class, StringValue.class);
         //noinspection EqualsWithItself
         assertTrue(func.equals(func));
         assertFalse(func.equals(Tests.<EnrichmentFunction<BoolValue, StringValue>>nullRef()));

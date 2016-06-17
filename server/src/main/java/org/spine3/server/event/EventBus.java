@@ -118,7 +118,7 @@ public class EventBus implements AutoCloseable {
      * The enricher for posted events or {@code null} if the enrichment is not supported.
      */
     @Nullable
-    private final Enricher enricher;
+    private final EventEnricher enricher;
 
     /**
      * Creates new instance by the passed builder.
@@ -158,7 +158,7 @@ public class EventBus implements AutoCloseable {
 
     @VisibleForTesting
     @Nullable
-    /* package */ Enricher getEnricher() {
+    /* package */ EventEnricher getEnricher() {
         return enricher;
     }
 
@@ -365,7 +365,7 @@ public class EventBus implements AutoCloseable {
         private MessageValidator eventValidator;
 
         @Nullable
-        private Enricher enricher;
+        private EventEnricher enricher;
 
         private Builder() {}
 
@@ -406,19 +406,19 @@ public class EventBus implements AutoCloseable {
         }
 
         /**
-         * Sets a custom {@link Enricher} for events posted to the {@code EventBus} which is being built.
+         * Sets a custom {@link EventEnricher} for events posted to the {@code EventBus} which is being built.
          *
          * <p>If the {@code Enricher} is not set, a default instance will be provided.
          *
          * @param enricher the {@code Enricher} for events or {@code null} if enrichment is not supported
          */
-        public Builder setEnricher(Enricher enricher) {
+        public Builder setEnricher(EventEnricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
         @Nullable
-        public Enricher getEnricher() {
+        public EventEnricher getEnricher() {
             return enricher;
         }
 
