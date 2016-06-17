@@ -46,7 +46,9 @@ public class EventBusFactory {
                                            .setStreamExecutor(MoreExecutors.directExecutor())
                                            .setStorage(storage)
                                            .build();
-        final EventBus eventBus = EventBus.newInstance(store);
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(store)
+                                          .build();
         return eventBus;
     }
 
@@ -58,7 +60,9 @@ public class EventBusFactory {
                                            .setStreamExecutor(MoreExecutors.directExecutor())
                                            .setStorage(storageFactory.createEventStorage())
                                            .build();
-        final EventBus eventBus = EventBus.newInstance(store);
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(store)
+                                          .build();
         return eventBus;
     }
 

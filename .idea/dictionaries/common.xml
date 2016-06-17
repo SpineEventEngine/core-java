@@ -12,6 +12,7 @@
       <w>datastores</w>
       <w>deserialized</w>
       <w>dirham</w>
+      <w>enrichments</w>
       <w>escaper</w>
       <w>flushables</w>
       <w>googleapis</w>
@@ -43,7 +44,6 @@
       <w>websocket</w>
       <w>workflows</w>
       <w>yevsyukov</w>
-      <w>enrichments</w>
     </words>
   </dictionary>
 </component>
