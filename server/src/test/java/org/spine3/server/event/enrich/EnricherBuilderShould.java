@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
@@ -95,5 +95,4 @@ public class EnricherBuilderShould {
         // This should fail.
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
     }
-
 }

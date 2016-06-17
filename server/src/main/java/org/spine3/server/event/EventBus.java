@@ -31,6 +31,7 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.procman.ProcessManager;

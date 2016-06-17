@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.BoolValue;
@@ -34,8 +34,8 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.*;
-import static org.spine3.server.event.EventMessageEnricher.unboundInstance;
-import static org.spine3.server.event.FieldEnricher.newInstance;
+import static org.spine3.server.event.enrich.EventMessageEnricher.unboundInstance;
+import static org.spine3.server.event.enrich.FieldEnricher.newInstance;
 
 public class EnrichmentFunctionShould {
 

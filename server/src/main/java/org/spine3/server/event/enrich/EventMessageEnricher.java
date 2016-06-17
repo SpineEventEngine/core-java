@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.DescriptorProtos;
@@ -42,6 +42,9 @@ import java.util.Map;
  */
 /* package */ class EventMessageEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
 
+    /**
+     * A parent instance holding this instance and its siblings.
+     */
     private final EventEnricher enricher;
 
     private EventMessageEnricher(EventEnricher enricher, Class<M> sourceClass, Class<E> targetClass) {

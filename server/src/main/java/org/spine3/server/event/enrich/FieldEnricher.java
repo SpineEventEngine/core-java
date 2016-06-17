@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 
 /**
- * {@code FieldEnrichment} performs transformation only using the passed function.
+ * This class performs enrichment conversion using the passed function.
  *
  * @author Alexander Yevsyukov
  */

@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
+import org.spine3.server.event.EventBus;
 
 import javax.annotation.Nullable;
 import java.util.Objects;

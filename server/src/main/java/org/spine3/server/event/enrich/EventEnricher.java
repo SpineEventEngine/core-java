@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -32,6 +32,8 @@ import org.spine3.base.Enrichments;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.type.EventClass;
 import org.spine3.type.TypeName;
 
