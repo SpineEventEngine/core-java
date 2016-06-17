@@ -29,6 +29,7 @@ import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.spine3.annotations.EventAnnotationsProto;
+import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -119,11 +120,9 @@ import java.util.Map;
     }
 
     private EnrichmentFunction<?, ?> getEnrichmentFunction(Descriptors.FieldDescriptor srcField,
-            Descriptors.FieldDescriptor targetField) {
-        final Class<?> sourceFieldClass = srcField.getDefaultValue()
-                                                  .getClass();
-        final Class<?> targetFieldClass = targetField.getDefaultValue()
-                                                     .getClass();
+                                                           Descriptors.FieldDescriptor targetField) {
+        final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
+        final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
 
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {

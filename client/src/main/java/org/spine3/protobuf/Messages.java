@@ -30,6 +30,7 @@ import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
+import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -208,4 +209,38 @@ public class Messages {
             throw new MissingDescriptorException(clazz, e.getCause());
         }
     }
+
+    public static Class<?> getFieldClass(Descriptors.FieldDescriptor fieldDescriptor) {
+        final Descriptors.FieldDescriptor.JavaType javaType = fieldDescriptor.getJavaType();
+
+        Object defaultObject = null;
+        switch (javaType) {
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+            case BOOLEAN:
+            case STRING:
+            case BYTE_STRING:
+                defaultObject = fieldDescriptor.getDefaultValue();
+                return defaultObject.getClass();
+            case ENUM:
+                //TODO:2016-06-17:alexander.yevsyukov: Figure out how to treat enums.
+                throw Exceptions.unsupported(
+                        "Enums in mapping are not yet supported. Discovered: " + fieldDescriptor.getFullName());
+            case MESSAGE:
+                final Descriptors.Descriptor messageType = fieldDescriptor.getMessageType();
+                final TypeName typeName = TypeName.of(messageType);
+                try {
+                    final Class<? extends Message> result = toMessageClass(typeName);
+                    return result;
+                } catch (ClassNotFoundException e) {
+                    propagate(e);
+                }
+                break;
+        }
+        throw new IllegalStateException("Unknown field type discovered: " + fieldDescriptor.getFullName());
+    }
+
+
 }
