@@ -100,8 +100,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
         }
         final EnrichmentFunction other = (EnrichmentFunction) obj;
         return Objects.equals(this.sourceClass, other.sourceClass)
-                && Objects.equals(this.targetClass, other.targetClass)
-                && Objects.equals(this.getFunction(), other.getFunction());
+                && Objects.equals(this.targetClass, other.targetClass);
     }
 
     @Override
@@ -109,7 +108,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
         return MoreObjects.toStringHelper(this)
                           .add("source", sourceClass)
                           .add("target", targetClass)
-                          .add("function", getFunction())
                           .toString();
     }
 }

@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -39,6 +40,7 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -142,7 +144,7 @@ public class EventEnricher {
         final Collection<EnrichmentFunction<?, ?>> availableFunctions = functions.get(eventClass.value());
 
         // Build enrichment using all the functions.
-        final Enrichments.Builder enrichmentsBuilder = Enrichments.newBuilder();
+        final Map<String, Any> enrichments = Maps.newHashMap();
         for (EnrichmentFunction function : availableFunctions) {
             @SuppressWarnings("unchecked") /** It is OK suppress because we ensure types when we...
              (a) create enrichments,
@@ -152,13 +154,15 @@ public class EventEnricher {
                                     function, eventMessage);
             final String typeName = TypeName.of(enriched)
                                             .toString();
-            enrichmentsBuilder.getMap().put(typeName, Any.pack(enriched));
+            enrichments.put(typeName, Any.pack(enriched));
         }
 
-        final EventContext.Builder enrichedContext = event.getContext()
-                                                          .toBuilder()
-                                                          .setEnrichments(enrichmentsBuilder);
-        final Event result = Events.createEvent(eventMessage, enrichedContext.build());
+        final EventContext enrichedContext = event.getContext()
+                                                  .toBuilder()
+                                                  .setEnrichments(Enrichments.newBuilder()
+                                                                             .putAllMap(enrichments))
+                                                  .build();
+        final Event result = Events.createEvent(eventMessage, enrichedContext);
         return result;
     }
 

@@ -47,8 +47,8 @@ public class Printer extends EventSubscriber {
 
     @Subscribe
     public void on(UserAccountSuspended event, EventContext context) {
-        Optional<UserAccountSuspended.Enrichment> enrichment = Events
-                .getEnrichment(UserAccountSuspended.Enrichment.class, context);
+        final Optional<UserAccountSuspended.Enrichment> enrichment = Events.getEnrichment(
+                UserAccountSuspended.Enrichment.class, context);
         print("Account suspended: " + event.getUserId().getValue());
         if (enrichment.isPresent()) {
             final PersonName personName = enrichment.get()

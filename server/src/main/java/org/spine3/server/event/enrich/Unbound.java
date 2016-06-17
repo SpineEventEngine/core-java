@@ -48,16 +48,6 @@ import javax.annotation.Nullable;
         return null;
     }
 
-    private static <M extends Message, E extends Message> Function<M, E> empty() {
-        return new Function<M, E>() {
-            @Nullable
-            @Override
-            public E apply(@Nullable M input) {
-                return null;
-            }
-        };
-    }
-
     /**
      * Converts the instance into the {@link EventMessageEnricher}.
      */

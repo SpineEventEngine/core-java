@@ -114,7 +114,9 @@ import static com.google.common.base.Preconditions.checkState;
             final EnrichmentFunction function = fieldFunctions.get(srcValue.getClass());
             final Object targetValue = function.apply(srcValue);
             final Descriptors.FieldDescriptor targetField = fieldMap.get(srcField);
-            builder.setField(targetField, targetValue);
+            if (targetValue != null) {
+                builder.setField(targetField, targetValue);
+            }
         }
         return (E) builder.build();
     }

@@ -53,6 +53,9 @@ public final class CommandClass extends MessageClass {
     /**
      * Creates a new instance for the class of the passed command.
      *
+     * <p>If an instance of {@link Command} (which implements {@code Message}) is passed to this method,
+     * enclosing command message will be un-wrapped to determine the class of the command.
+     *
      * @param command a command for which to get the class
      * @return new instance
      */
@@ -63,7 +66,8 @@ public final class CommandClass extends MessageClass {
             final Message enclosed = Commands.getMessage(commandRequest);
             return of(enclosed.getClass());
         }
-        return of(command.getClass());
+        final CommandClass result = of(command.getClass());
+        return result;
     }
 
     /**

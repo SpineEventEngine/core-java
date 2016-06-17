@@ -238,7 +238,7 @@ public class EventBus implements AutoCloseable {
         final Event enriched = enrich(event);
         callDispatchers(enriched);
         final Message message = getMessage(enriched);
-        final EventContext context = event.getContext();
+        final EventContext context = enriched.getContext();
         invokeSubscribers(message, context);
     }
 

@@ -22,6 +22,8 @@ package org.spine3.server.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.Event;
+import org.spine3.base.Events;
 
 import java.util.Set;
 
@@ -49,11 +51,22 @@ public final class EventClass extends MessageClass {
 
     /**
      * Creates a new instance of the event class by passed event instance.
+     *
+     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to this method,
+     * enclosing event message will be un-wrapped to determine the class of the event.
+     *
      * @param event an event instance
      * @return new instance
      */
     public static EventClass of(Message event) {
-        return of(checkNotNull(event).getClass());
+        final Message message = checkNotNull(event);
+        if (message instanceof Event) {
+            final Event eventRecord = (Event) event;
+            final Message enclosed = Events.getMessage(eventRecord);
+            return of(enclosed.getClass());
+        }
+        final EventClass result = of(message.getClass());
+        return result;
     }
 
     /**

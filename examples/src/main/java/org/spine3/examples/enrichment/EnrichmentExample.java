@@ -46,10 +46,11 @@ public class EnrichmentExample implements AutoCloseable {
 
     public EnrichmentExample(StorageFactory storageFactory) {
         this.storageFactory = storageFactory;
+        final UserNameLookup userNameLookup = new UserNameLookup();
         final EventEnricher enricher = EventEnricher
                 .newBuilder()
                 .addEventEnrichment(UserAccountSuspended.class, UserAccountSuspended.Enrichment.class)
-                .addFieldEnrichment(UserId.class, PersonName.class, new UserNameLookup())
+                .addFieldEnrichment(UserId.class, PersonName.class, userNameLookup)
                 .build();
 
         this.boundedContext = BoundedContext.newBuilder()
@@ -57,7 +58,7 @@ public class EnrichmentExample implements AutoCloseable {
                                             .setEventEnricher(enricher)
                                             .build();
         final EventBus eventBus = boundedContext.getEventBus();
-        eventBus.subscribe(new UserNameLookup());
+        eventBus.subscribe(userNameLookup);
         eventBus.subscribe(new Printer());
     }
 
