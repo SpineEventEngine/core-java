@@ -37,7 +37,6 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -60,7 +59,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EventEnricher {
 
     /**
-     * Available enrichments per event message class.
+     * Available enrichments per message class.
      */
     private final ImmutableMultimap<Class<? extends Message>, EnrichmentFunction<?, ?>> functions;
 
@@ -78,7 +77,7 @@ public class EventEnricher {
      * to this instance.
      */
     private EventEnricher(Builder builder) {
-        final Set<EnrichmentFunction<?, ?>> functions = builder.getFunctions();
+        final Set<EnrichmentFunction<?, ?>> functions = builder.functions;
 
         // Build the multi-map of all enrichments available per event class.
         final ImmutableMultimap.Builder<Class<? extends Message>, EnrichmentFunction<?, ?>>
@@ -160,6 +159,38 @@ public class EventEnricher {
         return result;
     }
 
+    /* package */ boolean hasFunctionFor(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+        final Optional<EnrichmentFunction<?, ?>> func =
+                FluentIterable.from(functions.values())
+                              .firstMatch(SupportsFieldConversion.of(sourceFieldClass, targetFieldClass));
+        return func.isPresent();
+    }
+
+    private static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
+
+        private final Class<?> sourceFieldClass;
+        private final Class<?> targetFieldClass;
+
+        /* package */ static SupportsFieldConversion of(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+            return new SupportsFieldConversion(sourceFieldClass, targetFieldClass);
+        }
+
+        private SupportsFieldConversion(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+            this.sourceFieldClass = sourceFieldClass;
+            this.targetFieldClass = targetFieldClass;
+        }
+
+        @Override
+        public boolean apply(@Nullable EnrichmentFunction input) {
+            if (input == null) {
+                return false;
+            }
+            final boolean sourceClassMatch = sourceFieldClass.equals(input.getSourceClass());
+            final boolean targetClassMatch = targetFieldClass.equals(input.getTargetClass());
+            return sourceClassMatch && targetClassMatch;
+        }
+    }
+
     /**
      * The {@code Builder} allows to register {@link EnrichmentFunction}s handled by the {@code Enricher}
      * and set a custom translation function, if needed.
@@ -206,7 +237,7 @@ public class EventEnricher {
         private <M extends Message, E extends Message> void checkDuplicate(EnrichmentFunction<M, E> function) {
             final Optional<EnrichmentFunction<? extends Message, ? extends Message>> duplicate =
                     FluentIterable.from(functions)
-                                  .firstMatch(new SameTransition(function));
+                                  .firstMatch(SameTransition.asFor(function));
             if (duplicate.isPresent()) {
                 final String msg = String.format("Enrichment from %s to %s already added with function: %s ",
                         function.getSourceClass(),
@@ -226,6 +257,10 @@ public class EventEnricher {
         private static class SameTransition implements Predicate<EnrichmentFunction> {
 
             private final EnrichmentFunction function;
+
+            /* package */ static SameTransition asFor(EnrichmentFunction function) {
+                return new SameTransition(function);
+            }
 
             private SameTransition(EnrichmentFunction function) {
                 this.function = checkNotNull(function);
@@ -260,22 +295,14 @@ public class EventEnricher {
             result.validate();
             return result;
         }
-
-        private void validateCompleteness(EventEnricher result) {
-            //TODO:2016-06-17:alexander.yevsyukov: Validate completeness of the translation schema by traversing
-            // DefaultTranslator instances and checking if the field definitions are also covered by functions we have.
-        }
-
-        /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
-            return Collections.unmodifiableSet(functions);
-        }
     }
 
     /**
-     * @throws IllegalStateException if there is a missing function for field enrichments entailed
-     * from annotations defined in the added event enrichments
+     * Performs validation by validating its functions.
      */
     private void validate() {
-
+        for (EnrichmentFunction<?, ?> func : functions.values()) {
+            func.validate();
+        }
     }
 }

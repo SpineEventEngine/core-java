@@ -21,9 +21,15 @@
 package org.spine3.server.event;
 
 import com.google.common.base.Function;
+import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import org.spine3.annotations.EventAnnotationsProto;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions} of
@@ -36,8 +42,11 @@ import javax.annotation.Nullable;
  */
 /* package */ class EventMessageEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
 
+    private final EventEnricher enricher;
+
     private EventMessageEnricher(EventEnricher enricher, Class<M> sourceClass, Class<E> targetClass) {
         super(sourceClass, targetClass, new Func<>(enricher, sourceClass, targetClass));
+        this.enricher = enricher;
     }
 
     /**
@@ -55,9 +64,62 @@ import javax.annotation.Nullable;
         return result;
     }
 
+    /**
+     * Performs validation checking that all fields annotated in the enrichment message
+     * can be created with the translation functions supplied in the parent enricher.
+     *
+     * @throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment
+     */
+    @SuppressWarnings("MethodWithMultipleLoops") // is OK because of nested nature of Protobuf descriptors.
     @Override
-    void validate() {
-        //TODO:2016-06-17:alexander.yevsyukov: Implement checking
+    /* package */void validate() {
+        final Descriptors.Descriptor sourceDescriptor = Internal.getDefaultInstance(getSourceClass())
+                                                                .getDescriptorForType();
+        final Descriptors.Descriptor targetDescriptor = Internal.getDefaultInstance(getTargetClass())
+                                                                .getDescriptorForType();
+
+        final GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, String> byOption =
+                EventAnnotationsProto.by;
+        final Descriptors.FieldDescriptor byOptionDescriptor = byOption.getDescriptor();
+
+
+        for (Descriptors.FieldDescriptor targetField : targetDescriptor.getFields()) {
+            final Map<Descriptors.FieldDescriptor, Object> allOptions = targetField.getOptions()
+                                                                                   .getAllFields();
+            for (Descriptors.FieldDescriptor option : allOptions.keySet()) {
+                if (option.equals(byOptionDescriptor)) {
+                    final String fieldReference = (String) allOptions.get(option);
+
+                    // In the following code we assume that the reference is not qualified.
+                    //TODO:2016-06-17:alexander.yevsyukov: Handle the sibling type and another package reference too.
+
+                    // Now try to find a field with such a name in the outer (source) message.
+                    final Descriptors.FieldDescriptor srcField = sourceDescriptor.findFieldByName(fieldReference);
+                    if (srcField == null) {
+                        final String msg = String.format(
+                                "Unable to find the field `%s` in the message `%s`. " +
+                                        "The field is referenced in the option of the field `%s`",
+                                    fieldReference,
+                                    sourceDescriptor.getFullName(),
+                                    targetField.getFullName());
+                        throw new IllegalStateException(msg);
+                    }
+
+                    final Class<?> sourceFieldClass = srcField.getDefaultValue()
+                                                              .getClass();
+                    final Class<?> targetFieldClass = targetField.getDefaultValue()
+                                                                 .getClass();
+
+                    if (enricher.hasFunctionFor(sourceFieldClass, targetFieldClass)) {
+                        final String msg = String.format(
+                                "There is no enrichment function for translating %s to %s",
+                                sourceFieldClass,
+                                targetFieldClass);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -111,6 +173,10 @@ import javax.annotation.Nullable;
         @Nullable
         @Override
         public E apply(@Nullable M input) {
+            if (input == null) {
+                return null;
+            }
+
             //TODO:2016-06-17:alexander.yevsyukov: Implement
             return null;
         }
@@ -118,17 +184,5 @@ import javax.annotation.Nullable;
         /* package */ EventEnricher getEnricher() {
             return enricher;
         }
-    }
-
-    /**
-     * Performs validation checking that all fields annotated in the enrichment message
-     * can be created with the translation functions supplied in the parent enricher.
-     *
-     * @throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment
-     */
-    /* package */ void init() {
-
-
-        //TODO:2016-06-17:alexander.yevsyukov: Implement validation
     }
 }
