@@ -290,8 +290,7 @@ public class Events {
             result = any.unpack(clazz);
             return result;
         } catch (InvalidProtocolBufferException e) {
-            propagate(e);
+            throw propagate(e);
         }
-        return null; // cannot really get here
     }
 }
