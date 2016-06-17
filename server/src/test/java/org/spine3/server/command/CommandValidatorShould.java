@@ -24,15 +24,13 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.command.CreateProject;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.createProjectCmd;
-import static org.spine3.testdata.TestCommands.createProjectMsg;
 
 /**
  * @author Alexander Litus
@@ -44,7 +42,7 @@ public class CommandValidatorShould {
 
     @Test
     public void validate_command_and_return_nothing_if_it_is_valid() {
-        final Command cmd = createProjectCmd();
+        final Command cmd = Given.Command.createProject();
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
@@ -62,7 +60,7 @@ public class CommandValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.create(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
 
         final List<ConstraintViolation> violations = validator.validate(cmd);
 
@@ -71,7 +69,7 @@ public class CommandValidatorShould {
 
     @Test
     public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command cmd = createProjectCmd();
+        final Command cmd = Given.Command.createProject();
 
         CommandValidator.checkCommand(cmd);
     }
@@ -85,7 +83,7 @@ public class CommandValidatorShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void check_command_and_throw_exception_if_context_is_NOT_valid() {
-        final Command cmd = Commands.create(createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command cmd = Commands.create(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
 
         CommandValidator.checkCommand(cmd);
     }

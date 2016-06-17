@@ -23,8 +23,7 @@ package org.spine3.server.reflect;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.testdata.TestEventMessageFactory;
+import org.spine3.test.reflect.event.ProjectCreated;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -66,7 +65,7 @@ public class EventSubscriberMethodShould {
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberTwoParams subscriberObject = spy(new ValidSubscriberTwoParams());
         final EventSubscriberMethod subscriber = new EventSubscriberMethod(subscriberObject.getMethod());
-        final ProjectCreated msg = TestEventMessageFactory.projectCreatedMsg();
+        final ProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 

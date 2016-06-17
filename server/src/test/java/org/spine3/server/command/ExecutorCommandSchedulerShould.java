@@ -29,7 +29,6 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.testdata.TestCommands;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -37,8 +36,6 @@ import static org.mockito.Mockito.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.milliseconds;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.addTaskMsg;
-import static org.spine3.testdata.TestCommands.createProjectMsg;
 
 /**
  * @author Alexander Litus
@@ -66,7 +63,7 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmdPrimary = Commands.create(createProjectMsg(), context);
+        final Command cmdPrimary = Commands.create(Given.CommandMessage.createProject(), context);
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
         scheduler.schedule(cmdPrimary);
@@ -81,8 +78,8 @@ public class ExecutorCommandSchedulerShould {
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();
-        final Command expectedCmd = Commands.create(createProjectMsg(id), context);
-        final Command extraCmd = Commands.create(addTaskMsg(id), context);
+        final Command expectedCmd = Commands.create(Given.CommandMessage.createProject(id), context);
+        final Command extraCmd = Commands.create(Given.CommandMessage.addTask(id), context);
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
@@ -95,7 +92,7 @@ public class ExecutorCommandSchedulerShould {
     public void throw_exception_if_is_shutdown() {
         scheduler.shutdown();
         try {
-            scheduler.schedule(TestCommands.createProjectCmd());
+            scheduler.schedule(Given.Command.createProject());
         } catch (IllegalStateException expected) {
             // is OK as it is shutdown
             return;

@@ -42,18 +42,19 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.customer.Customer;
-import org.spine3.test.customer.CustomerId;
-import org.spine3.test.customer.command.CreateCustomer;
-import org.spine3.test.customer.event.CustomerCreated;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.AddTask;
-import org.spine3.test.project.command.CreateProject;
-import org.spine3.test.project.command.StartProject;
-import org.spine3.test.project.event.ProjectCreated;
-import org.spine3.test.project.event.ProjectStarted;
-import org.spine3.test.project.event.TaskAdded;
+import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.clientservice.customer.CustomerId;
+import org.spine3.test.clientservice.customer.command.CreateCustomer;
+import org.spine3.test.clientservice.customer.event.CustomerCreated;
+import org.spine3.test.clientservice.Project;
+import org.spine3.test.clientservice.ProjectId;
+import org.spine3.test.clientservice.command.AddTask;
+import org.spine3.test.clientservice.command.CreateProject;
+import org.spine3.test.clientservice.command.StartProject;
+import org.spine3.test.clientservice.event.ProjectCreated;
+import org.spine3.test.clientservice.event.ProjectStarted;
+import org.spine3.test.clientservice.event.TaskAdded;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
@@ -65,9 +66,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.createCommand;
-import static org.spine3.testdata.TestCommands.createProjectCmd;
-import static org.spine3.testdata.TestEventMessageFactory.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class ClientServiceShould {
@@ -112,7 +110,7 @@ public class ClientServiceShould {
     @Test
     public void accept_commands_for_linked_bounded_contexts() {
         final TestResponseObserver responseObserver = new TestResponseObserver();
-        final Command createProject = createProjectCmd();
+        final Command createProject = Given.Command.createProject();
         clientService.post(createProject, responseObserver);
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
 
@@ -128,7 +126,8 @@ public class ClientServiceShould {
 
         clientService.post(unsupportedCmd, responseObserver);
 
-        final Throwable exception = responseObserver.getThrowable().getCause();
+        final Throwable exception = responseObserver.getThrowable()
+                                                    .getCause();
         assertEquals(UnsupportedCommandException.class, exception.getClass());
     }
 
@@ -157,7 +156,7 @@ public class ClientServiceShould {
                                                                                   .setHonorificSuffix("Cmd")))
                                           .build();
         final UserId userId = newUserId(Identifiers.newUuid());
-        final Command result = createCommand(msg, userId, TimeUtil.getCurrentTime());
+        final Command result = Given.Command.create(msg, userId, TimeUtil.getCurrentTime());
 
         return result;
     }
@@ -181,17 +180,17 @@ public class ClientServiceShould {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreatedMsg(cmd.getProjectId());
+            return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            return taskAddedMsg(cmd.getProjectId());
+            return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            final ProjectStarted message = projectStartedMsg(cmd.getProjectId());
+            final ProjectStarted message =  Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 

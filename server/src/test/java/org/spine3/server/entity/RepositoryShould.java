@@ -23,13 +23,13 @@ package org.spine3.server.entity;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.BoundedContextTestStubs;
+import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.storage.EntityStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.entity.Project;
+import org.spine3.test.entity.ProjectId;
 
 import javax.annotation.Nullable;
 

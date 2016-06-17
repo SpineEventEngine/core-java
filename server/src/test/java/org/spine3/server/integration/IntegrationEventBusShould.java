@@ -26,11 +26,9 @@ import org.junit.Test;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
-import org.spine3.test.project.event.ProjectCreated;
+import org.spine3.test.integration.event.ProjectCreated;
 
 import static org.junit.Assert.*;
-import static org.spine3.testdata.TestEventFactory.projectCreatedIntegrationEvent;
-import static org.spine3.testdata.TestEventFactory.taskAddedIntegrationEvent;
 
 /**
  * @author Alexander Litus
@@ -41,7 +39,7 @@ public class IntegrationEventBusShould {
     private IntegrationEventBus eventBus;
     private TestIntEventSubscriber subscriber;
 
-    private final IntegrationEvent event = projectCreatedIntegrationEvent();
+    private final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
 
     @Before
     public void setUp() {
@@ -64,7 +62,7 @@ public class IntegrationEventBusShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_no_subscribers_for_event() {
-        eventBus.post(taskAddedIntegrationEvent());
+        eventBus.post(Given.IntegrationEvent.taskAdded());
     }
 
     @Test

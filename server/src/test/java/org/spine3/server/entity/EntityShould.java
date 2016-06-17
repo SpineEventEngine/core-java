@@ -26,16 +26,14 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
-import org.spine3.testdata.TestEntity;
+import org.spine3.test.entity.Project;
+import org.spine3.test.entity.ProjectId;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.currentTimeSeconds;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 
 /**
  * @author Alexander Litus
@@ -46,11 +44,11 @@ public class EntityShould {
     private static final String ID = newUuid();
     private final Project state = newProject();
 
-    private TestEntity entity = new TestEntity(ID);
+    private Given.TestEntity entity = new Given.TestEntity(ID);
 
     @Before
     public void setUp() {
-        entity = new TestEntity(ID);
+        entity = new Given.TestEntity(ID);
     }
 
     @Test
@@ -164,7 +162,7 @@ public class EntityShould {
 
     @Test
     public void return_id_class() {
-        final Class<String> actual = Entity.getIdClass(TestEntity.class);
+        final Class<String> actual = Entity.getIdClass(Given.TestEntity.class);
 
         assertEquals(String.class, actual);
     }
@@ -189,7 +187,7 @@ public class EntityShould {
 
     private static Project newProject() {
         final Project.Builder project = Project.newBuilder()
-                                               .setId(newProjectId())
+                                               .setId(Given.AggregateId.newProjectId())
                                                .setStatus(Project.Status.CREATED);
         return project.build();
     }
@@ -204,7 +202,7 @@ public class EntityShould {
     private static class EntityWithMessageId extends Entity<ProjectId, StringValue> {
 
         protected EntityWithMessageId() {
-            super(newProjectId());
+            super(Given.AggregateId.newProjectId());
         }
     }
 }

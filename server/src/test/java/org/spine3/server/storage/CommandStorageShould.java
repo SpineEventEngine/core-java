@@ -35,8 +35,8 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.test.Tests;
-import org.spine3.test.project.ProjectId;
-import org.spine3.test.project.command.CreateProject;
+import org.spine3.test.storage.ProjectId;
+import org.spine3.test.storage.command.CreateProject;
 import org.spine3.type.TypeName;
 
 import java.util.Iterator;
@@ -53,8 +53,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
-import static org.spine3.testdata.TestCommands.*;
-import static org.spine3.testdata.TestEventMessageFactory.projectCreatedEventAny;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -86,7 +84,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = toAny(createProjectCmd());
+        final Any command = toAny(Given.Command.createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -112,7 +110,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_and_read_command() {
-        final Command command = createProjectCmd();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
 
         storage.store(command);
@@ -123,7 +121,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_command_with_error() {
-        final Command command = createProjectCmd();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
         final Error error = newError();
 
@@ -136,7 +134,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.create(createProjectMsg(), CommandContext.getDefaultInstance());
+        final Command command = Commands.create(Given.CommandMessage.createProject(), CommandContext.getDefaultInstance());
         final Error error = newError();
 
         storage.store(command, error);
@@ -151,7 +149,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void store_command_with_status() {
-        final Command command = createProjectCmd();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
         final CommandStatus status = SCHEDULED;
 
@@ -163,12 +161,12 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void load_commands_by_status() {
-        final List<Command> commands = ImmutableList.of(createProjectCmd(), addTaskCmd(), startProjectCmd());
+        final List<Command> commands = ImmutableList.of(Given.Command.createProject(), Given.Command.addTask(), Given.Command.startProject());
         final CommandStatus status = SCHEDULED;
 
         store(commands, status);
         // store an extra command with another status
-        storage.store(createProjectCmd(), ERROR);
+        storage.store(Given.Command.createProject(), ERROR);
 
         final Iterator<Command> iterator = storage.iterator(status);
         final List<Command> actualCommands = newArrayList(iterator);
@@ -222,7 +220,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = createProjectCmd();
+        final Command command = Given.Command.createProject();
         final CommandStatus status = RECEIVED;
 
         final CommandStorageRecord record = CommandStorage.newCommandStorageRecordBuilder(command, status).build();
@@ -289,19 +287,19 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() {
         close(storage);
-        storage.store(createProjectCmd());
+        storage.store(Given.Command.createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() {
         close(storage);
-        storage.store(createProjectCmd(), newError());
+        storage.store(Given.Command.createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() {
         close(storage);
-        storage.store(createProjectCmd(), OK);
+        storage.store(Given.Command.createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -355,7 +353,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     private static Failure newFailure() {
         return Failure.newBuilder()
-                .setInstance(projectCreatedEventAny())
+                .setInstance(Given.EventMessage.projectCreatedAny())
                 .setStacktrace("failure stacktrace")
                 .setTimestamp(TimeUtil.getCurrentTime())
                 .build();

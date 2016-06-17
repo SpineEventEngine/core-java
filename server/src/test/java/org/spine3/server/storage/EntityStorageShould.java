@@ -22,12 +22,11 @@ package org.spine3.server.storage;
 
 import org.junit.Test;
 import org.spine3.server.entity.Entity;
-import org.spine3.test.project.Project;
-import org.spine3.test.project.ProjectId;
+import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectId;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestAggregateIdFactory.newProjectId;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 
 /**
@@ -60,7 +59,7 @@ public abstract class EntityStorageShould<I> extends AbstractStorageShould<I, En
     @Test
     public void write_and_read_record_by_Message_id() {
         final EntityStorage<ProjectId> storage = getStorage(TestEntityWithIdMessage.class);
-        final ProjectId id = newProjectId(newUuid());
+        final ProjectId id = Given.AggregateId.newProjectId(newUuid());
         writeAndReadRecordTest(id, storage);
     }
 
