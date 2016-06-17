@@ -123,7 +123,6 @@ public class EnrichmentFunctionShould {
         final String out = func.toString();
         assertTrue(out.contains(Int32Value.class.getName()));
         assertTrue(out.contains(StringValue.class.getName()));
-        assertTrue(out.contains(func.getFunction().toString()));
     }
 
     @Test
