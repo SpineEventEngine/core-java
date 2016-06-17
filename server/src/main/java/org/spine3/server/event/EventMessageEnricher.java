@@ -82,7 +82,6 @@ import java.util.Map;
                 EventAnnotationsProto.by;
         final Descriptors.FieldDescriptor byOptionDescriptor = byOption.getDescriptor();
 
-
         for (Descriptors.FieldDescriptor targetField : targetDescriptor.getFields()) {
             final Map<Descriptors.FieldDescriptor, Object> allOptions = targetField.getOptions()
                                                                                    .getAllFields();
@@ -124,6 +123,8 @@ import java.util.Map;
 
     /**
      * An interim entry in the {@link EventEnricher.Builder} to hold information about the types.
+     *
+     * <p>Instances of this class are converted to real version via {@link #toBound(EventEnricher)} method.
      */
     /* package */ static class Unbound<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
 
@@ -158,6 +159,9 @@ import java.util.Map;
         }
     }
 
+    /**
+     * This is a helper class that performs the conversion.
+     */
     private static class Func<M extends Message, E extends Message> implements Function<M, E> {
 
         private final EventEnricher enricher;
