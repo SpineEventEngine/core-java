@@ -26,21 +26,10 @@ option java_multiple_files = true;
 option java_outer_classname = "TestIdentifiers";
 
 import "google/protobuf/timestamp.proto";
-
-message StringFieldId {
-    string id = 1;
-}
-
-message IntFieldId {
-    int32 id = 1;
-}
-
-message LongFieldId {
-    int64 id = 1;
-}
+import "google/protobuf/wrappers.proto";
 
 message NestedMessageId {
-    StringFieldId id = 1;
+    google.protobuf.StringValue id = 1;
 }
 
 message TimestampFieldId {
@@ -50,10 +39,10 @@ message TimestampFieldId {
 message SeveralFieldsId {
     string string = 1;
     int32 int = 2;
-    StringFieldId message = 3;
+    google.protobuf.StringValue message = 3;
 }
 
-message IdWithStructure {
+message IdWithPrimitiveFields {
     string name = 1;
     int32 number = 2;
     bool flag = 3;
