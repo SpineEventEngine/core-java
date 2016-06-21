@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.DescriptorProtos;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
@@ -35,7 +34,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.protobuf.Descriptors.*;
+import static com.google.protobuf.Descriptors.Descriptor;
+import static com.google.protobuf.Descriptors.FieldDescriptor;
 
 /**
  * Performs validation checking that all fields annotated in the enrichment message
@@ -51,7 +51,7 @@ import static com.google.protobuf.Descriptors.*;
     private final FieldDescriptor byOptionDescriptor;
 
     @Nullable
-    private ImmutableBiMap<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> sourceToTargetMap;
+    private ImmutableBiMap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
 
     /* package */ ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> sourceClass,
@@ -69,7 +69,7 @@ import static com.google.protobuf.Descriptors.*;
 
     @Nullable
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK since the implementation is immutable.
-    /* package */ ImmutableBiMap<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> fieldMap() {
+    /* package */ ImmutableBiMap<FieldDescriptor, FieldDescriptor> fieldMap() {
         return sourceToTargetMap;
     }
 
@@ -79,13 +79,11 @@ import static com.google.protobuf.Descriptors.*;
     @SuppressWarnings("MethodWithMultipleLoops") // OK because we iterate through fields and options.
     /* package */ List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
-
-        final ImmutableBiMap.Builder<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> fields =
-                ImmutableBiMap.builder();
+        final ImmutableBiMap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableBiMap.builder();
 
         for (FieldDescriptor targetField : targetDescriptor.getFields()) {
-            final Map<Descriptors.FieldDescriptor, Object> allOptions = targetField.getOptions()
-                                                                                   .getAllFields();
+            final Map<FieldDescriptor, Object> allOptions = targetField.getOptions()
+                                                                       .getAllFields();
             for (FieldDescriptor option : allOptions.keySet()) {
                 if (option.equals(byOptionDescriptor)) {
                     final String srcFieldRef = (String) allOptions.get(option);
@@ -111,7 +109,7 @@ import static com.google.protobuf.Descriptors.*;
         if (srcField == null) {
             final String msg = String.format(
                     "Unable to find the field `%s` in the message `%s`. " +
-                            "The field is referenced in the option of the field `%s`",
+                    "The field is referenced in the option of the field `%s`",
                     sourceFieldReference,
                     sourceDescriptor.getFullName(),
                     targetField.getFullName());
