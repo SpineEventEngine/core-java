@@ -19,14 +19,16 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine.test.identifiers;
 
-option java_package="org.spine3.test";
+option java_package="org.spine3.test.identifiers";
 option java_multiple_files = true;
-option java_outer_classname = "TestIdentifiers";
+option java_outer_classname = "IdentifiersShouldProto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+
+// Only for usage in `IdentifiersShould` class.
 
 message NestedMessageId {
     google.protobuf.StringValue id = 1;

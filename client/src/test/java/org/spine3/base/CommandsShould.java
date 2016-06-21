@@ -26,14 +26,12 @@ import com.google.common.collect.Iterables;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.protobuf.Durations;
-import org.spine3.test.RunTest;
-import org.spine3.test.TestCommand;
+import org.spine3.test.commands.TestCommand;
 import org.spine3.type.TypeName;
 
 import java.util.List;
@@ -123,10 +121,7 @@ public class CommandsShould {
 
     @Test
     public void create_logging_message_for_command_with_type_and_id() {
-        final Message message = RunTest.newBuilder()
-                                       .setMethodName("create_logging_message_for_command_with_type_and_id")
-                                       .build();
-        final Command command = commandFactory.create(message);
+        final Command command = commandFactory.create(newStringValue(newUuid()));
         final String typeName = TypeName.ofCommand(command).toString();
         final String commandId = idToString(getId(command));
 
@@ -146,7 +141,7 @@ public class CommandsShould {
     public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
         Commands.formatCommandTypeAndId("  ", commandFactory.create(newStringValue(newUuid())));
     }
-    
+
     @Test
     public void return_true_if_file_is_for_commands() {
         final FileDescriptor file = TestCommand.getDescriptor().getFile();

@@ -29,10 +29,10 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.test.RunTest;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -89,9 +89,7 @@ public class TypeNameShould {
     @Test
     public void obtain_type_of_command() {
         final CommandFactory factory = TestCommandFactory.newInstance(TypeNameShould.class);
-        final RunTest message = RunTest.newBuilder()
-                                       .setMethodName("obtain_type_of_command")
-                                       .build();
+        final StringValue message = newStringValue(newUuid());
         final Command command = factory.create(message);
 
         final TypeName typeName = TypeName.ofCommand(command);

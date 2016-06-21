@@ -27,10 +27,10 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.IdWithPrimitiveFields;
-import org.spine3.test.NestedMessageId;
-import org.spine3.test.SeveralFieldsId;
-import org.spine3.test.TimestampFieldId;
+import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.test.identifiers.NestedMessageId;
+import org.spine3.test.identifiers.SeveralFieldsId;
+import org.spine3.test.identifiers.TimestampFieldId;
 
 import javax.annotation.Nullable;
 
@@ -181,7 +181,7 @@ public class IdentifiersShould {
         final String expected =
                 "string=\"" + outerString + '\"' +
                 " int=" + number +
-                " message { id=\"" + nestedString + "\" }";
+                " message { value=\"" + nestedString + "\" }";
 
         final String actual = idToString(idToConvert);
 
