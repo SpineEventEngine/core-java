@@ -21,6 +21,7 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
@@ -31,15 +32,23 @@ import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
 
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+@SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EnricherBuilderShould {
 
     private EventEnricher.Builder builder;
     private Function<Timestamp, StringValue> function;
+    private FieldEnricher<Timestamp, StringValue> fieldEnricherFunction;
 
     @Before
     public void setUp() {
-        builder = EventEnricher.newBuilder();
-        function = new Function<Timestamp, StringValue>() {
+        this.builder = EventEnricher.newBuilder();
+        this.function = new Function<Timestamp, StringValue>() {
             @Nullable
             @Override
             public StringValue apply(@Nullable Timestamp input) {
@@ -49,6 +58,41 @@ public class EnricherBuilderShould {
                 return Values.newStringValue(TimeUtil.toString(input));
             }
         };
+        this.fieldEnricherFunction = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);
+    }
+
+    @Test
+    public void create_new_instance() {
+        assertNotNull(EventEnricher.Builder.newInstance());
+    }
+
+    @Test
+    public void build_enricher() {
+        assertNotNull(builder.build());
+    }
+
+    @Test
+    public void add_event_enrichment() {
+        builder.addEventEnrichment(Timestamp.class, StringValue.class);
+
+        final Set<EnrichmentFunction<? extends Message, ? extends Message>> functions = builder.getFunctions();
+        assertEquals(1, functions.size());
+    }
+
+    @Test
+    public void add_field_enrichment() {
+        builder.addFieldEnrichment(Timestamp.class, StringValue.class, fieldEnricherFunction.getFunction());
+
+        assertTrue(builder.getFunctions().contains(fieldEnricherFunction));
+    }
+
+    @Test
+    public void remove_enrichment_function() {
+        builder.addFieldEnrichment(Timestamp.class, StringValue.class, fieldEnricherFunction.getFunction());
+
+        builder.remove(fieldEnricherFunction);
+
+        assertTrue(builder.getFunctions().isEmpty());
     }
 
     @Test(expected = NullPointerException.class)

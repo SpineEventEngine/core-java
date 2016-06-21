@@ -20,11 +20,13 @@
 
 package org.spine3.server.event.enrich;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
@@ -301,6 +303,11 @@ public class EventEnricher {
             final EventEnricher result = new EventEnricher(this);
             result.validate();
             return result;
+        }
+
+        @VisibleForTesting
+        /* package */ Set<EnrichmentFunction<? extends Message, ? extends Message>> getFunctions() {
+            return ImmutableSet.copyOf(functions);
         }
     }
 
