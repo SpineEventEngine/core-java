@@ -19,6 +19,7 @@
  */
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
@@ -26,6 +27,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.testdata.TestCommandContextFactory;
+import org.spine3.type.TypeName;
 
 import java.util.List;
 
@@ -40,6 +42,7 @@ import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
+import static org.spine3.validate.Validate.isNotDefault;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventsShould {
@@ -60,7 +63,8 @@ public class EventsShould {
     public void generate_event_id() {
         final EventId result = generateId();
 
-        assertFalse(result.getUuid().isEmpty());
+        assertFalse(result.getUuid()
+                          .isEmpty());
     }
 
     @Test
@@ -80,7 +84,8 @@ public class EventsShould {
 
     @Test
     public void return_actor_from_EventContext() {
-        assertEquals(context.getCommandContext().getActor(), getActor(context));
+        assertEquals(context.getCommandContext()
+                            .getActor(), getActor(context));
     }
 
     @Test
@@ -111,13 +116,31 @@ public class EventsShould {
     }
 
     @Test
-    public void get_message_from_event() {
-        creatEventAndAssertReturnedMessageFor(stringValue);
-        creatEventAndAssertReturnedMessageFor(boolValue);
-        creatEventAndAssertReturnedMessageFor(doubleValue);
+    public void create_import_event() {
+        final Event event = Events.createImportEvent(stringValue, doubleValue);
+
+        assertEquals(stringValue, fromAny(event.getMessage()));
+        assertEquals(doubleValue, fromAny(event.getContext()
+                                               .getProducerId()));
     }
 
-    private void creatEventAndAssertReturnedMessageFor(Message msg) {
+    @Test
+    public void create_import_event_context() {
+        final EventContext context = Events.createImportEventContext(doubleValue);
+
+        assertEquals(doubleValue, fromAny(context.getProducerId()));
+        assertTrue(isNotDefault(context.getEventId()));
+        assertTrue(isNotDefault(context.getTimestamp()));
+    }
+
+    @Test
+    public void get_message_from_event() {
+        createEventAndAssertReturnedMessageFor(stringValue);
+        createEventAndAssertReturnedMessageFor(boolValue);
+        createEventAndAssertReturnedMessageFor(doubleValue);
+    }
+
+    private void createEventAndAssertReturnedMessageFor(Message msg) {
         final Event event = createEvent(msg, context);
 
         assertEquals(msg, getMessage(event));
@@ -139,6 +162,59 @@ public class EventsShould {
         assertEquals(msg.getValue(), id);
     }
 
+    @Test
+    public void return_true_if_event_enrichment_is_enabled() {
+        final Event event = createEvent(stringValue, context);
+
+        assertTrue(isEnrichmentEnabled(event));
+    }
+
+    @Test
+    public void return_false_if_event_enrichment_is_disabled() {
+        final EventContext withDisabledEnrichment = context.toBuilder()
+                                                           .setDoNotEnrich(true)
+                                                           .build();
+        final Event event = createEvent(stringValue, withDisabledEnrichment);
+
+        assertFalse(isEnrichmentEnabled(event));
+    }
+
+    @Test
+    public void return_all_event_enrichments() {
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue).value(), stringValue);
+
+        final Optional<Enrichments> enrichments = Events.getEnrichments(context);
+
+        assertTrue(enrichments.isPresent());
+        assertEquals(context.getEnrichments(), enrichments.get());
+    }
+
+    @Test
+    public void return_optional_absent_if_no_event_enrichments() {
+        assertFalse(Events.getEnrichments(context)
+                          .isPresent());
+    }
+
+    @Test
+    public void return_specific_event_enrichment() {
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue).value(), stringValue);
+
+        final Optional<? extends StringValue> enrichment = Events.getEnrichment(stringValue.getClass(), context);
+
+        assertTrue(enrichment.isPresent());
+        assertEquals(stringValue, enrichment.get());
+    }
+
+    private static EventContext newEventContextWithEnrichment(String key, Message enrichment) {
+        final Enrichments.Builder enrichments = Enrichments.newBuilder();
+        enrichments.getMutableMap()
+                   .put(key, toAny(enrichment));
+        final EventContext context = newEventContext().toBuilder()
+                                                      .setEnrichments(enrichments.build())
+                                                      .build();
+        return context;
+    }
+
     private static EventContext newEventContext() {
         return newEventContext(getCurrentTime());
     }
@@ -153,15 +229,5 @@ public class EventsShould {
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();
-    }
-
-    @Test
-    public void check_enrichment_attribute_of_EventContext() {
-        assertTrue(isEnrichmentEnabled(createEvent(stringValue, context)));
-
-        final EventContext withDisabledEnrichment = context.toBuilder()
-                                                           .setDoNotEnrich(true)
-                                                           .build();
-        assertFalse(isEnrichmentEnabled(createEvent(stringValue, withDisabledEnrichment)));
     }
 }
