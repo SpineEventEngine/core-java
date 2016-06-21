@@ -21,7 +21,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
@@ -38,6 +38,8 @@ import java.lang.reflect.Method;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.Descriptor;
+import static com.google.protobuf.Descriptors.GenericDescriptor;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -171,10 +173,10 @@ public class Messages {
         for (TypeName typeName : TypeToClassMap.knownTypes()) {
             try {
                 final Class<? extends Message> clazz = toMessageClass(typeName);
-                final Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
+                final GenericDescriptor descriptor = getClassDescriptor(clazz);
                 // Skip outer class descriptors.
-                if (descriptor instanceof Descriptors.Descriptor) {
-                    final Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
+                if (descriptor instanceof Descriptor) {
+                    final Descriptor typeDescriptor = (Descriptor) descriptor;
                     builder.add(typeDescriptor);
                 }
 
@@ -199,10 +201,10 @@ public class Messages {
     /**
      * Returns descriptor for the passed message class.
      */
-    public static Descriptors.GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
+    public static GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
-            final Descriptors.GenericDescriptor result = (Descriptors.GenericDescriptor) method.invoke(null);
+            final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
@@ -210,8 +212,8 @@ public class Messages {
         }
     }
 
-    public static Class<?> getFieldClass(Descriptors.FieldDescriptor fieldDescriptor) {
-        final Descriptors.FieldDescriptor.JavaType javaType = fieldDescriptor.getJavaType();
+    public static Class<?> getFieldClass(FieldDescriptor fieldDescriptor) {
+        final FieldDescriptor.JavaType javaType = fieldDescriptor.getJavaType();
 
         Object defaultObject = null;
         switch (javaType) {
@@ -229,7 +231,7 @@ public class Messages {
                 throw Exceptions.unsupported(
                         "Enums in mapping are not yet supported. Discovered: " + fieldDescriptor.getFullName());
             case MESSAGE:
-                final Descriptors.Descriptor messageType = fieldDescriptor.getMessageType();
+                final Descriptor messageType = fieldDescriptor.getMessageType();
                 final TypeName typeName = TypeName.of(messageType);
                 try {
                     final Class<? extends Message> result = toMessageClass(typeName);
@@ -241,6 +243,4 @@ public class Messages {
         }
         throw new IllegalStateException("Unknown field type discovered: " + fieldDescriptor.getFullName());
     }
-
-
 }
