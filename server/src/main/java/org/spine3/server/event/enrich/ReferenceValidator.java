@@ -35,6 +35,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.protobuf.Descriptors.*;
+
 /**
  * Performs validation checking that all fields annotated in the enrichment message
  * can be created with the translation functions supplied in the parent enricher.
@@ -44,14 +46,14 @@ import java.util.Map;
 /* package */ class ReferenceValidator {
 
     private final EventEnricher enricher;
-    private final Descriptors.Descriptor sourceDescriptor;
-    private final Descriptors.Descriptor targetDescriptor;
-    private final Descriptors.FieldDescriptor byOptionDescriptor;
+    private final Descriptor sourceDescriptor;
+    private final Descriptor targetDescriptor;
+    private final FieldDescriptor byOptionDescriptor;
 
     @Nullable
     private ImmutableBiMap<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> sourceToTargetMap;
 
-    ReferenceValidator(EventEnricher enricher,
+    /* package */ ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> sourceClass,
             Class<? extends Message> targetClass) {
         this.enricher = enricher;
@@ -81,13 +83,13 @@ import java.util.Map;
         final ImmutableBiMap.Builder<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> fields =
                 ImmutableBiMap.builder();
 
-        for (Descriptors.FieldDescriptor targetField : targetDescriptor.getFields()) {
+        for (FieldDescriptor targetField : targetDescriptor.getFields()) {
             final Map<Descriptors.FieldDescriptor, Object> allOptions = targetField.getOptions()
                                                                                    .getAllFields();
-            for (Descriptors.FieldDescriptor option : allOptions.keySet()) {
+            for (FieldDescriptor option : allOptions.keySet()) {
                 if (option.equals(byOptionDescriptor)) {
                     final String srcFieldRef = (String) allOptions.get(option);
-                    final Descriptors.FieldDescriptor srcField = resolveFieldRef(srcFieldRef, targetField);
+                    final FieldDescriptor srcField = resolveFieldRef(srcFieldRef, targetField);
 
                     final EnrichmentFunction<?, ?> function = getEnrichmentFunction(srcField, targetField);
                     functions.add(function);
@@ -99,14 +101,13 @@ import java.util.Map;
         return functions.build();
     }
 
-    private Descriptors.FieldDescriptor resolveFieldRef(String sourceFieldReference,
-                                                        Descriptors.FieldDescriptor targetField) {
+    private FieldDescriptor resolveFieldRef(String sourceFieldReference, FieldDescriptor targetField) {
 
         // In the following code we assume that the reference is not qualified.
         //TODO:2016-06-17:alexander.yevsyukov: Handle the sibling type and another package reference too.
 
         // Now try to find a field with such a name in the outer (source) message.
-        final Descriptors.FieldDescriptor srcField = sourceDescriptor.findFieldByName(sourceFieldReference);
+        final FieldDescriptor srcField = sourceDescriptor.findFieldByName(sourceFieldReference);
         if (srcField == null) {
             final String msg = String.format(
                     "Unable to find the field `%s` in the message `%s`. " +
@@ -119,11 +120,9 @@ import java.util.Map;
         return srcField;
     }
 
-    private EnrichmentFunction<?, ?> getEnrichmentFunction(Descriptors.FieldDescriptor srcField,
-                                                           Descriptors.FieldDescriptor targetField) {
+    private EnrichmentFunction<?, ?> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
         final Class<?> sourceFieldClass = Messages.getFieldClass(srcField);
         final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
-
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
             final String msg = String.format(
