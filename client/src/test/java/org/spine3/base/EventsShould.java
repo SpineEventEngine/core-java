@@ -181,7 +181,8 @@ public class EventsShould {
 
     @Test
     public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue).value(), stringValue);
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue)
+                                                                           .value(), stringValue);
 
         final Optional<Enrichments> enrichments = Events.getEnrichments(context);
 
@@ -203,6 +204,19 @@ public class EventsShould {
 
         assertTrue(enrichment.isPresent());
         assertEquals(stringValue, enrichment.get());
+    }
+
+    @Test
+    public void return_optional_absent_if_no_event_enrichments_when_getting_one() {
+        assertFalse(Events.getEnrichment(StringValue.class, context)
+                          .isPresent());
+    }
+
+    @Test
+    public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
+        final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue).value(), boolValue);
+        assertFalse(Events.getEnrichment(StringValue.class, context)
+                          .isPresent());
     }
 
     private static EventContext newEventContextWithEnrichment(String key, Message enrichment) {

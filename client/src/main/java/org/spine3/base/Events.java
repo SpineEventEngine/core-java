@@ -253,6 +253,12 @@ public class Events {
         return mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
     }
 
+    /**
+     * Returns all enrichments from the context.
+     *
+     * @param context a context to get enrichments from
+     * @return an optional of enrichments
+     */
     public static Optional<Enrichments> getEnrichments(EventContext context) {
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
         if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
@@ -261,14 +267,22 @@ public class Events {
         return Optional.absent();
     }
 
-    public static <T extends Message> Optional<T> getEnrichment(Class<T> attachmentClass, EventContext context) {
+    /**
+     * Return a specific enrichment from the context.
+     *
+     * @param enrichmentClass a class of the event enrichment
+     * @param context a context to get an enrichment from
+     * @param <E> a type of the event enrichment
+     * @return an optional of the enrichment
+     */
+    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
         final Optional<Enrichments> value = getEnrichments(context);
         if (!value.isPresent()) {
             return Optional.absent();
         }
 
         final Enrichments enrichments = value.get();
-        final TypeName typeName = TypeName.of(attachmentClass);
+        final TypeName typeName = TypeName.of(enrichmentClass);
 
         final Any any = enrichments.getMap()
                                    .get(typeName.value());
@@ -276,7 +290,7 @@ public class Events {
             return Optional.absent();
         }
 
-        final T result = unpack(attachmentClass, any);
+        final E result = unpack(enrichmentClass, any);
 
         return Optional.fromNullable(result);
     }
