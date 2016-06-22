@@ -114,11 +114,13 @@ public class Events {
     }
 
     /**
-     * Extracts the event instance from the passed record.
+     * Extracts the event message from the passed event.
+     *
+     * @param event an event to get message from
      */
-    public static Message getMessage(Event event) {
+    public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final Message result = Messages.fromAny(any);
+        final M result = Messages.fromAny(any);
         return result;
     }
 
