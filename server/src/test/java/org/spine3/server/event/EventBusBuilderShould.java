@@ -34,6 +34,7 @@ import java.util.concurrent.Executor;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusBuilderShould {
 
     private EventStore eventStore;
@@ -82,7 +83,7 @@ public class EventBusBuilderShould {
 
     @Test
     public void return_set_EventValidator() {
-        final MessageValidator validator = new MessageValidator();
+        final MessageValidator validator = MessageValidator.newInstance();
         assertEquals(validator, EventBus.newBuilder()
                                         .setEventValidator(validator)
                                         .getEventValidator());

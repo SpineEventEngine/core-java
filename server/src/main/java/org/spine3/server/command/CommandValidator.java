@@ -77,7 +77,7 @@ public class CommandValidator {
         if (isDefault(message)) {
             result.add(newConstraintViolation("Non-default command message must be set."));
         }
-        final List<ConstraintViolation> messageViolations = new MessageValidator().validate(message);
+        final List<ConstraintViolation> messageViolations = MessageValidator.newInstance().validate(message);
         result.addAll(messageViolations);
     }
 

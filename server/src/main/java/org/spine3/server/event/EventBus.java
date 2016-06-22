@@ -431,7 +431,7 @@ public class EventBus implements AutoCloseable {
             }
 
             if (eventValidator == null) {
-                eventValidator = new MessageValidator();
+                eventValidator = MessageValidator.newInstance();
             }
 
             final EventBus result = new EventBus(this);

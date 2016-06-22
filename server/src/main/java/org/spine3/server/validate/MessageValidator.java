@@ -45,8 +45,8 @@ public class MessageValidator {
     /**
      * Creates a new validator instance.
      */
-    public MessageValidator() {
-        this.rootFieldPath = FieldPath.getDefaultInstance();
+    public static MessageValidator newInstance() {
+        return new MessageValidator(FieldPath.getDefaultInstance());
     }
 
     /**
@@ -56,7 +56,11 @@ public class MessageValidator {
      *
      * @param rootFieldPath the path to the message field which is the root for this message
      */
-    /* package */ MessageValidator(FieldPath rootFieldPath) {
+    /* package */ static MessageValidator newInstance(FieldPath rootFieldPath) {
+        return new MessageValidator(rootFieldPath);
+    }
+
+    private MessageValidator(FieldPath rootFieldPath) {
         this.rootFieldPath = rootFieldPath;
     }
 
