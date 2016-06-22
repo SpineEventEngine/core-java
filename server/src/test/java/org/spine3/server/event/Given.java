@@ -30,7 +30,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 
 @SuppressWarnings("EmptyClass")
-/* package */ class Given {
+public class Given {
 
     /* package */ static class AggregateId {
 
@@ -64,7 +64,7 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class Event {
+    public static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 

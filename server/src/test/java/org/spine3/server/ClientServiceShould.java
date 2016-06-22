@@ -41,16 +41,15 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.clientservice.customer.Customer;
-import org.spine3.test.clientservice.customer.CustomerId;
-import org.spine3.test.clientservice.customer.command.CreateCustomer;
-import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.Project;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.clientservice.command.AddTask;
 import org.spine3.test.clientservice.command.CreateProject;
 import org.spine3.test.clientservice.command.StartProject;
+import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.clientservice.customer.CustomerId;
+import org.spine3.test.clientservice.customer.command.CreateCustomer;
+import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
@@ -76,13 +75,13 @@ public class ClientServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        final BoundedContext projectsContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext projectsContext = BoundedContextTestStubs.create();
         final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        final BoundedContext customersContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext customersContext = BoundedContextTestStubs.create();
         final CustomerAggregateRepository customerRepo = new CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);

@@ -20,16 +20,90 @@
 
 package org.spine3.server.event.enrich;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Event;
+import org.spine3.base.EventContext;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventSubscriber;
+import org.spine3.server.event.Given;
+import org.spine3.server.event.Subscribe;
+import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectId;
+import org.spine3.testdata.BoundedContextTestStubs;
 
-import static org.junit.Assert.assertNotNull;
+import javax.annotation.Nullable;
+
+import static org.junit.Assert.*;
+import static org.spine3.base.Events.getEnrichment;
+import static org.spine3.base.Events.getMessage;
 
 public class EventEnricherShould {
+
+    private BoundedContext boundedContext;
+    private EventBus eventBus;
+    private TestEventSubscriber subscriber;
+    private final Function<ProjectId, String> projectNameLookup = new ProjectNameLookup();
+
+    @Before
+    public void setUp() {
+        final EventEnricher enricher = EventEnricher
+                .newBuilder()
+                .addEventEnrichment(ProjectCreated.class, ProjectCreated.Enrichment.class)
+                .addFieldEnrichment(ProjectId.class, String.class, projectNameLookup)
+                .build();
+        this.boundedContext = BoundedContextTestStubs.create(enricher);
+        this.eventBus = boundedContext.getEventBus();
+        this.subscriber = new TestEventSubscriber();
+        eventBus.subscribe(subscriber);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        boundedContext.close();
+    }
 
     @Test
     public void have_builder() {
         assertNotNull(EventEnricher.newBuilder());
     }
 
-    //TODO:2016-06-17:alexander.yevsyukov: Add more tests.
+    @Test
+    public void enrich_event() {
+        final Event event = Given.Event.projectCreated();
+
+        eventBus.post(event);
+
+        assertTrue(subscriber.enrichment.isPresent());
+        final ProjectCreated.Enrichment enrichment = subscriber.enrichment.get();
+        final ProjectCreated msg = getMessage(event);
+        assertEquals(projectNameLookup.apply(msg.getProjectId()), enrichment.getProjectName());
+    }
+
+    private static class TestEventSubscriber extends EventSubscriber {
+
+        private Optional<ProjectCreated.Enrichment> enrichment;
+
+        @Subscribe
+        public void on(ProjectCreated event, EventContext context) {
+            this.enrichment = getEnrichment(ProjectCreated.Enrichment.class, context);
+        }
+    }
+
+    private static class ProjectNameLookup implements Function<ProjectId, String> {
+
+        @Nullable
+        @Override
+        public String apply(@Nullable ProjectId id) {
+            if (id == null) {
+                return null;
+            }
+            final String name = "Project " + id.getId();
+            return name;
+        }
+    }
 }

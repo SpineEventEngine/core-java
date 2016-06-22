@@ -23,6 +23,7 @@ package spine.test.event;
 
 import "spine/test/event/project.proto";
 import "spine/test/event/task.proto";
+import "spine/event_annotations.proto";
 
 option java_package="org.spine3.test.event";
 option java_outer_classname = "EventEventsProto";
@@ -30,6 +31,10 @@ option java_multiple_files = true;
 
 message ProjectCreated {
     ProjectId project_id = 1;
+
+    message Enrichment {
+        string project_name = 2 [(by) = "project_id"];
+    }
 }
 
 message TaskAdded {
