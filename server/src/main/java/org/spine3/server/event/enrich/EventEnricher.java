@@ -67,7 +67,7 @@ public class EventEnricher {
     /**
      * Available enrichments per message class.
      */
-    private final ImmutableMultimap<Class<? extends Message>, EnrichmentFunction<?, ?>> functions;
+    private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
     /**
      * Creates a new builder.
@@ -86,7 +86,7 @@ public class EventEnricher {
         final Set<EnrichmentFunction<?, ?>> functions = builder.functions;
 
         // Build the multi-map of all enrichments available per event class.
-        final ImmutableMultimap.Builder<Class<? extends Message>, EnrichmentFunction<?, ?>>
+        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>>
                 enrichmentsBuilder = ImmutableMultimap.builder();
 
         for (EnrichmentFunction<?, ?> function : functions) {
@@ -208,7 +208,7 @@ public class EventEnricher {
         /**
          * A map from an enrichment type to a translation function which performs the enrichment.
          */
-        private final Set<EnrichmentFunction<? extends Message, ? extends Message>> functions = Sets.newHashSet();
+        private final Set<EnrichmentFunction<?, ?>> functions = Sets.newHashSet();
 
         public static Builder newInstance() {
             return new Builder();
@@ -227,8 +227,9 @@ public class EventEnricher {
             return this;
         }
 
-        public <M extends Message, E extends Message> Builder addFieldEnrichment(Class<M> eventMessageClass,
-        Class<E> enrichmentClass, Function<M, E> function) {
+        public <M, E> Builder addFieldEnrichment(Class<M> eventMessageClass,
+                                                 Class<E> enrichmentClass,
+                                                 Function<M, E> function) {
             checkNotNull(eventMessageClass);
             checkNotNull(enrichmentClass);
             final EnrichmentFunction<M, E> newEntry = FieldEnricher.newInstance(eventMessageClass,
@@ -243,10 +244,9 @@ public class EventEnricher {
          * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
          * source and target classes
          */
-        private <M extends Message, E extends Message> void checkDuplicate(EnrichmentFunction<M, E> function) {
-            final Optional<EnrichmentFunction<? extends Message, ? extends Message>> duplicate =
-                    FluentIterable.from(functions)
-                                  .firstMatch(SameTransition.asFor(function));
+        private <M, E> void checkDuplicate(EnrichmentFunction<M, E> function) {
+            final Optional<EnrichmentFunction<?, ?>> duplicate = FluentIterable.from(functions)
+                    .firstMatch(SameTransition.asFor(function));
             if (duplicate.isPresent()) {
                 final String msg = String.format("Enrichment from %s to %s already added as: %s",
                         function.getSourceClass(),
@@ -306,7 +306,7 @@ public class EventEnricher {
         }
 
         @VisibleForTesting
-        /* package */ Set<EnrichmentFunction<? extends Message, ? extends Message>> getFunctions() {
+        /* package */ Set<EnrichmentFunction<?, ?>> getFunctions() {
             return ImmutableSet.copyOf(functions);
         }
     }

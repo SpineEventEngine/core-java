@@ -21,7 +21,6 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Message;
 
 import javax.annotation.Nullable;
 
@@ -30,16 +29,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * This class performs enrichment conversion using the passed function.
  *
+ * @param <S> the type of the field in the source event message
+ * @param <T> the type of the field in the target enrichment message
  * @author Alexander Yevsyukov
  */
-/* package */ class FieldEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
+/* package */ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
 
     /**
      * A function, which performs the enrichment.
      */
-    private final Function<M, E> function;
+    private final Function<S, T> function;
 
-    private FieldEnricher(Class<M> sourceClass, Class<E> targetClass, Function<M, E> function) {
+    private FieldEnricher(Class<S> sourceClass, Class<T> targetClass, Function<S, T> function) {
         super(sourceClass, targetClass);
         this.function = checkNotNull(function);
     }
@@ -50,13 +51,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @param source a class of the field in the event message
      * @param target a class of the field in the enrichment message
      * @param translator a conversion function
-     * @param <M> the type of the field in the event message
-     * @param <E> the type of the field in the enrichment message
-     * @return new instance
+     * @return a new instance
      */
-    /* package */ static <M extends Message, E extends Message>
-    FieldEnricher<M, E> newInstance(Class<M> source, Class<E> target, Function<M, E> translator) {
-        final FieldEnricher<M, E> result = new FieldEnricher<>(source, target, translator);
+    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> source,
+                                                                Class<T> target,
+                                                                Function<S, T> translator) {
+        final FieldEnricher<S, T> result = new FieldEnricher<>(source, target, translator);
         return result;
     }
 
@@ -66,19 +66,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
     }
 
     @Override
-    public Function<M, E> getFunction() {
+    public Function<S, T> getFunction() {
         return function;
     }
 
     @Override
     @Nullable
-    public E apply(@Nullable M message) {
+    public T apply(@Nullable S message) {
         if (message == null) {
             return null;
         }
-        final E result = function.apply(message);
+        final T result = function.apply(message);
         return result;
     }
-
-
 }

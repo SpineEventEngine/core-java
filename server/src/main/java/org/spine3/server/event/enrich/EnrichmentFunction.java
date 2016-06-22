@@ -22,7 +22,6 @@ package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.protobuf.Message;
 import org.spine3.server.event.EventBus;
 
 import javax.annotation.Nullable;
@@ -36,11 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events passed to {@link EventBus}.
  *
- * @param <M> a type of the source message to enrich
- * @param <E> a type of the enrichment
+ * @param <S> a type of the source object to enrich
+ * @param <T> a type of the enrichment
  * @author Alexander Yevsyukov
  */
-/* package */ abstract class EnrichmentFunction<M extends Message, E extends Message> implements Function<M, E> {
+/* package */ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
@@ -52,29 +51,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * An event message class.
      */
-    private final Class<M> sourceClass;
+    private final Class<S> sourceClass;
 
     /**
      * A class of a message with enrichment for the event.
      */
-    private final Class<E> targetClass;
+    private final Class<T> targetClass;
 
-    /* package */ EnrichmentFunction(Class<M> sourceClass, Class<E> targetClass) {
+    /* package */ EnrichmentFunction(Class<S> sourceClass, Class<T> targetClass) {
         this.sourceClass = checkNotNull(sourceClass);
         this.targetClass = checkNotNull(targetClass);
         checkArgument(!sourceClass.equals(targetClass),
                       "Source and target class must not be equal. Passed two values of %", sourceClass);
     }
 
-    public Class<M> getSourceClass() {
+    public Class<S> getSourceClass() {
         return sourceClass;
     }
 
-    public Class<E> getTargetClass() {
+    public Class<T> getTargetClass() {
         return targetClass;
     }
 
-    public abstract Function<M, E> getFunction();
+    public abstract Function<S, T> getFunction();
 
     /**
      * Validates the instance.

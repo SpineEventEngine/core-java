@@ -21,7 +21,6 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
@@ -31,12 +30,9 @@ import org.spine3.protobuf.Values;
 import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
-
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EnricherBuilderShould {
@@ -75,7 +71,7 @@ public class EnricherBuilderShould {
     public void add_event_enrichment() {
         builder.addEventEnrichment(Timestamp.class, StringValue.class);
 
-        final Set<EnrichmentFunction<? extends Message, ? extends Message>> functions = builder.getFunctions();
+        final Set<EnrichmentFunction<?, ?>> functions = builder.getFunctions();
         assertEquals(1, functions.size());
     }
 
