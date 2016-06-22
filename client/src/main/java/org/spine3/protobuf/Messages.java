@@ -30,7 +30,6 @@ import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
-import org.spine3.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -212,35 +211,47 @@ public class Messages {
         }
     }
 
-    public static Class<?> getFieldClass(FieldDescriptor fieldDescriptor) {
-        final FieldDescriptor.JavaType javaType = fieldDescriptor.getJavaType();
-
-        Object defaultObject = null;
+    /**
+     * Returns the class of the Protobuf message field.
+     *
+     * @param field the field descriptor
+     * @return the class of the field
+     */
+    public static Class<?> getFieldClass(FieldDescriptor field) {
+        final FieldDescriptor.JavaType javaType = field.getJavaType();
         switch (javaType) {
             case INT:
+                return Integer.class;
             case LONG:
+                return Long.class;
             case FLOAT:
+                return Float.class;
             case DOUBLE:
+                return Double.class;
             case BOOLEAN:
+                return Boolean.class;
             case STRING:
+                return String.class;
             case BYTE_STRING:
-                defaultObject = fieldDescriptor.getDefaultValue();
-                return defaultObject.getClass();
+                return ByteString.class;
             case ENUM:
-                //TODO:2016-06-17:alexander.yevsyukov: Figure out how to treat enums.
-                throw Exceptions.unsupported(
-                        "Enums in mapping are not yet supported. Discovered: " + fieldDescriptor.getFullName());
+                final String enumTypeNameStr = field.getEnumType().getFullName();
+                final TypeName enumTypeName = TypeName.of(enumTypeNameStr);
+                return tryConvertToClass(enumTypeName);
             case MESSAGE:
-                final Descriptor messageType = fieldDescriptor.getMessageType();
+                final Descriptor messageType = field.getMessageType();
                 final TypeName typeName = TypeName.of(messageType);
-                try {
-                    final Class<? extends Message> result = toMessageClass(typeName);
-                    return result;
-                } catch (ClassNotFoundException e) {
-                    propagate(e);
-                }
-                break;
+                return tryConvertToClass(typeName);
         }
-        throw new IllegalStateException("Unknown field type discovered: " + fieldDescriptor.getFullName());
+        throw new IllegalStateException("Unknown field type discovered: " + field.getFullName());
+    }
+
+    private static Class<? extends Message> tryConvertToClass(TypeName enumTypeName) {
+        try {
+            final Class<? extends Message> result = toMessageClass(enumTypeName);
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw propagate(e);
+        }
     }
 }
