@@ -112,7 +112,7 @@ public class EnrichmentFunctionShould {
     @Test
     public void have_hashCode() throws Exception {
         final EnrichmentFunction<BoolValue, StringValue> function = unboundInstance(BoolValue.class, StringValue.class);
-        assertTrue(function.hashCode() != System.identityHashCode(function));
+        assertNotEquals(System.identityHashCode(function), function.hashCode());
     }
 
     @Test
