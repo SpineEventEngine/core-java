@@ -21,39 +21,50 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Descriptors;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import org.spine3.protobuf.Messages;
+import org.spine3.server.event.enrich.EventEnricher.SupportsFieldConversion;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.protobuf.Descriptors.FieldDescriptor;
 
 /**
  * The default mechanism for enriching messages based on {@code FieldOptions} of Protobuf message definitions.
  *
- * @param <M> a type of the message of the event to enrich
- * @param <E> a type of the enrichment message
+ * @param <S> a type of the source event message to enrich
+ * @param <T> a type of the target enrichment message
  *
  * @author Alexander Yevsyukov
  */
-/* package */ class EventMessageEnricher<M extends Message, E extends Message> extends EnrichmentFunction<M, E> {
+/* package */ class EventMessageEnricher<S extends Message, T extends Message> extends EnrichmentFunction<S, T> {
 
     /**
      * A parent instance holding this instance and its siblings.
      */
     private final EventEnricher enricher;
 
+    /**
+     * A map from source event field class to enrichment functions.
+     */
     @Nullable
-    private ImmutableMap<Class<?>, EnrichmentFunction<?, ?>> fieldFunctions;
-    @Nullable
-    private ImmutableBiMap<Descriptors.FieldDescriptor, Descriptors.FieldDescriptor> fieldMap;
+    private ImmutableMultimap<Class<?>, EnrichmentFunction> fieldFunctions;
 
-    /* package */ EventMessageEnricher(EventEnricher enricher, Class<M> sourceClass, Class<E> targetClass) {
+    /**
+     * A map from source event field to target enrichment field descriptors.
+     */
+    @Nullable
+    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+
+    /* package */ EventMessageEnricher(EventEnricher enricher, Class<S> sourceClass, Class<T> targetClass) {
         super(sourceClass, targetClass);
         this.enricher = enricher;
     }
@@ -74,22 +85,20 @@ import static com.google.common.base.Preconditions.checkState;
     }
 
     @Override
-    public Function<M, E> getFunction() {
+    public Function<S, T> getFunction() {
         return this;
     }
 
     @Override
-    /* package */void validate() {
+    /* package */ void validate() {
         final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
                                                                              getSourceClass(),
                                                                              getTargetClass());
+        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map = ImmutableMultimap.builder();
         final List<EnrichmentFunction<?, ?>> fieldFunctions = referenceValidator.validate();
-
-        final ImmutableMap.Builder<Class<?>, EnrichmentFunction<?, ?>> map = ImmutableMap.builder();
         for (EnrichmentFunction<?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getSourceClass(), fieldFunction);
         }
-
         this.fieldFunctions = map.build();
         this.fieldMap = referenceValidator.fieldMap();
     }
@@ -97,7 +106,7 @@ import static com.google.common.base.Preconditions.checkState;
     @SuppressWarnings("unchecked") // We control the type safety during initialization and validation.
     @Nullable
     @Override
-    public E apply(@Nullable M message) {
+    public T apply(@Nullable S message) {
         if (message == null) {
             return null;
         }
@@ -107,17 +116,25 @@ import static com.google.common.base.Preconditions.checkState;
         checkState(!fieldMap.isEmpty(), "fieldMap is empty");
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
 
-        final E defaultTarget = Internal.getDefaultInstance(getTargetClass());
+        final T defaultTarget = Internal.getDefaultInstance(getTargetClass());
         final Message.Builder builder = defaultTarget.toBuilder();
-        for (Descriptors.FieldDescriptor srcField : fieldMap.keySet()) {
-            final Object srcValue = message.getField(srcField);
-            final EnrichmentFunction function = fieldFunctions.get(srcValue.getClass());
-            final Object targetValue = function.apply(srcValue);
-            final Descriptors.FieldDescriptor targetField = fieldMap.get(srcField);
-            if (targetValue != null) {
-                builder.setField(targetField, targetValue);
+
+        for (FieldDescriptor srcField : fieldMap.keySet()) {
+            final Object srcFieldValue = message.getField(srcField);
+            final Class<?> sourceFieldClass = srcFieldValue.getClass();
+            final Collection<EnrichmentFunction> functions = fieldFunctions.get(sourceFieldClass);
+            final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
+
+            // TODO:2016-06-23:alexander.litus: refactor
+            for (FieldDescriptor targetField : targetFields) {
+                final Optional<EnrichmentFunction> function = FluentIterable.from(functions)
+                        .firstMatch(SupportsFieldConversion.of(sourceFieldClass, Messages.getFieldClass(targetField)));
+                final Object targetValue = function.get().apply(srcFieldValue);
+                if (targetValue != null) {
+                    builder.setField(targetField, targetValue);
+                }
             }
         }
-        return (E) builder.build();
+        return (T) builder.build();
     }
 }

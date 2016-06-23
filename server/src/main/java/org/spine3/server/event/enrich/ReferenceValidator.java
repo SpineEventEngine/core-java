@@ -21,8 +21,8 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Internal;
@@ -51,7 +51,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     private final FieldDescriptor byOptionDescriptor;
 
     @Nullable
-    private ImmutableBiMap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
+    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
 
     /* package */ ReferenceValidator(EventEnricher enricher,
             Class<? extends Message> sourceClass,
@@ -69,7 +69,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 
     @Nullable
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK since the implementation is immutable.
-    /* package */ ImmutableBiMap<FieldDescriptor, FieldDescriptor> fieldMap() {
+    /* package */ ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
         return sourceToTargetMap;
     }
 
@@ -79,7 +79,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     @SuppressWarnings("MethodWithMultipleLoops") // OK because we iterate through fields and options.
     /* package */ List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
-        final ImmutableBiMap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableBiMap.builder();
+        final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
 
         for (FieldDescriptor targetField : targetDescriptor.getFields()) {
             final Map<FieldDescriptor, Object> allOptions = targetField.getOptions()

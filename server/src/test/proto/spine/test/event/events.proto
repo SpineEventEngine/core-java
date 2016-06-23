@@ -21,6 +21,7 @@ syntax = "proto3";
 
 package spine.test.event;
 
+import "spine/users/user_id.proto";
 import "spine/test/event/project.proto";
 import "spine/test/event/task.proto";
 import "spine/event_annotations.proto";
@@ -34,14 +35,21 @@ message ProjectCreated {
 
     message Enrichment {
         string project_name = 1 [(by) = "project_id"];
+
+        spine.users.UserId owner_id = 2 [(by) = "project_id"];
     }
 }
 
 message TaskAdded {
     ProjectId project_id = 1;
+
     Task task = 2;
 }
 
 message ProjectStarted {
     ProjectId project_id = 1;
+
+    message Enrichment {
+        string project_name = 1 [(by) = "project_id"];
+    }
 }

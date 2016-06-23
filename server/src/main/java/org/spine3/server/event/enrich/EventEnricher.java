@@ -175,7 +175,7 @@ public class EventEnricher {
         return func;
     }
 
-    private static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
+    /* package */ static class SupportsFieldConversion implements Predicate<EnrichmentFunction> {
 
         private final Class<?> sourceFieldClass;
         private final Class<?> targetFieldClass;
