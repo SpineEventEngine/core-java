@@ -23,6 +23,7 @@ package org.spine3.base;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
@@ -44,6 +45,7 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -54,6 +56,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class CommandsShould {
 
     private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(CommandsShould.class);
+    private final StringValue stringValue = newStringValue(newUuid());
 
     @Test
     public void sort() {
@@ -82,6 +85,22 @@ public class CommandsShould {
     }
 
     @Test
+    public void create_command() {
+        final Command command = Commands.create(stringValue, CommandContext.getDefaultInstance());
+
+        assertEquals(stringValue, Commands.getMessage(command));
+    }
+
+    @Test
+    public void create_command_with_Any() {
+        final Any msg = toAny(stringValue);
+
+        final Command command = Commands.create(msg, CommandContext.getDefaultInstance());
+
+        assertEquals(msg, command.getMessage());
+    }
+
+    @Test
     public void extract_message_from_command() {
         final StringValue message = newStringValue("extract_message_from_command");
 
@@ -92,7 +111,7 @@ public class CommandsShould {
 
     @Test
     public void extract_id_from_command() {
-        final Command command = commandFactory.create(newStringValue(newUuid()));
+        final Command command = commandFactory.create(stringValue);
 
         assertEquals(command.getContext().getCommandId(), getId(command));
     }
@@ -121,7 +140,7 @@ public class CommandsShould {
 
     @Test
     public void create_logging_message_for_command_with_type_and_id() {
-        final Command command = commandFactory.create(newStringValue(newUuid()));
+        final Command command = commandFactory.create(stringValue);
         final String typeName = TypeName.ofCommand(command).toString();
         final String commandId = idToString(getId(command));
 
@@ -134,12 +153,12 @@ public class CommandsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_create_logging_message_and_format_string_is_empty() {
-        Commands.formatCommandTypeAndId("", commandFactory.create(newStringValue(newUuid())));
+        Commands.formatCommandTypeAndId("", commandFactory.create(stringValue));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_create_logging_message_and_format_string_is_blank() {
-        Commands.formatCommandTypeAndId("  ", commandFactory.create(newStringValue(newUuid())));
+        Commands.formatCommandTypeAndId("  ", commandFactory.create(stringValue));
     }
 
     @Test
@@ -192,7 +211,7 @@ public class CommandsShould {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Command cmd = commandFactory.create(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations.ofMinutes(5);
 
@@ -205,7 +224,7 @@ public class CommandsShould {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = commandFactory.create(newStringValue(newUuid()));
+        final Command cmd = commandFactory.create(stringValue);
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);

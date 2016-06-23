@@ -120,10 +120,8 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
      * Converts EventStorageRecord to Event.
      */
     protected static Event toEvent(EventStorageRecord record) {
-        final Event.Builder builder = Event.newBuilder()
-                .setMessage(record.getMessage())
-                .setContext(record.getContext());
-        return builder.build();
+        final Event event = Events.createEvent(record.getMessage(), record.getContext());
+        return event;
     }
 
     /**

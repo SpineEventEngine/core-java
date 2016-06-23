@@ -20,6 +20,7 @@
 package org.spine3.base;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
@@ -112,6 +113,15 @@ public class EventsShould {
         final Event event = createEvent(msg, context);
 
         assertEquals(msg, fromAny(event.getMessage()));
+        assertEquals(context, event.getContext());
+    }
+
+    @Test
+    public void create_event_with_Any() {
+        final Any msg = toAny(stringValue);
+        final Event event = createEvent(msg, context);
+
+        assertEquals(msg, event.getMessage());
         assertEquals(context, event.getContext());
     }
 

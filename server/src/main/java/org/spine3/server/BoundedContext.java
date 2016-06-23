@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
@@ -209,10 +210,8 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
                 .setTimestamp(sourceContext.getTimestamp())
                 .setProducerId(toAny(producerId))
                 .build();
-        final Event.Builder result = Event.newBuilder()
-                .setMessage(integrationEvent.getMessage())
-                .setContext(context);
-        return result.build();
+        final Event result = Events.createEvent(integrationEvent.getMessage(), context);
+        return result;
     }
 
     /**

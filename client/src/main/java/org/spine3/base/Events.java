@@ -39,6 +39,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
@@ -90,11 +91,20 @@ public class Events {
     }
 
     /**
-     * Creates {@code Event} instance with the passed event and context.
+     * Creates a new {@code Event} instance with the passed event message and context.
      */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
+        return createEvent(toAny(event), context);
+    }
+
+    /**
+     * Creates a new {@code Event} instance with the passed event message wrapped to {@link Any} and context.
+     */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
+    public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()
-                .setMessage(Messages.toAny(event))
+                .setMessage(eventAny)
                 .setContext(context)
                 .build();
         return result;
