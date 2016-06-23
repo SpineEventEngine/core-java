@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
 import org.spine3.test.Tests;
+import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectId;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -35,7 +37,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
-public class EnricherBuilderShould {
+public class EventEnricherBuilderShould {
 
     private EventEnricher.Builder builder;
     private Function<Timestamp, StringValue> function;
@@ -79,7 +81,8 @@ public class EnricherBuilderShould {
     public void add_field_enrichment() {
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, fieldEnricherFunction.getFunction());
 
-        assertTrue(builder.getFunctions().contains(fieldEnricherFunction));
+        assertTrue(builder.getFunctions()
+                          .contains(fieldEnricherFunction));
     }
 
     @Test
@@ -134,5 +137,14 @@ public class EnricherBuilderShould {
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
         // This should fail.
         builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_no_function_for_field_enrichment() {
+        EventEnricher
+                .newBuilder()
+                .addEventEnrichment(ProjectCreated.class, ProjectCreated.Enrichment.class)
+                .addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName())
+                .build();
     }
 }
