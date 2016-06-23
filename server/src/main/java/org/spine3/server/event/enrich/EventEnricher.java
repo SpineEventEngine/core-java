@@ -205,35 +205,54 @@ public class EventEnricher {
      * and set a custom translation function, if needed.
      */
     public static class Builder {
+
         /**
-         * A map from an enrichment type to a translation function which performs the enrichment.
+         * Translation functions which perform the enrichment.
          */
         private final Set<EnrichmentFunction<?, ?>> functions = Sets.newHashSet();
 
+        /**
+         * Creates a new instance.
+         */
         public static Builder newInstance() {
             return new Builder();
         }
 
         private Builder() {}
 
-        public <M extends Message, E extends Message> Builder addEventEnrichment(Class<M> eventMessageClass,
-                Class<E> enrichmentClass) {
+        /**
+         * Add a new event enrichment.
+         *
+         * @param eventMessageClass a class of event to enrich
+         * @param enrichmentClass a class of an enrichment message
+         * @return a builder instance
+         */
+        public <S extends Message, T extends Message> Builder addEventEnrichment(Class<S> eventMessageClass,
+                Class<T> enrichmentClass) {
             checkNotNull(eventMessageClass);
             checkNotNull(enrichmentClass);
-            final EnrichmentFunction<M, E> newEntry = EventMessageEnricher.unboundInstance(eventMessageClass,
+            final EnrichmentFunction<S, T> newEntry = EventMessageEnricher.unboundInstance(eventMessageClass,
                                                                                            enrichmentClass);
             checkDuplicate(newEntry);
             functions.add(newEntry);
             return this;
         }
 
-        public <M, E> Builder addFieldEnrichment(Class<M> eventMessageClass,
-                                                 Class<E> enrichmentClass,
-                                                 Function<M, E> function) {
-            checkNotNull(eventMessageClass);
-            checkNotNull(enrichmentClass);
-            final EnrichmentFunction<M, E> newEntry = FieldEnricher.newInstance(eventMessageClass,
-                                                                                enrichmentClass,
+        /**
+         * Add a new field enrichment translation function.
+         *
+         * @param sourceFieldClass a class of the field in the event message
+         * @param targetFieldClass a class of the field in the enrichment message
+         * @param function a function which converts fields
+         * @return a builder instance
+         */
+        public <S, T> Builder addFieldEnrichment(Class<S> sourceFieldClass,
+                                                 Class<T> targetFieldClass,
+                                                 Function<S, T> function) {
+            checkNotNull(sourceFieldClass);
+            checkNotNull(targetFieldClass);
+            final EnrichmentFunction<S, T> newEntry = FieldEnricher.newInstance(sourceFieldClass,
+                                                                                targetFieldClass,
                                                                                 function);
             checkDuplicate(newEntry);
             functions.add(newEntry);
@@ -244,7 +263,7 @@ public class EventEnricher {
          * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
          * source and target classes
          */
-        private <M, E> void checkDuplicate(EnrichmentFunction<M, E> function) {
+        private void checkDuplicate(EnrichmentFunction<?, ?> function) {
             final Optional<EnrichmentFunction<?, ?>> duplicate = FluentIterable.from(functions)
                     .firstMatch(SameTransition.asFor(function));
             if (duplicate.isPresent()) {

@@ -48,15 +48,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * Creates a new instance.
      *
-     * @param source a class of the field in the event message
-     * @param target a class of the field in the enrichment message
+     * @param sourceFieldClass a class of the field in the event message
+     * @param targetFieldClass a class of the field in the enrichment message
      * @param translator a conversion function
      * @return a new instance
      */
-    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> source,
-                                                                Class<T> target,
+    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> sourceFieldClass,
+                                                                Class<T> targetFieldClass,
                                                                 Function<S, T> translator) {
-        final FieldEnricher<S, T> result = new FieldEnricher<>(source, target, translator);
+        final FieldEnricher<S, T> result = new FieldEnricher<>(sourceFieldClass, targetFieldClass, translator);
         return result;
     }
 
