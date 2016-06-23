@@ -216,6 +216,7 @@ public class Messages {
      *
      * @param field the field descriptor
      * @return the class of the field
+     * @throws IllegalArgumentException if the field type is unknown
      */
     public static Class<?> getFieldClass(FieldDescriptor field) {
         final FieldDescriptor.JavaType javaType = field.getJavaType();
@@ -243,9 +244,13 @@ public class Messages {
                 final TypeName typeName = TypeName.of(messageType);
                 return tryConvertToClass(typeName);
         }
-        throw new IllegalStateException("Unknown field type discovered: " + field.getFullName());
+        throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
     }
 
+    /**
+     * Converts the type name to the class of the message.
+     * Wraps {@link ClassNotFoundException} to {@link RuntimeException} if it is thrown.
+     */
     private static Class<? extends Message> tryConvertToClass(TypeName enumTypeName) {
         try {
             final Class<? extends Message> result = toMessageClass(enumTypeName);

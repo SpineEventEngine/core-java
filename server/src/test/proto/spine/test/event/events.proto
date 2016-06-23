@@ -33,7 +33,7 @@ message ProjectCreated {
     ProjectId project_id = 1;
 
     message Enrichment {
-        string project_name = 2 [(by) = "project_id"];
+        string project_name = 1 [(by) = "project_id"];
     }
 }
 
