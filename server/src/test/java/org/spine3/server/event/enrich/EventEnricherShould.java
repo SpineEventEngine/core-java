@@ -33,6 +33,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
 import org.spine3.server.event.Subscribe;
+import org.spine3.test.event.EnrichmentWithInvalidField;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectId;
@@ -116,6 +117,14 @@ public class EventEnricherShould {
 
         final ProjectCreated msg = getMessage(event);
         assertEquals(getProjectName.apply(msg.getProjectId()), subscriber.projectCreatedSeparateEnrichment.getProjectName());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_enrichment_has_invalid_options() {
+        EventEnricher.newBuilder()
+                     .addEventEnrichment(ProjectCreated.class, EnrichmentWithInvalidField.class)
+                     .addFieldEnrichment(ProjectId.class, String.class, getProjectName)
+                     .build();
     }
 
     @Test
