@@ -51,6 +51,7 @@ extend google.protobuf.FieldOptions {
     // </pre>
     //
     // The enrichment message can be defined anywhere and with any name.
+    // The value of the option is the name of the source event field, exactly the same as in the definition.
     //
     string by = 59100;
 }
