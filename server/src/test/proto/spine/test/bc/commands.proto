@@ -25,7 +25,7 @@ import "spine/test/bc/project.proto";
 import "spine/test/bc/task.proto";
 
 option java_package="org.spine3.test.bc.command";
-option java_outer_classname = "BCCommandsProto";
+option java_outer_classname = "TestBcCommandsProto";
 option java_multiple_files = true;
 
 message CreateProject {
