@@ -230,8 +230,7 @@ public class EventEnricher {
                 Class<T> enrichmentClass) {
             checkNotNull(eventMessageClass);
             checkNotNull(enrichmentClass);
-            final EnrichmentFunction<S, T> newEntry = EventMessageEnricher.unboundInstance(eventMessageClass,
-                                                                                           enrichmentClass);
+            final EnrichmentFunction<S, T> newEntry = Unbound.newInstance(eventMessageClass, enrichmentClass);
             checkDuplicate(newEntry);
             functions.add(newEntry);
             return this;

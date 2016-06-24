@@ -35,7 +35,21 @@ import javax.annotation.Nullable;
 
     private static final String CANNOT_USE_MSG = "Unbound instance cannot be used for enrichments";
 
-    /* package */Unbound(Class<M> sourceClass, Class<E> targetClass) {
+    /**
+     * Creates a new Unbound function instance for enriching events.
+     *
+     * @param source a class of the event message to enrich
+     * @param target a class of the target enrichment
+     * @param <M> the type of the event message
+     * @param <E> the type of the enrichment message
+     * @return new enrichment function
+     */
+    /* package */ static <M extends Message, E extends Message> Unbound<M, E> newInstance(Class<M> source,
+                                                                                          Class<E> target) {
+        return new Unbound<>(source, target);
+    }
+
+    private Unbound(Class<M> sourceClass, Class<E> targetClass) {
         super(sourceClass, targetClass);
     }
 
@@ -61,7 +75,7 @@ import javax.annotation.Nullable;
      * @throws IllegalStateException always to prevent the usage of instances in configured {@link EventEnricher}
      */
     @Override
-    /* package */void validate() {
+    /* package */ void validate() {
         throw Exceptions.unsupported(CANNOT_USE_MSG);
     }
 

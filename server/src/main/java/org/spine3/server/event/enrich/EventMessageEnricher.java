@@ -69,21 +69,6 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         this.enricher = enricher;
     }
 
-    /**
-     * Creates a new instance for enriching events.
-     *
-     * @param source a class of the event message to enrich
-     * @param target a class of the target enrichment
-     * @param <M> the type of the event message
-     * @param <E> the type of the enrichment message
-     * @return new enrichment function with {@link EventMessageEnricher}
-     */
-    /* package */ static <M extends Message, E extends Message>
-    EnrichmentFunction<M, E> unboundInstance(Class<M> source, Class<E> target) {
-        final EnrichmentFunction<M, E> result = new Unbound<>(source, target);
-        return result;
-    }
-
     @Override
     public Function<S, T> getFunction() {
         return this;

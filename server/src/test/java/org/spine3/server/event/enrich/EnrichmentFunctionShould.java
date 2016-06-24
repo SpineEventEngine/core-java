@@ -34,7 +34,6 @@ import org.spine3.test.Tests;
 import javax.annotation.Nullable;
 
 import static org.junit.Assert.*;
-import static org.spine3.server.event.enrich.EventMessageEnricher.unboundInstance;
 import static org.spine3.server.event.enrich.FieldEnricher.newInstance;
 
 public class EnrichmentFunctionShould {
@@ -58,17 +57,17 @@ public class EnrichmentFunctionShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class() {
-        unboundInstance(Tests.<Class<? extends Message>>nullRef(), StringValue.class);
+        Unbound.newInstance(Tests.<Class<? extends Message>>nullRef(), StringValue.class);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target_class() {
-        unboundInstance(StringValue.class, Tests.<Class<? extends Message>>nullRef());
+        Unbound.newInstance(StringValue.class, Tests.<Class<? extends Message>>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_same_source_and_target_class() {
-        unboundInstance(StringValue.class, StringValue.class);
+        Unbound.newInstance(StringValue.class, StringValue.class);
     }
 
     @Test(expected = NullPointerException.class)
@@ -78,12 +77,12 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void return_sourceClass() throws Exception {
-        assertEquals(Int32Value.class, unboundInstance(Int32Value.class, Int64Value.class).getSourceClass());
+        assertEquals(Int32Value.class, Unbound.newInstance(Int32Value.class, Int64Value.class).getSourceClass());
     }
 
     @Test
     public void return_targetClass() throws Exception {
-        assertEquals(Int64Value.class, unboundInstance(Int32Value.class, Int64Value.class).getTargetClass());
+        assertEquals(Int64Value.class, Unbound.newInstance(Int32Value.class, Int64Value.class).getTargetClass());
     }
 
     @Test
@@ -111,7 +110,7 @@ public class EnrichmentFunctionShould {
 
     @Test
     public void have_hashCode() throws Exception {
-        final EnrichmentFunction<BoolValue, StringValue> function = unboundInstance(BoolValue.class, StringValue.class);
+        final EnrichmentFunction<BoolValue, StringValue> function = Unbound.newInstance(BoolValue.class, StringValue.class);
         assertNotEquals(System.identityHashCode(function), function.hashCode());
     }
 

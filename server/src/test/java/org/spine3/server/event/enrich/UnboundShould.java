@@ -21,22 +21,34 @@
 package org.spine3.server.event.enrich;
 
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.spine3.server.event.enrich.EventMessageEnricher.unboundInstance;
 
 public class UnboundShould {
 
+    private final Unbound<BoolValue, StringValue> unbound = Unbound.newInstance(BoolValue.class, StringValue.class);
+
     @Test
     public void return_null_on_getFunction() throws Exception {
-        assertNull(unboundInstance(StringValue.class, Int64Value.class).getFunction());
+        assertNull(unbound.getFunction());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void throw_unsupported_on_apply() {
-        unboundInstance(BoolValue.class, StringValue.class).apply(BoolValue.getDefaultInstance());
+        unbound.apply(BoolValue.getDefaultInstance());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void throw_exception_on_validate() {
+        unbound.validate();
+    }
+
+    @Test
+    public void convert_to_bound() {
+        final EventMessageEnricher<BoolValue, StringValue> enricher = unbound.toBound(EventEnricher.newBuilder().build());
+        assertNotNull(enricher);
     }
 }
