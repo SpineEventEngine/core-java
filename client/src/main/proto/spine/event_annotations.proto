@@ -50,15 +50,7 @@ extend google.protobuf.FieldOptions {
     // }
     // </pre>
     //
-    // If the enrichment message is not enclosed into the event message, the source field name must be prefixed
-    // with the source event message type name:
-    //
-    // <pre>
-    //     spine.people.PersonName name = 1 [(by) = "MyEvent.user_id"];
-    // </pre>
-    //
-    // If the source message is not in the same package, the type name prefixing the field reference
-    // must be fully-qualified.
+    // The enrichment message can be defined anywhere and with any name.
     //
     string by = 59100;
 }

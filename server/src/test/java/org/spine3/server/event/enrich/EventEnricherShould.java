@@ -21,6 +21,8 @@
 package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -32,6 +34,7 @@ import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
 import org.spine3.server.event.Subscribe;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarted;
 import org.spine3.testdata.BoundedContextTestStubs;
@@ -100,6 +103,22 @@ public class EventEnricherShould {
     }
 
     @Test
+    public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event() {
+        final EventEnricher enricher = EventEnricher
+                .newBuilder()
+                .addEventEnrichment(ProjectCreated.class, ProjectCreatedSeparateEnrichment.class)
+                .addFieldEnrichment(ProjectId.class, String.class, getProjectName)
+                .build();
+        setUp(enricher);
+        final Event event = Given.Event.projectCreated();
+
+        eventBus.post(event);
+
+        final ProjectCreated msg = getMessage(event);
+        assertEquals(getProjectName.apply(msg.getProjectId()), subscriber.projectCreatedSeparateEnrichment.getProjectName());
+    }
+
+    @Test
     public void confirm_that_event_can_be_enriched_if_enrichments_registered() {
         final EventEnricher enricher = EventEnricher
                 .newBuilder()
@@ -132,6 +151,13 @@ public class EventEnricherShould {
         assertFalse(enricher.canBeEnriched(event));
     }
 
+    @Test
+    public void return_false_if_pass_null_to_function_checking_predicate() {
+        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class, String.class)
+                                                                    .apply(null);
+        assertFalse(result);
+    }
+
     private void setUp(EventEnricher enricher) {
         boundedContext = BoundedContextTestStubs.create(enricher);
         eventBus = boundedContext.getEventBus();
@@ -142,11 +168,20 @@ public class EventEnricherShould {
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
+        private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
         private ProjectStarted.Enrichment projectStartedEnrichment;
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
-            this.projectCreatedEnrichment = getEnrichment(ProjectCreated.Enrichment.class, context).get();
+            final Optional<ProjectCreated.Enrichment> enrichment = getEnrichment(ProjectCreated.Enrichment.class, context);
+            if (enrichment.isPresent()) {
+                this.projectCreatedEnrichment =  enrichment.get();
+            }
+            final Optional<ProjectCreatedSeparateEnrichment> enrichmentSeparate =
+                    getEnrichment(ProjectCreatedSeparateEnrichment.class, context);
+            if (enrichmentSeparate.isPresent()) {
+                this.projectCreatedSeparateEnrichment = enrichmentSeparate.get();
+            }
         }
 
         @Subscribe

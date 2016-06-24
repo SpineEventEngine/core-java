@@ -100,11 +100,6 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     }
 
     private FieldDescriptor resolveFieldRef(String sourceFieldReference, FieldDescriptor targetField) {
-
-        // In the following code we assume that the reference is not qualified.
-        //TODO:2016-06-17:alexander.yevsyukov: Handle the sibling type and another package reference too.
-
-        // Now try to find a field with such a name in the outer (source) message.
         final FieldDescriptor srcField = sourceDescriptor.findFieldByName(sourceFieldReference);
         if (srcField == null) {
             final String msg = String.format(
