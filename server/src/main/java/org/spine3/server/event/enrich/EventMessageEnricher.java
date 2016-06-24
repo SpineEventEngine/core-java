@@ -106,18 +106,17 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         return result;
     }
 
-    @SuppressWarnings({"ConstantConditions", "unchecked", "MethodWithMultipleLoops"})
-    /* it is assured that collections are not null, types are checked */
+    @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that collections are not null
     private void setFields(Message.Builder builder, S message) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
             final Object srcFieldValue = message.getField(srcField);
             final Class<?> sourceFieldClass = srcFieldValue.getClass();
             final Collection<EnrichmentFunction> functions = fieldFunctions.get(sourceFieldClass);
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
-
             for (FieldDescriptor targetField : targetFields) {
                 final Optional<EnrichmentFunction> function = FluentIterable.from(functions)
                         .firstMatch(SupportsFieldConversion.of(sourceFieldClass, Messages.getFieldClass(targetField)));
+                @SuppressWarnings("unchecked") // types are checked during the initialization and validation
                 final Object targetValue = function.get().apply(srcFieldValue);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);
