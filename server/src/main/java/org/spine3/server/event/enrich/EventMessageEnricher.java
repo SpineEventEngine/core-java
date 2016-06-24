@@ -103,7 +103,6 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         this.fieldMap = referenceValidator.fieldMap();
     }
 
-    @SuppressWarnings("unchecked") // We control the type safety during initialization and validation.
     @Nullable
     @Override
     public T apply(@Nullable S message) {
@@ -112,20 +111,25 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         }
         checkNotNull(this.fieldMap, "fieldMap");
         checkNotNull(this.fieldFunctions, "fieldFunctions");
-
         checkState(!fieldMap.isEmpty(), "fieldMap is empty");
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
-
         final T defaultTarget = Internal.getDefaultInstance(getTargetClass());
         final Message.Builder builder = defaultTarget.toBuilder();
+        setFields(builder, message);
+        @SuppressWarnings("unchecked") // types are checked during the initialization and validation
+        final T result = (T) builder.build();
+        return result;
+    }
 
+    @SuppressWarnings({"ConstantConditions", "unchecked", "MethodWithMultipleLoops"})
+    /* it is assured that collections are not null, types are checked */
+    private void setFields(Message.Builder builder, S message) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
             final Object srcFieldValue = message.getField(srcField);
             final Class<?> sourceFieldClass = srcFieldValue.getClass();
             final Collection<EnrichmentFunction> functions = fieldFunctions.get(sourceFieldClass);
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
 
-            // TODO:2016-06-23:alexander.litus: refactor
             for (FieldDescriptor targetField : targetFields) {
                 final Optional<EnrichmentFunction> function = FluentIterable.from(functions)
                         .firstMatch(SupportsFieldConversion.of(sourceFieldClass, Messages.getFieldClass(targetField)));
@@ -135,6 +139,5 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
                 }
             }
         }
-        return (T) builder.build();
     }
 }
