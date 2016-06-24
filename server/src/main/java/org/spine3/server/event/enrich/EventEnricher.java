@@ -114,8 +114,7 @@ public class EventEnricher {
      * @return {@code true} if the enrichment for the event is possible, {@code false} otherwise
      */
     public boolean canBeEnriched(Event event) {
-        final boolean containsKey = enrichmentRegistered(event);
-        if (!containsKey) {
+        if (!enrichmentRegistered(event)) {
             return false;
         }
         final boolean enrichmentEnabled = Events.isEnrichmentEnabled(event);

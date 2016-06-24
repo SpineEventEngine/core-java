@@ -81,6 +81,17 @@ public class TestEventContextFactory {
     }
 
     /**
+     * Creates a new {@link EventContext} with the given {@code doNotEnrich} value.
+     */
+    public static EventContext createEventContext(boolean doNotEnrich) {
+        final EventContext context = createEventContext()
+                .toBuilder()
+                .setDoNotEnrich(doNotEnrich)
+                .build();
+        return context;
+    }
+
+    /**
      * Creates a new {@link IntegrationEventContext} with default properties.
      */
     public static IntegrationEventContext createIntegrationEventContext() {

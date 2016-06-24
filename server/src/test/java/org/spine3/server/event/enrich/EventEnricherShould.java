@@ -39,10 +39,11 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.spine3.base.Events.getEnrichment;
-import static org.spine3.base.Events.getMessage;
+import static org.junit.Assert.*;
+import static org.spine3.base.Events.*;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 public class EventEnricherShould {
 
@@ -96,6 +97,39 @@ public class EventEnricherShould {
         final ProjectCreated msg = getMessage(event);
         assertEquals(getProjectName.apply(msg.getProjectId()), subscriber.projectCreatedEnrichment.getProjectName());
         assertEquals(getProjectOwnerId.apply(msg.getProjectId()), subscriber.projectCreatedEnrichment.getOwnerId());
+    }
+
+    @Test
+    public void confirm_that_event_can_be_enriched_if_enrichments_registered() {
+        final EventEnricher enricher = EventEnricher
+                .newBuilder()
+                .addEventEnrichment(ProjectStarted.class, ProjectStarted.Enrichment.class)
+                .addFieldEnrichment(ProjectId.class, String.class, getProjectName)
+                .build();
+
+        assertTrue(enricher.canBeEnriched(Given.Event.projectStarted()));
+    }
+
+    @Test
+    public void confirm_that_event_can_not_be_enriched_if_no_enrichment_registered() {
+        final EventEnricher enricher = EventEnricher
+                .newBuilder()
+                .build();
+
+        assertFalse(enricher.canBeEnriched(Given.Event.projectStarted()));
+    }
+
+    @Test
+    public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
+        final EventEnricher enricher = EventEnricher
+                .newBuilder()
+                .addEventEnrichment(ProjectStarted.class, ProjectStarted.Enrichment.class)
+                .addFieldEnrichment(ProjectId.class, String.class, getProjectName)
+                .build();
+
+        final Event event = createEvent(newStringValue(newUuid()), createEventContext(/*doNotEnrich=*/true));
+
+        assertFalse(enricher.canBeEnriched(event));
     }
 
     private void setUp(EventEnricher enricher) {
