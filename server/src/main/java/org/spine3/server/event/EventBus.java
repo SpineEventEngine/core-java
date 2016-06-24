@@ -243,14 +243,10 @@ public class EventBus implements AutoCloseable {
     }
 
     private Event enrich(Event event) {
-        if (enricher == null) {
+        if (enricher == null ||
+            !enricher.canBeEnriched(event)) {
             return event;
         }
-
-        if (!enricher.canBeEnriched(event)) {
-            return event;
-        }
-
         final Event enriched = enricher.enrich(event);
         return enriched;
     }
