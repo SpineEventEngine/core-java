@@ -64,8 +64,18 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
-    /* package */ EventMessageEnricher(EventEnricher enricher, Class<S> sourceClass, Class<T> targetClass) {
-        super(sourceClass, targetClass);
+    /**
+     * Creates a new message enricher instance.
+     */
+    /* package */ static <S extends Message, T extends Message> EventMessageEnricher newInstance(
+            EventEnricher enricher,
+            Class<S> eventClass,
+            Class<T> enrichmentClass) {
+        return new EventMessageEnricher<>(enricher, eventClass, enrichmentClass);
+    }
+
+    private EventMessageEnricher(EventEnricher enricher, Class<S> eventClass, Class<T> enrichmentClass) {
+        super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }
 
@@ -77,12 +87,12 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     @Override
     /* package */ void validate() {
         final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
-                                                                             getSourceClass(),
-                                                                             getTargetClass());
+                                                                             getEventClass(),
+                                                                             getEnrichmentClass());
         final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map = ImmutableMultimap.builder();
         final List<EnrichmentFunction<?, ?>> fieldFunctions = referenceValidator.validate();
         for (EnrichmentFunction<?, ?> fieldFunction : fieldFunctions) {
-            map.put(fieldFunction.getSourceClass(), fieldFunction);
+            map.put(fieldFunction.getEventClass(), fieldFunction);
         }
         this.fieldFunctions = map.build();
         this.fieldMap = referenceValidator.fieldMap();
@@ -98,7 +108,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         checkNotNull(this.fieldFunctions, "fieldFunctions");
         checkState(!fieldMap.isEmpty(), "fieldMap is empty");
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
-        final T defaultTarget = Internal.getDefaultInstance(getTargetClass());
+        final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
         final Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, message);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation

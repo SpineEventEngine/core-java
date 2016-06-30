@@ -48,29 +48,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * @see EventEnricher.Builder#addFieldEnrichment(Class, Class, Function)
      **/
 
-    /**
-     * An event message class.
-     */
-    private final Class<S> sourceClass;
+    private final Class<S> eventClass;
 
-    /**
-     * A class of a message with enrichment for the event.
-     */
-    private final Class<T> targetClass;
+    private final Class<T> enrichmentClass;
 
-    /* package */ EnrichmentFunction(Class<S> sourceClass, Class<T> targetClass) {
-        this.sourceClass = checkNotNull(sourceClass);
-        this.targetClass = checkNotNull(targetClass);
-        checkArgument(!sourceClass.equals(targetClass),
-                      "Source and target class must not be equal. Passed two values of %", sourceClass);
+    /* package */ EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
+        this.eventClass = checkNotNull(eventClass);
+        this.enrichmentClass = checkNotNull(enrichmentClass);
+        checkArgument(!eventClass.equals(enrichmentClass),
+                      "Source and target class must not be equal. Passed two values of %", eventClass);
     }
 
-    public Class<S> getSourceClass() {
-        return sourceClass;
+    public Class<S> getEventClass() {
+        return eventClass;
     }
 
-    public Class<T> getTargetClass() {
-        return targetClass;
+    public Class<T> getEnrichmentClass() {
+        return enrichmentClass;
     }
 
     public abstract Function<S, T> getFunction();
@@ -85,7 +79,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceClass, targetClass);
+        return Objects.hash(eventClass, enrichmentClass);
     }
 
     @Override
@@ -98,15 +92,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
             return false;
         }
         final EnrichmentFunction other = (EnrichmentFunction) obj;
-        return Objects.equals(this.sourceClass, other.sourceClass)
-                && Objects.equals(this.targetClass, other.targetClass);
+        return Objects.equals(this.eventClass, other.eventClass)
+                && Objects.equals(this.enrichmentClass, other.enrichmentClass);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("source", sourceClass)
-                          .add("target", targetClass)
+                          .add("eventClass", eventClass)
+                          .add("enrichmentClass", enrichmentClass)
                           .toString();
     }
 }

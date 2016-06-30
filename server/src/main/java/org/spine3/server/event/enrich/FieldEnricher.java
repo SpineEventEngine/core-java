@@ -40,23 +40,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
      */
     private final Function<S, T> function;
 
-    private FieldEnricher(Class<S> sourceClass, Class<T> targetClass, Function<S, T> function) {
-        super(sourceClass, targetClass);
+    private FieldEnricher(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> function) {
+        super(eventClass, enrichmentClass);
         this.function = checkNotNull(function);
     }
 
     /**
      * Creates a new instance.
      *
-     * @param sourceFieldClass a class of the field in the event message
-     * @param targetFieldClass a class of the field in the enrichment message
+     * @param eventFieldClass a class of the field in the event message
+     * @param enrichmentFieldClass a class of the field in the enrichment message
      * @param translator a conversion function
      * @return a new instance
      */
-    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> sourceFieldClass,
-                                                                Class<T> targetFieldClass,
+    /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
+                                                                Class<T> enrichmentFieldClass,
                                                                 Function<S, T> translator) {
-        final FieldEnricher<S, T> result = new FieldEnricher<>(sourceFieldClass, targetFieldClass, translator);
+        final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass, enrichmentFieldClass, translator);
         return result;
     }
 
