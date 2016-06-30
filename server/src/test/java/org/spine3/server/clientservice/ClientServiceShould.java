@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.clientservice;
 
 
 import com.google.common.collect.Sets;
@@ -36,6 +36,8 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.people.PersonName;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.ClientService;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
@@ -70,8 +72,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class ClientServiceShould {
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-    private ClientService clientService;
-
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
@@ -94,6 +94,8 @@ public class ClientServiceShould {
 
         clientService = builder.build();
     }
+
+    private ClientService clientService;
 
     @After
     public void tearDown() throws Exception {

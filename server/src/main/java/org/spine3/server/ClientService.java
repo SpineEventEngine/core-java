@@ -112,7 +112,7 @@ public class ClientService implements org.spine3.client.grpc.ClientServiceGrpc.C
     }
 
     @VisibleForTesting
-    /* package */ boolean isShutdown() {
+    public boolean isShutdown() {
         final boolean isShutdown = grpcServer == null;
         return isShutdown;
     }
