@@ -95,23 +95,23 @@ public class Messages {
      */
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
-
-        T result = null;
         String typeStr = "";
         try {
             final TypeName typeName = TypeName.ofEnclosed(any);
             typeStr = typeName.value();
-
             final Class<T> messageClass = toMessageClass(typeName);
-            result = any.unpack(messageClass);
-
-        } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeException(typeStr);
+            final T result = any.unpack(messageClass);
+            return result;
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof ClassNotFoundException) {
+                // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
+                throw new UnknownTypeException(typeStr);
+            } else {
+                throw e;
+            }
         } catch (InvalidProtocolBufferException e) {
-            propagate(e);
+            throw propagate(e);
         }
-
-        return result;
     }
 
     /**
@@ -121,14 +121,19 @@ public class Messages {
      *
      * @param messageType full type name defined in the proto files
      * @return message class
-     * @throws ClassNotFoundException in case there is no corresponding class for the given Protobuf message type
+     * @throws RuntimeException wrapping {@link ClassNotFoundException} if there is no corresponding class
+     *                          for the given Protobuf message type
      * @see #fromAny(Any) that uses the same convention
      */
-    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) throws ClassNotFoundException {
+    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
         final ClassName className = TypeToClassMap.get(messageType);
-        @SuppressWarnings("unchecked")
-        final Class<T> result = (Class<T>) Class.forName(className.value());
-        return result;
+        try {
+            @SuppressWarnings("unchecked")
+            final Class<T> result = (Class<T>) Class.forName(className.value());
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw propagate(e);
+        }
     }
 
     /**
@@ -170,17 +175,12 @@ public class Messages {
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeName typeName : TypeToClassMap.knownTypes()) {
-            try {
-                final Class<? extends Message> clazz = toMessageClass(typeName);
-                final GenericDescriptor descriptor = getClassDescriptor(clazz);
-                // Skip outer class descriptors.
-                if (descriptor instanceof Descriptor) {
-                    final Descriptor typeDescriptor = (Descriptor) descriptor;
-                    builder.add(typeDescriptor);
-                }
-
-            } catch (ClassNotFoundException e) {
-                propagate(e);
+            final Class<? extends Message> clazz = toMessageClass(typeName);
+            final GenericDescriptor descriptor = getClassDescriptor(clazz);
+            // Skip outer class descriptors.
+            if (descriptor instanceof Descriptor) {
+                final Descriptor typeDescriptor = (Descriptor) descriptor;
+                builder.add(typeDescriptor);
             }
         }
         return builder.build();
@@ -236,27 +236,14 @@ public class Messages {
             case BYTE_STRING:
                 return ByteString.class;
             case ENUM:
-                final String enumTypeNameStr = field.getEnumType().getFullName();
-                final TypeName enumTypeName = TypeName.of(enumTypeNameStr);
-                return tryConvertToClass(enumTypeName);
+                final String enumTypeName = field.getEnumType().getFullName();
+                final Class<? extends Message> enumClass = toMessageClass(TypeName.of(enumTypeName));
+                return enumClass;
             case MESSAGE:
-                final Descriptor messageType = field.getMessageType();
-                final TypeName typeName = TypeName.of(messageType);
-                return tryConvertToClass(typeName);
+                final TypeName typeName = TypeName.of(field.getMessageType());
+                final Class<? extends Message> msgClass = toMessageClass(typeName);
+                return msgClass;
         }
         throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
-    }
-
-    /**
-     * Converts the type name to the class of the message.
-     * Wraps {@link ClassNotFoundException} to {@link RuntimeException} if it is thrown.
-     */
-    private static Class<? extends Message> tryConvertToClass(TypeName enumTypeName) {
-        try {
-            final Class<? extends Message> result = toMessageClass(enumTypeName);
-            return result;
-        } catch (ClassNotFoundException e) {
-            throw propagate(e);
-        }
     }
 }
