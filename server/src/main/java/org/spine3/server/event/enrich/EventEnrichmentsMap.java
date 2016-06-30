@@ -22,8 +22,6 @@ package org.spine3.server.event.enrich;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.type.TypeName;
 
 import java.util.Map;
@@ -71,9 +69,6 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             putTo(builder, properties);
         }
         final ImmutableMap<TypeName, TypeName> result = builder.build();
-        if (log().isDebugEnabled()) {
-            log().debug("Entry count in " + EventEnrichmentsMap.class.getSimpleName() + ": " + result.size());
-        }
         return result;
     }
 
@@ -83,15 +78,5 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             final String eventType = properties.getProperty(enrichment);
             enrichmentsMap.put(TypeName.of(enrichment), TypeName.of(eventType));
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventEnrichmentsMap.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }
