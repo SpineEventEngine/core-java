@@ -23,8 +23,6 @@ package org.spine3.server.event.enrich;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.protobuf.DescriptorProtos;
-import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.spine3.annotations.EventAnnotationsProto;
@@ -32,39 +30,33 @@ import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 
 /**
  * Performs validation checking that all fields annotated in the enrichment message
- * can be created with the translation functions supplied in the parent enricher.
+ * can be initialized with the translation functions supplied in the parent enricher.
  *
  * @author Alexander Yevsyukov
  */
 /* package */ class ReferenceValidator {
 
     private final EventEnricher enricher;
-    private final Descriptor sourceDescriptor;
-    private final Descriptor targetDescriptor;
-    private final FieldDescriptor byOptionDescriptor;
+    private final Descriptor eventDescriptor;
+    private final Descriptor enrichmentDescriptor;
 
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap;
 
     /* package */ ReferenceValidator(EventEnricher enricher,
-            Class<? extends Message> sourceClass,
-            Class<? extends Message> targetClass) {
+            Class<? extends Message> eventClass,
+            Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
-        final GeneratedMessage.GeneratedExtension<DescriptorProtos.FieldOptions, String> byOption =
-                EventAnnotationsProto.by;
-        this.byOptionDescriptor = byOption.getDescriptor();
-
-        this.sourceDescriptor = Internal.getDefaultInstance(sourceClass)
-                                        .getDescriptorForType();
-        this.targetDescriptor = Internal.getDefaultInstance(targetClass)
-                                        .getDescriptorForType();
+        this.eventDescriptor = Internal.getDefaultInstance(eventClass)
+                                       .getDescriptorForType();
+        this.enrichmentDescriptor = Internal.getDefaultInstance(enrichmentClass)
+                                            .getDescriptorForType();
     }
 
     @Nullable
@@ -76,38 +68,30 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     /**
      * @throws IllegalStateException if the parent {@code Enricher} does not have a function for a field enrichment
      */
-    @SuppressWarnings("MethodWithMultipleLoops") // OK because we iterate through fields and options.
     /* package */ List<EnrichmentFunction<?, ?>> validate() {
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
-
-        for (FieldDescriptor targetField : targetDescriptor.getFields()) {
-            final Map<FieldDescriptor, Object> allOptions = targetField.getOptions()
-                                                                       .getAllFields();
-            for (FieldDescriptor option : allOptions.keySet()) {
-                if (option.equals(byOptionDescriptor)) {
-                    final String srcFieldRef = (String) allOptions.get(option);
-                    final FieldDescriptor srcField = resolveFieldRef(srcFieldRef, targetField);
-
-                    final EnrichmentFunction<?, ?> function = getEnrichmentFunction(srcField, targetField);
-                    functions.add(function);
-                    fields.put(srcField, targetField);
-                }
-            }
+        for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
+            final String eventFieldName = enrichmentField.getOptions()
+                                                         .getExtension(EventAnnotationsProto.by);
+            final FieldDescriptor eventField = findField(eventFieldName, enrichmentField);
+            final EnrichmentFunction<?, ?> function = getEnrichmentFunction(eventField, enrichmentField);
+            functions.add(function);
+            fields.put(eventField, enrichmentField);
         }
         this.sourceToTargetMap = fields.build();
         return functions.build();
     }
 
-    private FieldDescriptor resolveFieldRef(String sourceFieldReference, FieldDescriptor targetField) {
-        final FieldDescriptor srcField = sourceDescriptor.findFieldByName(sourceFieldReference);
+    private FieldDescriptor findField(String sourceFieldReference, FieldDescriptor enrichmentField) {
+        final FieldDescriptor srcField = eventDescriptor.findFieldByName(sourceFieldReference);
         if (srcField == null) {
             final String msg = String.format(
                     "Unable to find the field `%s` in the message `%s`. " +
-                    "The field is referenced in the option of the field `%s`",
+                            "The field is referenced in the option of the field `%s`",
                     sourceFieldReference,
-                    sourceDescriptor.getFullName(),
-                    targetField.getFullName());
+                    eventDescriptor.getFullName(),
+                    enrichmentField.getFullName());
             throw new IllegalStateException(msg);
         }
         return srcField;

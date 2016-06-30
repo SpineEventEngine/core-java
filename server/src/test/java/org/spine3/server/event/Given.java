@@ -29,11 +29,13 @@ import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-
+/**
+ * Is for usage only in tests under the `event` package.
+ */
 @SuppressWarnings("EmptyClass")
 public class Given {
 
-    /* package */ static class AggregateId {
+    public static class AggregateId {
 
         private AggregateId() {
         }
@@ -46,7 +48,7 @@ public class Given {
         }
     }
 
-    /* package */ static class EventMessage {
+    public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);

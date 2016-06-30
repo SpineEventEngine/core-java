@@ -28,20 +28,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
 import org.spine3.test.Tests;
-import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
+import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
-import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "ResultOfMethodCallIgnored"})
 public class EventEnricherBuilderShould {
 
     private EventEnricher.Builder builder;
     private Function<Timestamp, StringValue> function;
-    private FieldEnricher<Timestamp, StringValue> fieldEnricherFunction;
+    private FieldEnricher<Timestamp, StringValue> fieldEnricher;
 
     @Before
     public void setUp() {
@@ -56,7 +56,7 @@ public class EventEnricherBuilderShould {
                 return Values.newStringValue(TimeUtil.toString(input));
             }
         };
-        this.fieldEnricherFunction = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);
+        this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);
     }
 
     @Test
@@ -65,50 +65,29 @@ public class EventEnricherBuilderShould {
     }
 
     @Test
-    public void build_enricher() {
+    public void build_enricher_if_all_functions_registered() {
+        builder.addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName());
+        builder.addFieldEnrichment(ProjectId.class, UserId.class, new EventEnricherShould.GetProjectOwnerId());
+
         assertNotNull(builder.build());
     }
 
     @Test
-    public void add_event_enrichment() {
-        builder.addEventEnrichment(Timestamp.class, StringValue.class);
-
-        final Set<EnrichmentFunction<?, ?>> functions = builder.getFunctions();
-        assertEquals(1, functions.size());
-    }
-
-    @Test
     public void add_field_enrichment() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, fieldEnricherFunction.getFunction());
+        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
 
         assertTrue(builder.getFunctions()
-                          .contains(fieldEnricherFunction));
+                          .contains(fieldEnricher));
     }
 
     @Test
     public void remove_enrichment_function() {
-        builder.addFieldEnrichment(Timestamp.class, StringValue.class, fieldEnricherFunction.getFunction());
+        builder.addFieldEnrichment(Timestamp.class, StringValue.class, function);
 
-        builder.remove(fieldEnricherFunction);
+        builder.remove(fieldEnricher);
 
-        assertTrue(builder.getFunctions().isEmpty());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_source_class_for_event_enrichment() {
-        builder.addEventEnrichment(Tests.<Class<Timestamp>>nullRef(), StringValue.class);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_target_class_for_event_enrichment() {
-        builder.addEventEnrichment(Timestamp.class, Tests.<Class<StringValue>>nullRef());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_duplicates_for_event_enrichment() {
-        builder.addEventEnrichment(Timestamp.class, StringValue.class);
-        // This should fail.
-        builder.addEventEnrichment(Timestamp.class, StringValue.class);
+        assertTrue(builder.getFunctions()
+                          .isEmpty());
     }
 
     @Test(expected = NullPointerException.class)
@@ -140,11 +119,20 @@ public class EventEnricherBuilderShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_function_for_field_enrichment() {
-        EventEnricher
-                .newBuilder()
-                .addEventEnrichment(ProjectCreated.class, ProjectCreated.Enrichment.class)
-                .addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName())
-                .build();
+    public void throw_exception_if_no_enrichment_functions_registered() {
+        EventEnricher.newBuilder()
+                     .build();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_no_GetProjectName_function_registered() {
+        builder.addFieldEnrichment(ProjectId.class, UserId.class, new EventEnricherShould.GetProjectOwnerId());
+        builder.build();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_if_no_GetProjectOwnerId_function_registered() {
+        builder.addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName());
+        builder.build();
     }
 }

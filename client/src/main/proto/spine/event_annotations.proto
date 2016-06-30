@@ -26,7 +26,7 @@ syntax = "proto3";
 //
 // instead of:
 //
-//      option (spine.annotations.by) = "user_id";
+//     option (spine.annotations.by) = "user_id";
 //
 
 option java_generate_equals_and_hash = false;
@@ -36,8 +36,36 @@ option java_package = "org.spine3.annotations";
 
 import "google/protobuf/descriptor.proto";
 
+extend google.protobuf.MessageOptions {
+    // An instruction to associate an enrichment message with the event message to enrich.
+    //
+    // For example:
+    // <pre>
+    // message MyEventEnrichment {
+    //     option (enrichment_for) = "MyEvent";
+    //     ...
+    // }
+    // </pre>
+    //
+    // If the enrichment message is enclosed into the target event message, this option can be omitted.
+    //
+    // If the event message to enrich is in another package, the type name prefixing the field reference
+    // must be fully-qualified:
+    // <pre>
+    // message MyEventEnrichment {
+    //     option (enrichment_for) = "com.company.MyEvent";
+    //     ...
+    // }
+    // </pre>
+    //
+    string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
+                                    // EnrichmentLookupPlugin (update it there on changing).
+}
+
 extend google.protobuf.FieldOptions {
-    // An instruction to associate an enrichment message field with a field from a source event message.
+    // An instruction to associate an enrichment message's field with the field from an event message to enrich.
+    // The value of the option is the name of the target event message's field
+    // which is used to set the corresponding enrichment's field.
     //
     // For example:
     // <pre>
@@ -50,8 +78,6 @@ extend google.protobuf.FieldOptions {
     // }
     // </pre>
     //
-    // The enrichment message can be defined anywhere and with any name.
-    // The value of the option is the name of the source event field, exactly the same as in the definition.
-    //
-    string by = 59100;
+    string by = 57125; // NOTE: this field number is used in `tools` project,
+                       // EnrichmentLookupPlugin (update it there on changing).
 }

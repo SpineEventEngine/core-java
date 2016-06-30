@@ -49,7 +49,6 @@ public class EnrichmentExample implements AutoCloseable {
         final UserNameLookup userNameLookup = new UserNameLookup();
         final EventEnricher enricher = EventEnricher
                 .newBuilder()
-                .addEventEnrichment(UserAccountSuspended.class, UserAccountSuspended.Enrichment.class)
                 .addFieldEnrichment(UserId.class, PersonName.class, userNameLookup)
                 .build();
 

@@ -20,35 +20,40 @@
 
 package org.spine3.server.event.enrich;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.test.event.ProjectCreated;
+import org.spine3.type.TypeName;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import java.util.Map;
 
-public class UnboundShould {
+import static org.junit.Assert.*;
+import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-    private final Unbound<BoolValue, StringValue> unbound = Unbound.newInstance(BoolValue.class, StringValue.class);
+/**
+ * @author Alexander Litus
+ */
+@SuppressWarnings("InstanceMethodNamingConvention")
+public class EventEnrichmentsMapShould {
 
     @Test
-    public void return_null_on_getFunction() throws Exception {
-        assertNull(unbound.getFunction());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void throw_unsupported_on_apply() {
-        unbound.apply(BoolValue.getDefaultInstance());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void throw_exception_on_validate() {
-        unbound.validate();
+    public void have_private_constructor() {
+        assertTrue(hasPrivateUtilityConstructor(EventEnrichmentsMap.class));
     }
 
     @Test
-    public void convert_to_bound() {
-        final EventMessageEnricher<BoolValue, StringValue> enricher = unbound.toBound(EventEnricher.newBuilder().build());
-        assertNotNull(enricher);
+    public void return_map_instance() {
+        final Map<TypeName, TypeName> map = EventEnrichmentsMap.getInstance();
+
+        assertFalse(map.isEmpty());
+    }
+
+    @Test
+    public void return_event_type_by_enrichment_type_name() {
+        final TypeName enrichmentType = TypeName.of(ProjectCreated.Enrichment.getDescriptor());
+
+        final TypeName eventType = EventEnrichmentsMap.getInstance()
+                                                      .get(enrichmentType);
+
+        assertEquals(TypeName.of(ProjectCreated.getDescriptor()), eventType);
     }
 }

@@ -22,123 +22,119 @@ package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Int64Value;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Values;
+import org.spine3.server.event.Given;
 import org.spine3.test.Tests;
+import org.spine3.test.event.ProjectCreated;
 
 import javax.annotation.Nullable;
 
 import static org.junit.Assert.*;
-import static org.spine3.server.event.enrich.FieldEnricher.newInstance;
 
 public class EnrichmentFunctionShould {
 
-    private Function<Int32Value, StringValue> function;
+    private Function<ProjectCreated, ProjectCreated.Enrichment> function;
+    private FieldEnricher<ProjectCreated, ProjectCreated.Enrichment> fieldEnricher;
 
     @Before
     public void setUp() {
-        function = new Function<Int32Value, StringValue>() {
+        this.function = new Function<ProjectCreated, ProjectCreated.Enrichment>() {
             @Nullable
             @Override
-            public StringValue apply(@Nullable Int32Value input) {
+            public ProjectCreated.Enrichment apply(@Nullable ProjectCreated input) {
                 if (input == null) {
                     return null;
                 }
-                final String inputStr = String.valueOf(input.getValue());
-                return Values.newStringValue(inputStr + '+' + inputStr);
+                final ProjectCreated.Enrichment result = ProjectCreated.Enrichment.newBuilder()
+                        .setProjectName(input.getProjectId().getId())
+                        .build();
+                return result;
             }
         };
+        this.fieldEnricher = FieldEnricher.newInstance(ProjectCreated.class,
+                                                       ProjectCreated.Enrichment.class,
+                                                       function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_source_class() {
-        Unbound.newInstance(Tests.<Class<? extends Message>>nullRef(), StringValue.class);
+        FieldEnricher.newInstance(Tests.<Class<ProjectCreated>>nullRef(), ProjectCreated.Enrichment.class, function);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_target_class() {
-        Unbound.newInstance(StringValue.class, Tests.<Class<? extends Message>>nullRef());
+        FieldEnricher.newInstance(ProjectCreated.class, Tests.<Class<ProjectCreated.Enrichment>>nullRef(), function);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_same_source_and_target_class() {
-        Unbound.newInstance(StringValue.class, StringValue.class);
+        final Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
+            @Nullable
+            @Override
+            public StringValue apply(@Nullable StringValue input) {
+                return null;
+            }
+        };
+        FieldEnricher.newInstance(StringValue.class, StringValue.class, func);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_translator() {
-        newInstance(BoolValue.class, StringValue.class, Tests.<Function<BoolValue, StringValue>>nullRef());
+    public void do_not_accept_null_translator_function() {
+        FieldEnricher.newInstance(BoolValue.class,
+                                  ProjectCreated.Enrichment.class,
+                                  Tests.<Function<BoolValue, ProjectCreated.Enrichment>>nullRef());
     }
 
     @Test
     public void return_sourceClass() throws Exception {
-        assertEquals(Int32Value.class, Unbound.newInstance(Int32Value.class, Int64Value.class).getSourceClass());
+        assertEquals(ProjectCreated.class, fieldEnricher.getEventClass());
     }
 
     @Test
     public void return_targetClass() throws Exception {
-        assertEquals(Int64Value.class, Unbound.newInstance(Int32Value.class, Int64Value.class).getTargetClass());
+        assertEquals(ProjectCreated.Enrichment.class, fieldEnricher.getEnrichmentClass());
     }
 
     @Test
     public void create_custom_instances() throws Exception {
-        final EnrichmentFunction<Int32Value, StringValue> c1 = newInstance(Int32Value.class,
-                                                                           StringValue.class,
-                                                                           function);
-        final EnrichmentFunction<Int32Value, StringValue> c2 = newInstance(Int32Value.class,
-                                                                           StringValue.class,
-                                                                           function);
-        assertEquals(c1, c2);
+        assertEquals(fieldEnricher, FieldEnricher.newInstance(ProjectCreated.class,
+                                                              ProjectCreated.Enrichment.class,
+                                                              function));
     }
 
     @Test
     public void apply_enrichment() throws Exception {
+        final ProjectCreated event = Given.EventMessage.projectCreated();
 
-        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
-                                                                             StringValue.class,
-                                                                             function);
+        final ProjectCreated.Enrichment enriched = fieldEnricher.apply(event);
 
-        final StringValue encriched = func.apply(Values.newIntegerValue(2));
-        assertNotNull(encriched);
-        assertEquals("2+2", encriched.getValue());
+        assertNotNull(enriched);
+        assertEquals(event.getProjectId().getId(), enriched.getProjectName());
     }
 
     @Test
     public void have_hashCode() throws Exception {
-        final EnrichmentFunction<BoolValue, StringValue> function = Unbound.newInstance(BoolValue.class, StringValue.class);
-        assertNotEquals(System.identityHashCode(function), function.hashCode());
+        assertNotEquals(System.identityHashCode(fieldEnricher), fieldEnricher.hashCode());
     }
 
     @Test
     public void have_toString() throws Exception {
-        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
-                                                                             StringValue.class,
-                                                                             function);
-        final String out = func.toString();
-        assertTrue(out.contains(Int32Value.class.getName()));
-        assertTrue(out.contains(StringValue.class.getName()));
+        final String str = fieldEnricher.toString();
+        assertTrue(str.contains(ProjectCreated.class.getName()));
+        assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
     }
 
     @Test
     public void return_null_on_applying_null() {
-        final FieldEnricher<Int32Value, StringValue> fieldEnricher = newInstance(Int32Value.class,
-                                                                                 StringValue.class,
-                                                                                 function);
-        assertNull(fieldEnricher.apply(Tests.<Int32Value>nullRef()));
+        assertNull(fieldEnricher.apply(Tests.<ProjectCreated>nullRef()));
     }
 
     @Test
     public void have_smart_equals() {
-        final EnrichmentFunction<Int32Value, StringValue> func = newInstance(Int32Value.class,
-                                                                            StringValue.class,
-                                                                            function);
         //noinspection EqualsWithItself
-        assertTrue(func.equals(func));
-        assertFalse(func.equals(Tests.<EnrichmentFunction<Int32Value, StringValue>>nullRef()));
+        assertTrue(fieldEnricher.equals(fieldEnricher));
+        assertFalse(fieldEnricher.equals(Tests.<EnrichmentFunction<ProjectCreated, ProjectCreated.Enrichment>>nullRef()));
     }
 }
