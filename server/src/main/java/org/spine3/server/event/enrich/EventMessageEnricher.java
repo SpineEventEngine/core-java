@@ -67,7 +67,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     /**
      * Creates a new message enricher instance.
      */
-    /* package */ static <S extends Message, T extends Message> EventMessageEnricher newInstance(
+    /* package */ static <S extends Message, T extends Message> EventMessageEnricher<S, T> newInstance(
             EventEnricher enricher,
             Class<S> eventClass,
             Class<T> enrichmentClass) {
@@ -98,12 +98,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         this.fieldMap = referenceValidator.fieldMap();
     }
 
-    @Nullable
     @Override
     public T apply(@Nullable S message) {
-        if (message == null) {
-            return null;
-        }
+        checkNotNull(message);
         checkNotNull(this.fieldMap, "fieldMap");
         checkNotNull(this.fieldFunctions, "fieldFunctions");
         checkState(!fieldMap.isEmpty(), "fieldMap is empty");
