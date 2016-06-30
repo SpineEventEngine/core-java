@@ -62,7 +62,7 @@ public class EntityPackagesMap {
      * <p>Example:
      * <p>{@code com.example.order} - {@code AGGREGATE}
      */
-    private static final Map<String, EntityType> PACKAGES_MAP = buildPackagesMap();
+    private static final Map<String, EntityType> packagesMap = buildPackagesMap();
 
     private EntityPackagesMap() {}
 
@@ -74,7 +74,7 @@ public class EntityPackagesMap {
      */
     @Nullable
     public static EntityType get(String protoPackage) {
-        final EntityType result = PACKAGES_MAP.get(protoPackage);
+        final EntityType result = packagesMap.get(protoPackage);
         return result;
     }
 
