@@ -27,12 +27,14 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
+import org.spine3.server.event.enrich.EventEnricher.Builder.SameTransition;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectId;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -134,5 +136,15 @@ public class EventEnricherBuilderShould {
     public void throw_exception_if_no_GetProjectOwnerId_function_registered() {
         builder.addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName());
         builder.build();
+    }
+
+    @Test
+    public void assure_that_function_performs_same_transition() {
+        assertTrue(SameTransition.asFor(fieldEnricher).apply(fieldEnricher));
+    }
+
+    @Test
+    public void return_false_if_input_to_SameTransition_predicate_is_null() {
+        assertFalse(SameTransition.asFor(fieldEnricher).apply(null));
     }
 }

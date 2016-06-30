@@ -266,7 +266,8 @@ public class EventEnricher {
          * <p>Such functions are not necessarily equal because they may have different translators.
          * @see EnrichmentFunction
          */
-        private static class SameTransition implements Predicate<EnrichmentFunction> {
+        @VisibleForTesting
+        /* package */  static class SameTransition implements Predicate<EnrichmentFunction> {
 
             private final EnrichmentFunction function;
 
