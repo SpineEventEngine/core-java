@@ -24,15 +24,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spine3.type.TypeName;
 
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * A map from an event enrichment Protobuf type name to the corresponding event to enrich type name.
- * Is needed for event message enrichment.
+ * A map from an event enrichment Protobuf type name to the corresponding type name of an event to enrich.
+ *
+ * <p>Example:
+ * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.MyEvent}
  *
  * @author Alexander Litus
  */
@@ -44,21 +45,15 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      */
     private static final String PROPS_FILE_PATH = "enrichments.properties";
 
-    /**
-     * A map from an event enrichment Protobuf type name to the corresponding event to enrich type name.
-     *
-     * <p>Example:
-     * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.MyEvent}
-     */
     private static final ImmutableMap<TypeName, TypeName> enrichmentsMap = buildEnrichmentsMap();
 
     private EventEnrichmentsMap() {}
 
     /**
-     * Returns the map instance.
+     * Returns the immutable map instance.
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
-    public static Map<TypeName, TypeName> getInstance() {
+    /* package */ static ImmutableMap<TypeName, TypeName> getInstance() {
         return enrichmentsMap;
     }
 
