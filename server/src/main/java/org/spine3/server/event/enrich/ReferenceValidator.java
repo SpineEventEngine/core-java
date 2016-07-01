@@ -33,6 +33,7 @@ import java.util.List;
 
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
+import static java.lang.String.format;
 
 /**
  * Performs validation checking that all fields annotated in the enrichment message
@@ -41,6 +42,8 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  * @author Alexander Yevsyukov
  */
 /* package */ class ReferenceValidator {
+
+    private static final String PROTO_FQN_SEPARATOR = ".";
 
     private final EventEnricher enricher;
     private final Descriptor eventDescriptor;
@@ -72,9 +75,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            final String eventFieldName = enrichmentField.getOptions()
-                                                         .getExtension(EventAnnotationsProto.by);
-            final FieldDescriptor eventField = findField(eventFieldName, enrichmentField);
+            final String eventFieldName = parseEventFieldName(enrichmentField);
+            checkEventFieldName(eventFieldName, enrichmentField);
+            final FieldDescriptor eventField = findEventField(eventFieldName, enrichmentField);
             final EnrichmentFunction<?, ?> function = getEnrichmentFunction(eventField, enrichmentField);
             functions.add(function);
             fields.put(eventField, enrichmentField);
@@ -83,18 +86,24 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         return functions.build();
     }
 
-    private FieldDescriptor findField(String sourceFieldReference, FieldDescriptor enrichmentField) {
-        final FieldDescriptor srcField = eventDescriptor.findFieldByName(sourceFieldReference);
-        if (srcField == null) {
-            final String msg = String.format(
-                    "Unable to find the field `%s` in the message `%s`. " +
-                            "The field is referenced in the option of the field `%s`",
-                    sourceFieldReference,
-                    eventDescriptor.getFullName(),
-                    enrichmentField.getFullName());
-            throw new IllegalStateException(msg);
+    /**
+     * Returns an event field name or an empty string if there is no {@code by} option.
+     */
+    private static String parseEventFieldName(FieldDescriptor enrichmentField) {
+        String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
+        if (fieldName.contains(PROTO_FQN_SEPARATOR)) {
+            final int firstCharIndex = fieldName.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
+            fieldName = fieldName.substring(firstCharIndex);
         }
-        return srcField;
+        return fieldName;
+    }
+
+    private FieldDescriptor findEventField(String eventFieldName, FieldDescriptor enrichmentField) {
+        final FieldDescriptor result = eventDescriptor.findFieldByName(eventFieldName);
+        if (result == null) {
+            throw noEventField(eventFieldName, enrichmentField);
+        }
+        return result;
     }
 
     private EnrichmentFunction<?, ?> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
@@ -102,12 +111,34 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
         final Class<?> targetFieldClass = Messages.getFieldClass(targetField);
         final Optional<EnrichmentFunction<?, ?>> func = enricher.functionFor(sourceFieldClass, targetFieldClass);
         if (!func.isPresent()) {
-            final String msg = String.format(
-                    "There is no enrichment function for translating %s to %s",
-                    sourceFieldClass,
-                    targetFieldClass);
-            throw new IllegalStateException(msg);
+            throw noFunction(sourceFieldClass, targetFieldClass);
         }
         return func.get();
+    }
+
+    private static void checkEventFieldName(String eventFieldName, FieldDescriptor enrichmentField) {
+        if (eventFieldName.isEmpty()) {
+            final String msg = format("There is no `by` option for the enrichment field `%s`",
+                                      enrichmentField.getFullName());
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    private IllegalStateException noEventField(String eventFieldName, FieldDescriptor enrichmentField) {
+        final String msg = format(
+                "No field `%s` in the message `%s` found. " +
+                "The field is referenced in the option of the enrichment field `%s`.",
+                eventFieldName,
+                eventDescriptor.getFullName(),
+                enrichmentField.getFullName());
+        throw new IllegalStateException(msg);
+    }
+
+    private static IllegalStateException noFunction(Class<?> sourceFieldClass, Class<?> targetFieldClass) {
+        final String msg = format(
+                "There is no enrichment function for translating %s to %s",
+                sourceFieldClass,
+                targetFieldClass);
+        throw new IllegalStateException(msg);
     }
 }

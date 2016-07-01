@@ -38,25 +38,19 @@ import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MessageOptions {
     // An instruction to associate an enrichment message with the event message to enrich.
+    // If the event message to enrich is in another package, the event type name must be fully-qualified.
     //
     // For example:
     // <pre>
     // message MyEventEnrichment {
-    //     option (enrichment_for) = "MyEvent";
+    //     option (enrichment_for) = "example.events.MyEvent";
     //     ...
     // }
     // </pre>
     //
-    // If the enrichment message is enclosed into the target event message, this option can be omitted.
-    //
-    // If the event message to enrich is in another package, the type name prefixing the field reference
-    // must be fully-qualified:
-    // <pre>
-    // message MyEventEnrichment {
-    //     option (enrichment_for) = "com.company.MyEvent";
-    //     ...
-    // }
-    // </pre>
+    // This option can be omitted if:
+    // - the enrichment message is enclosed into the target event message;
+    // - all `by` options have the event name prefix ("example.events.MyEvent.user_id" instead of just "user_id").
     //
     string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
                                     // EnrichmentLookupPlugin (update it there on changing).
@@ -66,8 +60,10 @@ extend google.protobuf.FieldOptions {
     // An instruction to associate an enrichment message's field with the field from an event message to enrich.
     // The value of the option is the name of the target event message's field
     // which is used to set the corresponding enrichment's field.
+    // The value must have event FQN prefix if `enrichment_for` option is omitted
+    // ("example.events.MyEvent.user_id" instead of just "user_id").
     //
-    // For example:
+    // An example:
     // <pre>
     // message MyEvent {
     //    spine.users.UserId user_id = 1;
@@ -75,6 +71,10 @@ extend google.protobuf.FieldOptions {
     //    message Enrichment {
     //       spine.people.PersonName name = 1 [(by) = "user_id"];
     //    }
+    // }
+    //
+    // message MyEventEnrichment {
+    //     string str = 1 [(by) = "MyEvent.user_id"];
     // }
     // </pre>
     //
