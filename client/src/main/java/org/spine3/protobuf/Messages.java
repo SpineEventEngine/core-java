@@ -103,9 +103,10 @@ public class Messages {
             final T result = any.unpack(messageClass);
             return result;
         } catch (RuntimeException e) {
-            if (e.getCause() instanceof ClassNotFoundException) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof ClassNotFoundException) {
                 // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw new UnknownTypeException(typeStr);
+                throw new UnknownTypeException(typeStr, cause);
             } else {
                 throw e;
             }
@@ -132,7 +133,7 @@ public class Messages {
             final Class<T> result = (Class<T>) Class.forName(className.value());
             return result;
         } catch (ClassNotFoundException e) {
-            throw propagate(e);
+            throw new UnknownTypeException(messageType.value(), e);
         }
     }
 

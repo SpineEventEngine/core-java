@@ -150,7 +150,7 @@ public class TypeToClassMap {
             Class.forName(className.value());
         } catch (ClassNotFoundException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-            throw new UnknownTypeException(type.value());
+            throw new UnknownTypeException(type.value(), e);
         }
         return className;
     }

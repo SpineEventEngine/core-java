@@ -27,10 +27,26 @@ package org.spine3.protobuf.error;
  */
 public class UnknownTypeException extends RuntimeException {
 
+    private static final String ERR_MSG = "No Java class found for message type: ";
+
+    /**
+     * Creates a new instance.
+     *
+     * @param typeUrl the unknown type URL
+     */
     public UnknownTypeException(String typeUrl) {
-        super("No Java class found for message type: " + typeUrl);
+        super(ERR_MSG + typeUrl);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param typeUrl the unknown type URL
+     * @param cause the exception cause
+     */
+    public UnknownTypeException(String typeUrl, Throwable cause) {
+        super(ERR_MSG + typeUrl, cause);
     }
 
     private static final long serialVersionUID = 0L;
-
 }
