@@ -63,7 +63,6 @@ import static java.lang.String.format;
     }
 
     @Nullable
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK since the implementation is immutable.
     /* package */ ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap() {
         return sourceToTargetMap;
     }

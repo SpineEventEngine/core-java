@@ -36,7 +36,7 @@ import org.spine3.server.event.Subscribe;
  *
  * @author Mikhail Melnik
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "TypeMayBeWeakened", "UnusedParameters"})
+@SuppressWarnings({"TypeMayBeWeakened", "UnusedParameters"})
 class EventLogger extends EventSubscriber {
 
     private static final String NEW_LINE = System.lineSeparator();
@@ -75,5 +75,4 @@ class EventLogger extends EventSubscriber {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }

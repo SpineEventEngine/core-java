@@ -29,7 +29,7 @@ import static com.google.protobuf.util.TimeUtil.subtract;
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodWithTooExceptionsDeclared"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class TestsShould {
 
     @Test

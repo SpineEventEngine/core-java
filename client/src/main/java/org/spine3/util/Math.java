@@ -81,7 +81,6 @@ public class Math {
      * @param b  the divisor
      * @return the floor division
      */
-    @SuppressWarnings("JavaDoc")
     public static long floorDiv(long a, long b) {
         return (a >= 0 ? a / b : ((a + 1) / b) - 1);
     }

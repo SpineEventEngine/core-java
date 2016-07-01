@@ -87,7 +87,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
         if (this == obj) {
             return true;
         }
-        //noinspection ConstantConditions
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }

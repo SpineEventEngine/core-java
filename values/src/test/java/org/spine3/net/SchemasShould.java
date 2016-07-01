@@ -29,7 +29,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class SchemasShould {
 
     @Test

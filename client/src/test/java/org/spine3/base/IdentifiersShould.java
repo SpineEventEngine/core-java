@@ -46,7 +46,7 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";

@@ -47,7 +47,6 @@ public class ErrorsShould {
     @Test
     public void create_Error_by_Throwable() {
         final String msg = "create_Error_by_Throwable";
-        @SuppressWarnings("ThrowableInstanceNeverThrown")
         final Throwable throwable = new IllegalStateException(msg);
 
         final Error error = Errors.fromThrowable(throwable);

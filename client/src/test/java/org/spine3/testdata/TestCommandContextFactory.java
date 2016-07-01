@@ -40,7 +40,7 @@ import static org.spine3.time.ZoneOffsets.UTC;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
+@SuppressWarnings({"UtilityClass"})
 public class TestCommandContextFactory {
 
     private TestCommandContextFactory() {}

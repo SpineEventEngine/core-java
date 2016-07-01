@@ -111,7 +111,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
     private static void warnUnregisterNotPossible(CommandClass commandClass,
                                                   CommandDispatcher registeredDispatcher,
                                                   CommandDispatcher dispatcher) {
-        //noinspection TestOnlyProblems
         CommandBus.log().warn(
                 "Another dispatcher {} found when trying to unregister the dispatcher {} for the command class {}." +
                 " There can be only one dispatcher per command class. The passed dispatcher cannot be unregistered. " +
