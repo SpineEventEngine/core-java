@@ -31,3 +31,13 @@ message ProjectCreatedEnrichmentAnotherPackage {
 
     string project_name = 1 [(by) = "project_id"];
 }
+
+message ProjectCreatedEnrichmentAnotherPackageFqn {
+    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+}
+
+message ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt {
+    option (enrichment_for) = "spine.test.event.ProjectCreated";
+
+    string project_name = 1 [(by) = "spine.test.event.ProjectCreated.project_id"];
+}

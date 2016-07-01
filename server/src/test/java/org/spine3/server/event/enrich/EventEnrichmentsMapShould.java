@@ -20,8 +20,14 @@
 
 package org.spine3.server.event.enrich;
 
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
+import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
+import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
+import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
 import org.spine3.type.TypeName;
 
 import java.util.Map;
@@ -48,12 +54,19 @@ public class EventEnrichmentsMapShould {
     }
 
     @Test
-    public void return_event_type_by_enrichment_type_name() {
-        final TypeName enrichmentType = TypeName.of(ProjectCreated.Enrichment.getDescriptor());
+    public void contain_event_types_by_enrichment_type_names() {
+        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreated.Enrichment.class);
+        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedSeparateEnrichment.class);
+        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackage.class);
+        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqn.class);
+        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class);
+        getEventTypeByEnrichmentTypeTest(ProjectStarted.class, ProjectStarted.Enrichment.class);
+    }
 
+    private static void getEventTypeByEnrichmentTypeTest(Class<? extends Message> expectedEventClass,
+                                                         Class<? extends Message> enrichmentClass) {
         final TypeName eventType = EventEnrichmentsMap.getInstance()
-                                                      .get(enrichmentType);
-
-        assertEquals(TypeName.of(ProjectCreated.getDescriptor()), eventType);
+                                                      .get(TypeName.of(enrichmentClass));
+        assertEquals(TypeName.of(expectedEventClass), eventType);
     }
 }
