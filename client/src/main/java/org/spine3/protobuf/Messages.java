@@ -128,7 +128,7 @@ public class Messages {
     public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
         final ClassName className = TypeToClassMap.get(messageType);
         try {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked") // the client considers this message is of this class
             final Class<T> result = (Class<T>) Class.forName(className.value());
             return result;
         } catch (ClassNotFoundException e) {
