@@ -38,7 +38,8 @@ import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MessageOptions {
     // An instruction to associate an enrichment message with the event message to enrich.
-    // If the event message to enrich is in another package, the event type name must be fully-qualified.
+    // If the event message to enrich is in another package, the event type name should be qualified
+    // according to Protobuf conventions.
     //
     // For example:
     // <pre>
