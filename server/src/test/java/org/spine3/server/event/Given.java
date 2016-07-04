@@ -23,16 +23,19 @@ package org.spine3.server.event;
 import org.spine3.base.EventContext;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
+import org.spine3.test.event.ProjectStarted;
 
+import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
-
+/**
+ * Is for usage only in tests under the `event` package.
+ */
 @SuppressWarnings("EmptyClass")
-/* package */ class Given {
+public class Given {
 
-    /* package */ static class AggregateId {
+    public static class AggregateId {
 
         private AggregateId() {
         }
@@ -45,10 +48,11 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
     }
 
-    /* package */ static class EventMessage {
+    public static class EventMessage {
 
         private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
+        private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
 
         private EventMessage() {
         }
@@ -57,14 +61,24 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
             return PROJECT_CREATED;
         }
 
+        public static ProjectStarted projectStarted() {
+            return PROJECT_STARTED;
+        }
+
         public static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
+
+        public static ProjectStarted projectStarted(ProjectId id) {
+            return ProjectStarted.newBuilder()
+                                 .setProjectId(id)
+                                 .build();
+        }
     }
 
-    /* package */ static class Event {
+    public static class Event {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
@@ -72,30 +86,35 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Event} with default properties.
+         * Creates a new event with default properties.
          */
         public static org.spine3.base.Event projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
+         * Creates a new event with default properties.
+         */
+        public static org.spine3.base.Event projectStarted() {
+            final ProjectStarted msg = EventMessage.projectStarted();
+            final org.spine3.base.Event event = createEvent(msg, createEventContext(msg.getProjectId()));
+            return event;
+        }
+
+        /**
+         * Creates a new event with the given projectId.
          */
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
         /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
+         * Creates a new event with the given projectId and eventContext.
          */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
-            final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final org.spine3.base.Event.Builder builder =
-                    org.spine3.base.Event
-                            .newBuilder()
-                            .setContext(eventContext)
-                            .setMessage(toAny(event));
-            return builder.build();
+            final ProjectCreated msg = EventMessage.projectCreated(projectId);
+            final org.spine3.base.Event event = createEvent(msg, eventContext);
+            return event;
         }
     }
 }

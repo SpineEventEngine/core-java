@@ -19,12 +19,15 @@
  */
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -35,6 +38,8 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagate;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
@@ -86,22 +91,46 @@ public class Events {
     }
 
     /**
-     * Creates {@code Event} instance with the passed event and context.
+     * Creates a new {@code Event} instance with the passed event message and context.
      */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
+        return createEvent(toAny(event), context);
+    }
+
+    /**
+     * Creates a new {@code Event} instance with the passed event message wrapped to {@link Any} and context.
+     */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
+    public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()
-                .setMessage(Messages.toAny(event))
+                .setMessage(eventAny)
                 .setContext(context)
                 .build();
         return result;
     }
 
     /**
-     * Extracts the event instance from the passed record.
+     * Creates {@code Event} instance for import or integration operations.
+     *
+     * @param event the event message
+     * @param producerId the ID of an entity which is generating the event
+     * @return event with data from an external source
      */
-    public static Message getMessage(Event event) {
+    public static Event createImportEvent(Message event, Message producerId) {
+        final EventContext context = createImportEventContext(producerId);
+        final Event result = createEvent(event, context);
+        return result;
+    }
+
+    /**
+     * Extracts the event message from the passed event.
+     *
+     * @param event an event to get message from
+     */
+    public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final Message result = Messages.fromAny(any);
+        final M result = Messages.fromAny(any);
         return result;
     }
 
@@ -146,6 +175,7 @@ public class Events {
      * @return new instance of {@code EventContext} for the imported event
      */
     public static EventContext createImportEventContext(Message producerId) {
+        checkNotNull(producerId);
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
                                                          .setTimestamp(Timestamps.getCurrentTime())
@@ -226,4 +256,67 @@ public class Events {
         }
     }
 
+    /**
+     * Verifies if the enrichment is not disabled in the passed event.
+     */
+    public static boolean isEnrichmentEnabled(Event event) {
+        final EventContext context = event.getContext();
+        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
+        return mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+    }
+
+    /**
+     * Returns all enrichments from the context.
+     *
+     * @param context a context to get enrichments from
+     * @return an optional of enrichments
+     */
+    public static Optional<Enrichments> getEnrichments(EventContext context) {
+        final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
+        if (mode == EventContext.EnrichmentModeCase.ENRICHMENTS) {
+            return Optional.of(context.getEnrichments());
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Return a specific enrichment from the context.
+     *
+     * @param enrichmentClass a class of the event enrichment
+     * @param context a context to get an enrichment from
+     * @param <E> a type of the event enrichment
+     * @return an optional of the enrichment
+     */
+    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass, EventContext context) {
+        final Optional<Enrichments> value = getEnrichments(context);
+        if (!value.isPresent()) {
+            return Optional.absent();
+        }
+
+        final Enrichments enrichments = value.get();
+        final TypeName typeName = TypeName.of(enrichmentClass);
+
+        final Any any = enrichments.getMap()
+                                   .get(typeName.value());
+        if (any == null) {
+            return Optional.absent();
+        }
+
+        final E result = unpack(enrichmentClass, any);
+
+        return Optional.fromNullable(result);
+    }
+
+    //TODO:2016-06-17:alexander.yevsyukov: Evaluate using this function instead of Messages.fromAny() in general.
+    // The below approach may already work.
+
+    private static <T extends Message> T unpack(Class<T> clazz, Any any) {
+        final T result;
+        try {
+            result = any.unpack(clazz);
+            return result;
+        } catch (InvalidProtocolBufferException e) {
+            throw propagate(e);
+        }
+    }
 }

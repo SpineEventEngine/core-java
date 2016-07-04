@@ -21,12 +21,10 @@
 package org.spine3.testdata;
 
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-
-import static org.mockito.Mockito.spy;
 
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
@@ -37,26 +35,29 @@ import static org.mockito.Mockito.spy;
 public class BoundedContextTestStubs {
 
     public static BoundedContext create() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        return create(storageFactory);
+        final BoundedContext bc = create(InMemoryStorageFactory.getInstance());
+        return bc;
     }
 
     public static BoundedContext create(StorageFactory storageFactory) {
-        return create(BoundedContext.DEFAULT_NAME, storageFactory);
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                .setStorageFactory(storageFactory);
+        return builder.build();
     }
 
-    public static BoundedContext create(String name, StorageFactory storageFactory) {
-        final CommandBus commandBus = CommandBusFactory.create(storageFactory);
-        final EventBus eventBus = EventBusFactory.create(storageFactory);
+    public static BoundedContext create(EventEnricher enricher) {
         final BoundedContext.Builder builder = BoundedContext.newBuilder()
-                                                             .setName(name)
-                                                             .setStorageFactory(storageFactory)
-                                                             .setCommandBus(spy(commandBus))
-                                                             .setEventBus(spy(eventBus));
+                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setEventEnricher(enricher);
         return builder.build();
+    }
 
+    public static BoundedContext create(EventBus eventBus) {
+        final BoundedContext.Builder builder = BoundedContext.newBuilder()
+                                                             .setStorageFactory(InMemoryStorageFactory.getInstance())
+                                                             .setEventBus(eventBus);
+        return builder.build();
     }
 
     private BoundedContextTestStubs() {}
-
 }

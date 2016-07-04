@@ -20,18 +20,15 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.validate.internal.EntityType;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
@@ -62,7 +59,7 @@ public class EntityPackagesMap {
      * <p>Example:
      * <p>{@code com.example.order} - {@code AGGREGATE}
      */
-    private static final Map<String, EntityType> PACKAGES_MAP = buildPackagesMap();
+    private static final ImmutableMap<String, EntityType> packagesMap = buildPackagesMap();
 
     private EntityPackagesMap() {}
 
@@ -74,7 +71,7 @@ public class EntityPackagesMap {
      */
     @Nullable
     public static EntityType get(String protoPackage) {
-        final EntityType result = PACKAGES_MAP.get(protoPackage);
+        final EntityType result = packagesMap.get(protoPackage);
         return result;
     }
 
@@ -90,34 +87,21 @@ public class EntityPackagesMap {
         return contains;
     }
 
-    private static Map<String, EntityType> buildPackagesMap() {
-        final Map<String, EntityType> result = newHashMap();
+    private static ImmutableMap<String, EntityType> buildPackagesMap() {
+        final ImmutableMap.Builder<String, EntityType> builder = ImmutableMap.builder();
         final ImmutableSet<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
         for (Properties properties : propertiesSet) {
-            putTo(result, properties);
+            putTo(builder, properties);
         }
-        if (log().isDebugEnabled()) {
-            log().debug("Entry count in EntityPackagesMap: " + result.size());
-        }
-        return result;
+        return builder.build();
     }
 
-    private static void putTo(Map<String, EntityType> result, Properties properties) {
+    private static void putTo(ImmutableMap.Builder<String, EntityType> map, Properties properties) {
         final Set<String> protoPackages = properties.stringPropertyNames();
         for (String protoPackage : protoPackages) {
             final String entityTypeStr = properties.getProperty(protoPackage);
             final EntityType entityType = EntityType.valueOf(entityTypeStr);
-            result.put(protoPackage, entityType);
+            map.put(protoPackage, entityType);
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EntityPackagesMap.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

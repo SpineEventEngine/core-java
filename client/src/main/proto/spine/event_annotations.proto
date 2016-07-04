@@ -1,0 +1,84 @@
+//
+// Copyright 2016, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+// We do not define the package for this file to allow shorter options for user-defined types.
+// This would allow to write:
+//
+//     option (by) = "user_id";
+//
+// instead of:
+//
+//     option (spine.annotations.by) = "user_id";
+//
+
+option java_generate_equals_and_hash = false;
+option java_multiple_files = true;
+option java_outer_classname = "EventAnnotationsProto";
+option java_package = "org.spine3.annotations";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MessageOptions {
+    // An instruction to associate an enrichment message with the event message to enrich.
+    // If the event message to enrich is in another package, the event type name should be qualified
+    // according to Protobuf conventions.
+    //
+    // For example:
+    // <pre>
+    // message MyEventEnrichment {
+    //     option (enrichment_for) = "example.events.MyEvent";
+    //     ...
+    // }
+    // </pre>
+    //
+    // This option can be omitted if:
+    // - the enrichment message is enclosed into the target event message;
+    // - all `by` options have the event name prefix ("example.events.MyEvent.user_id" instead of just "user_id").
+    //
+    string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
+                                    // EnrichmentLookupPlugin (update it there on changing).
+}
+
+extend google.protobuf.FieldOptions {
+    // An instruction to associate an enrichment message's field with the field from an event message to enrich.
+    // The value of the option is the name of the target event message's field
+    // which is used to set the corresponding enrichment's field.
+    // The value must have event FQN prefix if `enrichment_for` option is omitted
+    // ("example.events.MyEvent.user_id" instead of just "user_id").
+    //
+    // An example:
+    // <pre>
+    // message MyEvent {
+    //    spine.users.UserId user_id = 1;
+    //    ...
+    //    message Enrichment {
+    //       spine.people.PersonName name = 1 [(by) = "user_id"];
+    //    }
+    // }
+    //
+    // message MyEventEnrichment {
+    //     string str = 1 [(by) = "MyEvent.user_id"];
+    // }
+    // </pre>
+    //
+    string by = 57125; // NOTE: this field number is used in `tools` project,
+                       // EnrichmentLookupPlugin (update it there on changing).
+}

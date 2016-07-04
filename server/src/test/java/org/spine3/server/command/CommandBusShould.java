@@ -23,6 +23,7 @@ package org.spine3.server.command;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
@@ -49,7 +50,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.type.CommandClass;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.Tests;
-import org.spine3.test.failures.Failures;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
@@ -792,9 +792,9 @@ public class CommandBusShould {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(Failures.UnableToHandle.newBuilder()
-                                         .setMessage(TestFailure.class.getName())
-                                         .build());
+            super(StringValue.newBuilder()
+                             .setValue(TestFailure.class.getName())
+                             .build());
         }
     }
 

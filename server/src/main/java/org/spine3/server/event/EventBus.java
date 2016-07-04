@@ -20,6 +20,7 @@
 package org.spine3.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.procman.ProcessManager;
@@ -37,6 +39,7 @@ import org.spine3.server.type.EventClass;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +47,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.spine3.base.Events.getMessage;
 
 /**
@@ -83,6 +85,12 @@ import static org.spine3.base.Events.getMessage;
 public class EventBus implements AutoCloseable {
 
     /**
+     * NOTE: Even though, the EventBus has a private constructor and is not supposed to be derived,
+     * we do not make this class final in order to be able to spy() on it from Mockito (which cannot spy
+     * on final or anonymous classes).
+     **/
+
+    /**
      * The registry of event dispatchers.
      */
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
@@ -102,41 +110,32 @@ public class EventBus implements AutoCloseable {
      */
     private final Executor executor;
 
-    private MessageValidator messageValidator;
+    /**
+     * The validator for events posted to the bus.
+     */
+    private final MessageValidator eventValidator;
 
     /**
-     * Creates new instance.
-     *
-     * @param eventStore the event store to put posted events
-     * @param executor the executor for invoking event subscribers
+     * The enricher for posted events or {@code null} if the enrichment is not supported.
      */
-    protected EventBus(EventStore eventStore, Executor executor) {
-        this.eventStore = eventStore;
-        this.executor = checkNotNull(executor);
-        this.messageValidator = new MessageValidator();
+    @Nullable
+    private final EventEnricher enricher;
+
+    /**
+     * Creates new instance by the passed builder.
+     */
+    private EventBus(Builder builder) {
+        this.eventStore = builder.eventStore;
+        this.executor = builder.executor;
+        this.eventValidator = builder.eventValidator;
+        this.enricher = builder.enricher;
     }
 
     /**
-     * Creates a new instance configured with the direct executor for invoking subscribers.
-     *
-     * @param eventStore the {@code EventStore} to put posted events
-     * @return new EventBus instance
+     * Creates a builder for new {@code EventBus}.
      */
-    public static EventBus newInstance(EventStore eventStore) {
-        final EventBus result = new EventBus(eventStore, directExecutor());
-        return result;
-    }
-
-    /**
-     * Creates a new instance with the passed executor for invoking subscribers.
-     *
-     * @param eventStore the {@code EventStore} to put posted events
-     * @param executor the executor for invoking event subscribers
-     * @return a new EventBus instance
-     */
-    public static EventBus newInstance(EventStore eventStore, Executor executor) {
-        final EventBus result = new EventBus(eventStore, executor);
-        return result;
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     /**
@@ -146,6 +145,22 @@ public class EventBus implements AutoCloseable {
         final Message message = getMessage(event);
         final EventClass result = EventClass.of(message);
         return result;
+    }
+
+    @VisibleForTesting
+    /* package */ Executor getExecutor() {
+        return executor;
+    }
+
+    @VisibleForTesting
+    /* package */ MessageValidator getEventValidator() {
+        return eventValidator;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    /* package */ EventEnricher getEnricher() {
+        return enricher;
     }
 
     /**
@@ -220,10 +235,20 @@ public class EventBus implements AutoCloseable {
      */
     public void post(Event event) {
         store(event);
-        callDispatchers(event);
-        final Message message = getMessage(event);
-        final EventContext context = event.getContext();
+        final Event enriched = enrich(event);
+        callDispatchers(enriched);
+        final Message message = getMessage(enriched);
+        final EventContext context = enriched.getContext();
         invokeSubscribers(message, context);
+    }
+
+    private Event enrich(Event event) {
+        if (enricher == null ||
+            !enricher.canBeEnriched(event)) {
+            return event;
+        }
+        final Event enriched = enricher.enrich(event);
+        return enriched;
     }
 
     private void callDispatchers(Event event) {
@@ -281,7 +306,7 @@ public class EventBus implements AutoCloseable {
             responseObserver.onError(Statuses.invalidArgumentWithCause(unsupportedEvent));
             return false;
         }
-        final List<ConstraintViolation> violations = messageValidator.validate(event);
+        final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent = InvalidEventException.onConstraintViolations(event, violations);
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
@@ -317,9 +342,97 @@ public class EventBus implements AutoCloseable {
         eventStore.close();
     }
 
-    @VisibleForTesting
-    /* package */ void setMessageValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
+    /**
+     * The {@code Builder} for {@code EventBus}.
+     */
+    public static class Builder {
+        private EventStore eventStore;
+        /**
+         * Optional {@code Executor} for executing subscriber methods.
+         *
+         * <p>If not set, a default value will be set by the builder.
+         */
+        private Executor executor;
+
+        /**
+         * Optional validator for events.
+         *
+         * <p>If not set, a default value will be set by the builder.
+         */
+        private MessageValidator eventValidator;
+
+        @Nullable
+        private EventEnricher enricher;
+
+        private Builder() {}
+
+        public Builder setEventStore(EventStore eventStore) {
+            this.eventStore = checkNotNull(eventStore);
+            return this;
+        }
+
+        @Nullable
+        public EventStore getEventStore() {
+            return eventStore;
+        }
+
+        /**
+         * Sets an {@code Executor} to be used for executing subscriber methods
+         * int the {@code EventBus} we build.
+         *
+         * <p>If the {@code Executor} is not set, {@link MoreExecutors#directExecutor()} will be used.
+         */
+        public Builder setExecutor(Executor executor) {
+            this.executor = checkNotNull(executor);
+            return this;
+        }
+
+        @Nullable
+        public Executor getExecutor() {
+            return executor;
+        }
+
+        public Builder setEventValidator(MessageValidator eventValidator) {
+            this.eventValidator = checkNotNull(eventValidator);
+            return this;
+        }
+
+        @Nullable
+        public MessageValidator getEventValidator() {
+            return eventValidator;
+        }
+
+        /**
+         * Sets a custom {@link EventEnricher} for events posted to the {@code EventBus} which is being built.
+         *
+         * <p>If the {@code Enricher} is not set, a default instance will be provided.
+         *
+         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is not supported
+         */
+        public Builder setEnricher(EventEnricher enricher) {
+            this.enricher = enricher;
+            return this;
+        }
+
+        @Nullable
+        public EventEnricher getEnricher() {
+            return enricher;
+        }
+
+        public EventBus build() {
+            checkNotNull(eventStore, "eventStore must be set");
+
+            if (executor == null) {
+                executor = MoreExecutors.directExecutor();
+            }
+
+            if (eventValidator == null) {
+                eventValidator = MessageValidator.newInstance();
+            }
+
+            final EventBus result = new EventBus(this);
+            return result;
+        }
     }
 
     private enum LogSingleton {

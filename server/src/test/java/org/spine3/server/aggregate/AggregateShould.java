@@ -37,8 +37,8 @@ import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
-import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.command.ImportEvents;
+import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
@@ -52,8 +52,8 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.*;
+import static org.spine3.base.Events.createEvent;
 import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.test.Tests.currentTimeSeconds;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -626,6 +626,6 @@ public class AggregateShould {
     }
 
     private static Event snapshotToEvent(Snapshot snapshot) {
-        return Event.newBuilder().setContext(EVENT_CONTEXT).setMessage(toAny(snapshot)).build();
+        return createEvent(snapshot, EVENT_CONTEXT);
     }
 }

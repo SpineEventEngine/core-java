@@ -1,3 +1,4 @@
+//
 // Copyright 2016, TeamDev Ltd. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
@@ -18,13 +19,25 @@
 //
 syntax = "proto3";
 
-package spine_examples.failure;
+package spine.test.messages;
 
-option java_package="org.spine3.test.failures";
-option java_multiple_files = false;
-// Do not specify java_outer_classname option as we're not generating multiple Java classes for failures.
-option java_generate_equals_and_hash = true;
+option java_package="org.spine3.test.messages";
+option java_multiple_files = true;
+option java_outer_classname = "MessagesShouldProto";
 
-message UnableToHandle {
-    string message = 1;
+import "google/protobuf/wrappers.proto";
+
+// Only for usage in `MessagesShould` class.
+
+message MessageWithStringValue {
+    google.protobuf.StringValue value = 1;
+}
+
+message TestEnumValue {
+    TestEnum value = 1;
+}
+
+enum TestEnum {
+    ZERO = 0;
+    ONE = 1;
 }

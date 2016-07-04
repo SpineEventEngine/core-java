@@ -1,0 +1,77 @@
+/*
+ * Copyright 2016, TeamDev Ltd. All rights reserved.
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.spine3.util;
+
+/**
+ * Utility class for working with exceptions for cases that are not
+ * supported by {@link com.google.common.base.Throwables}.
+ *
+ * @author Alexander Yevsyukov
+ */
+public class Exceptions {
+
+    private Exceptions() {}
+
+    /**
+     * Always throws {@code UnsupportedOperationException} initialized with the passed string.
+     *
+     * <p>Use this method in combination with static import for brevity of code for unsupported operations.
+     * The return type is given to keep Java type system happy when called in methods with return type as shown below:
+     *
+     * <pre>
+     *   import static com.teamdev.commons.Exceptions.unsupported;
+     *   ...
+     *   T doSomething() {
+     *      throw unsupported("Cannot do this");
+     *   }
+     * </pre>
+     *
+     * @throws UnsupportedOperationException always
+     * @param message a message for exception
+     * @return nothing ever
+     */
+    public static UnsupportedOperationException unsupported(String message) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException(message);
+    }
+
+
+    /**
+     * Always throws {@code UnsupportedOperationException}.
+     *
+     * <p>Use this method in combination with static import for brevity of code for unsupported operations.
+     * The return type is given to keep Java type system happy when called in methods with return type as shown below:
+     *
+     * <pre>
+     *   import static com.teamdev.commons.Exceptions.unsupported;
+     *   ...
+     *   T doSomething() {
+     *      throw unsupported();
+     *   }
+     * </pre>
+     *
+     * @throws UnsupportedOperationException always
+     * @return nothing ever
+     */
+    @SuppressWarnings("NewExceptionWithoutArguments") // No message necessary for this case.
+    public static UnsupportedOperationException unsupported() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+}

@@ -131,7 +131,6 @@ public class DurationsShould {
     }
 
     @Test
-    @SuppressWarnings("LocalVariableNamingConvention")
     public void convert_nanoseconds_to_duration_bigger_than_second() {
 
         final long oneSecondInNanos = 1000 * 1000 * 1000;

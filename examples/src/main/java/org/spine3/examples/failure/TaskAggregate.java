@@ -28,8 +28,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.command.Assign;
 
 /**
- * A sample of the aggregate that throws a business failure on a command, which cannot be
- * performed.
+ * A sample of the aggregate that throws a business failure on a command, which cannot be performed.
  *
  * @author Alexander Yevsyukov
  */

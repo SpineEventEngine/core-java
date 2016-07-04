@@ -22,16 +22,15 @@ package org.spine3.base;
 
 import com.google.common.base.Function;
 import com.google.protobuf.Any;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.IdWithStructure;
-import org.spine3.test.IntFieldId;
-import org.spine3.test.LongFieldId;
-import org.spine3.test.NestedMessageId;
-import org.spine3.test.SeveralFieldsId;
-import org.spine3.test.StringFieldId;
-import org.spine3.test.TimestampFieldId;
+import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.test.identifiers.NestedMessageId;
+import org.spine3.test.identifiers.SeveralFieldsId;
+import org.spine3.test.identifiers.TimestampFieldId;
 
 import javax.annotation.Nullable;
 
@@ -39,13 +38,15 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.*;
 import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.Values.newIntegerValue;
+import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "ClassWithTooManyMethods"})
+@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class IdentifiersShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
@@ -106,7 +107,7 @@ public class IdentifiersShould {
     @Test
     public void return_same_string_when_convert_string_wrapped_into_message() {
 
-        final StringFieldId id = newTestIdWithStringField(TEST_ID);
+        final StringValue id = newStringValue(TEST_ID);
 
         final String result = idToString(id);
 
@@ -116,7 +117,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_integer_id_wrapped_into_message() {
         final Integer value = 1024;
-        final IntFieldId id = IntFieldId.newBuilder().setId(value).build();
+        final Int32Value id = newIntegerValue(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -127,7 +128,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_long_id_wrapped_into_message() {
         final Long value = 100500L;
-        final LongFieldId id = LongFieldId.newBuilder().setId(value).build();
+        final Int64Value id = newLongValue(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -137,7 +138,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_with_string_field() {
-        final StringFieldId id = newTestIdWithStringField(TEST_ID);
+        final StringValue id = newStringValue(TEST_ID);
 
         final String result = idToString(id);
 
@@ -157,7 +158,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_with_message_field() {
-        final StringFieldId value = newTestIdWithStringField(TEST_ID);
+        final StringValue value = newStringValue(TEST_ID);
         final NestedMessageId idToConvert = NestedMessageId.newBuilder().setId(value).build();
 
         final String result = idToString(idToConvert);
@@ -167,7 +168,6 @@ public class IdentifiersShould {
 
     @Test
     public void have_default_to_string_conversion_of_message_id_with_several_fields() {
-
         final String nestedString = "nested_string";
         final String outerString = "outer_string";
         final Integer number = 256;
@@ -175,13 +175,13 @@ public class IdentifiersShould {
         final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
                 .setString(outerString)
                 .setInt(number)
-                .setMessage(newTestIdWithStringField(nestedString))
+                .setMessage(newStringValue(nestedString))
                 .build();
 
         final String expected =
                 "string=\"" + outerString + '\"' +
                 " int=" + number +
-                " message { id=\"" + nestedString + "\" }";
+                " message { value=\"" + nestedString + "\" }";
 
         final String actual = idToString(idToConvert);
 
@@ -190,8 +190,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
-
-        final StringFieldId messageToWrap = newTestIdWithStringField(TEST_ID);
+        final StringValue messageToWrap = newStringValue(TEST_ID);
         final Any any = toAny(messageToWrap);
 
         final String result = idToString(any);
@@ -199,13 +198,9 @@ public class IdentifiersShould {
         assertEquals(TEST_ID, result);
     }
 
-    private static StringFieldId newTestIdWithStringField(String nestedString) {
-        return StringFieldId.newBuilder().setId(nestedString).build();
-    }
-
-    private static final Function<IdWithStructure, String> ID_TO_STRING_CONVERTER = new Function<IdWithStructure, String>() {
+    private static final Function<IdWithPrimitiveFields, String> ID_TO_STRING_CONVERTER = new Function<IdWithPrimitiveFields, String>() {
         @Override
-        public String apply(@Nullable IdWithStructure id) {
+        public String apply(@Nullable IdWithPrimitiveFields id) {
             if (id == null) {
                 return NULL_ID;
             }
@@ -215,9 +210,9 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_registered_id_message_type() {
-        ConverterRegistry.getInstance().register(IdWithStructure.class, ID_TO_STRING_CONVERTER);
+        ConverterRegistry.getInstance().register(IdWithPrimitiveFields.class, ID_TO_STRING_CONVERTER);
 
-        final IdWithStructure id = IdWithStructure.newBuilder().setName(TEST_ID).build();
+        final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder().setName(TEST_ID).build();
         final String result = idToString(id);
 
         assertEquals(TEST_ID, result);

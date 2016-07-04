@@ -19,17 +19,13 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine.test.commands;
 
-option java_package="org.spine3.test";
+option java_package="org.spine3.test.commands";
 option java_multiple_files = true;
-option java_outer_classname = "TestCommands";
+option java_outer_classname = "CommandsShouldProto";
 
-// A test command to run a test by the method name.
-message RunTest {
-    string method_name = 1;
-}
-
+// Only for usage in `CommandsShould` class.
 message TestCommand {
     string value = 1;
 }

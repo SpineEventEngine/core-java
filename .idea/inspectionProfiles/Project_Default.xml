@@ -254,6 +254,10 @@
     <inspection_tool class="IfStatementWithTooManyBranches" enabled="true" level="INFO" enabled_by_default="true">
       <option name="m_limit" value="3" />
     </inspection_tool>
+    <inspection_tool class="IgnoreResultOfCall" enabled="true" level="INFO" enabled_by_default="true">
+      <option name="m_reportAllNonLibraryCalls" value="true" />
+      <option name="callCheckString" value="java.io.File,.*,java.io.InputStream,read|skip|available|markSupported,java.io.Writer,read|skip|ready|markSupported,java.lang.Boolean,.*,java.lang.Byte,.*,java.lang.Character,.*,java.lang.Double,.*,java.lang.Float,.*,java.lang.Integer,.*,java.lang.Long,.*,java.lang.Math,.*,java.lang.Object,equals|hashCode|toString,java.lang.Short,.*,java.lang.StrictMath,.*,java.lang.String,.*,java.math.BigInteger,.*,java.math.BigDecimal,.*,java.net.InetAddress,.*,java.net.URI,.*,java.util.UUID,.*,java.util.regex.Matcher,pattern|toMatchResult|start|end|group|groupCount|matches|find|lookingAt|quoteReplacement|replaceAll|replaceFirst|regionStart|regionEnd|hasTransparantBounds|hasAnchoringBounds|hitEnd|requireEnd,java.util.regex.Pattern,.*" />
+    </inspection_tool>
     <inspection_tool class="ImplicitNumericConversion" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreWideningConversions" value="true" />
       <option name="ignoreCharConversions" value="false" />
@@ -263,7 +267,7 @@
     <inspection_tool class="IncrementDecrementUsedAsExpression" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InnerClassMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InstanceMethodNamingConvention" enabled="true" level="INFO" enabled_by_default="true">
-      <scope name="Tests" level="INFO" enabled="true">
+      <scope name="Tests" level="INFO" enabled="false">
         <option name="m_regex" value="[a-z][A-Za-z\d]*" />
         <option name="m_minLength" value="4" />
         <option name="m_maxLength" value="32" />
@@ -329,7 +333,7 @@
       <option name="checkForEmptyMethods" value="true" />
     </inspection_tool>
     <inspection_tool class="LoadLibraryWithNonConstantString" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="LocalCanBeFinal" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="LocalCanBeFinal" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="REPORT_VARIABLES" value="true" />
       <option name="REPORT_PARAMETERS" value="false" />
       <option name="REPORT_CATCH_PARAMETERS" value="false" />

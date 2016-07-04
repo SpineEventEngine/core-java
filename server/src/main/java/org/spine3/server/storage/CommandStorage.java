@@ -208,10 +208,8 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
             if (record == null) {
                 return Command.getDefaultInstance();
             }
-            final Command.Builder builder = Command.newBuilder()
-                                                   .setMessage(record.getMessage())
-                                                   .setContext(record.getContext());
-            return builder.build();
+            final Command cmd = Commands.create(record.getMessage(), record.getContext());
+            return cmd;
         }
     };
 }

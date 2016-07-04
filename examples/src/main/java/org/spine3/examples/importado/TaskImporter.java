@@ -46,8 +46,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
-import static org.spine3.base.Events.createEvent;
-import static org.spine3.base.Events.createImportEventContext;
+import static org.spine3.base.Events.createImportEvent;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
 
 /**
@@ -151,22 +151,22 @@ public class TaskImporter implements AutoCloseable {
         final UserId taskOwner = UserUtil.newUserId(className);
         final UserId assignee = taskOwner;
         // The ID of the entity, which produces events.
-        final StringValue producerId = StringValue.newBuilder().setValue(className).build();
+        final StringValue producerId = newStringValue(className);
         final ImmutableList.Builder<Event> builder = ImmutableList.builder();
 
         final TaskCreated taskCreated = TaskCreated.newBuilder()
                                              .setTask(task)
                                              .build();
-        builder.add(createEvent(taskCreated, createImportEventContext(producerId)));
+        builder.add(createImportEvent(taskCreated, producerId));
 
         final WorkStarted workStarted = WorkStarted.newBuilder()
                                              .setId(taskId)
                                              .setAssignee(assignee)
                                              .build();
-        builder.add(createEvent(workStarted, createImportEventContext(producerId)));
+        builder.add(createImportEvent(workStarted, producerId));
 
         final TaskDone taskDone = TaskDone.newBuilder().setId(taskId).build();
-        builder.add(createEvent(taskDone, createImportEventContext(producerId)));
+        builder.add(createImportEvent(taskDone, producerId));
 
         return builder.build();
     }

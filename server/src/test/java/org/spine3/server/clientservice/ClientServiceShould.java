@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server;
+package org.spine3.server.clientservice;
 
 
 import com.google.common.collect.Sets;
@@ -36,21 +36,22 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.people.PersonName;
+import org.spine3.server.BoundedContext;
+import org.spine3.server.ClientService;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.error.UnsupportedCommandException;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.clientservice.customer.Customer;
-import org.spine3.test.clientservice.customer.CustomerId;
-import org.spine3.test.clientservice.customer.command.CreateCustomer;
-import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.Project;
 import org.spine3.test.clientservice.ProjectId;
 import org.spine3.test.clientservice.command.AddTask;
 import org.spine3.test.clientservice.command.CreateProject;
 import org.spine3.test.clientservice.command.StartProject;
+import org.spine3.test.clientservice.customer.Customer;
+import org.spine3.test.clientservice.customer.CustomerId;
+import org.spine3.test.clientservice.customer.command.CreateCustomer;
+import org.spine3.test.clientservice.customer.event.CustomerCreated;
 import org.spine3.test.clientservice.event.ProjectCreated;
 import org.spine3.test.clientservice.event.ProjectStarted;
 import org.spine3.test.clientservice.event.TaskAdded;
@@ -71,18 +72,16 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 public class ClientServiceShould {
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
-    private ClientService clientService;
-
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        final BoundedContext projectsContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext projectsContext = BoundedContextTestStubs.create();
         final ProjectAggregateRepository projectRepo = new ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        final BoundedContext customersContext = BoundedContextTestStubs.create(InMemoryStorageFactory.getInstance());
+        final BoundedContext customersContext = BoundedContextTestStubs.create();
         final CustomerAggregateRepository customerRepo = new CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
@@ -95,6 +94,8 @@ public class ClientServiceShould {
 
         clientService = builder.build();
     }
+
+    private ClientService clientService;
 
     @After
     public void tearDown() throws Exception {

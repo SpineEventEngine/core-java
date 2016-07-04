@@ -25,6 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,10 +37,10 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.FailureThrowable;
 import org.spine3.server.BoundedContext;
-import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.IdFunction;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.event.GetProducerIdFromEvent;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -54,13 +55,14 @@ import org.spine3.test.procman.command.StartProject;
 import org.spine3.test.procman.event.ProjectCreated;
 import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
+import org.spine3.testdata.BoundedContextTestStubs;
+import org.spine3.testdata.EventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.spine3.protobuf.Messages.fromAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
@@ -76,10 +78,12 @@ public class ProcessManagerRepositoryShould {
 
     private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
+    private EventBus eventBus;
 
     @Before
     public void setUp() {
-        boundedContext = BoundedContextTestStubs.create();
+        eventBus = spy(EventBusFactory.create());
+        boundedContext = BoundedContextTestStubs.create(eventBus);
 
         boundedContext.getCommandBus().register(new CommandDispatcher() {
             @Override
@@ -97,6 +101,11 @@ public class ProcessManagerRepositoryShould {
         repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(InMemoryStorageFactory.getInstance());
         TestProcessManager.clearMessageDeliveryHistory();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        boundedContext.close();
     }
 
     @Test
@@ -147,7 +156,7 @@ public class ProcessManagerRepositoryShould {
 
         final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
 
-        verify(boundedContext.getEventBus(), times(1)).post(argumentCaptor.capture());
+        verify(eventBus, times(1)).post(argumentCaptor.capture());
 
         final Event event = argumentCaptor.getValue();
 

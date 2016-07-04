@@ -18,19 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.test;
 
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Durations;
 import org.spine3.protobuf.Timestamps;
-import org.spine3.test.Tests;
 
 import static com.google.protobuf.util.TimeUtil.subtract;
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "MethodWithTooExceptionsDeclared"})
+@SuppressWarnings({"InstanceMethodNamingConvention"})
 public class TestsShould {
 
     @Test

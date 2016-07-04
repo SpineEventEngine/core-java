@@ -30,6 +30,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.event.error.InvalidEventException;
 import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
@@ -39,22 +40,17 @@ import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.validate.ConstraintViolation;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class EventBusShould {
-
-    //TODO:2016-01-27:alexander.yevsyukov: Check that EventStore is closed on close() too. Using Mocks?
-
-    //TODO:2016-01-27:alexander.yevsyukov: Reach 100% coverage.
 
     private EventStore eventStore;
     private EventBus eventBus;
@@ -62,30 +58,35 @@ public class EventBusShould {
 
     @Before
     public void setUp() {
+        setUp(null);
+    }
+
+    private void setUp(@Nullable EventEnricher enricher) {
         final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        this.eventStore = EventStore.newBuilder()
+        final EventStore.Builder storeBuilder = EventStore.newBuilder()
                 .setStreamExecutor(MoreExecutors.directExecutor())
                 .setStorage(storageFactory.createEventStorage())
-                .setLogger(EventStore.log())
-                .build();
-        this.eventBus = EventBus.newInstance(eventStore, MoreExecutors.directExecutor());
+                .setLogger(EventStore.log());
+        this.eventStore = spy(storeBuilder.build());
+        final EventBus.Builder busBuilder = EventBus.newBuilder()
+                .setEventStore(eventStore);
+        if (enricher != null) {
+            busBuilder.setEnricher(enricher);
+        }
+        this.eventBus = busBuilder.build();
         this.responseObserver = new TestResponseObserver();
     }
 
     @Test
-    public void create_direct_executor_instance() {
-        assertNotNull(EventBus.newInstance(eventStore));
-    }
-
-    @Test
-    public void create_instance_with_executor() {
-        assertNotNull(EventBus.newInstance(eventStore, Executors.newSingleThreadExecutor()));
+    public void have_builder() {
+        assertNotNull(EventBus.newBuilder());
     }
 
     @Test
     public void return_associated_EventStore() {
-        final EventBus bus = EventBus.newInstance(eventStore);
-        assertNotNull(bus.getEventStore());
+        final EventBus result = EventBus.newBuilder().setEventStore(eventStore)
+                                        .build();
+        assertNotNull(result.getEventStore());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -203,7 +204,7 @@ public class EventBusShould {
     }
 
     @Test
-    public void catches_exceptions_caused_by_subscribers() {
+    public void catch_exceptions_caused_by_subscribers() {
         final FaultySubscriber faultySubscriber = new FaultySubscriber();
 
         eventBus.subscribe(faultySubscriber);
@@ -225,12 +226,16 @@ public class EventBusShould {
 
     @Test
     public void call_onError_if_event_is_invalid() {
-        eventBus.subscribe(new TestEventSubscriber());
         final MessageValidator validator = mock(MessageValidator.class);
         doReturn(newArrayList(ConstraintViolation.getDefaultInstance()))
                 .when(validator)
                 .validate(any(Message.class));
-        eventBus.setMessageValidator(validator);
+
+        final EventBus eventBus = EventBus.newBuilder()
+                                          .setEventStore(eventStore)
+                                          .setEventValidator(validator)
+                                          .build();
+        eventBus.subscribe(new TestEventSubscriber());
 
         final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(), responseObserver);
 
@@ -248,6 +253,55 @@ public class EventBusShould {
         final Throwable cause = responseObserver.getThrowable().getCause();
         assertEquals(UnsupportedEventException.class, cause.getClass());
         assertNull(responseObserver.getResponse());
+    }
+
+    @Test
+    public void unregister_registries_on_close() throws Exception {
+        eventBus.register(new BareDispatcher());
+        eventBus.subscribe(new ProjectCreatedSubscriber());
+        final EventClass eventClass = EventClass.of(ProjectCreated.class);
+
+        eventBus.close();
+
+        assertTrue(eventBus.getDispatchers(eventClass).isEmpty());
+        assertTrue(eventBus.getSubscribers(eventClass).isEmpty());
+        verify(eventStore).close();
+    }
+
+    @Test
+    public void have_log() {
+        assertNotNull(EventBus.log());
+    }
+
+    @Test
+    public void do_not_have_Enricher_by_default() {
+        assertNull(eventBus.getEnricher());
+    }
+
+    @Test
+    public void enrich_event_if_it_can_be_enriched() {
+        final EventEnricher enricher = mock(EventEnricher.class);
+        final Event event = Given.Event.projectCreated();
+        doReturn(true).when(enricher).canBeEnriched(any(Event.class));
+        doReturn(event).when(enricher).enrich(any(Event.class));
+        setUp(enricher);
+        eventBus.subscribe(new ProjectCreatedSubscriber());
+
+        eventBus.post(event);
+
+        verify(enricher).enrich(any(Event.class));
+    }
+
+    @Test
+    public void do_not_enrich_event_if_it_cannot_be_enriched() {
+        final EventEnricher enricher = mock(EventEnricher.class);
+        doReturn(false).when(enricher).canBeEnriched(any(Event.class));
+        setUp(enricher);
+        eventBus.subscribe(new ProjectCreatedSubscriber());
+
+        eventBus.post(Given.Event.projectCreated());
+
+        verify(enricher, never()).enrich(any(Event.class));
     }
 
     private static class TestEventSubscriber extends EventSubscriber {
@@ -296,18 +350,6 @@ public class EventBusShould {
         /* package */ boolean isDispatchCalled() {
             return dispatchCalled;
         }
-    }
-
-    @Test
-    public void unregister_registries_on_close() throws Exception {
-        eventBus.register(new BareDispatcher());
-        eventBus.subscribe(new ProjectCreatedSubscriber());
-        final EventClass eventClass = EventClass.of(ProjectCreated.class);
-
-        eventBus.close();
-
-        assertTrue(eventBus.getDispatchers(eventClass).isEmpty());
-        assertTrue(eventBus.getSubscribers(eventClass).isEmpty());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {

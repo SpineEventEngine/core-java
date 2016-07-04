@@ -23,21 +23,22 @@ package org.spine3.type;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.test.RunTest;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.*;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeNameShould {
+
+    private static final String STRING_VALUE_TYPE_NAME = "google.protobuf.StringValue";
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_value() {
@@ -45,7 +46,7 @@ public class TypeNameShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_emtpy_string() {
+    public void do_not_accept_empty_string() {
         TypeName.of("");
     }
 
@@ -82,18 +83,23 @@ public class TypeNameShould {
         final Descriptors.Descriptor descriptor = StringValue.getDefaultInstance().getDescriptorForType();
 
         final TypeName typeName = TypeName.of(descriptor);
-        assertEquals(TypeName.of(StringValue.getDefaultInstance()), typeName);
+        assertEquals(STRING_VALUE_TYPE_NAME, typeName.value());
     }
 
     @Test
     public void obtain_type_of_command() {
         final CommandFactory factory = TestCommandFactory.newInstance(TypeNameShould.class);
-        final RunTest message = RunTest.newBuilder()
-                                       .setMethodName("obtain_type_of_command")
-                                       .build();
+        final StringValue message = newStringValue(newUuid());
         final Command command = factory.create(message);
 
         final TypeName typeName = TypeName.ofCommand(command);
         assertEquals(TypeName.of(message), typeName);
+    }
+
+    @Test
+    public void create_instance_by_class() {
+        final TypeName typeName = TypeName.of(StringValue.class);
+
+        assertEquals(STRING_VALUE_TYPE_NAME, typeName.value());
     }
 }

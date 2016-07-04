@@ -95,7 +95,7 @@ public class MessageValidatorShould {
     private static final String LESS_THAN_MIN_MSG = "Number must be greater than or equal to 16.5.";
     private static final String GREATER_MAX_MSG = "Number must be less than or equal to 64.5.";
 
-    private final MessageValidator validator = new MessageValidator();
+    private final MessageValidator validator = MessageValidator.newInstance();
 
     private List<ConstraintViolation> violations;
 

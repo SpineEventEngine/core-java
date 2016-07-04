@@ -19,42 +19,31 @@
 //
 syntax = "proto3";
 
-package spine.test;
+package spine_examples.enrichment;
 
-option java_package="org.spine3.test";
+option java_package="org.spine3.examples.enrichment.events";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
-option java_outer_classname = "TestIdentifiers";
+option java_generate_equals_and_hash = true;
 
-import "google/protobuf/timestamp.proto";
+import "spine/event_annotations.proto";
+import "spine/validate.proto";
+import "spine/users/user_id.proto";
+import "spine/people/person_name.proto";
 
-message StringFieldId {
-    string id = 1;
+message UserAccountCreated {
+    spine.users.UserId user_id = 1;
+    spine.people.PersonName name = 2 [(required).value = true];
 }
 
-message IntFieldId {
-    int32 id = 1;
+// An event, which reports suspension of a user account.
+// The only information we really need to know about the event is the ID of the user.
+message UserAccountSuspended {
+    spine.users.UserId user_id = 1;
+
+    // An enrichment for the event, which allows to show the name of the suspended user somewhere in UI.
+    message Enrichment {
+        spine.people.PersonName name = 2 [(by) = "user_id"];
+    }
 }
 
-message LongFieldId {
-    int64 id = 1;
-}
-
-message NestedMessageId {
-    StringFieldId id = 1;
-}
-
-message TimestampFieldId {
-    google.protobuf.Timestamp id = 1;
-}
-
-message SeveralFieldsId {
-    string string = 1;
-    int32 int = 2;
-    StringFieldId message = 3;
-}
-
-message IdWithStructure {
-    string name = 1;
-    int32 number = 2;
-    bool flag = 3;
-}

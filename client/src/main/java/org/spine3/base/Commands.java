@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import com.google.common.base.Predicate;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -47,6 +48,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.validate.Validate.*;
 
 /**
@@ -107,12 +109,25 @@ public class Commands {
      *
      * @param message the domain model message to send in the command
      * @param context the context of the command
-     * @return a new command request
+     * @return a new command
      */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Command create(Message message, CommandContext context) {
+        return create(toAny(message), context);
+    }
+
+    /**
+     * Creates a command instance with the given message wrapped to {@link Any} and the {@code context}.
+     *
+     * @param messageAny the domain model message wrapped to {@link Any}
+     * @param context the context of the command
+     * @return a new command
+     */
+    @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
+    public static Command create(Any messageAny, CommandContext context) {
         final Command.Builder request = Command.newBuilder()
-                .setMessage(Messages.toAny(message))
-                .setContext(context);
+                                               .setMessage(messageAny)
+                                               .setContext(context);
         return request.build();
     }
 

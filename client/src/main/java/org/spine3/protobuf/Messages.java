@@ -21,7 +21,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
@@ -37,6 +37,8 @@ import java.lang.reflect.Method;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.propagate;
+import static com.google.protobuf.Descriptors.Descriptor;
+import static com.google.protobuf.Descriptors.GenericDescriptor;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -93,23 +95,24 @@ public class Messages {
      */
     public static <T extends Message> T fromAny(Any any) {
         checkNotNull(any);
-
-        T result = null;
         String typeStr = "";
         try {
             final TypeName typeName = TypeName.ofEnclosed(any);
             typeStr = typeName.value();
-
             final Class<T> messageClass = toMessageClass(typeName);
-            result = any.unpack(messageClass);
-
-        } catch (ClassNotFoundException ignored) {
-            throw new UnknownTypeException(typeStr);
+            final T result = any.unpack(messageClass);
+            return result;
+        } catch (RuntimeException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof ClassNotFoundException) {
+                // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
+                throw new UnknownTypeException(typeStr, cause);
+            } else {
+                throw e;
+            }
         } catch (InvalidProtocolBufferException e) {
-            propagate(e);
+            throw propagate(e);
         }
-
-        return result;
     }
 
     /**
@@ -119,14 +122,19 @@ public class Messages {
      *
      * @param messageType full type name defined in the proto files
      * @return message class
-     * @throws ClassNotFoundException in case there is no corresponding class for the given Protobuf message type
+     * @throws RuntimeException wrapping {@link ClassNotFoundException} if there is no corresponding class
+     *                          for the given Protobuf message type
      * @see #fromAny(Any) that uses the same convention
      */
-    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) throws ClassNotFoundException {
+    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
         final ClassName className = TypeToClassMap.get(messageType);
-        @SuppressWarnings("unchecked")
-        final Class<T> result = (Class<T>) Class.forName(className.value());
-        return result;
+        try {
+            @SuppressWarnings("unchecked") // the client considers this message is of this class
+            final Class<T> result = (Class<T>) Class.forName(className.value());
+            return result;
+        } catch (ClassNotFoundException e) {
+            throw new UnknownTypeException(messageType.value(), e);
+        }
     }
 
     /**
@@ -168,17 +176,12 @@ public class Messages {
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
         for (TypeName typeName : TypeToClassMap.knownTypes()) {
-            try {
-                final Class<? extends Message> clazz = toMessageClass(typeName);
-                final Descriptors.GenericDescriptor descriptor = getClassDescriptor(clazz);
-                // Skip outer class descriptors.
-                if (descriptor instanceof Descriptors.Descriptor) {
-                    final Descriptors.Descriptor typeDescriptor = (Descriptors.Descriptor) descriptor;
-                    builder.add(typeDescriptor);
-                }
-
-            } catch (ClassNotFoundException e) {
-                propagate(e);
+            final Class<? extends Message> clazz = toMessageClass(typeName);
+            final GenericDescriptor descriptor = getClassDescriptor(clazz);
+            // Skip outer class descriptors.
+            if (descriptor instanceof Descriptor) {
+                final Descriptor typeDescriptor = (Descriptor) descriptor;
+                builder.add(typeDescriptor);
             }
         }
         return builder.build();
@@ -198,14 +201,50 @@ public class Messages {
     /**
      * Returns descriptor for the passed message class.
      */
-    public static Descriptors.GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
+    public static GenericDescriptor getClassDescriptor(Class<? extends Message> clazz) {
         try {
             final Method method = clazz.getMethod(METHOD_GET_DESCRIPTOR);
-            final Descriptors.GenericDescriptor result = (Descriptors.GenericDescriptor) method.invoke(null);
+            final GenericDescriptor result = (GenericDescriptor) method.invoke(null);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             //noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
             throw new MissingDescriptorException(clazz, e.getCause());
         }
+    }
+
+    /**
+     * Returns the class of the Protobuf message field.
+     *
+     * @param field the field descriptor
+     * @return the class of the field
+     * @throws IllegalArgumentException if the field type is unknown
+     */
+    public static Class<?> getFieldClass(FieldDescriptor field) {
+        final FieldDescriptor.JavaType javaType = field.getJavaType();
+        switch (javaType) {
+            case INT:
+                return Integer.class;
+            case LONG:
+                return Long.class;
+            case FLOAT:
+                return Float.class;
+            case DOUBLE:
+                return Double.class;
+            case BOOLEAN:
+                return Boolean.class;
+            case STRING:
+                return String.class;
+            case BYTE_STRING:
+                return ByteString.class;
+            case ENUM:
+                final String enumTypeName = field.getEnumType().getFullName();
+                final Class<? extends Message> enumClass = toMessageClass(TypeName.of(enumTypeName));
+                return enumClass;
+            case MESSAGE:
+                final TypeName typeName = TypeName.of(field.getMessageType());
+                final Class<? extends Message> msgClass = toMessageClass(typeName);
+                return msgClass;
+        }
+        throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());
     }
 }

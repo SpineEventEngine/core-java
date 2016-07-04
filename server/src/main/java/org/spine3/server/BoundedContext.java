@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
@@ -37,6 +38,7 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
@@ -208,10 +210,8 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
                 .setTimestamp(sourceContext.getTimestamp())
                 .setProducerId(toAny(producerId))
                 .build();
-        final Event.Builder result = Event.newBuilder()
-                .setMessage(integrationEvent.getMessage())
-                .setContext(context);
-        return result.build();
+        final Event result = Events.createEvent(integrationEvent.getMessage(), context);
+        return result;
     }
 
     /**
@@ -250,6 +250,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         private Executor eventStoreStreamExecutor;
         private EventBus eventBus;
         private boolean multitenant;
+        private EventEnricher eventEnricher;
 
         /**
          * Sets the name for a new bounded context.
@@ -328,6 +329,11 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
             return this;
         }
 
+        @Nullable
+        public EventStore getEventStore() {
+            return eventStore;
+        }
+
         /**
          * Specifies an {@code Executor} for returning event stream from {@code EventStore}.
          *
@@ -352,11 +358,6 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
             return eventStoreStreamExecutor;
         }
 
-        @Nullable
-        public EventStore getEventStore() {
-            return eventStore;
-        }
-
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
             return this;
@@ -365,6 +366,16 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         @Nullable
         public EventBus getEventBus() {
             return eventBus;
+        }
+
+        public Builder setEventEnricher(EventEnricher eventEnricher) {
+            this.eventEnricher = eventEnricher;
+            return this;
+        }
+
+        @Nullable
+        public EventEnricher getEventEnricher() {
+            return eventEnricher;
         }
 
         public BoundedContext build() {
@@ -422,8 +433,11 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
             if (eventStore == null) {
                 this.eventStore = createEventStore();
             }
-            final EventBus eventBus = EventBus.newInstance(eventStore);
-            return eventBus;
+            final EventBus result = EventBus.newBuilder()
+                                            .setEventStore(eventStore)
+                                            .setEnricher(eventEnricher)
+                                            .build();
+            return result;
         }
     }
 

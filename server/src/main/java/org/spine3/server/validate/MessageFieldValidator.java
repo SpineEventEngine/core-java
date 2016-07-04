@@ -91,7 +91,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
             return;
         }
         for (Message value : getValues()) {
-            final MessageValidator validator = new MessageValidator(getFieldPath());
+            final MessageValidator validator = MessageValidator.newInstance(getFieldPath());
             final List<ConstraintViolation> violations = validator.validate(value);
             if (!violations.isEmpty()) {
                 addViolation(newValidViolation(value, violations));

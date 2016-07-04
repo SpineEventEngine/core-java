@@ -37,7 +37,10 @@ option java_package = "org.spine3.annotations";
 import "google/protobuf/descriptor.proto";
 
 // TODO:2016-02-18:alexander.litus: obtain globally unique field numbers for opts from Google.
-
+//TODO:2016-06-14:alexander.yevsyukov: Most likely we're not going to have that many indexes reserved just for us.
+// We'd better distribute indexes we use in a smart way and continue using the project-dependent indexes.
+// In the unlikely event of receiving global indexes before we go to publicly used versions of the framework, we can
+// change these values.
 
 extend google.protobuf.FieldOptions {
     // Indicates a field which is internal to Spine, not part of the public API, and should not be used by users of the framework.
