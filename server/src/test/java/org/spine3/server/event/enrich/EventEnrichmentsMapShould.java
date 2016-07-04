@@ -54,17 +54,37 @@ public class EventEnrichmentsMapShould {
     }
 
     @Test
-    public void contain_event_types_by_enrichment_type_names() {
-        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreated.Enrichment.class);
-        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedSeparateEnrichment.class);
-        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackage.class);
-        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqn.class);
-        getEventTypeByEnrichmentTypeTest(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class);
-        getEventTypeByEnrichmentTypeTest(ProjectStarted.class, ProjectStarted.Enrichment.class);
+    public void contain_ProjectCreated_by_ProjectCreatedEnrichment_type() {
+        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreated.Enrichment.class);
     }
 
-    private static void getEventTypeByEnrichmentTypeTest(Class<? extends Message> expectedEventClass,
-                                                         Class<? extends Message> enrichmentClass) {
+    @Test
+    public void contain_ProjectCreated_by_ProjectCreatedSeparateEnrichment_type() {
+        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedSeparateEnrichment.class);
+    }
+
+    @Test
+    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackage_type() {
+        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackage.class);
+    }
+
+    @Test
+    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqn_type() {
+        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqn.class);
+    }
+
+    @Test
+    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt_type() {
+        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class);
+    }
+
+    @Test
+    public void contain_ProjectStarted_by_ProjectStartedEnrichment_type() {
+        assertEventTypeByEnrichmentType(ProjectStarted.class, ProjectStarted.Enrichment.class);
+    }
+
+    private static void assertEventTypeByEnrichmentType(Class<? extends Message> expectedEventClass,
+            Class<? extends Message> enrichmentClass) {
         final TypeName eventType = EventEnrichmentsMap.getInstance()
                                                       .get(TypeName.of(enrichmentClass));
         assertEquals(TypeName.of(expectedEventClass), eventType);
