@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -66,7 +67,7 @@ import static org.spine3.protobuf.Messages.toMessageClass;
 public class EventEnricher {
 
     /**
-     * Available enrichments per message class.
+     * Available enrichment functions per event message class.
      */
     private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
@@ -91,14 +92,17 @@ public class EventEnricher {
         this.functions = functionsMap.build();
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
     private void putMsgEnrichers(ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
-        final Map<TypeName, TypeName> enrichmentsMap = EventEnrichmentsMap.getInstance();
+        final ImmutableMultimap<TypeName, TypeName> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (TypeName enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = toMessageClass(enrichmentType);
-            final TypeName eventType = enrichmentsMap.get(enrichmentType);
-            final Class<Message> eventClass = toMessageClass(eventType);
-            final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this, eventClass, enrichmentClass);
-            functionsMap.put(eventClass, msgEnricher);
+            final ImmutableCollection<TypeName> eventTypes = enrichmentsMap.get(enrichmentType);
+            for (TypeName eventType : eventTypes) {
+                final Class<Message> eventClass = toMessageClass(eventType);
+                final EventMessageEnricher msgEnricher = EventMessageEnricher.newInstance(this, eventClass, enrichmentClass);
+                functionsMap.put(eventClass, msgEnricher);
+            }
         }
     }
 

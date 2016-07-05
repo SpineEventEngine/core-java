@@ -60,3 +60,9 @@ message ProjectStarted {
         string project_name = 1 [(by) = "project_id", (required).value = true];
     }
 }
+
+message EnrichmentForSeveralEvents {
+    option (enrichment_for) = "ProjectCreated, ProjectStarted";
+
+    string project_name = 1 [(by) = "project_id"];
+}

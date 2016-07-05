@@ -20,7 +20,8 @@
 
 package org.spine3.server.event.enrich;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.spine3.type.TypeName;
 
@@ -45,7 +46,12 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      */
     private static final String PROPS_FILE_PATH = "enrichments.properties";
 
-    private static final ImmutableMap<TypeName, TypeName> enrichmentsMap = buildEnrichmentsMap();
+    /**
+     * A separator between event types in the `.properties` file.
+     */
+    private static final String EVENT_TYPE_SEPARATOR = ",";
+
+    private static final ImmutableMultimap<TypeName, TypeName> enrichmentsMap = buildEnrichmentsMap();
 
     private EventEnrichmentsMap() {}
 
@@ -53,25 +59,30 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      * Returns the immutable map instance.
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
-    /* package */ static ImmutableMap<TypeName, TypeName> getInstance() {
+    /* package */ static ImmutableMultimap<TypeName, TypeName> getInstance() {
         return enrichmentsMap;
     }
 
-    private static ImmutableMap<TypeName, TypeName> buildEnrichmentsMap() {
-        final ImmutableMap.Builder<TypeName, TypeName> builder = ImmutableMap.builder();
+    private static ImmutableMultimap<TypeName, TypeName> buildEnrichmentsMap() {
+        final ImmutableMultimap.Builder<TypeName, TypeName> builder = ImmutableMultimap.builder();
         final ImmutableSet<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
         for (Properties properties : propertiesSet) {
             putTo(builder, properties);
         }
-        final ImmutableMap<TypeName, TypeName> result = builder.build();
+        final ImmutableMultimap<TypeName, TypeName> result = builder.build();
         return result;
     }
 
-    private static void putTo(ImmutableMap.Builder<TypeName, TypeName> enrichmentsMap, Properties properties) {
+    @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
+    private static void putTo(ImmutableMultimap.Builder<TypeName, TypeName> enrichmentsMap, Properties properties) {
         final Set<String> enrichments = properties.stringPropertyNames();
         for (String enrichment : enrichments) {
-            final String eventType = properties.getProperty(enrichment);
-            enrichmentsMap.put(TypeName.of(enrichment), TypeName.of(eventType));
+            final TypeName enrichmentType = TypeName.of(enrichment);
+            final String eventTypesStr = properties.getProperty(enrichment);
+            final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
+            for (String eventType : eventTypes) {
+                enrichmentsMap.put(enrichmentType, TypeName.of(eventType));
+            }
         }
     }
 }
