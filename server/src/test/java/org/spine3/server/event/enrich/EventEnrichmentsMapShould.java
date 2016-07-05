@@ -28,6 +28,7 @@ import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
@@ -87,8 +88,9 @@ public class EventEnrichmentsMapShould {
     }
 
     @Test
-    public void contain_ProjectCreated_and_ProjectStarted_by_EnrichmentForSeveralEvents_type() {
-        assertEventTypeByEnrichmentType(EnrichmentForSeveralEvents.class, ProjectStarted.class, ProjectCreated.class);
+    public void contain_events_by_EnrichmentForSeveralEvents_type() {
+        assertEventTypeByEnrichmentType(EnrichmentForSeveralEvents.class,
+                                        ProjectStarted.class, ProjectCreated.class, TaskAdded.class);
     }
 
     @SafeVarargs

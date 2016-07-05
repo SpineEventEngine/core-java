@@ -62,7 +62,7 @@ message ProjectStarted {
 }
 
 message EnrichmentForSeveralEvents {
-    option (enrichment_for) = "ProjectCreated, ProjectStarted";
+    option (enrichment_for) = "ProjectCreated, ProjectStarted, TaskAdded";
 
     string project_name = 1 [(by) = "project_id"];
 }
