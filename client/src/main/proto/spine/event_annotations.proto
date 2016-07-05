@@ -40,7 +40,7 @@ extend google.protobuf.MessageOptions {
     // An instruction to associate an enrichment message with event message(s) to enrich.
     // If the event message to enrich is in another package, the event type name(s) should be qualified
     // according to Protobuf conventions.
-    // If the enrichment is for multiple events, their type names should be separated with the comma and/or space.
+    // If the enrichment is for multiple events, their type names should be separated with the comma.
     //
     // For example:
     // <pre>

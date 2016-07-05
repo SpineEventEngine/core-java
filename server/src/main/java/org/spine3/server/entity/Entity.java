@@ -271,7 +271,8 @@ public abstract class Entity<I, S extends Message> {
         if (SUPPORTED_ID_TYPES.contains(idClass)) {
             return;
         }
-        if (!Message.class.isAssignableFrom(idClass)){
+        final boolean isMessage = entityId instanceof Message;
+        if (!isMessage){
             throw unsupportedIdType(idClass);
         }
     }
@@ -315,5 +316,4 @@ public abstract class Entity<I, S extends Message> {
         final String result = Joiner.on(", ").join(classStrings);
         return result;
     }
-
 }
