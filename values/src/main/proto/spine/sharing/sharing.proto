@@ -26,8 +26,8 @@ option java_multiple_files = true;
 option java_outer_classname = "SharingProto";
 option java_package = "org.spine3.sharing";
 
-import public "spine/users/user_id.proto";
-import public "spine/users/group.proto";
+import "spine/users/user_id.proto";
+import "spine/users/group.proto";
 
 // An object can be shared with a user or a group of users.
 message Subject {
