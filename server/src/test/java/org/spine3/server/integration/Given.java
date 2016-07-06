@@ -37,8 +37,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         private AggregateId() {
         }
 
-        /* package */
-        static ProjectId newProjectId() {
+        /* package */ static ProjectId newProjectId() {
             final String uuid = newUuid();
             return ProjectId.newBuilder()
                             .setId(uuid)
@@ -51,13 +50,13 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         private EventMessage() {
         }
 
-        public static ProjectCreated projectCreated(ProjectId id) {
+        /* package */ static ProjectCreated projectCreated(ProjectId id) {
             return ProjectCreated.newBuilder()
                                  .setProjectId(id)
                                  .build();
         }
 
-        public static TaskAdded taskAdded(ProjectId id) {
+        /* package */ static TaskAdded taskAdded(ProjectId id) {
             return TaskAdded.newBuilder()
                             .setProjectId(id)
                             .build();
@@ -74,14 +73,14 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties.
          */
-        public static org.spine3.server.integration.IntegrationEvent projectCreated() {
+        /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId.
          */
-        public static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId) {
+        /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
             return projectCreated(projectId, context);
         }
@@ -89,7 +88,9 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext.
          */
-        public static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId, IntegrationEventContext eventContext) {
+        /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated(
+                ProjectId projectId,
+                IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
             final org.spine3.server.integration.IntegrationEvent.Builder builder =
                     org.spine3.server.integration.IntegrationEvent
@@ -103,21 +104,23 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties.
          */
-        public static org.spine3.server.integration.IntegrationEvent taskAdded() {
+        /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded() {
             return taskAdded(PROJECT_ID);
         }
 
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId.
          */
-        public static org.spine3.server.integration.IntegrationEvent taskAdded(ProjectId projectId) {
+        /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded(ProjectId projectId) {
             return taskAdded(projectId, createIntegrationEventContext(projectId));
         }
 
         /**
          * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext.
          */
-        public static org.spine3.server.integration.IntegrationEvent taskAdded(ProjectId projectId, IntegrationEventContext context) {
+        /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded(
+                ProjectId projectId,
+                IntegrationEventContext context) {
             final TaskAdded event = EventMessage.taskAdded(projectId);
             final org.spine3.server.integration.IntegrationEvent.Builder builder =
                     org.spine3.server.integration.IntegrationEvent
