@@ -31,7 +31,7 @@ import java.util.Set;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * A map from an event enrichment Protobuf type name to the corresponding type name of an event to enrich.
+ * A map from an event enrichment Protobuf type name to the corresponding type name(s) of event(s) to enrich.
  *
  * <p>Example:
  * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.MyEvent}
@@ -64,24 +64,43 @@ import static org.spine3.io.IoUtil.loadAllProperties;
     }
 
     private static ImmutableMultimap<TypeName, TypeName> buildEnrichmentsMap() {
-        final ImmutableMultimap.Builder<TypeName, TypeName> builder = ImmutableMultimap.builder();
         final ImmutableSet<Properties> propertiesSet = loadAllProperties(PROPS_FILE_PATH);
-        for (Properties properties : propertiesSet) {
-            putTo(builder, properties);
-        }
+        final Builder builder = new Builder(propertiesSet);
         final ImmutableMultimap<TypeName, TypeName> result = builder.build();
         return result;
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // is OK in this case
-    private static void putTo(ImmutableMultimap.Builder<TypeName, TypeName> enrichmentsMap, Properties properties) {
-        final Set<String> enrichments = properties.stringPropertyNames();
-        for (String enrichment : enrichments) {
-            final TypeName enrichmentType = TypeName.of(enrichment);
-            final String eventTypesStr = properties.getProperty(enrichment);
-            final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
+    private static class Builder {
+
+        private final Set<Properties> propertiesSet;
+        private final ImmutableMultimap.Builder<TypeName, TypeName> builder;
+
+        /* package */ Builder(Set<Properties> propertiesSet) {
+            this.propertiesSet = propertiesSet;
+            this.builder = ImmutableMultimap.builder();
+        }
+
+        /* package */ ImmutableMultimap<TypeName, TypeName> build() {
+            for (Properties properties : propertiesSet) {
+                put(properties);
+            }
+            final ImmutableMultimap<TypeName, TypeName> result = builder.build();
+            return result;
+        }
+
+        private void put(Properties properties) {
+            final Set<String> enrichments = properties.stringPropertyNames();
+            for (String enrichment : enrichments) {
+                final TypeName enrichmentType = TypeName.of(enrichment);
+                final String eventTypesStr = properties.getProperty(enrichment);
+                final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
+                put(enrichmentType, eventTypes);
+            }
+        }
+
+        private void put(TypeName enrichmentType, Iterable<String> eventTypes) {
             for (String eventType : eventTypes) {
-                enrichmentsMap.put(enrichmentType, TypeName.of(eventType));
+                builder.put(enrichmentType, TypeName.of(eventType));
             }
         }
     }
