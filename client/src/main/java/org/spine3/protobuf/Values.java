@@ -28,6 +28,8 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 
+import static org.spine3.protobuf.Messages.toAny;
+
 /**
  * Utility class for working with {@link Message} value wrapper objects.
  *
@@ -54,7 +56,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(String value) {
-        final Any result = Any.pack(newStringValue(value));
+        final Any result = toAny(newStringValue(value));
         return result;
     }
 
@@ -75,7 +77,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(double value) {
-        final Any result = Any.pack(newDoubleValue(value));
+        final Any result = toAny(newDoubleValue(value));
         return result;
     }
 
@@ -96,7 +98,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(float value) {
-        final Any result = Any.pack(newFloatValue(value));
+        final Any result = toAny(newFloatValue(value));
         return result;
     }
 
@@ -117,7 +119,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(int value) {
-        final Any result = Any.pack(newIntegerValue(value));
+        final Any result = toAny(newIntegerValue(value));
         return result;
     }
 
@@ -138,7 +140,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(long value) {
-        final Any result = Any.pack(newLongValue(value));
+        final Any result = toAny(newLongValue(value));
         return result;
     }
 
@@ -159,7 +161,7 @@ public class Values {
      * Packs the passed value into {@link Any}.
      */
     public static Any pack(boolean value) {
-        final Any result = Any.pack(newBoolValue(value));
+        final Any result = toAny(newBoolValue(value));
         return result;
     }
 }

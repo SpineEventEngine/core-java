@@ -47,6 +47,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -75,7 +77,7 @@ public class MessagesShould {
 
     @Test
     public void convert_id_to_Any() {
-        final Any test = Messages.toAny(id);
+        final Any test = toAny(id);
         assertEquals(idAny, test);
     }
 
@@ -85,31 +87,31 @@ public class MessagesShould {
         final StringValue message = newStringValue(newUuid());
         final ByteString byteString = message.toByteString();
 
-        assertEquals(Any.pack(message), Messages.toAny(TypeName.of(message), byteString));
+        assertEquals(Any.pack(message), toAny(TypeName.of(message), byteString));
     }
 
     @Test
     public void convert_from_Any_to_id() {
-        final UserId test = Messages.fromAny(idAny);
+        final UserId test = fromAny(idAny);
         assertEquals(id, test);
     }
 
     @Test
     public void convert_from_Any_to_protobuf_class() {
         final StringValue expected = newStringValue(newUuid());
-        final Any expectedAny = Any.pack(expected);
-        final Message actual = Messages.fromAny(expectedAny);
+        final Any packedValue = toAny(expected);
+        final Message actual = fromAny(packedValue);
         assertEquals(expected, actual);
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_null_id() {
-        Messages.toAny(Tests.<Message>nullRef());
+        toAny(Tests.<Message>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
-        Messages.fromAny(Tests.<Any>nullRef());
+        fromAny(Tests.<Any>nullRef());
     }
 
     //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.

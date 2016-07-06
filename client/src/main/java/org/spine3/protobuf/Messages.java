@@ -61,7 +61,8 @@ public class Messages {
      * @return the instance of {@link Any} object that wraps given message.
      */
     public static Any toAny(Message message) {
-        return Any.pack(message);
+        final Any result = Any.pack(message);
+        return result;
     }
 
     /**

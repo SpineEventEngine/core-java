@@ -179,7 +179,7 @@ public class Events {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
                                                          .setTimestamp(Timestamps.getCurrentTime())
-                                                         .setProducerId(Any.pack(producerId));
+                                                         .setProducerId(toAny(producerId));
         return builder.build();
     }
 

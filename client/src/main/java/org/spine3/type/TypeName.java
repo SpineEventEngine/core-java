@@ -144,6 +144,7 @@ public final class TypeName extends StringTypeValue {
         return parts[1];
     }
 
+    //TODO:2016-07-07:alexander.yevsyukov: Support custom type URLs in this method.
     /**
      * Returns string to be used as a type URL in {@code Any}.
      *

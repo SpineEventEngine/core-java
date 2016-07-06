@@ -48,6 +48,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.*;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
@@ -155,7 +156,7 @@ public class EventEnricher {
                                     function, eventMessage);
             final String typeName = TypeName.of(enriched)
                                             .toString();
-            enrichments.put(typeName, Any.pack(enriched));
+            enrichments.put(typeName, toAny(enriched));
         }
         final EventContext enrichedContext = event.getContext()
                                                   .toBuilder()

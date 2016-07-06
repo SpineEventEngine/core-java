@@ -48,6 +48,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
 /**
@@ -455,7 +456,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     /* package */ Snapshot toSnapshot() {
-        final Any state = Any.pack(getState());
+        final Any state = toAny(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();
         final Snapshot.Builder builder = Snapshot.newBuilder()
