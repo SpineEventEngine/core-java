@@ -110,7 +110,6 @@ public class Messages {
      * Builds and returns the registry of types known in the application.
      *
      * @return {@code JsonFormat.TypeRegistry} instance
-     * @see TypeToClassMap#knownTypes()
      */
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();

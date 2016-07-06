@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
+import org.spine3.type.TypeName;
 
 import java.util.Set;
 
@@ -92,4 +93,11 @@ public final class EventClass extends MessageClass {
         return builder.build();
     }
 
+    /**
+     * Obtains {@code TypeName} corresponding to the event class.
+     */
+    public TypeName toTypeName() {
+        TypeName result = TypeName.of(value());
+        return result;
+    }
 }
