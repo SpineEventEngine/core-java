@@ -75,8 +75,8 @@ import static org.spine3.io.IoUtil.loadAllProperties;
         private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<TypeName, TypeName> builder;
 
-        /* package */ Builder(Iterable<Properties> propertiesSet) {
-            this.properties = propertiesSet;
+        /* package */ Builder(Iterable<Properties> properties) {
+            this.properties = properties;
             this.builder = ImmutableMultimap.builder();
         }
 
