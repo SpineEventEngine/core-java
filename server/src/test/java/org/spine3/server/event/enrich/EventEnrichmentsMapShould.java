@@ -24,6 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.test.event.EnrichmentByContextFields;
 import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
@@ -91,6 +92,11 @@ public class EventEnrichmentsMapShould {
     public void contain_events_by_EnrichmentForSeveralEvents_type() {
         assertEventTypeByEnrichmentType(EnrichmentForSeveralEvents.class,
                                         ProjectStarted.class, ProjectCreated.class, TaskAdded.class);
+    }
+
+    @Test
+    public void contain_ProjectCreated_by_EnrichmentByContextFields_type() {
+        assertEventTypeByEnrichmentType(EnrichmentByContextFields.class, ProjectCreated.class);
     }
 
     @SafeVarargs

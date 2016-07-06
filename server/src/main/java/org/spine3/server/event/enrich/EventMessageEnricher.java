@@ -26,6 +26,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
+import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 import org.spine3.server.event.enrich.EventEnricher.SupportsFieldConversion;
 
@@ -59,7 +60,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     private ImmutableMultimap<Class<?>, EnrichmentFunction> fieldFunctions;
 
     /**
-     * A map from source event field to target enrichment field descriptors.
+     * A map from source event/context field to target enrichment field descriptors.
      */
     @Nullable
     private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
@@ -99,24 +100,24 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
     }
 
     @Override
-    public T apply(@Nullable S message) {
-        checkNotNull(message);
-        checkNotNull(this.fieldMap, "fieldMap");
-        checkNotNull(this.fieldFunctions, "fieldFunctions");
+    public T apply(@Nullable S eventMsg) {
+        checkNotNull(eventMsg);
+        checkNotNull(fieldMap, "fieldMap");
+        checkNotNull(fieldFunctions, "fieldFunctions");
         checkState(!fieldMap.isEmpty(), "fieldMap is empty");
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
         final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
         final Message.Builder builder = defaultTarget.toBuilder();
-        setFields(builder, message);
+        setFields(builder, eventMsg);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
         final T result = (T) builder.build();
         return result;
     }
 
     @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that collections are not null
-    private void setFields(Message.Builder builder, S message) {
+    private void setFields(Message.Builder builder, S eventMsg) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
-            final Object srcFieldValue = message.getField(srcField);
+            final Object srcFieldValue = getSrcFieldValue(srcField, eventMsg);
             final Class<?> sourceFieldClass = srcFieldValue.getClass();
             final Collection<EnrichmentFunction> functions = fieldFunctions.get(sourceFieldClass);
             final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
@@ -130,5 +131,13 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
                 }
             }
         }
+    }
+
+    private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg) {
+        final boolean isContextField = srcField.getContainingType().equals(EventContext.getDescriptor());
+        final Object result = isContextField ?
+                getContext().getField(srcField) :
+                eventMsg.getField(srcField);
+        return result;
     }
 }

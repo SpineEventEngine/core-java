@@ -66,3 +66,21 @@ message EnrichmentForSeveralEvents {
 
     string project_name = 1 [(by) = "project_id"];
 }
+
+message EnrichmentByContextFields {
+    option (enrichment_for) = "ProjectCreated";
+
+    string by_event_id = 1 [(by) = "context.event_id"];
+
+    string by_timestamp = 2 [(by) = "context.timestamp"];
+
+    string by_command_context = 3 [(by) = "context.command_context"];
+
+    string by_producer_id = 4 [(by) = "context.producer_id"];
+
+    string by_version = 5 [(by) = "context.version"];
+
+    string by_attributes = 6 [(by) = "context.attributes"];
+
+    string by_event_field = 7 [(by) = "project_id"];
+}

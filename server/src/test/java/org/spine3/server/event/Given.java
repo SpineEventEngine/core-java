@@ -20,10 +20,20 @@
 
 package org.spine3.server.event;
 
+import com.google.common.base.Function;
+import com.google.protobuf.Any;
+import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
+import org.spine3.client.UserUtil;
+import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.users.UserId;
+
+import javax.annotation.Nullable;
 
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
@@ -35,10 +45,11 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 @SuppressWarnings("EmptyClass")
 public class Given {
 
+    private Given() {}
+
     public static class AggregateId {
 
-        private AggregateId() {
-        }
+        private AggregateId() {}
 
         public static ProjectId newProjectId() {
             final String uuid = newUuid();
@@ -54,8 +65,7 @@ public class Given {
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
         private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
 
-        private EventMessage() {
-        }
+        private EventMessage() {}
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -82,8 +92,7 @@ public class Given {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
 
-        private Event() {
-        }
+        private Event() {}
 
         /**
          * Creates a new event with default properties.
@@ -116,5 +125,103 @@ public class Given {
             final org.spine3.base.Event event = createEvent(msg, eventContext);
             return event;
         }
+    }
+
+    public static class Enrichment {
+
+        private Enrichment() {}
+
+        /**
+         * Creates a new enricher with all required enrichment functions set.
+         */
+        public static EventEnricher newEventEnricher() {
+            final EventEnricher.Builder builder = EventEnricher.newBuilder()
+                    .addFieldEnrichment(ProjectId.class, String.class, new GetProjectName())
+                    .addFieldEnrichment(ProjectId.class, UserId.class, new GetProjectOwnerId())
+                    .addFieldEnrichment(EventId.class, String.class, EVENT_ID_TO_STRING)
+                    .addFieldEnrichment(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
+                    .addFieldEnrichment(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
+                    .addFieldEnrichment(Any.class, String.class, ANY_TO_STRING)
+                    .addFieldEnrichment(Integer.class, String.class, VERSION_TO_STRING)
+                    .addFieldEnrichment(EventContext.Attributes.class, String.class, ATTRIBUTES_TO_STRING);
+            return builder.build();
+        }
+
+        public static class GetProjectName implements Function<ProjectId, String> {
+            @Nullable
+            @Override
+            public String apply(@Nullable ProjectId id) {
+                if (id == null) {
+                    return null;
+                }
+                final String name = "Project " + id.getId();
+                return name;
+            }
+        }
+
+        public static class GetProjectOwnerId implements Function<ProjectId, UserId> {
+            @Nullable
+            @Override
+            public UserId apply(@Nullable ProjectId id) {
+                if (id == null) {
+                    return null;
+                }
+                return UserUtil.newUserId("Project owner " + id.getId());
+            }
+        }
+
+        private static final Function<EventId, String> EVENT_ID_TO_STRING =
+                new Function<EventId, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable EventId input) {
+                        return input == null ? "" : input.getUuid();
+                    }
+                };
+
+        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
+                new Function<Timestamp, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable Timestamp input) {
+                        return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
+                new Function<CommandContext, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable CommandContext input) {
+                        return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<Any, String> ANY_TO_STRING =
+                new Function<Any, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable Any input) {
+                        return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<Integer, String> VERSION_TO_STRING =
+                new Function<Integer, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable Integer input) {
+                        return input == null ? "" : input.toString();
+                    }
+                };
+
+        private static final Function<EventContext.Attributes, String> ATTRIBUTES_TO_STRING =
+                new Function<EventContext.Attributes, String>() {
+                    @Nullable
+                    @Override
+                    public String apply(@Nullable EventContext.Attributes input) {
+                        return input == null ? "" : input.toString();
+                    }
+                };
     }
 }

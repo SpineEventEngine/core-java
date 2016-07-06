@@ -65,10 +65,11 @@ extend google.protobuf.MessageOptions {
 }
 
 extend google.protobuf.FieldOptions {
-    // An instruction to associate an enrichment message's field with the field from an event message to enrich.
-    // The value of the option is the name of the target event message's field
+    // An instruction to associate an enrichment message field with the field from an event message to enrich
+    // (or event context field).
+    // The value of the option is the name of the target event message/context field
     // which is used to set the corresponding enrichment's field.
-    // The value must have event FQN prefix if `enrichment_for` option is omitted
+    // The value must have event/context FQN prefix if `enrichment_for` option is omitted
     // ("example.events.MyEvent.user_id" instead of just "user_id").
     //
     // An example:
@@ -78,6 +79,8 @@ extend google.protobuf.FieldOptions {
     //    ...
     //    message Enrichment {
     //       spine.people.PersonName name = 1 [(by) = "user_id"];
+    //
+    //       string time = 2 [(by) = "context.timestamp"];
     //    }
     // }
     //

@@ -146,30 +146,31 @@ public class EventEnricher {
 
         final Message eventMessage = getMessage(event);
         final EventClass eventClass = EventClass.of(event);
-
-        // There can be more than one enrichment function per event message class.
         final Collection<EnrichmentFunction<?, ?>> availableFunctions = functions.get(eventClass.value());
-
-        // Build enrichment using all the functions.
         final Map<String, Any> enrichments = Maps.newHashMap();
         for (EnrichmentFunction function : availableFunctions) {
-            @SuppressWarnings("unchecked") /** It is OK suppress because we ensure types when we...
-             (a) create enrichments,
-             (b) put them into {@link #functions} by their event message class. **/
-            final Message enriched = (Message) function.apply(eventMessage);
+            function.setContext(event.getContext());
+            final Message enriched = apply(function, eventMessage);
             checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
                                     function, eventMessage);
             final String typeName = TypeName.of(enriched)
                                             .toString();
             enrichments.put(typeName, Any.pack(enriched));
         }
-
         final EventContext enrichedContext = event.getContext()
                                                   .toBuilder()
                                                   .setEnrichments(Enrichments.newBuilder()
                                                                              .putAllMap(enrichments))
                                                   .build();
         final Event result = createEvent(eventMessage, enrichedContext);
+        return result;
+    }
+
+    private static Message apply(EnrichmentFunction function, Message input) {
+        @SuppressWarnings("unchecked") /** It is OK to suppress because we ensure types when we...
+         (a) create enrichments,
+         (b) put them into {@link #functions} by their event message class. **/
+        final Message result = (Message) function.apply(input);
         return result;
     }
 

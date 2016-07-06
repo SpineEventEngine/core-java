@@ -88,7 +88,11 @@ message EventContext {
 
     // Service attributes that the system wants to store in addition to the domain attributes
     // defined in the event message.
-    map<string, google.protobuf.Any> attributes = 8;
+    Attributes attributes = 8;
+
+    message Attributes {
+        map<string, google.protobuf.Any> attributes = 1;
+    }
 }
 
 // A container for event enrichments.

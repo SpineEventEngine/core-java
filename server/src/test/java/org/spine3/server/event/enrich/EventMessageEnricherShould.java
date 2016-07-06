@@ -22,9 +22,8 @@ package org.spine3.server.event.enrich;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.event.Given;
 import org.spine3.test.event.ProjectCreated;
-import org.spine3.test.event.ProjectId;
-import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,11 +36,9 @@ public class EventMessageEnricherShould {
 
     @Before
     public void setUp() {
-        final EventEnricher eventEnricher = EventEnricher.newBuilder()
-                .addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName())
-                .addFieldEnrichment(ProjectId.class, UserId.class, new EventEnricherShould.GetProjectOwnerId())
-                .build();
-        this.enricher = EventMessageEnricher.newInstance(eventEnricher,
+        final EventEnricher eventEnricher = Given.Enrichment.newEventEnricher();
+        this.enricher = EventMessageEnricher.newInstance(
+                eventEnricher,
                 ProjectCreated.class,
                 ProjectCreated.Enrichment.class);
     }

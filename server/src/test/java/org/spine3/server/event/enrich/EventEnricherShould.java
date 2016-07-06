@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.client.UserUtil;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
@@ -43,8 +42,6 @@ import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.testdata.BoundedContextTestStubs;
 import org.spine3.users.UserId;
 
-import javax.annotation.Nullable;
-
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
@@ -56,16 +53,13 @@ public class EventEnricherShould {
     private BoundedContext boundedContext;
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
-    private final Function<ProjectId, String> getProjectName = new GetProjectName();
-    private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
     private EventEnricher enricher;
+    private final Function<ProjectId, String> getProjectName = new Given.Enrichment.GetProjectName();
+    private final Function<ProjectId, UserId> getProjectOwnerId = new Given.Enrichment.GetProjectOwnerId();
 
     @Before
     public void setUp() {
-        this.enricher = EventEnricher.newBuilder()
-                .addFieldEnrichment(ProjectId.class, String.class, getProjectName)
-                .addFieldEnrichment(ProjectId.class, UserId.class, getProjectOwnerId)
-                .build();
+        this.enricher = Given.Enrichment.newEventEnricher();
         boundedContext = BoundedContextTestStubs.create(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();
@@ -172,31 +166,6 @@ public class EventEnricherShould {
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
             this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class, context).get();
-        }
-    }
-
-    /* package */ static class GetProjectName implements Function<ProjectId, String> {
-
-        @Nullable
-        @Override
-        public String apply(@Nullable ProjectId id) {
-            if (id == null) {
-                return null;
-            }
-            final String name = "Project " + id.getId();
-            return name;
-        }
-    }
-
-    /* package */ static class GetProjectOwnerId implements Function<ProjectId, UserId> {
-
-        @Nullable
-        @Override
-        public UserId apply(@Nullable ProjectId id) {
-            if (id == null) {
-                return null;
-            }
-            return UserUtil.newUserId("Project owner " + id.getId());
         }
     }
 }
