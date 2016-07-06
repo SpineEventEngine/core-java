@@ -189,7 +189,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
         final StringValue messageToWrap = newStringValue(TEST_ID);
-        final Any any = AnyPacker.toAny(messageToWrap);
+        final Any any = AnyPacker.pack(messageToWrap);
 
         final String result = idToString(any);
 

@@ -37,13 +37,15 @@ import static com.google.common.base.Throwables.propagate;
  */
 public class AnyPacker {
 
+    private AnyPacker() {}
+
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
      *
      * @param message message that should be put inside the {@link Any} instance.
      * @return the instance of {@link Any} object that wraps given message.
      */
-    public static Any toAny(Message message) {
+    public static Any pack(Message message) {
         final Any result = Any.pack(message);
         return result;
     }
@@ -56,7 +58,7 @@ public class AnyPacker {
      * @param value the byte content of the message
      * @return new {@code Any} instance
      */
-    public static Any toAny(TypeName type, ByteString value) {
+    public static Any pack(TypeName type, ByteString value) {
         final String typeUrl = type.toTypeUrl();
         final Any result = Any.newBuilder()
                 .setValue(value)
@@ -77,7 +79,7 @@ public class AnyPacker {
      * @return unwrapped message instance
      * @throws UnknownTypeException if there is no Java class in the classpath for the enclosed type
      */
-    public static <T extends Message> T fromAny(Any any) {
+    public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
         String typeStr = "";
         try {

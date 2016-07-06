@@ -61,7 +61,7 @@ import static org.spine3.protobuf.Values.newLongValue;
 
     @Override
     protected Any wrap(Long value) {
-        final Any any = AnyPacker.toAny(newLongValue(value));
+        final Any any = AnyPacker.pack(newLongValue(value));
         return any;
     }
 }

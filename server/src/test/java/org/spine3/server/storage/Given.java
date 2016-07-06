@@ -86,9 +86,9 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
         private static final TaskAdded TASK_ADDED = taskAdded(DUMMY_PROJECT_ID);
         private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
-        private static final Any PROJECT_CREATED_ANY = AnyPacker.toAny(PROJECT_CREATED);
-        private static final Any TASK_ADDED_ANY = AnyPacker.toAny(TASK_ADDED);
-        private static final Any PROJECT_STARTED_ANY = AnyPacker.toAny(PROJECT_STARTED);
+        private static final Any PROJECT_CREATED_ANY = AnyPacker.pack(PROJECT_CREATED);
+        private static final Any TASK_ADDED_ANY = AnyPacker.pack(TASK_ADDED);
+        private static final Any PROJECT_STARTED_ANY = AnyPacker.pack(PROJECT_STARTED);
 
         private EventMessage() {
         }

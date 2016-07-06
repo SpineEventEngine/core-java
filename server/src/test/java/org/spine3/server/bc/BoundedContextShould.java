@@ -67,7 +67,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.spine3.base.Responses.ok;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
  * @author Alexander Litus
@@ -142,7 +142,7 @@ public class BoundedContextShould {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
         final IntegrationEvent event = Given.Event.projectCreatedIntegration();
-        final Message msg = fromAny(event.getMessage());
+        final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
 

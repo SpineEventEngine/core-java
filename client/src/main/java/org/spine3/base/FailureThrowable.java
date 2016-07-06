@@ -59,7 +59,7 @@ public abstract class FailureThrowable extends Throwable {
      */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
-                .setInstance(AnyPacker.toAny(this.failure))
+                .setInstance(AnyPacker.pack(this.failure))
                 .setStacktrace(Throwables.getStackTraceAsString(this))
                 .setTimestamp(this.timestamp);
         return builder.build();

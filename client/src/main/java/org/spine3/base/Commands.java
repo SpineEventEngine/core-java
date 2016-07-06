@@ -112,7 +112,7 @@ public class Commands {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Command create(Message message, CommandContext context) {
-        return create(AnyPacker.toAny(message), context);
+        return create(AnyPacker.pack(message), context);
     }
 
     /**
@@ -134,7 +134,7 @@ public class Commands {
      * Extracts the message from the passed {@code Command} instance.
      */
     public static Message getMessage(Command command) {
-        final Message result = AnyPacker.fromAny(command.getMessage());
+        final Message result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 

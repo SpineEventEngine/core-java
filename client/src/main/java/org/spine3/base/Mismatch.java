@@ -170,14 +170,14 @@ public class Mismatch {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder();
 
         if (expected != null) {
-            builder.setExpected(AnyPacker.toAny(expected));
+            builder.setExpected(AnyPacker.pack(expected));
         }
 
         if (actual != null) {
-            builder.setActual(AnyPacker.toAny(actual));
+            builder.setActual(AnyPacker.pack(actual));
         }
 
-        final Any requestedAny = AnyPacker.toAny(requested);
+        final Any requestedAny = AnyPacker.pack(requested);
 
         builder.setRequested(requestedAny);
         builder.setVersion(version);

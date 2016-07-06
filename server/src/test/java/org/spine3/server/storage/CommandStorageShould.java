@@ -51,7 +51,7 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -84,7 +84,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = AnyPacker.toAny(Given.Command.createProject());
+        final Any command = AnyPacker.pack(Given.Command.createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()
@@ -362,7 +362,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
     private static void checkRecord(CommandStorageRecord record, Command cmd, CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
         final CommandId commandId = context.getCommandId();
-        final CreateProject message = fromAny(cmd.getMessage());
+        final CreateProject message = unpack(cmd.getMessage());
         assertEquals(cmd.getMessage(), record.getMessage());
         assertTrue(record.getTimestamp().getSeconds() > 0);
         assertEquals(message.getClass().getSimpleName(), record.getCommandType());

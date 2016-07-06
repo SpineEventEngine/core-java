@@ -123,7 +123,7 @@ public class ClientApp {
         final int quantity = 1;
         final Money totalPrice = newMoney(bookPriceUsd * quantity, USD);
         final OrderLine orderLine = OrderLine.newBuilder()
-                .setProductId(AnyPacker.toAny(book.getBookId()))
+                .setProductId(AnyPacker.pack(book.getBookId()))
                 .setQuantity(quantity)
                 .setPrice(totalPrice)
                 .build();

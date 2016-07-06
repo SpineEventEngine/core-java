@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -102,7 +102,7 @@ public class Identifiers {
         if (isStringOrNumber(id)) {
             result = id.toString();
         } else if (id instanceof Any) {
-            final Message messageFromAny = fromAny((Any) id);
+            final Message messageFromAny = unpack((Any) id);
             result = idMessageToString(messageFromAny);
         } else if (id instanceof Message) {
             result = idMessageToString((Message) id);
@@ -182,16 +182,16 @@ public class Identifiers {
         //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
         if (id instanceof Message) {
             final Message message = (Message) id;
-            anyId = AnyPacker.toAny(message);
+            anyId = AnyPacker.pack(message);
         } else if (id instanceof String) {
             final String strValue = (String) id;
-            anyId = AnyPacker.toAny(newStringValue(strValue));
+            anyId = AnyPacker.pack(newStringValue(strValue));
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
-            anyId = AnyPacker.toAny(UInt32Value.newBuilder().setValue(intValue).build());
+            anyId = AnyPacker.pack(UInt32Value.newBuilder().setValue(intValue).build());
         } else if (id instanceof Long) {
             final Long longValue = (Long) id;
-            anyId = AnyPacker.toAny(UInt64Value.newBuilder().setValue(longValue).build());
+            anyId = AnyPacker.pack(UInt64Value.newBuilder().setValue(longValue).build());
         } else {
             throw unsupportedIdType(id);
         }
@@ -212,7 +212,7 @@ public class Identifiers {
      * </ul>
      */
     public static Object idFromAny(Any idInAny) {
-        final Message extracted = fromAny(idInAny);
+        final Message extracted = unpack(idInAny);
 
         //noinspection ChainOfInstanceofChecks
         if (extracted instanceof StringValue) {

@@ -96,7 +96,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                     org.spine3.server.integration.IntegrationEvent
                             .newBuilder()
                             .setContext(eventContext)
-                            .setMessage(AnyPacker.toAny(event));
+                            .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
 
@@ -126,7 +126,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
                     org.spine3.server.integration.IntegrationEvent
                             .newBuilder()
                             .setContext(context)
-                            .setMessage(AnyPacker.toAny(event));
+                            .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
     }

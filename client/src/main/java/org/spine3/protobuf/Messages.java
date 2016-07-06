@@ -63,7 +63,7 @@ public class Messages {
      * @return message class
      * @throws RuntimeException wrapping {@link ClassNotFoundException} if there is no corresponding class
      *                          for the given Protobuf message type
-     * @see AnyPacker#fromAny(Any) that uses the same convention
+     * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
         final ClassName className = TypeToClassMap.get(messageType);

@@ -156,7 +156,7 @@ public class EventEnricher {
                                     function, eventMessage);
             final String typeName = TypeName.of(enriched)
                                             .toString();
-            enrichments.put(typeName, AnyPacker.toAny(enriched));
+            enrichments.put(typeName, AnyPacker.pack(enriched));
         }
         final EventContext enrichedContext = event.getContext()
                                                   .toBuilder()

@@ -80,7 +80,7 @@ import static org.spine3.protobuf.Values.newStringValue;
                 .setMsgFormat(msg)
                 .addParam(regex)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.toAny(newStringValue(fieldValue)))
+                .setFieldValue(AnyPacker.pack(newStringValue(fieldValue)))
                 .build();
         return violation;
     }

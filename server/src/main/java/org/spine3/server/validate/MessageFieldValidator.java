@@ -144,7 +144,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
                 .setMsgFormat(msg)
                 .addParam(when)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.toAny(fieldValue))
+                .setFieldValue(AnyPacker.pack(fieldValue))
                 .build();
         return violation;
     }
@@ -154,7 +154,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.toAny(fieldValue))
+                .setFieldValue(AnyPacker.pack(fieldValue))
                 .addAllViolation(violations)
                 .build();
         return violation;

@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
@@ -72,9 +72,9 @@ public class MismatchShould {
     @Test
     public void return_mismatch_object_with_string_values() {
         final ValueMismatch mismatch = Mismatch.of(EXPECTED, ACTUAL, REQUESTED, VERSION);
-        final StringValue expected = fromAny(mismatch.getExpected());
-        final StringValue actual = fromAny(mismatch.getActual());
-        final StringValue requested = fromAny(mismatch.getRequested());
+        final StringValue expected = unpack(mismatch.getExpected());
+        final StringValue actual = unpack(mismatch.getActual());
+        final StringValue requested = unpack(mismatch.getRequested());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());
@@ -87,9 +87,9 @@ public class MismatchShould {
         final int actual = 1;
         final int requested = 2;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
-        final Int32Value expectedWrapper = fromAny(mismatch.getExpected());
-        final Int32Value actualWrapper = fromAny(mismatch.getActual());
-        final Int32Value requestedWrapper = fromAny(mismatch.getRequested());
+        final Int32Value expectedWrapper = unpack(mismatch.getExpected());
+        final Int32Value actualWrapper = unpack(mismatch.getActual());
+        final Int32Value requestedWrapper = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapper.getValue());
         assertEquals(actual, actualWrapper.getValue());
@@ -102,9 +102,9 @@ public class MismatchShould {
         final long actual = 1L;
         final long requested = 2L;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
-        final Int64Value expectedWrapped = fromAny(mismatch.getExpected());
-        final Int64Value actualWrapped = fromAny(mismatch.getActual());
-        final Int64Value requestedWrapped = fromAny(mismatch.getRequested());
+        final Int64Value expectedWrapped = unpack(mismatch.getExpected());
+        final Int64Value actualWrapped = unpack(mismatch.getActual());
+        final Int64Value requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
@@ -117,9 +117,9 @@ public class MismatchShould {
         final float actual = 1.0F;
         final float requested = 2.0F;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
-        final FloatValue expectedWrapped = fromAny(mismatch.getExpected());
-        final FloatValue actualWrapped = fromAny(mismatch.getActual());
-        final FloatValue requestedWrapped = fromAny(mismatch.getRequested());
+        final FloatValue expectedWrapped = unpack(mismatch.getExpected());
+        final FloatValue actualWrapped = unpack(mismatch.getActual());
+        final FloatValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
@@ -132,9 +132,9 @@ public class MismatchShould {
         final double actual = 0.2;
         final double requested = 0.3;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
-        final DoubleValue expectedWrapped = fromAny(mismatch.getExpected());
-        final DoubleValue actualWrapped = fromAny(mismatch.getActual());
-        final DoubleValue requestedWrapped = fromAny(mismatch.getRequested());
+        final DoubleValue expectedWrapped = unpack(mismatch.getExpected());
+        final DoubleValue actualWrapped = unpack(mismatch.getActual());
+        final DoubleValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue(), DELTA);
         assertEquals(actual, actualWrapped.getValue(), DELTA);
@@ -147,9 +147,9 @@ public class MismatchShould {
         final boolean actual = false;
         final boolean requested = true;
         final ValueMismatch mismatch = Mismatch.of(expected, actual, requested, VERSION);
-        final BoolValue expectedWrapped = fromAny(mismatch.getExpected());
-        final BoolValue actualWrapped = fromAny(mismatch.getActual());
-        final BoolValue requestedWrapped = fromAny(mismatch.getRequested());
+        final BoolValue expectedWrapped = unpack(mismatch.getExpected());
+        final BoolValue actualWrapped = unpack(mismatch.getActual());
+        final BoolValue requestedWrapped = unpack(mismatch.getRequested());
 
         assertEquals(expected, expectedWrapped.getValue());
         assertEquals(actual, actualWrapped.getValue());
@@ -177,9 +177,9 @@ public class MismatchShould {
     @Test
     public void return_mismatch_object_with_message_values() {
         final ValueMismatch mismatch = Mismatch.of(newStringValue(EXPECTED), newStringValue(ACTUAL), newStringValue(REQUESTED), VERSION);
-        final StringValue expected = fromAny(mismatch.getExpected());
-        final StringValue actual = fromAny(mismatch.getActual());
-        final StringValue requested = fromAny(mismatch.getRequested());
+        final StringValue expected = unpack(mismatch.getExpected());
+        final StringValue actual = unpack(mismatch.getActual());
+        final StringValue requested = unpack(mismatch.getRequested());
 
         assertEquals(EXPECTED, expected.getValue());
         assertEquals(ACTUAL, actual.getValue());

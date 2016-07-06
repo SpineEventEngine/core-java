@@ -216,7 +216,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             // such a call especially from the testing code.
             final Any any = (Any) command;
             //noinspection AssignmentToMethodParameter
-            command = AnyPacker.fromAny(any);
+            command = AnyPacker.unpack(any);
         }
 
         try {
@@ -368,7 +368,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param snapshot the snapshot with the state to restore
      */
     /* package */ void restore(Snapshot snapshot) {
-        final S stateToRestore = AnyPacker.fromAny(snapshot.getState());
+        final S stateToRestore = AnyPacker.unpack(snapshot.getState());
 
         // See if we're in the state update cycle.
         final B builder = this.builder;
@@ -455,7 +455,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     /* package */ Snapshot toSnapshot() {
-        final Any state = AnyPacker.toAny(getState());
+        final Any state = AnyPacker.pack(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();
         final Snapshot.Builder builder = Snapshot.newBuilder()

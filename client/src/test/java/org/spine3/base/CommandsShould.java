@@ -93,7 +93,7 @@ public class CommandsShould {
 
     @Test
     public void create_command_with_Any() {
-        final Any msg = AnyPacker.toAny(stringValue);
+        final Any msg = AnyPacker.pack(stringValue);
 
         final Command command = Commands.create(msg, CommandContext.getDefaultInstance());
 

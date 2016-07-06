@@ -61,7 +61,7 @@ import static org.spine3.protobuf.Values.newDoubleValue;
 
     @Override
     protected Any wrap(Double value) {
-        final Any any = AnyPacker.toAny(newDoubleValue(value));
+        final Any any = AnyPacker.pack(newDoubleValue(value));
         return any;
     }
 }

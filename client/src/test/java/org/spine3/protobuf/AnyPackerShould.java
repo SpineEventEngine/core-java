@@ -32,7 +32,7 @@ import org.spine3.users.UserId;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class AnyPackerShould {
@@ -41,7 +41,7 @@ public class AnyPackerShould {
 
     @Test
     public void convert_id_to_Any() {
-        final Any test = AnyPacker.toAny(id);
+        final Any test = AnyPacker.pack(id);
         assertEquals(idAny, test);
     }
 
@@ -50,31 +50,31 @@ public class AnyPackerShould {
         final StringValue message = newStringValue(newUuid());
         final ByteString byteString = message.toByteString();
 
-        assertEquals(Any.pack(message), AnyPacker.toAny(TypeName.of(message), byteString));
+        assertEquals(Any.pack(message), AnyPacker.pack(TypeName.of(message), byteString));
     }
 
     @Test
     public void convert_from_Any_to_id() {
-        final UserId test = fromAny(idAny);
+        final UserId test = unpack(idAny);
         assertEquals(id, test);
     }
 
     @Test
     public void convert_from_Any_to_protobuf_class() {
         final StringValue expected = newStringValue(newUuid());
-        final Any packedValue = AnyPacker.toAny(expected);
-        final Message actual = fromAny(packedValue);
+        final Any packedValue = AnyPacker.pack(expected);
+        final Message actual = unpack(packedValue);
         assertEquals(expected, actual);
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_null_id() {
-        AnyPacker.toAny(Tests.<Message>nullRef());
+        AnyPacker.pack(Tests.<Message>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void fail_on_attempt_to_convert_from_null_Any() {
-        fromAny(Tests.<Any>nullRef());
+        unpack(Tests.<Any>nullRef());
     }
 
 

@@ -42,7 +42,7 @@ public class TestEntityStorageRecordFactory {
      */
     public static EntityStorageRecord newEntityStorageRecord() {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(AnyPacker.toAny(newStringValue(newUuid())))
+                .setState(AnyPacker.pack(newStringValue(newUuid())))
                 .setWhenModified(getCurrentTime())
                 .setVersion(5); // set any non-default (non-zero) value
         return builder.build();

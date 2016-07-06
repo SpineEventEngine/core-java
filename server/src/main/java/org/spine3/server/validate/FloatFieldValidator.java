@@ -61,7 +61,7 @@ import static org.spine3.protobuf.Values.newFloatValue;
 
     @Override
     protected Any wrap(Float value) {
-        final Any any = AnyPacker.toAny(newFloatValue(value));
+        final Any any = AnyPacker.pack(newFloatValue(value));
         return any;
     }
 }

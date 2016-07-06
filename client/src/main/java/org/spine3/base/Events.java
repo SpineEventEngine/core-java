@@ -94,7 +94,7 @@ public class Events {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
-        return createEvent(AnyPacker.toAny(event), context);
+        return createEvent(AnyPacker.pack(event), context);
     }
 
     /**
@@ -129,7 +129,7 @@ public class Events {
      */
     public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final M result = AnyPacker.fromAny(any);
+        final M result = AnyPacker.unpack(any);
         return result;
     }
 
@@ -178,7 +178,7 @@ public class Events {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
                                                          .setTimestamp(Timestamps.getCurrentTime())
-                                                         .setProducerId(AnyPacker.toAny(producerId));
+                                                         .setProducerId(AnyPacker.pack(producerId));
         return builder.build();
     }
 

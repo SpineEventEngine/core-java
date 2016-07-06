@@ -56,7 +56,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 
 @SuppressWarnings({"InstanceMethodNamingConvention", "OverlyCoupledClass"})
 public class ProcessManagerShould {
@@ -96,7 +96,7 @@ public class ProcessManagerShould {
 
     private void testDispatchEvent(Message event) throws InvocationTargetException {
         processManager.dispatchEvent(event, EVENT_CONTEXT);
-        assertEquals(AnyPacker.toAny(event), processManager.getState());
+        assertEquals(AnyPacker.pack(event), processManager.getState());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ProcessManagerShould {
 
     private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
         final List<Event> events = processManager.dispatchCommand(command, COMMAND_CONTEXT);
-        assertEquals(AnyPacker.toAny(command), processManager.getState());
+        assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
 
@@ -127,7 +127,7 @@ public class ProcessManagerShould {
         assertEquals(1, events.size());
         final Event event = events.get(0);
         assertNotNull(event);
-        final ProjectCreated message = fromAny(event.getMessage());
+        final ProjectCreated message = unpack(event.getMessage());
         assertEquals(ID, message.getProjectId());
     }
 
@@ -152,7 +152,7 @@ public class ProcessManagerShould {
         // The producer of the event is our Process Manager.
         assertEquals(processManager.getId(), Events.getProducer(event.getContext()));
 
-        final Message message = AnyPacker.fromAny(event.getMessage());
+        final Message message = AnyPacker.unpack(event.getMessage());
 
         // The event type is CommandRouted.
         assertTrue(message instanceof CommandRouted);
@@ -216,34 +216,34 @@ public class ProcessManagerShould {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(AnyPacker.toAny(event));
+            incrementState(AnyPacker.pack(event));
         }
 
         @Subscribe
         public void on(TaskAdded event, EventContext ignored) {
-            incrementState(AnyPacker.toAny(event));
+            incrementState(AnyPacker.pack(event));
         }
 
         @Subscribe
         public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(AnyPacker.toAny(event));
+            incrementState(AnyPacker.pack(event));
         }
 
         @Assign
         public ProjectCreated handle(CreateProject command, CommandContext ignored) {
-            incrementState(AnyPacker.toAny(command));
+            incrementState(AnyPacker.pack(command));
             return Given.EventMessage.projectCreated(command.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask command, CommandContext ignored) {
-            incrementState(AnyPacker.toAny(command));
+            incrementState(AnyPacker.pack(command));
             return Given.EventMessage.taskAdded(command.getProjectId());
         }
 
         @Assign
         public CommandRouted handle(StartProject command, CommandContext context) {
-            incrementState(AnyPacker.toAny(command));
+            incrementState(AnyPacker.pack(command));
 
             final Message addTask = Given.CommandMessage.addTask(command.getProjectId());
             final CommandRouted route = newRouter().of(command, context)

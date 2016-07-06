@@ -46,7 +46,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
 public class TestEventContextFactory {
 
-    private static final Any AGGREGATE_ID = AnyPacker.toAny(newStringValue(newUuid()));
+    private static final Any AGGREGATE_ID = AnyPacker.pack(newStringValue(newUuid()));
 
     private static final String TEST_BC_NAME = "Test BC";
 
@@ -75,7 +75,7 @@ public class TestEventContextFactory {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
-                                                         .setProducerId(AnyPacker.toAny(aggregateId))
+                                                         .setProducerId(AnyPacker.pack(aggregateId))
                                                          .setTimestamp(getCurrentTime());
         return builder.build();
     }
@@ -113,7 +113,7 @@ public class TestEventContextFactory {
                                                                                .setEventId(eventId)
                                                                                .setTimestamp(getCurrentTime())
                                                                                .setBoundedContextName(TEST_BC_NAME)
-                                                                               .setProducerId(AnyPacker.toAny(aggregateId));
+                                                                               .setProducerId(AnyPacker.pack(aggregateId));
         return builder.build();
     }
 
@@ -137,7 +137,7 @@ public class TestEventContextFactory {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
-                                                         .setProducerId(AnyPacker.toAny(aggregateId));
+                                                         .setProducerId(AnyPacker.pack(aggregateId));
         return builder.build();
     }
 }

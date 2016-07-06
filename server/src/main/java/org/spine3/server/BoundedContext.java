@@ -53,7 +53,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.protobuf.AnyPacker.fromAny;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Logging.closed;
 
@@ -194,7 +194,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
 
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Response> responseObserver) {
-        final Message eventMsg = fromAny(integrationEvent.getMessage());
+        final Message eventMsg = unpack(integrationEvent.getMessage());
         final boolean isValid = eventBus.validate(eventMsg, responseObserver);
         if (isValid) {
             final Event event = toEvent(integrationEvent);
@@ -208,7 +208,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         final EventContext context = EventContext.newBuilder()
                 .setEventId(sourceContext.getEventId())
                 .setTimestamp(sourceContext.getTimestamp())
-                .setProducerId(AnyPacker.toAny(producerId))
+                .setProducerId(AnyPacker.pack(producerId))
                 .build();
         final Event result = Events.createEvent(integrationEvent.getMessage(), context);
         return result;

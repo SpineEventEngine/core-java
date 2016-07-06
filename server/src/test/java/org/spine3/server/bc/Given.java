@@ -102,7 +102,7 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
             final IntegrationEvent.Builder builder =
                     IntegrationEvent.newBuilder()
                                     .setContext(eventContext)
-                                    .setMessage(AnyPacker.toAny(event));
+                                    .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
     }
