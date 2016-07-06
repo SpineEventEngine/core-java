@@ -72,27 +72,27 @@ import static org.spine3.io.IoUtil.loadAllProperties;
 
     private static class Builder {
 
-        private final Set<Properties> propertiesSet;
+        private final Iterable<Properties> properties;
         private final ImmutableMultimap.Builder<TypeName, TypeName> builder;
 
-        /* package */ Builder(Set<Properties> propertiesSet) {
-            this.propertiesSet = propertiesSet;
+        /* package */ Builder(Iterable<Properties> propertiesSet) {
+            this.properties = propertiesSet;
             this.builder = ImmutableMultimap.builder();
         }
 
         /* package */ ImmutableMultimap<TypeName, TypeName> build() {
-            for (Properties properties : propertiesSet) {
-                put(properties);
+            for (Properties props : this.properties) {
+                put(props);
             }
             final ImmutableMultimap<TypeName, TypeName> result = builder.build();
             return result;
         }
 
-        private void put(Properties properties) {
-            final Set<String> enrichments = properties.stringPropertyNames();
+        private void put(Properties props) {
+            final Set<String> enrichments = props.stringPropertyNames();
             for (String enrichment : enrichments) {
                 final TypeName enrichmentType = TypeName.of(enrichment);
-                final String eventTypesStr = properties.getProperty(enrichment);
+                final String eventTypesStr = props.getProperty(enrichment);
                 final Iterable<String> eventTypes = FluentIterable.of(eventTypesStr.split(EVENT_TYPE_SEPARATOR));
                 put(enrichmentType, eventTypes);
             }
