@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.spine3.annotations.EventAnnotationsProto;
+import org.spine3.base.EventContext;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.Nullable;
@@ -43,7 +44,15 @@ import static java.lang.String.format;
  */
 /* package */ class ReferenceValidator {
 
+    /**
+     * The separator used in Protobuf fully-qualified names.
+     */
     private static final String PROTO_FQN_SEPARATOR = ".";
+
+    /**
+     * The reference to the event context used in the `by` field option.
+     */
+    private static final String CONTEXT_REFERENCE = "context";
 
     private final EventEnricher enricher;
     private final Descriptor eventDescriptor;
@@ -74,35 +83,48 @@ import static java.lang.String.format;
         final ImmutableList.Builder<EnrichmentFunction<?, ?>> functions = ImmutableList.builder();
         final ImmutableMultimap.Builder<FieldDescriptor, FieldDescriptor> fields = ImmutableMultimap.builder();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            final String eventFieldName = parseEventFieldName(enrichmentField);
-            checkEventFieldName(eventFieldName, enrichmentField);
-            final FieldDescriptor eventField = findEventField(eventFieldName, enrichmentField);
-            final EnrichmentFunction<?, ?> function = getEnrichmentFunction(eventField, enrichmentField);
+            final FieldDescriptor sourceField = findSourceField(enrichmentField);
+            final EnrichmentFunction<?, ?> function = getEnrichmentFunction(sourceField, enrichmentField);
             functions.add(function);
-            fields.put(eventField, enrichmentField);
+            fields.put(sourceField, enrichmentField);
         }
         this.sourceToTargetMap = fields.build();
         return functions.build();
     }
 
     /**
-     * Returns an event field name or an empty string if there is no {@code by} option.
+     * Searches for the event/context field with the name parsed from the enrichment field `by` option.
      */
-    private static String parseEventFieldName(FieldDescriptor enrichmentField) {
-        String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
-        if (fieldName.contains(PROTO_FQN_SEPARATOR)) {
-            final int firstCharIndex = fieldName.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
-            fieldName = fieldName.substring(firstCharIndex);
+    private FieldDescriptor findSourceField(FieldDescriptor enrichmentField) {
+        final String fieldName = enrichmentField.getOptions().getExtension(EventAnnotationsProto.by);
+        checkSourceFieldName(fieldName, enrichmentField);
+        final Descriptor srcMessage = getSrcMessage(fieldName);
+        final FieldDescriptor field = findField(fieldName, srcMessage);
+        if (field == null) {
+            throw noFieldException(fieldName, srcMessage, enrichmentField);
         }
-        return fieldName;
+        return field;
     }
 
-    private FieldDescriptor findEventField(String eventFieldName, FieldDescriptor enrichmentField) {
-        final FieldDescriptor result = eventDescriptor.findFieldByName(eventFieldName);
-        if (result == null) {
-            throw noEventField(eventFieldName, enrichmentField);
+    private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
+        if (fieldNameFull.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
+            final int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
+            final String fieldName = fieldNameFull.substring(firstCharIndex);
+            return srcMessage.findFieldByName(fieldName);
+        } else {
+            return srcMessage.findFieldByName(fieldNameFull);
         }
-        return result;
+    }
+
+    /**
+     * Returns an event descriptor or context descriptor
+     * if the field name contains {@link ReferenceValidator#CONTEXT_REFERENCE}.
+     */
+    private Descriptor getSrcMessage(String fieldName) {
+        final Descriptor msg = fieldName.contains(CONTEXT_REFERENCE) ?
+                EventContext.getDescriptor() :
+                eventDescriptor;
+        return msg;
     }
 
     private EnrichmentFunction<?, ?> getEnrichmentFunction(FieldDescriptor srcField, FieldDescriptor targetField) {
@@ -115,20 +137,26 @@ import static java.lang.String.format;
         return func.get();
     }
 
-    private static void checkEventFieldName(String eventFieldName, FieldDescriptor enrichmentField) {
-        if (eventFieldName.isEmpty()) {
+    /**
+     * Checks if the source field name (from event or context) is not empty.
+     */
+    private static void checkSourceFieldName(String srcFieldName, FieldDescriptor enrichmentField) {
+        if (srcFieldName.isEmpty()) {
             final String msg = format("There is no `by` option for the enrichment field `%s`",
                                       enrichmentField.getFullName());
             throw new IllegalStateException(msg);
         }
     }
 
-    private IllegalStateException noEventField(String eventFieldName, FieldDescriptor enrichmentField) {
+    private static IllegalStateException noFieldException(
+            String eventFieldName,
+            Descriptor srcMessage,
+            FieldDescriptor enrichmentField) {
         final String msg = format(
                 "No field `%s` in the message `%s` found. " +
                 "The field is referenced in the option of the enrichment field `%s`.",
                 eventFieldName,
-                eventDescriptor.getFullName(),
+                srcMessage.getFullName(),
                 enrichmentField.getFullName());
         throw new IllegalStateException(msg);
     }

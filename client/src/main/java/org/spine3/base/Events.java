@@ -262,7 +262,8 @@ public class Events {
     public static boolean isEnrichmentEnabled(Event event) {
         final EventContext context = event.getContext();
         final EventContext.EnrichmentModeCase mode = context.getEnrichmentModeCase();
-        return mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+        final boolean isEnabled = mode != EventContext.EnrichmentModeCase.DO_NOT_ENRICH;
+        return isEnabled;
     }
 
     /**

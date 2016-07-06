@@ -27,6 +27,7 @@ import com.google.protobuf.util.TimeUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Values;
+import org.spine3.server.event.Given;
 import org.spine3.server.event.enrich.EventEnricher.Builder.SameTransition;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectId;
@@ -68,10 +69,9 @@ public class EventEnricherBuilderShould {
 
     @Test
     public void build_enricher_if_all_functions_registered() {
-        builder.addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName());
-        builder.addFieldEnrichment(ProjectId.class, UserId.class, new EventEnricherShould.GetProjectOwnerId());
+        final EventEnricher enricher = Given.Enrichment.newEventEnricher();
 
-        assertNotNull(builder.build());
+        assertNotNull(enricher);
     }
 
     @Test
@@ -127,14 +127,9 @@ public class EventEnricherBuilderShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_GetProjectName_function_registered() {
-        builder.addFieldEnrichment(ProjectId.class, UserId.class, new EventEnricherShould.GetProjectOwnerId());
-        builder.build();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_GetProjectOwnerId_function_registered() {
-        builder.addFieldEnrichment(ProjectId.class, String.class, new EventEnricherShould.GetProjectName());
+    public void throw_exception_if_not_all_needed_functions_registered() {
+        builder.addFieldEnrichment(ProjectId.class, UserId.class, new Given.Enrichment.GetProjectOwnerId());
+        builder.addFieldEnrichment(ProjectId.class, String.class, new Given.Enrichment.GetProjectName());
         builder.build();
     }
 

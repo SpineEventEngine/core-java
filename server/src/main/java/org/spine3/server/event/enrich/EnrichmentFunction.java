@@ -22,6 +22,7 @@ package org.spine3.server.event.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
+import org.spine3.base.EventContext;
 import org.spine3.server.event.EventBus;
 
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events passed to {@link EventBus}.
  *
  * @param <S> a type of the source object to enrich
- * @param <T> a type of the enrichment
+ * @param <T> a type of the target enrichment
  * @author Alexander Yevsyukov
  */
 /* package */ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
@@ -49,25 +50,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
      **/
 
     private final Class<S> eventClass;
-
     private final Class<T> enrichmentClass;
+    private EventContext context;
 
     /* package */ EnrichmentFunction(Class<S> eventClass, Class<T> enrichmentClass) {
         this.eventClass = checkNotNull(eventClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
         checkArgument(!eventClass.equals(enrichmentClass),
-                      "Source and target class must not be equal. Passed two values of %", eventClass);
+                      "Event and enrichment class must not be equal. Passed two values of %", eventClass);
     }
 
-    public Class<S> getEventClass() {
+    /* package */ Class<S> getEventClass() {
         return eventClass;
     }
 
-    public Class<T> getEnrichmentClass() {
+    /* package */ Class<T> getEnrichmentClass() {
         return enrichmentClass;
     }
 
-    public abstract Function<S, T> getFunction();
+    protected EventContext getContext() {
+        return context;
+    }
+
+    /* package */ void setContext(EventContext context) {
+        this.context = context;
+    }
+
+    protected abstract Function<S, T> getFunction();
 
     /**
      * Validates the instance.
