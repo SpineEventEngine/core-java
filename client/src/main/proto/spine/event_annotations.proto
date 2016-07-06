@@ -50,8 +50,8 @@ extend google.protobuf.MessageOptions {
     // }
     //
     // message EventEnrichmentForSeveralEvents {
-    //     option (enrichment_for) = "example.events.FirstEvent,
-    //                                example.events.SecondEvent";
+    //     option (enrichment_for) = "example.events.FirstEvent,"
+    //                               "example.events.SecondEvent";
     //     ...
     // }
     // </pre>
