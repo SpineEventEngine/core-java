@@ -38,7 +38,7 @@ import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.AnyPacker.fromAny;
 import static org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc.IntegrationEventSubscriber;
 
 /**

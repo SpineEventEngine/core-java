@@ -29,6 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -47,7 +48,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
@@ -86,9 +86,9 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
         private static final TaskAdded TASK_ADDED = taskAdded(DUMMY_PROJECT_ID);
         private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
-        private static final Any PROJECT_CREATED_ANY = toAny(PROJECT_CREATED);
-        private static final Any TASK_ADDED_ANY = toAny(TASK_ADDED);
-        private static final Any PROJECT_STARTED_ANY = toAny(PROJECT_STARTED);
+        private static final Any PROJECT_CREATED_ANY = AnyPacker.toAny(PROJECT_CREATED);
+        private static final Any TASK_ADDED_ANY = AnyPacker.toAny(TASK_ADDED);
+        private static final Any PROJECT_STARTED_ANY = AnyPacker.toAny(PROJECT_STARTED);
 
         private EventMessage() {
         }

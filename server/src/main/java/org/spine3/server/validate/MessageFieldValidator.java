@@ -25,6 +25,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.Time;
 import org.spine3.validate.internal.TimeOption;
@@ -34,7 +35,6 @@ import org.spine3.validate.internal.ValidationProto;
 import java.util.List;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.internal.Time.FUTURE;
@@ -144,7 +144,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
                 .setMsgFormat(msg)
                 .addParam(when)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(toAny(fieldValue))
+                .setFieldValue(AnyPacker.toAny(fieldValue))
                 .build();
         return violation;
     }
@@ -154,7 +154,7 @@ import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                 .setMsgFormat(msg)
                 .setFieldPath(getFieldPath())
-                .setFieldValue(toAny(fieldValue))
+                .setFieldValue(AnyPacker.toAny(fieldValue))
                 .addAllViolation(violations)
                 .build();
         return violation;

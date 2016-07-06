@@ -28,8 +28,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.EntityPackagesMap;
-import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.type.TypeName;
@@ -48,7 +48,6 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.validate.Validate.*;
 
 /**
@@ -113,7 +112,7 @@ public class Commands {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Command create(Message message, CommandContext context) {
-        return create(toAny(message), context);
+        return create(AnyPacker.toAny(message), context);
     }
 
     /**
@@ -135,7 +134,7 @@ public class Commands {
      * Extracts the message from the passed {@code Command} instance.
      */
     public static Message getMessage(Command command) {
-        final Message result = Messages.fromAny(command.getMessage());
+        final Message result = AnyPacker.fromAny(command.getMessage());
         return result;
     }
 

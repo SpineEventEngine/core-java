@@ -32,7 +32,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.entity.Entity;
@@ -48,7 +48,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 
 /**
@@ -217,7 +216,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             // such a call especially from the testing code.
             final Any any = (Any) command;
             //noinspection AssignmentToMethodParameter
-            command = Messages.fromAny(any);
+            command = AnyPacker.fromAny(any);
         }
 
         try {
@@ -369,7 +368,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param snapshot the snapshot with the state to restore
      */
     /* package */ void restore(Snapshot snapshot) {
-        final S stateToRestore = Messages.fromAny(snapshot.getState());
+        final S stateToRestore = AnyPacker.fromAny(snapshot.getState());
 
         // See if we're in the state update cycle.
         final B builder = this.builder;
@@ -456,7 +455,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @CheckReturnValue
     /* package */ Snapshot toSnapshot() {
-        final Any state = toAny(getState());
+        final Any state = AnyPacker.toAny(getState());
         final int version = getVersion();
         final Timestamp whenModified = whenModified();
         final Snapshot.Builder builder = Snapshot.newBuilder()

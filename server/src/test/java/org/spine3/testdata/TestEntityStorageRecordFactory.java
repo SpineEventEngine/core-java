@@ -20,11 +20,11 @@
 
 package org.spine3.testdata;
 
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.storage.EntityStorageRecord;
 
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -42,7 +42,7 @@ public class TestEntityStorageRecordFactory {
      */
     public static EntityStorageRecord newEntityStorageRecord() {
         final EntityStorageRecord.Builder builder = EntityStorageRecord.newBuilder()
-                .setState(toAny(newStringValue(newUuid())))
+                .setState(AnyPacker.toAny(newStringValue(newUuid())))
                 .setWhenModified(getCurrentTime())
                 .setVersion(5); // set any non-default (non-zero) value
         return builder.build();

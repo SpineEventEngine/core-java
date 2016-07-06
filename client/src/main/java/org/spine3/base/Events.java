@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
@@ -39,7 +39,6 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.isBetween;
 
 /**
@@ -95,7 +94,7 @@ public class Events {
      */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
-        return createEvent(toAny(event), context);
+        return createEvent(AnyPacker.toAny(event), context);
     }
 
     /**
@@ -130,7 +129,7 @@ public class Events {
      */
     public static <M extends Message> M getMessage(Event event) {
         final Any any = event.getMessage();
-        final M result = Messages.fromAny(any);
+        final M result = AnyPacker.fromAny(any);
         return result;
     }
 
@@ -179,7 +178,7 @@ public class Events {
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(generateId())
                                                          .setTimestamp(Timestamps.getCurrentTime())
-                                                         .setProducerId(toAny(producerId));
+                                                         .setProducerId(AnyPacker.toAny(producerId));
         return builder.build();
     }
 

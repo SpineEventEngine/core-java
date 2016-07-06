@@ -24,8 +24,7 @@ import com.google.common.base.Throwables;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.TimeUtil;
-
-import static org.spine3.protobuf.Messages.toAny;
+import org.spine3.protobuf.AnyPacker;
 
 /**
  * Abstract base for throwable business failures.
@@ -60,7 +59,7 @@ public abstract class FailureThrowable extends Throwable {
      */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
-                .setInstance(toAny(this.failure))
+                .setInstance(AnyPacker.toAny(this.failure))
                 .setStacktrace(Throwables.getStackTraceAsString(this))
                 .setTimestamp(this.timestamp);
         return builder.build();

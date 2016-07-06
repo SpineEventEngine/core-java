@@ -63,7 +63,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.spine3.protobuf.Messages.fromAny;
+import static org.spine3.protobuf.AnyPacker.fromAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**

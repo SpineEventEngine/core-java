@@ -31,6 +31,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.test.commands.TestCommand;
 import org.spine3.type.TypeName;
@@ -45,7 +46,6 @@ import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations.seconds;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -93,7 +93,7 @@ public class CommandsShould {
 
     @Test
     public void create_command_with_Any() {
-        final Any msg = toAny(stringValue);
+        final Any msg = AnyPacker.toAny(stringValue);
 
         final Command command = Commands.create(msg, CommandContext.getDefaultInstance());
 

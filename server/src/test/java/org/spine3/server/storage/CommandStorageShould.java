@@ -34,6 +34,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.CreateProject;
@@ -50,8 +51,7 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.fromAny;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -84,7 +84,7 @@ public abstract class CommandStorageShould extends AbstractStorageShould<Command
 
     @Override
     protected CommandStorageRecord newStorageRecord() {
-        final Any command = toAny(Given.Command.createProject());
+        final Any command = AnyPacker.toAny(Given.Command.createProject());
         final TypeName commandType = TypeName.ofEnclosed(command);
         final CommandContext context = createCommandContext();
         final CommandStorageRecord.Builder builder = CommandStorageRecord.newBuilder()

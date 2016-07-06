@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.testdata.TestCommandContextFactory;
 import org.spine3.type.TypeName;
 
@@ -37,8 +38,7 @@ import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 import static org.junit.Assert.*;
 import static org.spine3.base.Events.*;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.fromAny;
 import static org.spine3.protobuf.Timestamps.minutesAgo;
 import static org.spine3.protobuf.Timestamps.secondsAgo;
 import static org.spine3.protobuf.Values.*;
@@ -118,7 +118,7 @@ public class EventsShould {
 
     @Test
     public void create_event_with_Any() {
-        final Any msg = toAny(stringValue);
+        final Any msg = AnyPacker.toAny(stringValue);
         final Event event = createEvent(msg, context);
 
         assertEquals(msg, event.getMessage());
@@ -232,7 +232,7 @@ public class EventsShould {
     private static EventContext newEventContextWithEnrichment(String key, Message enrichment) {
         final Enrichments.Builder enrichments = Enrichments.newBuilder();
         enrichments.getMutableMap()
-                   .put(key, toAny(enrichment));
+                   .put(key, AnyPacker.toAny(enrichment));
         final EventContext context = newEventContext().toBuilder()
                                                       .setEnrichments(enrichments.build())
                                                       .build();
@@ -249,7 +249,7 @@ public class EventsShould {
         final CommandContext cmdContext = TestCommandContextFactory.createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
-                                                         .setProducerId(toAny(producerId))
+                                                         .setProducerId(AnyPacker.toAny(producerId))
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();

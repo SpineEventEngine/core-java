@@ -31,6 +31,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.TimeUtil;
+import org.spine3.protobuf.AnyPacker;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -42,8 +43,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
+import static org.spine3.protobuf.AnyPacker.fromAny;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -182,16 +182,16 @@ public class Identifiers {
         //noinspection IfStatementWithTooManyBranches,ChainOfInstanceofChecks
         if (id instanceof Message) {
             final Message message = (Message) id;
-            anyId = toAny(message);
+            anyId = AnyPacker.toAny(message);
         } else if (id instanceof String) {
             final String strValue = (String) id;
-            anyId = toAny(newStringValue(strValue));
+            anyId = AnyPacker.toAny(newStringValue(strValue));
         } else if (id instanceof Integer) {
             final Integer intValue = (Integer) id;
-            anyId = toAny(UInt32Value.newBuilder().setValue(intValue).build());
+            anyId = AnyPacker.toAny(UInt32Value.newBuilder().setValue(intValue).build());
         } else if (id instanceof Long) {
             final Long longValue = (Long) id;
-            anyId = toAny(UInt64Value.newBuilder().setValue(longValue).build());
+            anyId = AnyPacker.toAny(UInt64Value.newBuilder().setValue(longValue).build());
         } else {
             throw unsupportedIdType(id);
         }

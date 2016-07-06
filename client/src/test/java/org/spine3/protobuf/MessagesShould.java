@@ -20,7 +20,6 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.BytesValue;
@@ -40,25 +39,14 @@ import org.spine3.test.messages.MessageWithStringValue;
 import org.spine3.test.messages.TestEnum;
 import org.spine3.test.messages.TestEnumValue;
 import org.spine3.type.TypeName;
-import org.spine3.users.UserId;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.UserUtil.newUserId;
-import static org.spine3.protobuf.Messages.fromAny;
-import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Values.newStringValue;
 
-/**
- * @author Mikhail Melnik
- */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MessagesShould {
-
-    private final UserId id = newUserId(newUuid());
-    private final Any idAny = Any.pack(id);
 
     @Test
     public void have_private_utility_ctor() {
@@ -75,44 +63,6 @@ public class MessagesShould {
         Messages.toJson(Tests.<Message>nullRef());
     }
 
-    @Test
-    public void convert_id_to_Any() {
-        final Any test = toAny(id);
-        assertEquals(idAny, test);
-    }
-
-
-    @Test
-    public void convert_ByteString_to_Any() {
-        final StringValue message = newStringValue(newUuid());
-        final ByteString byteString = message.toByteString();
-
-        assertEquals(Any.pack(message), toAny(TypeName.of(message), byteString));
-    }
-
-    @Test
-    public void convert_from_Any_to_id() {
-        final UserId test = fromAny(idAny);
-        assertEquals(id, test);
-    }
-
-    @Test
-    public void convert_from_Any_to_protobuf_class() {
-        final StringValue expected = newStringValue(newUuid());
-        final Any packedValue = toAny(expected);
-        final Message actual = fromAny(packedValue);
-        assertEquals(expected, actual);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void fail_on_attempt_to_convert_null_id() {
-        toAny(Tests.<Message>nullRef());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void fail_on_attempt_to_convert_from_null_Any() {
-        fromAny(Tests.<Any>nullRef());
-    }
 
     //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.
     @Ignore
