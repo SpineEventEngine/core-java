@@ -91,7 +91,7 @@ message EventContext {
     Attributes attributes = 8;
 
     message Attributes {
-        map<string, google.protobuf.Any> attributes = 1;
+        map<string, google.protobuf.Any> entries = 1;
     }
 }
 
