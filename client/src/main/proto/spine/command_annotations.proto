@@ -36,9 +36,6 @@ option java_package = "org.spine3.annotations";
 
 import "google/protobuf/descriptor.proto";
 
-
-//TODO:2016-06-10:alexander.yevsyukov: Obtain globally unique field numbers for options from Google.
-
 extend google.protobuf.MessageOptions {
     // Specifies Protobuf type names of the events that are produced after a command is handled.
     // The type names should be separated with commas. Space characters are allowed.

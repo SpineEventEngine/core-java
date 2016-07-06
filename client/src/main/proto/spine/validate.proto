@@ -40,8 +40,6 @@ import "google/protobuf/descriptor.proto";
 
 import "spine/annotations.proto";
 
-// TODO:2016-02-18:alexander.litus: obtain globally unique field number(s) for opts from Google.
-
 // A type of an entity.
 enum EntityType {
     // The default value (if the option value is not set).
