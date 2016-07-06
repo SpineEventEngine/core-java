@@ -84,8 +84,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             for (Properties props : this.properties) {
                 put(props);
             }
-            final ImmutableMultimap<TypeName, TypeName> result = builder.build();
-            return result;
+            return builder.build();
         }
 
         private void put(Properties props) {
