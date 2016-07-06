@@ -32,10 +32,12 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -83,7 +85,6 @@ public abstract class Entity<I, S extends Message> {
             .add(String.class)
             .add(Long.class)
             .add(Integer.class)
-            .add(Message.class)
             .build();
 
     private final I id;
@@ -306,7 +307,9 @@ public abstract class Entity<I, S extends Message> {
     }
 
     private static String supportedTypesToString() {
-        final Iterable<String> classStrings = transform(SUPPORTED_ID_TYPES, new Function<Class<?>, String>() {
+        final List<Class<?>> supportedIdTypes = newLinkedList(SUPPORTED_ID_TYPES);
+        supportedIdTypes.add(Message.class); // add Message only for string representation
+        final Iterable<String> classStrings = transform(supportedIdTypes, new Function<Class<?>, String>() {
             @Override
             @SuppressWarnings("NullableProblems") // OK in this case
             public String apply(Class<?> clazz) {
