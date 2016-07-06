@@ -84,9 +84,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         if (handlingResult == null) {
             return emptyList();
         }
-
-        final Class<?> resultClass = handlingResult.getClass();
-        if (List.class.isAssignableFrom(resultClass)) {
+        if (handlingResult instanceof List) {
             // Cast to the list of messages as it is the one of the return types we expect by methods we call.
             @SuppressWarnings("unchecked")
             final List<? extends Message> result = (List<? extends Message>) handlingResult;

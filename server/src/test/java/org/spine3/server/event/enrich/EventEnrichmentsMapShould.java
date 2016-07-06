@@ -20,17 +20,21 @@
 
 package org.spine3.server.event.enrich;
 
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedSeparateEnrichment;
 import org.spine3.test.event.ProjectStarted;
+import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqn;
 import org.spine3.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt;
 import org.spine3.type.TypeName;
 
-import java.util.Map;
+import java.util.Collection;
 
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -48,45 +52,57 @@ public class EventEnrichmentsMapShould {
 
     @Test
     public void return_map_instance() {
-        final Map<TypeName, TypeName> map = EventEnrichmentsMap.getInstance();
+        final ImmutableMultimap<TypeName, TypeName> map = EventEnrichmentsMap.getInstance();
 
         assertFalse(map.isEmpty());
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichment_type() {
-        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreated.Enrichment.class);
+        assertEventTypeByEnrichmentType(ProjectCreated.Enrichment.class, ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedSeparateEnrichment_type() {
-        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedSeparateEnrichment.class);
+        assertEventTypeByEnrichmentType(ProjectCreatedSeparateEnrichment.class, ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackage_type() {
-        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackage.class);
+        assertEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackage.class, ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqn_type() {
-        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqn.class);
+        assertEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackageFqn.class, ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt_type() {
-        assertEventTypeByEnrichmentType(ProjectCreated.class, ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class);
+        assertEventTypeByEnrichmentType(ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class, ProjectCreated.class);
     }
 
     @Test
     public void contain_ProjectStarted_by_ProjectStartedEnrichment_type() {
-        assertEventTypeByEnrichmentType(ProjectStarted.class, ProjectStarted.Enrichment.class);
+        assertEventTypeByEnrichmentType(ProjectStarted.Enrichment.class, ProjectStarted.class);
     }
 
-    private static void assertEventTypeByEnrichmentType(Class<? extends Message> expectedEventClass,
-            Class<? extends Message> enrichmentClass) {
-        final TypeName eventType = EventEnrichmentsMap.getInstance()
-                                                      .get(TypeName.of(enrichmentClass));
-        assertEquals(TypeName.of(expectedEventClass), eventType);
+    @Test
+    public void contain_events_by_EnrichmentForSeveralEvents_type() {
+        assertEventTypeByEnrichmentType(EnrichmentForSeveralEvents.class,
+                                        ProjectStarted.class, ProjectCreated.class, TaskAdded.class);
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("MethodParameterNamingConvention")
+    private static void assertEventTypeByEnrichmentType(
+            Class<? extends Message> enrichmentClass,
+            Class<? extends Message>... eventClassesExpected) {
+        final Collection<TypeName> eventTypesActual = EventEnrichmentsMap.getInstance()
+                                                                         .get(TypeName.of(enrichmentClass));
+        assertEquals(eventClassesExpected.length, eventTypesActual.size());
+        for (Class<? extends Message> expectedClass : FluentIterable.of(eventClassesExpected)) {
+            assertTrue(eventTypesActual.contains(TypeName.of(expectedClass)));
+        }
     }
 }

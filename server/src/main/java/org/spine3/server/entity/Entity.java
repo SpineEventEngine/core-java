@@ -32,10 +32,12 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static com.google.api.client.util.Throwables.propagate;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.util.TimeUtil.getCurrentTime;
 
 /**
@@ -79,11 +81,13 @@ public abstract class Entity<I, S extends Message> {
      */
     private static final int STATE_CLASS_GENERIC_INDEX = 1;
 
-    private static final ImmutableSet<Class<?>> SUPPORTED_ID_TYPES = ImmutableSet.<Class<?>>builder()
+    /**
+     * Supported ID types except {@link Message}s.
+     */
+    private static final ImmutableSet<Class<?>> supportedSimpleIdTypes = ImmutableSet.<Class<?>>builder()
             .add(String.class)
             .add(Long.class)
             .add(Integer.class)
-            .add(Message.class)
             .build();
 
     private final I id;
@@ -268,10 +272,11 @@ public abstract class Entity<I, S extends Message> {
      */
     public static <I> void checkIdType(I entityId) {
         final Class<?> idClass = entityId.getClass();
-        if (SUPPORTED_ID_TYPES.contains(idClass)) {
+        if (supportedSimpleIdTypes.contains(idClass)) {
             return;
         }
-        if (!Message.class.isAssignableFrom(idClass)){
+        final boolean isMessage = entityId instanceof Message;
+        if (!isMessage){
             throw unsupportedIdType(idClass);
         }
     }
@@ -305,7 +310,9 @@ public abstract class Entity<I, S extends Message> {
     }
 
     private static String supportedTypesToString() {
-        final Iterable<String> classStrings = transform(SUPPORTED_ID_TYPES, new Function<Class<?>, String>() {
+        final List<Class<?>> supportedIdTypes = newLinkedList(supportedSimpleIdTypes);
+        supportedIdTypes.add(Message.class); // add Message only for string representation
+        final Iterable<String> classStrings = transform(supportedIdTypes, new Function<Class<?>, String>() {
             @Override
             @SuppressWarnings("NullableProblems") // OK in this case
             public String apply(Class<?> clazz) {
@@ -315,5 +322,4 @@ public abstract class Entity<I, S extends Message> {
         final String result = Joiner.on(", ").join(classStrings);
         return result;
     }
-
 }

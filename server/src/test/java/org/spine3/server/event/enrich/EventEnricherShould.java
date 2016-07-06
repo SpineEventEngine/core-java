@@ -164,7 +164,7 @@ public class EventEnricherShould {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
-            this.projectCreatedEnrichment =  getEnrichment(ProjectCreated.Enrichment.class, context).get();
+            this.projectCreatedEnrichment = getEnrichment(ProjectCreated.Enrichment.class, context).get();
             this.projectCreatedSeparateEnrichment = getEnrichment(ProjectCreatedSeparateEnrichment.class, context).get();
             this.projectCreatedAnotherPackEnrichment = getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
         }

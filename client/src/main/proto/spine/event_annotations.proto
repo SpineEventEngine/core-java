@@ -37,14 +37,21 @@ option java_package = "org.spine3.annotations";
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MessageOptions {
-    // An instruction to associate an enrichment message with the event message to enrich.
-    // If the event message to enrich is in another package, the event type name should be qualified
+    // An instruction to associate an enrichment message with event message(s) to enrich.
+    // If the event message to enrich is in another package, the event type name(s) should be qualified
     // according to Protobuf conventions.
+    // If the enrichment is for multiple events, their type names should be separated with the comma.
     //
     // For example:
     // <pre>
     // message MyEventEnrichment {
     //     option (enrichment_for) = "example.events.MyEvent";
+    //     ...
+    // }
+    //
+    // message EventEnrichmentForSeveralEvents {
+    //     option (enrichment_for) = "example.events.FirstEvent,"
+    //                               "example.events.SecondEvent";
     //     ...
     // }
     // </pre>
