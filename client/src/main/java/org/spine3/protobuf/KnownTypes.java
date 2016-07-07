@@ -204,9 +204,6 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             return this;
         }
 
-        //TODO:2016-07-07:alexander.yevsyukov: Can we do what the below method does automatically?
-        // We can compose the same map on compile time by analyzing proto files packed with Protobuf's JAR.
-
         /**
          * Returns classes from the {@code com.google.protobuf} package that need to be present
          * in the type-to-class map.
