@@ -102,10 +102,10 @@ extend google.protobuf.FileOptions {
     // See more info in `annotations.proto`.
     bool beta_all = 58203;
 
-    // Specifies a type URL for all types within a file.
+    // Specifies a type URL prefix for all types within a file.
     // This type URL will be used when packing messages into `Any`.
     // See `any.proto` for more details.
-    string type_url = 58204;
+    string type_url_prefix = 58204;
 }
 
 extend google.protobuf.ServiceOptions {
