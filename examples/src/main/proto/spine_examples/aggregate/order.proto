@@ -24,8 +24,12 @@ package spine_examples.aggregate;
 option java_package="org.spine3.examples.aggregate";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
 import "spine/money/money.proto";
+
+import "google/protobuf/any.proto";
 
 message Order {
     OrderId order_id = 1;

@@ -25,6 +25,10 @@ option java_package="org.spine3.examples.aggregate.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 import "spine_examples/aggregate/order.proto";
 
 message OrderCreated {
