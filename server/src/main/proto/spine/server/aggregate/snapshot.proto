@@ -31,7 +31,6 @@ option (type_url_prefix) = "type.spine3.org";
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "spine/annotations.proto";
-import "spine/annotations.proto";
 
 // Built-in event type for storing aggregate snapshots.
 message Snapshot {

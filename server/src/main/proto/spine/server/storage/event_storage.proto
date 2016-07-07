@@ -34,7 +34,6 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/annotations.proto";
 import "spine/base/event.proto";
-import "spine/annotations.proto";
 
 // This type defines the way events are stored in event storage.
 // Some of the fields are defined as string representation of corresponding message types

@@ -31,7 +31,6 @@ option java_package = "org.spine3.server.event.grpc";
 option (type_url_prefix) = "type.spine3.org";
 
 import "spine/annotations.proto";
-import "spine/annotations.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
 import "spine/server/event/event_stream_query.proto";
