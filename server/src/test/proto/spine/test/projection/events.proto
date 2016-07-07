@@ -21,12 +21,14 @@ syntax = "proto3";
 
 package spine.test.projection.event;
 
-import "spine/test/projection/project.proto";
-import "spine/test/projection/task.proto";
-
 option java_package="org.spine3.test.projection.event";
 option java_outer_classname = "ProjectionEventsProto";
 option java_multiple_files = true;
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/test/projection/project.proto";
+import "spine/test/projection/task.proto";
+import "spine/annotations.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;

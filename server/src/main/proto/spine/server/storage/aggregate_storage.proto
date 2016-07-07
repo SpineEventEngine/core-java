@@ -27,9 +27,11 @@ option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
 option (SPI_all) = true;
+option (type_url_prefix) = "type.spine3.org";
 
 import "google/protobuf/timestamp.proto";
 
+import "spine/annotations.proto";
 import "spine/server/aggregate/snapshot.proto";
 import "spine/base/event.proto";
 import "spine/annotations.proto";

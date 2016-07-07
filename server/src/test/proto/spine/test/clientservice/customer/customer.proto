@@ -26,6 +26,9 @@ option java_multiple_files = true;
 option java_outer_classname = "CustomerProto";
 option java_package = "org.spine3.test.clientservice.customer";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
 import "spine/people/person_name.proto";
 import "spine/time/time.proto";
 
