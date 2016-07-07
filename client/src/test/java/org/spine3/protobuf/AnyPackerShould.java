@@ -21,12 +21,10 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
@@ -43,14 +41,6 @@ public class AnyPackerShould {
     public void convert_id_to_Any() {
         final Any test = AnyPacker.pack(id);
         assertEquals(idAny, test);
-    }
-
-    @Test
-    public void convert_ByteString_to_Any() {
-        final StringValue message = newStringValue(newUuid());
-        final ByteString byteString = message.toByteString();
-
-        assertEquals(Any.pack(message), AnyPacker.pack(TypeName.of(message), byteString));
     }
 
     @Test

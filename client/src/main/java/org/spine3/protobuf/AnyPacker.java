@@ -21,7 +21,6 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnknownTypeException;
@@ -47,23 +46,6 @@ public class AnyPacker {
      */
     public static Any pack(Message message) {
         final Any result = Any.pack(message);
-        return result;
-    }
-
-    /**
-     * Creates a new instance of {@link Any} with the message represented by its byte
-     * content and the passed type.
-     *
-     * @param type the type of the message to be wrapped into {@code Any}
-     * @param value the byte content of the message
-     * @return new {@code Any} instance
-     */
-    public static Any pack(TypeName type, ByteString value) {
-        final String typeUrl = type.toTypeUrl();
-        final Any result = Any.newBuilder()
-                .setValue(value)
-                .setTypeUrl(typeUrl)
-                .build();
         return result;
     }
 
