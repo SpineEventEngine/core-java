@@ -35,16 +35,16 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
  * @author Alexander Litus
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class TypeToClassMapShould {
+public class KnownTypesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateUtilityConstructor(TypeToClassMap.class));
+        assertTrue(hasPrivateUtilityConstructor(KnownTypes.class));
     }
 
     @Test
     public void return_known_proto_message_types() {
-        final ImmutableSet<TypeName> types = TypeToClassMap.knownTypes();
+        final ImmutableSet<TypeName> types = KnownTypes.typeNames();
 
         assertFalse(types.isEmpty());
     }
@@ -53,7 +53,7 @@ public class TypeToClassMapShould {
     public void return_java_class_name_by_proto_type_name() {
         final TypeName typeName = TypeName.of(Command.getDescriptor());
 
-        final ClassName className = TypeToClassMap.get(typeName);
+        final ClassName className = KnownTypes.get(typeName);
 
         assertEquals(ClassName.of(Command.class), className);
     }
@@ -62,7 +62,7 @@ public class TypeToClassMapShould {
     public void return_java_inner_class_name_by_proto_type_name() {
         final TypeName typeName = TypeName.of(CommandContext.Schedule.getDescriptor());
 
-        final ClassName className = TypeToClassMap.get(typeName);
+        final ClassName className = KnownTypes.get(typeName);
 
         assertEquals(ClassName.of(CommandContext.Schedule.class), className);
     }
@@ -71,18 +71,18 @@ public class TypeToClassMapShould {
     public void return_proto_type_name_by_java_class_name() {
         final ClassName className = ClassName.of(Command.class);
 
-        final TypeName typeName = TypeToClassMap.get(className);
+        final TypeName typeName = KnownTypes.get(className);
 
         assertEquals(TypeName.of(Command.getDescriptor()), typeName);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_no_proto_type_name_by_java_class_name() {
-        TypeToClassMap.get(ClassName.of(Exception.class));
+        KnownTypes.get(ClassName.of(Exception.class));
     }
 
     @Test(expected =  UnknownTypeException.class)
     public void throw_exception_if_no_java_class_name_by_proto_type_name() {
-        TypeToClassMap.get(TypeName.of("unexpected.type"));
+        KnownTypes.get(TypeName.of("unexpected.type"));
     }
 }

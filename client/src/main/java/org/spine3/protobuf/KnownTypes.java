@@ -53,7 +53,6 @@ import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.Internal;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
@@ -70,8 +69,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  */
-@Internal
-public class TypeToClassMap {
+/* package */ class KnownTypes {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
@@ -91,14 +89,14 @@ public class TypeToClassMap {
     private static final BiMap<TypeName, ClassName> biMap = Builder.build();
 
 
-    private TypeToClassMap() {}
+    private KnownTypes() {}
 
     /**
      * Retrieves Protobuf types known to the application.
      *
      * @return immutable set of Protobuf types known to the application
      */
-    public static ImmutableSet<TypeName> knownTypes() {
+    public static ImmutableSet<TypeName> typeNames() {
         final Set<TypeName> result = biMap.keySet();
         return ImmutableSet.copyOf(result);
     }
@@ -320,7 +318,7 @@ public class TypeToClassMap {
         private enum LogSingleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Logger value = LoggerFactory.getLogger(TypeToClassMap.class);
+            private final Logger value = LoggerFactory.getLogger(KnownTypes.class);
         }
     }
 }

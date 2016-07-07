@@ -66,7 +66,7 @@ public class Messages {
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
-        final ClassName className = TypeToClassMap.get(messageType);
+        final ClassName className = KnownTypes.get(messageType);
         try {
             @SuppressWarnings("unchecked") // the client considers this message is of this class
             final Class<T> result = (Class<T>) Class.forName(className.value());
@@ -113,7 +113,7 @@ public class Messages {
      */
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeName typeName : TypeToClassMap.knownTypes()) {
+        for (TypeName typeName : KnownTypes.typeNames()) {
             final Class<? extends Message> clazz = toMessageClass(typeName);
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.
