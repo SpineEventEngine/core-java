@@ -32,7 +32,6 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.test.messages.MessageWithStringValue;
@@ -64,8 +63,6 @@ public class MessagesShould {
     }
 
 
-    //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.
-    @Ignore
     @Test
     public void print_to_json() {
         final StringValue value = newStringValue("print_to_json");
@@ -73,8 +70,6 @@ public class MessagesShould {
                             .isEmpty());
     }
 
-    //TODO:2016-02-06:alexander.yevsyukov: Enable when storing nested types to .properties is fixed.
-    @Ignore
     @Test
     public void build_JsonFormat_registry_for_known_types() {
         final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
