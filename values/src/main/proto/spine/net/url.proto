@@ -7,6 +7,10 @@ option java_multiple_files = true;
 option java_package = "org.spine3.net";
 option java_outer_classname = "UrlProto";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 // Protobuf definition for URL.
 //
 // Can be defined in raw string form or as a structurized parsed record. Validity of URL is not guaranteed,
@@ -23,7 +27,6 @@ message Url {
     // Using this type makes it easier to operate concrete URL attributes.
     // Please see https://tools.ietf.org/html/rfc3986.
     message Record {
-
         // Application layer protocol
         Protocol protocol = 1;
 
@@ -89,4 +92,3 @@ message Url {
         }
     }
 }
-

@@ -26,20 +26,24 @@ option java_multiple_files = true;
 option java_outer_classname = "PersonNameProto";
 option java_package = "org.spine3.people";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 // A full name of a person.
 message PersonName {
-  // The honorific prefix (such as "Dr." or "Prof.") for this person.
-  string honorific_prefix = 1;
+    // The honorific prefix (such as "Dr." or "Prof.") for this person.
+    string honorific_prefix = 1;
 
-  // The given (first) name of the person.
-  string given_name = 2;
+    // The given (first) name of the person.
+    string given_name = 2;
 
-  // The middle name or the patronymic of this person.
-  string middle_name = 3;
+    // The middle name or the patronymic of this person.
+    string middle_name = 3;
 
-  // The family (last) name of the person.
-  string family_name = 4;
+    // The family (last) name of the person.
+    string family_name = 4;
 
-  // The honorific suffixes (such as "Jr.") for this person.
-  string honorific_suffix = 5;
+    // The honorific suffixes (such as "Jr.") for this person.
+    string honorific_suffix = 5;
 }

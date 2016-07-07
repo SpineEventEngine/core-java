@@ -32,7 +32,7 @@ import "spine/annotations.proto";
 
 // A string-based identifier of the user.
 message UserId {
-  // User ID value.
-  string value = 1;
+    // User ID value.
+    string value = 1;
 }
 
