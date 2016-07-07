@@ -29,7 +29,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.Internal;
 import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.EntityPackagesMap;
+import org.spine3.protobuf.EntityPackages;
 import org.spine3.protobuf.Timestamps;
 import org.spine3.time.ZoneOffset;
 import org.spine3.type.TypeName;
@@ -250,14 +250,14 @@ public class Commands {
     /**
      * Checks if the file belongs to an entity.
      *
-     * <p>See {@link EntityPackagesMap} for more info.
+     * <p>See {@link EntityPackages} for more info.
      *
      * @param file a descriptor of a {@code .proto} file to check
      * @return {@code true} if the file belongs to an entity, {@code false} otherwise
      */
     public static boolean isEntityFile(FileDescriptor file) {
         final String protoPackage = file.getPackage();
-        final boolean isCommandForEntity = EntityPackagesMap.contains(protoPackage);
+        final boolean isCommandForEntity = EntityPackages.contains(protoPackage);
         return isCommandForEntity;
     }
 

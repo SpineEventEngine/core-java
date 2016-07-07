@@ -44,7 +44,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * @author Alexander Litus
  */
 @Internal
-public class EntityPackagesMap {
+public class EntityPackages {
 
     /**
      * A path to a file which contains Protobuf packages and appropriate {@link EntityType}s.
@@ -52,6 +52,7 @@ public class EntityPackagesMap {
      */
     private static final String PROPS_FILE_PATH = "entities.properties";
 
+    //TODO:2016-07-07:alexander.yevsyukov: It is possible that one package would contain multiple entities.
     /**
      * A map from Protobuf package to {@link EntityType}.
      * The package contains files for this type of entity (aggregate, etc).
@@ -61,19 +62,22 @@ public class EntityPackagesMap {
      */
     private static final ImmutableMap<String, EntityType> packagesMap = buildPackagesMap();
 
-    private EntityPackagesMap() {}
+    private EntityPackages() {}
 
     /**
      * Returns an entity type for the Protobuf package.
      *
      * @param protoPackage a protobuf package name where entity files are located
      * @return a type of the entity to which the package belongs
+     * //TODO:2016-07-07:alexander.yevsyukov: Specify when null is returned.
      */
     @Nullable
     public static EntityType get(String protoPackage) {
         final EntityType result = packagesMap.get(protoPackage);
         return result;
     }
+
+    //TODO:2016-07-07:alexander.yevsyukov: Why don't we have a value type for PackageName?
 
     /**
      * Returns {@code true} if the map contains an entity type for a Protobuf package, {@code false} otherwise.
