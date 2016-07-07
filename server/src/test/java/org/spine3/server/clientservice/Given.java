@@ -83,9 +83,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
         private CommandMessage() {
         }
 
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
+        /** Creates a new {@link CreateProject} command with the given project ID. */
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
@@ -111,23 +109,17 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
             return result;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
-         */
+        /** Creates a new {@link org.spine3.base.Command} with default properties (current time etc). */
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
-         */
+        /** Creates a new {@link org.spine3.base.Command} with the given timestamp. */
         public static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
+        /** Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp. */
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);

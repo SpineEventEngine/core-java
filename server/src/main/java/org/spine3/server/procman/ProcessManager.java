@@ -87,9 +87,7 @@ import static org.spine3.base.Identifiers.idToAny;
  */
 public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> {
 
-    /**
-     * The Command Bus to post routed commands.
-     */
+    /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
 
     /**
@@ -103,16 +101,12 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
         super(id);
     }
 
-    /**
-     * The method to inject {@code CommandBus} instance from the repository.
-     */
+    /** The method to inject {@code CommandBus} instance from the repository. */
     /* package */ void setCommandBus(CommandBus commandBus) {
         this.commandBus = checkNotNull(commandBus);
     }
 
-    /**
-     * Returns the {@code CommandBus} to which post commands produced by this process manager.
-     */
+    /** Returns the {@code CommandBus} to which post commands produced by this process manager. */
     protected CommandBus getCommandBus() {
         return commandBus;
     }
@@ -292,23 +286,17 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
          */
         private UserId actor;
 
-        /**
-         * The zone offset from which the actor works.
-         */
+        /** The zone offset from which the actor works. */
         private ZoneOffset zoneOffset;
 
-        /**
-         * Command messages to route.
-         */
+        /** Command messages to route. */
         private final List<Message> toRoute = Lists.newArrayList();
 
         private CommandRouter(CommandBus commandBus) {
             this.commandBus = commandBus;
         }
 
-        /**
-         * Sets command to be routed.
-         */
+        /** Sets command to be routed. */
         public CommandRouter of(Message sourceCommand, CommandContext context) {
             this.sourceCommand = checkNotNull(sourceCommand);
             this.sourceContext = checkNotNull(context);
@@ -317,9 +305,7 @@ public abstract class ProcessManager<I, M extends Message> extends Entity<I, M> 
             return this;
         }
 
-        /**
-         * Adds {@code commandMessage} to be routed as a command.
-         */
+        /** Adds {@code commandMessage} to be routed as a command. */
         public CommandRouter add(Message commandMessage) {
             toRoute.add(commandMessage);
             return this;

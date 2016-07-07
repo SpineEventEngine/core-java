@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
      * translation function when building the {@link EventEnricher}.
      *
      * @see EventEnricher.Builder#addFieldEnrichment(Class, Class, Function)
-     **/
+     */
 
     private final Class<S> eventClass;
     private final Class<T> enrichmentClass;

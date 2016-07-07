@@ -23,9 +23,7 @@ package org.spine3.examples.importado;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 
-/**
- * {@code TaskRepository} is responsible for storing task aggregates.
- */
+/** {@code TaskRepository} is responsible for storing task aggregates. */
 public class TaskRepository extends AggregateRepository <TaskId, TaskAggregate> {
 
     public TaskRepository(BoundedContext boundedContext) {

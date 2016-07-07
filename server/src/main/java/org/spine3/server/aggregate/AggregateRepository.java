@@ -72,14 +72,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                           extends Repository<I, A>
                           implements CommandDispatcher {
 
-    /**
-     * The default number of events to be stored before a next snapshot is made.
-     */
+    /** The default number of events to be stored before a next snapshot is made. */
     public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
-    /**
-     * The number of events to store between snapshots.
-     */
+    /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
     private final GetTargetIdFromCommand<I, Message> getIdFunction = GetTargetIdFromCommand.newInstance();
@@ -200,9 +196,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         storage.writeEventCountAfterLastSnapshot(id, eventCount);
     }
 
-    /**
-     * Posts passed events to {@link EventBus}.
-     */
+    /** Posts passed events to {@link EventBus}. */
     private void postEvents(Iterable<Event> events) {
         for (Event event : events) {
             eventBus.post(event);

@@ -47,16 +47,12 @@ public abstract class FailureThrowable extends Throwable {
         return failure;
     }
 
-    /**
-     * @return timestamp of the instance creation
-     */
+    /** Returns timestamp of the instance creation. */
     public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    /**
-     * Converts this instance into {@link Failure} message.
-     */
+    /** Converts this instance into {@link Failure} message. */
     public Failure toMessage() {
         final Failure.Builder builder = Failure.newBuilder()
                 .setInstance(Any.pack(this.failure))

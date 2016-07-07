@@ -79,24 +79,18 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         private Event() {
         }
 
-        /**
-         * Creates a new {@link IntegrationEvent} with default properties.
-         */
+        /** Creates a new {@link IntegrationEvent} with default properties. */
         public static IntegrationEvent projectCreatedIntegration() {
             return projectCreatedIntegration(PROJECT_ID);
         }
 
-        /**
-         * Creates a new {@link IntegrationEvent} with the given projectId.
-         */
+        /** Creates a new {@link IntegrationEvent} with the given projectId. */
         public static IntegrationEvent projectCreatedIntegration(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
             return projectCreatedIntegration(projectId, context);
         }
 
-        /**
-         * Creates a new {@link IntegrationEvent} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link IntegrationEvent} with the given projectId and eventContext. */
         public static IntegrationEvent projectCreatedIntegration(ProjectId projectId, IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
             final IntegrationEvent.Builder builder =

@@ -90,34 +90,22 @@ public class EventBus implements AutoCloseable {
      * on final or anonymous classes).
      **/
 
-    /**
-     * The registry of event dispatchers.
-     */
+    /** The registry of event dispatchers. */
     private final DispatcherRegistry dispatcherRegistry = new DispatcherRegistry();
 
-    /**
-     * The registry of event subscriber methods.
-     */
+    /** The registry of event subscriber methods. */
     private final SubscriberRegistry subscriberRegistry = new SubscriberRegistry();
 
-    /**
-     * The {@code EventStore} to which put events before they get handled.
-     */
+    /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /**
-     * The executor for invoking subscriber methods.
-     */
+    /** The executor for invoking subscriber methods. */
     private final Executor executor;
 
-    /**
-     * The validator for events posted to the bus.
-     */
+    /** The validator for events posted to the bus. */
     private final MessageValidator eventValidator;
 
-    /**
-     * The enricher for posted events or {@code null} if the enrichment is not supported.
-     */
+    /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
     private final EventEnricher enricher;
 
@@ -131,16 +119,12 @@ public class EventBus implements AutoCloseable {
         this.enricher = builder.enricher;
     }
 
-    /**
-     * Creates a builder for new {@code EventBus}.
-     */
+    /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    /**
-     * Determines the class of the event from the passed event record.
-     */
+    /** Determines the class of the event from the passed event record. */
     public static EventClass getEventClass(Event event) {
         final Message message = getMessage(event);
         final EventClass result = EventClass.of(message);
@@ -177,9 +161,7 @@ public class EventBus implements AutoCloseable {
         subscriberRegistry.subscribe(object);
     }
 
-    /**
-     * Registers the passed dispatcher with the bus.
-     */
+    /** Registers the passed dispatcher with the bus. */
     public void register(EventDispatcher dispatcher) {
         dispatcherRegistry.register(dispatcher);
     }
@@ -212,16 +194,12 @@ public class EventBus implements AutoCloseable {
         subscriberRegistry.unsubscribe(object);
     }
 
-    /**
-     * Removes dispatcher from the bus.
-     */
+    /** Removes dispatcher from the bus. */
     public void unregister(EventDispatcher dispatcher) {
         dispatcherRegistry.unregister(dispatcher);
     }
 
-    /**
-     * @return {@link EventStore} associated with the bus.
-     */
+    /** Returns {@link EventStore} associated with the bus. */
     public EventStore getEventStore() {
         return eventStore;
     }
@@ -342,11 +320,11 @@ public class EventBus implements AutoCloseable {
         eventStore.close();
     }
 
-    /**
-     * The {@code Builder} for {@code EventBus}.
-     */
+    /** The {@code Builder} for {@code EventBus}. */
     public static class Builder {
+
         private EventStore eventStore;
+
         /**
          * Optional {@code Executor} for executing subscriber methods.
          *

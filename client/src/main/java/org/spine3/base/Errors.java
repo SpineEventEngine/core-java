@@ -32,9 +32,7 @@ public class Errors {
 
     private Errors() {}
 
-    /**
-     * Creates new instance of {@link Error} by the passed exception.
-     */
+    /** Creates new instance of {@link Error} by the passed exception. */
     public static Error fromException(Exception exception) {
         final String message = exception.getMessage();
         final Error result = Error.newBuilder()
@@ -45,9 +43,7 @@ public class Errors {
         return result;
     }
 
-    /**
-     * Creates new instance of {@link Error} by the passed {@code Throwable}.
-     */
+    /** Creates new instance of {@link Error} by the passed {@code Throwable}. */
     public static Error fromThrowable(Throwable throwable) {
         final String message = Strings.nullToEmpty(throwable.getMessage());
         final Error result = Error.newBuilder()

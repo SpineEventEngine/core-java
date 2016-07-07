@@ -110,47 +110,38 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
     /**
      * Reads storage format record.
+     *
      * @param eventId the ID of the event to read
      * @return the record instance of null if there's not record with such ID
      */
     @Nullable
     protected abstract EventStorageRecord readInternal(EventId eventId);
 
-    /**
-     * Converts EventStorageRecord to Event.
-     */
+    /** Converts EventStorageRecord to Event. */
     protected static Event toEvent(EventStorageRecord record) {
         final Event event = Events.createEvent(record.getMessage(), record.getContext());
         return event;
     }
 
-    /**
-     * Converts EventStorageRecords to Events.
-     */
+    /** Converts EventStorageRecords to Events. */
     @VisibleForTesting
     /* package */ static List<Event> toEventList(List<EventStorageRecord> records) {
         return Lists.transform(records, TO_EVENT);
     }
 
-    /**
-     * Converts EventStorageRecords to Events.
-     */
+    /** Converts EventStorageRecords to Events. */
     @SuppressWarnings("OverloadedVarargsMethod")
     @VisibleForTesting
     /* package */ static List<Event> toEventList(EventStorageRecord... records) {
         return Lists.transform(ImmutableList.copyOf(records), TO_EVENT);
     }
 
-    /**
-     * Converts {@code EventStorageRecord}s to {@code Event}s.
-     */
+    /** Converts {@code EventStorageRecord}s to {@code Event}s. */
     protected static Iterator<Event> toEventIterator(Iterator<EventStorageRecord> records) {
         return Iterators.transform(records, TO_EVENT);
     }
 
-    /**
-     * Creates storage record for the passed {@link Event}.
-     */
+    /** Creates storage record for the passed {@link Event}. */
     @VisibleForTesting
     /* package */ static EventStorageRecord toEventStorageRecord(EventId eventId, Event event) {
         final String eventIdString = checkValid(eventId).getUuid();
@@ -224,13 +215,12 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         }
     }
 
-    /**
-     * The predicate for filtering events by {@link EventFilter}.
-     */
+    /** The predicate for filtering events by {@link EventFilter}. */
     private static class MatchFilter implements Predicate<Event> {
 
         /**
          * The type of events to accept.
+         *
          * <p>If null, all events are accepted.
          */
         @Nullable
@@ -238,6 +228,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
         /**
          * The list of aggregate IDs of which events to accept.
+         *
          * <p>If null, all IDs are accepted.
          */
         @Nullable

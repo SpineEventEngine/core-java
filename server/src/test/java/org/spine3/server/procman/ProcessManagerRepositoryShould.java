@@ -216,9 +216,7 @@ public class ProcessManagerRepositoryShould {
 
     private static class TestProcessManager extends ProcessManager<ProjectId, Project> {
 
-        /**
-         * The event message we store for inspecting in delivery tests.
-         */
+        /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
 
         @SuppressWarnings("PublicConstructorInNonPublicClass") /* A Process Manager constructor must be public by

@@ -76,9 +76,7 @@ import org.spine3.net.Url.Record.Schema;
         return result.build();
     }
 
-    /**
-     * Initializes starting {@link UrlParser} state.
-     */
+    /** Initializes starting {@link UrlParser} state. */
     private void setupStartingState() {
         record = Url.Record.newBuilder();
         unProcessedInput = originalUrl;
@@ -114,9 +112,7 @@ import org.spine3.net.Url.Record.Schema;
         record.setProtocol(protocolBuilder.build());
     }
 
-    /**
-     * Parses credentials from remembered URL String and saves them to the state.
-     */
+    /** Parses credentials from remembered URL String and saves them to the state. */
     private void parseCredentials() {
         final int credentialsEndingIndex = unProcessedInput.indexOf(CREDENTIALS_ENDING);
         if (credentialsEndingIndex == -1) {
@@ -142,9 +138,7 @@ import org.spine3.net.Url.Record.Schema;
         record.setAuth(auth.build());
     }
 
-    /**
-     * Parses host and port and saves them to the state.
-     */
+    /** Parses host and port and saves them to the state. */
     private void parseHost() {
         final int hostEndingIndex = unProcessedInput.indexOf(HOST_ENDING);
         final String host;
@@ -168,9 +162,7 @@ import org.spine3.net.Url.Record.Schema;
         }
     }
 
-    /**
-     * Parses fragment and saves it to the state.
-     */
+    /** Parses fragment and saves it to the state. */
     private void parseFragment() {
         final int fragmentIndex = unProcessedInput.lastIndexOf(FRAGMENT_START);
         if (fragmentIndex == -1) {
@@ -205,9 +197,7 @@ import org.spine3.net.Url.Record.Schema;
         }
     }
 
-    /**
-     * Parses the URL resource path from the remaining part of URL.
-     */
+    /** Parses the URL resource path from the remaining part of URL. */
     private void parsePath() {
         if (unProcessedInput.isEmpty()) {
             return;

@@ -35,7 +35,6 @@ import static org.spine3.client.UserUtil.newUserId;
 /**
  * @author Alexander Yevsyukov
  */
-
 public class SampleData {
 
     static final ImmutableList<GeneratedMessage> events = generateEvents();

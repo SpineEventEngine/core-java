@@ -40,6 +40,7 @@ public final class ClassName extends StringTypeValue {
 
     /**
      * Creates a new instance with the name of the passed class.
+     *
      * @param clazz the class to get name from
      * @return new instance
      */
@@ -49,6 +50,7 @@ public final class ClassName extends StringTypeValue {
 
     /**
      * Creates a new instance with the passed class name value.
+     *
      * @param className a fully-qualified Java class name
      * @return new
      */
@@ -58,9 +60,7 @@ public final class ClassName extends StringTypeValue {
         return new ClassName(className);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public String value() {
         // Open access to other packages.

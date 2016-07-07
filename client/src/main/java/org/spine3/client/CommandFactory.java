@@ -41,6 +41,7 @@ public class CommandFactory {
 
     private final UserId actor;
     private final ZoneOffset zoneOffset;
+
     /**
      * The ID of the tenant in a multitenant application.
      *

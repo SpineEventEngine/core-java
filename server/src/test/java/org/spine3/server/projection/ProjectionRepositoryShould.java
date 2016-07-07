@@ -58,14 +58,10 @@ public class ProjectionRepositoryShould {
 
     private static final ProjectId ID = Given.AggregateId.newProjectId();
 
-    /**
-     * The projection stub used in tests.
-     */
+    /** The projection stub used in tests. */
     private static class TestProjection extends Projection<ProjectId, Project> {
 
-        /**
-         * The event message history we store for inspecting in delivery tests.
-         */
+        /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
 
         public TestProjection(ProjectId id) {
@@ -117,9 +113,7 @@ public class ProjectionRepositoryShould {
         }
     }
 
-    /**
-     * Stub projection repository.
-     */
+    /** Stub projection repository. */
     private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
         protected TestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);

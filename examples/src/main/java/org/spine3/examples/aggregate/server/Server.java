@@ -76,9 +76,7 @@ public class Server {
         boundedContext.close();
     }
 
-    /**
-     * The entry point of the server application.
-     */
+    /** The entry point of the server application. */
     public static void main(String[] args) throws IOException, InterruptedException {
         final Server server = new Server(InMemoryStorageFactory.getInstance());
         server.start();

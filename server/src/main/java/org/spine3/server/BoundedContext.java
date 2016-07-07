@@ -64,9 +64,8 @@ import static org.spine3.util.Logging.closed;
  * @author Mikhail Melnik
  */
 public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable {
-    /**
-     * The default name for a {@code BoundedContext}.
-     */
+
+    /** The default name for a {@code BoundedContext}. */
     public static final String DEFAULT_NAME = "Main";
 
     /**
@@ -75,9 +74,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
      */
     private final String name;
 
-    /**
-     * If `true` the bounded context serves many organizations.
-     */
+    /** If `true` the bounded context serves many organizations. */
     private final boolean multitenant;
     private final StorageFactory storageFactory;
     private final CommandBus commandBus;
@@ -119,6 +116,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
      *      <li>detached from its storage
      *      </ul>
      * </ol>
+     *
      * @throws Exception caused by closing one of the components
      */
     @Override
@@ -214,17 +212,13 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
         return result;
     }
 
-    /**
-     * Obtains instance of {@link CommandBus} of this {@code BoundedContext}.
-     */
+    /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
     @CheckReturnValue
     public CommandBus getCommandBus() {
         return this.commandBus;
     }
 
-    /**
-     * Obtains instance of {@link EventBus} of this {@code BoundedContext}.
-     */
+    /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
     @CheckReturnValue
     public EventBus getEventBus() {
         return this.eventBus;

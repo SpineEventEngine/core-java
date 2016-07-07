@@ -37,9 +37,7 @@ import static com.google.common.collect.Maps.newHashMap;
  */
 /* package */ class InMemoryEntityStorage<I> extends EntityStorage<I> {
 
-    /**
-     * A stub instance of {@code TenantId} to be used by the storage in single-tenant context.
-     */
+    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
     private static final TenantId singleTenant = TenantId.newBuilder().setValue("SINGLE_TENANT").build();
 
     private final Map<TenantId, Map<I, EntityStorageRecord>> tenantToStorageMap = newHashMap();

@@ -70,24 +70,18 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         private IntegrationEvent() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties. */
         /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId. */
         /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
             return projectCreated(projectId, context);
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext. */
         /* package */ static org.spine3.server.integration.IntegrationEvent projectCreated(
                 ProjectId projectId,
                 IntegrationEventContext eventContext) {
@@ -101,23 +95,17 @@ import static org.spine3.testdata.TestEventContextFactory.createIntegrationEvent
         }
 
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with default properties. */
         /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded() {
             return taskAdded(PROJECT_ID);
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId. */
         /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded(ProjectId projectId) {
             return taskAdded(projectId, createIntegrationEventContext(projectId));
         }
 
-        /**
-         * Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link org.spine3.server.integration.IntegrationEvent} with the given projectId and eventContext. */
         /* package */ static org.spine3.server.integration.IntegrationEvent taskAdded(
                 ProjectId projectId,
                 IntegrationEventContext context) {

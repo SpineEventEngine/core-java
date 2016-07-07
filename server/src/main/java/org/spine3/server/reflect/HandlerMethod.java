@@ -46,14 +46,10 @@ import static com.google.common.base.Throwables.propagate;
  */
 public abstract class HandlerMethod<C extends Message> {
 
-    /**
-     * The method to be called.
-     */
+    /** The method to be called. */
     private final Method method;
 
-    /**
-     * The number of parameters the method has.
-     */
+    /** The number of parameters the method has. */
     private final int paramCount;
 
     /**
@@ -67,32 +63,24 @@ public abstract class HandlerMethod<C extends Message> {
         method.setAccessible(true);
     }
 
-    /**
-     * @return the handling method
-     */
+    /** Returns the handling method. */
     protected Method getMethod() {
         return method;
     }
 
-    /**
-     * @return {@code true} if the method is declared {@code public}, {@code false} otherwise
-     */
+    /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
         final boolean result = Modifier.isPublic(getMethod().getModifiers());
         return result;
     }
 
-    /**
-     * @return {@code true} if the method is declared {@code private}, {@code false} otherwise
-     */
+    /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
     protected boolean isPrivate() {
         final boolean result = Modifier.isPrivate(getMethod().getModifiers());
         return result;
     }
 
-    /**
-     * Returns the count of the method parameters.
-     */
+    /** Returns the count of the method parameters. */
     protected int getParamCount() {
         return paramCount;
     }
@@ -214,19 +202,13 @@ public abstract class HandlerMethod<C extends Message> {
      */
     public interface Factory<H extends HandlerMethod> {
 
-        /**
-         * Returns the class of the method wrapper.
-         */
+        /** Returns the class of the method wrapper. */
         Class<H> getMethodClass();
 
-        /**
-         * Creates a wrapper for a method.
-         */
+        /** Creates a wrapper for a method. */
         H create(Method method);
 
-        /**
-         * Returns a predicate for filtering methods.
-         */
+        /** Returns a predicate for filtering methods. */
         Predicate<Method> getPredicate();
 
         /**
@@ -238,9 +220,7 @@ public abstract class HandlerMethod<C extends Message> {
         void checkAccessModifier(Method method);
     }
 
-    /**
-     * The predicate class allowing to filter message handler methods.
-     */
+    /** The predicate class allowing to filter message handler methods. */
     protected abstract static class FilterPredicate implements Predicate<Method> {
 
         @Override
@@ -249,9 +229,7 @@ public abstract class HandlerMethod<C extends Message> {
             return isHandler(method);
         }
 
-        /**
-         * Checks if the passed method is a handler.
-         */
+        /** Checks if the passed method is a handler. */
         protected boolean isHandler(Method method) {
             final boolean isHandler = isAnnotatedCorrectly(method)
                     && acceptsCorrectParams(method)
@@ -259,24 +237,16 @@ public abstract class HandlerMethod<C extends Message> {
             return isHandler;
         }
 
-        /**
-         * Returns {@code true} if the method is annotated correctly, {@code false} otherwise.
-         */
+        /** Returns {@code true} if the method is annotated correctly, {@code false} otherwise. */
         protected abstract boolean isAnnotatedCorrectly(Method method);
 
-        /**
-         * Returns {@code true} if the method return type is correct, {@code false} otherwise.
-         */
+        /** Returns {@code true} if the method return type is correct, {@code false} otherwise. */
         protected abstract boolean isReturnTypeCorrect(Method method);
 
-        /**
-         * Returns the context parameter type.
-         */
+        /** Returns the context parameter type. */
         protected abstract Class<? extends Message> getContextClass();
 
-        /**
-         * Returns {@code true} if the method parameters are correct, {@code false} otherwise.
-         */
+        /** Returns {@code true} if the method parameters are correct, {@code false} otherwise. */
         protected boolean acceptsCorrectParams(Method method) {
             final Class<?>[] paramTypes = method.getParameterTypes();
             final int paramCount = paramTypes.length;
@@ -301,9 +271,7 @@ public abstract class HandlerMethod<C extends Message> {
         private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
     }
 
-    /**
-     * The common logger used by message handling method classes.
-     */
+    /** The common logger used by message handling method classes. */
     protected static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

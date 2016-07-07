@@ -43,9 +43,7 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage {
         this.multitenant = multitenant;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean isMultitenant() {
         return multitenant;

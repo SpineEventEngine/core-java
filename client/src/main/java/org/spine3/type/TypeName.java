@@ -55,6 +55,7 @@ public final class TypeName extends StringTypeValue {
 
     /**
      * Creates a new type name instance taking its name from the passed message instance.
+     *
      * @param msg an instance to get the type name from
      * @return new instance
      */
@@ -119,9 +120,7 @@ public final class TypeName extends StringTypeValue {
         return commandType;
     }
 
-    /**
-     * Obtains type name for the passed message class.
-     */
+    /** Obtains type name for the passed message class. */
     public static TypeName of(Class<? extends Message> clazz) {
         final Message defaultInstance = com.google.protobuf.Internal.getDefaultInstance(clazz);
         final TypeName result = of(defaultInstance);
@@ -156,9 +155,7 @@ public final class TypeName extends StringTypeValue {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public String value() {
         // Expose method to other packages.

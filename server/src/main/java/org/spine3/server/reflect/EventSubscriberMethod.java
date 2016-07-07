@@ -36,9 +36,7 @@ import java.lang.reflect.Modifier;
  */
 public class EventSubscriberMethod extends HandlerMethod<EventContext> {
 
-    /**
-     * The instance of the predicate to filter event subscriber methods of a class.
-     */
+    /** The instance of the predicate to filter event subscriber methods of a class. */
     public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
@@ -62,16 +60,12 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         return result;
     }
 
-    /**
-     * @return the factory for filtering and creating event subscriber methods
-     */
+    /** Returns the factory for filtering and creating event subscriber methods. */
     public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.instance();
     }
 
-    /**
-     * The factory for filtering methods that match {@code EventHandlerMethod} specification.
-     */
+    /** The factory for filtering methods that match {@code EventHandlerMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<EventSubscriberMethod> {
 
         @Override

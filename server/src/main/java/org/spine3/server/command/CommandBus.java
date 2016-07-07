@@ -229,9 +229,7 @@ public class CommandBus implements AutoCloseable {
         }
     }
 
-    /**
-     * Returns {@code true} if a command is valid, {@code false} otherwise.
-     */
+    /** Returns {@code true} if a command is valid, {@code false} otherwise. */
     private boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
         final TenantId tenantId = command.getContext().getTenantId();
         if (isMultitenant && isDefault(tenantId)) {
@@ -305,9 +303,7 @@ public class CommandBus implements AutoCloseable {
         return result;
     }
 
-    /**
-     * Obtains the instance of the {@link CommandStatusService} associated with this command bus.
-     */
+    /** Obtains the instance of the {@link CommandStatusService} associated with this command bus. */
     public CommandStatusService getCommandStatusService() {
         return commandStatusService;
     }
@@ -431,9 +427,7 @@ public class CommandBus implements AutoCloseable {
         private final Logger value = LoggerFactory.getLogger(CommandBus.class);
     }
 
-    /**
-     * The logger instance used by {@code CommandBus}.
-     */
+    /** The logger instance used by {@code CommandBus}. */
     /* package */ static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

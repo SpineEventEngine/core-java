@@ -100,9 +100,7 @@ public abstract class CommandScheduler {
         isActive = false;
     }
 
-    /**
-     * Sets a command bus used to post scheduled commands.
-     */
+    /** Sets a command bus used to post scheduled commands. */
     /* package */ void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
     }

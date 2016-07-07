@@ -154,9 +154,7 @@ public class TypeToClassMap {
         return className;
     }
 
-    /**
-     * The helper class for building internal immutable type-to-class map.
-     */
+    /** The helper class for building internal immutable type-to-class map. */
     private static class Builder {
 
         private final ImmutableBiMap.Builder<TypeName, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();

@@ -66,9 +66,7 @@ import static org.spine3.base.Identifiers.newUuid;
         private CommandMessage() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.test.reflect.command.CreateProject} command with the generated project ID.
-         */
+        /** Creates a new {@link org.spine3.test.reflect.command.CreateProject} command with the generated project ID. */
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
                                 .setProjectId(AggregateId.newProjectId())

@@ -44,9 +44,7 @@ import java.util.Map;
         names.put(event.getUserId(), event.getName());
     }
 
-    /**
-     * Finds a person name by the passed {@code UserId}.
-     */
+    /** Finds a person name by the passed {@code UserId}. */
     @Nullable
     @Override
     public PersonName apply(@Nullable UserId userId) {

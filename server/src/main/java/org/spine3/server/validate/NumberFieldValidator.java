@@ -77,19 +77,13 @@ import java.util.regex.Pattern;
         this.digitsOption = getFieldOption(ValidationProto.digits);
     }
 
-    /**
-     * Converts a string representation to a number.
-     */
+    /** Converts a string representation to a number. */
     protected abstract V toNumber(String value);
 
-    /**
-     * Returns an absolute value of the number.
-     */
+    /** Returns an absolute value of the number. */
     protected abstract V getAbs(V number);
 
-    /**
-     * Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}.
-     */
+    /** Wraps a value to a corresponding message wrapper ({@link DoubleValue}, {@link Int32Value}, etc) and {@link Any}. */
     protected abstract Any wrap(V value);
 
     @Override

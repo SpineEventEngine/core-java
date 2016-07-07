@@ -76,48 +76,36 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private Event() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId. */
         public static org.spine3.base.Event taskAdded(ProjectId projectId) {
             return taskAdded(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext. */
         public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {
             final TaskAdded msg = EventMessage.taskAdded(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId. */
         public static org.spine3.base.Event projectStarted(ProjectId projectId) {
             return projectStarted(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext.
-         */
+        /** Creates a new {@link org.spine3.base.Event} with the given projectId and eventContext. */
         public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext context) {
             final ProjectStarted msg = EventMessage.projectStarted(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);

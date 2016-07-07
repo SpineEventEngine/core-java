@@ -40,14 +40,12 @@ import static org.spine3.time.ZoneOffsets.UTC;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"UtilityClass"})
+@SuppressWarnings("UtilityClass")
 public class TestCommandContextFactory {
 
     private TestCommandContextFactory() {}
 
-    /**
-     * Creates a new {@link CommandContext} with the random userId, commandId and current timestamp.
-     */
+    /** Creates a new {@link CommandContext} with the random userId, commandId and current timestamp. */
     public static CommandContext createCommandContext() {
         final UserId userId = newUserId(newUuid());
         final Timestamp now = getCurrentTime();
@@ -55,9 +53,7 @@ public class TestCommandContextFactory {
         return createCommandContext(userId, commandId, now);
     }
 
-    /**
-     * Creates a new {@link CommandContext} with the given userId, command time and timestamp.
-     */
+    /** Creates a new {@link CommandContext} with the given userId, command time and timestamp. */
     public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)
@@ -68,9 +64,7 @@ public class TestCommandContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new context with the given delay before the delivery time.
-     */
+    /** Creates a new context with the given delay before the delivery time. */
     public static CommandContext createCommandContext(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
                                           .setDelay(delay)
@@ -78,9 +72,7 @@ public class TestCommandContextFactory {
         return createCommandContext(schedule);
     }
 
-    /**
-     * Creates a new context with the given scheduling options.
-     */
+    /** Creates a new context with the given scheduling options. */
     public static CommandContext createCommandContext(Schedule schedule) {
         final CommandContext.Builder builder = createCommandContext().toBuilder()
                                                                      .setSchedule(schedule);

@@ -63,7 +63,7 @@ import static com.google.common.collect.Maps.newHashMap;
     }
 
     /**
-     * Obtains a state for the passed class..
+     * Obtains a state for the passed class.
      *
      * @param entityClass an entity class
      */

@@ -43,9 +43,7 @@ import static java.util.Collections.singletonList;
  */
 public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
-    /**
-     * The instance of the predicate to filter command handler methods of a class.
-     */
+    /** The instance of the predicate to filter command handler methods of a class. */
     public static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
@@ -112,9 +110,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         return Factory.instance();
     }
 
-    /**
-     * The factory for filtering methods that match {@code CommandHandlerMethod} specification.
-     */
+    /** The factory for filtering methods that match {@code CommandHandlerMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<CommandHandlerMethod> {
 
         @Override
@@ -150,9 +146,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
     }
 
-    /**
-     * The predicate class that allows to filter command handling methods.
-     */
+    /** The predicate class that allows to filter command handling methods. */
     private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
         @Override

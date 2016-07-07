@@ -61,14 +61,10 @@ public abstract class AbstractStorageShould<I, R extends Message> {
      */
     protected abstract AbstractStorage<I, R> getStorage();
 
-    /**
-     * Creates a new storage record.
-     */
+    /** Creates a new storage record. */
     protected abstract R newStorageRecord();
 
-    /**
-     * Creates a new unique storage record ID.
-     */
+    /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
     /**

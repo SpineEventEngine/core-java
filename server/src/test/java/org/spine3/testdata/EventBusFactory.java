@@ -52,9 +52,7 @@ public class EventBusFactory {
         return eventBus;
     }
 
-    /**
-     * Creates a new event bus with the given storage factory.
-     */
+    /** Creates a new event bus with the given storage factory. */
     public static EventBus create(StorageFactory storageFactory) {
         final EventStore store = EventStore.newBuilder()
                                            .setStreamExecutor(MoreExecutors.directExecutor())

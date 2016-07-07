@@ -36,9 +36,7 @@ import java.lang.reflect.Modifier;
  */
 /* package */ class EventApplierMethod extends HandlerMethod<Empty> {
 
-    /**
-     * The instance of the predicate to filter event applier methods of an aggregate class.
-     */
+    /** The instance of the predicate to filter event applier methods of an aggregate class. */
     /* package */ static final Predicate<Method> PREDICATE = new FilterPredicate();
 
     /**
@@ -74,9 +72,7 @@ import java.lang.reflect.Modifier;
         return Factory.instance();
     }
 
-    /**
-     * The factory for filtering methods that match {@code EventApplier} specification.
-     */
+    /** The factory for filtering methods that match {@code EventApplier} specification. */
     private static class Factory implements HandlerMethod.Factory<EventApplierMethod> {
 
         @Override
@@ -112,9 +108,7 @@ import java.lang.reflect.Modifier;
         }
     }
 
-    /**
-     * The predicate for filtering event applier methods.
-     */
+    /** The predicate for filtering event applier methods. */
     private static class FilterPredicate extends HandlerMethod.FilterPredicate {
 
         private static final int NUMBER_OF_PARAMS = 1;

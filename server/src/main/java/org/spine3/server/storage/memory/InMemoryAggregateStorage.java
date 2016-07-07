@@ -54,9 +54,7 @@ import static com.google.common.collect.Maps.newHashMap;
         super(multitenant);
     }
 
-    /**
-     * Creates a new single-tenant storage instance.
-     */
+    /** Creates a new single-tenant storage instance. */
     protected static <I> InMemoryAggregateStorage<I> newInstance() {
         return new InMemoryAggregateStorage<>(false);
     }
@@ -89,9 +87,7 @@ import static com.google.common.collect.Maps.newHashMap;
         eventCountMap.put(id, eventCount);
     }
 
-    /**
-     * Used for sorting by timestamp descending (from newer to older)
-     */
+    /** Used for sorting by timestamp descending (from newer to older). */
     private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateStorageRecord>,
                                                                             Serializable {
         @Override

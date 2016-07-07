@@ -46,9 +46,7 @@ public class GetTargetIdFromCommand<I, M extends Message> extends GetIdByFieldIn
         super(ID_FIELD_INDEX);
     }
 
-    /**
-     * Creates a new ID function instance.
-     */
+    /** Creates a new ID function instance. */
     public static <I, M extends Message> GetTargetIdFromCommand<I, M> newInstance() {
         return new GetTargetIdFromCommand<>();
     }

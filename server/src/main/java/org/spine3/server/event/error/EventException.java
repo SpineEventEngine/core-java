@@ -37,9 +37,7 @@ import java.util.Map;
  */
 public abstract class EventException extends RuntimeException {
 
-    /**
-     * Use {@link GeneratedMessage} because it is {@link Serializable}.
-     */
+    /** Use {@link GeneratedMessage} because it is {@link Serializable}. */
     private final GeneratedMessage eventMessage;
 
     private final Error error;
@@ -47,9 +45,9 @@ public abstract class EventException extends RuntimeException {
     /**
      * Creates a new instance.
      *
-     * @param messageText an error message text
+     * @param messageText  an error message text
      * @param eventMessage a related event
-     * @param error an error occurred
+     * @param error        an error occurred
      */
     protected EventException(String messageText, Message eventMessage, Error error) {
         super(messageText);
@@ -70,23 +68,17 @@ public abstract class EventException extends RuntimeException {
         return ImmutableMap.of(Attribute.EVENT_TYPE_NAME, value);
     }
 
-    /**
-     * Returns a related event.
-     */
+    /** Returns a related event. */
     public Message getEventMessage() {
         return eventMessage;
     }
 
-    /**
-     * Returns an error occurred.
-     */
+    /** Returns an error occurred. */
     public Error getError() {
         return error;
     }
 
-    /**
-     * Attribute names for event-related business failures.
-     */
+    /** Attribute names for event-related business failures. */
     public interface Attribute {
         String EVENT_TYPE_NAME = "eventType";
     }

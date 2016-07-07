@@ -66,14 +66,10 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  */
 public class EventEnricher {
 
-    /**
-     * Available enrichment functions per event message class.
-     */
+    /** Available enrichment functions per event message class. */
     private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?>> functions;
 
-    /**
-     * Creates a new builder.
-     */
+    /** Creates a new builder. */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -213,14 +209,10 @@ public class EventEnricher {
      */
     public static class Builder {
 
-        /**
-         * Translation functions which perform the enrichment.
-         */
+        /** Translation functions which perform the enrichment. */
         private final Set<EnrichmentFunction<?, ?>> functions = Sets.newHashSet();
 
-        /**
-         * Creates a new instance.
-         */
+        /** Creates a new instance. */
         public static Builder newInstance() {
             return new Builder();
         }
@@ -250,7 +242,7 @@ public class EventEnricher {
 
         /**
          * @throws IllegalArgumentException if the builder already has a function, which has the same couple of
-         * source event and enrichment classes
+         *                                  source event and enrichment classes
          */
         private void checkDuplicate(EnrichmentFunction<?, ?> function) {
             final Optional<EnrichmentFunction<?, ?>> duplicate = FluentIterable.from(functions)
@@ -266,9 +258,10 @@ public class EventEnricher {
 
         /**
          * A helper predicate that allows to find functions with the same transition from
-         * source event to enrichment class
+         * source event to enrichment class.
          *
          * <p>Such functions are not necessarily equal because they may have different translators.
+         *
          * @see EnrichmentFunction
          */
         @VisibleForTesting
@@ -297,17 +290,13 @@ public class EventEnricher {
             }
         }
 
-        /**
-         * Removes a translation for the passed type.
-         */
+        /** Removes a translation for the passed type. */
         public Builder remove(EnrichmentFunction entry) {
             functions.remove(entry);
             return this;
         }
 
-        /**
-         * Creates a new {@code Enricher}.
-         */
+        /** Creates a new {@code Enricher}. */
         public EventEnricher build() {
             final EventEnricher result = new EventEnricher(this);
             result.validate();
@@ -320,9 +309,7 @@ public class EventEnricher {
         }
     }
 
-    /**
-     * Performs validation by validating its functions.
-     */
+    /** Performs validation by validating its functions. */
     private void validate() {
         for (EnrichmentFunction<?, ?> func : functions.values()) {
             func.validate();

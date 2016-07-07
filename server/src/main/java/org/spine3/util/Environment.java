@@ -29,9 +29,7 @@ import javax.annotation.Nullable;
  */
 public class Environment {
 
-    /**
-     * The key of the Google AppEngine runtime version system property.
-     */
+    /** The key of the Google AppEngine runtime version system property. */
     private static final String APP_ENGINE_RUNTIME_VERSION_KEY = "com.google.appengine.runtime.version";
 
     @SuppressWarnings("AccessOfSystemProperties")
@@ -40,15 +38,13 @@ public class Environment {
 
     protected Environment() {}
 
-    /**
-     * @return the singleton instance.
-     */
+    /** Returns the singleton instance. */
     public static Environment getInstance() {
         return Singleton.INSTANCE.value;
     }
 
     /**
-     * @return {@code true} if the code is running on the Google AppEngine,
+     * Returns {@code true} if the code is running on the Google AppEngine,
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
@@ -58,7 +54,7 @@ public class Environment {
     }
 
     /**
-     * @return the current Google AppEngine version
+     * Returns the current Google AppEngine version
      * or {@code null} if the program is running not on the AppEngine.
      */
     @Nullable

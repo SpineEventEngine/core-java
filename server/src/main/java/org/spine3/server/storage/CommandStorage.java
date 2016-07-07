@@ -135,19 +135,13 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
      */
     protected abstract Iterator<CommandStorageRecord> read(CommandStatus status);
 
-    /**
-     * Updates the status of the command to {@link CommandStatus#OK}
-     */
+    /** Updates the status of the command to {@link CommandStatus#OK}. */
     public abstract void setOkStatus(CommandId commandId);
 
-    /**
-     * Updates the status of the command with the error.
-     */
+    /** Updates the status of the command with the error. */
     public abstract void updateStatus(CommandId commandId, Error error);
 
-    /**
-     * Updates the status of the command with the business failure.
-     */
+    /** Updates the status of the command with the business failure. */
     public abstract void updateStatus(CommandId commandId, Failure failure);
 
     /**
@@ -194,9 +188,7 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandS
         return builder;
     }
 
-    /**
-     * Converts {@code CommandStorageRecord}s to {@code Command}s.
-     */
+    /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
     @VisibleForTesting
     /* package */ static Iterator<Command> toCommandIterator(Iterator<CommandStorageRecord> records) {
         return Iterators.transform(records, TO_COMMAND);

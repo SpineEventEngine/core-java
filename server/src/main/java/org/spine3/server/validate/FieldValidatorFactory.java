@@ -38,16 +38,15 @@ import static java.lang.String.format;
  */
 /* package */ class FieldValidatorFactory {
 
-    /**
-     * Creates a new factory instance.
-     */
+    /** Creates a new factory instance. */
     /* package */ static FieldValidatorFactory newInstance() {
         return new FieldValidatorFactory();
     }
 
     /**
      * Creates a new validator instance according to the field type and validates the field.
-     *  @param descriptor a descriptor of the field to validate
+     *
+     * @param descriptor a descriptor of the field to validate
      * @param fieldValue a value of the field to validate
      * @param rootFieldPath a path to the root field
      */

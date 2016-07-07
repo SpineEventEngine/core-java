@@ -59,44 +59,28 @@ public class Timestamps {
      * Consider removing these constants if they become public in the Protobuf utils API.
      **/
 
-    /**
-     * The count of nanoseconds in one second.
-     */
+    /** The count of nanoseconds in one second. */
     public static final long NANOS_PER_SECOND = 1_000_000_000L;
 
-    /**
-     * The count of nanoseconds in one millisecond.
-     */
+    /** The count of nanoseconds in one millisecond. */
     public static final long NANOS_PER_MILLISECOND = 1_000_000L;
 
-    /**
-     * The count of milliseconds in one second.
-     */
+    /** The count of milliseconds in one second. */
     public static final long MILLIS_PER_SECOND = 1000L;
 
-    /**
-     * The count of nanoseconds in a microsecond.
-     */
+    /** The count of nanoseconds in a microsecond. */
     public static final long NANOS_PER_MICROSECOND = 1000L;
 
-    /**
-     * The count of microseconds in one second.
-     */
+    /** The count of microseconds in one second. */
     public static final long MICROS_PER_SECOND = 1_000_000L;
 
-    /**
-     * The count of seconds in one minute.
-     */
+    /** The count of seconds in one minute. */
     public static final int SECONDS_PER_MINUTE = 60;
 
-    /**
-     * The count of minutes in one hour.
-     */
+    /** The count of minutes in one hour. */
     public static final int MINUTES_PER_HOUR = 60;
 
-    /**
-     * The count of hours per day.
-     */
+    /** The count of hours per day. */
     public static final int HOURS_PER_DAY = 24;
 
     private static final ThreadLocal<Provider> timeProvider = new ThreadLocal<Provider>() {

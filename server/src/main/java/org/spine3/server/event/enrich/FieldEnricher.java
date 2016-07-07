@@ -35,9 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 /* package */ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
 
-    /**
-     * A function, which performs the enrichment.
-     */
+    /** A function, which performs the enrichment. */
     private final Function<S, T> function;
 
     private FieldEnricher(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> function) {
@@ -48,9 +46,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
     /**
      * Creates a new instance.
      *
-     * @param eventFieldClass a class of the field in the event message
+     * @param eventFieldClass      a class of the field in the event message
      * @param enrichmentFieldClass a class of the field in the enrichment message
-     * @param translator a conversion function
+     * @param translator           a conversion function
      * @return a new instance
      */
     /* package */ static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,

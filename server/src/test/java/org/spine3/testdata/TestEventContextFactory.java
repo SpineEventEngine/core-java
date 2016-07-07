@@ -52,9 +52,7 @@ public class TestEventContextFactory {
 
     private TestEventContextFactory() {}
 
-    /**
-     * Creates a new {@link EventContext} with default properties.
-     */
+    /** Creates a new {@link EventContext} with default properties. */
     public static EventContext createEventContext() {
         final Timestamp now = getCurrentTime();
         final UserId userId = newUserId(newUuid());
@@ -68,9 +66,7 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new {@link EventContext} with the given userId and aggregateId.
-     */
+    /** Creates a new {@link EventContext} with the given userId and aggregateId. */
     public static EventContext createEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -80,9 +76,7 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new {@link EventContext} with the given {@code doNotEnrich} value.
-     */
+    /** Creates a new {@link EventContext} with the given {@code doNotEnrich} value. */
     public static EventContext createEventContext(boolean doNotEnrich) {
         final EventContext context = createEventContext()
                 .toBuilder()
@@ -91,9 +85,7 @@ public class TestEventContextFactory {
         return context;
     }
 
-    /**
-     * Creates a new {@link IntegrationEventContext} with default properties.
-     */
+    /** Creates a new {@link IntegrationEventContext} with default properties. */
     public static IntegrationEventContext createIntegrationEventContext() {
         final EventId eventId = Events.generateId();
         final IntegrationEventContext.Builder builder = IntegrationEventContext.newBuilder()
@@ -104,9 +96,7 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new {@link IntegrationEventContext} with the given userId and aggregateId.
-     */
+    /** Creates a new {@link IntegrationEventContext} with the given userId and aggregateId. */
     public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
         final IntegrationEventContext.Builder builder = IntegrationEventContext.newBuilder()
@@ -117,9 +107,7 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new {@link EventContext} with the given timestamp.
-     */
+    /** Creates a new {@link EventContext} with the given timestamp. */
     public static EventContext createEventContext(Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -129,9 +117,7 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /**
-     * Creates a new {@link EventContext} with the given aggregate ID and timestamp.
-     */
+    /** Creates a new {@link EventContext} with the given aggregate ID and timestamp. */
     public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()

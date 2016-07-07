@@ -36,9 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
     private final InMemoryEntityStorage<I> entityStorage;
 
-    /**
-     * The time of the last handled event.
-     */
+    /** The time of the last handled event. */
     private Timestamp timestampOfLastEvent;
 
     public static <I> InMemoryProjectionStorage<I> newInstance(InMemoryEntityStorage<I> entityStorage, boolean multitenant) {

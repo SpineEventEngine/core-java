@@ -94,32 +94,24 @@ public class Given {
 
         private Event() {}
 
-        /**
-         * Creates a new event with default properties.
-         */
+        /** Creates a new event with default properties. */
         public static org.spine3.base.Event projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        /**
-         * Creates a new event with default properties.
-         */
+        /** Creates a new event with default properties. */
         public static org.spine3.base.Event projectStarted() {
             final ProjectStarted msg = EventMessage.projectStarted();
             final org.spine3.base.Event event = createEvent(msg, createEventContext(msg.getProjectId()));
             return event;
         }
 
-        /**
-         * Creates a new event with the given projectId.
-         */
+        /** Creates a new event with the given projectId. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new event with the given projectId and eventContext.
-         */
+        /** Creates a new event with the given projectId and eventContext. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
             final org.spine3.base.Event event = createEvent(msg, eventContext);
@@ -131,9 +123,7 @@ public class Given {
 
         private Enrichment() {}
 
-        /**
-         * Creates a new enricher with all required enrichment functions set.
-         */
+        /** Creates a new enricher with all required enrichment functions set. */
         public static EventEnricher newEventEnricher() {
             final EventEnricher.Builder builder = EventEnricher.newBuilder()
                     .addFieldEnrichment(ProjectId.class, String.class, new GetProjectName())

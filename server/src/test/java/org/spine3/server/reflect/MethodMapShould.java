@@ -33,9 +33,7 @@ import static org.junit.Assert.assertFalse;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class MethodMapShould {
 
-    /**
-     * Test aggregate in which methods are scanned.
-     */
+    /** Test aggregate in which methods are scanned. */
     private static final class TestAggregate extends Aggregate<Long, Project, Project.Builder> {
 
         public TestAggregate(Long id) {

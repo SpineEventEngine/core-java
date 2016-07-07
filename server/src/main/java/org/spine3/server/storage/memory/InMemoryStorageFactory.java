@@ -57,9 +57,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         return new InMemoryEventStorage(isMultitenant());
     }
 
-    /**
-     * NOTE: the parameter is unused.
-     */
+    /** NOTE: the parameter is unused. */
     @Override
     public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> unused) {
         return new InMemoryAggregateStorage<>(isMultitenant());

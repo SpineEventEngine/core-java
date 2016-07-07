@@ -61,9 +61,7 @@ import static com.google.common.collect.Iterators.filter;
         super(multitenant);
     }
 
-    /**
-     * Compares event records by timestamps of events.
-     */
+    /** Compares event records by timestamps of events. */
     private static class EventStorageRecordComparator implements Comparator<EventStorageRecord>, Serializable {
         @Override
         public int compare(EventStorageRecord record1, EventStorageRecord record2) {

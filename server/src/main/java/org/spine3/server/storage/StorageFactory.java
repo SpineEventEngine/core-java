@@ -39,14 +39,10 @@ public interface StorageFactory extends AutoCloseable {
      */
     boolean isMultitenant();
 
-    /**
-     * Creates a new {@link CommandStorage} instance.
-     */
+    /** Creates a new {@link CommandStorage} instance. */
     CommandStorage createCommandStorage();
 
-    /**
-     * Creates a new {@link EventStorage} instance.
-     */
+    /** Creates a new {@link EventStorage} instance. */
     EventStorage createEventStorage();
 
     /**

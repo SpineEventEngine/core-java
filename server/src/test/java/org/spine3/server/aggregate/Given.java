@@ -97,48 +97,36 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private Event() {
         }
 
-        /**
-         * Creates a new event with default properties.
-         */
+        /** Creates a new event with default properties. */
         public static org.spine3.base.Event projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        /**
-         * Creates a new event with the given projectId.
-         */
+        /** Creates a new event with the given projectId. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId) {
             return projectCreated(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new event with the given projectId and eventContext.
-         */
+        /** Creates a new event with the given projectId and eventContext. */
         public static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new event with the given projectId.
-         */
+        /** Creates a new event with the given projectId. */
         public static org.spine3.base.Event taskAdded(ProjectId projectId) {
             return taskAdded(projectId, createEventContext(projectId));
         }
 
-        /**
-         * Creates a new event with the given projectId and eventContext.
-         */
+        /** Creates a new event with the given projectId and eventContext. */
         public static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {
             final TaskAdded msg = EventMessage.taskAdded(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
             return event;
         }
 
-        /**
-         * Creates a new event with the given projectId and eventContext.
-         */
+        /** Creates a new event with the given projectId and eventContext. */
         public static org.spine3.base.Event projectStarted(ProjectId projectId, EventContext context) {
             final ProjectStarted msg = EventMessage.projectStarted(projectId);
             final org.spine3.base.Event event = createEvent(msg, context);
@@ -155,23 +143,17 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private Command() {
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with default properties (current time etc).
-         */
+        /** Creates a new {@link org.spine3.base.Command} with default properties (current time etc). */
         public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given timestamp.
-         */
+        /** Creates a new {@link org.spine3.base.Command} with the given timestamp. */
         public static org.spine3.base.Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        /**
-         * Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp.
-         */
+        /** Creates a new {@link org.spine3.base.Command} with the given userId, projectId and timestamp. */
         public static org.spine3.base.Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
             final CreateProject command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
@@ -193,27 +175,21 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
         private CommandMessage() {
         }
 
-        /**
-         * Creates a new {@link CreateProject} command with the given project ID.
-         */
+        /** Creates a new {@link CreateProject} command with the given project ID. */
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        /**
-         * Creates a new {@link AddTask} command with the given project ID.
-         */
+        /** Creates a new {@link AddTask} command with the given project ID. */
         public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
                           .setProjectId(id)
                           .build();
         }
 
-        /**
-         * Creates a new {@link StartProject} command with the given project ID.
-         */
+        /** Creates a new {@link StartProject} command with the given project ID. */
         public static StartProject startProject(ProjectId id) {
             return StartProject.newBuilder()
                                .setProjectId(id)
