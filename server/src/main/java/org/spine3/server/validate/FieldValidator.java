@@ -35,7 +35,6 @@ import org.spine3.validate.internal.ValidationProto;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.base.Commands.isEntityFile;
 import static org.spine3.base.Commands.isCommandsFile;
 
 /**
@@ -54,7 +53,6 @@ import static org.spine3.base.Commands.isCommandsFile;
 
     private final List<ConstraintViolation> violations = newLinkedList();
 
-    private final boolean isEntityFile;
     private final boolean isCommandsFile;
     private final boolean isFirstField;
     private final RequiredOption requiredOption;
@@ -73,7 +71,6 @@ import static org.spine3.base.Commands.isCommandsFile;
                 .addFieldName(fieldDescriptor.getName())
                 .build();
         final FileDescriptor file = fieldDescriptor.getFile();
-        this.isEntityFile = isEntityFile(file);
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
         this.requiredOption = getFieldOption(ValidationProto.required);
@@ -182,7 +179,8 @@ import static org.spine3.base.Commands.isCommandsFile;
      * @param customMsg a user-defined error message
      */
     protected String getErrorMsgFormat(Message option, String customMsg) {
-        final String defaultMsg = option.getDescriptorForType().getOptions().getExtension(ValidationProto.defaultMessage);
+        final String defaultMsg = option.getDescriptorForType()
+                                        .getOptions().getExtension(ValidationProto.defaultMessage);
         final String msg = customMsg.isEmpty() ? defaultMsg : customMsg;
         return msg;
     }
@@ -199,11 +197,10 @@ import static org.spine3.base.Commands.isCommandsFile;
 
     /**
      * Returns {@code true} if the field must be an entity ID
-     * (if the current Protobuf file is for entity commands and the field is the first in a command message);
-     * {@code false} otherwise.
+     * (if the field is the first in a command message), {@code false} otherwise.
      */
     private boolean isRequiredEntityIdField() {
-        final boolean result = isEntityFile && isCommandsFile && isFirstField;
+        final boolean result = isCommandsFile && isFirstField;
         return result;
     }
 

@@ -175,17 +175,6 @@ public class CommandsShould {
         assertFalse(Commands.isCommandsFile(file));
     }
 
-    // TODO:2016-04-06:alexander.litus: implement (find out how to use entity.proto in test .proto files)
-    public void return_true_if_file_belongs_to_entity() {
-    }
-
-    @Test
-    public void return_false_if_file_does_not_belong_to_entity() {
-        final FileDescriptor file = StringValue.getDescriptor().getFile();
-
-        assertFalse(Commands.isEntityFile(file));
-    }
-
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(10));

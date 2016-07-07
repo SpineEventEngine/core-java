@@ -34,9 +34,6 @@ message TaskId {
 }
 
 message Task {
-    // Declare that this message is the state of the aggregate.
-    option (state_of) = AGGREGATE;
-
     // A task must have a non-default ID.
     TaskId id = 1 [(required).value = true];
 
