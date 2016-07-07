@@ -26,8 +26,12 @@ option java_multiple_files = true;
 option java_outer_classname = "FieldFilterProto";
 option java_package = "org.spine3.base";
 
+option (type_url_prefix) = "type.spine3.org";
+
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/any.proto";
+
+import "spine/annotations.proto";
 
 // `FieldFilter` specifies accepted values for a field.
 message FieldFilter {

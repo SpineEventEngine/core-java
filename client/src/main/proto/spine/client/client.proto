@@ -26,6 +26,9 @@ option java_multiple_files = true;
 option java_outer_classname = "ClientProto";
 option java_package = "org.spine3.client";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
 import "spine/base/event.proto";
 
 // Version of the code executed on the client.

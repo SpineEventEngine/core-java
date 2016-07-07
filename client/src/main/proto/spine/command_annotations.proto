@@ -34,6 +34,10 @@ option java_multiple_files = true;
 option java_outer_classname = "CommandAnnotationsProto";
 option java_package = "org.spine3.annotations";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MessageOptions {

@@ -26,6 +26,10 @@ option java_outer_classname = "FieldPathProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 
 // Field path is a set of message field names.
 // For example, consider the following message declarations:

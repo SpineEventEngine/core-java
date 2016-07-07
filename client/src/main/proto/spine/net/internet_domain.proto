@@ -26,6 +26,10 @@ option java_multiple_files = true;
 option java_outer_classname = "InternetDomainProto";
 option java_package = "org.spine3.net";
 
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
+
 // An Internet domain name.
 message InternetDomain {
     // The value of the domain name.

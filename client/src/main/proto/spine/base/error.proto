@@ -26,8 +26,12 @@ option java_multiple_files = true;
 option java_outer_classname = "ErrorProto";
 option java_package = "org.spine3.base";
 
+option (type_url_prefix) = "type.spine3.org";
+
 import "google/protobuf/struct.proto";
+
 import "spine/validate/constraint_violation.proto";
+import "spine/annotations.proto";
 
 // Information on a technical error occurred in the system.
 //

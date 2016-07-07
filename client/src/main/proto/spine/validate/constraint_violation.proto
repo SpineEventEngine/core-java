@@ -26,8 +26,12 @@ option java_multiple_files = true;
 option java_outer_classname = "ConstraintViolationProto";
 option java_package = "org.spine3.validate";
 
-import "google/protobuf/any.proto";
+option (type_url_prefix) = "type.spine3.org";
+
+import "spine/annotations.proto";
 import "spine/base/field_path.proto";
+
+import "google/protobuf/any.proto";
 
 // A validation constraint violation for a message field.
 message ConstraintViolation {

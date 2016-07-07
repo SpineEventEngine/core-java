@@ -26,9 +26,13 @@ option java_multiple_files = true;
 option java_outer_classname = "BusinessFailureProto";
 option java_package = "org.spine3.base";
 
+option (type_url_prefix) = "type.spine3.org";
+
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
+
+import "spine/annotations.proto";
 
 // A business failure is a condition in business, which does not allow to
 // satisfy a request or perform an operation.
