@@ -26,7 +26,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ClientProto";
 option java_package = "org.spine3.client";
 
-import public "spine/base/event.proto";
+import "spine/base/event.proto";
 
 // Version of the code executed on the client.
 message CodeVersion {

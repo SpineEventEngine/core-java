@@ -215,9 +215,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
     }
 
     /**
-     * Convenience method for obtaining instance of {@link CommandBus}.
-     *
-     * @return instance of {@code CommandDispatcher} used in the application
+     * Obtains instance of {@link CommandBus} of this {@code BoundedContext}.
      */
     @CheckReturnValue
     public CommandBus getCommandBus() {
@@ -225,9 +223,7 @@ public class BoundedContext implements IntegrationEventSubscriber, AutoCloseable
     }
 
     /**
-     * Convenience method for obtaining instance of {@link EventBus}.
-     *
-     * @return instance of {@code EventBus} used in the application
+     * Obtains instance of {@link EventBus} of this {@code BoundedContext}.
      */
     @CheckReturnValue
     public EventBus getEventBus() {

@@ -26,9 +26,9 @@ option java_multiple_files = true;
 option java_outer_classname = "EventStreamQueryProto";
 option java_package = "org.spine3.server.event";
 
-import public "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
-import public "spine/server/event/event_filter.proto";
+import "spine/server/event/event_filter.proto";
 
 // The query specifies event to return from the event store.
 message EventStreamQuery {
