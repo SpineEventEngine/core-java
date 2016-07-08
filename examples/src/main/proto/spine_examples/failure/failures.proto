@@ -28,11 +28,11 @@ option java_multiple_files = false;
 // Then Spine Protobuf Gradle plugin for Java will generate `FailureThrowable` classes for these messages.
 // See `org.spine3.examples.failure.TaskAggregate` for using failure throwables in an aggregate.
 
+option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 
-option (type_url_prefix) = "type.spine3.org";
-
 import "spine/annotations.proto";
+
 import "spine_examples/failure/task.proto";
 
 message CannotCancelTaskInProgress {
