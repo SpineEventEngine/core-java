@@ -45,7 +45,7 @@ public class TestCommandContextFactory {
 
     private TestCommandContextFactory() {}
 
-    /** Creates a new {@link CommandContext} with the random userId, commandId and current timestamp. */
+    /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext() {
         final UserId userId = newUserId(newUuid());
         final Timestamp now = getCurrentTime();
@@ -53,7 +53,7 @@ public class TestCommandContextFactory {
         return createCommandContext(userId, commandId, now);
     }
 
-    /** Creates a new {@link CommandContext} with the given userId, command time and timestamp. */
+    /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)

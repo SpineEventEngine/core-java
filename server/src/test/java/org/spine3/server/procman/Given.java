@@ -93,21 +93,18 @@ import static org.spine3.base.Identifiers.newUuid;
         private CommandMessage() {
         }
 
-        /** Creates a new {@link CreateProject} command with the given project ID. */
         public static CreateProject createProject(ProjectId id) {
             return CreateProject.newBuilder()
                                 .setProjectId(id)
                                 .build();
         }
 
-        /** Creates a new {@link AddTask} command with the given project ID. */
         public static AddTask addTask(ProjectId id) {
             return AddTask.newBuilder()
                           .setProjectId(id)
                           .build();
         }
 
-        /** Creates a new {@link StartProject} command with the given project ID. */
         public static StartProject startProject(ProjectId id) {
             return StartProject.newBuilder()
                                .setProjectId(id)

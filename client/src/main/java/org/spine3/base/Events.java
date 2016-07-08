@@ -84,13 +84,13 @@ public class Events {
         return result;
     }
 
-    /** Creates a new {@code Event} instance with the passed event message and context. */
+    /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Message event, EventContext context) {
         return createEvent(toAny(event), context);
     }
 
-    /** Creates a new {@code Event} instance with the passed event message wrapped to {@link Any} and context. */
+    /** Creates a new {@code Event} instance. */
     @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
     public static Event createEvent(Any eventAny, EventContext context) {
         final Event result = Event.newBuilder()

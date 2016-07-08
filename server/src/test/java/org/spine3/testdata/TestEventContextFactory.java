@@ -66,7 +66,6 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /** Creates a new {@link EventContext} with the given userId and aggregateId. */
     public static EventContext createEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -76,7 +75,6 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /** Creates a new {@link EventContext} with the given {@code doNotEnrich} value. */
     public static EventContext createEventContext(boolean doNotEnrich) {
         final EventContext context = createEventContext()
                 .toBuilder()
@@ -96,7 +94,6 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /** Creates a new {@link IntegrationEventContext} with the given userId and aggregateId. */
     public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
         final EventId eventId = Events.generateId();
         final IntegrationEventContext.Builder builder = IntegrationEventContext.newBuilder()
@@ -107,7 +104,6 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /** Creates a new {@link EventContext} with the given timestamp. */
     public static EventContext createEventContext(Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
@@ -117,7 +113,6 @@ public class TestEventContextFactory {
         return builder.build();
     }
 
-    /** Creates a new {@link EventContext} with the given aggregate ID and timestamp. */
     public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
         final EventId eventId = Events.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()

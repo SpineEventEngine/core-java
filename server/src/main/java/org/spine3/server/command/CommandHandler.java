@@ -45,23 +45,23 @@ import static org.spine3.base.Identifiers.idToAny;
 /**
  * The abstract base for classes that expose command handling methods
  * and post their results to {@link EventBus}.
- * <p/>
+ *
  * <p>A command handler is responsible for:
  * <ol>
- * <li>Changing the state of the business model
- * <li>Producing corresponding events.
- * <li>Posting events to {@code EventBus}.
+ *     <li>Changing the state of the business model
+ *     <li>Producing corresponding events.
+ *     <li>Posting events to {@code EventBus}.
  * </ol>
- * <p/>
+ *
  * <p>Event messages are returned as values of command handling methods.
- * <p/>
+ *
  * <h2>Command handling methods</h2>
  * <p>A command handling method is a {@code public} method that accepts two parameters.
  * The first parameter is a command message. The second parameter is {@link CommandContext}.
- * <p/>
+ *
  * <p>The method returns an event message of the specific type, or {@code List} of messages
  * if it produces more than one event.
- * <p/>
+ *
  * <p>The method may throw one or more throwables derived from {@link FailureThrowable}.
  * Throwing a {@code FailureThrowable} indicates that the passed command cannot be handled
  * because of a business failure, which can be obtained via {@link FailureThrowable#getFailure()}.
