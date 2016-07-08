@@ -21,11 +21,10 @@ syntax = "proto3";
 
 package spine.test.bc.command;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.bc.command";
 option java_outer_classname = "TestBcCommandsProto";
 option java_multiple_files = true;
-
-option (type_url_prefix) = "type.spine3.org";
 
 import "spine/annotations.proto";
 import "spine/test/bc/project.proto";

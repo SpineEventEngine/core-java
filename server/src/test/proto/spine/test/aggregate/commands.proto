@@ -22,15 +22,14 @@ syntax = "proto3";
 package spine.test.aggregate.command;
 
 option (type_url_prefix) = "type.spine3.org";
-
 option java_package="org.spine3.test.aggregate.command";
 option java_outer_classname = "AggregateCommandsProto";
 option java_multiple_files = true;
 
+import "spine/annotations.proto";
 import "spine/test/aggregate/project.proto";
 import "spine/test/aggregate/task.proto";
 import "spine/base/event.proto";
-import "spine/annotations.proto";
 
 message CreateProject {
     ProjectId project_id = 1;

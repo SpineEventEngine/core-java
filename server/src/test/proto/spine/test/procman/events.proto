@@ -21,15 +21,14 @@ syntax = "proto3";
 
 package spine.test.procman.event;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.procman.event";
 option java_outer_classname = "ProcmanEventsProto";
 option java_multiple_files = true;
 
-option (type_url_prefix) = "type.spine3.org";
-
+import "spine/annotations.proto";
 import "spine/test/procman/project.proto";
 import "spine/test/procman/task.proto";
-import "spine/annotations.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;

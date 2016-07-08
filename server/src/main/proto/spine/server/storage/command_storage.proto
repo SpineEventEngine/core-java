@@ -21,21 +21,20 @@ syntax = "proto3";
 
 package spine.server.storage;
 
+option (type_url_prefix) = "type.spine3.org";
+option (SPI_all) = true;
 option java_package = "org.spine3.server.storage";
 option java_multiple_files = true;
 option java_outer_classname = "CommandStoreProto";
 option java_generate_equals_and_hash = true;
 
-option (SPI_all) = true;
-option (type_url_prefix) = "type.spine3.org";
-
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
+import "spine/annotations.proto";
 import "spine/base/command.proto";
 import "spine/base/error.proto";
 import "spine/base/failure.proto";
-import "spine/annotations.proto";
 
 // This type defines the way commands are stored in command storage.
 // Some of the fields are defined as string representation of corresponding message types

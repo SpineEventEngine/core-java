@@ -21,11 +21,10 @@ syntax = "proto3";
 
 package spine.test.event.command;
 
+option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.event.command";
 option java_outer_classname = "EventCommandsProto";
 option java_multiple_files = true;
-
-option (type_url_prefix) = "type.spine3.org";
 
 import "spine/annotations.proto";
 import "spine/test/event/project.proto";
