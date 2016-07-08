@@ -23,9 +23,9 @@ package org.spine3.type;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.google.protobuf.MessageOrBuilder;
 import org.spine3.Internal;
 import org.spine3.base.Command;
 import org.spine3.validate.Validate;
@@ -49,17 +49,13 @@ public final class TypeName extends StringTypeValue {
         super(checkNotEmpty(value));
     }
 
-    private TypeName(MessageOrBuilder msg) {
-        this(msg.getDescriptorForType().getFullName());
-    }
-
     /**
      * Creates a new type name instance taking its name from the passed message instance.
      * @param msg an instance to get the type name from
      * @return new instance
      */
     public static TypeName of(Message msg) {
-        return new TypeName(msg);
+        return new TypeName(msg.getDescriptorForType().getFullName());
     }
 
     /**
@@ -68,7 +64,7 @@ public final class TypeName extends StringTypeValue {
      * @param descriptor the descriptor of the type
      * @return new instance
      */
-    public static TypeName of(Descriptors.Descriptor descriptor) {
+    public static TypeName of(Descriptor descriptor) {
         return new TypeName(descriptor.getFullName());
     }
 
@@ -93,11 +89,11 @@ public final class TypeName extends StringTypeValue {
      * @return new instance of {@code TypeName}
      */
     public static TypeName ofEnclosed(AnyOrBuilder any) {
-        String typeName = null;
+        String typeName;
         try {
             typeName = getTypeName(any.getTypeUrl());
         } catch (InvalidProtocolBufferException e) {
-            propagate(e);
+            throw propagate(e);
         }
         assert typeName != null;
         return of(typeName);
