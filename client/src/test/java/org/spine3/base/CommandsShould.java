@@ -34,7 +34,7 @@ import org.spine3.client.test.TestCommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations;
 import org.spine3.test.commands.TestCommand;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.List;
 
@@ -141,7 +141,7 @@ public class CommandsShould {
     @Test
     public void create_logging_message_for_command_with_type_and_id() {
         final Command command = commandFactory.create(stringValue);
-        final String typeName = TypeName.ofCommand(command).toString();
+        final String typeName = TypeUrl.ofCommand(command).getTypeName();
         final String commandId = idToString(getId(command));
 
         @SuppressWarnings("QuestionableName") // is OK for this test.

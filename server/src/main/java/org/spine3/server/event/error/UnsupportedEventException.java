@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
 import org.spine3.server.type.EventClass;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 /**
  * Exception that is thrown when unsupported event is obtained
@@ -39,10 +39,10 @@ public class UnsupportedEventException extends EventException {
 
     private static String messageFormat(Message eventMsg) {
         final EventClass eventClass = EventClass.of(eventMsg);
-        final TypeName typeName = TypeName.of(eventMsg);
+        final TypeUrl typeUrl = TypeUrl.of(eventMsg);
         final String result = String.format(
                 "There is no registered handler or dispatcher for the event of class: `%s`. Protobuf type: `%s`",
-                eventClass, typeName
+                eventClass, typeUrl
         );
         return result;
     }

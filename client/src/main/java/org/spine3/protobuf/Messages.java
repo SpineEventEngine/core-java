@@ -22,16 +22,13 @@ package org.spine3.protobuf;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
-import org.spine3.annotations.AnnotationsProto;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.type.TypeName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -54,10 +51,6 @@ public class Messages {
     @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
-    private static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
-
-    private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
-
     private Messages() {}
 
     /**
@@ -65,37 +58,21 @@ public class Messages {
      *
      * <p>This method is temporary until full support of {@link Any} is provided.
      *
-     * @param messageType full type name defined in the proto files
+     * @param typeUrl the type URL of the message
      * @return message class
      * @throws RuntimeException wrapping {@link ClassNotFoundException} if there is no corresponding class
      *                          for the given Protobuf message type
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
-    public static <T extends Message> Class<T> toMessageClass(TypeName messageType) {
-        final ClassName className = KnownTypes.get(messageType);
+    public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
+        final ClassName className = KnownTypes.get(typeUrl);
         try {
             @SuppressWarnings("unchecked") // the client considers this message is of this class
             final Class<T> result = (Class<T>) Class.forName(className.value());
             return result;
         } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(messageType.value(), e);
+            throw new UnknownTypeException(typeUrl.getTypeName(), e);
         }
-    }
-
-    /**
-     *
-     *
-     * @param message
-     * @return
-     */
-    public static String getTypeUrlPrefix(Descriptor message) { // TODO:2016-07-08:alexander.litus: tests
-        final FileDescriptor file = message.getFile();
-        if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
-            return GOOGLE_TYPE_URL_PREFIX;
-        }
-        final String result = file.getOptions()
-                                  .getExtension(AnnotationsProto.typeUrlPrefix);
-        return result;
     }
 
     /**
@@ -135,8 +112,8 @@ public class Messages {
      */
     public static JsonFormat.TypeRegistry forKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeName typeName : KnownTypes.typeNames()) {
-            final Class<? extends Message> clazz = toMessageClass(typeName);
+        for (TypeUrl typeUrl : KnownTypes.typeNames()) {
+            final Class<? extends Message> clazz = toMessageClass(typeUrl);
             final GenericDescriptor descriptor = getClassDescriptor(clazz);
             // Skip outer class descriptors.
             if (descriptor instanceof Descriptor) {
@@ -198,11 +175,11 @@ public class Messages {
                 return ByteString.class;
             case ENUM:
                 final String enumTypeName = field.getEnumType().getFullName();
-                final Class<? extends Message> enumClass = toMessageClass(TypeName.of(enumTypeName));
+                final Class<? extends Message> enumClass = toMessageClass(TypeUrl.of(enumTypeName));
                 return enumClass;
             case MESSAGE:
-                final TypeName typeName = TypeName.of(field.getMessageType());
-                final Class<? extends Message> msgClass = toMessageClass(typeName);
+                final TypeUrl typeUrl = TypeUrl.of(field.getMessageType());
+                final Class<? extends Message> msgClass = toMessageClass(typeUrl);
                 return msgClass;
         }
         throw new IllegalArgumentException("Unknown field type discovered: " + field.getFullName());

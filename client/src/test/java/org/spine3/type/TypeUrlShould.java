@@ -29,77 +29,96 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.Tests;
+import org.spine3.validate.internal.RequiredOption;
 
 import static org.junit.Assert.*;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
-public class TypeNameShould {
+public class TypeUrlShould {
+
+    // TODO:2016-07-08:alexander.litus: add tests
 
     private static final String STRING_VALUE_TYPE_NAME = "google.protobuf.StringValue";
 
+    private static final String STRING_VALUE_TYPE_URL =
+            TypeUrl.GOOGLE_TYPE_URL_PREFIX + TypeUrl.SEPARATOR + STRING_VALUE_TYPE_NAME;
+
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_value() {
-        TypeName.of(Tests.<String>nullRef());
+    public void not_accept_null_value() {
+        TypeUrl.of(Tests.<String>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_empty_string() {
-        TypeName.of("");
+    public void not_accept_empty_string() {
+        TypeUrl.of("");
     }
 
     @Test
-    public void return_type_url() {
-        final TypeName test = TypeName.of(newStringValue("return_type_url"));
+    public void create_from_message() {
+        final TypeUrl typeUrl = TypeUrl.of(newStringValue(newUuid()));
 
-        assertFalse(test.toTypeUrl().isEmpty());
+        assertIsStringValueUrl(typeUrl);
     }
 
     @Test
     public void do_not_accept_Any_with_malformed_type_url() {
         final Any any = Any.newBuilder().setTypeUrl("do_not_accept_Any_with_malformed_type_url").build();
         try {
-            TypeName.ofEnclosed(any);
+            TypeUrl.ofEnclosed(any);
         } catch (RuntimeException e) {
             assertTrue(e.getCause() instanceof InvalidProtocolBufferException);
         }
     }
 
     @Test
-    public void return_name_only() {
-        assertEquals("UInt64Value", TypeName.of(UInt64Value.getDefaultInstance()).nameOnly());
+    public void return_simple_type_name() {
+        assertEquals("UInt64Value", TypeUrl.of(UInt64Value.getDefaultInstance()).getSimpleName());
     }
 
     @Test
-    public void return_name_if_no_package() {
-        final String name = TypeNameShould.class.getSimpleName();
-        assertEquals(name, TypeName.of(name).nameOnly());
+    public void return_simple_name_if_no_package() {
+        // A type without Protobuf package:
+        final String name = RequiredOption.class.getSimpleName();
+        final TypeUrl typeUrl = TypeUrl.of(name);
+
+        final String actual = typeUrl.getSimpleName();
+
+        assertEquals(name, actual);
     }
 
     @Test
     public void create_by_descriptor() {
         final Descriptors.Descriptor descriptor = StringValue.getDefaultInstance().getDescriptorForType();
 
-        final TypeName typeName = TypeName.of(descriptor);
-        assertEquals(STRING_VALUE_TYPE_NAME, typeName.value());
+        final TypeUrl typeUrl = TypeUrl.of(descriptor);
+        assertIsStringValueUrl(typeUrl);
     }
 
     @Test
     public void obtain_type_of_command() {
-        final CommandFactory factory = TestCommandFactory.newInstance(TypeNameShould.class);
+        final CommandFactory factory = TestCommandFactory.newInstance(TypeUrlShould.class);
         final StringValue message = newStringValue(newUuid());
         final Command command = factory.create(message);
 
-        final TypeName typeName = TypeName.ofCommand(command);
-        assertEquals(TypeName.of(message), typeName);
+        final TypeUrl typeUrl = TypeUrl.ofCommand(command);
+        assertEquals(TypeUrl.of(message), typeUrl);
     }
 
     @Test
     public void create_instance_by_class() {
-        final TypeName typeName = TypeName.of(StringValue.class);
+        final TypeUrl typeUrl = TypeUrl.of(StringValue.class);
 
-        assertEquals(STRING_VALUE_TYPE_NAME, typeName.value());
+        assertIsStringValueUrl(typeUrl);
+    }
+
+    private static void assertIsStringValueUrl(TypeUrl typeUrl) {
+        assertEquals(STRING_VALUE_TYPE_URL, typeUrl.value());
+        assertEquals(TypeUrl.GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
+        assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
+        assertEquals(StringValue.class.getSimpleName(), typeUrl.getSimpleName());
     }
 }

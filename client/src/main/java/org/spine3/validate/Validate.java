@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -103,7 +103,7 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeName.of(object));
+        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object));
         return object;
     }
 
@@ -144,7 +144,7 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", TypeName.of(object));
+        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object));
         return object;
     }
 

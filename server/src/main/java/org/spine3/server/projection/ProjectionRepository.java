@@ -283,7 +283,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, M>, M exte
         final Set<EventClass> eventClasses = getEventClasses();
         for (EventClass eventClass : eventClasses) {
             builder.add(EventFilter.newBuilder()
-                                   .setEventType(eventClass.toTypeName().value())
+                                   .setEventType(eventClass.toTypeUrl().getTypeName())
                                    .build());
         }
         return builder.build();

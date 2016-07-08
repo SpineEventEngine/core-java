@@ -26,7 +26,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.type.TypeName;
 
 import static org.junit.Assert.*;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
@@ -37,6 +36,8 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class KnownTypesShould {
 
+    // TODO:2016-07-08:alexander.litus: add tests
+
     @Test
     public void have_private_constructor() {
         assertTrue(hasPrivateUtilityConstructor(KnownTypes.class));
@@ -44,45 +45,45 @@ public class KnownTypesShould {
 
     @Test
     public void return_known_proto_message_types() {
-        final ImmutableSet<TypeName> types = KnownTypes.typeNames();
+        final ImmutableSet<TypeUrl> types = KnownTypes.typeNames();
 
         assertFalse(types.isEmpty());
     }
 
     @Test
-    public void return_java_class_name_by_proto_type_name() {
-        final TypeName typeName = TypeName.of(Command.getDescriptor());
+    public void return_java_class_name_by_proto_type_url() {
+        final TypeUrl typeUrl = TypeUrl.of(Command.getDescriptor());
 
-        final ClassName className = KnownTypes.get(typeName);
+        final ClassName className = KnownTypes.get(typeUrl);
 
         assertEquals(ClassName.of(Command.class), className);
     }
 
     @Test
-    public void return_java_inner_class_name_by_proto_type_name() {
-        final TypeName typeName = TypeName.of(CommandContext.Schedule.getDescriptor());
+    public void return_java_inner_class_name_by_proto_type_url() {
+        final TypeUrl typeUrl = TypeUrl.of(CommandContext.Schedule.getDescriptor());
 
-        final ClassName className = KnownTypes.get(typeName);
+        final ClassName className = KnownTypes.get(typeUrl);
 
         assertEquals(ClassName.of(CommandContext.Schedule.class), className);
     }
 
     @Test
-    public void return_proto_type_name_by_java_class_name() {
+    public void return_proto_type_url_by_java_class_name() {
         final ClassName className = ClassName.of(Command.class);
 
-        final TypeName typeName = KnownTypes.get(className);
+        final TypeUrl typeUrl = KnownTypes.get(className);
 
-        assertEquals(TypeName.of(Command.getDescriptor()), typeName);
+        assertEquals(TypeUrl.of(Command.getDescriptor()), typeUrl);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_proto_type_name_by_java_class_name() {
+    public void throw_exception_if_no_proto_type_url_by_java_class_name() {
         KnownTypes.get(ClassName.of(Exception.class));
     }
 
-    @Test(expected =  UnknownTypeException.class)
-    public void throw_exception_if_no_java_class_name_by_proto_type_name() {
-        KnownTypes.get(TypeName.of("unexpected.type"));
+    @Test(expected = UnknownTypeException.class)
+    public void throw_exception_if_no_java_class_name_by_type_url() {
+        KnownTypes.get(TypeUrl.of("prefix" + TypeUrl.SEPARATOR + "unexpected.type"));
     }
 }

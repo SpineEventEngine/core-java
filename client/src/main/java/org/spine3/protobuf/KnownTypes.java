@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import org.spine3.Internal;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
-import org.spine3.type.TypeName;
 
 import java.util.Properties;
 import java.util.Set;
@@ -65,7 +64,7 @@ import java.util.Set;
 import static org.spine3.io.IoUtil.loadAllProperties;
 
 /**
- * A utility class for reading real proto class names from properties file.
+ * A map which contains all Protobuf types known to the application.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
@@ -84,20 +83,21 @@ public class KnownTypes {
     private static final String PROPS_FILE_PATH = "known_types.properties";
 
     /**
-     * A map from Protobuf type name to a Java class name.
+     * A map from Protobuf type name to Java class name.
      *
      * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final BiMap<TypeName, ClassName> typeToClassMap = Builder.build();
+    private static final BiMap<TypeUrl, ClassName> typeToClassMap = Builder.build();
 
     /**
-     * A map from Protobuf type name to type URL prefix.
+     * A map from Protobuf type name to type URL.
      *
-     * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code type.spine3.org}.
+     * <p>For example, for a key {@code spine.base.EventId},
+     * there will be the value {@code type.spine3.org/spine.base.EventId}.
      *
-     * @see TypeName
+     * @see TypeUrl
      */
-    private static final ImmutableMap<String, String> typeNameToUrlPrefixMap = buildUrlPrefixMap(typeToClassMap);
+    private static final ImmutableMap<String, TypeUrl> typeNameToUrlMap = buildTypeToUrlMap(typeToClassMap);
 
 
     private KnownTypes() {}
@@ -107,8 +107,8 @@ public class KnownTypes {
      *
      * @return immutable set of Protobuf types known to the application
      */
-    public static ImmutableSet<TypeName> typeNames() {
-        final Set<TypeName> result = typeToClassMap.keySet();
+    public static ImmutableSet<TypeUrl> typeNames() {
+        final Set<TypeUrl> result = typeToClassMap.keySet();
         return ImmutableSet.copyOf(result);
     }
 
@@ -120,7 +120,7 @@ public class KnownTypes {
      * @return Java class name
      * @throws UnknownTypeException if there is no such type known to the application
      */
-    public static ClassName get(TypeName protoType) throws UnknownTypeException {
+    public static ClassName get(TypeUrl protoType) throws UnknownTypeException {
         if (!typeToClassMap.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
             typeToClassMap.put(protoType, className);
@@ -136,8 +136,8 @@ public class KnownTypes {
      * @return a Protobuf type name
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
-    public static TypeName get(ClassName className) {
-        final TypeName result = typeToClassMap.inverse().get(className);
+    public static TypeUrl get(ClassName className) {
+        final TypeUrl result = typeToClassMap.inverse().get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type found for the Java class " + className);
         }
@@ -149,48 +149,43 @@ public class KnownTypes {
      *
      * <p>For example, com.package.OuterClass.InnerClass class name.
      *
-     * @param type {@link TypeName} of the class to find
+     * @param typeUrl {@link TypeUrl} of the class to find
      * @return the found class name
      * @throws UnknownTypeException if there is no such type known to the application
      */ // TODO:2016-07-08:alexander.litus: check if it is needed
-    private static ClassName findInnerMessageClass(TypeName type) throws UnknownTypeException {
-        String lookupType = type.value();
+    private static ClassName findInnerMessageClass(TypeUrl typeUrl) throws UnknownTypeException {
+        String lookupType = typeUrl.getTypeName();
         ClassName className = null;
         final StringBuilder suffix = new StringBuilder(lookupType.length());
         int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         while (className == null && lastDotPosition != -1) {
             suffix.insert(0, lookupType.substring(lastDotPosition));
             lookupType = lookupType.substring(0, lastDotPosition);
-            final TypeName typeName = TypeName.of(lookupType);
-            className = typeToClassMap.get(typeName);
+            className = typeToClassMap.get(TypeUrl.of(lookupType));
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
-            throw new UnknownTypeException(type.value());
+            throw new UnknownTypeException(typeUrl.getTypeName());
         }
         className = ClassName.of(className.value() + suffix);
         try {
             Class.forName(className.value());
         } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(type.value(), e);
+            throw new UnknownTypeException(typeUrl.getTypeName(), e);
         }
         return className;
     }
 
-    /**
-     *
-     * @param typeName
-     * @return
-     */
-    public static String getTypeUrlPrefix(String typeName) { // TODO:2016-07-08:alexander.litus: tests
-        final String prefix = typeNameToUrlPrefixMap.get(typeName);
-        return prefix;
+    /** Returns a type URL by its type name. */
+    public static TypeUrl getTypeUrl(String typeName) { // TODO:2016-07-08:alexander.litus: tests
+        final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
+        return typeUrl;
     }
 
-    private static ImmutableMap<String, String> buildUrlPrefixMap(BiMap<TypeName, ClassName> typeToClassMap) {
-        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        for (TypeName typeName : typeToClassMap.keySet()) {
-            builder.put(typeName.value(), typeName.toTypeUrl());
+    private static ImmutableMap<String, TypeUrl> buildTypeToUrlMap(BiMap<TypeUrl, ClassName> typeToClassMap) {
+        final ImmutableMap.Builder<String, TypeUrl> builder = ImmutableMap.builder();
+        for (TypeUrl typeUrl : typeToClassMap.keySet()) {
+            builder.put(typeUrl.getTypeName(), typeUrl);
         }
         return builder.build();
     }
@@ -200,14 +195,14 @@ public class KnownTypes {
      */
     private static class Builder {
 
-        private final ImmutableBiMap.Builder<TypeName, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();
+        private final ImmutableBiMap.Builder<TypeUrl, ClassName> mapBuilder = new ImmutableBiMap.Builder<>();
 
-        private static BiMap<TypeName, ClassName> build() {
+        private static BiMap<TypeUrl, ClassName> build() {
             final Builder builder = new Builder()
                     .addStandardProtobufTypes()
                     .loadNamesFromProperties();
 
-            final ImmutableBiMap<TypeName, ClassName> result = builder.mapBuilder.build();
+            final ImmutableBiMap<TypeUrl, ClassName> result = builder.mapBuilder.build();
 
             if (log().isDebugEnabled()) {
                 log().debug("Total classes in TypeToClassMap: " + result.size());
@@ -227,9 +222,9 @@ public class KnownTypes {
         private Builder putProperties(Properties properties) {
             final Set<String> typeNames = properties.stringPropertyNames();
             for (String name : typeNames) {
-                final TypeName typeName = TypeName.of(name);
+                final TypeUrl typeUrl = TypeUrl.of(name);
                 final ClassName className = ClassName.of(properties.getProperty(name));
-                mapBuilder.put(typeName, className);
+                mapBuilder.put(typeUrl, className);
             }
             return this;
         }
@@ -332,9 +327,9 @@ public class KnownTypes {
         }
 
         private void put(Class<? extends GeneratedMessage> clazz) {
-            final TypeName typeName = TypeName.of(clazz);
+            final TypeUrl typeUrl = TypeUrl.of(clazz);
             final ClassName className = ClassName.of(clazz);
-            mapBuilder.put(typeName, className);
+            mapBuilder.put(typeUrl, className);
         }
 
         private static Logger log() {

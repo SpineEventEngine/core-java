@@ -35,17 +35,18 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.base.Identifiers;
+import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.protobuf.TypeUrl.ofEnclosed;
 import static org.spine3.validate.Validate.*;
 
 /**
@@ -156,9 +157,9 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         final String eventIdString = checkValid(eventId).getUuid();
         final Any message = event.getMessage();
         final EventContext context = event.getContext();
-        final String eventType = TypeName.ofEnclosed(message).nameOnly();
+        final String eventType = ofEnclosed(message).getTypeName();
         checkNotEmptyOrBlank(eventType, "event type");
-        final String producerId = Identifiers.idToString(Events.getProducer(context));
+        final String producerId = idToString(Events.getProducer(context));
         checkNotEmptyOrBlank(producerId, "producer ID");
         final Timestamp timestamp = checkTimestamp(context.getTimestamp(), "event time");
         final EventStorageRecord.Builder builder = EventStorageRecord.newBuilder()
@@ -234,7 +235,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
          * <p>If null, all events are accepted.
          */
         @Nullable
-        private final TypeName eventType;
+        private final TypeUrl eventType;
 
         /**
          * The list of aggregate IDs of which events to accept.
@@ -246,7 +247,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
             this.eventType = eventType.isEmpty() ? null :
-                    TypeName.of(eventType);
+                    TypeUrl.of(eventType);
             final List<Any> aggregateIdList = filter.getAggregateIdList();
             this.aggregateIds = aggregateIdList.isEmpty() ? null :
                     aggregateIdList;
@@ -259,7 +260,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
 
             final Message message = Events.getMessage(event);
-            final TypeName actualType = TypeName.of(message);
+            final TypeUrl actualType = TypeUrl.of(message);
 
             if (eventType != null) {
                 if (!eventType.equals(actualType)) {

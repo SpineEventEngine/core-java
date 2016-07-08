@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.error.UnknownTypeException;
-import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
@@ -46,7 +45,8 @@ public class AnyPacker {
      * @return the instance of {@link Any} object that wraps given message
      */
     public static Any pack(Message message) {
-        final String typeUrlPrefix = getTypeUrlPrefix(message.getDescriptorForType());
+        final TypeUrl typeUrl = TypeUrl.of(message.getDescriptorForType());
+        final String typeUrlPrefix = typeUrl.getPrefix();
         final Any result = Any.pack(message, typeUrlPrefix);
         return result;
     }
@@ -65,18 +65,18 @@ public class AnyPacker {
      */
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
-        String typeStr = "";
+        String typeName = "";
         try {
-            final TypeName typeName = TypeName.ofEnclosed(any);
-            typeStr = typeName.value();
-            final Class<T> messageClass = toMessageClass(typeName);
+            final TypeUrl typeUrl = TypeUrl.of(any.getTypeUrl());
+            typeName = typeUrl.getTypeName();
+            final Class<T> messageClass = toMessageClass(typeUrl);
             final T result = any.unpack(messageClass);
             return result;
         } catch (RuntimeException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof ClassNotFoundException) {
                 // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw new UnknownTypeException(typeStr, cause);
+                throw new UnknownTypeException(typeName, cause);
             } else {
                 throw e;
             }

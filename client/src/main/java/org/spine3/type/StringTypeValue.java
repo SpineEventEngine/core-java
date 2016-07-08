@@ -20,6 +20,8 @@
 
 package org.spine3.type;
 
+import org.spine3.Internal;
+
 import javax.annotation.Nullable;
 import java.util.Objects;
 
@@ -29,7 +31,8 @@ import java.util.Objects;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // is OK for the value object base.
-abstract class StringTypeValue {
+@Internal
+public abstract class StringTypeValue {
     // NOTE: the class has the 'Type' infix in the name to prevent the name clash with com.google.protobuf.StringValue.
 
     private final String value;

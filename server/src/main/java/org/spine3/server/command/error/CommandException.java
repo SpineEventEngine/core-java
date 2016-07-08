@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Command;
 import org.spine3.base.Error;
-import org.spine3.type.TypeName;
+import org.spine3.protobuf.TypeUrl;
 
 import java.util.Map;
 
@@ -58,7 +58,7 @@ public abstract class CommandException extends RuntimeException {
      * @param commandMessage a command message to get the type from
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
-        final String commandType = TypeName.of(commandMessage).value();
+        final String commandType = TypeUrl.of(commandMessage).getTypeName();
         final Value value = Value.newBuilder()
                                  .setStringValue(commandType)
                                  .build();
