@@ -29,13 +29,12 @@ syntax = "proto3";
 //     [(spine.base.required).value = true];
 //
 
+option (type_url_prefix) = "type.spine3.org";
+option (internal_all) = true;
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "ValidationProto";
 option java_package = "org.spine3.validate.internal";
-
-option (internal_all) = true;
-option (type_url_prefix) = "type.spine3.org";
 
 import "google/protobuf/descriptor.proto";
 
