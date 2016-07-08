@@ -28,16 +28,20 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
 import org.spine3.base.Command;
-import org.spine3.validate.Validate;
+import org.spine3.protobuf.KnownTypes;
+import org.spine3.protobuf.Messages;
 
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * A value object for fully-qualified Protobuf type name.
+ *
+ * <p>The type name is the string coming after the type URL prefix
+ * (for example, "type.googleapis.com/") in the URL returned by {@link Any#getTypeUrl()}.
  *
  * @see Descriptors.FileDescriptor#getFullName()
  * @see Message#getDescriptorForType()
@@ -45,17 +49,27 @@ import static com.google.common.base.Throwables.propagate;
  */
 public final class TypeName extends StringTypeValue {
 
-    private TypeName(String value) {
-        super(checkNotEmpty(value));
+    // TODO:2016-07-08:alexander.litus: consider renaming to TypeUrl
+
+    private static final String TYPE_URL_SEPARATOR = "/";
+    private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(TYPE_URL_SEPARATOR);
+    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR = Pattern.compile("\\.");
+
+    private final String typeUrlPrefix;
+
+    private TypeName(String typeUrlPrefix, String typeName) {
+        super(checkNotEmptyOrBlank(typeName, "type name"));
+        this.typeUrlPrefix = typeUrlPrefix;
     }
 
     /**
      * Creates a new type name instance taking its name from the passed message instance.
+     *
      * @param msg an instance to get the type name from
      * @return new instance
      */
     public static TypeName of(Message msg) {
-        return new TypeName(msg.getDescriptorForType().getFullName());
+        return of(msg.getDescriptorForType());
     }
 
     /**
@@ -65,25 +79,43 @@ public final class TypeName extends StringTypeValue {
      * @return new instance
      */
     public static TypeName of(Descriptor descriptor) {
-        return new TypeName(descriptor.getFullName());
+        final String typeUrlPrefix = Messages.getTypeUrlPrefix(descriptor);
+        return new TypeName(typeUrlPrefix, descriptor.getFullName());
     }
 
     /**
      * Creates a new instance with the passed type name.
      *
-     * @param typeName the name of the type
+     * @param typeNameOrUrl the name of the Protobuf message type or its type URL
      * @return new instance
      */
     @Internal
-    public static TypeName of(String typeName) {
-        return new TypeName(typeName);
+    public static TypeName of(String typeNameOrUrl) { // TODO:2016-07-08:alexander.litus:  tests
+        return isTypeUrl(typeNameOrUrl) ?
+               ofTypeUrl(typeNameOrUrl) :
+               ofTypeName(typeNameOrUrl);
+    }
+
+    private static boolean isTypeUrl(String str) {
+        return str.contains(TYPE_URL_SEPARATOR);
+    }
+
+    private static TypeName ofTypeUrl(String typeNameOrUrl) {
+        final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeNameOrUrl);
+        if (parts.length != 2) {
+            throw propagate(
+                    new InvalidProtocolBufferException("Invalid Protobuf type url encountered: " + typeNameOrUrl));
+        }
+        return new TypeName(parts[0], parts[1]);
+    }
+
+    private static TypeName ofTypeName(String typeName) {
+        final String typeUrlPrefix = KnownTypes.getTypeUrlPrefix(typeName);
+        return new TypeName(typeUrlPrefix, typeName);
     }
 
     /**
      * Obtains the type name of the message enclosed into passed instance of {@link Any}.
-     *
-     * <p>The type name is the string coming after "type.googleapis.com/" in the URL
-     * returned by {@link Any#getTypeUrl()}.
      *
      * @param any the instance of {@code Any} containing {@code Message} instance of interest
      * @return new instance of {@code TypeName}
@@ -100,7 +132,7 @@ public final class TypeName extends StringTypeValue {
     }
 
     /**
-     * Obtains the type name of the command's message.
+     * Obtains the type name of the command message.
      *
      * <p>The passed command must have non-default message.
      *
@@ -109,7 +141,7 @@ public final class TypeName extends StringTypeValue {
      */
     public static TypeName ofCommand(Command command) {
         final Any message = command.getMessage();
-        Validate.checkNotDefault(message);
+        checkNotDefault(message);
 
         final TypeName commandType = ofEnclosed(message);
         return commandType;
@@ -124,32 +156,23 @@ public final class TypeName extends StringTypeValue {
         return result;
     }
 
-    private static final String TYPE_URL_PREFIX = "type.googleapis.com";
-
-    private static final String TYPE_URL_SEPARATOR = "/";
-    private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(TYPE_URL_SEPARATOR);
-    private static final Pattern PROTOBUF_PACKAGE_SEPARATOR = Pattern.compile("\\.");
-
-    private static String getTypeName(String typeUrl)
-            throws InvalidProtocolBufferException {
+    private static String getTypeName(String typeUrl) throws InvalidProtocolBufferException {
         final String[] parts = TYPE_URL_SEPARATOR_PATTERN.split(typeUrl);
-        if (parts.length != 2 || !parts[0].equals(TYPE_URL_PREFIX)) {
-            throw new InvalidProtocolBufferException(
-                    "Invalid type url encountered: " + typeUrl);
+        if (parts.length != 2) {
+            throw new InvalidProtocolBufferException("Invalid type url encountered: " + typeUrl);
         }
         return parts[1];
     }
 
-    //TODO:2016-07-07:alexander.yevsyukov: Support custom type URLs in this method.
     /**
      * Returns string to be used as a type URL in {@code Any}.
      *
-     * @return string with "type.googleapis.com/" prefix followed by the full type name
+     * @return a Protobuf type URL
      * @see Any#getTypeUrl()
      * @see #ofEnclosed(AnyOrBuilder)
      */
     public String toTypeUrl() {
-        final String result = TYPE_URL_PREFIX + TYPE_URL_SEPARATOR + value();
+        final String result = typeUrlPrefix + TYPE_URL_SEPARATOR + value();
         return result;
     }
 
@@ -179,11 +202,5 @@ public final class TypeName extends StringTypeValue {
         }
         final String result = parts[parts.length - 1];
         return result;
-    }
-
-    private static String checkNotEmpty(String value) {
-        checkNotNull(value, "TypeName cannot be null.") ;
-        checkArgument(!value.isEmpty(), "TypeName cannot be empty string.");
-        return value;
     }
 }

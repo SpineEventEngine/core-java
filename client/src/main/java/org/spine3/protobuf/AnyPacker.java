@@ -28,6 +28,7 @@ import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.propagate;
+import static org.spine3.protobuf.Messages.*;
 
 /**
  * Utilities for working with {@link Any}.
@@ -41,11 +42,12 @@ public class AnyPacker {
     /**
      * Wraps {@link Message} object inside of {@link Any} instance.
      *
-     * @param message message that should be put inside the {@link Any} instance.
-     * @return the instance of {@link Any} object that wraps given message.
+     * @param message message that should be put inside the {@link Any} instance
+     * @return the instance of {@link Any} object that wraps given message
      */
     public static Any pack(Message message) {
-        final Any result = Any.pack(message);
+        final String typeUrlPrefix = getTypeUrlPrefix(message.getDescriptorForType());
+        final Any result = Any.pack(message, typeUrlPrefix);
         return result;
     }
 
@@ -67,7 +69,7 @@ public class AnyPacker {
         try {
             final TypeName typeName = TypeName.ofEnclosed(any);
             typeStr = typeName.value();
-            final Class<T> messageClass = Messages.toMessageClass(typeName);
+            final Class<T> messageClass = toMessageClass(typeName);
             final T result = any.unpack(messageClass);
             return result;
         } catch (RuntimeException e) {

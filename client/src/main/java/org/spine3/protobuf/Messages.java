@@ -22,10 +22,12 @@ package org.spine3.protobuf;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
+import org.spine3.annotations.AnnotationsProto;
 import org.spine3.protobuf.error.MissingDescriptorException;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
@@ -52,6 +54,10 @@ public class Messages {
     @SuppressWarnings("DuplicateStringLiteralInspection") // This constant is used in generated classes.
     private static final String METHOD_GET_DESCRIPTOR = "getDescriptor";
 
+    private static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
+
+    private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
+
     private Messages() {}
 
     /**
@@ -74,6 +80,22 @@ public class Messages {
         } catch (ClassNotFoundException e) {
             throw new UnknownTypeException(messageType.value(), e);
         }
+    }
+
+    /**
+     *
+     *
+     * @param message
+     * @return
+     */
+    public static String getTypeUrlPrefix(Descriptor message) { // TODO:2016-07-08:alexander.litus: tests
+        final FileDescriptor file = message.getFile();
+        if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
+            return GOOGLE_TYPE_URL_PREFIX;
+        }
+        final String result = file.getOptions()
+                                  .getExtension(AnnotationsProto.typeUrlPrefix);
+        return result;
     }
 
     /**

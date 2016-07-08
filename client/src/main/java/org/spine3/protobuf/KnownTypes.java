@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Api;
@@ -53,6 +54,7 @@ import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.Internal;
 import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 import org.spine3.type.TypeName;
@@ -69,7 +71,8 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * @author Alexander Yevsyukov
  * @author Alexander Litus
  */
-/* package */ class KnownTypes {
+@Internal
+public class KnownTypes {
 
     private static final char CLASS_PACKAGE_DELIMITER = '.';
 
@@ -85,7 +88,16 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      *
      * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code org.spine3.base.EventId}.
      */
-    private static final BiMap<TypeName, ClassName> biMap = Builder.build();
+    private static final BiMap<TypeName, ClassName> typeToClassMap = Builder.build();
+
+    /**
+     * A map from Protobuf type name to type URL prefix.
+     *
+     * <p>For example, for a key {@code spine.base.EventId}, there will be the value {@code type.spine3.org}.
+     *
+     * @see TypeName
+     */
+    private static final ImmutableMap<String, String> typeNameToUrlPrefixMap = buildUrlPrefixMap(typeToClassMap);
 
 
     private KnownTypes() {}
@@ -96,7 +108,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      * @return immutable set of Protobuf types known to the application
      */
     public static ImmutableSet<TypeName> typeNames() {
-        final Set<TypeName> result = biMap.keySet();
+        final Set<TypeName> result = typeToClassMap.keySet();
         return ImmutableSet.copyOf(result);
     }
 
@@ -109,11 +121,11 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      * @throws UnknownTypeException if there is no such type known to the application
      */
     public static ClassName get(TypeName protoType) throws UnknownTypeException {
-        if (!biMap.containsKey(protoType)) {
+        if (!typeToClassMap.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
-            biMap.put(protoType, className);
+            typeToClassMap.put(protoType, className);
         }
-        final ClassName result = biMap.get(protoType);
+        final ClassName result = typeToClassMap.get(protoType);
         return result;
     }
 
@@ -125,7 +137,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
     public static TypeName get(ClassName className) {
-        final TypeName result = biMap.inverse().get(className);
+        final TypeName result = typeToClassMap.inverse().get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type found for the Java class " + className);
         }
@@ -140,7 +152,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
      * @param type {@link TypeName} of the class to find
      * @return the found class name
      * @throws UnknownTypeException if there is no such type known to the application
-     */
+     */ // TODO:2016-07-08:alexander.litus: check if it is needed
     private static ClassName findInnerMessageClass(TypeName type) throws UnknownTypeException {
         String lookupType = type.value();
         ClassName className = null;
@@ -150,7 +162,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             suffix.insert(0, lookupType.substring(lastDotPosition));
             lookupType = lookupType.substring(0, lastDotPosition);
             final TypeName typeName = TypeName.of(lookupType);
-            className = biMap.get(typeName);
+            className = typeToClassMap.get(typeName);
             lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
         }
         if (className == null) {
@@ -163,6 +175,24 @@ import static org.spine3.io.IoUtil.loadAllProperties;
             throw new UnknownTypeException(type.value(), e);
         }
         return className;
+    }
+
+    /**
+     *
+     * @param typeName
+     * @return
+     */
+    public static String getTypeUrlPrefix(String typeName) { // TODO:2016-07-08:alexander.litus: tests
+        final String prefix = typeNameToUrlPrefixMap.get(typeName);
+        return prefix;
+    }
+
+    private static ImmutableMap<String, String> buildUrlPrefixMap(BiMap<TypeName, ClassName> typeToClassMap) {
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        for (TypeName typeName : typeToClassMap.keySet()) {
+            builder.put(typeName.value(), typeName.toTypeUrl());
+        }
+        return builder.build();
     }
 
     /**
