@@ -65,21 +65,11 @@ public class AnyPacker {
      */
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
-        String typeName = "";
+        final TypeUrl typeUrl = TypeUrl.of(any.getTypeUrl());
+        final Class<T> messageClass = toMessageClass(typeUrl);
         try {
-            final TypeUrl typeUrl = TypeUrl.of(any.getTypeUrl());
-            typeName = typeUrl.getTypeName();
-            final Class<T> messageClass = toMessageClass(typeUrl);
             final T result = any.unpack(messageClass);
             return result;
-        } catch (RuntimeException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof ClassNotFoundException) {
-                // noinspection ThrowInsideCatchBlockWhichIgnoresCaughtException
-                throw new UnknownTypeException(typeName, cause);
-            } else {
-                throw e;
-            }
         } catch (InvalidProtocolBufferException e) {
             throw propagate(e);
         }
