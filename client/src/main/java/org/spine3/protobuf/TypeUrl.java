@@ -166,13 +166,7 @@ public final class TypeUrl extends StringTypeValue {
         return result;
     }
 
-    /**
-     *
-     *
-     * @param message
-     * @return
-     */ // TODO:2016-07-08:alexander.litus: refactor
-    public static String getTypeUrlPrefix(Descriptor message) { // TODO:2016-07-08:alexander.litus: tests
+    private static String getTypeUrlPrefix(Descriptor message) { // TODO:2016-07-08:alexander.litus: tests
         final Descriptors.FileDescriptor file = message.getFile();
         if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
             return GOOGLE_TYPE_URL_PREFIX;
@@ -180,13 +174,6 @@ public final class TypeUrl extends StringTypeValue {
         final String result = file.getOptions()
                                   .getExtension(AnnotationsProto.typeUrlPrefix);
         return result;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String value() {
-        // Expose method to other packages.
-        return super.value();
     }
 
     public String getPrefix() {

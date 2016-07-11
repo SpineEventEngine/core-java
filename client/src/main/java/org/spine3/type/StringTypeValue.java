@@ -41,7 +41,8 @@ public abstract class StringTypeValue {
         this.value = value;
     }
 
-    protected String value() {
+    /** Returns the enclosed value. */
+    public String value() {
         return value;
     }
 
