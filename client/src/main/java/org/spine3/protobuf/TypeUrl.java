@@ -52,8 +52,6 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  */
 public final class TypeUrl extends StringTypeValue {
 
-    // TODO:2016-07-08:alexander.litus: implement toString() and equals()
-
     @VisibleForTesting
     /* package */ static final String SEPARATOR = "/";
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
