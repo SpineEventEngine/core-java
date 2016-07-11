@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.type;
+package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.test.Tests;
 import org.spine3.validate.internal.RequiredOption;
 
