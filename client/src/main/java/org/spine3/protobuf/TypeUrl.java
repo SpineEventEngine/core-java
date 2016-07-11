@@ -20,6 +20,7 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
@@ -53,7 +54,8 @@ public final class TypeUrl extends StringTypeValue {
 
     // TODO:2016-07-08:alexander.litus: implement toString() and equals()
 
-    public static final String SEPARATOR = "/";
+    @VisibleForTesting
+    /* package */ static final String SEPARATOR = "/";
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
 
     private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
@@ -63,7 +65,10 @@ public final class TypeUrl extends StringTypeValue {
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
+    /** The prefix of the type URL. */
     private final String prefix;
+
+    /** The name of the Protobuf type. */
     private final String typeName;
 
     private TypeUrl(String prefix, String typeName) {
@@ -104,9 +109,10 @@ public final class TypeUrl extends StringTypeValue {
     @Internal
     public static TypeUrl of(String typeUrlOrName) { // TODO:2016-07-08:alexander.litus:  tests
         checkNotEmptyOrBlank(typeUrlOrName, "type URL or name");
-        return isTypeUrl(typeUrlOrName) ?
-               ofTypeUrl(typeUrlOrName) :
-               ofTypeName(typeUrlOrName);
+        final TypeUrl typeUrl = isTypeUrl(typeUrlOrName) ?
+                                ofTypeUrl(typeUrlOrName) :
+                                ofTypeName(typeUrlOrName);
+        return typeUrl;
     }
 
     private static boolean isTypeUrl(String str) {
@@ -193,7 +199,7 @@ public final class TypeUrl extends StringTypeValue {
         return typeName;
     }
 
-    /** Returns the simple name of the Protobuf type (not fully qualified name). */
+    /** Returns the unqualified name of the Protobuf type, for example: `StringValue`. */
     public String getSimpleName() {
         if (typeName.contains(PROTOBUF_PACKAGE_SEPARATOR)) {
             final String[] parts = PROTOBUF_PACKAGE_SEPARATOR_PATTERN.split(typeName);
