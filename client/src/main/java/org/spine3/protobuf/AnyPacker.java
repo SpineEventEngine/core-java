@@ -65,7 +65,7 @@ public class AnyPacker {
      */
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
-        final TypeUrl typeUrl = TypeUrl.of(any.getTypeUrl());
+        final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
         final Class<T> messageClass = toMessageClass(typeUrl);
         try {
             final T result = any.unpack(messageClass);

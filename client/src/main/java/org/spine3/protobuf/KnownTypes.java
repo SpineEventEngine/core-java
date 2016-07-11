@@ -220,10 +220,10 @@ public class KnownTypes {
         }
 
         private Builder putProperties(Properties properties) {
-            final Set<String> typeNames = properties.stringPropertyNames();
-            for (String name : typeNames) {
-                final TypeUrl typeUrl = TypeUrl.of(name);
-                final ClassName className = ClassName.of(properties.getProperty(name));
+            final Set<String> typeUrls = properties.stringPropertyNames();
+            for (String typeUrlStr : typeUrls) {
+                final TypeUrl typeUrl = TypeUrl.of(typeUrlStr);
+                final ClassName className = ClassName.of(properties.getProperty(typeUrlStr));
                 mapBuilder.put(typeUrl, className);
             }
             return this;
