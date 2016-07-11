@@ -155,7 +155,7 @@ public class EventEnricher {
             checkNotNull(enriched, "EnrichmentFunction %s produced `null` from event message %s",
                                     function, eventMessage);
             final String typeName = TypeUrl.of(enriched)
-                                            .toString();
+                                           .getTypeName();
             enrichments.put(typeName, AnyPacker.pack(enriched));
         }
         final EventContext enrichedContext = event.getContext()

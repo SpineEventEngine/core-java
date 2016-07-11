@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -60,7 +59,7 @@ public class EventEnricherShould {
 
     @Before
     public void setUp() {
-        this.enricher = Given.Enrichment.newEventEnricher();
+        enricher = Given.Enrichment.newEventEnricher();
         boundedContext = BoundedContextTestStubs.create(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();
@@ -77,8 +76,6 @@ public class EventEnricherShould {
         assertNotNull(EventEnricher.newBuilder());
     }
 
-    // TODO:2016-07-08:alexander.litus: fix and enable
-    @Ignore
     @Test
     public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
         final ProjectStarted msg = Given.EventMessage.projectStarted();
@@ -89,8 +86,6 @@ public class EventEnricherShould {
                      subscriber.projectStartedEnrichment.getProjectName());
     }
 
-    // TODO:2016-07-08:alexander.litus: fix and enable
-    @Ignore
     @Test
     public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
         final ProjectCreated msg = Given.EventMessage.projectCreated();
@@ -101,8 +96,6 @@ public class EventEnricherShould {
                      subscriber.projectCreatedSeparateEnrichment.getProjectName());
     }
 
-    // TODO:2016-07-08:alexander.litus: fix and enable
-    @Ignore
     @Test
     public void enrich_event_if_enrichment_definition_is_in_another_package() {
         final ProjectCreated msg = Given.EventMessage.projectCreated();
@@ -113,8 +106,6 @@ public class EventEnricherShould {
                      subscriber.projectCreatedAnotherPackEnrichment.getProjectName());
     }
 
-    // TODO:2016-07-08:alexander.litus: fix and enable
-    @Ignore
     @Test
     public void enrich_event_with_several_fields_by_same_source_id() {
         final ProjectCreated msg = Given.EventMessage.projectCreated();
