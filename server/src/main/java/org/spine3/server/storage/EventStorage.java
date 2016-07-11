@@ -257,7 +257,7 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             }
             final Message message = Events.getMessage(event);
             final TypeUrl actualTypeUrl = TypeUrl.of(message);
-            if (!actualTypeUrl.equals(eventTypeUrl)) {
+            if (eventTypeUrl != null && !actualTypeUrl.equals(eventTypeUrl)) {
                 return false;
             }
             final EventContext context = event.getContext();
