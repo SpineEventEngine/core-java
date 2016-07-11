@@ -225,9 +225,10 @@ public class Commands {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final TypeUrl commandType = TypeUrl.of(commandMessage);
+        final String cmdType = TypeUrl.of(commandMessage)
+                                      .getTypeName();
         final String id = idToString(commandId);
-        final String result = String.format(format, commandType, id);
+        final String result = String.format(format, cmdType, id);
         return result;
     }
 

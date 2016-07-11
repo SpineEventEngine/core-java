@@ -229,10 +229,10 @@ public class EventsShould {
                           .isPresent());
     }
 
-    private static EventContext newEventContextWithEnrichment(String key, Message enrichment) {
+    private static EventContext newEventContextWithEnrichment(String enrichmentKey, Message enrichment) {
         final Enrichments.Builder enrichments = Enrichments.newBuilder();
         enrichments.getMutableMap()
-                   .put(key, AnyPacker.pack(enrichment));
+                   .put(enrichmentKey, AnyPacker.pack(enrichment));
         final EventContext context = newEventContext().toBuilder()
                                                       .setEnrichments(enrichments.build())
                                                       .build();

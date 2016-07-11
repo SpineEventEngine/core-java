@@ -184,13 +184,10 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
         @SuppressWarnings("IfMayBeConditional")
         public MatchesStreamQuery(EventStreamQuery query) {
             this.query = query;
-
             final Timestamp after = query.getAfter();
             final Timestamp before = query.getBefore();
-
             final boolean afterSpecified = query.hasAfter();
             final boolean beforeSpecified = query.hasBefore();
-
             //noinspection IfStatementWithTooManyBranches
             if (afterSpecified && !beforeSpecified) {
                 this.timePredicate = new Events.IsAfter(after);
@@ -208,12 +205,10 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             if (!timePredicate.apply(input)) {
                 return false;
             }
-
             final List<EventFilter> filterList = query.getFilterList();
             if (filterList.isEmpty()) {
                 return true; // The time range matches, and no filters specified.
             }
-
             // Check if one of the filters matches. If so, the event matches.
             for (EventFilter filter : filterList) {
                 final Predicate<Event> filterPredicate = new MatchFilter(filter);
@@ -231,11 +226,11 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
     private static class MatchFilter implements Predicate<Event> {
 
         /**
-         * The type of events to accept.
+         * The type URL of events to accept.
          * <p>If null, all events are accepted.
          */
         @Nullable
-        private final TypeUrl eventType;
+        private final TypeUrl eventTypeUrl;
 
         /**
          * The list of aggregate IDs of which events to accept.
@@ -246,11 +241,13 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
 
         private MatchFilter(EventFilter filter) {
             final String eventType = filter.getEventType();
-            this.eventType = eventType.isEmpty() ? null :
-                    TypeUrl.of(eventType);
+            this.eventTypeUrl = eventType.isEmpty() ?
+                                null :
+                                TypeUrl.of(eventType);
             final List<Any> aggregateIdList = filter.getAggregateIdList();
-            this.aggregateIds = aggregateIdList.isEmpty() ? null :
-                    aggregateIdList;
+            this.aggregateIds = aggregateIdList.isEmpty() ?
+                                null :
+                                aggregateIdList;
         }
 
         @Override
@@ -258,24 +255,19 @@ public abstract class EventStorage extends AbstractStorage<EventId, Event> {
             if (event == null) {
                 return false;
             }
-
             final Message message = Events.getMessage(event);
-            final TypeUrl actualType = TypeUrl.of(message);
-
-            if (eventType != null) {
-                if (!eventType.equals(actualType)) {
+            final TypeUrl actualTypeUrl = TypeUrl.of(message);
+            if (eventTypeUrl != null) {
+                if (!eventTypeUrl.equals(actualTypeUrl)) {
                     return false;
                 }
             }
-
             final EventContext context = event.getContext();
             final Any aggregateId = context.getProducerId();
-
             if (aggregateIds != null) {
                 final boolean matches = aggregateIds.contains(aggregateId);
                 return matches;
             }
-
             return true;
         }
     }

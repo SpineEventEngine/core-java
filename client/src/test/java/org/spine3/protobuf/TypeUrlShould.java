@@ -21,7 +21,6 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
@@ -32,7 +31,8 @@ import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.validate.internal.RequiredOption;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
@@ -65,7 +65,7 @@ public class TypeUrlShould {
 
     @Test
     public void do_not_accept_Any_with_malformed_type_url() {
-        final Any any = Any.newBuilder().setTypeUrl("do_not_accept_Any_with_malformed_type_url").build();
+        final Any any = Any.newBuilder().setTypeUrl("invalid_type_url").build();
         try {
             TypeUrl.ofEnclosed(any);
         } catch (RuntimeException e) {
@@ -91,9 +91,8 @@ public class TypeUrlShould {
 
     @Test
     public void create_by_descriptor() {
-        final Descriptors.Descriptor descriptor = StringValue.getDefaultInstance().getDescriptorForType();
+        final TypeUrl typeUrl = TypeUrl.of(StringValue.getDescriptor());
 
-        final TypeUrl typeUrl = TypeUrl.of(descriptor);
         assertIsStringValueUrl(typeUrl);
     }
 
@@ -104,7 +103,7 @@ public class TypeUrlShould {
         final Command command = factory.create(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
-        assertEquals(TypeUrl.of(message), typeUrl);
+        assertIsStringValueUrl(typeUrl);
     }
 
     @Test

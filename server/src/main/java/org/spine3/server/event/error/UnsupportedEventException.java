@@ -39,11 +39,10 @@ public class UnsupportedEventException extends EventException {
 
     private static String messageFormat(Message eventMsg) {
         final EventClass eventClass = EventClass.of(eventMsg);
-        final TypeUrl typeUrl = TypeUrl.of(eventMsg);
+        final String typeName = TypeUrl.of(eventMsg).getTypeName();
         final String result = String.format(
                 "There is no registered handler or dispatcher for the event of class: `%s`. Protobuf type: `%s`",
-                eventClass, typeUrl
-        );
+                eventClass, typeName);
         return result;
     }
 

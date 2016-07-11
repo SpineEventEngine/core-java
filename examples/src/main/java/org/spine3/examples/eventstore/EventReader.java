@@ -63,7 +63,7 @@ public class EventReader {
             final Event next = iterator.next();
             final Message event = Events.getMessage(next);
             final EventContext context = next.getContext();
-            log().info("Event: {} ({})", TypeUrl.of(event), TextFormat.shortDebugString(event));
+            log().info("Event: {} ({})", TypeUrl.of(event).getTypeName(), TextFormat.shortDebugString(event));
             log().info("Context: {}", TextFormat.shortDebugString(context));
         }
     }

@@ -103,7 +103,7 @@ public class Validate {
      */
     public static <M extends Message> M checkNotDefault(M object) {
         checkNotNull(object);
-        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object));
+        checkNotDefault(object, "The message is in the default state: %s", TypeUrl.of(object).getTypeName());
         return object;
     }
 
@@ -144,7 +144,7 @@ public class Validate {
      */
     public static <M extends Message> M checkDefault(M object) {
         checkNotNull(object);
-        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object));
+        checkDefault(object, "The message is not in the default state: %s", TypeUrl.of(object).getTypeName());
         return object;
     }
 
