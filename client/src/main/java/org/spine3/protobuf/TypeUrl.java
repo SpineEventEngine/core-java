@@ -43,7 +43,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * A wrapper for the Protobuf type URL.
  *
  * <p>Consists of the two parts separated with {@link TypeUrl#SEPARATOR}.
- * The first part is the type URL prefix (for example, "type.googleapis.com");
+ * The first part is the type URL prefix (for example, {@link TypeUrl#GOOGLE_TYPE_URL_PREFIX});
  * the second one is the fully-qualified Protobuf type name.
  *
  * @see Any#getTypeUrl()
@@ -59,7 +59,8 @@ public final class TypeUrl extends StringTypeValue {
     private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
     private static final Pattern PROTOBUF_PACKAGE_SEPARATOR_PATTERN = Pattern.compile('\\' + PROTOBUF_PACKAGE_SEPARATOR);
 
-    public static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
+    @VisibleForTesting
+    /* package */ static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
