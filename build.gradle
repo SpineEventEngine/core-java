@@ -27,7 +27,7 @@ project.ext {
     MAVEN_REPOSITORY_URL = 'http://maven.teamdev.com/repository/spine';
     SPINE_PROTOBUF_PLUGIN_VERSION = "1.4.6"
     GRPC_VERSION = '0.14.0'
-    SLF4J_VERSION = '1.7.12'
+    SLF4J_VERSION = '1.7.21'
 }
 
 def repositoryUserName = null;
