@@ -100,7 +100,6 @@ public class EventEnrichmentsMapShould {
     }
 
     @SafeVarargs
-    @SuppressWarnings("MethodParameterNamingConvention")
     private static void assertEventTypeByEnrichmentType(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {

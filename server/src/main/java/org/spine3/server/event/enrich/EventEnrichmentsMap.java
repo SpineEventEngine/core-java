@@ -57,7 +57,6 @@ import static org.spine3.io.IoUtil.loadAllProperties;
     /**
      * Returns the immutable map instance.
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // is immutable
     /* package */ static ImmutableMultimap<String, String> getInstance() {
         return enrichmentsMap;
     }
