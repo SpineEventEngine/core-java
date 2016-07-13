@@ -37,7 +37,7 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  *
  * @author Alexander Litus
  */
-/* package */ class EventEnrichmentsMap { // TODO:2016-07-08:alexander.litus: check usages
+/* package */ class EventEnrichmentsMap {
 
     /**
      * A path to the file which contains enrichment and event Protobuf type names.

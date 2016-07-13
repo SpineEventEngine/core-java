@@ -106,7 +106,7 @@ public final class TypeUrl extends StringTypeValue {
      * @param typeUrlOrName the type URL of the Protobuf message type or its fully-qualified name
      */
     @Internal
-    public static TypeUrl of(String typeUrlOrName) { // TODO:2016-07-08:alexander.litus:  tests
+    public static TypeUrl of(String typeUrlOrName) {
         checkNotEmptyOrBlank(typeUrlOrName, "type URL or name");
         final TypeUrl typeUrl = isTypeUrl(typeUrlOrName) ?
                                 ofTypeUrl(typeUrlOrName) :
@@ -167,7 +167,7 @@ public final class TypeUrl extends StringTypeValue {
         return result;
     }
 
-    private static String getTypeUrlPrefix(Descriptor message) { // TODO:2016-07-08:alexander.litus: tests
+    private static String getTypeUrlPrefix(Descriptor message) {
         final Descriptors.FileDescriptor file = message.getFile();
         if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
             return GOOGLE_TYPE_URL_PREFIX;

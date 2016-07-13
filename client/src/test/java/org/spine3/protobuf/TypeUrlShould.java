@@ -41,8 +41,6 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeUrlShould {
 
-    // TODO:2016-07-08:alexander.litus: add tests
-
     private static final String STRING_VALUE_TYPE_NAME = "google.protobuf.StringValue";
 
     private static final String STRING_VALUE_TYPE_URL = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
@@ -65,6 +63,20 @@ public class TypeUrlShould {
     }
 
     @Test
+    public void create_from_type_name_string() {
+        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_NAME);
+
+        assertIsStringValueUrl(typeUrl);
+    }
+
+    @Test
+    public void create_from_type_url_string() {
+        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_URL);
+
+        assertIsStringValueUrl(typeUrl);
+    }
+
+    @Test
     public void do_not_accept_Any_with_malformed_type_url() {
         final Any any = Any.newBuilder().setTypeUrl("invalid_type_url").build();
         try {
@@ -81,7 +93,7 @@ public class TypeUrlShould {
 
     @Test
     public void return_simple_name_if_no_package() {
-        // A type without Protobuf package:
+        // A msg type without Protobuf package
         final String name = RequiredOption.class.getSimpleName();
         final TypeUrl typeUrl = TypeUrl.of(name);
 
@@ -91,10 +103,17 @@ public class TypeUrlShould {
     }
 
     @Test
-    public void create_by_descriptor() {
+    public void create_by_descriptor_of_google_msg() {
         final TypeUrl typeUrl = TypeUrl.of(StringValue.getDescriptor());
 
         assertIsStringValueUrl(typeUrl);
+    }
+
+    @Test
+    public void create_by_descriptor_of_spine_msg() {
+        final TypeUrl typeUrl = TypeUrl.of(Command.getDescriptor());
+
+        assertEquals("type.spine3.org/spine.base.Command", typeUrl.value());
     }
 
     @Test
