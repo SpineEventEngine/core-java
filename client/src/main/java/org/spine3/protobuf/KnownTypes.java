@@ -73,8 +73,6 @@ import static org.spine3.io.IoUtil.loadAllProperties;
 @Internal
 public class KnownTypes {
 
-    private static final char CLASS_PACKAGE_DELIMITER = '.';
-
     /**
      * File, containing Protobuf messages' typeUrls and their appropriate class names.
      *
@@ -116,16 +114,15 @@ public class KnownTypes {
      * Retrieves compiled proto's java class name by proto type url
      * to be used to parse {@link Message} from {@link Any}.
      *
-     * @param protoType {@link Any} type url
+     * @param typeUrl {@link Any} type url
      * @return Java class name
      * @throws UnknownTypeException if there is no such type known to the application
      */
-    public static ClassName getClassName(TypeUrl protoType) throws UnknownTypeException {
-        if (!typeToClassMap.containsKey(protoType)) {
-            final ClassName className = findInnerMessageClass(protoType);
-            typeToClassMap.put(protoType, className);
+    public static ClassName getClassName(TypeUrl typeUrl) throws UnknownTypeException {
+        if (!typeToClassMap.containsKey(typeUrl)) {
+            throw new UnknownTypeException(typeUrl.getTypeName());
         }
-        final ClassName result = typeToClassMap.get(protoType);
+        final ClassName result = typeToClassMap.get(typeUrl);
         return result;
     }
 
@@ -144,38 +141,6 @@ public class KnownTypes {
         return result;
     }
 
-    /**
-     * Attempts to find a {@link ClassName} for the passed inner Protobuf type.
-     *
-     * <p>For example, com.package.OuterClass.InnerClass class name.
-     *
-     * @param typeUrl {@link TypeUrl} of the class to find
-     * @return the found class name
-     * @throws UnknownTypeException if there is no such type known to the application
-     */ // TODO:2016-07-08:alexander.litus: check if it is needed
-    private static ClassName findInnerMessageClass(TypeUrl typeUrl) throws UnknownTypeException {
-        String lookupType = typeUrl.getTypeName();
-        ClassName className = null;
-        final StringBuilder suffix = new StringBuilder(lookupType.length());
-        int lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
-        while (className == null && lastDotPosition != -1) {
-            suffix.insert(0, lookupType.substring(lastDotPosition));
-            lookupType = lookupType.substring(0, lastDotPosition);
-            className = typeToClassMap.get(TypeUrl.of(lookupType));
-            lastDotPosition = lookupType.lastIndexOf(CLASS_PACKAGE_DELIMITER);
-        }
-        if (className == null) {
-            throw new UnknownTypeException(typeUrl.getTypeName());
-        }
-        className = ClassName.of(className.value() + suffix);
-        try {
-            Class.forName(className.value());
-        } catch (ClassNotFoundException e) {
-            throw new UnknownTypeException(typeUrl.getTypeName(), e);
-        }
-        return className;
-    }
-
     /** Returns a Protobuf type URL by Protobuf type name. */
     public static TypeUrl getTypeUrl(String typeName) {
         final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
@@ -191,7 +156,7 @@ public class KnownTypes {
     }
 
     /**
-     * The helper class for building internal immutable type-to-class map.
+     * The helper class for building internal immutable typeUrl-to-JavaClass map.
      */
     private static class Builder {
 
