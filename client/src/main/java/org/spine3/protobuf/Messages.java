@@ -65,7 +65,7 @@ public class Messages {
      * @see AnyPacker#unpack(Any) that uses the same convention
      */
     public static <T extends Message> Class<T> toMessageClass(TypeUrl typeUrl) {
-        final ClassName className = KnownTypes.get(typeUrl);
+        final ClassName className = KnownTypes.getClassName(typeUrl);
         try {
             @SuppressWarnings("unchecked") // the client considers this message is of this class
             final Class<T> result = (Class<T>) Class.forName(className.value());

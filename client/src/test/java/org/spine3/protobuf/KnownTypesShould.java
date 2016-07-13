@@ -21,6 +21,7 @@
 package org.spine3.protobuf;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -28,6 +29,7 @@ import org.spine3.protobuf.error.UnknownTypeException;
 import org.spine3.type.ClassName;
 
 import static org.junit.Assert.*;
+import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
 
 /**
@@ -35,8 +37,6 @@ import static org.spine3.test.Tests.hasPrivateUtilityConstructor;
  */
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class KnownTypesShould {
-
-    // TODO:2016-07-08:alexander.litus: add tests
 
     @Test
     public void have_private_constructor() {
@@ -54,7 +54,7 @@ public class KnownTypesShould {
     public void return_java_class_name_by_proto_type_url() {
         final TypeUrl typeUrl = TypeUrl.of(Command.getDescriptor());
 
-        final ClassName className = KnownTypes.get(typeUrl);
+        final ClassName className = KnownTypes.getClassName(typeUrl);
 
         assertEquals(ClassName.of(Command.class), className);
     }
@@ -63,7 +63,7 @@ public class KnownTypesShould {
     public void return_java_inner_class_name_by_proto_type_url() {
         final TypeUrl typeUrl = TypeUrl.of(CommandContext.Schedule.getDescriptor());
 
-        final ClassName className = KnownTypes.get(typeUrl);
+        final ClassName className = KnownTypes.getClassName(typeUrl);
 
         assertEquals(ClassName.of(CommandContext.Schedule.class), className);
     }
@@ -72,19 +72,28 @@ public class KnownTypesShould {
     public void return_proto_type_url_by_java_class_name() {
         final ClassName className = ClassName.of(Command.class);
 
-        final TypeUrl typeUrl = KnownTypes.get(className);
+        final TypeUrl typeUrl = KnownTypes.getTypeUrl(className);
 
         assertEquals(TypeUrl.of(Command.getDescriptor()), typeUrl);
     }
 
+    @Test
+    public void return_proto_type_url_by_proto_type_name() {
+        final TypeUrl typeUrlExpected = TypeUrl.of(StringValue.getDescriptor());
+
+        final TypeUrl typeUrlActual = KnownTypes.getTypeUrl(typeUrlExpected.getTypeName());
+
+        assertEquals(typeUrlExpected, typeUrlActual);
+    }
+
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_no_proto_type_url_by_java_class_name() {
-        KnownTypes.get(ClassName.of(Exception.class));
+        KnownTypes.getTypeUrl(ClassName.of(Exception.class));
     }
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_if_no_java_class_name_by_type_url() {
-        final TypeUrl unexpectedUrl = TypeUrl.of("prefix" + TypeUrl.SEPARATOR + "unexpected.type");
-        KnownTypes.get(unexpectedUrl);
+        final TypeUrl unexpectedUrl = TypeUrl.of(composeTypeUrl("prefix", "unexpected.type"));
+        KnownTypes.getClassName(unexpectedUrl);
     }
 }

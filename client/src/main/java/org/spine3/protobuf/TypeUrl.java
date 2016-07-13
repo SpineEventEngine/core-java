@@ -52,8 +52,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  */
 public final class TypeUrl extends StringTypeValue {
 
-    @VisibleForTesting
-    /* package */ static final String SEPARATOR = "/";
+    private static final String SEPARATOR = "/";
     private static final Pattern TYPE_URL_SEPARATOR_PATTERN = Pattern.compile(SEPARATOR);
 
     private static final String PROTOBUF_PACKAGE_SEPARATOR = ".";
@@ -76,7 +75,8 @@ public final class TypeUrl extends StringTypeValue {
         this.typeName = checkNotEmptyOrBlank(typeName, "typeName");
     }
 
-    private static String composeTypeUrl(String typeUrlPrefix, String typeName) {
+    @VisibleForTesting
+    /* package */ static String composeTypeUrl(String typeUrlPrefix, String typeName) {
         final String url = typeUrlPrefix + SEPARATOR + typeName;
         return url;
     }

@@ -120,7 +120,7 @@ public class KnownTypes {
      * @return Java class name
      * @throws UnknownTypeException if there is no such type known to the application
      */
-    public static ClassName get(TypeUrl protoType) throws UnknownTypeException {
+    public static ClassName getClassName(TypeUrl protoType) throws UnknownTypeException {
         if (!typeToClassMap.containsKey(protoType)) {
             final ClassName className = findInnerMessageClass(protoType);
             typeToClassMap.put(protoType, className);
@@ -136,7 +136,7 @@ public class KnownTypes {
      * @return a Protobuf type name
      * @throws IllegalStateException if there is no Protobuf type for the specified class
      */
-    public static TypeUrl get(ClassName className) {
+    public static TypeUrl getTypeUrl(ClassName className) {
         final TypeUrl result = typeToClassMap.inverse().get(className);
         if (result == null) {
             throw new IllegalStateException("No Protobuf type found for the Java class " + className);
@@ -176,8 +176,8 @@ public class KnownTypes {
         return className;
     }
 
-    /** Returns a type URL by its type name. */
-    public static TypeUrl getTypeUrl(String typeName) { // TODO:2016-07-08:alexander.litus: tests
+    /** Returns a Protobuf type URL by Protobuf type name. */
+    public static TypeUrl getTypeUrl(String typeName) {
         final TypeUrl typeUrl = typeNameToUrlMap.get(typeName);
         return typeUrl;
     }

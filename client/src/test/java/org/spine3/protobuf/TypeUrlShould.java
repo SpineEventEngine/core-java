@@ -34,6 +34,8 @@ import org.spine3.validate.internal.RequiredOption;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.TypeUrl.GOOGLE_TYPE_URL_PREFIX;
+import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
@@ -43,8 +45,7 @@ public class TypeUrlShould {
 
     private static final String STRING_VALUE_TYPE_NAME = "google.protobuf.StringValue";
 
-    private static final String STRING_VALUE_TYPE_URL =
-            TypeUrl.GOOGLE_TYPE_URL_PREFIX + TypeUrl.SEPARATOR + STRING_VALUE_TYPE_NAME;
+    private static final String STRING_VALUE_TYPE_URL = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_value() {
@@ -115,7 +116,7 @@ public class TypeUrlShould {
 
     private static void assertIsStringValueUrl(TypeUrl typeUrl) {
         assertEquals(STRING_VALUE_TYPE_URL, typeUrl.value());
-        assertEquals(TypeUrl.GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
+        assertEquals(GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
         assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
         assertEquals(StringValue.class.getSimpleName(), typeUrl.getSimpleName());
     }
