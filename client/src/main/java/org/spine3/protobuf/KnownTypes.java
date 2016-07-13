@@ -29,6 +29,7 @@ import com.google.protobuf.Api;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.BytesValue;
 import com.google.protobuf.DescriptorProtos;
+import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
@@ -39,14 +40,17 @@ import com.google.protobuf.FloatValue;
 import com.google.protobuf.GeneratedMessage;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.ListValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.Method;
 import com.google.protobuf.Mixin;
+import com.google.protobuf.NullValue;
 import com.google.protobuf.Option;
 import com.google.protobuf.SourceContext;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Struct;
+import com.google.protobuf.Syntax;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.Type;
 import com.google.protobuf.UInt32Value;
@@ -136,7 +140,7 @@ public class KnownTypes {
     public static TypeUrl getTypeUrl(ClassName className) {
         final TypeUrl result = typeToClassMap.inverse().get(className);
         if (result == null) {
-            throw new IllegalStateException("No Protobuf type found for the Java class " + className);
+            throw new IllegalStateException("No Protobuf type URL found for the Java class " + className);
         }
         return result;
     }
@@ -220,8 +224,10 @@ public class KnownTypes {
                 put(DescriptorProtos.DescriptorProto.ReservedRange.class);
 
             put(DescriptorProtos.FieldDescriptorProto.class);
-                //TODO:2016-07-07:alexander.yevsyukov: Handle internal enum Type
-                //TODO:2016-07-07:alexander.yevsyukov: Handle internal enum Label
+                putEnum(DescriptorProtos.FieldDescriptorProto.Type.getDescriptor(),
+                        DescriptorProtos.FieldDescriptorProto.Type.class);
+                putEnum(DescriptorProtos.FieldDescriptorProto.Label.getDescriptor(),
+                    DescriptorProtos.FieldDescriptorProto.Label.class);
 
             put(DescriptorProtos.OneofDescriptorProto.class);
             put(DescriptorProtos.EnumDescriptorProto.class);
@@ -229,11 +235,14 @@ public class KnownTypes {
             put(DescriptorProtos.ServiceDescriptorProto.class);
             put(DescriptorProtos.MethodDescriptorProto.class);
             put(DescriptorProtos.FileOptions.class);
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum OptimizeMode
+            putEnum(DescriptorProtos.FileOptions.OptimizeMode.getDescriptor(),
+                    DescriptorProtos.FileOptions.OptimizeMode.class);
             put(DescriptorProtos.MessageOptions.class);
             put(DescriptorProtos.FieldOptions.class);
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum CType
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum JSType
+                putEnum(DescriptorProtos.FieldOptions.CType.getDescriptor(),
+                        DescriptorProtos.FieldOptions.CType.class);
+                putEnum(DescriptorProtos.FieldOptions.JSType.getDescriptor(),
+                        DescriptorProtos.FieldOptions.JSType.class);
             put(DescriptorProtos.EnumOptions.class);
             put(DescriptorProtos.EnumValueOptions.class);
             put(DescriptorProtos.ServiceOptions.class);
@@ -261,7 +270,7 @@ public class KnownTypes {
             // Types from `struct.proto`.
             put(Struct.class);
             put(Value.class);
-                //TODO:2016-07-07:alexander.yevsyukov: handle enum NullValue
+            putEnum(NullValue.getDescriptor(), NullValue.class);
             put(ListValue.class);
 
             // Types from `timestamp.proto`.
@@ -270,12 +279,12 @@ public class KnownTypes {
             // Types from `type.proto`.
             put(Type.class);
             put(Field.class);
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum Kind.
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum Cardinality
+                putEnum(Field.Kind.getDescriptor(), Field.Kind.class);
+                putEnum(Field.Cardinality.getDescriptor(), Field.Cardinality.class);
             put(com.google.protobuf.Enum.class);
             put(EnumValue.class);
             put(Option.class);
-                //TODO:2016-07-07:alexander.yevsyukov: Handle enum Syntax
+            putEnum(Syntax.getDescriptor(), Syntax.class);
 
             // Types from `wrappers.proto`.
             put(DoubleValue.class);
@@ -294,6 +303,12 @@ public class KnownTypes {
         private void put(Class<? extends GeneratedMessage> clazz) {
             final TypeUrl typeUrl = TypeUrl.of(clazz);
             final ClassName className = ClassName.of(clazz);
+            mapBuilder.put(typeUrl, className);
+        }
+
+        private void putEnum(EnumDescriptor desc, Class<? extends EnumLite> enumClass) {
+            final TypeUrl typeUrl = TypeUrl.of(desc);
+            final ClassName className = ClassName.of(enumClass);
             mapBuilder.put(typeUrl, className);
         }
 

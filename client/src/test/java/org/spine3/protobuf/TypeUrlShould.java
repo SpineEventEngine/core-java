@@ -21,29 +21,34 @@
 package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Field;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.CommandValidationError;
 import org.spine3.client.CommandFactory;
 import org.spine3.client.test.TestCommandFactory;
 import org.spine3.test.Tests;
+import org.spine3.users.UserId;
 import org.spine3.validate.internal.RequiredOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.TypeUrl.GOOGLE_TYPE_URL_PREFIX;
-import static org.spine3.protobuf.TypeUrl.composeTypeUrl;
+import static org.spine3.protobuf.TypeUrl.*;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings("InstanceMethodNamingConvention")
 public class TypeUrlShould {
 
-    private static final String STRING_VALUE_TYPE_NAME = "google.protobuf.StringValue";
+    private static final String STRING_VALUE_TYPE_NAME = StringValue.getDescriptor().getFullName();
 
-    private static final String STRING_VALUE_TYPE_URL = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
+    private static final String STRING_VALUE_TYPE_URL_STR = composeTypeUrl(GOOGLE_TYPE_URL_PREFIX, STRING_VALUE_TYPE_NAME);
+
+    private final TypeUrl stringValueTypeUrl = TypeUrl.of(StringValue.getDescriptor());
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_value() {
@@ -71,7 +76,7 @@ public class TypeUrlShould {
 
     @Test
     public void create_from_type_url_string() {
-        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_URL);
+        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_URL_STR);
 
         assertIsStringValueUrl(typeUrl);
     }
@@ -87,8 +92,18 @@ public class TypeUrlShould {
     }
 
     @Test
+    public void return_type_url_prefix() {
+        assertEquals(GOOGLE_TYPE_URL_PREFIX, stringValueTypeUrl.getPrefix());
+    }
+
+    @Test
+    public void return_type_name() {
+        assertEquals(STRING_VALUE_TYPE_NAME, stringValueTypeUrl.getTypeName());
+    }
+
+    @Test
     public void return_simple_type_name() {
-        assertEquals("UInt64Value", TypeUrl.of(UInt64Value.getDefaultInstance()).getSimpleName());
+        assertEquals(StringValue.class.getSimpleName(), stringValueTypeUrl.getSimpleName());
     }
 
     @Test
@@ -111,9 +126,30 @@ public class TypeUrlShould {
 
     @Test
     public void create_by_descriptor_of_spine_msg() {
-        final TypeUrl typeUrl = TypeUrl.of(Command.getDescriptor());
+        final Descriptors.Descriptor descriptor = UserId.getDescriptor();
+        final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, descriptor.getFullName());
 
-        assertEquals("type.spine3.org/spine.base.Command", typeUrl.value());
+        final TypeUrl typeUrl = TypeUrl.of(descriptor);
+
+        assertEquals(expectedUrl, typeUrl.value());
+    }
+
+    @Test
+    public void create_by_enum_descriptor_of_google_msg() {
+        assertCreatesTypeUrlFromEnum(Field.Kind.getDescriptor(), GOOGLE_TYPE_URL_PREFIX);
+    }
+
+    @Test
+    public void create_by_enum_descriptor_of_spine_msg() {
+        assertCreatesTypeUrlFromEnum(CommandValidationError.getDescriptor(), SPINE_TYPE_URL_PREFIX);
+    }
+
+    private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor, String typeUrlPrefix) {
+        final String expected = composeTypeUrl(typeUrlPrefix, enumDescriptor.getFullName());
+
+        final TypeUrl typeUrl = TypeUrl.of(enumDescriptor);
+
+        assertEquals(expected, typeUrl.value());
     }
 
     @Test
@@ -123,6 +159,7 @@ public class TypeUrlShould {
         final Command command = factory.create(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
+
         assertIsStringValueUrl(typeUrl);
     }
 
@@ -134,7 +171,7 @@ public class TypeUrlShould {
     }
 
     private static void assertIsStringValueUrl(TypeUrl typeUrl) {
-        assertEquals(STRING_VALUE_TYPE_URL, typeUrl.value());
+        assertEquals(STRING_VALUE_TYPE_URL_STR, typeUrl.value());
         assertEquals(GOOGLE_TYPE_URL_PREFIX, typeUrl.getPrefix());
         assertEquals(STRING_VALUE_TYPE_NAME, typeUrl.getTypeName());
         assertEquals(StringValue.class.getSimpleName(), typeUrl.getSimpleName());

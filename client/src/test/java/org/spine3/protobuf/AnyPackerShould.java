@@ -30,6 +30,7 @@ import org.spine3.users.UserId;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.UserUtil.newUserId;
+import static org.spine3.protobuf.TypeUrl.*;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class AnyPackerShould {
@@ -40,9 +41,10 @@ public class AnyPackerShould {
     @Test
     public void pack_spine_message_to_Any() {
         final Any actual = AnyPacker.pack(spineMsg);
+        final String expectedUrl = composeTypeUrl(SPINE_TYPE_URL_PREFIX, UserId.getDescriptor().getFullName());
 
         assertEquals(Any.pack(spineMsg).getValue(), actual.getValue());
-        assertEquals("type.spine3.org/spine.users.UserId", actual.getTypeUrl());
+        assertEquals(expectedUrl, actual.getTypeUrl());
     }
 
     @Test

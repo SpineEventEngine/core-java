@@ -25,6 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.EnumDescriptor;
+import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.Internal;
@@ -61,6 +63,8 @@ public final class TypeUrl extends StringTypeValue {
     @VisibleForTesting
     /* package */ static final String GOOGLE_TYPE_URL_PREFIX = "type.googleapis.com";
 
+    public static final String SPINE_TYPE_URL_PREFIX = "type.spine3.org";
+
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
     /** The prefix of the type URL. */
@@ -91,11 +95,21 @@ public final class TypeUrl extends StringTypeValue {
     }
 
     /**
-     * Creates a new instance by the passed descriptor taking its type URL.
+     * Creates a new instance by the passed message descriptor taking its type URL.
      *
      * @param descriptor the descriptor of the type
      */
     public static TypeUrl of(Descriptor descriptor) {
+        final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
+        return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
+    }
+
+    /**
+     * Creates a new instance by the passed enum descriptor taking its type URL.
+     *
+     * @param descriptor the descriptor of the type
+     */
+    public static TypeUrl of(EnumDescriptor descriptor) {
         final String typeUrlPrefix = getTypeUrlPrefix(descriptor);
         return new TypeUrl(typeUrlPrefix, descriptor.getFullName());
     }
@@ -167,8 +181,8 @@ public final class TypeUrl extends StringTypeValue {
         return result;
     }
 
-    private static String getTypeUrlPrefix(Descriptor message) {
-        final Descriptors.FileDescriptor file = message.getFile();
+    private static String getTypeUrlPrefix(GenericDescriptor descriptor) {
+        final Descriptors.FileDescriptor file = descriptor.getFile();
         if (file.getPackage().equals(GOOGLE_PROTOBUF_PACKAGE)) {
             return GOOGLE_TYPE_URL_PREFIX;
         }
